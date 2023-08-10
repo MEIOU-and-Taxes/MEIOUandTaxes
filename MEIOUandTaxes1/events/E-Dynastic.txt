@@ -1,0 +1,2534 @@
+namespace = dynastic
+namespace = dynastic_events
+
+# Carnal sins
+country_event = {
+	id = dynastic.9450
+	title = "EVTNAME9450"
+	desc = "EVTDESC9450"
+	picture = RELIGION_eventPicture
+	
+	trigger = {
+		OR = { #description mentions Sunday confession, but by modifying description it could be expanded to all religions that are not keen on heirs from outside of wedlock
+			religion = catholic
+			religion = avignonist
+		}
+		papacy_active = yes
+		has_heir = no
+		has_regency = no
+		is_female = no
+		is_lesser_in_union = no
+		government = monarchy
+		#dip = 2 #no good reason for skill check
+		#NOT = { AND = { competitive_trigger = yes religion_group = muslim } } #commented out because of earlier religion check
+		#NOT = { AND = { electivisation_trigger = yes religion_group = muslim } }
+		NOT = { ruler_has_personality = infertile_personality }
+	}
+	
+	mean_time_to_happen = {
+		years = 33
+		
+		modifier = {
+			factor = 0.5
+			dip = 4
+		}
+	}
+	
+	option = {
+		name = "EVTOPTA9450"
+		ai_chance = {
+			factor = 10
+		}
+		define_heir = {
+			dynasty = ROOT
+			claim = 30
+		}
+		add_papal_influence = -5
+		add_prestige = -5
+		# add_reform_desire = 0.001
+	}
+	option = {
+		name = "EVTOPTB9450"
+		ai_chance = {
+			factor = 90
+		}
+		add_papal_influence = 2
+	}
+}
+
+# A beloved heir dies
+country_event = {
+	id = dynastic.9451
+	title = "EVTNAME9451"
+	desc = "EVTDESC9451"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	trigger = {
+		has_heir = yes
+		is_female = no
+		is_lesser_in_union = no
+		has_regency = no
+		government = monarchy
+		electivisation_trigger = no
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9451"
+		kill_heir = { allow_new_heir = yes } #new heir should be allowed, a new heir is not guaranteed with that option
+		if = {
+			limit = {
+				NOT = { ruler_has_personality = zealot_personality }
+			}
+			add_ruler_personality = zealot_personality
+		}
+	}
+	
+	option = {
+		name = "EVTOPTB9451"
+		kill_heir = { allow_new_heir = yes }
+		define_heir = {
+			dynasty = ROOT
+			claim = 30
+		}
+		add_prestige = -10
+	}
+}
+
+# Palace Coup
+country_event = {
+	id = dynastic.9452
+	title = "EVTNAME9452"
+	desc = "EVTDESC9452"
+	picture = ASSASSINATION_eventPicture
+	
+	trigger = {
+		has_heir = yes
+		heir_age = 15
+		#heir_claim = 90 #it shouldn't be limited to only strong heirs, especially as heir claim is tied to the past and can be low if country is in bad position
+		is_lesser_in_union = no
+		OR = {
+			NOT = { stability = -2 }
+			AND = {
+				NOT = { stability = -1 }
+				war_exhaustion = 10
+			}
+		}
+		has_regency = no
+		government = monarchy
+		electivisation_trigger = no
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		OR = {
+			NOT = { tag = CHU }
+			is_year = 1360
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 16
+		modifier = {
+			factor = 0.5
+			is_at_war = yes
+		}
+	}
+	
+	option = {
+		name = "EVTOPTA9452"
+		kill_ruler = yes
+		add_country_modifier = {
+			name = "illegitimate_ruler"
+			duration = 1825
+		}
+	}
+	
+	option = {
+		name = "EVTOPTB9452"
+		kill_heir = { }
+	}
+}
+
+# The Weeping Song
+country_event = {
+	id = dynastic.9453
+	title = "EVTNAME9453"
+	desc = "EVTDESC9453"
+	picture = COURT_eventPicture
+	
+	trigger = {
+		has_heir = yes
+		#has_wartaxes = yes #using wartaxes is too random, war exhaustion should cover the same
+		is_lesser_in_union = no
+		treasury = 40
+		war_exhaustion = 5
+		is_at_war = yes
+		OR = {
+			has_regency = no
+			AND = {
+				has_consort_regency = yes
+				has_female_consort = no
+			}
+		}
+		government = monarchy
+		electivisation_trigger = no
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9453"
+		#TODO: link with options of limiting taxation on manpower or cash tax instead of targetting treasury
+		#Mepper: Giving some 10% tax reduction via mana cost of taxation for a few years
+		add_country_modifier = {
+			name = "weeping_limit_tax"
+			duration = 1095
+		}
+		add_war_exhaustion = -2
+	}
+	
+	option = {
+		name = "EVTOPTB9453"
+		add_country_modifier = {
+			name = "weeping_denied"
+			duration = 1095
+		}
+		add_war_exhaustion = 1
+	}
+}
+
+# Springtime
+country_event = {
+	id = dynastic.9454
+	title = "EVTNAME9454"
+	desc = "EVTDESC9454" #description is quite creepy, TODO: rewrite or comment out
+	picture = COURT_eventPicture
+	
+	trigger = {
+		government = monarchy
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		NOT = { AND = { electivisation_trigger = yes religion_group = muslim } }
+		celestial_trigger = no
+		is_month = 3
+		NOT = { is_month = 6 }
+		has_heir = no
+		is_female = no
+		is_lesser_in_union = no
+		has_regency = no
+		OR = {
+			NOT = { has_dlc = "Rights of Man" }
+			has_consort = no
+		}
+		any_known_country = {
+			religion = ROOT
+			government = monarchy
+			is_lesser_in_union = no
+			alliance_with = ROOT
+			ai = yes
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 33
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_known_country = {
+				limit = {
+					religion = ROOT
+					government = monarchy
+					is_lesser_in_union = no
+					alliance_with = ROOT
+					NOT = { marriage_with = ROOT }
+					ai = yes
+				}
+				save_event_target_as = bargaining_chip_country
+			}
+		}
+	}
+	
+	option = {
+		name = "EVTOPTA9454"
+		define_heir = {
+			dynasty = ROOT
+			claim = 30
+		}
+	}
+	option = {
+		name = "EVTOPTB9454"
+		trigger = {
+			any_known_country = {
+				religion = ROOT
+				government = monarchy
+				is_lesser_in_union = no
+				alliance_with = ROOT
+				NOT = { marriage_with = ROOT }
+				ai = yes
+			}
+		}
+		event_target:bargaining_chip_country = {
+			create_marriage = ROOT
+		}
+		if = {
+			limit = {
+				has_dlc = "Rights of Man"
+			}
+			define_consort = {
+				country_of_origin = event_target:bargaining_chip_country
+				culture = event_target:bargaining_chip_country
+				religion = event_target:bargaining_chip_country
+			}
+		}
+	}
+}
+
+# # Soir?e			Needs rework
+# country_event = {
+# 	id = dynastic.9455
+# 	title = "EVTNAME9455"
+# 	desc = "EVTDESC9455"
+# 	picture = COURT_eventPicture
+	
+# 	trigger = {
+# 		has_heir = no
+# 		is_lesser_in_union = no
+# 		government = monarchy
+# 		has_regency = no
+# 		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+# 		NOT = { AND = { electivisation_trigger = yes religion_group = muslim } }
+# 		celestial_trigger = no
+# 		NOT = { ruler_has_personality = infertile_personality }
+# 		NOT = { has_country_flag = Horde_Collapse_Ongoing }
+#		NOT = { has_country_flag = Horde_Ruler_Murdered }
+# 	}
+	
+# 	mean_time_to_happen = {
+# 		months = 800
+# 	}
+	
+# 	immediate = {
+# 		check_if_non_state_advisor_effect = { #Hidden scripted effect, is used by scripted effect and must always be cleared in after = { } using erase_advisor_flags_effect.
+# 			chance_of_primary = 85 #Not percentages!
+# 			chance_of_tertiary = 5
+# 			chance_of_secondary = 15
+# 		}
+# 		hidden_effect = {
+# 			random_list = {
+# 				33 = { set_country_flag = treasurer_flag }
+# 				33 = { set_country_flag = philosopher_flag }
+# 				33 = { set_country_flag = diplomat_flag }
+# 			}
+# 		}
+		
+# 	}
+	
+# 	option = {
+# 		name = "EVTOPTA9455"
+# 		trigger = {
+# 			is_female = no
+# 		}
+# 		define_heir = {
+# 			dynasty = ROOT
+# 			claim = 30
+# 		}
+# 		add_prestige = -5
+# 	}
+# 	option = {
+# 		name = "EVTOPTB9455"
+# 		trigger = {
+# 			is_female = yes
+# 		}
+# 		define_heir = {
+# 			dynasty = ROOT
+# 			claim = 30
+# 		}
+# 		add_prestige = -5
+# 	}
+# 	option = {
+# 		name = "EVTOPTC9455"
+# 		trigger_switch = {
+# 			on_trigger = has_country_flag
+# 			treasurer_flag = {
+# 				generate_advisor_of_type_and_semi_random_religion_effect = {
+# 					advisor_type=treasurer
+# 					advisor_type_if_not_state=trader
+# 					skill=1
+# 					scaled_skill = no
+# 					discount=yes
+# 				}
+# 			}
+# 			philosopher_flag = {
+# 				generate_advisor_of_type_and_semi_random_religion_effect = {
+# 					advisor_type=philosopher
+# 					advisor_type_if_not_state=artist
+# 					scaled_skill = no
+# 					skill=1
+# 					discount=yes
+# 				}
+# 			}
+# 			diplomat_flag = {
+# 				generate_advisor_of_type_and_semi_random_religion_effect = {
+# 					advisor_type=diplomat
+# 					advisor_type_if_not_state=spymaster
+# 					skill=1
+# 					scaled_skill = no
+# 					discount=yes
+# 				}
+# 			}
+# 		}
+# 		add_prestige = -5
+# 	}
+# 	after = {
+# 		erase_advisor_flags_effect = yes
+# 		trigger_switch = {
+# 			on_trigger = has_country_flag
+# 			treasurer_flag = { clr_country_flag = treasurer_flag }
+# 			philosopher_flag = { clr_country_flag = philosopher_flag }
+# 			diplomat_flag = { clr_country_flag = diplomat_flag }
+# 		}
+# 	}
+# }
+
+# Heir Falls ill
+country_event = {
+	id = dynastic.9456
+	title = "EVTNAME9456"
+	desc = "EVTDESC9456"
+	picture = PLAGUE_eventPicture
+	
+	trigger = {
+		has_heir = yes
+		government = monarchy
+		has_regency = no
+		is_lesser_in_union = no
+		electivisation_trigger = no
+	}
+	
+	is_triggered_only = yes
+	option = {
+		name = "EVTOPTA9456"
+		if = {
+			limit = {
+				monthly_income = 2
+			}
+			add_years_of_income = -0.25 #3 months of income
+		}
+		else = {
+			add_treasury = -6 #floor value
+		}
+	
+		random_list = {
+			50 = { kill_heir = { allow_new_heir = yes } } #new heir should be allowed, a new heir is not guaranteed with that option
+			50 = {
+				add_legitimacy = 5
+				add_horde_unity = 5
+			}
+		}
+	}
+	
+	option = {
+		name = "EVTOPTB9456"
+		random_list = {
+			75 = { kill_heir = { allow_new_heir = yes } }
+			25 = {
+				add_legitimacy = 30
+				add_horde_unity = 30
+			}
+		}
+	}
+}
+
+# Child in the Reeds
+country_event = {
+	id = dynastic.9457
+	title = "EVTNAME9457"
+	desc = "EVTDESC9457"
+	picture = NEW_HEIR_eventPicture
+	
+	trigger = {
+		has_heir = no
+		is_lesser_in_union = no
+		government = monarchy
+		NOT = { has_reform = Pol_Succession2 } #This government type does not have heirs
+		has_regency = no
+		crown_republic_trigger = no
+		electivisation_trigger = no
+		#NOT = { ruler_has_personality = infertile_personality } #it seems to make all of sense to adopt the child as infertile ruler, not sure why it was added as a limit
+		NOT = { has_country_flag = Horde_Collapse_Ongoing }
+		NOT = { has_country_flag = Horde_Ruler_Murdered }
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9457"
+		define_heir = {
+			claim = 20
+			dynasty = ROOT
+			adm = 4				#Child in the Reeds should be pretty good
+			dip = 4
+			mil = 4
+			male = yes
+			no_consort_with_heir = yes
+		}
+		add_prestige = -5
+		add_country_modifier = {
+			name = "illegitimate_ruler"
+			duration = 1825
+		}
+		ai_chance = {
+			factor = 50
+
+			modifier = {
+				factor = 2
+				ruler_has_personality = infertile_personality
+			}
+			modifier = {
+				factor = 2
+				ruler_age = 50
+			}
+			modifier = {
+				factor = 2
+				consort_age = 50
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTB9457"
+		add_treasury = 5
+		ai_chance = {
+			factor = 50
+		}
+	}
+}
+
+# Tournament
+country_event = {
+	id = dynastic.9458
+	title = "EVTNAME9458"
+	desc = "EVTDESC9458"
+	picture = TOURNAMENT_eventPicture
+	
+	trigger = {
+		NOT = { is_year = 1450 }
+		capital_scope = { continent = europe }
+		has_heir = yes
+		has_female_heir = no
+		heir_age = 15
+		NOT = { heir_age = 50 }
+		is_lesser_in_union = no
+		electivisation_trigger = no
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		NOT = { has_country_flag = last_jousting_tournament_held }
+		army_tradition = 20
+	}
+	
+	mean_time_to_happen = {
+		years = 20
+		modifier = {
+			factor = 0.9
+			army_tradition = 40
+		}
+	}
+
+	immediate = {
+		random_country = {
+			limit = {
+				has_country_flag = last_jousting_tournament_held
+			}
+			clr_country_flag = last_jousting_tournament_held
+		}
+		set_country_flag = last_jousting_tournament_held
+	}
+	
+	option = {
+		name = "EVTOPTA9458"
+		random_list = {
+			30 = { add_prestige = 5 }
+			20 = { add_legitimacy = 10 }
+			25 = { add_prestige = -5 }
+			20 = { add_legitimacy = -10 }
+			5 = { kill_heir = { } }
+		}
+	}
+	
+	option = {
+		name = "EVTOPTB9458"
+		random_list = {
+			50 = { add_prestige = 3 }
+			50 = { add_prestige = -3 }
+		}
+	}
+	
+	option = {
+		name = "EVTOPTC9458"
+	}
+}
+
+
+# Hunting accident
+country_event = {
+	id = dynastic.9459
+	title = "EVTNAME9459"
+	desc = "EVTDESC9459"
+	picture = DEATH_OF_HEIR_eventPicture
+	is_triggered_only = yes 		#In random events on_four_yearly_pulse
+
+	trigger = {
+		has_heir = yes
+		heir_age = 15
+		is_lesser_in_union = no
+		electivisation_trigger = no
+	}
+	option = {
+		name = "EVTOPTA9459"
+		kill_heir = { allow_new_heir = yes } #new heir should be allowed, a new heir is not guaranteed with that option
+		random_list = {
+			30 = {}
+			40 = {
+				Stab_Subtract50Percent = yes
+			}
+			30 = {
+				Stab_Subtract1 = yes
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTB9459"
+		kill_heir = { allow_new_heir = yes }
+		add_prestige = -10
+	}
+}
+
+
+# Heir goes out at night
+country_event = {
+	id = dynastic.9460
+	title = "EVTNAME9460"
+	desc = "EVTDESC9460"
+	picture = COURT_eventPicture
+	is_triggered_only = yes				#In random events on_four_yearly_pulse
+	
+	trigger = {
+		capital_scope = { continent = europe }
+		religion_group = christian
+		has_heir = yes
+		heir_age = 15
+		is_lesser_in_union = no
+		government = monarchy
+		electivisation_trigger = no
+	}
+	
+	option = {
+		name = "EVTOPTA9460"
+		add_prestige = -5
+	}
+	
+	option = {
+		name = "EVTOPTB9460"
+		add_heir_claim = -10
+	}
+}
+
+# Scheming Bureaucracy
+# TODO: rework, we should not have random event changing government type
+country_event = {
+	id = dynastic.9462
+	title = "EVTNAME9462"
+	desc = "EVTDESC9462"
+	picture = DEBATE_REPUBLICAN_eventPicture
+	is_triggered_only = yes				#In random events on_four_yearly_pulse
+	trigger = {
+		government = monarchy
+		is_free_or_tributary_trigger = yes
+		NOT = { AND = { electivisation_trigger = yes religion_group = muslim } }
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		celestial_trigger = no
+		adm_tech = 41
+		adm_power = 200
+	}
+	
+	option = {
+		name = "EVTOPTA9462"
+		ai_chance = { factor = 90 }
+		add_adm_power = -100 #I would prefer some country modifier here, 100 adm power is few yer of taxes, quite important thing. Maybe reduction of state reach or block of using expand state reach for some time?
+		random_list = {
+			30 = {}
+			40 = {
+				Stab_Subtract50Percent = yes
+			}
+			30 = {
+				Stab_Subtract1 = yes
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTB9462"
+		ai_chance = { factor = 10 }
+		Pol_ChangeGovRepublic = { Mandate=2 Stylings=1 ExtraPowers=1 Assembly=3 TermOfOffice=3 } 
+		add_government_reform = Pol_Nobility4
+		kill_ruler = yes
+		Stab_Subtract6 = yes
+	}
+}
+
+# The Family
+country_event = {
+	id = dynastic.9463
+	title = "EVTNAME9463"
+	desc = "EVTDESC9463"
+	picture = GOOD_WITH_MONARCH_eventPicture
+	
+	trigger = {
+		stability = 0
+		treasury = 100
+		government = monarchy
+		NOT = {
+			AND = {
+				religion_group = muslim
+				electivisation_trigger = yes
+			}
+		}
+		has_regency = no
+		any_known_country = {
+			dynasty = ROOT
+			government = monarchy
+			NOT = { stability = -2 }
+			NOT = { senior_union_with = ROOT }
+			NOT = { junior_union_with = ROOT }
+			NOT = { vassal_of = ROOT }
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			random_known_country = {
+				limit = {
+					dynasty = ROOT
+					government = monarchy
+					NOT = { stability = -2 }
+					NOT = { senior_union_with = ROOT }
+					NOT = { junior_union_with = ROOT }
+					NOT = { vassal_of = ROOT }
+				}
+				save_event_target_as = country_in_need
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 3
+	}
+	
+	option = {
+		name = "EVTOPTA9463"
+		event_target:country_in_need = {
+			country_event = { id = dynastic.9476 days = 1 }
+			add_opinion = { who = ROOT modifier = opinion_dynastic_helper }
+		}
+		add_treasury = -100
+		add_prestige = 10
+	}
+	option = {
+		name = "EVTOPTB9463"
+		event_target:country_in_need = {
+			country_event = { id = dynastic.9477 days = 1 }
+			add_opinion = { who = ROOT modifier = opinion_ignore_dynasty }
+		}
+	}
+}
+
+# Regent usurps throne
+country_event = {
+	id = dynastic.9468
+	title = "EVTNAME9468"
+	desc = "EVTDESC9468"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { stability = -1 }
+		is_lesser_in_union = no
+		government = monarchy
+		NOT = { legitimacy_or_horde_unity = 50 }
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		NOT = { AND = { electivisation_trigger = yes religion_group = muslim } }
+		has_regency = yes
+		has_consort_regency = no
+		has_heir = yes
+	}
+	
+	option = {				#Adapapted from Vanilla a bit
+		name = "EVTOPTA9468"
+		kill_heir = { allow_new_heir = no }
+		define_ruler = {			#Mepper: Does not actually make the regency council into a ruler, as they are a council and not a person. So a random new ruler is generated, of a new dynasty
+		}
+		Stab_Subtract1 = yes
+		add_legitimacy = -40 # was -90 - balanced out following the change of add_absolutism
+		add_horde_unity = -90
+		add_absolutism = -5 # was 10 - but usurpation should reduce it instead, having to fight for legitimacy
+	}
+	option = {
+		name = "EVTOPTB9468"
+		kill_ruler = yes			#Since he is sent to the salt mines the regent should die
+		random_list = {
+			30 = {}
+			40 = {
+				Stab_Subtract50Percent = yes
+			}
+			30 = {
+				Stab_Subtract1 = yes
+			}
+		}
+		add_heir_claim = 30
+	}
+}
+
+# Born under a star
+country_event = {
+	id = dynastic.9469
+	title = "EVTNAME9469"
+	desc = "EVTDESC9469"
+	picture = NEW_HEIR_eventPicture
+	is_triggered_only = yes
+
+	trigger = {
+		government = monarchy
+		has_heir = no
+		has_regency = no
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		electivisation_trigger = no
+		celestial_trigger = no
+		is_lesser_in_union = no
+		OR = {
+			NOT = { has_dlc = "Rights of Man" }
+			has_consort = yes
+		}
+		NOT = { ruler_has_personality = infertile_personality }
+		NOT = { has_country_flag = Horde_Collapse_Ongoing }
+		NOT = { has_country_flag = Horde_Ruler_Murdered }
+	}
+	
+	option = {
+		name = "EVTOPTA9469"
+		define_heir = {
+			dynasty = ROOT
+			name = "Alexander"
+			claim = 100
+			mil = 6
+		}
+	}
+	option = {
+		name = "EVTOPTB9469"
+		define_heir = {
+			dynasty = ROOT
+			name = "Caesar"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTC9469"
+		trigger = {
+			OR = {
+				culture_group = langue_d_oil
+				culture_group = langue_d_oc
+				culture_group = colonial_french
+			}
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Gilles"
+			claim = 100
+			dip = 6
+		}
+	}
+	option = {
+		name = "EVTOPTC9469"
+		trigger = {
+			primary_culture = catalan
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Oriol"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTD9469"
+		trigger = {
+			culture_group = british
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Luke"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTE9469"
+		trigger = {
+			OR = {
+				culture_group = high_germanic
+				culture_group = low_germanic
+				culture_group = colonial_germanic
+			}
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Oliver"
+			claim = 100
+			mil = 6
+		}
+	}
+	option = {
+		name = "EVTOPTF9469"
+		trigger = {
+			OR = {
+				culture_group = iberian
+				culture_group = basque_group
+				culture_group = colonial_spanish
+			}
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Javier"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTG9469"
+		trigger = {
+			primary_culture = polish
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Jakub"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTH9469"
+		trigger = {
+			culture_group = colonial_british
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "David"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTI9469"
+		trigger = {
+			OR = {
+				culture_group = chinese_group
+				culture_group = colonial_chinese
+			}
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Sun Wu"
+			claim = 100
+			dip = 3
+			female = yes
+		}
+	}
+	option = {
+		name = "EVTOPTJ9469"
+		trigger = {
+			OR = { culture_group = scandinavian culture_group = finnic }
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Johan"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTJ9469"
+		trigger = {
+			culture_group = latin
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Marco"
+			claim = 100
+			adm = 6
+		}
+	}
+	option = {
+		name = "EVTOPTK9469"
+		trigger = {
+			NOT = { culture_group = langue_d_oil }
+			NOT = { culture_group = langue_d_oc }
+			NOT = { culture_group = colonial_french }
+			NOT = { culture_group = british }
+			NOT = { culture_group = colonial_british }
+			NOT = { culture_group = high_germanic }
+			NOT = { culture_group = low_germanic }
+			NOT = { culture_group = colonial_germanic }
+			NOT = { culture_group = iberian }
+			NOT = { primary_culture = catalan }
+			NOT = { culture_group = basque_group }
+			NOT = { culture_group = colonial_spanish }
+			NOT = { culture_group = chinese_group }
+			NOT = { culture_group = colonial_chinese }
+			NOT = { culture_group = scandinavian }
+			NOT = { culture_group = finnic }
+			NOT = { culture_group = latin }
+		}
+		define_heir = {
+			dynasty = ROOT
+			name = "Gigau"
+			claim = 100
+			dip = 3
+		}
+	}
+}
+
+# Heir is of our Dynasty
+country_event = {
+	id = dynastic.9470
+	title = "EVTNAME9470"
+	desc = "EVTDESC9470"
+	picture = DIPLOMACY_eventPicture
+	
+	trigger = {
+		num_of_royal_marriages = 4
+		religion_group = christian
+		government = monarchy
+		#electivisation_trigger = no #it should be okay, elected kings could still spread their dynasty using marriage ties I think, needed on receiving end only
+		#NOT = { AND = { competitive_trigger = yes religion_group = muslim } } #covered by religion_group = christian
+		has_regency = no
+		is_lesser_in_union = no
+		any_country = {
+			religion_group = christian
+			government = monarchy
+			electivisation_trigger = no
+			#NOT = { AND = { competitive_trigger = yes religion_group = muslim } } #religion_group = christian
+			marriage_with = ROOT
+			NOT = { dynasty = ROOT }
+			has_heir = no
+			is_lesser_in_union = no
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_known_country = {
+				limit = {
+					government = monarchy
+					marriage_with = ROOT
+					NOT = { dynasty = ROOT }
+					has_heir = no
+					is_lesser_in_union = no
+				}
+				save_event_target_as = marriage_policy_paid_off_here
+			}
+		}
+	}
+	
+	mean_time_to_happen = { #make it so that idea grou picks have an effect
+		years = 20
+		modifier = {
+			factor = 0.75
+			num_of_royal_marriages = 6
+		}
+		modifier = {
+			factor = 0.5
+			has_idea_group = diplomacy_ideas
+		}
+		modifier = {
+			factor = 2
+			NOT = { has_idea_group = aristocracy_ideas }
+		}
+		modifier = {
+			factor = 0.5
+			has_idea_group = influence_ideas
+		}
+	}
+	
+	#both options are the same, it is just about the loc
+	option = {
+		name = "EVTOPTA9470"
+		trigger = {
+			NOT = { dynasty = "von Habsburg" }
+		}
+		event_target:marriage_policy_paid_off_here = {
+			define_heir = { #Generated immediately, rather than in the followup event, so that the actual heir matches the tooltip for ROOT.
+				dynasty = ROOT
+				age = 14
+			}
+			hidden_effect = {
+				country_event = { id = dynastic_events.8 }
+				set_heir_culture = FROM
+				set_heir_religion = FROM
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTB9470"
+		trigger = {
+			dynasty = "von Habsburg"
+		}
+		event_target:marriage_policy_paid_off_here = {
+			define_heir = { #Generated immediately, rather than in the followup event, so that the actual heir matches the tooltip for ROOT.
+				dynasty = ROOT
+				age = 14
+			}
+			hidden_effect = {
+				country_event = { id = dynastic_events.8 }
+				set_heir_culture = FROM
+				set_heir_religion = FROM
+			}
+		}
+	}
+}
+
+# The Family Opt 1
+country_event = {
+	id = dynastic.9476
+	title = "EVTNAME9476"
+	desc = "EVTDESC9476"
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "EVTOPTA9476"
+		add_treasury = 100
+		random_list = {
+			10 = {
+				Stab_Add1 = yes
+			}
+			10 = {
+				Stab_Add2 = yes
+			}
+			10 = {
+				Stab_Add3 = yes
+			}
+		}
+		tooltip = {
+			add_opinion = { who = FROM modifier = opinion_dynastic_helper }
+		}	
+	}
+}
+
+# The Family Opt 2
+country_event = {
+	id = dynastic.9477
+	title = "EVTNAME9477"
+	desc = "EVTDESC9477"
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9477"
+		random_list = {
+			10 = {
+				Stab_Add1 = yes
+			}
+			10 = {
+				kill_ruler = yes
+			}
+			10 = {
+				Stab_Subtract2 = yes
+			}
+		}
+		tooltip = {
+			add_opinion = { who = FROM modifier = opinion_ignore_dynasty }
+		}
+	}
+}
+
+# Fear and Loathing 1/3
+country_event = {
+	id = dynastic.9481
+	title = "EVTNAME9481" #TODO: description uses Province Name but nothing sets it
+	desc = "EVTDESC9481"
+	picture = ASSASSINATION_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		religion_group = christian
+		ruler_has_personality = mad_personality
+		has_heir = yes
+		papacy_active = yes
+		has_regency = no
+		electivisation_trigger = no
+		# NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		is_lesser_in_union = no
+		NOT = { has_country_flag = murdering_bastard }
+		NOT = { has_country_flag = contained_insanity }
+		NOT = { heir_age = 3 }
+	}
+	
+	option = {
+		name = "EVTOPTA9481"
+		kill_heir = { allow_new_heir = yes }set_country_flag = murdering_bastard
+	}
+	
+	option = {
+		name = "EVTOPTB9481"
+		add_papal_influence = 5
+		set_country_flag = contained_insanity
+	}
+}
+
+# Fear and Loathing 2/3
+country_event = {
+	id = dynastic.9482
+	title = "EVTNAME9482"
+	desc = "EVTDESC9482"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	trigger = {
+		has_country_flag = murdering_bastard
+		NOT = { has_country_flag = contained_insanity }
+		has_regency = no
+		is_lesser_in_union = no
+		OR = {
+			NOT = { tag = CHU }
+			is_year = 1360
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 1
+	}
+	
+	option = {
+		name = "EVTOPTA9482"
+		kill_ruler = yes
+		#clr_country_flag = murdering_bastard #this flag will be cleared by dynastic.9492 on new monarch
+	}
+	
+	option = {
+		name = "EVTOPTB9482" #TODO: either option name makes no sense or I am not getting a jokeS
+		add_prestige = -10
+		add_legitimacy = -20
+		set_country_flag = contained_insanity
+	}
+}
+
+# Fear and Loathing 3/3
+country_event = {
+	id = dynastic.9483
+	title = "EVTNAME9483"
+	desc = "EVTDESC9483"
+	picture = DEATH_OF_HEIR_eventPicture
+
+	trigger = {
+		has_country_flag = contained_insanity
+		has_regency = no
+		is_lesser_in_union = no
+		OR = {
+			NOT = { tag = CHU }
+			is_year = 1360
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 8
+	}
+	
+	option = {
+		name = "EVTOPTA9483"
+		Stab_Subtract3 = yes
+		add_prestige = -20
+		clr_country_flag = contained_insanity
+	}
+	
+	option = {
+		name = "EVTOPTB9483"
+		kill_ruler = yes
+		# add_country_modifier = { #this modifier will be added by dynastic.9492 on new monarch
+		# 	name = "relief_from"
+		# 	duration = 3650
+		# }
+		#clr_country_flag = contained_insanity
+	}
+}
+
+# Fear and Loathing removal on ruler death, ontriggered
+country_event = {
+	id = dynastic.9492
+	title = "EVTNAME9492"
+	desc = "EVTDESC9492"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	trigger = {
+		OR = {
+			has_country_flag = contained_insanity
+			has_country_flag = murdering_bastard
+		}
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9492"
+		add_country_modifier = {
+			name = "relief_from"
+			duration = 3650
+		}
+		clr_country_flag = contained_insanity
+		clr_country_flag = murdering_bastard
+	}
+}
+
+# Wedding bells
+country_event = {
+	id = dynastic.9484
+	title = "EVTNAME9484"
+	desc = "EVTDESC9484"
+	picture = GOOD_WITH_MONARCH_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		prestige = 30
+		government = monarchy
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		electivisation_trigger = no
+		is_lesser_in_union = no
+		is_at_war = no
+		has_regency = no
+		has_heir = no
+		is_female = no
+		OR = {
+			NOT = { num_of_royal_marriages = 2 }
+			AND = {
+				has_dlc = "Rights of Man"
+				has_consort = no
+			}
+		}
+		any_known_country = {
+			religion = ROOT
+			government = monarchy
+			is_lesser_in_union = no
+			alliance_with = ROOT
+			ai = yes
+		}
+	}
+	
+	option = {
+		name = "EVTOPTA9484"   #Time to settle down
+		random_country = {
+			limit = {
+				religion = ROOT
+				government = monarchy
+				is_lesser_in_union = no
+				alliance_with = ROOT
+				ai = yes
+			}
+			create_marriage = ROOT
+		}
+		
+	}
+	
+	option = {
+		name = "EVTOPTB9484"  #No
+		add_prestige = 5
+		add_country_modifier = {
+			name = "sought_after_bachelor"
+			duration = -1
+		}
+	}
+}
+
+# A modest proposal
+country_event = {
+	id = dynastic.9485
+	title = "EVTNAME9485"
+	desc = "EVTDESC9485"
+	picture = DIPLOMACY_eventPicture
+	
+	trigger = {
+		any_known_country = {
+			has_country_modifier = sought_after_bachelor
+			is_lesser_in_union = no
+			government = monarchy
+			religion_group = ROOT				
+			has_opinion = {
+				who = ROOT
+				value = 10
+			}
+		}
+		government = monarchy
+		is_lesser_in_union = no
+	}
+	
+	mean_time_to_happen = {
+		years = 2
+	}
+	
+	option = {
+		name = "EVTOPTA9485"
+		random_country = {
+			limit = {
+				has_country_modifier = sought_after_bachelor
+				religion_group = ROOT
+				has_opinion = {
+					who = ROOT
+					value = 10
+				}
+			}
+			random_list = {
+				20 = { country_event = { id = dynastic.9486 } }
+				80 = { country_event = { id = dynastic.9487 } }
+			}
+		}
+		add_treasury = -15
+		add_dip_power = -10
+	}
+	
+	option = {
+		name = "EVTOPTB9485"
+	}
+}
+
+# Wedding bells
+country_event = {
+	id = dynastic.9486
+	title = "EVTNAME9486"
+	desc = "EVTDESC9486"
+	picture = GOOD_WITH_MONARCH_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9486"
+		if = {
+			limit = {
+				has_dlc = "Rights of Man"
+			}
+			define_consort = {
+				country_of_origin = FROM
+				culture = FROM
+				religion = FROM
+			}
+		}
+		create_marriage = FROM
+		add_opinion = { who = FROM modifier = opinion_marriage_offer }
+		remove_country_modifier = sought_after_bachelor
+	}
+	
+	option = {
+		name = "EVTOPTB9486"
+		reverse_add_opinion = { who = FROM modifier = opinion_witchcraft }
+		#kill_ruler = yes #why would it kill the ruler?
+		add_prestige = -5 
+	}
+}
+
+# Wedding bells
+country_event = {
+	id = dynastic.9487
+	title = "EVTNAME9487"
+	desc = "EVTDESC9487"
+	picture = GOOD_WITH_MONARCH_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA9487"
+		if = {
+			limit = {
+				has_dlc = "Rights of Man"
+			}
+			define_consort = {
+				country_of_origin = FROM
+				culture = FROM
+				religion = FROM
+			}
+		}
+		create_marriage = FROM
+		add_opinion = { who = FROM modifier = opinion_united_dynasties }
+		remove_country_modifier = sought_after_bachelor
+	}
+	
+	option = {
+		name = "EVTOPTB9487"
+		reverse_add_opinion = { who = FROM modifier = opinion_refused_marriage }
+		#kill_ruler = yes #why would it kill the ruler?
+		add_prestige = -5 
+	}
+}
+
+#Last war was a failure
+country_event = {
+	id = dynastic.9488
+	title = "EVTNAME9488"
+	desc = "EVTDESC9488"
+	picture = MILITARY_CAMP_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		government = monarchy
+		electivisation_trigger = no
+		has_heir = yes
+		is_heir_leader = yes
+		heir_age = 20
+		any_known_country = {
+			truce_with = ROOT
+		}
+		is_at_war = no
+		is_lesser_in_union = no
+		war_exhaustion = 12
+		OR = {
+			NOT = { tag = CHU }
+			is_year = 1360
+		}
+	}
+	
+	option = {
+		name = "EVTOPTA9488"
+		kill_ruler = yes
+		add_war_exhaustion = -4
+		#Stab_Add2 = yes #change of ruler would hardly add stability to the situation
+	}
+	
+	option = {
+		name = "EVTOPTB9488"
+		kill_heir = { allow_new_heir = yes }
+	}
+}
+
+# The Moon
+country_event = {
+	id = dynastic.9489
+	title = "EVTNAME9489"
+	desc = "EVTDESC9489"
+	picture = IMPORTANT_STATUE_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		war_exhaustion = 4
+		adm = 3
+	}
+	
+	option = {
+		name = "EVTOPTA9489"
+		add_prestige = 5
+	}
+	
+	option = {
+		name = "EVTOPTB9489"
+		add_mil_power = 25
+	}
+}
+
+# Seeing the real you
+country_event = {
+	id = dynastic.9490
+	title = "EVTNAME9490"
+	desc = "EVTDESC9490"
+	picture = NEW_HEIR_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		is_lesser_in_union = no
+		government = monarchy
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		electivisation_trigger = no
+		celestial_trigger = no
+		has_heir = no
+		is_female = no
+		has_regency = no
+		num_of_royal_marriages = 1
+		NOT = { has_country_modifier = a_woman_scorned }
+		NOT = { ruler_has_personality = infertile_personality }
+		NOT = { has_country_flag = Horde_Collapse_Ongoing }
+		NOT = { has_country_flag = Horde_Ruler_Murdered }
+	}
+	
+	option = {
+		name = "EVTOPTA9490"
+		define_heir = {
+			dynasty = ROOT
+		}
+	}
+	
+	option = {
+		name = "EVTOPTB9490"
+		add_years_of_income = 0.2 #TODO: change for better modifier
+		add_legitimacy = -20
+		add_prestige = -5
+		add_country_modifier = {
+			name = "a_woman_scorned"
+			duration = 1095
+		}
+	}
+}
+
+### Suggestions by Ex Mudder, scripted by Sara Wendel-?rtqvist
+
+# Starlight
+country_event = {
+	id = dynastic_events.1
+	title = dynastic_events.1.t
+	desc = dynastic_events.1.d
+	picture = NEW_HEIR_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		has_heir = no
+		ruler_age = 40
+		government = monarchy
+		religion_group = christian
+		electivisation_trigger = no
+		is_lesser_in_union = no
+	}
+	
+	#TODO: I don't get options with names as they will look strange for most tags; also - stats could be random here
+	#TODO: shouldn't you have an option to reject her, like in event #2, giving modifier dyn_newborn_daughter?
+	option = { 
+		name = dynastic_events.1.a
+		define_heir = {
+			name = "Elisabeth"
+			dynasty = ROOT
+			claim = 50
+			female = yes
+			adm = 4
+			dip = 3
+			mil = 3
+		}
+	}
+	
+	option = {
+		name = dynastic_events.1.b
+		define_heir = {
+			dynasty = ROOT
+			name = "Caterine"
+			claim = 50
+			adm = 3
+			dip = 3
+			mil = 4
+			female = yes
+		}
+	}
+	option = {
+		name = dynastic_events.1.c
+		define_heir = {
+			dynasty = ROOT
+			claim = 50
+			adm = 3
+			dip = 4
+			mil = 3
+			female = yes
+		}
+	}
+	option = {
+		name = dynastic_events.1.e
+		define_heir = {
+			dynasty = ROOT
+			name = "Sara"
+			claim = 50
+			adm = 3
+			dip = 3
+			mil = 4
+			female = yes
+		}
+	}
+}
+
+# Newborn Daughter
+country_event = {
+	id = dynastic_events.2
+	title = dynastic_events.2.t
+	desc = dynastic_events.2.d
+	picture = NEW_HEIR_eventPicture
+	is_triggered_only = yes
+	trigger = {
+		has_heir = no
+		ruler_age = 20
+		government = monarchy
+		NOT = {
+			culture_group = tartar_group
+			culture_group = altaic
+			culture_group = tungusic
+			culture_group = japanese_g
+			culture_group = oghuz
+		}
+		NOT = { religion = confucianism }
+		NOT = { religion_group = muslim }
+		crown_republic_trigger = no
+		electivisation_trigger = no
+		is_lesser_in_union = no
+		NOT = { has_country_modifier = dyn_newborn_daughter }
+	}
+	
+	option = {
+		name = dynastic_events.2.a
+		add_horde_unity = 10
+		add_legitimacy = -10
+		if = {
+			limit = {
+				religion = catholic
+			}
+			add_papal_influence = -10
+		}
+		if = {
+			limit = {
+				religion_group = muslim
+			}
+			add_piety = -0.10
+		}
+		define_heir = {
+			dynasty = ROOT
+			female = yes
+			claim = 50
+		}
+	}
+	
+	option = {
+		name = dynastic_events.2.b
+		add_country_modifier = {
+			name = dyn_newborn_daughter
+			duration = 365
+		}
+	}
+}
+
+# Talented and Ambitious Daughter
+country_event = {
+	id = dynastic_events.3
+	title = dynastic_events.3.t
+	desc = dynastic_events.3.d
+	picture = NEW_HEIR_eventPicture
+	
+	is_triggered_only = yes
+	trigger = {
+		has_heir = no
+		ruler_age = 40
+		government = monarchy
+		NOT = { religion = confucianism }
+		electivisation_trigger = no
+		NOT = { religion_group = muslim }
+		NOT = { AND = { competitive_trigger = yes religion_group = muslim } }
+		is_lesser_in_union = no
+		NOT = { has_ruler_flag = talented_daughter_happened }
+	}
+	
+	immediate = {
+		set_ruler_flag = talented_daughter_happened
+	}
+	
+	option = {
+		name = dynastic_events.3.a
+		add_horde_unity = -10
+		add_legitimacy = -10
+
+		if = {
+			limit = {
+				religion = catholic
+			}
+			add_papal_influence = -10
+		}
+		else_if = {
+			limit = {
+				religion_group = muslim
+			}
+			add_piety = -0.10
+		}
+
+		define_heir = {
+			dynasty = ROOT
+			age = 13
+			adm = 4
+			dip = 4
+			mil = 4
+			claim = 50
+			female = yes
+			no_consort_with_heir = yes
+		}
+	}
+	
+	option = {
+		name = dynastic_events.3.b
+		capital_scope = {
+			add_unrest = 5
+		}
+	}
+}
+
+# The Ruler's Daughter
+country_event = {
+	id = dynastic_events.4
+	title = dynastic_events.4.t
+	desc = dynastic_events.4.d
+	picture = NEW_HEIR_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_heir = no
+		num_of_cities = 2
+		has_regency = yes
+		is_lesser_in_union = no
+		NOT = { has_country_flag = ruler_prisonner_of_war }
+		government = monarchy
+		electivisation_trigger = no
+		religion_group = christian 
+		capital_scope = {
+			continent = europe
+		}
+		any_known_country = {
+			government = monarchy
+			religion = ROOT
+			electivisation_trigger = no
+			has_regency = no
+			is_free_or_tributary_trigger = yes
+			num_of_cities = ROOT
+			capital_scope = {
+				continent = europe
+			}
+			NOT = { war_with = ROOT }
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_known_country = {
+				limit = {
+					government = monarchy
+					electivisation_trigger = no
+					has_regency = no
+					is_free_or_tributary_trigger = yes
+					num_of_cities = ROOT
+					religion_group = ROOT
+					capital_scope = {
+						continent = europe
+					}
+					NOT = { war_with = ROOT }
+				}
+				save_event_target_as = dyn_woman_pretender
+			}
+		}
+	}
+	
+	option = {
+		name = dynastic_events.4.a
+		if = {
+			limit = {
+				religion = catholic
+			}
+			add_papal_influence = -10
+		}
+		define_ruler = {
+			dynasty = ROOT
+			age = 20
+			adm = 3
+			dip = 3
+			mil = 3
+			claim = 50
+			female = yes
+		}
+		event_target:dyn_woman_pretender = {
+			add_casus_belli = {
+				target = ROOT
+				type = cb_restore_personal_union
+				months = 12
+			}
+			add_opinion = {
+				who = ROOT
+				modifier = opinion_spurned_heir
+			}
+		}
+	}
+	
+	option = {
+		name = dynastic_events.4.b
+		#TODO: notification event?
+		event_target:dyn_woman_pretender = {
+			add_opinion = {
+				who = ROOT
+				modifier = opinion_choose_heir
+			}
+			ROOT = {
+				define_ruler = {
+					dynasty = PREV
+					age = 20
+				}
+			}
+		}
+
+		random_owned_province = {
+			limit = {
+				is_capital = no
+			}
+			spawn_rebels = {
+				type = pretender_rebels
+				size = 2
+				female = yes
+			}
+		}
+	}
+}
+
+# Offer Personal Union
+country_event = {
+	id = dynastic_events.5
+	title = dynastic_events.5.t
+	desc = dynastic_events.5.d
+	picture = DIPLOMACY_eventPicture
+	
+	trigger = {
+		has_heir = no
+		government = monarchy
+		electivisation_trigger = no
+		religion_group = christian
+		is_free_or_tributary_trigger = yes
+		ruler_age = 16
+		NOT = { ruler_age = 40 }
+
+		any_neighbor_country = {
+			government = monarchy
+			electivisation_trigger = no
+			religion_group = christian
+			has_heir = no
+			ruler_age = 16
+			NOT = { ruler_age = 40 }
+			NOT = {
+				OR = {
+					has_opinion_modifier = {
+						who = ROOT
+						modifier = opinion_spurned_pu
+					}
+					reverse_has_opinion_modifier = {
+						who = ROOT
+						modifier = opinion_spurned_pu
+					}
+				}
+			}
+			OR = {
+				AND = {
+					is_female = no
+					ROOT = {
+						is_female = yes
+						has_consort_regency = no
+					}
+				}
+				AND = {
+					is_female = yes
+					has_consort_regency = no
+					ROOT = {
+						is_female = no
+					}
+				}
+			}
+			OR = {
+				dynasty = ROOT
+				culture_group = ROOT
+			}
+			has_opinion = { who = ROOT value = 75 }
+			reverse_has_opinion = { who = ROOT value = 75 }
+			is_free_or_tributary_trigger = yes
+		}
+	}
+	
+	immediate = {
+		random_neighbor_country = {
+			limit = {
+				government = monarchy
+				electivisation_trigger = no
+				religion_group = christian
+				has_heir = no
+				ruler_age = 16
+				NOT = { ruler_age = 40 }
+				NOT = {
+					OR = {
+						has_opinion_modifier = {
+							who = ROOT
+							modifier = opinion_spurned_pu
+						}
+						reverse_has_opinion_modifier = {
+							who = ROOT
+							modifier = opinion_spurned_pu
+						}
+					}
+				}
+				OR = {
+					AND = {
+						is_female = no
+						ROOT = {
+							is_female = yes
+							has_consort_regency = no
+						}
+					}
+					AND = {
+						is_female = yes
+						has_consort_regency = no
+						ROOT = {
+							is_female = no
+						}
+					}
+				}
+				OR = {
+					dynasty = ROOT
+					culture_group = ROOT
+				}
+				has_opinion = { who = ROOT value = 75 }
+				reverse_has_opinion = { who = ROOT value = 75 }
+				is_free_or_tributary_trigger = yes
+			}
+			save_event_target_as = potential_PU_target
+		}
+	}
+
+
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = dynastic_events.5.a
+		event_target:potential_PU_target = {
+			country_event = {
+				id = dynastic_events.6
+				tooltip = dynastic_events.6.t
+			}
+		}
+	}
+	
+	option = {
+		name = dynastic_events.5.b
+		add_legitimacy = 10
+	}
+}
+
+# Personal Union Offered
+country_event = {
+	id = dynastic_events.6
+	title = dynastic_events.6.t
+	desc = dynastic_events.6.d
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dynastic_events.6.a
+		add_legitimacy = 20
+		FROM = {
+			set_country_flag = dyn_pu_accepted_flag
+			create_union = ROOT
+			country_event = {
+				id = dynastic_events.7
+				tooltip = dynastic_events.7.t
+			}
+		}
+	}
+	
+	option = {
+		name = dynastic_events.6.b
+		FROM = {
+			set_country_flag = dyn_pu_refused_flag
+			add_opinion = {
+				modifier = opinion_spurned_pu
+				who = ROOT
+			}
+			add_casus_belli = {
+				target = ROOT
+				type = cb_insult
+				months = 12
+			}
+			country_event = {
+				id = dynastic_events.7
+				tooltip = dynastic_events.7.t
+			}
+		}
+	}
+}
+
+# A Political Marriage - Accepted or Not?
+country_event = {
+	id = dynastic_events.7
+	title = dynastic_events.7.t
+	desc = dynastic_events.7.d
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dynastic_events.7.a
+		trigger = {
+			has_country_flag = dyn_pu_accepted_flag
+		}
+		add_legitimacy = 20
+		tooltip = {
+			create_union = FROM
+		}
+	}
+	
+	option = {
+		name = dynastic_events.7.b
+		trigger = {
+			has_country_flag = dyn_pu_refused_flag
+		}
+		tooltip = {
+			add_opinion = {
+				modifier = opinion_spurned_pu
+				who = FROM
+			}
+			add_casus_belli = {
+				target = FROM
+				type = cb_insult
+				months = 12
+			}
+		}
+	}
+}
+
+# Marriage Policies paid off
+country_event = {
+	id = dynastic_events.8
+	title = dynastic_events.8.t
+	desc = dynastic_events.8.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dynastic_events.8.a
+		trigger = {
+			FROM = {
+				NOT = { dynasty = "von Habsburg" }
+			}
+		}
+		custom_tooltip = dynastic_events.8.a.tt
+	}
+	option = {
+		name = dynastic_events.8.b
+		trigger = {
+			FROM = {
+				dynasty = "von Habsburg"
+			}
+		}
+		custom_tooltip = dynastic_events.8.a.tt
+	}
+}
+
+# A marriage to seal a truce
+country_event = {
+	id = dynastic.1001
+	title = "dynastic.1001.title"
+	desc = "dynastic.1001.desc"
+	picture = IBERIAN_WEDDING_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		religion_group = FROM
+		NOT = { marriage_with = FROM }
+		is_free_or_tributary_trigger = yes
+		government = monarchy
+		has_country_modifier = title_5
+		FROM = {
+			government = monarchy
+			has_country_modifier = title_5
+			is_free_or_tributary_trigger = yes
+		}
+	}
+	
+	option = {
+		name = "dynastic.1001.opta"
+		ai_chance = {
+			factor = 90
+			
+			modifier = {
+				factor = 0
+				
+				is_rival = FROM
+			}
+		}
+		FROM = {
+			country_event = {
+				id = dynastic.1002
+				days = 15
+			}
+		}
+	}
+	
+	option = {
+		name = "dynastic.1001.optb"
+		ai_chance = {
+			factor = 10
+		}
+		FROM = {
+			country_event = {
+				id = dynastic.1004
+				days = 15
+			}
+		}
+	}
+}
+
+country_event = {
+	id = dynastic.1002
+	title = "dynastic.1002.title"
+	desc = "dynastic.1002.desc"
+	picture = IBERIAN_WEDDING_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1002.opta"
+		ai_chance = {
+			factor = 90
+			
+			modifier = {
+				factor = 0
+				
+				is_rival = FROM
+			}
+		}
+		add_opinion = { who = FROM modifier = marriage_secured_peace }
+		FROM = {
+			country_event = {
+				id = dynastic.1003
+				days = 15
+			}
+		}
+	}
+	
+	option = {
+		name = "dynastic.1002.optb"
+		ai_chance = {
+			factor = 10
+		}
+		add_opinion = { who = FROM modifier = peace_marriage_refused }
+		FROM = {
+			country_event = {
+				id = dynastic.1004
+				days = 15
+			}
+		}
+	}
+}
+
+country_event = {
+	id = dynastic.1003
+	title = "dynastic.1003.title"
+	desc = "dynastic.1003.desc"
+	picture = IBERIAN_WEDDING_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1003.opta"
+		add_opinion = { who = FROM modifier = marriage_secured_peace }
+		create_marriage = FROM
+	}
+}
+
+country_event = {
+	id = dynastic.1004
+	title = "dynastic.1004.title"
+	desc = "dynastic.1004.desc"
+	picture = IBERIAN_WEDDING_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1004.opta"
+		add_opinion = { who = FROM modifier = peace_marriage_refused }
+	}
+}
+
+# The Treaty of Perpetual Peace
+country_event = {
+	id = dynastic.1005
+	title = "dynastic.1005.title"
+	desc = "dynastic.1005.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1005.opta"
+		trigger = {
+			num_of_owned_provinces_with = {
+				value = 1
+				region = scotland_region
+				owned_by = ENG
+			}
+		}
+		ai_chance = {
+			factor = 80
+		}
+		FROM = {
+			country_event = {
+				id = dynastic.1006
+				days = 15
+			}
+		}
+	}
+	
+	option = {
+		name = "dynastic.1005.optb"
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 10
+				NOT = {
+					num_of_owned_provinces_with = {
+						value = 1
+						region = scotland_region
+						owned_by = ENG
+					}
+				}
+			}
+		}
+		add_opinion = { who = FROM modifier = perpetual_peace_treaty }
+		FROM = {
+			country_event = {
+				id = dynastic.1007
+				days = 15
+			}
+		}
+	}
+	
+	option = {
+		name = "dynastic.1005.optc"
+		ai_chance = {
+			factor = 10
+		}
+		add_opinion = { who = FROM modifier = perpetual_peace_refused }
+		FROM = {
+			country_event = {
+				id = dynastic.1008
+				days = 15
+			}
+		}
+	}
+}
+
+country_event = {
+	id = dynastic.1006
+	title = "dynastic.1006.title"
+	desc = "dynastic.1006.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1006.opta"
+		ai_chance = {
+			factor = 90
+		}
+		every_owned_province = {
+			limit = {
+				region = scotland_region
+			}
+			cede_province = ROOT
+		}
+		add_opinion = { who = FROM modifier = perpetual_peace_treaty }
+		FROM = {
+			country_event = {
+				id = dynastic.1007
+				days = 15
+			}
+		}
+	}
+	
+	option = {
+		name = "dynastic.1006.optb"
+		ai_chance = {
+			factor = 10
+		}
+		add_opinion = { who = FROM modifier = perpetual_peace_refused }
+		FROM = {
+			country_event = {
+				id = dynastic.1008
+				days = 15
+			}
+		}
+	}
+}
+
+country_event = {
+	id = dynastic.1007
+	title = "dynastic.1007.title"
+	desc = "dynastic.1007.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1007.opta"
+		add_opinion = { who = FROM modifier = perpetual_peace_treaty }
+		create_marriage = FROM
+	}
+}
+
+country_event = {
+	id = dynastic.1008
+	title = "dynastic.1008.title"
+	desc = "dynastic.1008.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "dynastic.1008.opta"
+		add_opinion = { who = FROM modifier = perpetual_peace_refused }
+	}
+}
+
+# Union of the Crowns
+country_event = {
+	id = dynastic.1009
+	title = "dynastic.1009.title"
+	desc = "dynastic.1009.desc"
+	picture = COURT_eventPicture
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = ENG
+				NOT = { war_with = SCO }
+				NOT = { truce_with = SCO }
+				is_vassal = no
+				is_lesser_in_union = no
+				has_opinion_modifier = {
+					modifier = perpetual_peace_treaty
+					who = SCO
+				}
+				SCO = {
+					OR = {
+						AND = {
+							ruler_age = 50
+							has_heir = no
+						}
+						AND = {
+							is_female = yes
+							has_consort_regency = no
+						}
+						has_disaster = interregnum
+					}
+					OR = {
+						is_vassal = no
+						vassal_of = ENG
+					}
+					is_lesser_in_union = no
+					religion = ROOT
+				}
+			}
+			AND = {
+				tag = SCO
+				NOT = { war_with = ENG }
+				NOT = { truce_with = ENG }
+				is_vassal = no
+				is_lesser_in_union = no
+				has_opinion_modifier = {
+					modifier = perpetual_peace_treaty
+					who = ENG
+				}
+				ENG = {
+					OR = {
+						AND = {
+							ruler_age = 50
+							has_heir = no
+						}
+						AND = {
+							is_female = yes
+							has_consort_regency = no
+						}
+						has_disaster = interregnum
+					}
+					OR = {
+						is_vassal = no
+						vassal_of = SCO
+					}
+					is_lesser_in_union = no
+					religion = ROOT
+				}
+			}
+		}
+		dip_tech = 25
+	}
+	
+	mean_time_to_happen = { months = 12 }
+	
+	option = {
+		name = "dynastic.1009.opta"
+		trigger = {
+			tag = ENG
+		}
+		add_opinion = { who = SCO modifier = opinion_good_relations }
+		create_union = SCO
+		set_country_flag = union_of_the_crowns
+		SCO = {
+			add_opinion = { who = ROOT modifier = opinion_good_relations }
+		}
+	}
+	
+	option = {
+		name = "dynastic.1009.optb"
+		trigger = {
+			tag = SCO
+		}
+		add_opinion = { who = ENG modifier = opinion_good_relations }
+		ENG = {
+			create_union = ROOT
+			set_country_flag = union_of_the_crowns
+			add_opinion = { who = ROOT modifier = opinion_good_relations }
+		}
+	}
+	
+	option = {
+		name = "dynastic.1009.optc"
+		trigger = {
+			ai = no
+			tag = SCO
+		}
+		ENG = {
+			add_casus_belli = { target = ROOT type = cb_restore_personal_union months = 60 }
+		}
+	}
+}
+
+country_event = {
+	id = dynastic.1010
+	
+	title = "dynastic.1010.t"
+	desc = "dynastic.1010.d"
+	
+	picture = SIEGE_eventPicture
+	
+	trigger = {
+		OR = {
+			primary_culture = irish
+			primary_culture = hiberno_norman
+		}
+		capital_scope = {
+			region = ireland_region
+		}
+		AND = {
+			has_reform = Pol_Succession4
+			check_key = { lhs = Prov_TRPow value = 50 }
+		}
+		has_regency = yes
+		NOT = { has_country_flag = ruler_prisonner_of_war }
+	}
+	
+	mean_time_to_happen = { months = 12 }
+	
+	option = {
+		name = "dynastic.1010a"
+		define_ruler = {
+			dynasty = ROOT
+		}
+		define_heir = {
+			dynasty = ROOT
+		}
+	}
+}

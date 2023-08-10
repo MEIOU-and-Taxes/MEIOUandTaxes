@@ -1,0 +1,1639 @@
+# Economy \ Trade \ Misc
+# By KJH
+
+TN_GetDmndBudgetAll = {
+    ### NOTE, DirectBuy only supports up to FoodStep4
+    TN_GetDmndBudget = {
+        class = SF
+        div = 6
+    }
+    TN_GetDmndBudget = {
+        class = NM 
+        div = 6
+    }
+    TN_GetDmndBudget = {
+        class = RE 
+        div = 10
+    }
+    TN_GetDmndBudget = {
+        class = NO 
+        div = 18
+    }
+    TN_GetDmndBudget = {
+        class = BG 
+        div = 20
+    }
+    TN_GetDmndBudget = {
+        class = CL 
+        div = 20
+    }
+    set_key = { lhs = SF_DirectBuy1 value = 0 }
+    set_key = { lhs = SF_DirectFill1 value = 0 }
+    set_key = { lhs = NM_DirectBuy1 value = 0 }
+    set_key = { lhs = NM_DirectFill1 value = 0 }
+    set_key = { lhs = NO_DirectBuy1 value = 0 }
+    set_key = { lhs = NO_DirectBuyFromSF1 value = 0 }
+    set_key = { lhs = NO_DirectBuyFromNM1 value = 0 }
+    set_key = { lhs = NO_DirectFill1 value = 0 }
+    set_key = { lhs = CL_DirectBuy1 value = 0 }
+    set_key = { lhs = CL_DirectBuyFromSF1 value = 0 }
+    set_key = { lhs = CL_DirectFill1 value = 0 }
+
+    # Elites first, let them take what they need
+    # Nomadic chiefs are not as extractive
+    TN_GetDmndEliteDirect = { class = NO worker = NM good=1 BasePrice=TN_ProvPrc1 DirectBuyPerc=1.0 Scalar100=NM_Ratio elite1 = NO }
+    # Nobles on the other hand will use feudalism if present to its fullest extent
+    TN_GetDmndEliteDirect = { class = NO worker = SF good=1 BasePrice=TN_ProvPrc1 DirectBuyPerc=2.5 Scalar100=NO_RuralPowerScalar elite1 = NO elite2 = CL }
+    
+    ### Only Tax empowered Clergy allow mass DirectBuy of peasant goods
+    ### Clergy calc, to factor in Rights
+    set_key = { lhs = Tmp_3 which = Prov_CLPow }
+    multiply_key = { lhs = Tmp_3 value = 0.01 } # 0-100 scale -> 0-1 scale
+    set_key = { lhs = Tmp_4 which = Tmp_3 }
+    multiply_key = { lhs = Tmp_3 which = Tmp_3 }
+    multiply_key = { lhs = Tmp_3 value = 0.666 }
+    multiply_key = { lhs = Tmp_4 value = 0.333 }
+    change_key = { lhs = Tmp_3 which = Tmp_4 }
+	if = {
+		limit = {
+			owner = { # Charity dues exempt clergy
+				NOT = { Rights_CLTax3HasGreater = yes }
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					Rights_CLTax1Has = yes
+				}
+			}
+			set_key = { lhs = Tax_TmpBase value = 0.2 }
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 0.1 }
+		}
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_3 } ## Semi-exponential clergy power
+    }
+    else = { ### without that, its just a 1% tithe
+        set_key = { lhs = Tax_TmpBase which = CL_PrpResources }
+        multiply_key = { lhs = Tax_TmpBase value = 0.005 } ## 100-1 scale and x0.5
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_3 } ## Semi-exponential clergy power
+    }
+    # overall Clergy will use their power, but the maximume extent of it is not as severe
+    TN_GetDmndEliteDirect = { class = CL worker = SF good=1 BasePrice=TN_ProvPrc1 DirectBuyPerc=1.5 Scalar=Tax_TmpBase elite1 = NO elite2 = CL }
+
+    # Then workers, who have to feed off the scraps left over
+    TN_GetDmndWorkerDirect = { class = SF good=1 BasePrice=TN_ProvPrc1 DirectBuyPerc=0.95 elite1 = NO elite2 = CL }
+    TN_GetDmndWorkerDirect = { class = NM good=1 BasePrice=TN_ProvPrc1 DirectBuyPerc=1.0 elite1 = NO }
+
+    set_key = { lhs = Class_DirectBuyR1 which = SF_DirectBuy1 }
+    change_key = { lhs = Class_DirectBuyR1 which = NO_DirectBuyFromSF1 }
+    change_key = { lhs = Class_DirectBuyR1 which = CL_DirectBuyFromSF1 }
+    set_key = { lhs = Class_DirectBuyNM1 which = NM_DirectBuy1 }
+    change_key = { lhs = Class_DirectBuyNM1 which = NO_DirectBuyFromNM1 }
+}
+
+TN_GetDmndAll = {
+    TN_GetDmndBudgetAll = yes ## Get Budgets and DirectFulfil amounts
+    # Get level of over/under consumption based on wealth
+    TN_GetDmnd = {
+        class = SF
+        edu = 0.005 
+        DirectBuy1 = yes
+        FoodStep1=0.8 LifeStep1=0.12
+        FoodStep2=0.2 LifeStep2=0.6 ComfortStep2=0.15 LuxuryStep2=0.05
+        FoodStep3=0.4 LifeStep3=0.6 ComfortStep3=0.25 LuxuryStep3=0.15
+        FoodStep4=0.5 LifeStep4=0.6 ComfortStep4=0.5 LuxuryStep4=0.3
+        FoodStep5=0.6 LifeStep5=0.58 ComfortStep5=0.6 LuxuryStep5=0.5
+        ComfortStep6=0.5 LuxuryStep6=0.5
+        ComfortStep7=1.0 LuxuryStep7=1.0
+    }
+    TN_GetDmnd = {
+        class = NM 
+        edu = 0.005 
+        DirectBuy1 = yes
+        FoodStep1=1.0 LifeStep1=0.1
+        FoodStep2=0.2 LifeStep2=0.4 ComfortStep2=0.05 LuxuryStep2=0.05
+        FoodStep3=0.2 LifeStep3=0.5 ComfortStep3=0.25 LuxuryStep3=0.1
+        FoodStep4=0.3 LifeStep4=0.5 ComfortStep4=0.6 LuxuryStep4=0.15
+        FoodStep5=0.3 LifeStep5=0.5 ComfortStep5=0.6 LuxuryStep5=0.2
+        ComfortStep6=0.5 LuxuryStep6=0.5
+        ComfortStep7=0.5 LuxuryStep7=0.5
+    }
+    TN_GetDmnd = {
+        class = RE 
+        edu = 0.005 
+        FoodStep1=0.9 LifeStep1=0.4
+        FoodStep2=0.2 LifeStep2=0.6 ComfortStep2=0.15 LuxuryStep2=0.05
+        FoodStep3=0.4 LifeStep3=0.5 ComfortStep3=0.25 LuxuryStep3=0.15
+        FoodStep4=0.5 LifeStep4=0.5 ComfortStep4=0.5 LuxuryStep4=0.3
+        FoodStep5=0.5 LifeStep5=0.5 ComfortStep5=0.6 LuxuryStep5=0.5
+        ComfortStep6=0.5 LuxuryStep6=0.5
+        ComfortStep7=1.0 LuxuryStep7=1.0
+    }
+    TN_GetDmnd = {
+        class = NO 
+        edu = 0.005 
+        DirectBuy1 = yes
+        FoodStep1=1.0 LifeStep1=0.75
+        FoodStep2=1.0 LifeStep2=0.75 ComfortStep2=0.25 LuxuryStep2=0.2
+        FoodStep3=1.0 LifeStep3=0.5 ComfortStep3=0.5 LuxuryStep3=0.3
+        FoodStep4=1.0 LifeStep4=0.5 ComfortStep4=0.5 LuxuryStep4=0.5
+        FoodStep5=1.0 LifeStep5=0.5 ComfortStep5=0.5 LuxuryStep5=0.5
+        ComfortStep6=0.75 LuxuryStep6=0.5
+        ComfortStep7=1.0 LuxuryStep7=1.0
+    }
+    TN_GetDmnd = {
+        class = BG 
+        edu = 0.005 
+        FoodStep1=1.0 LifeStep1=0.75
+        FoodStep2=1.0 LifeStep2=0.75 ComfortStep2=0.25 LuxuryStep2=0.2
+        FoodStep3=1.0 LifeStep3=0.5 ComfortStep3=0.5 LuxuryStep3=0.3
+        FoodStep4=1.0 LifeStep4=0.5 ComfortStep4=0.5 LuxuryStep4=0.5
+        FoodStep5=1.0 LifeStep5=0.5 ComfortStep5=0.5 LuxuryStep5=0.5
+        ComfortStep6=0.75 LuxuryStep6=0.5
+        ComfortStep7=1.0 LuxuryStep7=1.0
+    }
+    TN_GetDmnd = {
+        class = CL 
+        edu = 0.005 
+        DirectBuy1 = yes
+        FoodStep1=0.8 LifeStep1=0.5
+        FoodStep2=0.2 LifeStep2=0.5 ComfortStep2=0.25 LuxuryStep2=0.1
+        FoodStep3=0.5 LifeStep3=0.5 ComfortStep3=0.25 LuxuryStep3=0.15
+        FoodStep4=0.5 LifeStep4=0.5 ComfortStep4=0.5 LuxuryStep4=0.25
+        FoodStep5=0.5 LifeStep5=0.5 ComfortStep5=0.5 LuxuryStep5=0.5
+        ComfortStep6=0.5 LuxuryStep6=0.5
+        ComfortStep7=1.0 LuxuryStep7=1.0
+    }
+}
+
+TN_GetDmndBudget = {
+    set_key = { lhs = $class$_FillFood value = 0 }
+    set_key = { lhs = $class$_FillLife value = 0 }
+    set_key = { lhs = $class$_FillLifeC value = 0 }
+    set_key = { lhs = $class$_FillComfort value = 0 }
+    set_key = { lhs = $class$_FillLuxury value = 0 }
+    set_key = { lhs = $class$_FillKnowledge value = 0 }
+    set_key = { lhs = $class$_Dole value = 0 }
+
+    if = {
+        limit = {
+            check_key = { lhs = $class$_Total value = 0.001 }
+            check_key = { lhs = $class$_Wealth value = 0.1 }
+        }
+		# How much a class is planning to spend
+        set_key = { lhs = $class$_BudgetFulfil which = $class$_Wealth }
+        divide_key = { lhs = $class$_BudgetFulfil value = $div$ }
+		
+    }
+    else = {
+        set_key = { lhs = $class$_BudgetFulfil value = 0 }
+    }
+}
+
+
+TN_GetDmndWorkerDirect = {
+    if = {
+        limit = {
+            check_key = { lhs = $class$_Produce$good$ value = 0.001 }
+            check_key = { lhs = $class$_BudgetFulfil value = 0.1 }
+        }
+        ### Deduct what elite classes already bought
+        set_key = { lhs = Tmp_4 which = $class$_Produce$good$ }
+        [[elite1] subtract_key = { lhs = Tmp_4 which = $elite1$_DirectBuyFrom$class$$good$ } ]
+        [[elite2] subtract_key = { lhs = Tmp_4 which = $elite2$_DirectBuyFrom$class$$good$ } ]
+        [[elite3] subtract_key = { lhs = Tmp_4 which = $elite3$_DirectBuyFrom$class$$good$ } ]
+        ### The rest we can tap, as its our own produce
+        if = {
+            limit = { NOT = { check_key = { lhs = Tmp_4 value = 0.01 } } }
+            set_key = { lhs = $class$_DirectBuy$good$ value = 0 }
+            set_key = { lhs = $class$_DirectFill$good$ value = 0 }
+        }
+        else ={
+            # How much 100% fulfilment will cost
+            TN_GetDmnd$class$$good$ = { return = Tmp_3 }
+            set_key = { lhs = Tmp_1 which = Tmp_3 }
+            multiply_key = { lhs = Tmp_1 value = $DirectBuyPerc$ } ### % of Good Demand
+            ### Tmp_1 is now the total amount of goods we are demanded
+            # Also how much will this cost
+            set_key = { lhs = Tmp_2 which = Tmp_1 }
+            multiply_key = { lhs = Tmp_2 which = $BasePrice$ } ### BASE Good PRICE
+            ### Tmp_2 is now the value of these goods
+            
+            # First, can we afford this?
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_2 which = $class$_BudgetFulfil } # if we cant?
+                }
+                # Bring Good demanded down, demand will be Wealth / BasePrice), aka Good for that value
+                set_key = { lhs = Tmp_1 which = $class$_BudgetFulfil }
+                divide_key = { lhs = Tmp_1 which = $BasePrice$ }
+                ### make this our new Tmp_1, the total amount of food in our budget
+            }
+
+            set_key = { lhs = $class$_DirectBuy$good$ which = Tmp_1 }
+            # Now to see how much we can direct eat
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_4 which = Tmp_1 } # If we produce more than we need, then great, 100% of DirectBuy% is met. Thats our fulfil
+                }
+                ## Dont change DirectBuy, we can buy all of it
+                set_key = { lhs = $class$_DirectFill$good$ value = $DirectBuyPerc$ }
+            }
+            else = { # if we dont, then we will eat all of our produce
+                set_key = { lhs = $class$_DirectBuy$good$ which = Tmp_4 }
+                set_key = { lhs = $class$_DirectFill$good$ which = $class$_DirectBuy$good$ } # Fulfil will be what we can consume / how much we actually want at 1x
+                divide_key = { lhs = $class$_DirectFill$good$ which = Tmp_3 }
+            }
+
+            # Consider this wealth spent, dont factor it in for the rest of demand
+            set_key = { lhs = Tmp_2 which = $class$_DirectBuy$good$ }
+            multiply_key = { lhs = Tmp_2 which = $BasePrice$ } ### BASE Good PRICE
+            subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_2 }
+        }
+    }
+}
+TN_GetDmndEliteDirect = {
+    if = {
+        limit = {
+            check_key = { lhs = $worker$_Produce$good$ value = 0.001 }
+            check_key = { lhs = $class$_BudgetFulfil value = 0.1 }
+        }
+
+        ### How much produce can we actually tap, usually scaled down by a Scalar (100 being 100 scale)
+        set_key = { lhs = Tmp_4 which = $worker$_Produce$good$ }
+        [[Scalar100]
+        multiply_key = { lhs = Tmp_4 value = 0.01 } ### Overflow
+        multiply_key = { lhs = Tmp_4 which = $Scalar100$ }
+        ]
+        [[Scalar]
+        multiply_key = { lhs = Tmp_4 which = $Scalar$ }
+        ]
+        ### Still need to factor out what other elite classes already bought
+        [[elite1] subtract_key = { lhs = Tmp_4 which = $elite1$_DirectBuyFrom$worker$$good$ } ]
+        [[elite2] subtract_key = { lhs = Tmp_4 which = $elite2$_DirectBuyFrom$worker$$good$ } ]
+        [[elite3] subtract_key = { lhs = Tmp_4 which = $elite3$_DirectBuyFrom$worker$$good$ } ]
+        if = {
+            limit = { NOT = { check_key = { lhs = Tmp_4 value = 0.01 } } }
+            set_key = { lhs = $class$_DirectBuyFrom$worker$$good$ value = 0 }
+            set_key = { lhs = Tmp_5 value = 0 }
+        }
+        else ={
+            set_key = { lhs = Tmp_0 value = $DirectBuyPerc$ }
+            subtract_key = { lhs = Tmp_0 which = $class$_DirectFill$good$ } ### how much have we already fulfilled, factor that out. can be repeat demanded from multiple classes
+            # How much 100% fulfilment will cost
+            TN_GetDmnd$class$$good$ = { return = Tmp_3 }
+            set_key = { lhs = Tmp_1 which = Tmp_3 }
+            multiply_key = { lhs = Tmp_1 which = Tmp_0 } ### % of Good Demand
+            ### Tmp_1 is now the total amount of goods we are demanded
+    
+            # Also how much will this cost
+            set_key = { lhs = Tmp_2 which = Tmp_1 }
+            multiply_key = { lhs = Tmp_2 which = $BasePrice$ } ### BASE Good PRICE
+            ### Tmp_2 is now the value of these goods
+            
+            # First, can we afford this?
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_2 which = $class$_BudgetFulfil } # if we cant?
+                }
+                # Bring Good demanded down, demand will be Wealth / BasePrice, aka Good for that value
+                set_key = { lhs = Tmp_1 which = $class$_BudgetFulfil }
+                divide_key = { lhs = Tmp_1 which = $BasePrice$ }
+                ### make this our new Tmp_1, the total amount of food in our budget
+            }
+
+            set_key = { lhs = $class$_DirectBuyFrom$worker$$good$ which = Tmp_1 } ### set it to Tmp_1, the total amount of food we can buy
+            # Now to see how much we can direct eat, Tmp_5 is DirectFill here
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_4 which = Tmp_1 } # If what we can access produces more than we need, then great, 100% of DirectBuy% is met. Thats our fulfil
+                }
+                ## Dont change DirectBuy, we can buy all of it
+                set_key = { lhs = Tmp_5 which = Tmp_0 }
+            }
+            else = { # if we dont, then we will eat all of their produce we can access
+                set_key = { lhs = $class$_DirectBuyFrom$worker$$good$ which = Tmp_4 }
+                set_key = { lhs = Tmp_5 which = $class$_DirectBuyFrom$worker$$good$ } # Fulfil will be what we can consume / how much we actually want at 1x
+                divide_key = { lhs = Tmp_5 which = Tmp_3 }
+            }
+
+            # Consider this wealth spent, dont factor it in for the rest of demand
+            set_key = { lhs = Tmp_2 which = $class$_DirectBuyFrom$worker$$good$ }
+            multiply_key = { lhs = Tmp_2 which = $BasePrice$ } ### BASE Good PRICE
+            subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_2 }
+
+            change_key = { lhs = $class$_DirectBuy$good$ which = $class$_DirectBuyFrom$worker$$good$ }
+            change_key = { lhs = $class$_DirectFill$good$ which = Tmp_5 }
+        }
+    }
+}
+
+
+# Set intial value for 4 fulfillment variables
+# Initial value represents how much they want to fill up
+# Actual fulfillment is that multiplied by how much was actually fulfilled
+TN_GetDmnd = {
+    if = {
+        limit = {
+            check_key = { lhs = $class$_BudgetFulfil value = 0.001 }
+        }
+        set_key = { lhs = Tmp_9 value = 0 }
+		# How much 100% fulfillment will cost
+        TN_GetDmnd$class$1 = { return = Tmp_1 }
+        TN_GetDmnd$class$2 = { return = Tmp_2 }
+        TN_GetDmnd$class$4 = { return = Public_Tmp1 }
+        TN_GetDmnd$class$5 = { return = Tmp_3 }
+        TN_GetDmnd$class$6 = { return = Public_Tmp6 }
+        TN_GetDmnd$class$9 = { return = Tmp_6 }
+        TN_GetDmnd$class$10 = { return = Public_Tmp3 }
+        TN_GetDmnd$class$21 = { return = Tmp_4 }
+        TN_GetDmnd$class$23 = { return = Public_Tmp2 }
+        TN_GetDmnd$class$24 = { return = Public_Tmp5 }
+        TN_GetDmnd$class$25 = { return = Tmp_7 }
+		
+        multiply_key = { lhs = Tmp_1 which = TN_ProvPrc1 }
+        multiply_key = { lhs = Tmp_2 which = TN_ProvPrc2 }
+        multiply_key = { lhs = Public_Tmp1 which = TN_ProvPrc4 }
+        multiply_key = { lhs = Tmp_3 which = TN_ProvPrc5 }
+        multiply_key = { lhs = Public_Tmp6 which = TN_ProvPrc6 }
+        multiply_key = { lhs = Tmp_6 which = TN_ProvPrc9 }
+        multiply_key = { lhs = Public_Tmp3 which = TN_ProvPrc10 }
+        multiply_key = { lhs = Tmp_4 which = TN_ProvPrc21 }
+        multiply_key = { lhs = Public_Tmp2 which = TN_ProvPrc23 }
+        multiply_key = { lhs = Public_Tmp5 which = TN_ProvPrc24 }
+        multiply_key = { lhs = Tmp_7 which = TN_ProvPrc25 }
+
+        set_key = { lhs = Tmp_0 value = 0 }
+        set_key = { lhs = Public_Tmp7 value = $FoodStep1$ }
+        [[DirectBuy1]
+        if = {
+            limit = {
+                check_key = { lhs = $class$_DirectFill1 value = $FoodStep1$ } 
+                always = $DirectBuy1$
+            }
+            set_key = { lhs = Tmp_0 which = $class$_DirectFill1 }
+            subtract_key = { lhs = Tmp_0 value = $FoodStep1$ }
+            set_key = { lhs = Public_Tmp7 value = 0 }
+        }
+        else = {
+            subtract_key = { lhs = Public_Tmp7 which = $class$_DirectFill1 }
+        }
+        ]
+		
+		# What happens below is, classes calculate how much it would cost for each step of demand
+		# Then, they subtract their budgete with that expected cost
+		# If budget is still positive, move onto next step
+		# If not, stop
+        set_key = { lhs = Tmp_8 which = Tmp_1 }    # Food
+        multiply_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 1, Food %
+        change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+        set_key = { lhs = Tmp_8 which = Tmp_2 }
+        change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+        change_key = { lhs = Tmp_8 which = Tmp_3 }
+        multiply_key = { lhs = Tmp_8 value = $LifeStep1$ } # Step 1, Life %
+        change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+        if = {
+            limit = { 
+                check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 } # If budget > cost so far
+            }
+            subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+            divide_key = { lhs = $class$_BudgetFulfil value = 1.442 }
+            set_key = { lhs = Tmp_9 value = 0 }
+
+            change_key = { lhs = $class$_FillFood which = Public_Tmp7 } # Step 1,  Food %
+            change_key = { lhs = $class$_FillLife value = $LifeStep1$ } # Step 1,  Life %
+
+            set_key = { lhs = Public_Tmp7 value = $FoodStep2$ }
+            [[DirectBuy1]
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_0 value = $FoodStep2$ } 
+                }
+                subtract_key = { lhs = Tmp_0 value = $FoodStep2$ }
+                set_key = { lhs = Public_Tmp7 value = 0 }
+            }
+            else = {
+                subtract_key = { lhs = Public_Tmp7 which = Tmp_0 }
+                set_key = { lhs = Tmp_0 value = 0 }
+            }
+            ]
+            set_key = { lhs = Tmp_8 which = Tmp_1 }
+            multiply_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 2, extra Food %
+            change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+            set_key = { lhs = Tmp_8 which = Tmp_2 }
+            change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+            change_key = { lhs = Tmp_8 which = Tmp_3 }
+            multiply_key = { lhs = Tmp_8 value = $LifeStep2$ } # Step 2, extra Life %
+            change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+            set_key = { lhs = Tmp_8 which = Tmp_4 }
+            change_key = { lhs = Tmp_8 which = Public_Tmp2 }
+            change_key = { lhs = Tmp_8 which = Public_Tmp6 }
+            multiply_key = { lhs = Tmp_8 value = $ComfortStep2$ } # Step 2, extra Comfort %
+            change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+            set_key = { lhs = Tmp_8 which = Tmp_6 }
+            change_key = { lhs = Tmp_8 which = Tmp_7 }
+            change_key = { lhs = Tmp_8 which = Public_Tmp3 }
+            change_key = { lhs = Tmp_8 which = Public_Tmp5 }
+            multiply_key = { lhs = Tmp_8 value = $LuxuryStep2$ } # Step 2, extra Luxury %
+            change_key = { lhs = Tmp_9 which = Tmp_8 }
+            if = {
+                limit = { 
+                    check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 } # If budget > cost so far
+                }
+                subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                divide_key = { lhs = $class$_BudgetFulfil value = 1.442 }
+                set_key = { lhs = Tmp_9 value = 0 }
+
+                change_key = { lhs = $class$_FillFood which = Public_Tmp7 } # Step 2, extra Food %
+                change_key = { lhs = $class$_FillLife value = $LifeStep2$ } # Step 2, extra Life %
+                change_key = { lhs = $class$_FillComfort value = $ComfortStep2$ } # Step 2, extra Comfort %
+                change_key = { lhs = $class$_FillLuxury value = $LuxuryStep2$ } # Step 2, extra Luxury %
+
+                set_key = { lhs = Public_Tmp7 value = $FoodStep3$ }
+                [[DirectBuy1]
+                if = {
+                    limit = {
+                        check_key = { lhs = Tmp_0 value = $FoodStep3$ } 
+                    }
+                    subtract_key = { lhs = Tmp_0 value = $FoodStep3$ }
+                    set_key = { lhs = Public_Tmp7 value = 0 }
+                }
+                else = {
+                    subtract_key = { lhs = Public_Tmp7 which = Tmp_0 }
+                    set_key = { lhs = Tmp_0 value = 0 }
+                }
+                ]
+                set_key = { lhs = Tmp_8 which = Tmp_1 }
+                multiply_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 2, extra Food %
+                change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                set_key = { lhs = Tmp_8 which = Tmp_2 }
+                change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+                change_key = { lhs = Tmp_8 which = Tmp_3 }
+                multiply_key = { lhs = Tmp_8 value = $LifeStep3$ } # Step 3, extra Life %
+                change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                set_key = { lhs = Tmp_8 which = Tmp_4 }
+                change_key = { lhs = Tmp_8 which = Public_Tmp2 }
+                change_key = { lhs = Tmp_8 which = Public_Tmp6 }
+                multiply_key = { lhs = Tmp_8 value = $ComfortStep3$ } # Step 3, extra Comfort %
+                change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                set_key = { lhs = Tmp_8 which = Tmp_6 }
+                change_key = { lhs = Tmp_8 which = Tmp_7 }
+                change_key = { lhs = Tmp_8 which = Public_Tmp3 }
+                change_key = { lhs = Tmp_8 which = Public_Tmp5 }
+                multiply_key = { lhs = Tmp_8 value = $LuxuryStep3$ } # Step 3, extra Luxury %
+                change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                if = {
+                    limit = {
+                        check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                    }
+                    subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                    divide_key = { lhs = $class$_BudgetFulfil value = 1.442 }
+                    set_key = { lhs = Tmp_9 value = 0 }
+
+                    change_key = { lhs = $class$_FillFood which = Public_Tmp7 } # Step 3, extra Food %
+                    change_key = { lhs = $class$_FillLife value = $LifeStep3$ } # Step 3, extra Life %
+                    change_key = { lhs = $class$_FillComfort value = $ComfortStep3$ } # Step 3, extra Comfort %
+                    change_key = { lhs = $class$_FillLuxury value = $LuxuryStep3$ } # Step 3, extra Luxury %
+
+                    set_key = { lhs = Public_Tmp7 value = $FoodStep4$ }
+                    [[DirectBuy1]
+                    if = {
+                        limit = {
+                            check_key = { lhs = Tmp_0 value = $FoodStep4$ } 
+                        }
+                        subtract_key = { lhs = Tmp_0 value = $FoodStep4$ }
+                        set_key = { lhs = Public_Tmp7 value = 0 }
+                    }
+                    else = {
+                        subtract_key = { lhs = Public_Tmp7 which = Tmp_0 }
+                        set_key = { lhs = Tmp_0 value = 0 }
+                    }
+                    ]
+                    set_key = { lhs = Tmp_8 which = Tmp_1 }
+                    multiply_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 2, extra Food %
+                    change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                    set_key = { lhs = Tmp_8 which = Tmp_2 }
+                    change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+                    change_key = { lhs = Tmp_8 which = Tmp_3 }
+                    multiply_key = { lhs = Tmp_8 value = $LifeStep4$ } # Step 4, extra Life %
+                    change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                    set_key = { lhs = Tmp_8 which = Tmp_4 }
+                    change_key = { lhs = Tmp_8 which = Public_Tmp2 }
+                    change_key = { lhs = Tmp_8 which = Public_Tmp6 }
+                    multiply_key = { lhs = Tmp_8 value = $ComfortStep4$ } # Step 4, extra Comfort %
+                    change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                    set_key = { lhs = Tmp_8 which = Tmp_6 }
+                    change_key = { lhs = Tmp_8 which = Tmp_7 }
+                    change_key = { lhs = Tmp_8 which = Public_Tmp3 }
+                    change_key = { lhs = Tmp_8 which = Public_Tmp5 }
+                    multiply_key = { lhs = Tmp_8 value = $LuxuryStep4$ } # Step 4, extra Luxury %
+                    change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                    if = {
+                        limit = {
+                            check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                        }
+                        subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                        divide_key = { lhs = $class$_BudgetFulfil value = 1.442 }
+                        set_key = { lhs = Tmp_9 value = 0 }
+
+                        change_key = { lhs = $class$_FillFood which = Public_Tmp7 } # Step 4, extra Food %
+                        change_key = { lhs = $class$_FillLife value = $LifeStep4$ } # Step 4, extra Life %
+                        change_key = { lhs = $class$_FillComfort value = $ComfortStep4$ } # Step 4, extra Comfort %
+                        change_key = { lhs = $class$_FillLuxury value = $LuxuryStep4$ } # Step 4, extra Luxury %
+
+                        set_key = { lhs = Tmp_8 which = Tmp_1 }
+                        multiply_key = { lhs = Tmp_8 value = $FoodStep5$ } # Step 5, extra Food %
+                        change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                        set_key = { lhs = Tmp_8 which = Tmp_2 }
+                        change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+                        change_key = { lhs = Tmp_8 which = Tmp_3 }
+                        multiply_key = { lhs = Tmp_8 value = $LifeStep5$ } # Step 5, extra Life %
+                        change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                        set_key = { lhs = Tmp_8 which = Tmp_4 }
+                        change_key = { lhs = Tmp_8 which = Public_Tmp2 }
+                        change_key = { lhs = Tmp_8 which = Public_Tmp6 }
+                        multiply_key = { lhs = Tmp_8 value = $ComfortStep5$ } # Step 5, extra Comfort %
+                        change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                        set_key = { lhs = Tmp_8 which = Tmp_6 }
+                        change_key = { lhs = Tmp_8 which = Tmp_7 }
+                        change_key = { lhs = Tmp_8 which = Public_Tmp3 }
+                        change_key = { lhs = Tmp_8 which = Public_Tmp5 }
+                        multiply_key = { lhs = Tmp_8 value = $LuxuryStep5$ } # Step 5, extra Luxury %
+                        change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                        if = {
+                            limit = {
+                                check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                            }
+                            subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                            divide_key = { lhs = $class$_BudgetFulfil value = 1.442 }
+                            set_key = { lhs = Tmp_9 value = 0 }
+
+                            change_key = { lhs = $class$_FillFood value = $FoodStep5$ } # Step 5, extra Food %
+                            change_key = { lhs = $class$_FillLife value = $LifeStep5$ } # Step 5, extra Life %
+                            change_key = { lhs = $class$_FillComfort value = $ComfortStep5$ } # Step 5, extra Comfort %
+                            change_key = { lhs = $class$_FillLuxury value = $LuxuryStep5$ } # Step 5, extra Luxury %
+
+                            #set_key = { lhs = Tmp_8 which = Tmp_1 }
+                            #multiply_key = { lhs = Tmp_8 value = 0 } # Step 6, extra Food %
+                            #change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                            #set_key = { lhs = Tmp_8 which = Tmp_2 }
+                            #change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+                            ##change_key = { lhs = Tmp_8 which = Tmp_3 }
+                            #multiply_key = { lhs = Tmp_8 value = 0 } # Step 6, extra Life %
+                            #change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                            set_key = { lhs = Tmp_8 which = Tmp_4 }
+                            change_key = { lhs = Tmp_8 which = Public_Tmp2 }
+                            change_key = { lhs = Tmp_8 which = Public_Tmp6 }
+                            multiply_key = { lhs = Tmp_8 value = $ComfortStep6$ } # Step 6, extra Comfort %
+                            change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                            set_key = { lhs = Tmp_8 which = Tmp_6 }
+                            change_key = { lhs = Tmp_8 which = Tmp_7 }
+                            change_key = { lhs = Tmp_8 which = Public_Tmp3 }
+                            change_key = { lhs = Tmp_8 which = Public_Tmp5 }
+                            multiply_key = { lhs = Tmp_8 value = $LuxuryStep6$ } # Step 6, extra Luxury %
+                            change_key = { lhs = Tmp_9 which = Tmp_8 }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                                }
+                                subtract_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                                divide_key = { lhs = $class$_BudgetFulfil value = 1.442 }
+                                set_key = { lhs = Tmp_9 value = 0 }
+
+                                #change_key = { lhs = $class$_FillFood value = 0 } # Step 6, extra Food %
+                                #change_key = { lhs = $class$_FillLife value = 0 } # Step 6, extra Life %
+                                change_key = { lhs = $class$_FillComfort value = $ComfortStep6$ } # Step 6, extra Comfort %
+                                change_key = { lhs = $class$_FillLuxury value = $LuxuryStep6$ } # Step 6, extra Luxury %
+
+                                #set_key = { lhs = Tmp_8 which = Tmp_1 }
+                                #multiply_key = { lhs = Tmp_8 value = 0 } # Step 7, extra Food %
+                                #change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                                #set_key = { lhs = Tmp_8 which = Tmp_2 }
+                                #change_key = { lhs = Tmp_8 which = Public_Tmp1 }
+                                ##change_key = { lhs = Tmp_8 which = Tmp_3 }
+                                #multiply_key = { lhs = Tmp_8 value = 0 } # Step 7, extra Life %
+                                #change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                                set_key = { lhs = Tmp_8 which = Tmp_4 }
+                                change_key = { lhs = Tmp_8 which = Public_Tmp2 }
+                                change_key = { lhs = Tmp_8 which = Public_Tmp6 }
+                                multiply_key = { lhs = Tmp_8 value = $ComfortStep7$ } # Step 7, extra Comfort %
+                                change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                                set_key = { lhs = Tmp_8 which = Tmp_6 }
+                                change_key = { lhs = Tmp_8 which = Tmp_7 }
+                                change_key = { lhs = Tmp_8 which = Public_Tmp3 }
+                                change_key = { lhs = Tmp_8 which = Public_Tmp5 }
+                                multiply_key = { lhs = Tmp_8 value = $LuxuryStep7$ } # Step 7, extra Luxury %
+                                change_key = { lhs = Tmp_9 which = Tmp_8 }
+
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                                    }
+                                    #change_key = { lhs = $class$_FillFood value = 0 } # Step 7, extra Food %
+                                    #change_key = { lhs = $class$_FillLife value = 0 } # Step 7, extra Life %
+                                    change_key = { lhs = $class$_FillComfort value = $ComfortStep7$ } # Step 7, extra Comfort %
+                                    change_key = { lhs = $class$_FillLuxury value = $LuxuryStep7$ } # Step 7, extra Luxury %
+                                }
+                                else = {
+                                    divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                            
+                                    #set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                    #multiply_key = { lhs = Tmp_8 value = 0 } # Step 7, extra Life %
+                                    #change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                            
+                                    #set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                    #multiply_key = { lhs = Tmp_8 value = 0 } # Step 7, extra Life %
+                                    #change_key = { lhs = $class$_FillLife which = Tmp_8 }
+
+                                    set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                    multiply_key = { lhs = Tmp_8 value = $ComfortStep7$ } # Step 7, extra Comfort %
+                                    change_key = { lhs = $class$_FillComfort which = Tmp_8 }
+
+                                    set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                    multiply_key = { lhs = Tmp_8 value = $LuxuryStep7$ } # Step 7, extra Luxury %
+                                    change_key = { lhs = $class$_FillLuxury which = Tmp_8 }
+                                }
+                            }
+                            else = {
+                                divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                        
+                                #set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                #multiply_key = { lhs = Tmp_8 value = 0 } # Step 6, extra Food %
+                                #change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                        
+                                #set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                #multiply_key = { lhs = Tmp_8 value = 0 } # Step 6, extra Life %
+                                #change_key = { lhs = $class$_FillLife which = Tmp_8 }
+
+                                set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                multiply_key = { lhs = Tmp_8 value = $ComfortStep6$ } # Step 6, extra Comfort %
+                                change_key = { lhs = $class$_FillComfort which = Tmp_8 }
+
+                                set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                                multiply_key = { lhs = Tmp_8 value = $LuxuryStep6$ } # Step 6, extra Luxury %
+                                change_key = { lhs = $class$_FillLuxury which = Tmp_8 }
+                            }
+                        }
+                        else = {
+                            divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                    
+                            set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                            multiply_key = { lhs = Tmp_8 value = $FoodStep5$ } # Step 5, extra Food %
+                            change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                    
+                            set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                            multiply_key = { lhs = Tmp_8 value = $LifeStep5$ } # Step 5, extra Life %
+                            change_key = { lhs = $class$_FillLife which = Tmp_8 }
+
+                            set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                            multiply_key = { lhs = Tmp_8 value = $ComfortStep5$ } # Step 5, extra Comfort %
+                            change_key = { lhs = $class$_FillComfort which = Tmp_8 }
+
+                            set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                            multiply_key = { lhs = Tmp_8 value = $LuxuryStep5$ } # Step 5, extra Luxury %
+                            change_key = { lhs = $class$_FillLuxury which = Tmp_8 }
+                        }
+                    }
+                    else = {
+                        divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                
+                        set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                        multiply_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 4, extra Food %
+                        change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                
+                        set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                        multiply_key = { lhs = Tmp_8 value = $LifeStep4$ } # Step 4, extra Life %
+                        change_key = { lhs = $class$_FillLife which = Tmp_8 }
+
+                        set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                        multiply_key = { lhs = Tmp_8 value = $ComfortStep4$ } # Step 4, extra Comfort %
+                        change_key = { lhs = $class$_FillComfort which = Tmp_8 }
+
+                        set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                        multiply_key = { lhs = Tmp_8 value = $LuxuryStep4$ } # Step 4, extra Luxury %
+                        change_key = { lhs = $class$_FillLuxury which = Tmp_8 }
+                    }
+                }
+                else = {
+                    divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                
+                    set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                    multiply_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 3, extra Food %
+                    change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                
+                    set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                    multiply_key = { lhs = Tmp_8 value = $LifeStep3$ } # Step 3, extra Life %
+                    change_key = { lhs = $class$_FillLife which = Tmp_8 }
+
+                    set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                    multiply_key = { lhs = Tmp_8 value = $ComfortStep3$ } # Step 3, extra Comfort %
+                    change_key = { lhs = $class$_FillComfort which = Tmp_8 }
+
+                    set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                    multiply_key = { lhs = Tmp_8 value = $LuxuryStep3$ } # Step 3, extra Luxury %
+                    change_key = { lhs = $class$_FillLuxury which = Tmp_8 }
+                }
+            }
+            else = {
+                divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+                
+                set_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 2, extra Food %
+                multiply_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                
+                set_key = { lhs = Tmp_8 value = $LifeStep2$ } # Step 2, extra Life %
+                multiply_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                change_key = { lhs = $class$_FillLife which = Tmp_8 }
+
+                set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                multiply_key = { lhs = Tmp_8 value = $ComfortStep2$ } # Step 2, extra Comfort %
+                change_key = { lhs = $class$_FillComfort which = Tmp_8 }
+
+                set_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+                multiply_key = { lhs = Tmp_8 value = $LuxuryStep2$ } # Step 2, extra Luxury %
+                change_key = { lhs = $class$_FillLuxury which = Tmp_8 }
+            }
+        }
+        else = {
+            divide_key = { lhs = $class$_BudgetFulfil which = Tmp_9 }
+            
+            set_key = { lhs = Tmp_8 which = Public_Tmp7 } # Step 1, Food %
+            multiply_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+            change_key = { lhs = $class$_FillFood which = Tmp_8 }
+                
+            set_key = { lhs = Tmp_8 value = $LifeStep1$ } # Step 1,  Life %
+            multiply_key = { lhs = Tmp_8 which = $class$_BudgetFulfil }
+            change_key = { lhs = $class$_FillLife which = Tmp_8 }
+        }
+		
+        if = {
+            limit = {
+                check_key = { lhs = $class$_FillLife value = 0.1 } # Without life, no need for knowledge
+            }
+            # Knowledge fulfillment is special in that it has its own budget
+            set_key = { lhs = $class$_FillKnowledge which = $class$_Wealth }
+            multiply_key = { lhs = $class$_FillKnowledge value = $edu$ }
+            if = {
+                limit = {
+                    NOT = { check_key = { lhs = $class$_FillLife value = 1.0 } } # Without life, no need for knowledge
+                }
+                multiply_key = { lhs = $class$_FillKnowledge which = $class$_FillLife }
+            }
+
+            if = {
+                limit = {
+                    check_key = { lhs = TN_ProvPrc41 value = 10 }
+                }
+                multiply_key = { lhs = $class$_FillKnowledge value = 10 }
+                divide_key = { lhs = $class$_FillKnowledge which = TN_ProvPrc41 }
+            }
+            
+            TN_GetDmnd$class$41 = { return = Tmp_0 }
+            multiply_key = { lhs = Tmp_0 which = TN_ProvPrc41 }
+
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_0 value = 0.001 }
+                }
+                divide_key = { lhs = $class$_FillKnowledge which = Tmp_0 }
+
+                if = {
+                    limit = {
+                        check_key = { lhs = $class$_FillKnowledge value = 2 }
+                    }
+                    set_key = { lhs = $class$_FillKnowledge value = 2 }
+                }
+            }
+            else = {
+                set_key = { lhs = $class$_FillKnowledge value = 1 }
+            }
+            change_key = { lhs = $class$_FillKnowledge value = 0.01 }
+        }
+        else = {
+            set_key = { lhs = $class$_FillKnowledge value = 0 }
+        }
+		
+		change_key = { lhs = $class$_FillFood value = 0.01 }
+		change_key = { lhs = $class$_FillLife value = 0.01 }
+		change_key = { lhs = $class$_FillComfort value = 0.01 }
+		change_key = { lhs = $class$_FillLuxury value = 0.01 }
+		
+		# Grain dole
+		set_key = { lhs = Public_Tmp1 value = 1 }
+        [[DirectBuy1]
+        subtract_key = { lhs = Public_Tmp1 which = $class$_DirectFill1 }
+        ]
+        if = {
+            limit = {
+                NOT = {
+                    check_key = { lhs = $class$_FillFood which = Public_Tmp1 }
+                }
+            }
+            set_key = { lhs = $class$_Dole which = Public_Tmp1 }
+            subtract_key = { lhs = $class$_Dole which = $class$_FillFood }
+
+            if = {
+                limit = {
+                    check_key = { lhs = $class$_Dole which = TN_Dole }
+                }
+                set_key = { lhs = $class$_Dole which = TN_Dole }
+            }
+
+            change_key = { lhs = $class$_FillFood which = $class$_Dole }
+            set_key = { lhs = $class$_DoleD which = $class$_Dole }
+            multiply_key = { lhs = $class$_DoleD value = 100 }
+        }
+
+		set_key = { lhs = Public_Tmp1 value = 0 }
+		set_key = { lhs = Public_Tmp2 value = 0 }
+		set_key = { lhs = Public_Tmp3 value = 0 }
+		set_key = { lhs = Public_Tmp4 value = 0 }
+    }
+}
+
+# Effects below contain information as to how much of each tradegood each classes consume as a base
+
+# Edit for new produce 
+# Food
+TN_GetDmndSF1 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand1 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand1 }
+}
+TN_GetDmndNM1 = {
+    set_key = { lhs = $return$ value = 0.08 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand1 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand1 }
+}
+TN_GetDmndRE1 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand1 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand1 }
+}
+TN_GetDmndNO1 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand1 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand1 }
+}
+TN_GetDmndBG1 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand1 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand1 }
+}
+TN_GetDmndCL1 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand1 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand1 }
+}
+
+# Salt
+TN_GetDmndSF2 = {
+	set_key = { lhs = $return$ value = 0.01 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand2 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand2 }
+}
+TN_GetDmndNM2 = {
+	set_key = { lhs = $return$ value = 0.005 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand2 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand2 }
+}
+TN_GetDmndRE2 = {
+	set_key = { lhs = $return$ value = 0.01 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand2 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand2 }
+}
+TN_GetDmndNO2 = {
+	set_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand2 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand2 }
+}
+TN_GetDmndBG2 = {
+	set_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand2 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand2 }
+}
+TN_GetDmndCL2 = {
+	set_key = { lhs = $return$ value = 0.12 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand2 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand2 }
+}
+# Fibre
+TN_GetDmndSF4 = {
+    set_key = { lhs = $return$ value = 0.02 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand4 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand4 }
+}
+TN_GetDmndNM4 = {
+    set_key = { lhs = $return$ value = 0.015 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand4 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand4 }
+}
+TN_GetDmndRE4 = {
+    set_key = { lhs = $return$ value = 0.02 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand4 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand4 }
+}
+TN_GetDmndNO4 = {
+    set_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand4 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand4 }
+}
+TN_GetDmndBG4 = {
+    set_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand4 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand4 }
+}
+TN_GetDmndCL4 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand4 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand4 }
+}
+
+TN_GetDmndTemp = {
+	if = { # Lower than Norm
+		limit = {
+			NOT = { check_key = { lhs = Land_AvgTemp value = $Norm$ } }
+		}
+		if = {
+			limit = {
+				NOT = {
+					check_key = { lhs = Land_AvgTemp value = 0.1 }
+				}
+			}
+			multiply_key = { lhs = $return$ value = 2 }
+		}
+		else = {
+			set_key = { lhs = Tmp_5 value = $Norm$ }
+			subtract_key = { lhs = Tmp_5 which = Land_AvgTemp }
+
+			divide_key = { lhs = Tmp_5 value = $Norm$ }
+			#multiply_key = { lhs = Tmp_5 value = 0.75 }
+			change_key = { lhs = Tmp_5 value = 1 }
+			multiply_key = { lhs = $return$ which = Tmp_5 }
+
+			set_key = { lhs = Tmp_5 value = 0 }
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				check_key = { lhs = Land_AvgTemp value = $Max$ }
+			}
+			multiply_key = { lhs = $return$ value = 0.5 }
+		}
+		else = {
+			set_key = { lhs = Tmp_5 which = Land_AvgTemp }
+			subtract_key = { lhs = Tmp_5 value = $Norm$ }
+			set_key = { lhs = Tmp_6 value = $Max$ }
+			subtract_key = { lhs = Tmp_6 value = $Norm$ }
+
+			divide_key = { lhs = Tmp_5 which = Tmp_6 }
+			
+			set_key = { lhs = Tmp_6 value = 1 }
+			subtract_key = { lhs = Tmp_6 which = Tmp_5 }
+			
+			multiply_key = { lhs = Tmp_6 value = 0.5 }
+			change_key = { lhs = Tmp_6 value = 0.5 }
+			multiply_key = { lhs = $return$ which = Tmp_6 }
+
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = Tmp_6 value = 0 }
+		}
+	}
+}
+# Fuel
+TN_GetDmndSF5 = {
+    set_key = { lhs = $return$ value = 0.013 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand5 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand5 }
+	TN_GetDmndTemp = { return=$return$ Norm=12 Max=24 }
+}
+TN_GetDmndNM5 = {
+    set_key = { lhs = $return$ value = 0.005 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand5 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand5 }
+	TN_GetDmndTemp = { return=$return$ Norm=12 Max=24 }
+}
+TN_GetDmndRE5 = {
+    set_key = { lhs = $return$ value = 0.013 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand5 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand5 }
+	TN_GetDmndTemp = { return=$return$ Norm=12 Max=24 }
+}
+TN_GetDmndNO5 = {
+    set_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand5 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand5 }
+	TN_GetDmndTemp = { return=$return$ Norm=12 Max=24 }
+}
+TN_GetDmndBG5 = {
+    set_key = { lhs = $return$ value = 0.15 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand5 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand5 }
+	TN_GetDmndTemp = { return=$return$ Norm=12 Max=24 }
+}
+TN_GetDmndCL5 = {
+    set_key = { lhs = $return$ value = 0.1 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand5 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand5 }
+	TN_GetDmndTemp = { return=$return$ Norm=12 Max=24 }
+}
+# Raw
+TN_GetDmndSF6 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 0.002 }
+    multiply_key = { lhs = $return$ value = 1.5 } # 0.0025
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand6 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand6 }
+}
+TN_GetDmndNM6 = {
+    set_key = { lhs = $return$ value = 0 }
+}
+TN_GetDmndRE6 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ value = 0.002 }
+    multiply_key = { lhs = $return$ value = 1.5 } # 0.0025
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand6 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand6 }
+}
+TN_GetDmndNO6 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ value = 0.25 }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand6 }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand6 }
+}
+TN_GetDmndBG6 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand6 }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand6 }
+}
+TN_GetDmndCL6 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ value = 0.15 }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand6 }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand6 }
+}
+
+# Exotics
+TN_GetDmndSF9 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 0.015 }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire9 }
+}
+TN_GetDmndNM9 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ value = 0.01 }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire9 }
+}
+TN_GetDmndRE9 = {
+    set_key = { lhs = $return$ value = 0.015 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire9 }
+}
+TN_GetDmndNO9 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ value = 1.0 }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire9 }
+}
+TN_GetDmndBG9 = {
+    set_key = { lhs = $return$ value = 1.0 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire9 }
+}
+TN_GetDmndCL9 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ value = 0.3 }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand9 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire9 }
+}
+
+# Delicacies
+TN_GetDmndSF10 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 0.015 }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire10 }
+}
+TN_GetDmndNM10 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ value = 0.008 }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire10 }
+}
+TN_GetDmndRE10 = {
+    set_key = { lhs = $return$ value = 0.015 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire10 }
+}
+TN_GetDmndNO10 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ value = 1.0 }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire10 }
+}
+TN_GetDmndBG10 = {
+    set_key = { lhs = $return$ value = 1.0 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire10 }
+}
+TN_GetDmndCL10 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ value = 0.3 }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand10 }
+	multiply_key = { lhs = $return$ which = Modi_ProdDesire10 }
+}
+
+# Consumer Product
+TN_GetDmndSF21 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 0.012 }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand21 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand21 }
+}
+TN_GetDmndNM21 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NM_Total }
+    multiply_key = { lhs = $return$ value = 0.008 }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand }
+    multiply_key = { lhs = $return$ which = Modi_NMDemand21 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand21 }
+}
+TN_GetDmndRE21 = {
+    set_key = { lhs = $return$ value = 0.06 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand21 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand21 }
+}
+TN_GetDmndNO21 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ value = 0.3 }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand21 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand21 }
+}
+TN_GetDmndBG21 = {
+    set_key = { lhs = $return$ value = 0.5 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand21 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand21 }
+}
+TN_GetDmndCL21 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ value = 0.2 }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand21 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand21 }
+}
+# Naval
+TN_GetDmndSF23 = {
+    set_key = { lhs = $return$ value = 0 }
+}
+TN_GetDmndNM23 = {
+    set_key = { lhs = $return$ value = 0 }
+}
+TN_GetDmndRE23 = {
+	if = {
+		limit = {
+            OR = {
+                has_port = yes
+                check_key = { lhs = TN_River value = 1 }
+            }
+		}
+        set_key = { lhs = $return$ value = 125 }
+        subtract_key = { lhs = $return$ which = Prov_TRPow }
+        divide_key = { lhs = $return$ value = 125 }
+		multiply_key = { lhs = $return$ which = RE_Total }
+		multiply_key = { lhs = $return$ value = 0.01 }
+        if = {
+            limit = {
+                NOT = { has_port = yes }
+            }
+            multiply_key = { lhs = $return$ value = 0.1 }
+        }
+		multiply_key = { lhs = $return$ which = Modi_REDemand }
+		multiply_key = { lhs = $return$ which = Modi_REDemand23 }
+		multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+		multiply_key = { lhs = $return$ which = Modi_ClassDemand23 }
+	}
+	else = {
+		set_key = { lhs = $return$ value = 0 }
+	}
+}
+TN_GetDmndNO23 = {
+	if = {
+		limit = {
+            has_port = yes
+		}
+        set_key = { lhs = $return$ value = 125 }
+        subtract_key = { lhs = $return$ which = Prov_TRPow }
+        divide_key = { lhs = $return$ value = 125 }
+		multiply_key = { lhs = $return$ which = NO_Total }
+		multiply_key = { lhs = $return$ value = 0.02 }
+		multiply_key = { lhs = $return$ which = Modi_NODemand }
+		multiply_key = { lhs = $return$ which = Modi_NODemand23 }
+		multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+		multiply_key = { lhs = $return$ which = Modi_ClassDemand23 }
+	}
+	else = {
+		set_key = { lhs = $return$ value = 0 }
+	}
+}
+TN_GetDmndBG23 = {
+	if = {
+		limit = {
+            OR = {
+                has_port = yes
+                check_key = { lhs = TN_River value = 1 }
+            }
+		}
+        set_key = { lhs = $return$ value = 125 }
+        subtract_key = { lhs = $return$ which = Prov_TRPow }
+        divide_key = { lhs = $return$ value = 125 }
+		multiply_key = { lhs = $return$ which = BG_Total }
+		multiply_key = { lhs = $return$ value = 0.05 }
+        if = {
+            limit = {
+                NOT = { has_port = yes }
+            }
+            multiply_key = { lhs = $return$ value = 0.1 }
+        }
+		multiply_key = { lhs = $return$ which = Modi_BGDemand }
+		multiply_key = { lhs = $return$ which = Modi_BGDemand23 }
+		multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+		multiply_key = { lhs = $return$ which = Modi_ClassDemand23 }
+	}
+	else = {
+		set_key = { lhs = $return$ value = 0 }
+	}
+}
+TN_GetDmndCL23 = {
+    set_key = { lhs = $return$ value = 0 }
+}
+# Industrial
+TN_GetDmndSF24 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 0.001 }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand24 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand24 }
+}
+TN_GetDmndNM24 = {
+    set_key = { lhs = $return$ value = 0 }
+}
+TN_GetDmndRE24 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ value = 0.004 }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand24 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand24 }
+}
+TN_GetDmndNO24 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ value = 0.12 }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand24 }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand24 }
+}
+TN_GetDmndBG24 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ value = 0.16 }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand24 }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand24 }
+}
+TN_GetDmndCL24 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ value = 0.04 }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand24 }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+    multiply_key = { lhs = $return$ which = Modi_ClassDemand24 }
+}
+
+# Luxury Product
+TN_GetDmndSF25 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 0.004 }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand25 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand25 }
+}
+TN_GetDmndNM25 = {
+    set_key = { lhs = $return$ value = 0 }
+}
+TN_GetDmndRE25 = {
+    set_key = { lhs = $return$ value = 0.03 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand25 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand25 }
+}
+TN_GetDmndNO25 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ value = 0.12 }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand25 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand25 }
+}
+TN_GetDmndBG25 = {
+    set_key = { lhs = $return$ value = 0.16 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand25 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand25 }
+}
+TN_GetDmndCL25 = {
+    set_key = { lhs = $return$ value = 125 }
+    subtract_key = { lhs = $return$ which = Prov_TRPow }
+    divide_key = { lhs = $return$ value = 125 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ value = 0.05 }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand25 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand25 }
+}
+
+# Knowledge
+TN_GetDmndSF41 = {
+    set_key = { lhs = $return$ value = 0.002 }
+    multiply_key = { lhs = $return$ which = SF_Total }
+    multiply_key = { lhs = $return$ value = 1.5 } # 0.0025
+    multiply_key = { lhs = $return$ which = Modi_SFDemand }
+    multiply_key = { lhs = $return$ which = Modi_SFDemand41 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand41 }
+}
+TN_GetDmndNM41 = { 
+    set_key = { lhs = $return$ value = 0 }
+}
+TN_GetDmndRE41 = {
+    set_key = { lhs = $return$ value = 0.007 }
+    multiply_key = { lhs = $return$ which = RE_Total }
+    multiply_key = { lhs = $return$ which = Modi_REDemand }
+    multiply_key = { lhs = $return$ which = Modi_REDemand41 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand41 }
+}
+TN_GetDmndNO41 = {
+    set_key = { lhs = $return$ value = 0.03 }
+    multiply_key = { lhs = $return$ which = NO_Total }
+    multiply_key = { lhs = $return$ which = Modi_NODemand }
+    multiply_key = { lhs = $return$ which = Modi_NODemand41 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand41 }
+}
+TN_GetDmndBG41 = {
+    set_key = { lhs = $return$ value = 0.05 }
+    multiply_key = { lhs = $return$ which = BG_Total }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand }
+    multiply_key = { lhs = $return$ which = Modi_BGDemand41 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand41 }
+}
+TN_GetDmndCL41 = {
+    set_key = { lhs = $return$ value = 0.075 }
+    multiply_key = { lhs = $return$ which = CL_Total }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand }
+    multiply_key = { lhs = $return$ which = Modi_CLDemand41 }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand }
+	multiply_key = { lhs = $return$ which = Modi_ClassDemand41 }
+}

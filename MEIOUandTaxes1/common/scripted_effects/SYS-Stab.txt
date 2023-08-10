@@ -1,0 +1,288 @@
+Stab_GetMonthlyChange = {
+    export_to_key = {
+        lhs = Stab_Change
+        value = modifier:stability_cost_modifier
+    }
+	
+	multiply_key = { lhs = Stab_Change value = -100 }
+}
+
+###
+### Base points is 1200 (Years to Max * 12), Years To Max is 100
+###
+
+Stab_DoMain = {
+    Stab_GetMonthlyChange = yes
+
+    change_key = { lhs = Stab_Point which = Stab_Change } # Add change to total
+	
+    divide_key = { lhs = Stab_Change value = 12 } # % gained of total this month
+	
+    multiply_key = { lhs = Stab_Change value = 0.1 }
+    multiply_key = { lhs = Stab_Change value = 10 }
+	
+	Stab_DoUpdate = yes
+	Stab_Disp = yes
+
+    set_key = { lhs = Tmp_0 value = 0 }
+}
+
+Stab_Disp = {
+    set_key = { lhs = Stab_Disp which = Stab_Point }
+    divide_key = { lhs = Stab_Disp value = 12 } # % of total gained
+	
+	# Rounding for display
+    multiply_key = { lhs = Stab_Disp value = 0.1 }
+    multiply_key = { lhs = Stab_Disp value = 10 }
+	
+    set_key = { lhs = Stab_DispToGo value = 100 }
+    subtract_key = { lhs = Stab_DispToGo which = Stab_Disp } # % of total left to go
+}
+
+Stab_DoChangeNoUpdate = {
+    change_key = { lhs = Stab_Point $type$ = $inp$ }
+	Stab_Disp = yes
+}
+
+Stab_DoChange = {
+    change_key = { lhs = Stab_Point $type$ = $inp$ }
+	Stab_DoUpdate = yes
+	Stab_Disp = yes
+}
+
+Stab_DoUpdate = {
+	if = {
+		limit = {
+			check_key = { lhs = Stab_Point value = 1200 }
+		}
+		if = {
+			limit = {
+				stability = 3
+			}
+			set_key = { lhs = Stab_Point value = 1200 }
+		}
+		else = {
+			subtract_key = { lhs = Stab_Point value = 1200 }
+			add_stability = 1
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { check_key = { lhs = Stab_Point value = 0 } }
+		}
+		if = {
+			limit = {
+				NOT = { stability = -2 }
+			}
+			set_key = { lhs = Stab_Point value = 0 }
+		}
+		else = {
+			change_key = { lhs = Stab_Point value = 1200 }
+			add_stability = -1
+		}
+	}
+}
+Stab_DoStepUp = {
+	if = {
+		limit = {
+			stability = 3
+		}
+		set_key = { lhs = Stab_Point value = 1200 }
+	}
+	else = {
+		add_stability = $amount$
+	}
+}
+Stab_DoStepDown = {
+	if = {
+		limit = {
+			NOT = { stability = -2 }
+		}
+		set_key = { lhs = Stab_Point value = 0 }
+	}
+	else = {
+		add_stability = -$amount$
+	}
+}
+
+Stab_Add10Percent = {
+	hidden_effect = { Stab_DoChange = { type=value inp=120 } } # (Years to Max * 12) * 0.1
+	custom_tooltip = POP_StabAdd10
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 0.5
+	}
+}
+Stab_Subtract10Percent = {
+	hidden_effect = { Stab_DoChange = { type=value inp=-120 } } # (Years to Max * 12) * 0.1
+	custom_tooltip = POP_StabSubtract10
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -0.5
+	}
+}
+Stab_Subtract25Percent = {
+	hidden_effect = { Stab_DoChange = { type=value inp=-300 } } # (Years to Max * 12) * 0.25
+	custom_tooltip = POP_StabSubtract25
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -1
+	}
+}
+Stab_Add25Percent = {
+	hidden_effect = { Stab_DoChange = { type=value inp=300 } } # (Years to Max * 12) * 0.25
+	custom_tooltip = POP_StabAdd25
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 1
+	}
+}
+Stab_Subtract50Percent = {
+	hidden_effect = { Stab_DoChange = { type=value inp=-600 } } # (Years to Max * 12) * 0.5
+	custom_tooltip = POP_StabSubtract50
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -2.5
+	}
+}
+Stab_Add50Percent = {
+	hidden_effect = { Stab_DoChange = { type=value inp=600 } } # (Years to Max * 12) * 0.5
+	custom_tooltip = POP_StabAdd50
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 2.5
+	}
+}
+
+Stab_Subtract1 = {
+	hidden_effect = { Stab_DoStepDown = { amount=1 } }
+	tooltip = { add_stability = -1 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -5
+	}
+}
+Stab_Add1 = {
+	hidden_effect = { Stab_DoStepUp = { amount=1 } }
+	tooltip = { add_stability = 1 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate =5
+	}
+}
+Stab_Subtract2 = {
+	hidden_effect = { Stab_DoStepDown = { amount=2 } }
+	tooltip = { add_stability = -2 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -10
+	}
+}
+Stab_Add2 = {
+	hidden_effect = { Stab_DoStepUp = { amount=2 } }
+	tooltip = { add_stability = 2 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 10
+	}
+}
+Stab_Subtract3 = {
+	hidden_effect = { Stab_DoStepDown = { amount=3 } }
+	tooltip = { add_stability = -3 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -15
+	}
+}
+Stab_Add3 = {
+	hidden_effect = { Stab_DoStepUp = { amount=3 } }
+	tooltip = { add_stability = 3 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 15
+	}
+}
+Stab_Subtract4 = {
+	hidden_effect = { Stab_DoStepDown = { amount=4 } }
+	tooltip = { add_stability = -4 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -20
+	}
+}
+Stab_Add4 = {
+	hidden_effect = { Stab_DoStepUp = { amount=4 } }
+	tooltip = { add_stability = 4 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -20
+	}
+}
+Stab_Subtract5 = {
+	hidden_effect = { Stab_DoStepDown = { amount=5 }}
+	tooltip = { add_stability = -5 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -25
+	}
+}
+Stab_Add5 = {
+	hidden_effect = { Stab_DoStepUp = { amount=5 } }
+	tooltip = { add_stability = 5 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 25
+	}
+}
+Stab_Subtract6 = {
+	hidden_effect = { Stab_DoStepDown = { amount=6 } }
+	tooltip = { add_stability = -6 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = -30
+	}
+}
+Stab_Add6 = {
+	hidden_effect = { Stab_DoStepUp = { amount=6 } }
+	tooltip = { add_stability = 6 }
+	if = {
+		limit = {
+			is_emperor_of_china = yes
+		}
+		add_mandate = 30
+	}
+}

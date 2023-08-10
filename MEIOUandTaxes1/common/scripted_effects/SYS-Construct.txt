@@ -1,0 +1,554 @@
+Construct_Calc = {
+	set_key = { lhs = Construct_Cost value = 0 }
+    set_key = { lhs = Construct_Tmp4 value = 0 }
+	every_province = {
+		limit = {
+			isValidProv = yes
+			OR = {
+				owned_by = ROOT
+				owner = { 
+					is_subject_other_than_tributary_trigger = yes
+					is_subject_of = ROOT
+				}
+			}
+		}
+		set_key = { lhs = Construct_Tmp4 value = 0 }
+		set_key = { lhs = Construct_Cost value = 0 }
+		set_key = { lhs = Construct_Type which = PREV }
+		set_key = { lhs = Construct_Building which = PREV }
+        set_key = { lhs = Construct_Tmp3 which = PREV } #Amount of extra units
+		set_key = { lhs = Construct_Amount which = PREV }
+        
+		if = {
+			limit = {
+			    OR = {
+				has_province_flag = UI_Select
+				has_province_flag = Autobuilder_Selected_1
+				has_province_flag = Autobuilder_Selected_2
+				has_province_flag = Autobuilder_Selected_3
+				has_province_flag = Autobuilder_Selected_4
+				has_province_flag = Autobuilder_Selected_5
+				has_province_flag = Autobuilder_Selected_6
+				has_province_flag = Autobuilder_Selected_7
+				}
+			}
+			if = {
+				limit = {
+					is_key_equal = { lhs = Construct_Type value = 1 }
+				}
+				Construct_CalcResources = yes
+			}
+			else_if = {
+				limit = {
+					is_key_equal = { lhs = Construct_Type value = 2 }
+				}
+				Construct_CalcBuilding = yes
+			}
+			else_if = {
+				limit = {
+					is_key_equal = { lhs = Construct_Type value = 3 }
+				}
+				Construct_CalcInfra = yes
+			}
+			else = { 
+				set_key = { lhs = Construct_ContribNO value = 0 }
+				set_key = { lhs = Construct_ContribBG value = 0 }
+				set_key = { lhs = Construct_ContribCL value = 0 }
+				set_key = { lhs = Construct_ContribLV value = 0 }
+				set_key = { lhs = Construct_ContribMP value = 0 }
+				set_key = { lhs = Construct_Amount value = 0 }
+			}
+			PREV = { change_key = { lhs = Construct_Cost which = PREV } change_key = { lhs = Construct_Tmp4 which = PREV } } #Construct_Tmp4 total amount of units, display purposes.
+			
+		}
+		else = { # if its fallen out of the selection, clear it. Be safe, be secure, stop breaking shit
+			set_key = { lhs = Construct_ContribNO value = 0 }
+			set_key = { lhs = Construct_ContribBG value = 0 }
+			set_key = { lhs = Construct_ContribCL value = 0 }
+			set_key = { lhs = Construct_ContribLV value = 0 }
+			set_key = { lhs = Construct_ContribMP value = 0 }
+			set_key = { lhs = Construct_Amount value = 0 }
+		}
+		set_key = { lhs = Construct_Type value = 0 }
+		set_key = { lhs = Construct_Building value = 0 }
+		# Construct_Amount is hijacked if a valid prov to tell us how many will be built
+	}
+}
+
+Construct_CalcBuildingHelper = {
+	if = {
+		limit = {
+			Infra_CanConstruct = yes
+			check_key = { lhs = Construct_Amount value = 0.001 }
+		}
+		if = { # Simple raw numbers
+			limit = {
+				check_key = { lhs = Construct_Amount value = 1 }
+				OR = {
+					owner = { is_key_equal = { lhs = Construct_TypeToggle value = 0 } }
+					overlord = { is_key_equal = { lhs = Construct_TypeToggle value = 0 } }
+				}
+			}
+			multiply_key = { lhs = Construct_Amount value = 0.001 } # an absolute number of buildings, no decimals
+			multiply_key = { lhs = Construct_Amount value = 1000 }
+			[[cap]
+			set_key = { lhs = Construct_Tmp0 which = $cap$ }
+			subtract_key = { lhs = Construct_Tmp0 which = Building_$type$ }
+			subtract_key = { lhs = Construct_Tmp0 which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Construct_Amount which = Construct_Tmp0 }
+				}
+				set_key = { lhs = Construct_Amount which = Construct_Tmp0 }
+			}
+			]
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Construct_Amount value = 0 } }
+				}
+				set_key = { lhs = Construct_Amount value = 0 }
+			}
+			set_key = { lhs = Construct_Cost which = Building_$type$Cost1 }
+			multiply_key = { lhs = Construct_Cost which = Construct_Amount }
+			
+			# Construct_Amount stays the same, already raw
+			set_key = { lhs = Construct_Tmp0 value = 0 }
+		}
+		else_if = { # % of current (25% more, 50% more)
+			limit = {
+				OR = {
+					owner = { is_key_equal = { lhs = Construct_TypeToggle value = 1 } }
+					overlord = { is_key_equal = { lhs = Construct_TypeToggle value = 1 } }
+				}
+			}
+			set_key = { lhs = Construct_Cost which = Building_$type$ }
+			multiply_key = { lhs = Construct_Cost which = Construct_Amount }
+			multiply_key = { lhs = Construct_Cost value = 0.01 } # 0-100 scale
+			multiply_key = { lhs = Construct_Cost value = 0.001 } # an absolute number of buildings, no decimals
+			multiply_key = { lhs = Construct_Cost value = 1000 }
+			
+			[[cap]
+			set_key = { lhs = Construct_Tmp1 which = $cap$ }
+			subtract_key = { lhs = Construct_Tmp1 which = Building_$type$ }
+			subtract_key = { lhs = Construct_Tmp1 which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Construct_Cost which = Construct_Tmp1 }
+				}
+				set_key = { lhs = Construct_Cost which = Construct_Tmp1 }
+			}
+			]
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Construct_Cost value = 0 } }
+				}
+				set_key = { lhs = Construct_Cost value = 0 }
+			}
+			
+			# Save the amount of buildings to be constructed
+			set_key = { lhs = Construct_Amount value = 0 }
+			set_key = { lhs = Construct_Amount which = Construct_Cost }
+			
+			multiply_key = { lhs = Construct_Cost which = Building_$type$Cost1 }
+			set_key = { lhs = Construct_Tmp0 value = 0 }
+			set_key = { lhs = Construct_Tmp1 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Construct_Amount value = 0 }
+		}
+	}
+	else = {
+		set_key = { lhs = Construct_Amount value = 0 }
+	}
+}
+
+Construct_CalcResources = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 1 }
+			check_key = { lhs = Building_AgricultureMax value = 1 }
+			
+		}
+		Construct_CalcBuildingHelper = { type = Agriculture cap = Building_AgricultureMax }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 2 }
+			check_key = { lhs = Building_ForestryMax value = 1 }
+		}
+		Construct_CalcBuildingHelper = { type = Forestry cap = Building_ForestryMax }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 3 }
+			check_key = { lhs = Building_ExtractionMax value = 1 }
+		}
+		Construct_CalcBuildingHelper = { type = Extraction cap = Building_ExtractionMax }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 4 }
+			check_key = { lhs = Building_FisheryMax value = 1 }
+		}
+		Construct_CalcBuildingHelper = { type = Fishery cap = Building_FisheryMax }
+	}
+	else = {
+		set_key = { lhs = Construct_Amount value = 0 }
+	}
+}
+
+Construct_CalcBuilding = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 1 }
+		}
+		Construct_CalcBuildingHelper = { type = Industrial }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 2 }
+		}
+		Construct_CalcBuildingHelper = { type = Commercial }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 3 }
+		}
+		Construct_CalcBuildingHelper = { type = Academic }
+	}
+	else = {
+		set_key = { lhs = Construct_Amount value = 0 }
+	}
+}
+
+Construct_CalcInfra = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 1 }
+			Infra_CanPathing = yes
+		}
+		Construct_CalcInfraHelper = { type = Pathing }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 2 }
+			Infra_CanHarbourage = yes
+		}
+		Construct_CalcInfraHelper = { type = Harbourage }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 3 }
+			Infra_CanAmenities = yes
+		}
+		Construct_CalcInfraHelper = { type = Amenities }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 4 }
+			Infra_CanIrrigation = yes
+		}
+		Construct_CalcInfraHelper = { type = Irrigation }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 5 }
+			Infra_CanCapitol = yes
+		}
+		Construct_CalcInfraHelper = { type = Capitol }
+	}
+	#else_if = {
+	#	limit = {
+	#		is_key_equal = { lhs = Construct_Building value = 6 }
+	#		Infra_CanCourthouse = yes
+	#	}
+	#	Construct_CalcInfraHelper = { type = Courthouse }
+	#}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 7 }
+			Infra_CanGarrison = yes
+		}
+		Construct_CalcInfraHelper = { type = Garrison }
+	}
+	else = {
+		set_key = { lhs = Construct_Amount value = 0 }
+	}
+}
+
+Construct_CalcInfraHelper = {
+	if = {
+		limit = {
+			Infra_CanConstruct = yes
+			Infra_Can$type$ = yes
+			check_key = { lhs = Construct_Amount value = 0.001 }
+		}
+		subtract_key = { lhs = Construct_Amount value = 1 }
+		if = { # Build up to X rank
+			limit = {
+				OR = {
+					owner = { is_key_equal = { lhs = Construct_TypeToggle value = 0 } }
+					overlord = { is_key_equal = { lhs = Construct_TypeToggle value = 0 } }
+				}
+			}
+			
+			Infra_GetGoal$type$ = { return=Construct_Cost inp=Construct_Amount }
+            
+            change_key = { lhs = Construct_Cost which = Construct_Tmp3 }
+			subtract_key = { lhs = Construct_Cost which = Infra_$type$Size }
+			subtract_key = { lhs = Construct_Cost which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Construct_Cost value = 0 } }
+				}
+				set_key = { lhs = Construct_Cost value = 0 }
+			}
+			
+			# Save the amount of buildings to be constructed
+			set_key = { lhs = Construct_Amount value = 0 }
+			set_key = { lhs = Construct_Amount which = Construct_Cost }
+			set_key = { lhs = Construct_Tmp4 which = Construct_Amount } #Save amount of units to export to owner for display purposes
+			multiply_key = { lhs = Construct_Cost which = Infra_$type$SizeCost1 }
+		}
+		else_if = { # Build X rank
+			limit = {
+				OR = {
+					owner = { is_key_equal = { lhs = Construct_TypeToggle value = 1 } }
+					overlord = { is_key_equal = { lhs = Construct_TypeToggle value = 1 } }
+				}
+			}
+			Infra_GetGoal$type$ = { return=Construct_Cost inp=Construct_Amount }
+            change_key = { lhs = Construct_Cost which = Construct_Tmp3 }
+			
+			set_key = { lhs = Construct_Tmp1 value = 6 }
+			Infra_GetGoal$type$ = { return=Construct_Tmp0 inp=Construct_Tmp1 }
+            
+			subtract_key = { lhs = Construct_Tmp0 which = Infra_$type$Size }
+			subtract_key = { lhs = Construct_Tmp0 which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Construct_Cost which = Construct_Tmp0 }
+				}
+				set_key = { lhs = Construct_Cost which = Construct_Tmp0 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Construct_Cost value = 0 } }
+				}
+				set_key = { lhs = Construct_Cost value = 0 }
+			}
+			
+			# Save the amount of buildings to be constructed
+			set_key = { lhs = Construct_Amount value = 0 }
+			set_key = { lhs = Construct_Amount which = Construct_Cost }
+            set_key = { lhs = Construct_Tmp4 which = Construct_Amount } #Save amount of units to export to owner for display purposes
+			
+			multiply_key = { lhs = Construct_Cost which = Infra_$type$SizeCost1 }
+			
+			
+			set_key = { lhs = Construct_Tmp0 value = 0 }
+			set_key = { lhs = Construct_Tmp1 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Construct_Amount value = 0 }
+		}
+	}
+	else = {
+		set_key = { lhs = Construct_Amount value = 0 }
+	}
+}
+
+Construct_Build = {
+	hidden_effect = {
+		if = {
+			limit = {
+				NOT = {
+					is_key_equal = { lhs = Construct_Type value = 3 }
+				}
+			}
+			change_key = { lhs = Building_ProjectWealth which = Construct_Tmp0 }
+		}
+		
+		POP_RemoveDucat = { type=which inp=Construct_Tmp0 }
+	}
+	every_province = {
+		limit = {
+			check_key = { lhs = Construct_Amount value = 0.001 }
+			isValidProv = yes
+			OR = {
+				owned_by = ROOT
+				owner = { 
+					is_non_sovereign_subject_trigger = yes
+					is_subject_of = ROOT
+				}
+			}
+		}
+        set_province_flag = comes_from_manual
+		set_key = { lhs = Construct_Type which = PREV } #Type of Construction
+		set_key = { lhs = Construct_Building which = PREV } #Type of building
+		set_key = { lhs = Construct_Parallel which = PREV } #Amount of Parallelism
+        set_key = { lhs = Construct_Tmp3 which = PREV } #Amount of extra units
+		change_key = { lhs = Construct_Parallel value = 1 } # fallback, default width is 0, so 1
+		Construct_HandleContrib = yes
+            
+		if = {
+			limit = {
+				is_key_equal = { lhs = Construct_Type value = 1 }
+			}
+			Construct_BuildResources = yes
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = Construct_Type value = 2 }
+			}
+			Construct_BuildBuilding = yes
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = Construct_Type value = 3 }
+			}
+			Construct_BuildInfra = yes
+		}
+		
+		# Clear it all
+		set_key = { lhs = Construct_Cost value = 0 }
+		set_key = { lhs = Construct_Amount value = 0 }
+		set_key = { lhs = Construct_ContribNO value = 0 }
+		set_key = { lhs = Construct_ContribBG value = 0 }
+		set_key = { lhs = Construct_ContribCL value = 0 }
+		set_key = { lhs = Construct_ContribLV value = 0 }
+		set_key = { lhs = Construct_ContribMP value = 0 }
+		set_key = { lhs = Construct_Type value = 0 }
+		set_key = { lhs = Construct_Building value = 0 }
+		#set_key = { lhs = Construct_Parallel value = 0 }
+	}
+}
+Construct_HandleContrib = { # Actually subtract the contributions, dont move money otherwise
+}
+Construct_Clear = {
+	every_owned_province = {
+		set_key = { lhs = Construct_ContribNO value = 0 }
+		set_key = { lhs = Construct_ContribBG value = 0 }
+		set_key = { lhs = Construct_ContribCL value = 0 }
+		set_key = { lhs = Construct_ContribLV value = 0 }
+		set_key = { lhs = Construct_ContribMP value = 0 }
+	}
+}
+Construct_CalcCorvee = {
+}
+Construct_CalcMP = {
+}
+Construct_CalcNO = {
+}
+Construct_CalcBG = {
+}
+Construct_CalcCL = {
+}
+Construct_BuildBuildingHelper = {
+	Infra_StartProject = { id = $id$ owner = 7 height = Construct_Amount width = Construct_Parallel }
+}
+
+Construct_BuildResources = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 1 }
+		}
+		Construct_BuildBuildingHelper = { id = 1 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 2 }
+		}
+		Construct_BuildBuildingHelper = { id = 2 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 3 }
+		}
+		Construct_BuildBuildingHelper = { id = 3 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 4 }
+		}
+		Construct_BuildBuildingHelper = { id = 4 }
+	}
+}
+
+Construct_BuildBuilding = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 1 }
+		}
+		Construct_BuildBuildingHelper = { id = 6 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 2 }
+		}
+		Construct_BuildBuildingHelper = { id = 5 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 3 }
+		}
+		Construct_BuildBuildingHelper = { id = 7 }
+	}
+}
+Construct_BuildInfraHelper = {
+    if = { #If comes from manual investment (player construct even) add extra units to the final count
+        limit = { 
+            has_province_flag = comes_from_manual
+        }
+        change_key = { lhs = Construct_Amount which = Construct_Tmp3 }
+        clr_province_flag = comes_from_manual
+    }
+    
+	Infra_StartProject = { id = $id$ height = Construct_Amount width = Construct_Parallel }
+	change_key = { lhs = Infra_Wealth which = Construct_Cost }
+}
+
+Construct_BuildInfra = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 1 }
+		}
+		Construct_BuildInfraHelper = { id = 8 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 2 }
+		}
+		Construct_BuildInfraHelper = { id = 9 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 3 }
+		}
+		Construct_BuildInfraHelper = { id = 10 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 4 }
+		}
+		Construct_BuildInfraHelper = { id = 11 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 5 }
+		}
+		Construct_BuildInfraHelper = { id = 12 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 6 }
+		}
+		Construct_BuildInfraHelper = { id = 13 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = Construct_Building value = 7 }
+		}
+		Construct_BuildInfraHelper = { id = 14 }
+	}
+}

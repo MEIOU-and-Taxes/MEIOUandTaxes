@@ -1,0 +1,532 @@
+monarchy_mechanic = {
+	monarchy = yes
+	heir = yes
+	queen = yes
+	basic_reform = yes # = invisible/does not take up a slot
+	valid_for_nation_designer = no
+	custom_attributes = {
+		enables_aristocratic_idea_group = yes
+	}
+}
+Pol_Succession1 = {		 		#Birthright; The throne is passed down a line of succession, and the identity of the legal heir is conventionally a matter established prior to the death of the monarch.
+	icon = "king"
+	allow_normal_conversion = yes
+	legacy_equivalent = Monarchy_Birthright
+	potential = {
+		always = yes
+	}
+	trigger = {
+		OR = {
+			custom_trigger_tooltip = {
+				tooltip = Pol_Succession4NOT
+				NOT = { has_reform = Pol_Succession4 }
+				#is_key_equal = { lhs = Pol_Succession value = 3 }
+			}
+			custom_trigger_tooltip = {
+				tooltip = Rights_NOGov4HasGreater
+				Rights_NOGov4HasGreater = yes
+			}
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	
+	modifiers = {
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Succession value = 0 } }
+		if = {
+			limit = {
+				religion_group = muslim
+			}
+			add_government_reform = Pol_Family2
+		}
+		else = {
+			add_government_reform = Pol_Family1
+		}
+	}
+	custom_attributes = {
+		dynamic_heir_claim = yes
+		ruler_stats_affect_legitimacy = yes
+	}
+}
+Pol_Succession2 = {				#Foreign; Those who take the throne are necessarily of an alien culture, having come from far away lands to join the ruling class.
+	icon = "mamluk_government"
+	allow_normal_conversion = yes
+	legacy_equivalent = Monarchy_Foreign
+	potential = {
+		OR = {
+			tag = MAM
+			has_reform = Pol_Succession2
+			#is_key_equal = { lhs = Pol_Succession value = 1 }
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	allow_convert = no
+	heir = no
+	foreign_slave_rulers = yes
+	
+	modifiers = {
+		monarch_military_power = 1
+		stability_cost_modifier = 0.30
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Succession value = 1 } }
+		add_government_reform = Pol_Family2 #the ruler's wife is irrelevant in the succession regardless of religion
+	}
+	custom_attributes = {
+		dynamic_heir_claim = yes
+		ruler_stats_affect_legitimacy = yes
+	}
+}
+Pol_Succession3 = {					#Undefined; There are no clear rules regarding the passing of the crown, and subsequently there can always be said to be a legal heir.
+	icon = "crown"
+	allow_normal_conversion = yes
+	legacy_equivalent = Monarchy_Undefined
+	potential = {
+		has_reform = Pol_Succession3
+		#is_key_equal = { lhs = Pol_Succession value = 2 }
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	allow_convert = no
+	
+	modifiers = {
+		legitimacy = -4.5
+		monthly_heir_claim_increase = 0.10
+		diplomatic_reputation = -1
+		stability_cost_modifier = 0.10
+	}
+	
+	custom_attributes = {
+		dynamic_heir_claim = yes
+		ruler_stats_affect_legitimacy = yes
+		choose_own_heir = yes
+	}
+	
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Succession value = 2 } }
+	}
+}
+Pol_Succession4 = {				#Elective; A new monarch is elected from a pool of both domestic and foreign princes upon the death of the previous.
+	icon = "elective_monarchy"
+	allow_normal_conversion = yes
+	legacy_equivalent = Monarchy_Elective
+	potential = {
+		always = yes
+	}
+	trigger = {
+		always = yes
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	#is_elective = yes
+	
+	modifiers = {
+		legitimacy = -0.10
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Succession value = 3 } }
+		if = {
+			limit = {
+				religion_group = muslim
+			}
+			add_government_reform = Pol_Family2
+		}
+		else = {
+			add_government_reform = Pol_Family1
+		}
+	}
+	custom_attributes = {
+		dynamic_heir_claim = yes
+		ruler_stats_affect_legitimacy = yes
+	}
+}
+Pol_Succession5 = {					#Dynastic; he throne passes from one member of the ruling dynasty to another. The reigning monarch generally picks a favourite to succeed them.
+	icon = "celestial_empire"
+	allow_normal_conversion = yes
+	legacy_equivalent = Monarchy_Dynastic
+	potential = {
+		always = yes
+	}
+	trigger = {
+		custom_trigger_tooltip = {
+			tooltip = Pol_Succession4NOT
+			NOT = { has_reform = Pol_Succession4 }
+			#is_key_equal = { lhs = Pol_Succession value = 3 }
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	maintain_dynasty = yes
+	allow_convert = no
+	
+	modifiers = {
+	}
+
+	conditional = {
+		allow = { 
+			has_dlc = "Mandate of Heaven"
+		}
+		custom_attributes = {
+			has_tributaries = yes
+		}
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Succession value = 4 } }
+		if = {
+			limit = {
+				religion_group = muslim
+			}
+			add_government_reform = Pol_Family3
+		}
+		else_if = {
+			limit = {
+				NOT = { religion_group = christian }
+			}
+			add_government_reform = Pol_Family4
+		}
+	}
+	custom_attributes = {
+		dynamic_heir_claim = yes
+		ruler_stats_affect_legitimacy = yes
+	}
+}
+Pol_Family1 = {				#Primary Spouse; The ruler has a single or at least primary consort.
+	icon = "queen"
+	allow_normal_conversion = yes
+
+	potential = {
+		NOT = { religion_group = muslim }
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	allow_convert = no
+	queen = yes
+	
+	modifiers = {
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Family value = 0 } }
+	}
+}
+
+Pol_Family2 = {				#No Primary Spouse; The ruler has no consort, or at least no consort which takes primacy over their others.
+	icon = "noble_muslim"
+	allow_normal_conversion = yes
+
+	potential = {
+		OR = {
+			religion_group = muslim
+			has_reform = Pol_Succession2
+			#is_key_equal = { lhs = Pol_Succession value = 1 }
+		}
+		NOT = { primary_culture = turkish }
+		NOT = { primary_culture = osmanli }
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	allow_convert = no
+	queen = no
+	
+	modifiers = {
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Family value = 1 } }
+	}
+}
+
+Pol_Family3 = {					#Harem; The ruler has many spouses, and all offspring of the ruler by them are considered legitimate.
+	icon = "ottoman_government"
+	allow_normal_conversion = yes
+
+	potential = {
+		religion_group = muslim
+		NOT = { culture_group = tartar_group }
+		NOT = { culture_group = old_turkic }
+		NOT = { culture_group = altaic }
+		NOT = { primary_culture = turkish }
+		NOT = { primary_culture = osmanli }
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	allow_convert = no
+	queen = no
+	
+	conditional = {
+		allow = { has_dlc = "Rights of Man" }
+		has_harem = yes
+	}
+	
+	modifiers = {
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Family value = 2 } }
+	}
+}
+
+Pol_Family4 = {					#Harem and Primary Spouse; Whilst the ruler has a number of spouses which can provide him with legitimate offspring, they still have a single consort which takes special status among them.
+	icon = "general_eastern_administrative"
+	allow_normal_conversion = yes
+
+	potential = {
+		OR = {
+			NOT = { religion_group = muslim }
+			culture_group = tartar_group
+			culture_group = old_turkic
+			culture_group = altaic
+			primary_culture = turkish
+			primary_culture = osmanli
+		}
+		NOT = { religion_group = christian }
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	lock_level_when_selected = yes
+	allow_convert = no
+	queen = yes
+	
+	conditional = {
+		allow = { has_dlc = "Rights of Man" }
+		has_harem = yes
+	}
+	
+	modifiers = {
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Family value = 3 } }
+	}
+}
+
+
+
+celestial_empire = {
+	icon = "chinese_palace"
+	allow_normal_conversion = no
+	legacy_equivalent = celestial_empire_legacy
+	potential = {
+		OR = {
+			is_key_equal = { lhs = Pol_Privileges value = 3 }
+			has_reform = celestial_empire
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	allow_convert = no
+	lock_level_when_selected = yes
+	
+	modifiers = {
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Privileges value = 3 } }
+	}
+
+	conditional = {
+		allow = { has_dlc = "Mandate of Heaven" }
+		has_meritocracy = yes
+		allow_vassal_war = yes
+		allow_vassal_alliance = yes
+	}
+
+	conditional = {
+		allow = { 
+			has_dlc = "Mandate of Heaven"
+		}
+		custom_attributes = {
+			has_tributaries = yes
+		}
+	}
+
+	custom_attributes = {
+		locked_government_type = yes
+	}
+}
+shogunate = {
+	icon = "shogunate"
+	allow_normal_conversion = yes
+	legacy_equivalent = shogunate_legacy
+	potential = {
+		OR = {
+			has_reform = shogunate
+			is_key_equal = { lhs = Pol_Privileges value = 4 }
+		}
+	}
+	
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	allow_convert = no
+	lock_level_when_selected = yes
+	allow_vassal_war = yes
+	allow_vassal_alliance = yes
+	
+	modifiers = {
+		reduced_liberty_desire = 40
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Privileges value = 4 } }
+	}
+}
+Horde_Monarchy = { # Horde Monarchy
+	icon = "horde_riding"
+	allow_normal_conversion = yes
+	potential = {
+		OR = {
+			is_key_equal = { lhs = Pol_Privileges value = 8 }
+			has_reform = Horde_Monarchy
+		}
+		OR = {
+			NOT = { has_country_flag = Horde_Timur }
+			has_country_flag = Timur_Dead
+		}
+		OR = {
+			tag = CHG
+			tag = MGH
+			tag = TIM
+			tag = GGK
+			tag = GOL
+			tag = YUA
+			tag = WHI
+			tag = BLU
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	allow_convert = no
+	lock_level_when_selected = yes
+	
+	nomad = yes
+	allow_vassal_war = yes
+	allow_vassal_alliance = yes
+
+	conditional = {
+		allow = { 
+			has_dlc = "Mandate of Heaven"
+		}
+		custom_attributes = {
+			has_tributaries = yes
+		}
+	}
+	
+	modifiers = {
+		cav_to_inf_ratio = 0.30
+		manpower_recovery_speed = 0.10
+		monarch_military_power = 1
+		reduced_liberty_desire = 10
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Privileges value = 8 } }
+	}
+}
+Horde_MonarchyS = { # Horde Monarchy, Timur no general edition
+	icon = "horde_riding"
+	allow_normal_conversion = yes
+	potential = {
+		OR = {
+			is_key_equal = { lhs = Pol_Privileges value = 8 }
+			has_reform = Horde_MonarchyS
+		}
+		has_country_flag = Horde_Timur
+		NOT = { has_country_flag = Timur_Dead }
+		OR = {
+			tag = CHG
+			tag = MGH
+			tag = TIM
+			tag = GGK
+			tag = GOL
+			tag = YUA
+			tag = WHI
+			tag = BLU
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	allow_convert = no
+	lock_level_when_selected = yes
+	
+	nomad = yes
+	allow_vassal_war = yes
+	allow_vassal_alliance = yes
+
+	conditional = {
+		allow = { 
+			has_dlc = "Mandate of Heaven"
+		}
+		custom_attributes = {
+			has_tributaries = yes
+		}
+	}
+	
+	modifiers = {
+		cav_to_inf_ratio = 0.60
+		manpower_recovery_speed = 0.30
+		monarch_military_power = 1
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Privileges value = 8 } }
+	}
+}
+Yuan_Monarchy = {
+	icon = "chinese_palace"
+	allow_normal_conversion = no
+	potential = {
+		OR = {
+			has_reform = Yuan_Monarchy
+			is_key_equal = { lhs = Pol_Privileges value = 9 }
+		}
+	}
+	valid_for_nation_designer = yes
+	nation_designer_cost = 0
+	
+	allow_convert = no
+	lock_level_when_selected = yes
+	
+	allow_vassal_war = yes
+	allow_vassal_alliance = yes
+	
+	modifiers = {
+		cav_to_inf_ratio = 0.30
+		manpower_recovery_speed = 0.10
+	}
+	effect = {
+		hidden_effect = { set_key = { lhs = Pol_Privileges value = 9 } }
+	}
+
+	conditional = {
+		allow = { has_dlc = "Mandate of Heaven" }
+		has_meritocracy = yes
+	}
+
+	conditional = {
+		allow = { 
+			has_dlc = "Mandate of Heaven"
+		}
+		custom_attributes = {
+			has_tributaries = yes
+		}
+	}
+
+	custom_attributes = {
+		locked_government_type = yes
+	}
+}

@@ -1,0 +1,132 @@
+Local_SetInitialTagID = {
+    owner = { PREV = { set_key = { lhs = ID_Tag which = PREV } } }
+}
+Local_SetTagID = {
+    $tag$ = { PREV = { set_key = { lhs = ID_Tag which = PREV } } }
+}
+
+Local_ReleaseTag = {
+    POP_GetTag = { var=ID_Tag return=TagScope }
+    clr_province_flag = Local_ExistedPrior
+    if = {
+        limit = {
+            exists = event_target:TagScope
+        }
+        set_province_flag = Local_ExistedPrior
+    }
+    if = {
+        limit = {
+            OR = {
+                NOT = { has_province_flag = Local_ExistedPrior }
+                always = $foreignCede$
+            }
+            owner = {
+                NOT = { is_key_equal = { lhs = ID_Tag which = PREV } }
+            }
+        }
+        [[cleanTag]
+        if = {
+            limit = {
+                always = $cleanTag$
+                OR = {
+                    NOT = { always = $foreignCede$ }
+                    NOT = { has_province_flag = Local_ExistedPrior }
+                }
+            }
+            every_province = {
+                limit = {
+                    isValidProv = yes
+                    is_core = event_target:TagScope
+                }
+                remove_core = event_target:TagScope
+            }
+        }
+        ]
+        [[sameOwner]
+        owner = {
+            save_event_target_as = NOwnerTag
+        }
+        ]
+        every_province = {
+            limit = {
+                isValidProv = yes
+                NOT = { has_province_flag = ReleasedByLocal }
+                is_key_equal = { lhs = ID_Tag which = PREV }
+                OR = {
+                    always = $allCores$
+                    NOT = { always = $foreignCede$ }
+                    NOT = { owned_by = event_target:TagScope }
+                }
+                [[sameOwner]
+                always = $sameOwner$
+                owned_by = event_target:NOwnerTag
+                ]
+                [[conquest]
+                always = $conquest$
+                has_province_modifier = ProvConquest
+                ]
+            }
+            set_province_flag = ReleasedByLocal
+            add_core = event_target:TagScope
+            if = {
+                limit = {
+                    OR = {
+                        AND = {
+                            NOT = { always = $allCores$ }
+                            NOT = { PREV = { has_province_flag = Local_ExistedPrior } }
+                        }
+                        AND = {
+                            always = $foreignCede$
+                            PREV = { has_province_flag = Local_ExistedPrior }
+                        }
+                    }
+                }
+                cede_province = event_target:TagScope
+            }
+            [[conquest] remove_province_modifier = ProvConquest ]
+        }
+        if = {
+            limit = {
+                always = $allCores$
+                NOT = { exists = event_target:TagScope }
+            }
+            owner = {
+                release = event_target:TagScope
+            }
+        }
+        if = {
+            limit = {
+                NOT = { has_province_flag = Local_ExistedPrior }
+                exists = event_target:TagScope
+            }
+            owner = { set_country_flag = ReleasedByLocal }
+        }
+    }
+    clr_province_flag = Local_ExistedPrior
+}
+
+Local_DisolveTag = {
+    every_province = {
+        limit = {
+            isValidProv = yes
+            NOT = { has_province_flag = ReleasedByLocal }
+            owned_by = PREV
+        }
+        Local_ReleaseTag = { allCores=no foreignCede=yes sameOwner=yes }
+    }
+}
+Local_Cleanup = {
+    every_country = {
+        limit = {
+            has_country_flag = ReleasedByLocal
+        }
+		clr_country_flag = ReleasedByLocal
+		country_event = { id = Init.2 }
+    }
+    every_province = {
+        limit = {
+            has_province_flag = ReleasedByLocal
+        }
+		clr_province_flag = ReleasedByLocal
+    }
+}

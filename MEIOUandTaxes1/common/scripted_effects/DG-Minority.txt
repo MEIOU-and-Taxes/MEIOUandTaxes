@@ -1,0 +1,1299 @@
+# Clean slot, to remove completely a religion, and clean the slot.
+#Example of use:
+#	MN_CleanSlot = { 
+#		slot = 3 
+#	}
+MN_CleanSlot = {
+	set_key = { lhs = MN_S$slot$			value = 0 }
+	set_key = { lhs = MN_S$slot$RurN		value = 0 } # Absolute Number of rural pops in Slot
+	set_key = { lhs = MN_S$slot$UrbN		value = 0 } # Absolute Number of urban pops in Slot
+	set_key = { lhs = MN_S$slot$NotN		value = 0 } # Absolute Number of elite pops in Slot
+	set_key = { lhs = MN_S$slot$RurP		value = 0 } # Percentage Value of Pops in Slot
+	set_key = { lhs = MN_S$slot$UrbP		value = 0 } # Percentage Value of Pops in Slot
+	set_key = { lhs = MN_S$slot$NotP		value = 0 } # Percentage Value of Pops in Slot
+	set_key = { lhs = MN_S$slot$TotN		value = 0 } # Absolute number of pops in slot
+	set_key = { lhs = MN_S$slot$TotP		value = 0 } # percentage value of pops in slot
+	set_key = { lhs = MN_S$slot$Rural		value = 0 }
+	set_key = { lhs = MN_S$slot$Urban		value = 0 }
+	set_key = { lhs = MN_S$slot$Notables	value = 0 }
+	set_key = { lhs = MN_S$slot$INF			value = 0 }	# Chuch Infrastructure? 
+	set_key = { lhs = MN_S$slot$ENT			value = 0 } # Religious entrenchement
+	set_key = { lhs = MN_S$slot$Preach		value = 0 }
+	set_key = { lhs = MN_S$slot$Inquis		value = 0 }
+	set_key = { lhs = MN_S$slot$Tolerance	value = 0 }
+	set_key = { lhs = MN_S$slot$Bastion		value = 0 }
+	set_key = { lhs = MN_S$slot$MStrength	value = 0 }
+	set_key = { lhs = MN_S$slot$_Var		value = 0 }
+	#MN_Regularize = { type = Rural }
+	#MN_Regularize = { type = Urban }
+	#MN_Regularize = { type = Notables }
+}
+
+# Change how many people are in a slot
+MN_ChangePop = {
+	multiply_key = { lhs = MN_S$slot$$type$ which = Class_$type$ }
+	change_key = { lhs = MN_S$slot$$type$ $typeChange$ = $change$ }
+
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = MN_S$slot$$type$ value = 0 }
+			}
+		}
+		set_key = { lhs = MN_S$slot$$type$ value = 0 }
+	}
+
+	if = {
+		limit = { is_key_equal = { lhs = Class_$type$ value = 0 } }
+		set_key = { lhs = MN_S$slot$$type$ value = 0 }
+		
+	}
+	else = {
+		divide_key = { lhs = MN_S$slot$$type$ which = Class_$type$ }
+	}
+	
+	set_key = { lhs = DG_Tmp1 value = 1 }
+	subtract_key = { lhs = DG_Tmp1 which = MN_S$slot$$type$ }
+
+	MN_ChangePopHelper = { slot = 0 slott = $slot$ type = $type$ }
+	MN_ChangePopHelper = { slot = 1 slott = $slot$ type = $type$ }
+	MN_ChangePopHelper = { slot = 2 slott = $slot$ type = $type$ }
+	MN_ChangePopHelper = { slot = 3 slott = $slot$ type = $type$ }
+	MN_ChangePopHelper = { slot = 4 slott = $slot$ type = $type$ }
+	MN_ChangePopHelper = { slot = 5 slott = $slot$ type = $type$ }
+
+	#MN_Regularize = { type = $type$ }
+
+	set_key = { lhs = DG_Tmp1 value = 0 }
+}
+
+# Change how many people are in a religion
+MN_ChangePopReligion = {
+	MN_ChangePopReligionHelper = { slot = 0 type = $type$ typeChange = $typeChange$ typeReligion = $typeReligion$ change = $change$ religion = $religion$ }
+	MN_ChangePopReligionHelper = { slot = 1 type = $type$ typeChange = $typeChange$ typeReligion = $typeReligion$ change = $change$ religion = $religion$ }
+	MN_ChangePopReligionHelper = { slot = 2 type = $type$ typeChange = $typeChange$ typeReligion = $typeReligion$ change = $change$ religion = $religion$ }
+	MN_ChangePopReligionHelper = { slot = 3 type = $type$ typeChange = $typeChange$ typeReligion = $typeReligion$ change = $change$ religion = $religion$ }
+	MN_ChangePopReligionHelper = { slot = 4 type = $type$ typeChange = $typeChange$ typeReligion = $typeReligion$ change = $change$ religion = $religion$ }
+	MN_ChangePopReligionHelper = { slot = 5 type = $type$ typeChange = $typeChange$ typeReligion = $typeReligion$ change = $change$ religion = $religion$ }
+}
+
+# Get how many people are in a slot
+# Keep Public_TmpX to not interfere with the change_religion_effect effect
+
+MN_GetSlot = {
+	set_key = { lhs = Public_Tmp1 which = MN_S$slot$Rural }
+	set_key = { lhs = Public_Tmp2 which = MN_S$slot$Urban }
+	set_key = { lhs = Public_Tmp3 which = MN_S$slot$Notables }
+
+	multiply_key = { lhs = Public_Tmp1 which = Class_Rural }
+	multiply_key = { lhs = Public_Tmp2 which = Class_Urban }
+	multiply_key = { lhs = Public_Tmp3 which = Class_Notables }
+
+	set_key = { lhs = $return$ which = Public_Tmp1 }
+	change_key = { lhs = $return$ which = Public_Tmp2 }
+	change_key = { lhs = $return$ which = Public_Tmp3 }
+
+	set_key = { lhs = Public_Tmp1 value = 0 }
+	set_key = { lhs = Public_Tmp2 value = 0 }
+	set_key = { lhs = Public_Tmp3 value = 0 }
+}
+
+# Get how many people are in a religion
+MN_GetReligion = {
+	set_key = { lhs = $return$ value = 0 }
+	
+	MN_GetReligionHelper = { slot = 0 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetReligionHelper = { slot = 1 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetReligionHelper = { slot = 2 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetReligionHelper = { slot = 3 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetReligionHelper = { slot = 4 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetReligionHelper = { slot = 5 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+}
+
+MN_GetTypeSlot = {
+	set_key = { lhs = $return$ which = MN_S$slot$$type$ }
+	multiply_key = { lhs = $return$ which = Class_$type$ }
+}
+
+MN_GetTypeReligion = {
+	set_key = { lhs = $return$ value = 0 }
+	
+	MN_GetTypeReligionHelper = { slot = 0 type = $type$ typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetTypeReligionHelper = { slot = 1 type = $type$ typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetTypeReligionHelper = { slot = 2 type = $type$ typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetTypeReligionHelper = { slot = 3 type = $type$ typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetTypeReligionHelper = { slot = 4 type = $type$ typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetTypeReligionHelper = { slot = 5 type = $type$ typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+}
+
+MN_GetProportionSlot = {
+	MN_GetSlot = { slot = $slot$ return = $return$ }
+
+	if = {
+		limit = { is_key_equal = { lhs = Class_Total value = 0 } }
+		set_key = { lhs = $return$ value = 0 }
+		
+	}
+	else = {
+		divide_key = { lhs = $return$ which = Class_Total }
+	}
+}
+
+MN_GetProportionReligion = {
+	set_key = { lhs = $return$ value = 0 }
+
+	MN_GetProportionReligionHelper = { slot = 0 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetProportionReligionHelper = { slot = 1 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetProportionReligionHelper = { slot = 2 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetProportionReligionHelper = { slot = 3 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetProportionReligionHelper = { slot = 4 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+	MN_GetProportionReligionHelper = { slot = 5 typeReligion = $typeReligion$ religion = $religion$ return = $return$ }
+}
+
+#Adds a new religion slot
+#Necessary before adding pops to a slot
+#Uses the id or the rebellion or a key
+#ex: MN_AddReligion = { type = value religion = 3 }
+#ex: MN_AddReligion = { type = which religion = DG_Tmp1 }
+MN_AddReligionHelper = {
+	#checks which is the first empty slot
+	if = {
+		limit = {
+			NOT = { is_key_equal = { lhs = MN_AddReligionVar value = 0 } }
+		}
+		if = {
+			limit = {
+				is_key_equal = { lhs = MN_S0 value = 0 }
+			}
+			set_key = { lhs = MN_S0 which = MN_AddReligionVar }
+			MN_GetInfrast_Helper = { slot = 0 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = MN_S1 value = 0 }
+			}
+			set_key = { lhs = MN_S1 which = MN_AddReligionVar }
+			MN_GetInfrast_Helper = { slot = 1 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = MN_S2 value = 0 }
+			}
+			set_key = { lhs = MN_S2 which = MN_AddReligionVar }
+			MN_GetInfrast_Helper = { slot = 2 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = MN_S3 value = 0 }
+			}
+			set_key = { lhs = MN_S3 which = MN_AddReligionVar }
+			MN_GetInfrast_Helper = { slot = 3 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = MN_S4 value = 0 }
+			}
+			set_key = { lhs = MN_S4 which = MN_AddReligionVar }
+			MN_GetInfrast_Helper = { slot = 4 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = MN_S5 value = 0 }
+			}
+			set_key = { lhs = MN_S5 which = MN_AddReligionVar }
+			MN_GetInfrast_Helper = { slot = 5 }
+		}
+	}
+	set_key = { lhs = MN_AddReligionVar value = 0 }
+}
+MN_AddReligion = {
+	if = {
+		limit = {
+			NOT = {
+				is_key_equal = { lhs = MN_S0 $type$ = $religion$ }
+				is_key_equal = { lhs = MN_S1 $type$ = $religion$ }
+				is_key_equal = { lhs = MN_S2 $type$ = $religion$ }
+				is_key_equal = { lhs = MN_S3 $type$ = $religion$ }
+				is_key_equal = { lhs = MN_S4 $type$ = $religion$ }
+				is_key_equal = { lhs = MN_S5 $type$ = $religion$ }
+			}
+		}
+		set_key = { lhs = MN_AddReligionVar $type$ = $religion$ }
+		province_event = { # Code Optimisation
+			id = DG_Convert.903
+		}
+		set_key = { lhs = MN_AddReligionVar value = 0 }
+	}
+}
+
+# Check slot and see if it should be popped
+MN_CheckSlot_Helper = {
+	set_key    = { lhs = MN_S$slot$TotN	which = MN_S$slot$RurN }
+	change_key = { lhs = MN_S$slot$TotN	which = MN_S$slot$UrbN }
+	change_key = { lhs = MN_S$slot$TotN	which = MN_S$slot$NotN }
+	if = {
+		limit = {
+			OR = {
+				is_key_equal = { lhs = MN_S$slot$TotN value = 0 }
+				NOT = { check_key = { lhs = MN_S$slot$TotN value = 0 } }
+				is_key_equal = { lhs = MN_S$slot$ value = 0 }
+			}
+		}
+		MN_CleanSlot = { 
+			slot = $slot$ 
+		}
+	}
+}
+
+MN_CheckSlot = {
+	MN_CheckSlot_Helper = { slot = 0 }
+	MN_CheckSlot_Helper = { slot = 1 }
+	MN_CheckSlot_Helper = { slot = 2 }
+	MN_CheckSlot_Helper = { slot = 3 }
+	MN_CheckSlot_Helper = { slot = 4 }
+	MN_CheckSlot_Helper = { slot = 5 }
+}
+
+#Sets minoritiesin new provinces
+#Example:
+#	MN_StartUpProv = {
+#		rural0 = 0.70 urban0 = 0.85 notables0 = 0.99
+#		religion1 = 67 rural1 = 0.20 urban1 = 0.10 notables1 = 0.01
+#		religion2 = 3  rural2 = 0.10 urban2 = 0.05 notables2 = 0.00
+#	}
+MN_StartUpProv = {
+	export_to_key = {
+		lhs = MN_S0
+		value = religion
+	}
+	set_key = { lhs = MN_S0Rural value = $rural0$ }
+	set_key = { lhs = MN_S0Urban value = $urban0$ }
+	set_key = { lhs = MN_S0Notables value = $notables0$ }
+
+[[religion1]
+	set_key = { lhs = MN_S1 value = $religion1$ }
+	set_key = { lhs = MN_S1Rural value = $rural1$ }
+	set_key = { lhs = MN_S1Urban value = $urban1$ }
+	set_key = { lhs = MN_S1Notables value = $notables1$ }
+]
+[[religion2]
+	set_key = { lhs = MN_S2 value = $religion2$ }
+	set_key = { lhs = MN_S2Rural value = $rural2$ }
+	set_key = { lhs = MN_S2Urban value = $urban2$ }
+	set_key = { lhs = MN_S2Notables value = $notables2$ }
+]
+[[religion3]
+	set_key = { lhs = MN_S3 value = $religion3$ }
+	set_key = { lhs = MN_S3Rural value = $rural3$ }
+	set_key = { lhs = MN_S3Urban value = $urban3$ }
+	set_key = { lhs = MN_S3Notables value = $notables3$ }
+]
+[[religion4]
+	set_key = { lhs = MN_S4 value = $religion4$ }
+	set_key = { lhs = MN_S4Rural value = $rural4$ }
+	set_key = { lhs = MN_S4Urban value = $urban4$ }
+	set_key = { lhs = MN_S4Notables value = $notables4$ }
+]
+[[religion5]
+	set_key = { lhs = MN_S5 value = $religion5$ }
+	set_key = { lhs = MN_S5Rural value = $rural5$ }
+	set_key = { lhs = MN_S5Urban value = $urban5$ }
+	set_key = { lhs = MN_S5Notables value = $notables5$ }
+]
+}
+
+#Get how many people are in a slot for each class, as well as proportions.
+#MN_GetSlot_ClassHelper does the action, MN_GetSlot_Class calls it for each slot.
+#Use : MN_GetSlot_Class = yes
+MN_GetSlot_ClassHelper = {
+	if = {
+		limit = {
+			check_key = { lhs = MN_S$slot$ value = 1 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = MN_S$slot$RurN 		value = 0.001 }
+				check_key = { lhs = Class_Rural 		value = 0.001 }
+			}
+			set_key = { lhs = MN_S$slot$Rural			which = MN_S$slot$RurN }
+			divide_key = { lhs = MN_S$slot$Rural		which = Class_Rural }
+			set_key = { lhs = MN_S$slot$RurP			which = MN_S$slot$Rural }
+			multiply_key = { lhs = MN_S$slot$RurP		value = 100 }
+		}
+		else = {
+			set_key = { lhs = MN_S$slot$Rural			value = 0 }
+			set_key = { lhs = MN_S$slot$RurP			value = 0 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = MN_S$slot$UrbN 		value = 0.001 }
+				check_key = { lhs = Class_Urban 		value = 0.001 }
+			}
+			set_key = { lhs = MN_S$slot$Urban			which = MN_S$slot$UrbN }
+			divide_key = { lhs = MN_S$slot$Urban		which = Class_Urban }
+			set_key = { lhs = MN_S$slot$UrbP			which = MN_S$slot$Urban }
+			multiply_key = { lhs = MN_S$slot$UrbP		value = 100 }
+		}
+		else = {
+			set_key = { lhs = MN_S$slot$Urban			value = 0 }
+			set_key = { lhs = MN_S$slot$UrbP			value = 0 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = MN_S$slot$NotN 		value = 0.001 }
+				check_key = { lhs = Class_Notables 		value = 0.001 }
+			}
+			set_key = { lhs = MN_S$slot$Notables		which = MN_S$slot$NotN }
+			divide_key = { lhs = MN_S$slot$Notables		which = Class_Notables }
+			set_key = { lhs = MN_S$slot$NotP			which = MN_S$slot$Notables }
+			multiply_key = { lhs = MN_S$slot$NotP		value = 100 }
+		}
+		else = {
+			set_key = { lhs = MN_S$slot$Notables		value = 0 }
+			set_key = { lhs = MN_S$slot$NotP			value = 0 }
+		}
+
+		set_key = { lhs = MN_S$slot$TotN				which = MN_S$slot$RurN }
+		change_key = { lhs = MN_S$slot$TotN				which = MN_S$slot$UrbN }
+		change_key = { lhs = MN_S$slot$TotN				which = MN_S$slot$NotN }
+		
+		if = {
+			limit = {
+				check_key = { lhs = MN_S$slot$TotN value = 0.001 }
+				check_key = { lhs = Class_Total value = 0.001 }
+			}
+			set_key = { lhs = MN_S$slot$TotP			which = MN_S$slot$TotN }
+			divide_key = { lhs = MN_S$slot$TotP			which = Class_Total }
+			multiply_key = { lhs = MN_S$slot$TotP		value = 100 }
+		}
+		else = {
+			set_key = { lhs = MN_S$slot$TotP			value = 0 }
+		}
+	}
+	else = {
+		set_key = { lhs = MN_S$slot$			value = 0 }
+		set_key = { lhs = MN_S$slot$RurN		value = 0 }
+		set_key = { lhs = MN_S$slot$UrbN		value = 0 }
+		set_key = { lhs = MN_S$slot$NotN		value = 0 }
+		set_key = { lhs = MN_S$slot$RurP		value = 0 }
+		set_key = { lhs = MN_S$slot$UrbP		value = 0 }
+		set_key = { lhs = MN_S$slot$NotP		value = 0 }
+		set_key = { lhs = MN_S$slot$TotN		value = 0 }
+		set_key = { lhs = MN_S$slot$TotP		value = 0 }
+		set_key = { lhs = MN_S$slot$Rural		value = 0 }
+		set_key = { lhs = MN_S$slot$Urban		value = 0 }
+		set_key = { lhs = MN_S$slot$Notables	value = 0 }
+		set_key = { lhs = MN_S$slot$INF		value = 0 }
+		set_key = { lhs = MN_S$slot$ENT		value = 0 }
+		set_key = { lhs = MN_S$slot$Preach		value = 0 }
+		set_key = { lhs = MN_S$slot$Inquis		value = 0 }
+		set_key = { lhs = MN_S$slot$Tolerance	value = 0 }
+		set_key = { lhs = MN_S$slot$Bastion	value = 0 }
+		set_key = { lhs = MN_S$slot$MStrength	value = 0 }
+		set_key = { lhs = MN_S$slot$_Var		value = 0 }
+	}
+}
+
+MN_GetSlot_Class = {
+#	MN_GetSlot_ClassHelper = { slot = 0 }
+#	MN_GetSlot_ClassHelper = { slot = 1 }
+#	MN_GetSlot_ClassHelper = { slot = 2 }
+#	MN_GetSlot_ClassHelper = { slot = 3 }
+#	MN_GetSlot_ClassHelper = { slot = 4 }
+#	MN_GetSlot_ClassHelper = { slot = 5 }
+}
+
+#Impact conversion resistance - country
+MN_conv_resist_c = {
+	change_key = { lhs = DG_conv_resist value = $strength$ }
+	if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 90 } }
+		add_country_modifier = { name = dg_rc_90 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 80 } }
+		add_country_modifier = { name = dg_rc_80 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 70 } }
+		add_country_modifier = { name = dg_rc_70 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 60 } }
+		add_country_modifier = { name = dg_rc_60 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 50 } }
+		add_country_modifier = { name = dg_rc_50 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 40 } }
+		add_country_modifier = { name = dg_rc_40 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 30 } }
+		add_country_modifier = { name = dg_rc_30 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 20 } }
+		add_country_modifier = { name = dg_rc_20 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 10 } }
+		add_country_modifier = { name = dg_rc_10 duration = -1 hidden = yes }
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else_if = {
+		limit = { check_key = { lhs = DG_conv_resist value = 0 } }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+	else = {
+		set_key = { lhs = DG_conv_resist value = 0 }
+		remove_country_modifier = dg_rc_10
+		remove_country_modifier = dg_rc_20
+		remove_country_modifier = dg_rc_30
+		remove_country_modifier = dg_rc_40
+		remove_country_modifier = dg_rc_50
+		remove_country_modifier = dg_rc_60
+		remove_country_modifier = dg_rc_70
+		remove_country_modifier = dg_rc_80
+		remove_country_modifier = dg_rc_90
+	}
+}
+
+UnrestPerSize = {
+	if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 90 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.90 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 80 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.80 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 70 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.70 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 60 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.60 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 50 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.50 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 40 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.40 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 30 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.30 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 20 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.20 }
+	}
+	else_if = {
+		limit = {
+			MN_CheckProp = { religion = $religion$ type = TotP prop = 10 }
+		}
+		MinorityTrauma = { religion = $religion$ strength = 0.10 }
+	}
+}
+
+#Calculation of religion size on country level
+ReligionSize_Prov_Helper = {
+	set_key = { lhs = MN_$religion$_N value = 0 }
+	if = {
+		limit = { is_key_equal = { lhs = MN_S0 value = $religion$ } }
+		set_key = { lhs = MN_$religion$_N which = MN_S0TotN }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 value = $religion$ } }
+		set_key = { lhs = MN_$religion$_N which = MN_S1TotN }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S2 value = $religion$ } }
+		set_key = { lhs = MN_$religion$_N which = MN_S2TotN }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S3 value = $religion$ } }
+		set_key = { lhs = MN_$religion$_N which = MN_S3TotN }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S4 value = $religion$ } }
+		set_key = { lhs = MN_$religion$_N which = MN_S4TotN }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S5 value = $religion$ } }
+		set_key = { lhs = MN_$religion$_N which = MN_S5TotN }
+	}
+}
+
+ReligionSize_Prov = {
+	ReligionSize_Prov_Helper = { religion = 1 }
+	ReligionSize_Prov_Helper = { religion = 2 }
+	ReligionSize_Prov_Helper = { religion = 3 }
+	ReligionSize_Prov_Helper = { religion = 4 }
+	ReligionSize_Prov_Helper = { religion = 5 }
+	ReligionSize_Prov_Helper = { religion = 6 }
+	ReligionSize_Prov_Helper = { religion = 7 }
+	ReligionSize_Prov_Helper = { religion = 8 }
+	ReligionSize_Prov_Helper = { religion = 9 }
+	ReligionSize_Prov_Helper = { religion = 10 }
+	ReligionSize_Prov_Helper = { religion = 11 }
+	ReligionSize_Prov_Helper = { religion = 12 }
+	ReligionSize_Prov_Helper = { religion = 13 }
+	ReligionSize_Prov_Helper = { religion = 14 }
+	ReligionSize_Prov_Helper = { religion = 15 }
+	ReligionSize_Prov_Helper = { religion = 16 }
+	ReligionSize_Prov_Helper = { religion = 17 }
+	ReligionSize_Prov_Helper = { religion = 18 }
+	ReligionSize_Prov_Helper = { religion = 19 }
+	ReligionSize_Prov_Helper = { religion = 20 }
+	ReligionSize_Prov_Helper = { religion = 21 }
+	ReligionSize_Prov_Helper = { religion = 22 }
+	ReligionSize_Prov_Helper = { religion = 23 }
+	ReligionSize_Prov_Helper = { religion = 24 }
+	ReligionSize_Prov_Helper = { religion = 25 }
+	ReligionSize_Prov_Helper = { religion = 26 }
+	ReligionSize_Prov_Helper = { religion = 27 }
+	ReligionSize_Prov_Helper = { religion = 28 }
+	ReligionSize_Prov_Helper = { religion = 29 }
+	ReligionSize_Prov_Helper = { religion = 30 }
+	ReligionSize_Prov_Helper = { religion = 31 }
+	ReligionSize_Prov_Helper = { religion = 32 }
+	ReligionSize_Prov_Helper = { religion = 33 }
+	ReligionSize_Prov_Helper = { religion = 34 }
+	ReligionSize_Prov_Helper = { religion = 35 }
+	ReligionSize_Prov_Helper = { religion = 36 }
+	ReligionSize_Prov_Helper = { religion = 37 }
+	ReligionSize_Prov_Helper = { religion = 38 }
+	ReligionSize_Prov_Helper = { religion = 39 }
+	ReligionSize_Prov_Helper = { religion = 40 }
+	ReligionSize_Prov_Helper = { religion = 41 }
+	ReligionSize_Prov_Helper = { religion = 42 }
+	ReligionSize_Prov_Helper = { religion = 43 }
+	ReligionSize_Prov_Helper = { religion = 44 }
+	ReligionSize_Prov_Helper = { religion = 45 }
+	ReligionSize_Prov_Helper = { religion = 46 }
+	ReligionSize_Prov_Helper = { religion = 47 }
+	ReligionSize_Prov_Helper = { religion = 48 }
+	ReligionSize_Prov_Helper = { religion = 49 }
+	ReligionSize_Prov_Helper = { religion = 50 }
+	ReligionSize_Prov_Helper = { religion = 51 }
+	ReligionSize_Prov_Helper = { religion = 52 }
+	ReligionSize_Prov_Helper = { religion = 53 }
+	ReligionSize_Prov_Helper = { religion = 54 }
+	ReligionSize_Prov_Helper = { religion = 55 }
+	ReligionSize_Prov_Helper = { religion = 56 }
+	ReligionSize_Prov_Helper = { religion = 57 }
+	ReligionSize_Prov_Helper = { religion = 58 }
+	ReligionSize_Prov_Helper = { religion = 59 }
+	ReligionSize_Prov_Helper = { religion = 60 }
+	ReligionSize_Prov_Helper = { religion = 61 }
+	ReligionSize_Prov_Helper = { religion = 62 }
+	ReligionSize_Prov_Helper = { religion = 63 }
+	ReligionSize_Prov_Helper = { religion = 64 }
+	ReligionSize_Prov_Helper = { religion = 65 }
+	ReligionSize_Prov_Helper = { religion = 66 }
+	ReligionSize_Prov_Helper = { religion = 67 }
+	ReligionSize_Prov_Helper = { religion = 68 }
+	ReligionSize_Prov_Helper = { religion = 69 }
+	ReligionSize_Prov_Helper = { religion = 70 }
+	ReligionSize_Prov_Helper = { religion = 71 }
+	ReligionSize_Prov_Helper = { religion = 72 }
+	ReligionSize_Prov_Helper = { religion = 73 }
+	ReligionSize_Prov_Helper = { religion = 74 }
+	ReligionSize_Prov_Helper = { religion = 75 }
+	ReligionSize_Prov_Helper = { religion = 76 }
+	ReligionSize_Prov_Helper = { religion = 77 }
+	ReligionSize_Prov_Helper = { religion = 78 }
+	ReligionSize_Prov_Helper = { religion = 79 }
+}
+
+ReligionSize_Country_Helper = {
+	set_key = { lhs = MN_$religion$_N value = 0 }
+	set_key = { lhs = MN_$religion$_P value = 0 }
+}
+ReligionSize_Country_Helper2 = {
+	change_key = { lhs = MN_$religion$_N which = PREV }
+}
+ReligionSize_Country_Helper3 = {
+	change_key = { lhs = MN_$religion$_P which = MN_$religion$_N } 
+	change_key = { lhs = MN_Tot_N which = MN_$religion$_N }
+}
+
+ReligionSize_Proportion_Helper = {
+	if = {
+		limit = {
+			check_key = { lhs = MN_$religion$_P value = 0.001 }
+			check_key = { lhs = MN_Tot_N value = 0.001 }
+		}
+		divide_key = { lhs = MN_$religion$_P which = MN_Tot_N }
+		multiply_key = { lhs = MN_$religion$_P value = 100 }
+	}
+}
+
+ReligionSize_Country = {
+	set_key = { lhs = MN_Tot_N value = 0 }
+	every_owned_province = {
+		limit = {
+			isValidProv = yes
+		}
+		ReligionSize_Prov = yes
+	}
+	ReligionSize_Country_Helper = { religion = 1 }
+	ReligionSize_Country_Helper = { religion = 2 }
+	ReligionSize_Country_Helper = { religion = 3 }
+	ReligionSize_Country_Helper = { religion = 4 }
+	ReligionSize_Country_Helper = { religion = 5 }
+	ReligionSize_Country_Helper = { religion = 6 }
+	ReligionSize_Country_Helper = { religion = 7 }
+	ReligionSize_Country_Helper = { religion = 8 }
+	ReligionSize_Country_Helper = { religion = 9 }
+	ReligionSize_Country_Helper = { religion = 10 }
+	ReligionSize_Country_Helper = { religion = 11 }
+	ReligionSize_Country_Helper = { religion = 12 }
+	ReligionSize_Country_Helper = { religion = 13 }
+	ReligionSize_Country_Helper = { religion = 14 }
+	ReligionSize_Country_Helper = { religion = 15 }
+	ReligionSize_Country_Helper = { religion = 16 }
+	ReligionSize_Country_Helper = { religion = 17 }
+	ReligionSize_Country_Helper = { religion = 18 }
+	ReligionSize_Country_Helper = { religion = 19 }
+	ReligionSize_Country_Helper = { religion = 20 }
+	ReligionSize_Country_Helper = { religion = 21 }
+	ReligionSize_Country_Helper = { religion = 22 }
+	ReligionSize_Country_Helper = { religion = 23 }
+	ReligionSize_Country_Helper = { religion = 24 }
+	ReligionSize_Country_Helper = { religion = 25 }
+	ReligionSize_Country_Helper = { religion = 26 }
+	ReligionSize_Country_Helper = { religion = 27 }
+	ReligionSize_Country_Helper = { religion = 28 }
+	ReligionSize_Country_Helper = { religion = 29 }
+	ReligionSize_Country_Helper = { religion = 30 }
+	ReligionSize_Country_Helper = { religion = 31 }
+	ReligionSize_Country_Helper = { religion = 32 }
+	ReligionSize_Country_Helper = { religion = 33 }
+	ReligionSize_Country_Helper = { religion = 34 }
+	ReligionSize_Country_Helper = { religion = 35 }
+	ReligionSize_Country_Helper = { religion = 36 }
+	ReligionSize_Country_Helper = { religion = 37 }
+	ReligionSize_Country_Helper = { religion = 38 }
+	ReligionSize_Country_Helper = { religion = 39 }
+	ReligionSize_Country_Helper = { religion = 40 }
+	ReligionSize_Country_Helper = { religion = 41 }
+	ReligionSize_Country_Helper = { religion = 42 }
+	ReligionSize_Country_Helper = { religion = 43 }
+	ReligionSize_Country_Helper = { religion = 44 }
+	ReligionSize_Country_Helper = { religion = 45 }
+	ReligionSize_Country_Helper = { religion = 46 }
+	ReligionSize_Country_Helper = { religion = 47 }
+	ReligionSize_Country_Helper = { religion = 48 }
+	ReligionSize_Country_Helper = { religion = 49 }
+	ReligionSize_Country_Helper = { religion = 50 }
+	ReligionSize_Country_Helper = { religion = 51 }
+	ReligionSize_Country_Helper = { religion = 52 }
+	ReligionSize_Country_Helper = { religion = 53 }
+	ReligionSize_Country_Helper = { religion = 54 }
+	ReligionSize_Country_Helper = { religion = 55 }
+	ReligionSize_Country_Helper = { religion = 56 }
+	ReligionSize_Country_Helper = { religion = 57 }
+	ReligionSize_Country_Helper = { religion = 58 }
+	ReligionSize_Country_Helper = { religion = 59 }
+	ReligionSize_Country_Helper = { religion = 60 }
+	ReligionSize_Country_Helper = { religion = 61 }
+	ReligionSize_Country_Helper = { religion = 62 }
+	ReligionSize_Country_Helper = { religion = 63 }
+	ReligionSize_Country_Helper = { religion = 64 }
+	ReligionSize_Country_Helper = { religion = 65 }
+	ReligionSize_Country_Helper = { religion = 66 }
+	ReligionSize_Country_Helper = { religion = 67 }
+	ReligionSize_Country_Helper = { religion = 68 }
+	ReligionSize_Country_Helper = { religion = 69 }
+	ReligionSize_Country_Helper = { religion = 70 }
+	ReligionSize_Country_Helper = { religion = 71 }
+	ReligionSize_Country_Helper = { religion = 72 }
+	ReligionSize_Country_Helper = { religion = 73 }
+	ReligionSize_Country_Helper = { religion = 74 }
+	ReligionSize_Country_Helper = { religion = 75 }
+	ReligionSize_Country_Helper = { religion = 76 }
+	ReligionSize_Country_Helper = { religion = 77 }
+	ReligionSize_Country_Helper = { religion = 78 }
+	ReligionSize_Country_Helper = { religion = 79 }
+	every_owned_province = {
+		limit = {
+			isValidProv = yes
+		}
+		PREV = {
+			ReligionSize_Country_Helper2 = { religion = 1 }
+			ReligionSize_Country_Helper2 = { religion = 2 }
+			ReligionSize_Country_Helper2 = { religion = 3 }
+			ReligionSize_Country_Helper2 = { religion = 4 }
+			ReligionSize_Country_Helper2 = { religion = 5 }
+			ReligionSize_Country_Helper2 = { religion = 6 }
+			ReligionSize_Country_Helper2 = { religion = 7 }
+			ReligionSize_Country_Helper2 = { religion = 8 }
+			ReligionSize_Country_Helper2 = { religion = 9 }
+			ReligionSize_Country_Helper2 = { religion = 10 }
+			ReligionSize_Country_Helper2 = { religion = 11 }
+			ReligionSize_Country_Helper2 = { religion = 12 }
+			ReligionSize_Country_Helper2 = { religion = 13 }
+			ReligionSize_Country_Helper2 = { religion = 14 }
+			ReligionSize_Country_Helper2 = { religion = 15 }
+			ReligionSize_Country_Helper2 = { religion = 16 }
+			ReligionSize_Country_Helper2 = { religion = 17 }
+			ReligionSize_Country_Helper2 = { religion = 18 }
+			ReligionSize_Country_Helper2 = { religion = 19 }
+			ReligionSize_Country_Helper2 = { religion = 20 }
+			ReligionSize_Country_Helper2 = { religion = 21 }
+			ReligionSize_Country_Helper2 = { religion = 22 }
+			ReligionSize_Country_Helper2 = { religion = 23 }
+			ReligionSize_Country_Helper2 = { religion = 24 }
+			ReligionSize_Country_Helper2 = { religion = 25 }
+			ReligionSize_Country_Helper2 = { religion = 26 }
+			ReligionSize_Country_Helper2 = { religion = 27 }
+			ReligionSize_Country_Helper2 = { religion = 28 }
+			ReligionSize_Country_Helper2 = { religion = 29 }
+			ReligionSize_Country_Helper2 = { religion = 30 }
+			ReligionSize_Country_Helper2 = { religion = 31 }
+			ReligionSize_Country_Helper2 = { religion = 32 }
+			ReligionSize_Country_Helper2 = { religion = 33 }
+			ReligionSize_Country_Helper2 = { religion = 34 }
+			ReligionSize_Country_Helper2 = { religion = 35 }
+			ReligionSize_Country_Helper2 = { religion = 36 }
+			ReligionSize_Country_Helper2 = { religion = 37 }
+			ReligionSize_Country_Helper2 = { religion = 38 }
+			ReligionSize_Country_Helper2 = { religion = 39 }
+			ReligionSize_Country_Helper2 = { religion = 40 }
+			ReligionSize_Country_Helper2 = { religion = 41 }
+			ReligionSize_Country_Helper2 = { religion = 42 }
+			ReligionSize_Country_Helper2 = { religion = 43 }
+			ReligionSize_Country_Helper2 = { religion = 44 }
+			ReligionSize_Country_Helper2 = { religion = 45 }
+			ReligionSize_Country_Helper2 = { religion = 46 }
+			ReligionSize_Country_Helper2 = { religion = 47 }
+			ReligionSize_Country_Helper2 = { religion = 48 }
+			ReligionSize_Country_Helper2 = { religion = 49 }
+			ReligionSize_Country_Helper2 = { religion = 50 }
+			ReligionSize_Country_Helper2 = { religion = 51 }
+			ReligionSize_Country_Helper2 = { religion = 52 }
+			ReligionSize_Country_Helper2 = { religion = 53 }
+			ReligionSize_Country_Helper2 = { religion = 54 }
+			ReligionSize_Country_Helper2 = { religion = 55 }
+			ReligionSize_Country_Helper2 = { religion = 56 }
+			ReligionSize_Country_Helper2 = { religion = 57 }
+			ReligionSize_Country_Helper2 = { religion = 58 }
+			ReligionSize_Country_Helper2 = { religion = 59 }
+			ReligionSize_Country_Helper2 = { religion = 60 }
+			ReligionSize_Country_Helper2 = { religion = 61 }
+			ReligionSize_Country_Helper2 = { religion = 62 }
+			ReligionSize_Country_Helper2 = { religion = 63 }
+			ReligionSize_Country_Helper2 = { religion = 64 }
+			ReligionSize_Country_Helper2 = { religion = 65 }
+			ReligionSize_Country_Helper2 = { religion = 66 }
+			ReligionSize_Country_Helper2 = { religion = 67 }
+			ReligionSize_Country_Helper2 = { religion = 68 }
+			ReligionSize_Country_Helper2 = { religion = 69 }
+			ReligionSize_Country_Helper2 = { religion = 70 }
+			ReligionSize_Country_Helper2 = { religion = 71 }
+			ReligionSize_Country_Helper2 = { religion = 72 }
+			ReligionSize_Country_Helper2 = { religion = 73 }
+			ReligionSize_Country_Helper2 = { religion = 74 }
+			ReligionSize_Country_Helper2 = { religion = 75 }
+			ReligionSize_Country_Helper2 = { religion = 76 }
+			ReligionSize_Country_Helper2 = { religion = 77 }
+			ReligionSize_Country_Helper2 = { religion = 78 }
+			ReligionSize_Country_Helper2 = { religion = 79 }
+		}
+	}
+	ReligionSize_Country_Helper3 = { religion = 1 }
+	ReligionSize_Country_Helper3 = { religion = 2 }
+	ReligionSize_Country_Helper3 = { religion = 3 }
+	ReligionSize_Country_Helper3 = { religion = 4 }
+	ReligionSize_Country_Helper3 = { religion = 5 }
+	ReligionSize_Country_Helper3 = { religion = 6 }
+	ReligionSize_Country_Helper3 = { religion = 7 }
+	ReligionSize_Country_Helper3 = { religion = 8 }
+	ReligionSize_Country_Helper3 = { religion = 9 }
+	ReligionSize_Country_Helper3 = { religion = 10 }
+	ReligionSize_Country_Helper3 = { religion = 11 }
+	ReligionSize_Country_Helper3 = { religion = 12 }
+	ReligionSize_Country_Helper3 = { religion = 13 }
+	ReligionSize_Country_Helper3 = { religion = 14 }
+	ReligionSize_Country_Helper3 = { religion = 15 }
+	ReligionSize_Country_Helper3 = { religion = 16 }
+	ReligionSize_Country_Helper3 = { religion = 17 }
+	ReligionSize_Country_Helper3 = { religion = 18 }
+	ReligionSize_Country_Helper3 = { religion = 19 }
+	ReligionSize_Country_Helper3 = { religion = 20 }
+	ReligionSize_Country_Helper3 = { religion = 21 }
+	ReligionSize_Country_Helper3 = { religion = 22 }
+	ReligionSize_Country_Helper3 = { religion = 23 }
+	ReligionSize_Country_Helper3 = { religion = 24 }
+	ReligionSize_Country_Helper3 = { religion = 25 }
+	ReligionSize_Country_Helper3 = { religion = 26 }
+	ReligionSize_Country_Helper3 = { religion = 27 }
+	ReligionSize_Country_Helper3 = { religion = 28 }
+	ReligionSize_Country_Helper3 = { religion = 29 }
+	ReligionSize_Country_Helper3 = { religion = 30 }
+	ReligionSize_Country_Helper3 = { religion = 31 }
+	ReligionSize_Country_Helper3 = { religion = 32 }
+	ReligionSize_Country_Helper3 = { religion = 33 }
+	ReligionSize_Country_Helper3 = { religion = 34 }
+	ReligionSize_Country_Helper3 = { religion = 35 }
+	ReligionSize_Country_Helper3 = { religion = 36 }
+	ReligionSize_Country_Helper3 = { religion = 37 }
+	ReligionSize_Country_Helper3 = { religion = 38 }
+	ReligionSize_Country_Helper3 = { religion = 39 }
+	ReligionSize_Country_Helper3 = { religion = 40 }
+	ReligionSize_Country_Helper3 = { religion = 41 }
+	ReligionSize_Country_Helper3 = { religion = 42 }
+	ReligionSize_Country_Helper3 = { religion = 43 }
+	ReligionSize_Country_Helper3 = { religion = 44 }
+	ReligionSize_Country_Helper3 = { religion = 45 }
+	ReligionSize_Country_Helper3 = { religion = 46 }
+	ReligionSize_Country_Helper3 = { religion = 47 }
+	ReligionSize_Country_Helper3 = { religion = 48 }
+	ReligionSize_Country_Helper3 = { religion = 49 }
+	ReligionSize_Country_Helper3 = { religion = 50 }
+	ReligionSize_Country_Helper3 = { religion = 51 }
+	ReligionSize_Country_Helper3 = { religion = 52 }
+	ReligionSize_Country_Helper3 = { religion = 53 }
+	ReligionSize_Country_Helper3 = { religion = 54 }
+	ReligionSize_Country_Helper3 = { religion = 55 }
+	ReligionSize_Country_Helper3 = { religion = 56 }
+	ReligionSize_Country_Helper3 = { religion = 57 }
+	ReligionSize_Country_Helper3 = { religion = 58 }
+	ReligionSize_Country_Helper3 = { religion = 59 }
+	ReligionSize_Country_Helper3 = { religion = 60 }
+	ReligionSize_Country_Helper3 = { religion = 61 }
+	ReligionSize_Country_Helper3 = { religion = 62 }
+	ReligionSize_Country_Helper3 = { religion = 63 }
+	ReligionSize_Country_Helper3 = { religion = 64 }
+	ReligionSize_Country_Helper3 = { religion = 65 }
+	ReligionSize_Country_Helper3 = { religion = 66 }
+	ReligionSize_Country_Helper3 = { religion = 67 }
+	ReligionSize_Country_Helper3 = { religion = 68 }
+	ReligionSize_Country_Helper3 = { religion = 69 }
+	ReligionSize_Country_Helper3 = { religion = 70 }
+	ReligionSize_Country_Helper3 = { religion = 71 }
+	ReligionSize_Country_Helper3 = { religion = 72 }
+	ReligionSize_Country_Helper3 = { religion = 73 }
+	ReligionSize_Country_Helper3 = { religion = 74 }
+	ReligionSize_Country_Helper3 = { religion = 75 }
+	ReligionSize_Country_Helper3 = { religion = 76 }
+	ReligionSize_Country_Helper3 = { religion = 77 }
+	ReligionSize_Country_Helper3 = { religion = 78 }
+	ReligionSize_Country_Helper3 = { religion = 79 }
+	if = {
+		limit = {
+			check_key = { lhs = MN_Tot_N value = 0.001 }
+		}
+		ReligionSize_Proportion_Helper = { religion = 1 }
+		ReligionSize_Proportion_Helper = { religion = 2 }
+		ReligionSize_Proportion_Helper = { religion = 3 }
+		ReligionSize_Proportion_Helper = { religion = 4 }
+		ReligionSize_Proportion_Helper = { religion = 5 }
+		ReligionSize_Proportion_Helper = { religion = 6 }
+		ReligionSize_Proportion_Helper = { religion = 7 }
+		ReligionSize_Proportion_Helper = { religion = 8 }
+		ReligionSize_Proportion_Helper = { religion = 9 }
+		ReligionSize_Proportion_Helper = { religion = 10 }
+		ReligionSize_Proportion_Helper = { religion = 11 }
+		ReligionSize_Proportion_Helper = { religion = 12 }
+		ReligionSize_Proportion_Helper = { religion = 13 }
+		ReligionSize_Proportion_Helper = { religion = 14 }
+		ReligionSize_Proportion_Helper = { religion = 15 }
+		ReligionSize_Proportion_Helper = { religion = 16 }
+		ReligionSize_Proportion_Helper = { religion = 17 }
+		ReligionSize_Proportion_Helper = { religion = 18 }
+		ReligionSize_Proportion_Helper = { religion = 19 }
+		ReligionSize_Proportion_Helper = { religion = 20 }
+		ReligionSize_Proportion_Helper = { religion = 21 }
+		ReligionSize_Proportion_Helper = { religion = 22 }
+		ReligionSize_Proportion_Helper = { religion = 23 }
+		ReligionSize_Proportion_Helper = { religion = 24 }
+		ReligionSize_Proportion_Helper = { religion = 25 }
+		ReligionSize_Proportion_Helper = { religion = 26 }
+		ReligionSize_Proportion_Helper = { religion = 27 }
+		ReligionSize_Proportion_Helper = { religion = 28 }
+		ReligionSize_Proportion_Helper = { religion = 29 }
+		ReligionSize_Proportion_Helper = { religion = 30 }
+		ReligionSize_Proportion_Helper = { religion = 31 }
+		ReligionSize_Proportion_Helper = { religion = 32 }
+		ReligionSize_Proportion_Helper = { religion = 33 }
+		ReligionSize_Proportion_Helper = { religion = 34 }
+		ReligionSize_Proportion_Helper = { religion = 35 }
+		ReligionSize_Proportion_Helper = { religion = 36 }
+		ReligionSize_Proportion_Helper = { religion = 37 }
+		ReligionSize_Proportion_Helper = { religion = 38 }
+		ReligionSize_Proportion_Helper = { religion = 39 }
+		ReligionSize_Proportion_Helper = { religion = 40 }
+		ReligionSize_Proportion_Helper = { religion = 41 }
+		ReligionSize_Proportion_Helper = { religion = 42 }
+		ReligionSize_Proportion_Helper = { religion = 43 }
+		ReligionSize_Proportion_Helper = { religion = 44 }
+		ReligionSize_Proportion_Helper = { religion = 45 }
+		ReligionSize_Proportion_Helper = { religion = 46 }
+		ReligionSize_Proportion_Helper = { religion = 47 }
+		ReligionSize_Proportion_Helper = { religion = 48 }
+		ReligionSize_Proportion_Helper = { religion = 49 }
+		ReligionSize_Proportion_Helper = { religion = 50 }
+		ReligionSize_Proportion_Helper = { religion = 51 }
+		ReligionSize_Proportion_Helper = { religion = 52 }
+		ReligionSize_Proportion_Helper = { religion = 53 }
+		ReligionSize_Proportion_Helper = { religion = 54 }
+		ReligionSize_Proportion_Helper = { religion = 55 }
+		ReligionSize_Proportion_Helper = { religion = 56 }
+		ReligionSize_Proportion_Helper = { religion = 57 }
+		ReligionSize_Proportion_Helper = { religion = 58 }
+		ReligionSize_Proportion_Helper = { religion = 59 }
+		ReligionSize_Proportion_Helper = { religion = 60 }
+		ReligionSize_Proportion_Helper = { religion = 61 }
+		ReligionSize_Proportion_Helper = { religion = 62 }
+		ReligionSize_Proportion_Helper = { religion = 63 }
+		ReligionSize_Proportion_Helper = { religion = 64 }
+		ReligionSize_Proportion_Helper = { religion = 65 }
+		ReligionSize_Proportion_Helper = { religion = 66 }
+		ReligionSize_Proportion_Helper = { religion = 67 }
+		ReligionSize_Proportion_Helper = { religion = 68 }
+		ReligionSize_Proportion_Helper = { religion = 69 }
+		ReligionSize_Proportion_Helper = { religion = 70 }
+		ReligionSize_Proportion_Helper = { religion = 71 }
+		ReligionSize_Proportion_Helper = { religion = 72 }
+		ReligionSize_Proportion_Helper = { religion = 73 }
+		ReligionSize_Proportion_Helper = { religion = 74 }
+		ReligionSize_Proportion_Helper = { religion = 75 }
+		ReligionSize_Proportion_Helper = { religion = 76 }
+		ReligionSize_Proportion_Helper = { religion = 77 }
+		ReligionSize_Proportion_Helper = { religion = 78 }
+		ReligionSize_Proportion_Helper = { religion = 79 }
+	}
+}
+
+AvailableMissionariesCount = {
+	if = {
+		limit = { num_of_missionaries = 10 }
+		set_key = { lhs = AvailableMissionaries value = 10 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 9 }
+		set_key = { lhs = AvailableMissionaries value = 9 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 8 }
+		set_key = { lhs = AvailableMissionaries value = 8 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 7 }
+		set_key = { lhs = AvailableMissionaries value = 7 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 6 }
+		set_key = { lhs = AvailableMissionaries value = 6 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 5 }
+		set_key = { lhs = AvailableMissionaries value = 5 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 4 }
+		set_key = { lhs = AvailableMissionaries value = 4 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 3 }
+		set_key = { lhs = AvailableMissionaries value = 3 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 2 }
+		set_key = { lhs = AvailableMissionaries value = 2 }
+	}
+	else_if = {
+		limit = { num_of_missionaries = 1 }
+		set_key = { lhs = AvailableMissionaries value = 1 }
+	}
+	else = {
+		set_key = { lhs = AvailableMissionaries value = 0 }
+	}
+	every_owned_province = {
+		limit = { OR = { has_missionary = yes has_province_modifier = minority_missionary } }
+		owner = { change_key = { lhs = AvailableMissionaries value = -1 } }
+	}
+}
+
+MN_CalcTotalTolerance = {
+	set_key = { lhs = MN_Tolerance value = 0 }
+	if = {
+		limit = {
+			check_key = { lhs = MN_S0 value = 1 }
+		}
+		set_key = { lhs = Modi_Tmp1 which = MN_S0TotP }
+		multiply_key = { lhs = Modi_Tmp1 value = 0.01 }
+		multiply_key = { lhs = Modi_Tmp1 which = MN_S0Tolerance }
+		change_key = { lhs = MN_Tolerance which = Modi_Tmp1 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = MN_S1 value = 1 }
+		}
+		set_key = { lhs = Modi_Tmp1 which = MN_S1TotP }
+		multiply_key = { lhs = Modi_Tmp1 value = 0.01 }
+		multiply_key = { lhs = Modi_Tmp1 which = MN_S1Tolerance }
+		change_key = { lhs = MN_Tolerance which = Modi_Tmp1 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = MN_S2 value = 1 }
+		}
+		set_key = { lhs = Modi_Tmp1 which = MN_S2TotP }
+		multiply_key = { lhs = Modi_Tmp1 value = 0.01 }
+		multiply_key = { lhs = Modi_Tmp1 which = MN_S2Tolerance }
+		change_key = { lhs = MN_Tolerance which = Modi_Tmp1 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = MN_S3 value = 1 }
+		}
+		set_key = { lhs = Modi_Tmp1 which = MN_S3TotP }
+		multiply_key = { lhs = Modi_Tmp1 value = 0.01 }
+		multiply_key = { lhs = Modi_Tmp1 which = MN_S3Tolerance }
+		change_key = { lhs = MN_Tolerance which = Modi_Tmp1 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = MN_S4 value = 1 }
+		}
+		set_key = { lhs = Modi_Tmp1 which = MN_S4TotP }
+		multiply_key = { lhs = Modi_Tmp1 value = 0.01 }
+		multiply_key = { lhs = Modi_Tmp1 which = MN_S4Tolerance }
+		change_key = { lhs = MN_Tolerance which = Modi_Tmp1 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = MN_S5 value = 1 }
+		}
+		set_key = { lhs = Modi_Tmp1 which = MN_S5TotP }
+		multiply_key = { lhs = Modi_Tmp1 value = 0.01 }
+		multiply_key = { lhs = Modi_Tmp1 which = MN_S5Tolerance }
+		change_key = { lhs = MN_Tolerance which = Modi_Tmp1 }
+	}
+}
+
+#Cleans up if there are  two slots of same religion.
+#Used in the SYS-Census 008 event
+MN_DeduplicateSlot_Helper = {
+	#Adds the pop of the duplicate slot into the first one
+	change_key   = { lhs = MN_S$slotto$RurN		which = MN_S$slotfrom$RurN }
+	change_key   = { lhs = MN_S$slotto$UrbN		which = MN_S$slotfrom$UrbN }
+	change_key   = { lhs = MN_S$slotto$NotN		which = MN_S$slotfrom$NotN }
+	set_key      = { lhs = MN_S$slotto$TotN		which = MN_S$slotto$RurN }	
+	change_key   = { lhs = MN_S$slotto$TotN		which = MN_S$slotto$UrbN }	
+	change_key   = { lhs = MN_S$slotto$TotN		which = MN_S$slotto$NotN }
+	set_key      = { lhs = MN_S$slotto$Rural	which = MN_S$slotto$RurN }
+	set_key      = { lhs = MN_S$slotto$Urban	which = MN_S$slotto$UrbN }
+	set_key      = { lhs = MN_S$slotto$Notables	which = MN_S$slotto$NotN }
+	if = {
+		limit = {
+			NOT = { is_key_equal = { lhs = MN_S$slotto$TotN value = 0 } }
+		}
+		divide_key   = { lhs = MN_S$slotto$Rural	which = MN_S$slotto$TotN }
+		divide_key   = { lhs = MN_S$slotto$Urban	which = MN_S$slotto$TotN }
+		divide_key   = { lhs = MN_S$slotto$Notables	which = MN_S$slotto$TotN }
+	}
+	set_key      = { lhs = MN_S$slotto$RurP		which = MN_S$slotto$Rural }
+	multiply_key = { lhs = MN_S$slotto$RurP		value = 100 }
+	set_key      = { lhs = MN_S$slotto$UrbP		which = MN_S$slotto$Urban }
+	multiply_key = { lhs = MN_S$slotto$UrbP		value = 100 }
+	set_key      = { lhs = MN_S$slotto$NotP		which = MN_S$slotto$Notables }
+	multiply_key = { lhs = MN_S$slotto$NotP		value = 100 }
+	set_key      = { lhs = MN_S0TotP			which = MN_S0TotN }
+	if = {
+		limit = {
+			NOT = { is_key_equal = { lhs = Class_Total value = 0 } }
+		}
+		divide_key   = { lhs = MN_S0TotP			which = Class_Total }
+	}
+	multiply_key = { lhs = MN_S0TotP			value = 100 }
+	#Cleans the duplicate slot
+	set_key = { lhs = MN_S$slotfrom$			value = 0 }
+	set_key = { lhs = MN_S$slotfrom$RurN		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$UrbN		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$NotN		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$RurP		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$UrbP		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$NotP		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$TotN		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$TotP		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Rural		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Urban		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Notables	value = 0 }
+	set_key = { lhs = MN_S$slotfrom$INF			value = 0 }
+	set_key = { lhs = MN_S$slotfrom$ENT			value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Preach		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Inquis		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Tolerance	value = 0 }
+	set_key = { lhs = MN_S$slotfrom$Bastion		value = 0 }
+	set_key = { lhs = MN_S$slotfrom$MStrength	value = 0 }
+	set_key = { lhs = MN_S$slotfrom$_Var		value = 0 }
+}
+
+MN_DeduplicateSlot = {
+	if = {
+		limit = { is_key_equal = { lhs = MN_S0 which = MN_S1 } }
+		MN_DeduplicateSlot_Helper = { slotto = 0 slotfrom = 1 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S0 which = MN_S2 } }
+		MN_DeduplicateSlot_Helper = { slotto = 0 slotfrom = 2 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S0 which = MN_S3 } }
+		MN_DeduplicateSlot_Helper = { slotto = 0 slotfrom = 3 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S0 which = MN_S4 } }
+		MN_DeduplicateSlot_Helper = { slotto = 0 slotfrom = 4 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S0 which = MN_S5 } }
+		MN_DeduplicateSlot_Helper = { slotto = 0 slotfrom = 5 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 which = MN_S2 } }
+		MN_DeduplicateSlot_Helper = { slotto = 1 slotfrom = 2 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 which = MN_S3 } }
+		MN_DeduplicateSlot_Helper = { slotto = 1 slotfrom = 3 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 which = MN_S4 } }
+		MN_DeduplicateSlot_Helper = { slotto = 1 slotfrom = 4 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 which = MN_S5 } }
+		MN_DeduplicateSlot_Helper = { slotto = 1 slotfrom = 5 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S2 which = MN_S3 } }
+		MN_DeduplicateSlot_Helper = { slotto = 2 slotfrom = 3 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S2 which = MN_S4 } }
+		MN_DeduplicateSlot_Helper = { slotto = 2 slotfrom = 4 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S2 which = MN_S5 } }
+		MN_DeduplicateSlot_Helper = { slotto = 2 slotfrom = 5 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S3 which = MN_S4 } }
+		MN_DeduplicateSlot_Helper = { slotto = 3 slotfrom = 4 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S3 which = MN_S5 } }
+		MN_DeduplicateSlot_Helper = { slotto = 3 slotfrom = 5 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S4 which = MN_S5 } }
+		MN_DeduplicateSlot_Helper = { slotto = 4 slotfrom = 5 }
+	}
+}

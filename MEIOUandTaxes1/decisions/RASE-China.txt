@@ -1,0 +1,566 @@
+country_decisions = {
+	form_celestial_empire = {
+		major = yes
+		potential = {
+			OR = {
+				culture_group = chinese_group
+				has_country_flag = China_ClaimForeign
+			}
+			OR = {
+				is_emperor_of_china = no
+				has_country_flag = annexed_emperor_of_china
+			}
+			is_colonial_nation = no
+			NOT = { has_country_flag = China_Claim }
+		}
+		provinces_to_highlight = {
+			has_province_flag = InMiddleKingdom
+		}
+		allow = {
+			check_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 135 }
+			OR = {
+				owns = 701 #Kaifeng
+				owns = 702 #Luoyang
+				owns = 708 #Beijing
+				owns = 2150 #Nanjing
+				owns = 2252 #Xi'an
+			}
+			is_subject = no
+			is_at_war = no
+		}
+		effect = {
+			random_country = {
+				limit = {
+					has_country_flag = former_dynasty_china
+				}
+				clr_country_flag = former_dynasty_china
+			}
+			random_country = {
+				limit = {
+					has_country_flag = China_Claim
+					NOT = { tag = ROOT }
+				}
+				clr_country_flag = China_Claim
+				set_country_flag = former_dynasty_china
+			}
+			set_country_flag = China_Claim
+			clr_country_flag = red_turban_reb
+			clr_country_flag = imperial_appenage
+			clr_country_flag = annexed_emperor_of_china
+			clr_global_flag = China_Broken
+			set_emperor_of_china = ROOT
+			if = {
+				limit = { government = monarchy NOT = { has_country_modifier = title_6 } }
+				change_title_6 = yes
+			}
+			hidden_effect = { ### Shift TagID to unified China.
+				every_province = {
+					limit = {
+						has_province_flag = InMiddleKingdom
+					}
+					set_key = { lhs = ID_Tag which = PREV }
+				}
+			}
+			#add_legitimacy = 100
+			Stab_Add6 = yes
+			add_prestige = 20
+			add_government_reform = celestial_empire
+			set_meritocracy = 60 #??? do we want this
+			add_corruption = -30
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=-30 }
+			#add_country_modifier = {
+			#	name = new_mandate_holder
+			#	duration = -1
+			#}
+			if = {
+				limit = {
+					culture_group = chinese_group
+				}
+				north_china_superregion = { limit = { culture_group = chinese_group NOT = { is_core = ROOT } } add_core = ROOT }
+				north_china_superregion = { limit = { NOT = { culture_group = chinese_group } NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5266 } } add_permanent_claim = ROOT }
+				east_china_superregion = { limit = { culture_group = chinese_group NOT = { is_core = ROOT } } add_core = ROOT }
+				east_china_superregion = { limit = { NOT = { culture_group = chinese_group } NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5267 } } add_permanent_claim = ROOT }
+				southwest_china_superregion = { limit = { culture_group = chinese_group NOT = { is_core = ROOT } } add_core = ROOT }
+				southwest_china_superregion = { limit = { NOT = { culture_group = chinese_group } NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5268 } } add_permanent_claim = ROOT }
+			}
+			else_if = {
+				limit = {
+					has_country_flag = China_ClaimForeign
+				}
+				north_china_superregion = { limit = { owned_by = ROOT NOT = { is_core = ROOT } } add_core = ROOT }
+				north_china_superregion = { limit = { NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5266 } } add_permanent_claim = ROOT }
+				east_china_superregion = { limit = { owned_by = ROOT NOT = { is_core = ROOT } } add_core = ROOT }
+				east_china_superregion = { limit = { NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5267 } } add_permanent_claim = ROOT }
+				southwest_china_superregion = { limit = { owned_by = ROOT NOT = { is_core = ROOT } } add_core = ROOT }
+				southwest_china_superregion = { limit = { NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5268 } } add_permanent_claim = ROOT }
+			}
+			add_absolutism = 10
+			country_event = { id = tianxia.120 }
+			if = {
+				limit = {
+					NOT = { technology_group = chinese }
+					NOT = { technology_group = japanese }
+					NOT = { technology_group = tibetan }
+					NOT = { technology_group = southeast_asian }
+					NOT = { technology_group = western }
+					NOT = { technology_group = eastern }
+					NOT = { technology_group = byzantine }
+				}
+				change_technology_group = chinese
+				change_unit_type = chinese
+			}
+			add_country_modifier = { name = "recently_unified_china" duration = 9125 }
+			remove_country_modifier = China_LoyalistMod
+			remove_country_modifier = non_imperial_hegemon
+			country_event = { id = red_turban.29 }
+			if = {
+				limit = {
+					ai = yes
+				}
+				if = {
+					limit = {
+						exists = JCH
+						JCH = {
+							is_subject_of = PREV
+							ai = yes
+						}
+					}
+					inherit = JCH
+				}
+				if = {
+					limit = {
+						exists = ZHN
+						ZHN = {
+							is_subject_of = PREV
+							ai = yes
+						}
+					}
+					inherit = ZHN
+				}
+			}
+			MakeChinaGreat = yes
+		}
+		ai_will_do = {
+			factor = 1
+		}
+		ai_importance = 400
+	}
+	claim_celestial_empire = {
+		major = yes
+		potential = {
+			OR = {
+				technology_group = steppestech
+				technology_group = japanese
+				technology_group = chinese
+				technology_group = southeast_asian
+				tag = GGK
+				tag = TIM
+				tag = CHU
+				tag = WHI
+				tag = BLU
+				tag = GOL
+				tag = MGH
+				tag = CHG
+			}
+			NOT = { culture_group = chinese_group }
+			NOT = { has_country_flag = China_ClaimForeign }
+			NOT = { has_country_flag = China_Claim }
+			is_subject = no
+		}
+		provinces_to_highlight = {
+			has_province_flag = InMiddleKingdom
+		}
+		allow = {
+			legitimacy = 70
+			num_of_cities = 20
+			OR = {
+				owns = 708	# Beijing
+				owns = 2252	# Xi'an
+				owns = 1337	# Chengdu
+				owns = 2121 # Guangdong
+				owns = 2150 # Nanjing
+				owns = 1172 # Wuchang
+			}
+		}
+		effect = {
+			set_country_flag = China_ClaimForeign
+			add_prestige = 10
+			#commented out as the events are not in the mod
+			#if = {	#Xia or Qin
+			#	limit = {
+			#		#primary_culture = qiang
+			#		dynasty = "Namgyal"
+			#	}
+			#	country_event = { id = tianxia.042 }
+			#}
+			#if = {	#Shen
+			#	limit = {
+			#		primary_culture = korean
+			#	}
+			#	country_event = { id = tianxia.043 }
+			#}
+			#else_if = {	#Jin
+			#	limit = {
+			#		culture_group = tungusic
+			#		NOT = { primary_culture = daur }
+			#	}
+			#	country_event = { id = tianxia.044 }
+			#}
+			#else_if = {	#Yue or Nan
+			#	limit = {
+			#		culture_group = vietic
+			#	}
+			#	country_event = { id = tianxia.046 }
+			#}
+			#else_if = {	#Liao
+			#	limit = {
+			#		OR = {
+			#			primary_culture = daur
+			#			primary_culture = khitan
+			#		}
+			#	}
+			#	country_event = { id = tianxia.047 }
+			#}
+			#else_if = {	#Wu
+			#	limit = {
+			#		culture_group = japanese_g
+			#	}
+			#	country_event = { id = tianxia.048 }
+			#}
+			#else_if = { #Yuan
+			#	limit = {
+			#		OR = {
+			#			culture_group = altaic
+			#			borjigin_trigger = yes
+			#		}
+			#	}
+			#	country_event = { id = tianxia.050 }
+			#}
+			#else_if = {	#Nan
+			#	limit = {
+			#		OR = {
+			#			culture_group = zuqun
+			#			culture_group = loloish
+			#			culture_group = rau_group
+			#		}
+			#	}
+			#	country_event = { id = tianxia.051 }
+			#}
+			#else_if = {	#Hui
+			#	limit = {
+			#		dynasty = "Timurid"
+			#	}
+			#	country_event = { id = tianxia.049 }
+			#}
+			#else_if = {	#Tang or Jin or Han
+			#	limit = {
+			#		primary_culture = onggud
+			#	}
+			#	country_event = { id = tianxia.045 }
+			#}
+			#else_if = {	#Tu?
+			#	limit = {
+			#		primary_culture = tibetan
+			#	}
+			#	country_event = { id = tianxia.041 }
+			#}
+			#else = {
+			#	country_event = { id = tianxia.035 }
+			#}
+			north_china_superregion = { limit = { owned_by = ROOT } add_core = ROOT }
+			east_china_superregion = { limit = { owned_by = ROOT } add_core = ROOT }
+			southwest_china_superregion = { limit = { owned_by = ROOT } add_core = ROOT }
+		}
+		ai_will_do = {
+			factor = 1
+		}
+		ai_importance = 400
+	}
+	
+	# Vassal kings assassinate their Emperors - Chen Youliang, Zhu Yuanzhang
+	betray_chinese_lord = {
+		major = yes
+		potential = {
+			culture_group = chinese_group
+			overlord = {
+				has_country_flag = red_turban_reb
+			}
+			is_subject_of_type = warlord
+			NOT = { has_country_flag = attempted_coup }
+		}
+		allow = {
+			OR = {
+				overlord = {
+					NOT = {
+						army_strength = {
+							who = ROOT
+							value = 1.0
+						}
+					}
+				}
+				development_of_overlord_fraction = 1.0
+				ai = no
+				has_ruler = "Youliang"
+			}
+			mil_power = 200
+			dip_power = 200
+			hidden_trigger = {
+				NOT = {
+					capital_scope = {
+						has_province_modifier = betray_chinese_lord_trigger
+					}
+				}
+			}
+		}
+		effect = {
+			set_country_flag = attempted_coup
+			hidden_effect = {
+				capital_scope = {
+					add_province_triggered_modifier = betray_chinese_lord_trigger
+				}
+			}
+			add_mil_power = -200
+			add_dip_power = -200
+		}
+		ai_will_do = {
+			factor = 1
+			
+			modifier = {
+				is_at_war = yes
+				factor = 0
+			}
+			modifier = {
+				has_ruler = "Yuanzhang"
+				factor = 0
+			}
+			modifier = {
+				has_ruler = "Youliang"
+				factor = 50
+			}
+		}
+		ai_importance = 400
+	}
+	
+	# Reaffirm Emperorship - in case when a fallen empire makes a comeback ex. Player-led Yuan
+	reaffirm_emperorship = {
+		major = yes
+		potential = {
+			OR = {
+				is_emperor_without_mandate = yes
+				has_country_flag = China_Claim
+			}
+			OR = {
+				NOT = { has_country_flag = white_lotus_rebellion }
+				had_country_flag = { flag = white_lotus_rebellion days = 3650 }
+			}
+			NOT = { has_country_flag = reaffirm_emperorship }
+		}
+		allow = {
+			check_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 200 }
+			NOT = {
+				calc_true_if = {
+					all_known_country = {
+						has_country_flag = red_turban_reb
+					}
+					amount = 1
+				}
+			}
+		}
+		effect = {
+			add_country_modifier = { name = "recently_unified_china" duration = 9125 }
+			remove_country_modifier = China_LoyalistMod
+			every_subject_country = {
+				limit = {
+					isValidCountry = yes
+					OR = {
+						culture_group = chinese_group
+						primary_culture = uriankhai
+					}
+					NOT = { has_country_flag = imperial_appenage }
+					is_subject_of_type = warlord
+				}
+				country_event = { id = red_turban.20 }
+			}
+			add_mandate = 25
+			Stab_Add6 = yes
+			add_prestige = 20
+			add_meritocracy = 30 #??? do we want this
+			add_corruption = -30
+			add_absolutism = 10
+			north_china_superregion = { limit = { owned_by = ROOT NOT = { is_core = ROOT } } add_core = ROOT }
+			north_china_superregion = { limit = { NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5266 } } add_permanent_claim = ROOT }
+			east_china_superregion = { limit = { owned_by = ROOT NOT = { is_core = ROOT } } add_core = ROOT }
+			east_china_superregion = { limit = { NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5267 } } add_permanent_claim = ROOT }
+			southwest_china_superregion = { limit = { owned_by = ROOT NOT = { is_core = ROOT } } add_core = ROOT }
+			southwest_china_superregion = { limit = { NOT = { owned_by = ROOT } NOT = { is_permanent_claim = ROOT } NOT = { province_id = 5268 } } add_permanent_claim = ROOT }
+			#country_event = { id = chinese_factions.1 }
+			set_country_flag = reaffirm_emperorship
+			country_event = { id = red_turban.29 }
+		}
+		ai_will_do = {
+			factor = 1
+		}
+		ai_importance = 100
+	}
+	
+	
+	# After successful proclamation of the dynasty we can compile the history of the previous dynasty
+	compile_dynastic_history = {
+		potential = {
+			has_country_flag = China_Claim
+			any_country = {
+				has_country_flag = former_dynasty_china
+			}
+			NOT = { has_country_flag = compiling_dynastic_history }
+			NOT = { has_country_flag = compiled_dynastic_history }
+		}
+		allow = {
+			ADM = 4
+			adm_power = 200
+		}
+		effect = {
+			set_country_flag = compiling_dynastic_history
+			hidden_effect = {
+				random_country = {
+					limit = {
+						has_country_flag = former_dynasty_china
+					}
+					save_global_event_target_as = former_dynasty_of_china
+				}
+			}
+			country_event = { id = tianxia.100 days = 15 random = 5 }
+			add_adm_power = -200
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	the_unified_china = {
+		major = yes
+		potential = {
+			culture_group = chinese_group
+			borjigin_trigger = no
+			NOT = { has_country_flag = China_Claim }
+			NOT = { has_ruler_flag = request_defect }
+			OR = {
+				is_free_or_tributary_trigger = yes
+				overlord = { culture_group = chinese_group }
+			}
+			any_neighbor_country = {
+				isValidCountry = yes
+				has_country_flag = China_Claim
+			}
+		}
+		allow = {
+			any_neighbor_country = {
+				has_country_flag = China_Claim
+				offensive_war_with = ROOT
+			}
+		}
+		effect = {
+			random_neighbor_country = {
+				limit = {
+					isValidCountry = yes
+					has_country_flag = China_Claim
+					NOT = { war_with = ROOT }
+					culture_group = chinese_group
+					is_free_or_tributary_trigger = yes
+				}
+				country_event = { id = tianxia.015 }
+			}
+			set_ruler_flag = request_defect
+		}
+		ai_will_do = {
+			factor = 1
+			
+			modifier = {
+				war_score = -50
+				factor = 0
+			}
+		}
+	}
+	grant_peerage = {
+		potential = {
+			has_country_flag = China_Claim
+			has_country_modifier = territorial_princes
+		}
+		allow = {
+			is_at_war = no
+		}
+		effect = {
+			country_event = { id = tianxia.130 }
+			set_country_flag = granted_peerage
+		}
+		ai_will_do = {
+			factor = 1
+			
+			modifier = {
+				NOT = { has_country_modifier = territorial_princes }
+				factor = 0
+			}
+			modifier = {
+				legitimacy_equivalent = 50
+				imperial_mandate = 50
+				factor = 0
+			}
+		}
+	}
+	sinification_of_government = {
+		potential = {
+			capital_scope = { culture_group = chinese_group }
+			government = tribal
+		}
+		allow = {
+			religion = confucianism
+			stability = 1
+			is_at_war = no
+		}
+		effect = {
+			custom_tooltip = sinification.tt
+			country_event = { id = red_turban.13 }
+			set_country_flag = sinification
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+	uriankhai_surrender = {
+		potential = {
+			tag = MXI
+			any_known_country = {
+				isValidCountry = yes
+				war_with = MXI
+				OR = {
+					primary_culture = korean
+					culture_group = chinese_group
+					has_country_flag = China_Claim
+				}
+				NOT = { culture_group = jurchen_group }
+				NOT = { culture_group = altaic }
+			}
+			NOT = { has_country_flag = naghacu_surrendered }
+		}
+		allow = {
+			capital_scope = {
+				NOT = {
+					controlled_by = ROOT
+				}
+				NOT = {
+					controlled_by = REB
+				}
+			}
+		}
+		effect = {
+			set_country_flag = naghacu_surrendered
+			capital_scope = {
+				controller = {
+					country_event = { id = red_turban.16 }
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 100
+		}
+	}
+}

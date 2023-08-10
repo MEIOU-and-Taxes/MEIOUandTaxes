@@ -1,0 +1,171 @@
+# Aspiration for liberty
+country_event = {
+	id = aspiration_for_liberty.1
+	title = "EVTNAME1061"
+	desc = "EVTDESC1061"
+	picture = ANGRY_MOB_eventPicture
+	
+	is_triggered_only = yes
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		set_country_flag = had_liberalism
+		Stab_Subtract6 = yes
+		hidden_effect = {
+			export_to_variable = {
+				which = num_of_cities_var
+				value = num_of_cities
+			}
+		}
+		capital_scope = {
+			add_province_modifier = {
+				name = "revolutionaries_organizing"
+				duration = 3650
+			}
+			add_unrest = 10
+		}
+		random_owned_province = {
+			limit = {
+				NOT = { has_province_modifier = revolutionaries_organizing }
+			}
+			add_province_modifier = {
+				name = "revolutionaries_organizing"
+				duration = 1825
+			}
+			add_unrest = 5
+		}
+		while = {
+			limit = {
+				check_variable = { which = num_of_cities_var value = 5 }
+			}
+			subtract_variable = { which = num_of_cities_var value = 5 }
+			random_owned_province = {
+				limit = {
+					is_city = yes
+					NOT = { has_province_modifier = revolutionaries_organizing }
+				}
+				add_province_modifier = {
+					name = "revolutionaries_organizing"
+					duration = 1825
+				}
+				add_unrest = 5
+			}
+		}
+		hidden_effect = {
+			set_variable = { which = num_of_cities_var value = 0 }
+		}
+	}
+	
+	option = {
+		name = "EVTOPTA1061"
+		add_prestige = -5
+	}
+}
+
+# Governmental incompetence
+country_event = {
+	id = aspiration_for_liberty.2
+	title = "EVTNAME1062"
+	desc = "EVTDESC1062"
+	picture = ANGRY_MOB_eventPicture
+	
+	
+	is_triggered_only = yes
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = "EVTOPTA1062" # There is nothing to be concerned about.
+		ai_chance = { factor = 50 }
+		every_owned_province = {
+			limit = {
+				likely_rebels = revolutionary_rebels
+				is_overseas = no
+			}
+			add_unrest = 1
+		}
+	}
+	option = {
+		name = "EVTOPTB1062" # Prevent them from advancing further.
+		ai_chance = { factor = 10 }
+		add_years_of_income = -1.0
+		add_absolutism = -5
+		
+		every_owned_province = {
+			limit = {
+				is_capital = no
+				likely_rebels = revolutionary_rebels
+				is_overseas = no
+			}
+			add_local_autonomy = 15
+		}
+	}
+}
+
+# Battles on foreign ground
+country_event = {
+	id = aspiration_for_liberty.3
+	title = "EVTNAME1063"
+	desc = "EVTDESC1063"
+	picture = BATTLE_eventPicture
+	
+	trigger = {
+		is_at_war = yes
+		num_of_allies = 1
+		OR = {
+			num_of_loans = 5
+			inflation = 15
+			war_exhaustion = 5
+		}
+		
+		NOT = {  has_country_modifier = "decreased_morale" }
+		NOT = {  has_country_modifier = "reduceed_war_expenditures" }
+	}
+	
+	is_triggered_only = yes
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = "EVTOPTA1063" # The treasury isn't even close to empty.
+		random_ally = { add_opinion = { who = ROOT modifier = opinion_munificent_ally } }
+		add_disaster_modifier = {
+			name = "decreased_morale"
+			duration = -1
+			disaster = aspiration_for_liberty
+		}
+	}
+	option = {
+		name = "EVTOPTB1063" # Cut down on war expenditures.	
+		add_disaster_modifier = {
+			name = reduceed_war_expenditures
+			duration = -1
+			disaster = aspiration_for_liberty
+		}
+		random_ally = {
+			add_opinion = { who = ROOT modifier = opinion_reduced_war_expenditures }
+		}
+	}
+}
+
+# Order is restored
+country_event = {
+	id = aspiration_for_liberty.4
+	title = "EVTNAME1064"
+	desc = "EVTDESC1064"
+	picture = CITY_VIEW_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "EVTOPTA1064"
+		Stab_Add2 = yes
+		add_absolutism = -10
+		set_country_flag = liberal_constitution
+	}
+}

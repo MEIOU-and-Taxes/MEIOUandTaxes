@@ -1,0 +1,536 @@
+# Author: Phlopsi
+
+# Example: magnitude_effect = { which = v_my_variable }
+magnitude_effect = {
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = $which$ value = 0 }
+			}
+		}
+
+		multiply_key = { lhs = $which$ value = -1 }
+	}
+}
+
+# Example: distance_1d_effect = { which = v_distance which_x1 = v_my_variable_x1 which_x2 = v_my_variable_x2 }
+distance_1d_effect = {
+	set_key = { lhs = $which$ which = $which_x1$ }
+
+	subtract_key = { lhs = $which$ which = $which_x2$ }
+
+	magnitude_effect = {
+		which = $which$
+	}
+}
+
+# Example: sqrt_effect = { which = v_my_variable }
+sqrt_effect = {
+	if = {
+		limit = {
+			check_key = { lhs = $which$ value = 0.001 }
+		}
+
+		set_key = { lhs = tv_sqrt_precision value = 0.001 }
+		set_key = { lhs = tv_sqrt_length which = $which$ }
+		set_key = { lhs = tv_sqrt_width value = 1 }
+		set_key = { lhs = tv_sqrt_delta which = $which$ }
+		subtract_key = { lhs = tv_sqrt_delta value = 1 }
+
+		while = {
+			limit = {
+				NOT = {
+					check_key = { lhs = tv_sqrt_precision which = tv_sqrt_delta }
+				}
+			}
+
+			# tv_sqrt_length = (tv_sqrt_length + tv_sqrt_width) / 2
+			change_key = { lhs = tv_sqrt_length which = tv_sqrt_width }
+			divide_key = { lhs = tv_sqrt_length value = 2 }
+
+			# tv_sqrt_width = $which$ / tv_sqrt_length
+			set_key = { lhs = tv_sqrt_width which = $which$ }
+			divide_key = { lhs = tv_sqrt_width which = tv_sqrt_length }
+
+			distance_1d_effect = {
+				which	= tv_sqrt_delta
+				which_x1 = tv_sqrt_length
+				which_x2 = tv_sqrt_width
+			}
+		}
+
+		set_key = { lhs = $which$ which = tv_sqrt_length }
+
+		# cleanup
+		set_key = { lhs = tv_sqrt_precision value = 0 }
+		set_key = { lhs = tv_sqrt_length value = 0 }
+		set_key = { lhs = tv_sqrt_width value = 0 }
+		set_key = { lhs = tv_sqrt_delta value = 0 }
+	}
+	else = {
+		set_key = { lhs = $which$ value = 0 }
+	}
+}
+
+# Inputs
+#$which_x2$
+#$which_y2$
+#$which_x1$
+#$which_y1$
+#$which$
+distance_2d_effect = { 
+	set_key = { lhs = Xdiff which = $which_x2$ }
+	set_key = { lhs = Ydiff which = $which_y2$ }
+
+	subtract_key = { lhs = Xdiff which = $which_x1$ }
+	subtract_key = { lhs = Ydiff which = $which_y1$ }
+
+	pythagoras_approx_opt = { return=$which$ }
+	
+	set_key = { lhs = Xdiff value = 0 }
+	set_key = { lhs = Ydiff value = 0 }
+}
+
+power_effect = {
+	set_key = { lhs = tv_power_base which = $which$ }
+
+	set_key = { lhs = tv_power_exponent which = $exponent$ }
+
+	while = {
+		limit = {
+			check_key = { lhs = tv_power_exponent value = 2 }
+		}
+
+		subtract_key = { lhs = tv_power_exponent value = 1 }
+
+		multiply_key = { lhs = $which$ which = tv_power_base }
+	}
+
+	subtract_key = { lhs = tv_power_exponent value = 1 }
+
+	ln_funct = {
+		type = which
+		inp = tv_power_base
+	}
+
+	multiply_key = { lhs = tv_power_exponent which = ln_val }
+
+	e_funct = {
+		type = which
+		expnt = tv_power_exponent
+		prec = 5
+		return = e
+	}
+
+	multiply_key = { lhs = $which$ which = e }
+}
+
+# Use `whole_part_c_effect` or `whole_part_v_effect`, whenever possible, instead.
+_whole_part_effect = {
+	set_key = { lhs = $out_result$ $_type$ = $value$ }
+
+	multiply_key = { lhs = $out_result$ value = 0.001 }
+	multiply_key = { lhs = $out_result$ value = 1000 }
+}
+
+whole_part_c_effect = {
+	_whole_part_effect = {
+		_type = value
+		value = $value$
+		out_result = $out_result$
+	}
+}
+
+whole_part_v_effect = {
+	_whole_part_effect = {
+		_type = which
+		value = $value$
+		out_result = $out_result$
+	}
+}
+
+# Use `fractional_part_c_effect` or `fractional_part_v_effect`, whenever possible, instead.
+_fractional_part_effect = {
+	set_key = { lhs = $out_result$ $_type$ = $value$ }
+
+	_whole_part_effect = {
+		_type = $_type$
+		value = $value$
+		out_result = tv_fractional_part_tmp
+	}
+
+	subtract_key = { lhs = $out_result$ which = tv_fractional_part_tmp }
+
+	set_key = { lhs = tv_fractional_part_tmp value = 0 }
+}
+
+fractional_part_c_effect = {
+	_fractional_part_effect = {
+		_type = value
+		value = $value$
+		out_result = $out_result$
+	}
+}
+
+fractional_part_v_effect = {
+	_fractional_part_effect = {
+		_type = which
+		value = $value$
+		out_result = $out_result$
+	}
+}
+
+_whole_and_fractional_part_effect = {
+	set_key = { lhs = $out_fractional_part$ $_type$ = $value$ }
+
+	_whole_part_effect = {
+		_type = $_type$
+		value = $value$
+		out_result = $out_whole_part$
+	}
+
+	subtract_key = { lhs = $out_fractional_part$ which = $out_whole_part$ }
+}
+
+whole_and_fractional_part_c_effect = {
+	_whole_and_fractional_part_effect = {
+		_type = value
+		value = $value$
+		out_whole_part = $out_whole_part$
+		out_fractional_part = $out_fractional_part$
+	}
+}
+
+whole_and_fractional_part_v_effect = {
+	_whole_and_fractional_part_effect = {
+		_type = which
+		value = $value$
+		out_whole_part = $out_whole_part$
+		out_fractional_part = $out_fractional_part$
+	}
+}
+
+# $dividend_type$
+# $dividend_value$
+# $divider_type$
+# $divider_value$
+# $divided$
+# $remainder$
+divided_and_remainder_effect = {
+
+}
+
+exp_effect = {
+	set_key = { lhs = $out_result$ value = 1 }
+	set_key = { lhs = i value = 5 }
+
+	while = {
+		limit = {
+			check_key = { lhs = i value = 1 }
+		}
+
+		multiply_key = { lhs = $out_result$ value = $exponent$ }
+
+		divide_key = { lhs = $out_result$ which = i }
+
+		change_key = { lhs = $out_result$ value = 1 }
+		subtract_key = { lhs = i value = 1 }
+	}
+}
+
+# Input/Output:
+# - $out_significand$
+# - $out_exponent$
+# Hashcode: 5B0160E1
+hp_normalize_effect = {
+	if = {
+		limit = {
+			is_key_equal = { lhs = $out_significand$ value = 0 }
+		}
+
+		set_key = { lhs = $out_exponent$ value = 0 }
+	}
+	else = {
+		set_key = { lhs = 5B0160E1__quotient value = 2147483 }
+
+		divide_key = { lhs = 5B0160E1__quotient which = $out_significand$ }
+
+		magnitude_effect = {
+			which = 5B0160E1__quotient
+		}
+
+		while = {
+			limit = {
+				check_key = { lhs = 5B0160E1__quotient value = 10 }
+			}
+
+			multiply_key = { lhs = $out_significand$ value = 10 }
+
+			subtract_key = { lhs = $out_exponent$ value = 1 }
+
+			divide_key = { lhs = 5B0160E1__quotient value = 10 }
+		}
+
+		set_key = { lhs = 5B0160E1__quotient value = 0 }
+	}
+}
+
+# Input:
+# - $lhs_significand_type$
+# - $lhs_significand_value$
+# - $lhs_exponent_type$
+# - $lhs_exponent_value$
+# - $rhs_significand_type$
+# - $rhs_significand_value$
+# - $rhs_exponent_type$
+# - $rhs_exponent_value$
+# Output:
+# - $out_significand$
+# - $out_exponent$
+# Hashcode: AA1343C3
+hp_sum_effect = {
+	set_key = { lhs = AA1343C3__lhs_significand $lhs_significand_type$ = $lhs_significand_value$ }
+	set_key = { lhs = AA1343C3__lhs_exponent $lhs_exponent_type$ = $lhs_exponent_value$ }
+	set_key = { lhs = AA1343C3__rhs_significand $rhs_significand_type$ = $rhs_significand_value$ }
+	set_key = { lhs = AA1343C3__rhs_exponent $rhs_exponent_type$ = $rhs_exponent_value$ }
+
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = AA1343C3__lhs_exponent which = AA1343C3__rhs_exponent }
+			}
+		}
+
+		while = {
+			limit = {
+				NOT = {
+					check_key = { lhs = AA1343C3__lhs_exponent which = AA1343C3__rhs_exponent }
+				}
+			}
+
+			divide_key = { lhs = AA1343C3__lhs_significand value = 10 }
+
+			change_key = { lhs = AA1343C3__lhs_exponent value = 1 }
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = AA1343C3__rhs_exponent which = AA1343C3__lhs_exponent }
+			}
+		}
+
+		while = {
+			limit = {
+				NOT = {
+					check_key = { lhs = AA1343C3__rhs_exponent which = AA1343C3__lhs_exponent }
+				}
+			}
+
+			divide_key = { lhs = AA1343C3__rhs_significand value = 10 }
+
+			change_key = { lhs = AA1343C3__rhs_exponent value = 1 }
+		}
+	}
+
+	set_key = { lhs = $out_significand$ which = AA1343C3__lhs_significand }
+
+	change_key = { lhs = $out_significand$ which = AA1343C3__rhs_significand }
+
+	set_key = { lhs = $out_exponent$ which = AA1343C3__lhs_exponent }
+
+	# Fix over- and underflow by increasing the exponent, reducing the
+	# significand and repeating the addition of the two values
+	if = {
+		limit = {
+			OR = {
+				# Overflow
+				AND = {
+					check_key = { lhs = AA1343C3__lhs_significand value = 0.001 }
+					check_key = { lhs = AA1343C3__rhs_significand value = 0.001 }
+					NOT = {
+						check_key = { lhs = $out_significand$ value = 0.002 }
+					}
+				}
+				# Underflow
+				AND = {
+					NOT = {
+						check_key = { lhs = AA1343C3__lhs_significand value = 0 }
+					}
+					NOT = {
+						check_key = { lhs = AA1343C3__rhs_significand value = 0 }
+					}
+					check_key = { lhs = $out_significand$ value = -0.001 }
+				}
+			}
+		}
+
+		divide_key = { lhs = AA1343C3__lhs_significand value = 10 }
+
+		divide_key = { lhs = AA1343C3__rhs_significand value = 10 }
+
+		set_key = { lhs = $out_significand$ which = AA1343C3__lhs_significand }
+
+		change_key = { lhs = $out_significand$ which = AA1343C3__rhs_significand }
+
+		change_key = { lhs = $out_exponent$ value = 1 }
+	}
+
+	hp_normalize_effect = {
+		out_significand = $out_significand$
+		out_exponent	= $out_exponent$
+	}
+
+	set_key = { lhs = AA1343C3__lhs_significand value = 0 }
+	set_key = { lhs = AA1343C3__lhs_exponent value = 0 }
+	set_key = { lhs = AA1343C3__rhs_significand value = 0 }
+	set_key = { lhs = AA1343C3__rhs_exponent value = 0 }
+}
+
+# Input:
+# - $lhs_significand_type$
+# - $lhs_significand_value$
+# - $lhs_exponent_type$
+# - $lhs_exponent_value$
+# - $rhs_significand_type$
+# - $rhs_significand_value$
+# - $rhs_exponent_type$
+# - $rhs_exponent_value$
+# Output:
+# - $out_significand$
+# - $out_exponent$
+# Hashcode: 4D43F03C
+hp_difference_effect = {
+	set_key = { lhs = 4D43F03C__rhs_significand_value value = 0 }
+
+	subtract_key = { lhs = 4D43F03C__rhs_significand_value $rhs_significand_type$ = $rhs_significand_value$ }
+
+	hp_sum_effect = {
+		lhs_significand_type  = $lhs_significand_type$
+		lhs_significand_value = $lhs_significand_value$
+		lhs_exponent_type	 = $lhs_exponent_type$
+		lhs_exponent_value	= $lhs_exponent_value$
+		rhs_significand_type  = which
+		rhs_significand_value = 4D43F03C__rhs_significand_value
+		rhs_exponent_type	 = $rhs_exponent_type$
+		rhs_exponent_value	= $rhs_exponent_value$
+		out_significand	   = $out_significand$
+		out_exponent		  = $out_exponent$
+	}
+
+	set_key = { lhs = 4D43F03C__rhs_significand_value value = 0 }
+}
+
+# Input:
+# - $lhs_significand_type$
+# - $lhs_significand_value$
+# - $lhs_exponent_type$
+# - $lhs_exponent_value$
+# - $rhs_significand_type$
+# - $rhs_significand_value$
+# - $rhs_exponent_type$
+# - $rhs_exponent_value$
+# Output:
+# - $out_significand$
+# - $out_exponent$
+# Hashcode: 5CCAD40A
+hp_product_effect = {
+	set_key = { lhs = 5CCAD40A__lhs_significand $lhs_significand_type$ = $lhs_significand_value$ }
+	set_key = { lhs = 5CCAD40A__lhs_exponent $lhs_exponent_type$ = $lhs_exponent_value$ }
+	set_key = { lhs = 5CCAD40A__rhs_significand $rhs_significand_type$ = $rhs_significand_value$ }
+	set_key = { lhs = 5CCAD40A__rhs_exponent $rhs_exponent_type$ = $rhs_exponent_value$ }
+
+	set_key = { lhs = $out_significand$ which = 5CCAD40A__lhs_significand }
+
+	multiply_key = { lhs = $out_significand$ which = 5CCAD40A__rhs_significand }
+
+	set_key = { lhs = $out_exponent$ which = 5CCAD40A__lhs_exponent }
+
+	change_key = { lhs = $out_exponent$ which = 5CCAD40A__rhs_exponent }
+
+	set_key = { lhs = 5CCAD40A__lhs_significand value = 0 }
+	set_key = { lhs = 5CCAD40A__lhs_exponent value = 0 }
+	set_key = { lhs = 5CCAD40A__rhs_significand value = 0 }
+	set_key = { lhs = 5CCAD40A__rhs_exponent value = 0 }
+}
+
+# Input:
+# - $lhs_significand_type$
+# - $lhs_significand_value$
+# - $lhs_exponent_type$
+# - $lhs_exponent_value$
+# - $rhs_significand_type$
+# - $rhs_significand_value$
+# - $rhs_exponent_type$
+# - $rhs_exponent_value$
+# Output:
+# - $out_significand$
+# - $out_exponent$
+# Hashcode: 18F1AA6A
+hp_quotient_effect = {
+}
+
+# range fn
+range_fn = {
+	set_key = {	lhs = tmp_0	value = $start$	}
+	set_key = {	lhs = tmp_1	value = $end$ }
+	set_key = {	lhs = tmp_2	value = $step$ }
+
+	# when positive step, needs to be = end > start
+	if = {
+		limit = {
+			check_key = { lhs = tmp_2 value = 0 }
+			check_key = { lhs = tmp_1 which = tmp_0 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = tmp_1 which = tmp_0 }
+			}
+			$effect$ = yes
+			change_key = { lhs = tmp_0	which = tmp_2 }
+		}
+	}
+	# when negative step, needs to be = start > end
+	else_if = {
+		limit = {
+			check_key = { lhs = tmp_0 which = tmp_1 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = tmp_0 which = tmp_1 }
+			}
+			$effect$ = yes
+			change_key = { lhs = tmp_0	which = tmp_2 }
+		}
+	}
+}
+
+# base = can't never go past this point
+# max = the max amount it can diminish to. It's basically the same as 'base'. 
+# min = the min amount it can dimish (this can't be 0 or it will always be the minimum). 
+# threshold = at what starting value it will have effect. Value has to be higher or equal to threshold
+# scalingfactor = at what rate it diminishes. The higher the scaling factor the more it diminishes returns
+# outputs $return$
+#dimishing_returns_threshold = {
+#	set_key = { lhs = Public_Tmp1 which = $input$ }
+#
+#	subtract_key = { lhs = Public_Tmp1 value = $threshold$ }
+#	divide_key = { lhs = Public_Tmp1 value = $scalingfactor$ }
+#	change_key = { lhs = Public_Tmp1 value = 1 }
+#
+#	set_key = { lhs = Public_Tmp0 value = 1 }
+#	divide_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
+#
+#	set_key = { lhs = Public_Tmp1 value = 1 }
+#	subtract_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
+#
+#	multiply_key = { lhs = Public_Tmp0 value = $base$ }
+#	multiply_key = { lhs = Public_Tmp0 value = $max$ }
+#	multiply_key = { lhs = Public_Tmp0 value = $min$ }
+#	change_key = { lhs = Public_Tmp0 value = $min$ }
+#
+#	set_key = { lhs = $return$ which = Public_Tmp0 }
+#
+#	set_key = { lhs = Public_Tmp0 value = 0 }
+#	set_key = { lhs = Public_Tmp1 value = 0 }
+#}

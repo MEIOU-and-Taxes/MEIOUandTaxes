@@ -1,0 +1,2790 @@
+########################################
+# Burgundy & Netherlands Events        #
+########################################
+
+namespace = flavor_bur_inheritance
+namespace = flavor_bur
+# DUKE OF BURGUNDY DIES
+country_event = {
+	id = flavor_bur_inheritance.1
+	title = "flavor_bur_inheritance.1.title"
+	desc = "flavor_bur_inheritance.1.desc"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	major = yes
+	
+	trigger = {
+		tag = BUR
+		NOT = { has_global_flag = 1530_start_date }
+		ai = yes
+		NOT = { has_country_flag = burgundian_succession_crisis }
+	   #FRA = { has_country_flag = king_jean_released }
+		luck = no
+		is_at_war = yes
+		is_emperor = no
+		government = monarchy
+		OR = { 
+			has_regency = no 
+			has_consort_regency = yes 
+		}
+		is_female = no
+		is_lesser_in_union = no
+		OR = {
+			AND = {
+				is_free_or_tributary_trigger = yes
+				check_variable = { which = "Cores_on_the_Netherlands" value = 10 }
+			}
+			AND = {
+				is_subject_other_than_tributary_trigger = yes
+				check_variable = { which = "Cores_on_the_Netherlands" value = 15 }
+			}
+		}
+		capital_scope = {
+			continent = europe
+		}
+		FRA = {
+			exists = yes
+			is_free_or_tributary_trigger = yes
+			num_of_cities = 8
+			is_neighbor_of = BUR
+		}
+		OR = {
+			emperor = {
+				exists = yes
+				NOT = { war_with = FRA }
+			}
+			emperor = {
+				exists = no
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 41
+		modifier = {
+			factor = 0.75
+			has_heir = no
+		}
+		modifier = {
+			factor = 0.75
+			is_monarch_leader = yes
+		}
+		modifier = {
+			factor = 0.75
+			is_heir_leader = yes
+		}
+		modifier = {
+			factor = 0.85
+			NOT = { war_score = 0 }
+		}
+		modifier = {
+			factor = 0.75
+			NOT = { war_score = -25 }
+		}
+		modifier = {
+			factor = 0.75
+			NOT = { war_score = -50 }
+		}
+		modifier = {
+			factor = 0.5
+			NOT = { war_score = -75 }
+		}
+	}
+	
+	immediate = {
+		log = "FE-BUR:[GetYear]:[Root.GetName]:ruler of Burgundy died, inheritance event started:flavor_bur_inheritance.1"
+		hidden_effect = {
+			set_country_flag = burgundian_succession_crisis
+			#clr_country_flag = french_apanage
+			add_ruler_modifier = {
+				name = burgundian_succession_crisis
+			}
+			# France vassalizes French subjects of BUR, gets an event to considier their options
+			if = {
+				limit = {
+					any_subject_country = {
+						ai = yes
+						capital_scope = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+							}
+						}
+					}
+				}
+				every_subject_country = {
+					limit = {
+						ai = yes
+						capital_scope = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+							}
+						}
+					}
+					set_country_flag = bur_french_vassal
+					FRA = {
+						vassalize = PREV
+					}
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.10 days = 10 }
+				}
+			}
+			# Check whether France is eligible and flag the French provinces
+			if = {
+				limit = {
+					any_owned_province = {
+						OR = {
+							region = east_france_region
+							region = provence_region
+							region = languedoc_region
+							region = aquitaine_region
+							region = ouest_france_region
+							region = high_countries_region
+							culture_group = langue_d_oil
+						}
+						NOT = { region = belgii_region }
+						NOT = { region = low_countries_region }
+						is_part_of_hre = no
+					}
+				}
+				every_owned_province = {
+					limit = {
+						OR = {
+							region = east_france_region
+							region = provence_region
+							region = languedoc_region
+							region = aquitaine_region
+							region = ouest_france_region
+							region = high_countries_region
+							culture_group = langue_d_oil
+						}
+						is_part_of_hre = no
+						NOT = { region = belgii_region }
+						NOT = { region = low_countries_region }
+					}
+					set_province_flag = bur_french_province
+				}
+				set_country_flag = bur_eligible_france
+				log = "FE-BUR:[GetYear]:[Root.GetName]:France is eligible:flavor_bur_inheritance.1"
+			}
+			
+ 			# Check provinces of subjects of Burgundy as well
+			if = {
+				limit = {
+					any_subject_country = {
+						any_owned_province = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+								culture_group = langue_d_oil
+							}
+							is_part_of_hre = no
+							NOT = { region = belgii_region }
+							NOT = { region = low_countries_region }
+						}
+					}
+				}
+				every_subject_country = {
+					every_owned_province = {
+						limit = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+								culture_group = langue_d_oil
+							}
+							is_part_of_hre = no
+							NOT = { region = belgii_region }
+							NOT = { region = low_countries_region }
+						}
+						set_province_flag = bur_french_province
+					}
+				}
+				set_country_flag = bur_eligible_france
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Burgundy is eligible:flavor_bur_inheritance.1"
+			}
+			
+			# Check whether the Emperor is eligible
+			if = {
+				limit = {
+					emperor = {
+						OR = {
+							NOT = { war_with = BUR }
+							NOT = {
+								any_owned_province = {
+									controlled_by = BUR
+								}
+							}
+						}
+						OR = {
+							AND = {
+								tag = HAB
+								num_of_cities = 6
+							}
+							num_of_cities = 8
+						}
+					}
+				}
+				set_country_flag = bur_eligible_emperor
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Emperor is eligible:flavor_bur_inheritance.1"
+			}
+			# Check whether a strong RM partner in the HRE is eligible.
+			if = {																#Vari. Impossible if Burgundy isn't independent.
+				limit = {
+					any_country = {
+						marriage_with = ROOT
+						num_of_cities = 10
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = yes
+						}
+					}
+				}
+				random_country = {
+					limit = {
+						marriage_with = ROOT
+						num_of_cities = 10
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = yes
+						}
+					}
+					set_country_flag = bur_marriage
+				}
+				set_country_flag = bur_eligible_marriage
+				log = "FE-BUR:[GetYear]:[Root.GetName]:there is marriage partner eligible:flavor_bur_inheritance.1"
+			}
+			# Check whether Spain or Castile is eligible
+			if = {
+				limit = {
+					SPA = {
+						exists = yes
+						num_of_cities = 8
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = no
+						}
+					}
+				}
+				set_country_flag = bur_eligible_spain
+				set_country_flag = bur_spain_spa
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Spain is eligible:flavor_bur_inheritance.1"
+			}
+			if = {
+				limit = {
+					SPA = {
+						exists = no
+					}
+					CAS = {
+						num_of_cities = 8
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = no
+						}
+					}
+				}
+				set_country_flag = bur_eligible_spain
+				set_country_flag = bur_spain_cas
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Castile is eligible:flavor_bur_inheritance.1"
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.1.a"
+		if = {
+			limit = {
+				has_heir = yes
+			}
+			kill_heir = {}
+		}
+		tooltip = {
+			kill_ruler = yes
+		}
+		hidden_effect = {
+			define_ruler = {
+				regency = yes
+			}
+			# If France is eligible, they get their own event
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_france
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.4 days = 5 }
+				}
+			}
+			# If France is not eligible, they get the standard event.
+			if = {
+				limit = {
+					NOT = { has_country_flag = bur_eligible_france }
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			# Eligible countries get the event.
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_emperor
+				}
+				emperor = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_cas
+				}
+				CAS = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_spa
+				}
+				SPA = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_marriage
+				}
+				every_known_country = {
+					limit = {
+						has_country_flag = bur_marriage
+					}
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			# Fires the Great Privilege event
+			country_event = {
+				id = flavor_bur_inheritance.3
+				days = 10
+			}
+			# FIRES THE "CHOOSE INHERITOR" EVENT ONE MONTH FROM NOW
+			country_event = {
+				id = flavor_bur_inheritance.6
+				days = 30
+			}
+		}
+	}
+}
+
+#### FATE OF BURGUNDY
+country_event = {
+	id = flavor_bur_inheritance.2
+	title = "flavor_bur_inheritance.2.title"
+	desc = "flavor_bur_inheritance.2.desc"
+	picture = CIVIL_WAR_eventPicture
+	
+	major = yes
+	
+	trigger = {
+		tag = BUR
+		NOT = { has_global_flag = 1530_start_date }
+		ai = yes
+		NOT = { has_country_flag = burgundian_succession_crisis }
+	   #FRA = { has_country_flag = king_jean_released }
+		is_at_war = no
+		is_free_or_tributary_trigger = yes
+		is_emperor = no
+		NOT = { is_year = 1500 }
+		capital_scope = {
+			continent = europe
+		}
+		has_regency = yes
+		has_heir = no
+		FRA = {
+			exists = yes
+			is_free_or_tributary_trigger = yes
+			num_of_cities = 8
+			is_neighbor_of = BUR
+		}
+		OR = {
+			emperor = {
+				exists = yes
+				NOT = { war_with = FRA }
+			}
+			emperor = {
+				exists = no
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		modifier = {
+			factor = 1.1
+			luck = yes
+		}
+		modifier = {
+			factor = 0.75
+			has_heir = no
+		}
+		modifier = {
+			factor = 0.75
+			is_monarch_leader = yes
+		}
+		modifier = {
+			factor = 0.75
+			is_heir_leader = yes
+		}
+		modifier = {
+			factor = 0.85
+			NOT = { war_score = 0 }
+		}
+		modifier = {
+			factor = 0.75
+			NOT = { war_score = -25 }
+		}
+		modifier = {
+			factor = 0.75
+			NOT = { war_score = -50 }
+		}
+		modifier = {
+			factor = 0.5
+			NOT = { war_score = -75 }
+		}
+	}
+	
+	immediate = {
+		log = "FE-BUR:[GetYear]:[Root.GetName]:Fate of Burgundy event started:flavor_bur_inheritance.2"
+		hidden_effect = {
+			set_country_flag = burgundian_succession_crisis
+			clr_country_flag = french_apanage
+			add_ruler_modifier = {
+				name = burgundian_succession_crisis
+			}
+			# France vassalizes French subjects of BUR, gets an event to considier their options
+			if = {
+				limit = {
+					any_subject_country = {
+						ai = yes
+						capital_scope = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+							}
+						}
+					}
+				}
+				every_subject_country = {
+					limit = {
+						ai = yes
+						capital_scope = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+							}
+						}
+					}
+					set_country_flag = bur_french_vassal
+					FRA = {
+						vassalize = PREV
+						country_event = { id = flavor_bur_inheritance.10 days = 10 }
+					}
+				}
+			}
+			# Check whether France is eligible and flag the French provinces
+			if = {
+				limit = {
+					any_owned_province = {
+						OR = {
+							region = east_france_region
+							region = provence_region
+							region = languedoc_region
+							region = aquitaine_region
+							region = ouest_france_region
+							region = high_countries_region
+							culture_group = langue_d_oil
+						}
+						NOT = { region = belgii_region }
+						NOT = { region = low_countries_region }
+						is_part_of_hre = no
+					}
+				}
+				every_owned_province = {
+					limit = {
+						OR = {
+							region = east_france_region
+							region = provence_region
+							region = languedoc_region
+							region = aquitaine_region
+							region = ouest_france_region
+							region = high_countries_region
+							culture_group = langue_d_oil
+						}
+						is_part_of_hre = no
+						NOT = { region = belgii_region }
+						NOT = { region = low_countries_region }
+					}
+					set_province_flag = bur_french_province
+				}
+				set_country_flag = bur_eligible_france
+				log = "FE-BUR:[GetYear]:[Root.GetName]:France is eligible:flavor_bur_inheritance.2"
+			}
+			
+ 			# Check provinces of subjects of Burgundy as well
+			if = {
+				limit = {
+					any_subject_country = {
+						any_owned_province = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+								culture_group = langue_d_oil
+							}
+							is_part_of_hre = no
+							NOT = { region = belgii_region }
+							NOT = { region = low_countries_region }
+						}
+					}
+				}
+				every_subject_country = {
+					every_owned_province = {
+						limit = {
+							OR = {
+								region = east_france_region
+								region = provence_region
+								region = languedoc_region
+								region = aquitaine_region
+								region = ouest_france_region
+								region = high_countries_region
+								culture_group = langue_d_oil
+							}
+							is_part_of_hre = no
+							NOT = { region = belgii_region }
+							NOT = { region = low_countries_region }
+						}
+						set_province_flag = bur_french_province
+					}
+				}
+				set_country_flag = bur_eligible_france
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Burgundy is eligible:flavor_bur_inheritance.2"
+			}
+			
+			# Check whether the Emperor is eligible
+			if = {
+				limit = {
+					emperor = {
+						OR = {
+							NOT = { war_with = BUR }
+							NOT = {
+								any_owned_province = {
+									controlled_by = BUR
+								}
+							}
+						}
+						OR = {
+							AND = {
+								tag = HAB
+								num_of_cities = 6
+							}
+							num_of_cities = 8
+						}
+					}
+				}
+				set_country_flag = bur_eligible_emperor
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Emperor is eligible:flavor_bur_inheritance.2"
+			}
+			# Check whether a strong RM partner in the HRE is eligible.
+			if = {																#Vari. Impossible if Burgundy isn't independent.
+				limit = {
+					any_country = {
+						marriage_with = ROOT
+						num_of_cities = 10
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = yes
+						}
+					}
+				}
+				random_country = {
+					limit = {
+						marriage_with = ROOT
+						num_of_cities = 10
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = yes
+						}
+					}
+					set_country_flag = bur_marriage
+				}
+				set_country_flag = bur_eligible_marriage
+				log = "FE-BUR:[GetYear]:[Root.GetName]:there is marriage partner eligible:flavor_bur_inheritance.2"
+
+			}
+			# Check whether Spain or Castile is eligible
+			if = {
+				limit = {
+					SPA = {
+						exists = yes
+						num_of_cities = 8
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = no
+						}
+					}
+				}
+				set_country_flag = bur_eligible_spain
+				set_country_flag = bur_spain_spa
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Spain is eligible:flavor_bur_inheritance.2"
+			}
+			if = {
+				limit = {
+					SPA = {
+						exists = no
+					}
+					CAS = {
+						num_of_cities = 8
+						is_free_or_tributary_trigger = yes
+						capital_scope = {
+							is_part_of_hre = no
+						}
+					}
+				}
+				set_country_flag = bur_eligible_spain
+				set_country_flag = bur_spain_cas
+				log = "FE-BUR:[GetYear]:[Root.GetName]:Castile is eligible:flavor_bur_inheritance.2"
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.2.a"
+		if = {
+			limit = {
+				has_heir = yes
+			}
+			kill_heir = {}
+		}
+		tooltip = {
+			kill_ruler = yes
+		}
+		hidden_effect = {
+			define_ruler = {
+				regency = yes
+			}
+			# If France is eligible, they get their own event
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_france
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.4 days = 5 }
+				}
+			}
+			# If France is not eligible, they get the standard event.
+			if = {
+				limit = {
+					NOT = { has_country_flag = bur_eligible_france }
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			# Eligible countries get the event.
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_emperor
+				}
+				emperor = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_cas
+				}
+				CAS = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_spa
+				}
+				SPA = {
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_marriage
+				}
+				every_known_country = {
+					limit = {
+						has_country_flag = bur_marriage
+					}
+					country_event = { id = flavor_bur_inheritance.5 days = 5 }
+				}
+			}
+			# Fires the Great Privilege event
+			country_event = {
+				id = flavor_bur_inheritance.3
+				days = 10
+			}
+			# FIRES THE "CHOOSE INHERITOR" EVENT ONE MONTH FROM NOW
+			country_event = {
+				id = flavor_bur_inheritance.6
+				days = 30
+			}
+		}
+	}
+}
+
+#### The Great Privilege
+country_event = {
+	id = flavor_bur_inheritance.3
+	title = "flavor_bur_inheritance.3.title"
+	desc = "flavor_bur_inheritance.3.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	major = yes
+
+	immediate = {
+		hidden_effect = {
+			BUR = { save_event_target_as = Adapt }
+		}
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.3.a" #We have no other choice.
+		
+		if = {
+			limit = {
+				is_possible_vassal = HAI
+			}
+			release = HAI
+			create_union = HAI
+			HAI = { 
+				hidden_effect = {
+					Reset_Religion_to_Capital = yes 
+					Pol_AdaptFromScope = yes
+					add_government_reform = Pol_Privileges1
+					clr_country_flag = POP_Init
+					country_event = { id = Init.1 }
+				}
+			}
+			log = "FE-BUR:[GetYear]:[Root.GetName]:Hainau got released during The Great Privilege event:flavor_bur_inheritance.3"
+		}
+		if = {
+			limit = {
+				is_possible_vassal = BRB
+			}
+			release = BRB
+			create_union = BRB
+			BRB = { 
+				hidden_effect = {
+					Reset_Religion_to_Capital = yes 
+					Pol_AdaptFromScope = yes
+					add_government_reform = Pol_Privileges1
+					clr_country_flag = POP_Init
+					country_event = { id = Init.1 }
+				}
+			}
+			log = "FE-BUR:[GetYear]:[Root.GetName]:Brabant got released during The Great Privilege event:flavor_bur_inheritance.3"
+		}
+		if = {
+			limit = {
+				is_possible_vassal = FLA
+			}
+			release = FLA
+			create_union = FLA
+			FLA = { 
+				hidden_effect = {
+					Reset_Religion_to_Capital = yes 
+					Pol_AdaptFromScope = yes
+					add_government_reform = Pol_Privileges1
+					clr_country_flag = POP_Init
+					country_event = { id = Init.1 }
+				}
+			}
+			log = "FE-BUR:[GetYear]:[Root.GetName]:Flanders got released during The Great Privilege event:flavor_bur_inheritance.3"
+		}
+		if = {
+			limit = {
+				is_possible_vassal = HOL
+			}
+			hidden_effect = {
+				#Fryslan
+				1371 = {
+					remove_core = HOL
+				}
+				#Drenthe
+				2450 = {
+					remove_core = HOL
+				}
+				#Oversticht
+				1372 = {
+					remove_core = HOL
+				}
+			}
+			release = HOL
+			create_union = HOL
+			HOL = { 
+				hidden_effect = {
+					Reset_Religion_to_Capital = yes 
+					Pol_AdaptFromScope = yes
+					add_government_reform = Pol_Privileges1
+					clr_country_flag = POP_Init
+					country_event = { id = Init.1 }
+				}
+			}
+			log = "FE-BUR:[GetYear]:[Root.GetName]:Holland got released during The Great Privilege event:flavor_bur_inheritance.3"
+			hidden_effect = {
+				#Fryslan
+				1371 = {
+					add_core = HOL
+				}
+				#Drenthe
+				2450 = {
+					add_core = HOL
+				}
+				#Oversticht
+				1372 = {
+					add_core = HOL
+				}
+			}
+		}
+	}
+}
+#### FRANCE ELIGIBLE
+country_event = {
+	id = flavor_bur_inheritance.4
+	title = "flavor_bur_inheritance.4.title" #Burgundian Succession Crisis
+	desc = "flavor_bur_inheritance.4.desc"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur_inheritance.4.a" #These lands rightfully belong to France!
+		
+		ai_chance = { factor = 75 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:France took French provinces from Burgundy, no marriage:flavor_bur_inheritance.4"
+		if = {
+			limit = {
+				war_with = BUR
+			}
+			white_peace = BUR
+			log = "FE-BUR:[GetYear]:[Root.GetName]:event ended war between France and Burgundy:flavor_bur_inheritance.4"
+		}
+		# Clear vassalization
+		hidden_effect = {
+			if = {
+				limit = {
+					BUR = {
+						is_vassal_of_trigger = { tag = FRA }
+					}
+				}
+				free_vassal = BUR
+				log = "FE-BUR:[GetYear]:[Root.GetName]:event removed vassalage of Burgundy under France:flavor_bur_inheritance.4"
+			}
+		}
+		# Give French provinces to France
+		BUR = {
+			every_owned_province = {
+				limit = {
+					has_province_flag = bur_french_province
+				}
+				add_core = ROOT
+			}
+			every_owned_province = {
+				limit = {
+					has_province_flag = bur_french_province
+				}
+				cede_province = ROOT
+				#set_province_flag = bur_succession_province
+				clr_province_flag = bur_french_province
+				add_local_autonomy = 10
+			}
+			# Give the French provinces of Burgundian subjects as well
+			every_subject_country = {
+				every_owned_province = {
+					limit = {
+						has_province_flag = bur_french_province
+					}
+					add_core = ROOT
+				}
+				every_owned_province = {
+					limit = {
+						has_province_flag = bur_french_province
+					}
+					cede_province = ROOT
+					#set_province_flag = bur_succession_province
+					clr_province_flag = bur_french_province
+					add_local_autonomy = 10
+				}
+			}
+		}
+		# Clear eligibility flag
+		hidden_effect = {
+			BUR = {
+				clr_country_flag = bur_eligible_france
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.4.b" #Send a marriage offer
+		log = "FE-BUR:[GetYear]:[Root.GetName]:send a marriage offer to Burgundy:flavor_bur_inheritance.4"
+		ai_chance = {
+			factor = 25
+			# AI will never choose this option if Burgundian liberty desire is greater than 50.
+			modifier = {
+				factor = 0
+				BUR = { liberty_desire = 50 }
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.4.c" #This is not worth our time.
+		ai_chance = { factor = 0 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:backed out from Burgundian inheritance:flavor_bur_inheritance.4"
+		add_prestige = -10
+		hidden_effect = {
+			BUR = {
+				clr_country_flag = bur_eligible_france
+			}
+		}
+	}
+}
+
+#### STANDARD SUCCESSION CRISIS EVENT
+country_event = {
+	id = flavor_bur_inheritance.5
+	title = "flavor_bur_inheritance.5.title" #Burgundian Succession Crisis
+	desc = "flavor_bur_inheritance.5.desc"
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur_inheritance.5.a" #Send a marriage offer
+		log = "FE-BUR:[GetYear]:[Root.GetName]:send a marriage offer to Burgundy:flavor_bur_inheritance.5"
+		ai_chance = { factor = 100 }
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.5.b" #What the hell is Burgundy?
+		ai_chance = { factor = 0 }
+		add_prestige = -10
+		log = "FE-BUR:[GetYear]:[Root.GetName]:backed out from Burgundian inheritance:flavor_bur_inheritance.5"
+
+		# Clear the eligibility tags if players reject (AI cannot reject)
+		hidden_effect = {
+			if = {
+				limit = {
+					tag = FRA
+				}
+				BUR = {
+					clr_country_flag = bur_eligible_france
+				}
+			}
+			if = {
+				limit = {
+					is_emperor = yes
+				}
+				BUR = {
+					clr_country_flag = bur_eligible_emperor
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						tag = CAS
+						tag = SPA
+					}
+				}
+				BUR = {
+					clr_country_flag = bur_eligible_spain
+					clr_country_flag = bur_spain_cas
+					clr_country_flag = bur_spain_spa
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_marriage
+				}
+				clr_country_flag = bur_marriage
+				BUR = {
+					clr_country_flag = bur_eligible_marriage
+				}
+			}
+		}
+	}
+}
+
+
+#### BURGUNDY CHOOSES THE INHERITOR
+country_event = {
+	id = flavor_bur_inheritance.6
+	title = "flavor_bur_inheritance.6.title" #Time to Choose a Husband
+	desc = "flavor_bur_inheritance.6.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+
+	# Burgundy selection probabilities if all countries are eligible
+	# Emperor 50%
+	# France 20%
+	# RM partner 20%
+	# Spain 10%
+	
+	# Burgundy selection probabilities if there is no eligible RM partner (the usual case)
+	# Emperor 67.5%
+	# France 25%
+	# Spain 12.5%
+	
+	option = {
+		name = "flavor_bur_inheritance.6.a" #France
+		trigger = {
+			has_country_flag = bur_eligible_france
+		}
+		ai_chance = {
+			factor = 20
+			modifier = {
+				factor = 0
+				liberty_desire = 50
+			}
+		}
+		log = "FE-BUR:[GetYear]:[Root.GetName]:picked France for inheritance:flavor_bur_inheritance.6"
+		hidden_effect = {
+			# France gets the Inheritor event
+			FRA = {
+				country_event = { id = flavor_bur_inheritance.7 days = 1 }
+			}
+			# The rest get the sorry you didn't inherit event
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_emperor
+					NOT = {
+						emperor = {
+							tag = FRA
+						}
+					}
+				}
+				emperor = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_cas
+				}
+				CAS = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_spa
+				}
+				SPA = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_marriage
+				}
+				every_known_country = {
+					limit = {
+						has_country_flag = bur_marriage
+					}
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_bur_inheritance.6.b" #Emperor
+		trigger = {
+			has_country_flag = bur_eligible_emperor
+		}
+		ai_chance = { factor = 50 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:picked Emperor for inheritance:flavor_bur_inheritance.6"
+		hidden_effect = {
+			# Emperor gets the Inheritor event
+			emperor = {
+				country_event = { id = flavor_bur_inheritance.7 days = 1 }
+			}
+			# France gets special event where they get permanent claims
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_france
+					NOT = {
+						emperor = {
+							tag = FRA
+						}
+					}
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.9 days = 10 }
+				}
+			}
+			# The rest gets sorry you didn't inherit event
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_cas
+					NOT = {
+						emperor = {
+							tag = CAS
+						}
+					}
+				}
+				CAS = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_spa
+					NOT = {
+						emperor = {
+							tag = SPA
+						}
+					}
+				}
+				SPA = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_marriage
+				}
+				every_known_country = {
+					limit = {
+						has_country_flag = bur_marriage
+					}
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_bur_inheritance.6.c" #Spain
+		trigger = {
+			has_country_flag = bur_eligible_spain
+		}
+		ai_chance = { factor = 10 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:picked Spain/Castile for inheritance:flavor_bur_inheritance.6"
+		hidden_effect = {
+			# SPA/CAS gets the Inheritor event
+			if = {
+				limit = {
+					has_country_flag = bur_spain_cas
+				}
+				CAS = {
+					country_event = { id = flavor_bur_inheritance.7 days = 1 }
+				}
+			}
+			else_if = {
+				limit = {
+					has_country_flag = bur_spain_spa
+				}
+				SPA = {
+					country_event = { id = flavor_bur_inheritance.7 days = 1 }
+				}
+			}
+			# France gets special event where they get permanent claims
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_france
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.9 days = 10 }
+				}
+			}
+			# The rest gets sorry you didn't inherit event
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_emperor
+					NOT = {
+						emperor = {
+							tag = CAS
+						}
+					}
+					NOT = {
+						emperor = {
+							tag = SPA
+						}
+					}
+				}
+				emperor = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_marriage
+				}
+				every_known_country = {
+					limit = {
+						has_country_flag = bur_marriage
+					}
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_bur_inheritance.6.d" #Royal marriage partner
+		trigger = {
+			has_country_flag = bur_eligible_marriage
+		}
+		ai_chance = { factor = 20 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:picked royal marriage partner for inheritance:flavor_bur_inheritance.6"
+		hidden_effect = {
+			# RM partner gets the Inheritor event
+			every_known_country = {
+				limit = {
+					has_country_flag = bur_marriage
+				}
+				country_event = { id = flavor_bur_inheritance.7 days = 1 }
+			}
+			# France gets special event where they get permanent claims
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_france
+				}
+				FRA = {
+					country_event = { id = flavor_bur_inheritance.9 days = 10 }
+				}
+			}
+			# The rest gets sorry you didn't inherit event
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_cas
+				}
+				CAS = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_spain
+					has_country_flag = bur_spain_spa
+				}
+				SPA = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = bur_eligible_emperor
+				}
+				emperor = {
+					country_event = { id = flavor_bur_inheritance.8 days = 10 }
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_bur_inheritance.6.e" # We retain independence
+		trigger = {
+			NOT = {
+				has_country_flag = bur_eligible_emperor
+				has_country_flag = bur_eligible_france
+				has_country_flag = bur_eligible_spain
+				has_country_flag = bur_eligible_marriage
+			}
+		}
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided to retain independence:flavor_bur_inheritance.6"
+	}
+		
+	# Clear flags and vassal status
+	after = {
+		hidden_effect = {
+			BUR = {
+				clr_country_flag = bur_eligible_france
+				clr_country_flag = bur_eligible_emperor
+				clr_country_flag = bur_eligible_marriage
+				clr_country_flag = bur_eligible_spain
+				clr_country_flag = bur_spain_cas
+				clr_country_flag = bur_spain_spa
+			}
+			every_known_country = {
+				limit = {
+					has_country_flag = bur_marriage
+				}
+				clr_country_flag = bur_marriage
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					BUR = {
+						is_vassal_of_trigger = { tag = FRA }
+					}
+				}
+				FRA = {
+					free_vassal = BUR
+				}
+			}
+		}
+	}
+}
+
+#### INHERIT EVENT
+country_event = {
+	id = flavor_bur_inheritance.7
+	title = "flavor_bur_inheritance.7.title" #End of the Burgundian Succession Crisis
+	desc = "flavor_bur_inheritance.7.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur_inheritance.7.a" # A wise choice
+		add_prestige = 10
+		log = "FE-BUR:[GetYear]:[Root.GetName]:was picked for inheritance:flavor_bur_inheritance.7"
+
+		hidden_effect = {
+			set_country_flag = bur_inheritor
+		}
+		
+		# Burgundy is made PU partner only if they have at least 3 cities
+		BUR = {
+			every_subject_country = {
+				ROOT = {
+					create_subject = {
+						subject_type = rebellious_decentralized_vassal
+						subject = PREV
+					}
+				}
+			}
+			if = {
+				limit = {
+					num_of_cities = 3
+				}
+				ROOT = {
+					create_subject = {
+						subject_type = rebellious_decentralized_vassal
+						subject = BUR
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = { num_of_cities = 3 }
+				}
+				every_owned_province = {
+					add_core = ROOT
+				}
+				every_owned_province = {
+					cede_province = ROOT
+					add_local_autonomy = 10
+					#set_province_flag = bur_succession_province
+				}
+			}
+		}
+	}
+}
+
+#### SORRY YOU DIDN'T INHERIT EVENT
+country_event = {
+	id = flavor_bur_inheritance.8
+	title = "flavor_bur_inheritance.8.title" #End of the Burgundian Succession Crisis
+	desc = "flavor_bur_inheritance.8.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur_inheritance.8.a" # Shame
+		add_prestige = -5
+	}
+}
+
+#### FRANCE GETS PERMANENT CLAIMS
+country_event = {
+	id = flavor_bur_inheritance.9
+	title = "flavor_bur_inheritance.9.title" #End of the Burgundian Succession Crisis
+	desc = "flavor_bur_inheritance.9.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur_inheritance.9.a" # We will have our revenge
+		log = "FE-BUR:[GetYear]:[Root.GetName]:got permanent claims on Burgundian lands:flavor_bur_inheritance.9"
+		every_province = {
+			limit = {
+				has_province_flag = bur_french_province
+				not = { is_core = FRA }
+			}
+			add_permanent_claim = FRA
+		}
+		add_prestige = -10
+	}
+}
+
+#### France event for Burgundian subjects in France
+country_event = {
+	id = flavor_bur_inheritance.10
+	title = "flavor_bur_inheritance.10.title"
+	desc = "flavor_bur_inheritance.10.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur_inheritance.10.a" # Keep the previous lord in place
+		ai_chance = { factor = 0 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:kept lords of Burgundian subjects in place:flavor_bur_inheritance.10"
+		add_legitimacy = 10
+		every_subject_country = {
+			add_liberty_desire = -5
+		}
+		hidden_effect = {
+			every_subject_country = {
+				limit = {
+					has_country_flag = bur_french_vassal
+				}
+				clr_country_flag = bur_french_vassal
+			}
+		}
+	}
+		
+	option = {
+		name = "flavor_bur_inheritance.10.b" # Put a $DYNASTY$ noble in charge
+		ai_chance = { factor = 75 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:put their dynasty on throne of Burgundian subjects:flavor_bur_inheritance.10"
+		every_subject_country = {
+			limit = {
+				has_country_flag = bur_french_vassal
+			}
+			define_ruler = {
+				dynasty = ROOT
+				culture = ROOT
+				religion = ROOT
+				male = yes
+				claim = 90
+			}
+			kill_heir = {}
+		}
+		hidden_effect = {
+			every_subject_country = {
+				limit = {
+					has_country_flag = bur_french_vassal
+				}
+				clr_country_flag = bur_french_vassal
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_bur_inheritance.10.c" # Appoint a governor from [Root.Capital.GetName]
+		ai_chance = { factor = 25 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:appointed governors on throne of Burgundian subjects:flavor_bur_inheritance.10"
+		every_subject_country = {
+			limit = {
+				has_country_flag = bur_french_vassal
+			}
+			FRA = {
+				inherit = PREV
+			}
+		}
+		add_legitimacy = -10
+		add_dip_power = -50
+		every_subject_country = {
+			add_liberty_desire = 5
+		}
+		hidden_effect = {
+			every_subject_country = {
+				limit = {
+					has_country_flag = bur_french_vassal
+				}
+				clr_country_flag = bur_french_vassal
+			}
+		}
+	}
+}
+
+# NED independence events changed and moved to FlavourEventsSVP
+
+# Outdated Burgundy events can be found at FlavourEventsBUR_old
+
+# flavor_bur.7 May release previous owner provinces in HRE - removed
+# flavor_bur.8 , 9 and 18 PROVINCENAME Revolts! - removed
+# flavor_bur.13 Dutch Nobility demands General Estates - removed
+# flavor_bur.14 The Count of Charolais and the Edict of Blood - removed
+# flavor_bur.15 The Count of Macon and the Union of Arras - removed
+
+
+# Margarethe III and the union with Burgundy
+country_event = {
+	id = flavor_bur.1001
+	title = "flavor_bur.1001.n"
+	desc = "flavor_bur.1001.t"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		tag = FLA
+		is_female = yes
+		has_consort_regency = no
+		exists = BUR
+		BUR = { has_country_flag = margarethe_marriage }
+		is_free_or_tributary_trigger = yes
+		# NOT = { personal_union = 1 }
+		# NOT = { personal_union_limited = 1 }
+		NOT = { is_year = 1405 } #Death of Margarethe
+		NOT = { has_country_flag = union_with_burgundy }
+	}
+	
+	immediate = { set_country_flag = union_with_burgundy }
+	
+	option = {
+		name = "flavor_bur.1001.a"
+		ai_chance = { factor = 95 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided for union with Burgundy:flavor_bur.1001"
+		custom_tooltip = game_over
+		every_country = {
+			limit = {
+				OR = {
+					alliance_with = ROOT
+					marriage_with = ROOT
+					is_neighbor_of = ROOT
+					is_subject_of = ROOT
+					overlord_of = ROOT
+					culture_group = low_frankish
+				}
+				NOT = { tag = BUR }
+			}
+			country_event = { id = flavor_bur.1013 days = 6 }
+		}
+		BUR = { country_event = { id = flavor_bur.1002 days = 5 } }
+	}
+	
+	option = {
+		name = "flavor_bur.1001.b"
+		ai_chance = { factor = 5 }
+		add_legitimacy = -50
+		add_prestige = -25
+		break_marriage = BUR
+		BUR = { add_casus_belli = { target = ROOT type = cb_restore_personal_union months = 120 } }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided to ignore union and break marriage with Burgundy:flavor_bur.1001"
+	}
+}
+
+# Flanders
+country_event = {
+	id = flavor_bur.1002
+	title = "flavor_bur.1002.n"
+	desc = "flavor_bur.1002.t"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1002.a"
+		ai_chance = { factor = 100 }
+		FROM = {
+			hidden_effect = {
+				every_owned_province = {
+					every_neighbor_province = {
+						limit = {
+							NOT = { owned_by = FROM }
+							NOT = { owned_by = BUR }
+							OR = {
+								region = belgii_region
+								region = low_countries_region
+							}
+						}
+						add_claim = BUR
+						owner = { set_country_flag = burgundian_claim }
+					}
+				}
+			}
+		}
+		inherit = FROM
+		log = "FE-BUR:[GetYear]:[Root.GetName]:inherited Flanders:flavor_bur.1002"
+	}
+	
+	option = {
+		name = "flavor_bur.1002.b"
+		ai_chance = { factor = 0 }
+		add_legitimacy = 10
+		add_prestige = 20
+		log = "FE-BUR:[GetYear]:[Root.GetName]:refused to inherit Flanders:flavor_bur.1002"
+	}
+}
+
+# Death of Philippe de Rouvre
+country_event = {
+	id = flavor_bur.1003
+	title = "flavor_bur.1003.n"
+	desc = "flavor_bur.1003.t"
+	picture = PLAGUE_RETURN_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = BUR
+		NOT = { has_global_flag = 1530_start_date }
+		OR = {
+			has_regency = yes
+			AND = {
+				has_ruler = "Philippe I"
+				has_heir = no
+			}
+		}
+		NOT = { has_country_flag = burgundian_succession_crisis }
+		NOT = { has_country_flag = burgundian_escape_clause }
+		FRA = { is_lesser_in_union = no }
+	}
+	
+	mean_time_to_happen = { years = 5 }
+	
+	option = {
+		name = "flavor_bur.1003.a"
+		ai_chance = { factor = 100 }
+		hidden_effect = { add_country_modifier = { name = bur_succession_cooldown duration = 100 hidden = yes } }
+		country_event = { id = flavor_bur.1004 days = 5 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:Death of Philippe de Rouvre happened:flavor_bur.1003"
+	}
+}
+
+# The Burgundian Inheritance
+country_event = {
+	id = flavor_bur.1004
+	title = "flavor_bur.1004.n"
+	desc = "flavor_bur.1004.t"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture
+	
+	fire_only_once = yes
+	major = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				BUR = { owns_or_non_sovereign_subject_of = 88 }
+			}
+			BUR = {
+				88 = { cede_province = FLA }
+			}
+		}
+		if = {
+			limit = {
+				BGG = {
+					is_subject_other_than_tributary_trigger = yes
+					is_subject_of = ROOT
+				}
+			}
+			FLA = {
+				vassalize = BGG
+			}
+		}
+		if = { 
+			limit = {
+				AUV = {
+					is_subject_other_than_tributary_trigger = yes
+					is_subject_of = ROOT
+				}
+			}
+			FRA = {
+				create_subject = {
+					subject_type = daimyo_vassal
+					who = AUV
+				}
+			}
+			AUV = {
+				if = {
+					limit = {
+						NOT = {
+							is_year = 1386
+						}
+					}
+					define_ruler = {
+						name = Jean
+						dynasty = "d'Auvergne"
+						male = yes
+						min_age = 35
+						max_age = 58
+						culture = Auvergnat
+					}
+				}
+				else = {
+					define_ruler = {
+						male = yes
+						dynasty = "d'Auvergne"
+						culture = Auvergnat
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_bur.1004.a"	#We choose France
+		ai_chance = { factor = 80 }
+		trigger = {
+			FRA = {
+				exists = yes 
+				is_free_or_tributary_trigger = yes
+				dynasty = "de Valois"
+			}
+		}
+		FRA = {
+			create_union = BUR
+		}
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided to revert Burgundy to France:flavor_bur.1004"
+	}
+	
+	option = {
+		name = "flavor_bur.1004.b"		#We choose Navarre
+		trigger = {
+			NAV = {
+				exists = yes
+				is_free_or_tributary_trigger = yes
+				dynasty = "d'Evreux"
+			}
+		}
+		ai_chance = { factor = 20 }
+		NAV = {
+			create_union = BUR
+		}
+		if = {
+			limit = {
+				FRA = {
+					exists = yes 
+					is_free_or_tributary_trigger = yes
+					dynasty = "de Valois"
+				}
+			}
+			FRA = {
+				add_casus_belli = {
+					target = BUR
+					type = cb_restore_personal_union
+					months = 36
+				}
+			}
+		}
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided to revert Burgundy to Navarre:flavor_bur.1004"
+	}
+	
+	option = {
+		name = "flavor_bur.1004.c"		#We choose ourselves
+		trigger = {
+			OR = {
+				ai = no
+				NOT = {
+					NAV = {
+						exists = yes
+						is_free_or_tributary_trigger = yes
+						dynasty = "d'Evreux"
+					}
+				}
+				NOT = {
+					FRA = {
+						exists = yes 
+						is_free_or_tributary_trigger = yes
+						dynasty = "de Valois"
+					}
+				}
+			}
+		}
+		ai_chance = { factor = 1 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided to let the Burgundians find their own Duke:flavor_bur.1004"
+	}
+	after = {
+		FLA = {
+			if = {
+				limit = {
+					exists = yes
+					dynasty = "de Dampierre"
+					OR = {
+						has_ruler = "Margarethe III"
+						has_heir = "Margarethe"
+					}
+				}
+				country_event = {
+					id = flavor_bur.104
+					days = 5
+				}
+			}
+			
+		}
+	}
+}
+
+country_event = {		#Promised husband to Margarethe has died, who is next?
+	id = flavor_bur.104
+	title = "flavor_bur.104.t"
+	desc = "flavor_bur.104.d"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture 
+	is_triggered_only = yes
+	major = yes
+
+	trigger = {
+		tag = FLA
+		dynasty = "de Dampierre"
+		OR = {
+			has_ruler = "Margarethe III"
+			has_heir = "Margarethe"
+		}
+	}
+
+	option = {			#France
+		name = flavor_bur.104.a
+		trigger = {
+			FRA = {
+				exists = yes
+				is_free_or_tributary_trigger = yes
+				dynasty = "de Valois"
+			}	
+		}
+		ai_chance = { factor = 80 }
+		hidden_effect = {
+			FRA = { set_country_flag = margarethe_marriage_promised_to_us }
+		} 
+	}
+
+	option = {		#England
+		name = flavor_bur.104.b
+		trigger = {
+			OR = {
+				AND = {
+					exists = ENG
+					ENG = {
+						is_free_or_tributary_trigger = yes
+						dynasty = "Plantagenet"
+					}
+				}
+				AND = {
+					exists = UEF
+					UEF = {
+						is_free_or_tributary_trigger = yes
+						dynasty = "Plantagenet"
+					}
+				}
+			}
+		}
+		ai_chance = { factor = 20 }
+		if = {
+			limit = {
+				exists = UEF
+			}
+			UEF = { create_union = FLA }
+		}
+		else_if = {
+			limit = {
+				exists = ENG
+			}
+			ENG = { create_union = FLA }
+		}
+		if = {
+			limit = {
+				FRA = {
+					exists = yes
+					is_free_or_tributary_trigger = yes
+					dynasty = "de Valois"
+				}
+			}
+			FRA = {
+				add_casus_belli = {
+					target = FLA
+					type = cb_restore_personal_union
+					months = 36
+				}
+			}
+		}
+	}
+
+	option = {		#Margarethe shall rule Flanders herself
+		name = flavor_bur.104.c
+		ai_chance = {
+			factor = 0
+		}
+		if = {
+			limit = {
+				FRA = {
+					exists = yes
+					is_free_or_tributary_trigger = yes
+					dynasty = "de Valois"
+				}
+			}
+			FRA = {
+				add_casus_belli = {
+					target = FLA
+					type = cb_restore_personal_union
+					months = 36
+				}
+			}
+		}
+	}
+}
+
+# Unruly Burgundy
+country_event = {
+	id = flavor_bur.1005
+	title = "flavor_bur.1005.n"
+	desc = "flavor_bur.1005.t"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = FRA
+		OR = {
+			senior_union_with = BUR
+			NOT = { exists = BUR }
+		}
+		BUR = {
+			NOT = { has_country_flag = burgundian_succession_crisis }
+			NOT = { has_country_flag = burgundian_escape_clause }
+		}
+		NOT = { has_global_flag = 1530_start_date }
+	}
+	
+	mean_time_to_happen = { months = 30 }
+	
+	option = {
+		name = "flavor_bur.1005.a"
+		ai_chance = { factor = 90 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:decided to let Philippe the Bold to rule Burgundy after complains:flavor_bur.1005"
+		if = {
+			limit = {
+				senior_union_with = BUR
+			}
+			break_union = BUR
+		}
+		if = {
+			limit = {
+				NOT = { exists = BUR }
+			}
+			every_owned_province = {
+				limit = {
+					is_core = BUR
+				}
+				cede_province = BUR
+			}
+		}
+		BUR = {
+			hidden_effect = { add_country_modifier = { name = bur_succession_cooldown duration = 100 hidden = yes } }
+			kill_heir = {}
+			kill_ruler = yes
+			define_ruler = {
+				name = "Philippe II"
+				dynasty = "de Valois"
+				ADM = 6
+				DIP = 5
+				MIL = 4
+			}
+		}
+		create_subject = {
+			subject = BUR
+			subject_type = appanage_subject
+		}
+		if = {
+			limit = {
+				has_country_flag = margarethe_marriage_promised_to_us
+			}
+			clr_country_flag = margarethe_marriage_promised_to_us
+			BUR = {
+				add_ruler_modifier = {
+					name = margarethe_marriage
+				}
+			}	
+		}
+		if = {
+			limit = {
+				FLA = { is_subject_of = FRA }
+			}
+			FRA = { free_vassal = FLA }
+			BUR = { vassalize = FLA }
+		}
+		if = {
+			limit = {
+				HAI = { is_subject_of = FRA }
+			}
+			FRA = { free_vassal = HAI }
+			BUR = { vassalize = HAI }
+		}
+		if = {
+			limit = {
+				HOL = { is_subject_of = FRA }
+			}
+			FRA = { free_vassal = HOL }
+			BUR = { vassalize = HOL }
+		}
+		if = {
+			limit = {
+				BRB = { is_subject_of = FRA }
+			}
+			FRA = { free_vassal = BRB }
+			BUR = { vassalize = BRB }
+		}
+		if = {
+			limit = {
+				AUV = { is_subject_of = FRA }
+			}
+			FRA = { free_vassal = AUV }
+			BUR = { vassalize = AUV }
+		}
+	}
+	
+	option = {
+		name = "flavor_bur.1005.b"
+		ai_chance = { 
+			factor = 10
+		}
+		log = "FE-BUR:[GetYear]:[Root.GetName]:refused to let Philippe the Bold to rule Burgundy after complains:flavor_bur.1005"
+		if = {
+			limit = {
+				senior_union_with = BUR
+			}
+			BUR = {
+				add_opinion = { who = ROOT modifier = independence_refused }
+				add_liberty_desire = 25
+			}
+		}
+		if = {
+			limit = {
+				FLA = {
+					is_free_or_tributary_trigger = yes
+					dynasty = "de Dampierre"
+				}
+				has_country_flag = margarethe_marriage_promised_to_us
+			}
+			create_union = FLA
+		}
+	}
+}
+
+# A Powerful Neighbor
+country_event = {
+	id = flavor_bur.1006
+	title = "flavor_bur.1006.n"
+	desc = "flavor_bur.1006.t"
+	picture = BURGUNDY_COURT_eventPicture
+
+	trigger = {
+		has_country_flag = burgundian_claim
+		#Minimum requirements
+		culture_group = low_frankish
+		NOT = { num_of_cities = 8 }
+		capital_scope = {
+			OR = {
+				region = belgii_region
+				region = low_countries_region
+			}
+		}
+		government = monarchy
+		#Specific to this event
+		#Exclusions
+		is_at_war = no
+		NOT = { tag = NED }
+		NOT = { tag = BUR }
+		OR = {
+			overlord = { ai = yes }
+			NOT = { is_subject_other_than_tributary_trigger = yes }
+		}
+		exists = BUR
+		BUR = { NOT = { has_country_flag = burgundian_succession_crisis } }
+		NOT = { has_global_flag = 1530_start_date }
+	}
+	
+	fire_only_once = yes
+	
+	mean_time_to_happen = {
+		
+		years = 8
+		
+		modifier = {
+			NOT = { num_of_cities = 2 }
+			factor = 2
+		}
+		modifier = {
+			NOT = { num_of_cities = 3 }
+			factor = 2
+		}
+		modifier = {
+			NOT = { num_of_cities = 4 }
+			factor = 2
+		}
+		modifier = {
+			factor = 0.5
+			num_of_owned_provinces_with = {
+				is_claim = BUR
+				value = 2
+			}
+		}
+		modifier = {
+			any_neighbor_country = { tag = BUR }
+			factor = 0.25
+		}
+		modifier = {
+			has_heir = no
+			factor = 0.5
+		}
+		modifier = {
+			marriage_with = BUR
+			factor = 0.7
+		}
+		modifier = {
+			ai = no
+			factor = 3
+		}
+	}
+	
+	immediate = {
+		clr_country_flag = burgundian_claim
+	}
+	
+	option = {
+		name = "flavor_bur.1006.a"
+		ai_chance = { factor = 95 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:pledged fealty to the Duke of Burgundy:flavor_bur.1006"
+		BUR = { country_event = { id = flavor_bur.1007 days = 1 } }
+	}
+	
+	option = {
+		name = "flavor_bur.1006.b"
+		ai_chance = { factor = 5 } #TODO: checks for power?
+		declare_war = BUR
+		BUR = { country_event = { id = flavor_bur.1008 days = 1 } }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:declared war on Burgundy:flavor_bur.1006"
+	}
+}
+
+country_event = {
+	id = flavor_bur.1007
+	title = "flavor_bur.1007.n"
+	desc = "flavor_bur.1007.t"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1007.a"
+		trigger = { FROM = { ai = yes } }
+		ai_chance = { factor = 90 }
+		FROM = {
+			hidden_effect = {
+				every_owned_province = {
+					every_neighbor_province = {
+						limit = {
+							NOT = { owned_by = FROM }
+							NOT = { owned_by = BUR }
+							OR = {
+								region = belgii_region
+								region = low_countries_region
+							}
+						}
+						add_claim = BUR
+					}
+				}
+			}
+		}
+		inherit = FROM
+	}
+	
+	option = {
+		name = "flavor_bur.1007.b"
+		ai_chance = { factor = 10 }
+		vassalize = FROM
+	}
+	
+	option = {
+		name = "flavor_bur.1007.c"
+		ai_chance = { factor = 0 }
+		add_legitimacy = 10
+		add_prestige = 20
+	}
+}
+
+country_event = {
+	id = flavor_bur.1008
+	title = "flavor_bur.1008.n"
+	desc = "flavor_bur.1008.t"
+	picture = BURGUNDY_COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1008.a"
+		belgii_region = {
+			limit = {
+				is_city = yes
+				owned_by = BRB
+			}
+			add_core = ROOT
+		}
+		low_countries_region = {
+			limit = {
+				is_city = yes
+				owned_by = BRB
+			}
+			add_core = ROOT
+		}
+	}
+}
+
+#The bankruptcy of Namur
+country_event = {
+	id = flavor_bur.1009
+	title = flavor_bur.1009.n
+	desc = flavor_bur.1009.t
+	picture = DIPLOMACY_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		culture_group = low_frankish
+		NOT = { has_global_flag = 1530_start_date }
+		#Minimum requirements
+		NOT = { num_of_cities = 8 }
+		capital_scope = {
+			OR = {
+				region = belgii_region
+				region = low_countries_region
+			}
+		}
+		government = monarchy
+		#Specific to this event
+		NOT = { years_of_income = 1 }
+		OR = {
+			num_of_loans = 1
+			is_bankrupt = yes
+			NOT = { years_of_income = 0.1 }
+			NOT = { stability = -2 }
+			num_of_revolts = 1
+		}
+		#Exclusions
+		OR = { has_regency = no has_consort_regency = yes }
+		is_at_war = no
+		NOT = { tag = NED }
+		NOT = { tag = BUR }
+		NOT = { personal_union = 1 }
+		NOT = { personal_union_limited = 1 }
+		NOT = { is_subject_other_than_tributary_trigger = yes }
+		exists = BUR
+		BUR = { NOT = { has_country_flag = burgundian_succession_crisis } }
+	}
+	
+	mean_time_to_happen = {
+		
+		years = 41
+		
+		modifier = {
+			any_neighbor_country = { tag = BUR }
+			factor = 0.25
+		}
+		modifier = {
+			has_heir = no
+			factor = 0.5
+		}
+		modifier = {
+			ai = no
+			factor = 3
+		}
+		modifier = {
+			num_of_loans = 1
+			factor = 0.7
+		}
+		modifier = {
+			NOT = { years_of_income = 0.10 }
+			factor = 0.7
+		}
+		modifier = {
+			is_bankrupt = yes
+			factor = 0.25
+		}
+		#Avoid the same country being targeted by a game-over event several times
+		modifier = {
+			has_country_flag = burgundian_claim
+			factor = 2
+		}
+		modifier = {
+			marriage_with = BUR
+			factor = 2
+		}
+		modifier = {
+			is_female = yes
+			factor = 2
+		}
+	}
+	
+	option = {
+		name = flavor_bur.1009.a
+		ai_chance = { factor = 95 }
+		custom_tooltip = game_over
+		add_years_of_income = 1
+		BUR = {
+			if = {
+				limit = {
+					HAI = { junior_union_with = HOL }
+				}
+				set_country_flag = hainaut_inheritance
+			}
+			country_event = { id = flavor_bur.1101 days = 5 }
+		}
+	}
+	option = {
+		name = flavor_bur.1009.b
+		ai_chance = { factor = 5 }
+		random_list = {
+			30 = {}
+			40 = {
+				Stab_Subtract50Percent = yes
+			}
+			30 = {
+				Stab_Subtract1 = yes
+			}
+		}
+		add_legitimacy = -10
+		add_prestige = -10
+		remove_advisor = random
+	}
+}
+
+#New Phase of the Cod and Hook Conflict in Holland
+country_event = {
+	id = flavor_bur.1010
+	title = "flavor_bur.1010.n"
+	desc = "flavor_bur.1010.t"
+	picture = CODS_HOOKS_eventPicture
+	
+	trigger = {
+		has_country_flag = burgundian_support
+		NOT = {
+			OR = {
+				has_ruler_modifier = involved_for_annexation
+				has_ruler_modifier = involved_for_vasselage
+				has_ruler_modifier = non_involvement
+			}
+		}
+		NOT = { has_global_flag = 1530_start_date }
+		HOL = {
+			num_of_cities = 1
+			is_free_or_tributary_trigger = yes
+		}
+	}
+	
+	mean_time_to_happen = { months = 12 }
+	
+	option = {
+		name = "flavor_bur.1010.a"
+		ai_chance = { factor = 90 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:actively supported the Cods:flavor_bur.1010"
+		add_treasury = -50
+		add_ruler_modifier = {
+			name = involved_for_annexation
+		}
+		97 = {
+			add_province_modifier = {
+				name = "peasants_organizing"
+				duration = 1825
+			}
+			custom_tooltip = peasants_organizing_tt
+		}
+		HOL = {
+			add_opinion = { who = ROOT modifier = outside_intervention }
+			set_country_flag = burgandian_interference_a
+		}
+	}
+	
+	option = {
+		name = "flavor_bur.1010.b"
+		ai_chance = { factor = 10 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:financially supported the Cods:flavor_bur.1010"
+		add_treasury = -25
+		add_ruler_modifier = {
+			name = involved_for_vasselage
+		}
+		HOL = {
+			add_opinion = { who = ROOT modifier = outside_intervention }
+			set_country_flag = burgandian_interference_v
+		}
+	}
+	
+	option = {
+		name = "flavor_bur.1010.c"
+		ai_chance = { factor = 0 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:have not supported the Cods:flavor_bur.1010"
+		add_ruler_modifier = {
+			name = non_involvement
+		}
+		HOL = {
+			add_opinion = { who = ROOT modifier = non_interference }
+		}
+	}
+}
+country_event = {
+	id = flavor_bur.1011
+	title = "flavor_bur.1011.n"
+	desc = "flavor_bur.1011.t"
+	picture = CODS_HOOKS_eventPicture
+	
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1011.a"
+		log = "FE-BUR:[GetYear]:[Root.GetName]:Victory of the Cods in Holland:flavor_bur.1011"
+		inherit = HOL
+		log = "FE-BUR:[GetYear]:[Root.GetName]:inherited Holland:flavor_bur.1011"
+		if = {
+			limit = {
+				has_country_flag = hainaut_inheritance
+				HAI = { is_at_war = no }
+			}
+			inherit = HAI
+			log = "FE-BUR:[GetYear]:[Root.GetName]:inherited Hainau:flavor_bur.1011"
+		}
+	}
+}
+country_event = {
+	id = flavor_bur.1012
+	title = "flavor_bur.1012.n"
+	desc = "flavor_bur.1012.t"
+	picture = CODS_HOOKS_eventPicture
+	
+	fire_only_once = yes
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1012.a"
+		log = "FE-BUR:[GetYear]:[Root.GetName]:Victory of the Cods in Holland:flavor_bur.1012"
+		vassalize = HOL
+		log = "FE-BUR:[GetYear]:[Root.GetName]:vassalized Holland:flavor_bur.1012"
+		if = {
+			limit = {
+				HAI = { junior_union_with = HOL }
+			}
+			vassalize = HAI
+			log = "FE-BUR:[GetYear]:[Root.GetName]:vassalized Hainau:flavor_bur.1012"
+		}
+	}
+}
+
+# The Count's plans come to fruition
+country_event = {
+	id = flavor_bur.1013
+	title = "flavor_bur.1013.n"
+	desc = "flavor_bur.1013.t"
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes #By flavor_bur.1001
+	
+	option = {
+		name = "flavor_bur.1013.a" #Accept the union
+		ai_chance = { factor = 90 }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:accepted the union with Flanders:flavor_bur.1013"
+	}
+	option = {
+		name = "flavor_bur.1013.b" #Reject the union
+		ai_chance = {
+			factor = 10
+			modifier = {
+				is_rival = BUR
+				factor = 3
+			}
+			modifier = {
+				is_enemy = BUR
+				factor = 3
+			}
+			modifier = {
+				overlord_of = FROM
+				factor = 3
+			}
+			modifier = {
+				alliance_with = FROM
+				factor = 2
+			}
+			modifier = {
+				marriage_with = FROM
+				factor = 2
+			}
+			modifier = {
+				war_with = BUR
+				factor = 5
+			}
+			modifier = {
+				truce_with = BUR
+				factor = 5
+			}
+		}
+		log = "FE-BUR:[GetYear]:[Root.GetName]:rejected the union with Flanders:flavor_bur.1013"
+		add_legitimacy = -1
+		BUR = { add_opinion = { who = ROOT modifier = insulted } }
+		if = {
+			limit = { overlord_of = FROM }
+			add_casus_belli = { target = BUR type = cb_insult months = 120 }
+		}
+		if = {
+			limit = {
+				NOT = { overlord_of = FROM }
+				OR = {
+					alliance_with = FROM
+					marriage_with = FROM
+				}
+			}
+			add_casus_belli = { target = BUR type = cb_insult months = 12 }
+		}
+	}
+}
+
+country_event = {
+	id = flavor_bur.1014
+	title = "flavor_bur.1014.n"
+	desc = "flavor_bur.1014.t"
+	picture = CODS_HOOKS_eventPicture
+
+	is_triggered_only = yes #from flavor_hol.1100
+	
+	option = {
+		name = "flavor_bur.1014.a"
+		log = "FE-BUR:[GetYear]:[Root.GetName]:got claims on provinces previously owned by [HOL.GetName]:flavor_bur.1014"
+		every_province = {
+			limit = {
+				is_city = yes
+				previous_owner = HOL
+			}
+			add_claim = ROOT
+		}
+		every_province = {
+			limit = {
+				is_city = yes
+				owned_by = HAI
+				HAI = { junior_union_with = HOL }
+			}
+			add_claim = ROOT
+		}
+	}
+}
+
+country_event = {
+	id = flavor_bur.1015
+	title = "flavor_bur.1015.n"
+	desc = "flavor_bur.1015.t"
+	picture = CODS_HOOKS_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1015.a"
+		log = "FE-BUR:[GetYear]:[Root.GetName]:got claims on provinces owned by [HOL.GetName]:flavor_bur.1015"
+		every_province = {
+			limit = {
+				is_city = yes
+				owned_by = HOL
+			}
+			add_claim = ROOT
+		}
+		every_province = {
+			limit = {
+				is_city = yes
+				owned_by = HAI
+				HAI = { junior_union_with = HOL }
+			}
+			add_claim = ROOT
+		}
+	}
+}
+
+country_event = {
+	id = flavor_bur.1051
+	title = "flavor_bur.1051.n"
+	desc = "flavor_bur.1051.t"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture
+
+	is_triggered_only = yes	 #Triggered by Burgundy decisions
+
+	option = {
+		name = "flavor_bur.1051.a"
+		ai_chance = { factor = 100 }
+		hidden_effect = { set_country_flag = bur_inherit }
+		log = "FE-BUR:[GetYear]:[Root.GetName]:got inherited by [BUR.GetName]:flavor_bur.1051"
+		every_subject_country = {
+			limit = { 
+				OR = {
+					is_subject_of_type = personal_union 
+					is_subject_of_type = personal_union_limited 
+				}
+			}
+			log = "FE-BUR:[GetYear]:[This.GetName]:as lesser partner of [Root.GetName], got inherited by [BUR.GetName]:flavor_bur.1051"
+			ROOT = { inherit = PREV }
+		}
+		FROM = {
+			inherit = ROOT
+			if = {
+				limit = {
+					has_country_flag = bur_artois_inherit_done
+				}
+				clr_country_flag = bur_artois_inherit_done
+				release = BGG
+				create_union = BGG
+				BGG = { 
+					Reset_Religion_to_Capital = yes 
+					clr_country_flag = POP_Init
+					country_event = { id = Init.1 }
+				}
+			}
+		}
+
+	}
+	
+	option = {
+		name = "flavor_bur.1051.b"
+		ai_chance = { factor = 0 }
+		FROM = {
+			#remove_country_modifier = expansion_trough_marriage
+			add_opinion = {
+				who = ROOT
+				modifier = opinion_refused_marriage
+			}
+		}
+	}
+}
+
+# The count of Namur pawns his County
+country_event = {
+	id = flavor_bur.1101
+	title = "flavor_bur.1101.n"
+	desc = "flavor_bur.1101.t"
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes	#Triggered by a NAM pawn_the_county decision (REUW_Burgundy decision file).
+	
+	option = {
+		name = "flavor_bur.1101.a"
+		log = "FE-BUR:[GetYear]:[Root.GetName]:agreed to pawn the Namur:flavor_bur.1101"
+		ai_chance = { factor = 100 }
+		if = {
+			limit = { FROM = { total_development = 5 NOT = { total_development = 10 } } }
+			add_treasury = -30
+		}
+		if = {
+			limit = { FROM = { total_development = 10 NOT = { total_development = 15 } } }
+			add_treasury = -60
+		}
+		if = {
+			limit = { FROM = { total_development = 15 NOT = { total_development = 20 } } }
+			add_treasury = -90
+		}
+		if = {
+			limit = { FROM = { total_development = 20 NOT = { total_development = 25 } } }
+			add_treasury = -120
+		}
+		if = {
+			limit = { FROM = { total_development = 25 NOT = { total_development = 30 } } }
+			add_treasury = -150
+		}
+		if = {
+			limit = { FROM = { total_development = 30 NOT = { total_development = 35 } } }
+			add_treasury = -180
+		}
+		if = {
+			limit = { FROM = { total_development = 35 NOT = { total_development = 40 } } }
+			add_treasury = -210
+		}
+		if = {
+			limit = { FROM = { total_development = 40 NOT = { total_development = 45 } } }
+			add_treasury = -240
+		}
+		if = {
+			limit = { FROM = { total_development = 45 NOT = { total_development = 50 } } }
+			add_treasury = -270
+		}
+		if = {
+			limit = { FROM = { total_development = 50 } }
+			add_treasury = -300
+		}
+		FROM = {
+			hidden_effect = {
+				every_owned_province = {
+					every_neighbor_province = {
+						limit = {
+							NOT = { owned_by = FROM }
+							NOT = { owned_by = BUR }
+							OR = {
+								region = belgii_region
+								region = low_countries_region
+							}
+						}
+						add_claim = BUR
+						owner = { set_country_flag = burgundian_claim }
+					}
+				}
+			}
+		}
+		inherit = FROM
+	}
+	option = {
+		name = "flavor_bur.1101.b"
+		ai_chance = { factor = 0 }
+		add_prestige = -25
+		log = "FE-BUR:[GetYear]:[Root.GetName]:refused to pawn the Namur:flavor_bur.1101"
+	}
+}
+
+country_event = {
+	id = flavor_bur.1151
+	title = "flavor_bur.1151.n"
+	desc = "flavor_bur.1151.t"
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_bur.1151.a"
+		ai_chance = { factor = 1 }
+		add_prestige = -10
+	}
+}
+

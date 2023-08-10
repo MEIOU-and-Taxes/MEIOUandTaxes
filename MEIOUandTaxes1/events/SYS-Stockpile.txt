@@ -1,0 +1,836 @@
+namespace = POP_Stockpile
+
+country_event = {
+    id = POP_Stockpile.0011
+    title = no_localisation
+    desc = no_localisation
+	picture = MEIOU_AND_TAXES_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+
+    immediate = {
+		hidden_effect = {
+			Military_DoSpecialReact = yes
+			Military_DoSpecial = yes
+			
+			### Handle State Recruitment into actual manpower values for all valid provinces
+			### We need this data to budget
+			regiongroup = {
+				region = {
+					limit = {
+						isValidProv = yes
+					}
+					Military_DoPreBU = yes
+					### Get cost per good per unit, for both training and recruitment
+					Military_GetCost = { type = Maint return = Mil_CostMaint }
+					Military_GetCost = { type = Build return = Mil_CostBuild }
+				}
+			}
+			
+			### Handle Country manpower calculations
+			every_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				#####
+				# HANDLE MANPOWER LOSS DISTRIBUTION
+				#####
+				Mil_ManpowerLossCalc = yes
+
+				### FIGURE OUT BUREAU MANPOWER MONEY ALLOCATION
+				Mil_DoBudgetBU = yes
+			}
+			
+			######
+			# Calculation of actual recruitment, training based on budget and goods cost per province
+			######
+			regiongroup = {
+				region = {
+					limit = {
+						isValidProv = yes
+					}
+					
+					### Calculate manpower potential and calculate for various elite recruitment types
+					Military_DoPre = { type = NO } # Noble Levies
+					Military_DoPre = { type = BG } # Citizen Militia
+					Military_DoPre = { type = TR } # Clan Host
+					Military_DoPreHelperBU = yes # State Army calc
+					
+					# Get maint/build totals, also affect it by API to replicate cost effects and prevent wealth leaks
+					# Maint
+					set_key = { lhs = Mil_MPMaint value = 0 }
+					
+					set_key = { lhs = Public_Tmp5 which = NO_MPMaint }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilNOCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilNOMaint }
+					change_key = { lhs = Mil_MPMaint which = Public_Tmp5 }
+					
+					set_key = { lhs = Public_Tmp5 which = BG_MPMaint }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBGCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBGMaint }
+					change_key = { lhs = Mil_MPMaint which = Public_Tmp5 }
+					
+					set_key = { lhs = Public_Tmp5 which = TR_MPMaint }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilTRCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilTRMaint }
+					change_key = { lhs = Mil_MPMaint which = Public_Tmp5 }
+					
+					set_key = { lhs = Public_Tmp5 which = BU_MPMaint }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBUCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBUMaint }
+					change_key = { lhs = Mil_MPMaint which = Public_Tmp5 }
+					
+					# Build
+					set_key = { lhs = Mil_MPBuild value = 0 }
+					
+					set_key = { lhs = Public_Tmp5 which = NO_MPBuild }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilNOCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilNOBuild }
+					change_key = { lhs = Mil_MPBuild which = Public_Tmp5 }
+					
+					set_key = { lhs = Public_Tmp5 which = BG_MPBuild }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBGCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBGBuild }
+					change_key = { lhs = Mil_MPBuild which = Public_Tmp5 }
+					
+					set_key = { lhs = Public_Tmp5 which = TR_MPBuild }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilTRCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilTRBuild }
+					change_key = { lhs = Mil_MPBuild which = Public_Tmp5 }
+					
+					set_key = { lhs = Public_Tmp5 which = BU_MPBuild }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBUCost }
+					multiply_key = { lhs = Public_Tmp5 which = Modi_MilBUBuild }
+					change_key = { lhs = Mil_MPBuild which = Public_Tmp5 }
+					
+					set_key = { lhs = Mil_Maint which = Mil_MPMaint }
+					set_key = { lhs = Mil_Build which = Mil_MPBuild }
+					# Calc goods required for actually to be recruited & maintained troops
+					Military_GetMaint = { out = Mil_Maint size = Mil_Maint }
+					Military_GetBuild = { out = Mil_Build size = Mil_Build }
+				}
+			}
+			
+			###########
+			# Navy calculation of military system
+			###########
+			every_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				set_key = { lhs = Mil_Navy5 value = 0 }
+				set_key = { lhs = Mil_Navy22 value = 0 }
+				set_key = { lhs = Mil_Navy23 value = 0 }
+				set_key = { lhs = Mil_Navy24 value = 0 }
+				
+				if = {
+					limit = {
+						has_global_flag = POP_Sim
+					}
+					set_key = { lhs = Public_Tmp5 which = SP_Transport }
+					set_key = { lhs = Public_Tmp6 which = SP_Galley }
+					set_key = { lhs = Public_Tmp7 which = SP_Light }
+					set_key = { lhs = Public_Tmp8 which = SP_Heavy }
+				}
+				else = {
+					set_key = { lhs = Public_Tmp5 value = 0 }
+					set_key = { lhs = Public_Tmp6 value = 0 }
+					set_key = { lhs = Public_Tmp7 value = 0 }
+					set_key = { lhs = Public_Tmp8 value = 0 }
+				}
+				
+				Military_DoTransport = yes
+				Military_DoGalley = yes
+				Military_DoLight = yes
+				Military_DoHeavy = yes
+				
+				set_key = { lhs = Stat_NFL value = 0 }
+				
+				capital_scope = {
+					if = {
+						limit = {
+							is_key_equal = { lhs = Stat_NFL value = 0 }
+						}
+						set_key = { lhs = Stat_NFL value = 0.1 }
+					}
+				}
+				
+				every_owned_province = {
+					limit = {
+						check_key = { lhs = Stat_NFL value = 0.001 }
+					}
+					PREV = { 
+						change_key = { lhs = Stat_NFL which = PREV }
+					}
+				}
+				
+				if = { #If Budget is higher than the maximum possible levy
+					limit = {
+						check_key = { lhs = Stat_NFL value = 1 }
+					}
+					divide_key = { lhs = Mil_Navy5 which = Stat_NFL }
+					divide_key = { lhs = Mil_Navy22 which = Stat_NFL }
+					divide_key = { lhs = Mil_Navy23 which = Stat_NFL }
+					divide_key = { lhs = Mil_Navy24 which = Stat_NFL }
+				}
+				else = {
+					set_key = { lhs = Mil_Navy5 value = 0 }
+					set_key = { lhs = Mil_Navy22 value = 0 }
+					set_key = { lhs = Mil_Navy23 value = 0 }
+					set_key = { lhs = Mil_Navy24 value = 0 }
+				}
+				
+				set_key = { lhs = Tmp_0 value = 0 }
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				
+				every_owned_province = {
+					limit = {
+						check_key = { lhs = Stat_NFL value = 0.001 }
+					}
+					set_key = { lhs = Mil_Navy5 which = PREV }
+					set_key = { lhs = Mil_Navy22 which = PREV }
+					set_key = { lhs = Mil_Navy23 which = PREV }
+					set_key = { lhs = Mil_Navy24 which = PREV }
+					
+					multiply_key = { lhs = Mil_Navy5 which = Stat_NFL }
+					multiply_key = { lhs = Mil_Navy22 which = Stat_NFL }
+					multiply_key = { lhs = Mil_Navy23 which = Stat_NFL }
+					multiply_key = { lhs = Mil_Navy24 which = Stat_NFL }
+					
+					set_key = { lhs = Tmp_0 which = TN_ProvPrc5 }
+					set_key = { lhs = Tmp_1 which = TN_ProvPrc22 }
+					set_key = { lhs = Tmp_2 which = TN_ProvPrc23 }
+					set_key = { lhs = Tmp_3 which = TN_ProvPrc24 }
+					
+					multiply_key = { lhs = Tmp_0 which = Stat_NFL }
+					multiply_key = { lhs = Tmp_1 which = Stat_NFL }
+					multiply_key = { lhs = Tmp_2 which = Stat_NFL }
+					multiply_key = { lhs = Tmp_3 which = Stat_NFL }
+					
+					PREV = {
+						change_key = { lhs = Tmp_0 which = PREV }
+						change_key = { lhs = Tmp_1 which = PREV }
+						change_key = { lhs = Tmp_2 which = PREV }
+						change_key = { lhs = Tmp_3 which = PREV }
+					}
+				}
+				
+				if = { #If Budget is higher than the maximum possible levy
+					limit = {
+						check_key = { lhs = Stat_NFL value = 1 }
+					}
+					divide_key = { lhs = Tmp_0 which = Stat_NFL }
+					divide_key = { lhs = Tmp_1 which = Stat_NFL }
+					divide_key = { lhs = Tmp_2 which = Stat_NFL }
+					divide_key = { lhs = Tmp_3 which = Stat_NFL }
+				}
+				else = {
+					set_key = { lhs = Tmp_0 value = 0 }
+					set_key = { lhs = Tmp_1 value = 0 }
+					set_key = { lhs = Tmp_2 value = 0 }
+					set_key = { lhs = Tmp_3 value = 0 }
+				}
+				
+				set_key = { lhs = SP_Transport value = 1 }
+				
+				Military_DoTransport = yes
+				
+				multiply_key = { lhs = Mil_5 which = Tmp_0 }
+				multiply_key = { lhs = Mil_23 which = Tmp_2 }
+				multiply_key = { lhs = Mil_24 which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_4 which = Mil_5 }
+				change_key = { lhs = Tmp_4 which = Mil_23 }
+				change_key = { lhs = Tmp_4 which = Mil_24 }
+				
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 value = 0.012 }
+					}
+					divide_key = { lhs = Tmp_4 value = 12 }
+				}
+				
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=1.28 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.64 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.32 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.16 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.08 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.04 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.02 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Trans value=0.01 type=country }
+				
+				set_key = { lhs = SP_Galley value = 1 }
+				
+				Military_DoGalley = yes
+				
+				multiply_key = { lhs = Mil_22 which = Tmp_1 }
+				multiply_key = { lhs = Mil_23 which = Tmp_2 }
+				multiply_key = { lhs = Mil_24 which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_4 which = Mil_22 }
+				change_key = { lhs = Tmp_4 which = Mil_23 }
+				change_key = { lhs = Tmp_4 which = Mil_24 }
+				
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 value = 0.012 }
+					}
+					divide_key = { lhs = Tmp_4 value = 12 }
+				}
+				
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=1.28 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.64 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.32 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.16 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.08 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.04 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.02 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Galley value=0.01 type=country }
+				
+				set_key = { lhs = SP_Light value = 1 }
+				
+				Military_DoLight = yes
+				
+				multiply_key = { lhs = Mil_5 which = Tmp_0 }
+				multiply_key = { lhs = Mil_22 which = Tmp_1 }
+				multiply_key = { lhs = Mil_23 which = Tmp_2 }
+				multiply_key = { lhs = Mil_24 which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_4 which = Mil_5 }
+				change_key = { lhs = Tmp_4 which = Mil_22 }
+				change_key = { lhs = Tmp_4 which = Mil_23 }
+				change_key = { lhs = Tmp_4 which = Mil_24 }
+				
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 value = 0.012 }
+					}
+					divide_key = { lhs = Tmp_4 value = 12 }
+				}
+				
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=1.28 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.64 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.32 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.16 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.08 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.04 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.02 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Light value=0.01 type=country }
+				
+				set_key = { lhs = SP_Heavy value = 1 }
+				
+				Military_DoHeavy = yes
+				
+				multiply_key = { lhs = Mil_5 which = Tmp_0 }
+				multiply_key = { lhs = Mil_22 which = Tmp_1 }
+				multiply_key = { lhs = Mil_23 which = Tmp_2 }
+				multiply_key = { lhs = Mil_24 which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_4 which = Mil_5 }
+				change_key = { lhs = Tmp_4 which = Mil_22 }
+				change_key = { lhs = Tmp_4 which = Mil_23 }
+				change_key = { lhs = Tmp_4 which = Mil_24 }
+				
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 value = 0.012 }
+					}
+					divide_key = { lhs = Tmp_4 value = 12 }
+				}
+				
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=1.28 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.64 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.32 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.16 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.08 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.04 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.02 type=country }
+				POP_SetMod = { varname=Tmp_4 modname=SP_Heavy value=0.01 type=country }
+				
+				set_key = { lhs = SP_Transport which = Public_Tmp5 }
+				set_key = { lhs = SP_Galley which = Public_Tmp6 }
+				set_key = { lhs = SP_Light which = Public_Tmp7 }
+				set_key = { lhs = SP_Heavy which = Public_Tmp8 }
+			}
+		}
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_Stockpile.0012
+    title = no_localisation
+    desc = no_localisation
+	picture = MEIOU_AND_TAXES_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+
+    immediate = {
+		hidden_effect = {
+			regiongroup = {
+				region = {
+					limit = {
+						isValidProv = yes
+					}
+					Military_GetSpend = { in = Mil_Maint return = Mil_MaintSpend }
+					Military_GetSpend = { in = Mil_Build return = Mil_BuildSpend }
+										
+					Military_GetFill = { return = Mil_Fill }
+					
+					Military_DoAfter = { from = NO who0 = NO who1 = SF who2 = Special }
+					Military_DoAfter = { from = BG who0 = BG who1 = RE who2 = Special }
+					Military_DoAfter = { from = TR who0 = SF who1 = RE who2 = NM who3 = NO who4 = BG who5 = CL who6 = Special }
+					Military_DoAfter = { from = BU who0 = SF who1 = RE who2 = NO who3 = BG who4 = CL who5 = Special }					
+				}
+			}
+			
+			every_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				set_key = { lhs = BU_SpendMP value = 0 }
+				set_key = { lhs = BU_SpendMPMaint value = 0 }
+				set_key = { lhs = BU_SpendMPBuild value = 0 }
+				set_key = { lhs = BU_SpendMPMaintSave value = 0 }
+				
+				every_owned_province = {
+					set_key = { lhs = BU_SpendMPMaintSave which = BU_SpendMPMaint }
+					if = {
+						limit = {
+							check_key = { lhs = BU_SpendMPMaintSave value = 0.001 }
+						}
+						divide_key = { lhs = BU_SpendMPMaintSave which = Mil_BUSliderSave }  # Undo the saving
+					}
+					PREV = {
+						change_key = { lhs = BU_SpendMP which = PREV }
+						change_key = { lhs = BU_SpendMPMaint which = PREV }
+						change_key = { lhs = BU_SpendMPBuild which = PREV }
+						change_key = { lhs = BU_SpendMPMaintSave which = PREV }
+					}
+				}
+			}
+		}
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+country_event = {
+    id = POP_Stockpile.002
+    title = no_localisation
+    desc = no_localisation
+	picture = MEIOU_AND_TAXES_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		hidden_effect = {
+			every_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				if = {
+					limit = {
+						#ai = no # This is now enabled for ALL nations
+						NOT = { has_global_flag = POP_Sim }
+					}
+					## This is a 0.333-1.0 value due to the defines, if changed check the save of the slider too
+					POP_GetMaint = { type = land return = Public_Tmp1 }
+					# figure out what 1 months worth is worth
+					if = {
+						limit = {
+							check_key = { lhs = Public_Tmp1 value = 0.001 }
+						}
+						multiply_key = { lhs = Public_Tmp1 value = 0.666 } ## *0.666
+					}
+					change_key = { lhs = Public_Tmp1 value = 0.333 }
+					multiply_key = { lhs = Public_Tmp1 value = 0.083 }	#Divide by 12
+					### add to the stack
+					change_key = { lhs = Mil_BUSlider which = Public_Tmp1 }
+				}
+				else = {
+					set_key = { lhs = Mil_BUSlider value = 0.666 }
+				}
+				if = {
+					limit = {
+						NOT = { check_key = { lhs = Mil_BUSlider value = 0.001 } }
+					}
+					set_key = { lhs = Mil_BUSlider value = 0.001 }
+				}
+				
+				set_key = { lhs = Public_Tmp1 value = 0 }
+				
+				if = {
+					limit = {
+						NOT = { has_global_flag = POP_Sim }
+					}
+					POP_GetMaint = { type = naval return = Public_Tmp1 }
+					multiply_key = { lhs = Public_Tmp1 value = 0.667 }
+					change_key = { lhs = Public_Tmp1 value = 0.333 }
+
+					change_key = { lhs = Public_Tmp1 value = 1 }
+					multiply_key = { lhs = Public_Tmp1 value = 0.042 } # ~/24
+
+					POP_GetNumOf = { type = transport return = Public_Tmp2 }
+					multiply_key = { lhs = Public_Tmp2 which = Public_Tmp1 }
+					change_key = { lhs = SP_Transport which = Public_Tmp2 }
+
+					POP_GetNumOf = { type = galley return = Public_Tmp2 }
+					multiply_key = { lhs = Public_Tmp2 which = Public_Tmp1 }
+					change_key = { lhs = SP_Galley which = Public_Tmp2 }
+
+					POP_GetNumOf = { type = light_ship return = Public_Tmp2 }
+					multiply_key = { lhs = Public_Tmp2 which = Public_Tmp1 }
+					change_key = { lhs = SP_Light which = Public_Tmp2 }
+
+					POP_GetNumOf = { type = heavy_ship return = Public_Tmp2 }
+					multiply_key = { lhs = Public_Tmp2 which = Public_Tmp1 }
+					change_key = { lhs = SP_Heavy which = Public_Tmp2 }
+				}
+			}
+		}
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+country_event = {
+    id = POP_Stockpile.0031
+    title = no_localisation
+    desc = no_localisation
+	picture = MEIOU_AND_TAXES_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		hidden_effect = {
+			every_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				set_key = { lhs = BU_SpendMP value = 0 }
+				set_key = { lhs = BU_SpendMPMaintSave value = 0 }
+				set_key = { lhs = BU_SpendMPMaint value = 0 }
+				set_key = { lhs = BU_SpendMPBuild value = 0 }
+				
+				every_owned_province = {
+					set_key = { lhs = MP_Losses value = 0 }
+					PREV = {
+						change_key = { lhs = BU_SpendMP which = PREV }
+						change_key = { lhs = BU_SpendMPMaintSave which = PREV }
+						change_key = { lhs = BU_SpendMPMaint which = PREV }
+						change_key = { lhs = BU_SpendMPBuild which = PREV }
+					}
+				}
+				set_key = { lhs = Mil_BUMonthlyCost which = MP_MP }
+				if = {
+					limit = {
+						check_key = { lhs = Mil_BUMonthlyCost value = 0.01 }
+					}
+					divide_key = { lhs = Mil_BUMonthlyCost which = MP_YearStart }
+				}
+				else = {
+					set_key = { lhs = Mil_BUMonthlyCost value = 0 }
+				}
+				multiply_key = { lhs = Mil_BUMonthlyCost which = BU_SpendMPMaintSave }
+				# Very important. Basically, sum up what the actual amount paid was. This is how many goods are demanded
+				# Then, apply it to maintenance demand, drop it. But afterwards, we actually want to scale the costs back up
+				# Because for the next year, if they pay more, we need to factor that in
+				# This will be slightly leaky. But, it allows a range of player dynamism.
+				if = {
+					limit = {
+						check_key = { lhs = Mil_BUMonthlyCost value = 0.012 }
+					}
+					divide_key = { lhs = Mil_BUMonthlyCost value = 12 }
+				}
+
+				## Remove these so Modi_MilTrainSave can get a pure reading
+				POP_ClrMod = { modname=Mil_Maint value=327.68 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=163.84 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=81.92 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=40.96 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=20.48 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=10.24 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=5.12 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=2.56 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=1.28 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.64 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.32 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.16 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.08 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.04 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.02 type=country }
+				POP_ClrMod = { modname=Mil_Maint value=0.01 type=country }
+
+				### Moved land_maintenance_modifier export to this, so it can resume its old use in the mil system
+				## Modi_MilTrainSave is used to reduce recruit costs for elites in SYS-API
+				export_to_key = {
+					lhs = Modi_MilTrainSave
+					value = modifier:land_maintenance_modifier
+				}
+				change_key = { lhs = Modi_MilTrainSave value = 1 }
+				
+				export_to_key = {
+					lhs = Tmp_3
+					value = army_size
+				}
+				POP_GetMerc = { return=Tmp_1 }
+				subtract_key = { lhs = Tmp_3 which = Tmp_1 }
+				# Tmp 3 is true army size, no mercs
+				export_to_key = {
+					lhs = Tmp_1
+					value = max_manpower
+				}
+				if = {
+					limit = {
+						ai = yes
+					}
+					change_key = { lhs = Tmp_1 which = MP_RaisedReg }
+				}
+				set_key = { lhs = Tmp_4 which = Tmp_3 }
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 value = 0.001 }
+					}
+					divide_key = { lhs = Tmp_4 which = Tmp_1 }
+				}
+				else = {
+					set_key = { lhs = Tmp_4 value = 0 }
+				}
+				# Tmp_4 here is % of manpower that is on the field
+				set_key = { lhs = Tmp_2 value = 1 }
+				subtract_key = { lhs = Tmp_2 which = Tmp_4 }
+				# Tmp_2 here is % of manpower off the field
+				
+				set_key = { lhs = Mil_ManpowerExpenses value = 0 }
+				capital_scope = {
+					set_key = { lhs = Mil_BUMonthlyCost which = PREV }
+					set_key = { lhs = Tmp_2 which = PREV }
+					multiply_key = { lhs = Mil_BUMonthlyCost which = Tmp_2 } # only send the manpower not on the field to misc expenses
+					if = {
+						limit = {
+							NOT = { has_global_flag = POP_Sim }
+						}
+						owner = {
+							export_to_key = {
+								lhs = Tmp_0
+								value = trigger_value:land_maintenance
+							}
+						}
+						set_key = { lhs = Tmp_0 which = PREV }
+						multiply_key = { lhs = Tmp_0 value = 0.5 }
+						change_key = { lhs = Tmp_0 value = 0.5 }
+						multiply_key = { lhs = Mil_BUMonthlyCost which = Tmp_0 }
+					}
+					
+					multiply_key = { lhs = Mil_BUMonthlyCost value = 12 }
+					
+					set_key = { lhs = Mil_ManpowerExpenses which = Mil_BUMonthlyCost }
+					PREV = { set_key = { lhs = Mil_ManpowerExpenses which = PREV } }
+					
+					set_key = { lhs = Stat_Inp which = Mil_BUMonthlyCost }
+					change_key = { lhs = Stat_Inp which = Stat_Misc }
+					set_key = { lhs = Misc_Final which = Stat_Inp }
+			
+					if = {
+						limit = {
+							NOT = { check_key = { lhs = Stat_Inp value = 0.01 } }
+						}
+						if = {
+							limit = {
+								NOT = { has_province_modifier = misc_expenses_none }
+							}
+							POP_ClrMod = { modname=misc_expenses_neg value=0.64 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.32 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.16 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.08 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.04 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.02 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.01 type=province }
+							POP_ClrMod = { modname=misc_expenses value=5242.88 type=province }
+							POP_ClrMod = { modname=misc_expenses value=2621.44 type=province }
+							POP_ClrMod = { modname=misc_expenses value=1310.72 type=province }
+							POP_ClrMod = { modname=misc_expenses value=655.36 type=province }
+							POP_ClrMod = { modname=misc_expenses value=327.68 type=province }
+							POP_ClrMod = { modname=misc_expenses value=163.84 type=province }
+							POP_ClrMod = { modname=misc_expenses value=81.92 type=province }
+							POP_ClrMod = { modname=misc_expenses value=40.96 type=province }
+							POP_ClrMod = { modname=misc_expenses value=20.48 type=province }
+							POP_ClrMod = { modname=misc_expenses value=10.24 type=province }
+							POP_ClrMod = { modname=misc_expenses value=5.12 type=province }
+							POP_ClrMod = { modname=misc_expenses value=2.56 type=province }
+							POP_ClrMod = { modname=misc_expenses value=1.28 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.64 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.32 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.16 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.08 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.04 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.02 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.01 type=province }
+							add_province_modifier = {
+								name = misc_expenses_none 
+								duration = -1
+								hidden = yes
+							}
+						}
+					}
+					else = {
+						if = {
+							limit = {
+								has_province_modifier = misc_expenses_none
+							}
+							remove_province_modifier = misc_expenses_none
+						}
+						
+						export_to_key = { lhs = Tmp_0 value = development }
+						multiply_key = { lhs = Stat_Inp value = 100 }
+						if = {
+							limit = {
+								check_key = { lhs = Tmp_0 value = 1 }
+							}
+							divide_key = { lhs = Stat_Inp which = Tmp_0 }
+						}
+						if = {
+							limit = {
+								check_key = { lhs = Stat_Inp value = 0.001 }
+							}
+							divide_key = { lhs = Stat_Inp value = 12 }
+						}
+						subtract_key = { lhs = Stat_Inp value = 1 }
+						if = {
+							limit = {
+								check_key = { lhs = Stat_Inp value = 0.001 }
+							}
+							POP_ClrMod = { modname=misc_expenses_neg value=0.64 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.32 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.16 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.08 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.04 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.02 type=province }
+							POP_ClrMod = { modname=misc_expenses_neg value=0.01 type=province }
+						
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=5242.88 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=2621.44 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=1310.72 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=655.36 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=327.68 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=163.84 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=81.92 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=40.96 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=20.48 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=10.24 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=5.12 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=2.56 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=1.28 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.64 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.32 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.16 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.08 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.04 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.02 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses value=0.01 type=province }
+						}
+						else = {
+							multiply_key = { lhs = Stat_Inp value = -1 }
+						
+							POP_ClrMod = { modname=misc_expenses value=5242.88 type=province }
+							POP_ClrMod = { modname=misc_expenses value=2621.44 type=province }
+							POP_ClrMod = { modname=misc_expenses value=1310.72 type=province }
+							POP_ClrMod = { modname=misc_expenses value=655.36 type=province }
+							POP_ClrMod = { modname=misc_expenses value=327.68 type=province }
+							POP_ClrMod = { modname=misc_expenses value=163.84 type=province }
+							POP_ClrMod = { modname=misc_expenses value=81.92 type=province }
+							POP_ClrMod = { modname=misc_expenses value=40.96 type=province }
+							POP_ClrMod = { modname=misc_expenses value=20.48 type=province }
+							POP_ClrMod = { modname=misc_expenses value=10.24 type=province }
+							POP_ClrMod = { modname=misc_expenses value=5.12 type=province }
+							POP_ClrMod = { modname=misc_expenses value=2.56 type=province }
+							POP_ClrMod = { modname=misc_expenses value=1.28 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.64 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.32 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.16 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.08 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.04 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.02 type=province }
+							POP_ClrMod = { modname=misc_expenses value=0.01 type=province }
+							
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.64 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.32 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.16 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.08 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.04 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.02 type=province }
+							POP_SetMod = { varname=Stat_Inp modname=misc_expenses_neg value=0.01 type=province }
+						}
+					}
+				}
+				
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_3 value = 0.001 }
+					}
+					set_key = { lhs = Stat_Inp which = Mil_BUMonthlyCost }
+					divide_key = { lhs = Stat_Inp which = Modi_MilTrainSave } # scale up/down by any land maint discounts, they are meant to apply in-system not in-budget
+					multiply_key = { lhs = Stat_Inp which = Tmp_4 } # only pay for units put on the map
+					divide_key = { lhs = Stat_Inp which = Tmp_3 }
+				}
+				else = {
+					set_key = { lhs = Stat_Inp value = 0 }
+				}
+				#set_key = { lhs = Tmp_5 which = Stat_Inp }
+				#if = {
+				#	limit = {
+				#		Rights_BUSer1Has = yes
+				#	}
+				#	multiply_key = { lhs = Tmp_5 value = 5 }
+				#}
+				#else_if = {
+				#	limit = {
+				#		Rights_BUSer2Has = yes
+				#	}
+				#	multiply_key = { lhs = Tmp_5 value = 4 }
+				#}
+				#else = {
+				#	multiply_key = { lhs = Tmp_5 value = 2.5 }
+				#}
+
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 327.68 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 163.84 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 81.92 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 40.96 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 20.48 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 10.24 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 5.12 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 2.56 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 1.28 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.64 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.32 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.16 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.08 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.04 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.02 }
+				POP_AddMod = { varname = Stat_Inp modname = Mil_Maint type = country value = 0.01 }
+			}
+		}
+    }
+
+    option = {
+		name = no_localisation
+    }
+}

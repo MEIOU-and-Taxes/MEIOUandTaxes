@@ -1,0 +1,672 @@
+namespace = elections
+
+# Election! (election on end of term)
+country_event = {
+	id = elections.700
+	title = "EVTNAME700"
+	picture = ELECTION_REPUBLICAN_eventPicture
+	
+	desc = {
+		trigger = { NOT = { has_ruler_flag = leader_has_been_pushed_out } }
+		desc = EVTDESC700
+	}
+	
+	desc = {
+		trigger = { has_ruler_flag = leader_has_been_pushed_out }
+		desc = elections.700.d
+	}
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		sortition_trigger = no
+	}
+	# immediate = {
+	# 	hidden_effect = { #commented out, as AI is not using this variable in their decision making atm
+	# 		set_key = {
+	# 			lhs = Gov_Tmp0
+	# 			value = 0
+	# 		}
+	# 		change_key = { 
+	# 			lhs = Gov_Tmp0
+	# 			which = Ruler_SkillADM 
+	# 		}
+	# 		change_key = { 
+	# 			lhs = Gov_Tmp0
+	# 			which = Ruler_SkillDIP
+	# 		}
+	# 		change_key = { 
+	# 			lhs = Gov_Tmp0
+	# 			which = Ruler_SkillMIL 
+	# 		}
+	# 	}
+	# }
+
+	option = {
+		name = "EVTOPTA700"	# Current ruler stays
+		trigger = {
+			has_regency = no
+			NOT = { has_ruler_flag = leader_has_been_pushed_out }
+		}
+		ai_chance = { 
+			factor = 0 #Rarely worth it under the new system, and causes a lot of republics to transition to monarchism
+			# modifier = { #commented out, as the whole option has factor of 0
+			# 	factor = 0
+			# 	NOT = { republican_tradition = 25 }
+			# }	
+			# modifier = {
+			# 	factor = 0.5
+			# 	NOT = { republican_tradition = 50 }
+			# }				
+			# modifier = {
+			# 	factor = 0.5
+			# 	NOT = { republican_tradition = 75 }
+			# }	
+			# modifier = {
+			# 	factor = 2.0
+			# 	republican_tradition = 90
+			# }	
+			# modifier = {
+			# 	factor = 2.0
+			# 	check_key = { lhs = Gov_Tmp0 value = 12 }
+			# }			
+			# modifier = {
+			# 	factor = 2.0
+			# 	check_key = { lhs = Gov_Tmp0 value = 15 }
+			# }	
+		}
+		custom_tooltip = remains_ruler
+		if = {
+			limit = {
+				government = republic
+				NOT = { republican_tradition = 20 }
+			}
+			if = {
+				limit = { 
+					is_tribal = yes
+				}	
+				add_government_reform = Pol_Leadership1 #Kingship
+			}
+			else = {
+				add_government_reform = Pol_TermOfOffice1 #Terms of Office: Life
+				add_government_reform = Pol_ExtraPowers2 #Legal Dictatorship (requires Terms of Office: Life to be enacted)
+			}
+		}
+		random_list = {
+			10 = { change_adm = 1 add_adm_power = 50 }
+			10 = { change_dip = 1 add_dip_power = 50 }
+			10 = { change_mil = 1 add_mil_power = 50 }
+		}
+		if = {
+			limit = {
+				is_tribal = no  
+				government = republic
+				NOT = { republican_tradition = 20 }
+				NOT = { has_dlc = "Res Publica" }
+			}
+			change_government = monarchy
+			add_government_reform = Pol_Succession1
+			add_government_reform = Pol_Assembly1
+			add_government_reform = Pol_Nobility2
+		}
+		if = {
+			limit = {
+				has_reform = Pol_TermOfOffice1
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 0 } # Life, assumed to be 25 years
+			}
+			add_republican_tradition = -15
+			#add_corruption = 15
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice2
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 1 } # 10
+			}
+			add_republican_tradition = -6
+			#add_corruption = 8
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice3
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 2 } # 7
+			}
+			add_republican_tradition = -4
+			#add_corruption = 5
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice4
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 3 } # 5
+			}
+			add_republican_tradition = -3
+			#add_corruption = 3
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice5
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 4 } # 4
+			}
+			add_republican_tradition = -2
+			#add_corruption = 2
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice8
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 7 } # 1
+			}
+			add_republican_tradition = -1
+			#add_corruption = 0.5
+		}
+		#add_republican_tradition = -5
+	}
+	option = {
+		name = "EVTOPTB700"	# An administrator type
+		ai_chance = { factor = 20 }
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {	
+				adm = 4
+			}
+		}
+		add_republican_tradition = 10
+	}
+	option = {
+		name = "EVTOPTC700"	# A diplomat
+		ai_chance = { factor = 20 }
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {			
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {
+				dip = 4
+			}
+		}
+		add_republican_tradition = 10
+		
+	}
+	option = {
+		name = "EVTOPTD700"	# A military man
+		ai_chance = { factor = 20 }
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+			}
+		}
+		else = {
+			define_ruler = {
+				mil = 4
+			}
+		}
+		add_republican_tradition = 10
+	}
+	option = { # Nepotism choice, re-electing within dynasty
+		name = "EVTOPTE700"
+		trigger = {
+			has_government_attribute = enables_nepotism # attribute of govt. reform, assigned from Pol_Mandate4 (Aristocratic)
+		}
+		ai_chance = { factor = 0 } #Rarely worth it under the new system, and causes a lot of republics to transition to monarchism
+		if = {
+			limit = {
+				has_reform = Pol_TermOfOffice1
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 0 } # Life, assumed to be 25 years
+			}
+			add_republican_tradition = -15
+			#add_corruption = 16
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice2
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 1 } # 10
+			}
+			add_republican_tradition = -6
+			#add_corruption = 9
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice3
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 2 } # 7
+			}
+			add_republican_tradition = -4
+			#add_corruption = 6
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice4
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 3 } # 5
+			}
+			add_republican_tradition = -3
+			#add_corruption = 4
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice5
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 4 } # 4
+			}
+			add_republican_tradition = -2
+			#add_corruption = 3
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice8
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 7 } # 1
+			}
+			add_republican_tradition = -1
+			#add_corruption = 1
+		}
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				min_age = 30
+				max_age = 50
+				name = "lastname"
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {
+				min_age = 30
+				max_age = 50
+				name = "lastname"
+			}
+		}
+	}
+	# after = {
+	# 	set_key = { #commented out, as AI is not using this variable in their decision making atm
+	# 		lhs = Gov_Tmp0
+	# 		value = 0
+	# 	}
+	# }
+}
+
+# Election! (election on ruler death)
+country_event = {
+	id = elections.701
+	title = "EVTNAME700"
+	desc = "EVTDESC701"
+	picture = ELECTION_REPUBLICAN_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		sortition_trigger = no
+	}
+	
+	
+	option = {
+		name = "EVTOPTB700"	# An administrator type
+		ai_chance = { factor = 30 }
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {			
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTC700"	# A diplomat
+		ai_chance = { factor = 30 }
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTD700"	# A military man
+		ai_chance = { factor = 30 }
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {
+			}
+		}
+	}
+	option = { # Nepotism choice, re-electing within dynasty
+		name = "EVTOPTE701"
+		trigger = {
+			has_government_attribute = enables_nepotism # attribute of govt. reform, assigned from Pol_Mandate4 (Aristocratic)
+		}
+		ai_chance = { factor = 0 } #Rarely worth it under the new system, and causes a lot of republics to transition to monarchism
+		if = {
+			limit = {
+				has_reform = Pol_TermOfOffice1
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 0 } # Life, assumed to be 25 years
+			}
+			add_republican_tradition = -15
+			#add_corruption = 16
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice2
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 1 } # 10
+			}
+			add_republican_tradition = -6
+			#add_corruption = 9
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice3
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 2 } # 7
+			}
+			add_republican_tradition = -4
+			#add_corruption = 6
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice4
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 3 } # 5
+			}
+			add_republican_tradition = -3
+			#add_corruption = 4
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice5
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 4 } # 4
+			}
+			add_republican_tradition = -2
+			#add_corruption = 3
+		}
+		else_if = {
+			limit = {
+				has_reform = Pol_TermOfOffice8
+				#is_key_equal = { lhs = Pol_TermOfOffice value = 7 } # 1
+			}
+			add_republican_tradition = -1
+			#add_corruption = 1
+		}
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				min_age = 30
+				max_age = 50
+				name = "lastname"
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {
+				min_age = 30
+				max_age = 50
+				name = "lastname"
+			}
+		}
+	}
+}
+
+########################################
+# Colonial Nations                     #
+########################################
+
+# Election!
+country_event = {
+	id = elections.707
+	title = "elections.EVTNAME707"
+	desc = "elections.EVTDESC707"
+	picture = ELECTION_REPUBLICAN_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "elections.EVTOPTB707"	# Bureaucrat Candidate
+		ai_chance = { factor = 20 }
+		FROM = {
+			define_ruler = {
+			adm = 3
+			}
+		}
+	}
+	option = {
+		name = "elections.EVTOPTC707"	# Diplomat Candidate
+		ai_chance = { factor = 20 }
+		FROM = {
+			define_ruler = {
+			dip = 3
+			}
+		}
+	}
+	option = {
+		name = "elections.EVTOPTD707"	# Military Candidate
+		ai_chance = { factor = 20 }
+		FROM = {
+			define_ruler = {
+			mil = 3
+			}	
+		}
+	}
+
+	after = {
+		FROM = {
+			set_ruler_flag = appointed_by_overlord
+		}
+	}
+}
+
+# Colonial Assembly
+country_event = {
+	id = elections.711
+	title = "elections.EVTNAME711"
+	desc = "elections.EVTDESC711"
+	picture = ELECTION_REPUBLICAN_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "elections.EVTOPTB711"	# Suspicious indeed...
+		tooltip = {
+			FROM = {
+				add_liberty_desire = 10
+			}
+		}
+	}
+}
+
+## Winds of Liberty
+#country_event = {
+#	id = elections.712
+#	title = "elections.EVTNAME712"
+#	desc = "elections.EVTDESC712"
+#	picture = ELECTION_REPUBLICAN_eventPicture
+#	
+#	is_triggered_only = yes
+#
+#	option = {
+#		name = "elections.EVTOPTB712"	# Most worrisome...
+#		tooltip = {
+#			FROM = {
+#				add_liberty_desire = -25
+#			}
+#		}
+#	}
+#}
+
+# Lottery Election by Daniel Tolman
+country_event = {
+	id = elections.800
+	title = elections.800.t
+	desc = elections.800.d
+	picture = ELECTION_REPUBLICAN_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		sortition_trigger = yes # attribute of govt. reform, assigned from Pol_Mandate2 (Democratic)
+	}
+	
+	immediate = {
+		hidden_effect = {
+			#if = {
+			#	limit = {
+			#		has_active_policy = mandatory_service
+			#	}
+			#	define_exiled_ruler = {
+			#		exiled_as = lottery_candidate_a_@ROOT
+			#		random_gender = yes
+			#		min_age = 50
+			#		max_age = 75
+			#		option = 0
+			#	}
+			#}
+			#else = {
+				define_exiled_ruler = {
+					exiled_as = lottery_candidate_a_@ROOT
+					min_age = 50
+					max_age = 75
+					option = 0
+				}
+			#}
+			if = {
+				limit = {
+					has_active_policy = mandatory_service
+				}
+				
+				define_exiled_ruler = {
+					exiled_as = lottery_candidate_b_@ROOT
+					min_age = 50
+					max_age = 75
+					random_gender = yes
+					option = 1
+				}
+			}
+			else = {
+				define_exiled_ruler = {
+					exiled_as = lottery_candidate_b_@ROOT
+					min_age = 50
+					max_age = 75
+					option = 1
+				}
+			}
+			#if = {
+			#	limit = {
+			#		has_active_policy = mandatory_service
+			#	}
+			#	
+			#	define_exiled_ruler = {
+			#		exiled_as = lottery_candidate_c_@ROOT
+			#		min_age = 50
+			#		max_age = 75
+			#		random_gender = yes
+			#		option = 2
+			#	}
+			#}
+			#else = {
+				define_exiled_ruler = {
+					exiled_as = lottery_candidate_c_@ROOT
+					min_age = 50
+					max_age = 75
+					option = 2
+				}
+			#}
+		}
+	}
+	
+	after = {
+		clear_exiled_ruler = lottery_candidate_a_@ROOT
+		clear_exiled_ruler = lottery_candidate_b_@ROOT
+		clear_exiled_ruler = lottery_candidate_c_@ROOT
+	}
+	
+	option = {
+		name = elections.800.a
+		ai_chance = {
+			factor = 0
+		}
+		set_ruler = lottery_candidate_a_@ROOT
+		hidden_effect = {
+			Ruler_Calc = yes
+		}
+		add_republican_tradition = -5
+		custom_tooltip = lottery_candidate_bonus_one
+	}
+	option = {
+		name = elections.800.b
+		ai_chance = {
+			factor = 0
+		}
+		set_ruler = lottery_candidate_b_@ROOT
+		hidden_effect = {
+			Ruler_Calc = yes
+		}
+		add_republican_tradition = -5
+		custom_tooltip = lottery_candidate_bonus_one
+	}
+	option = {
+		name = elections.800.c
+		ai_chance = {
+			factor = 0
+		}
+		set_ruler = lottery_candidate_c_@ROOT
+		hidden_effect = {
+			Ruler_Calc = yes
+		}
+		add_republican_tradition = -5
+		custom_tooltip = lottery_candidate_bonus_one
+	}
+	option = { # lottery
+		name = elections.800.da
+		ai_chance = {
+			factor = 90
+		}
+		random_list = {
+			33 = { 
+				set_ruler = lottery_candidate_a_@ROOT 
+			}
+			33 = { 
+				set_ruler = lottery_candidate_b_@ROOT 
+			}
+			33 = { 
+				set_ruler = lottery_candidate_c_@ROOT 
+			}
+		}
+		hidden_effect = {
+			Ruler_Calc = yes
+		}
+		custom_tooltip = lottery_candidate_bonus_plural
+		add_republican_tradition = 15
+	}
+	option = { # nepotism
+		name = elections.800.e
+		trigger = {
+			has_government_attribute = enables_nepotism # attribute of govt. reform, assigned from Pol_Mandate4 (Aristocratic)
+		}
+		ai_chance = { factor = 0 } #Rarely worth it under the new system, and causes a lot of republics to transition to monarchism
+		add_republican_tradition = -10
+		if = {
+			limit = { always = no } #no gender reform
+			define_ruler = {
+				min_age = 30
+				max_age = 50
+				name = "lastname"
+				random_gender = yes # Allows random gender for republics
+			}
+		}
+		else = {
+			define_ruler = {
+				min_age = 30
+				max_age = 50
+				name = "lastname"
+			}
+		}
+	}
+}

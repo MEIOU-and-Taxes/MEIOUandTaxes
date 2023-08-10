@@ -1,0 +1,408 @@
+# Ported to M&T v3.0 by Beorsferth
+
+# Old Authors
+# Author: Phlopsi
+# Author: Sun_Wu
+# Author: Warial (small tweaks)
+
+# `culture_conversions.2` is the core event. When the progress completes it fires `culture_conversions.1` to convert.
+# `culture_conversions.3` clears progress and is called when the province owner changes.
+#
+namespace = culture_conversions
+# Fired by Pulse System at December each year
+country_event = {
+	id = culture_conversions.1
+	title = no_localisation
+	desc = no_localisation
+	picture = CITY_VIEW_eventPicture
+	
+	hidden = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		every_country = {
+			limit = { isValidCountry = yes }
+			every_owned_province = {
+				limit = {
+					CV_Can_Convert = yes
+				}
+				calc_culture_conversion_progress = yes
+				if = {
+					limit = {
+						check_key = {
+							lhs = Culture_Progress
+							value = 100
+						}
+					}
+					cv_change_culture = yes
+				}
+				add_province_modifier = {
+					name = culture_conversion_cooldown
+					duration = 7300 # 20 years
+					hidden = yes
+				}
+			}
+		}
+	}
+	option = {
+		name = no_localisation
+	}
+}
+
+### Special Conversion events
+
+#province_event = {
+#	id = culture_conversions.4
+#	title = "culture_conversions.4.name"
+#	desc = "culture_conversions.4.desc"
+#	picture = REFORM_eventPicture
+#	
+#	mean_time_to_happen = {
+#		years = 50
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 2 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 3 }
+#		}
+#	}
+#	
+#	trigger = {
+#		OR = { region = syria_region region = lower_mesopotamia_region province_id = 2224 province_id = 2655 }
+#		culture_group = aramaic_group
+#		religion_group = muslim
+#		NOT = { nationalism = 1 }
+#		NOT = {
+#			AND = {
+#				owner = { religion_group = muslim }
+#				has_owner_culture = yes
+#			}
+#		}
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.4.opta"
+#		
+#		trigger = {
+#			area = palestine_area
+#		}
+#		
+#		if = {
+#			limit = {
+#				province_id = 1331
+#			}
+#			change_culture = bedouin
+#		}
+#		else = {
+#			change_culture = levantine
+#		}
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.4.optb"
+#		
+#		trigger = {
+#			OR = {
+#				area = syria_area
+#				area = aleppo_area
+#				province_id = 2655
+#			}
+#			NOT = { province_id = 3091 }
+#		}
+#		
+#		if = {
+#			limit = {
+#				owner = { culture_group = oghuz }
+#				province_id = 2655
+#			}
+#			change_culture = turkoman
+#		}
+#		else = {
+#			change_culture = shami
+#		}
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.4.optc"
+#		
+#		trigger = {
+#			OR = {
+#				area = mosul_area
+#				province_id = 2224
+#			}
+#		}
+#		if = {
+#			limit = {
+#				OR = {
+#					owner = { culture_group = oghuz }
+#					owner = { culture_group = persian_group }
+#				}
+#			}
+#			change_culture = kurdish
+#		}
+#		else = {
+#			change_culture = moslawi
+#		}
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.4.optb"
+#		
+#		trigger = {
+#			OR = {
+#				area = iraq_arabi_area
+#				area = lower_iraq_area
+#				area = basra_area
+#				province_id = 3091
+#			}
+#		}
+#		
+#		if = {
+#			limit = {
+#				province_id = 393
+#			}
+#			change_culture = khaliji
+#		}
+#		else = {
+#			change_culture = iraqi
+#		}
+#	}
+#}
+
+#province_event = {
+#	id = culture_conversions.5
+#	title = "culture_conversions.5.name"
+#	desc = "culture_conversions.5.desc"
+#	picture = REFORM_eventPicture
+#	
+#	mean_time_to_happen = {
+#		years = 75
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 2 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 3 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.8
+#			base_production = 5 # Urban center
+#		}
+#		
+#		modifier = {
+#			factor = 2
+#			OR = {
+#				# East Palestine
+#				province_id = 2636
+#				province_id = 2575
+#				province_id = 1331
+#				area = iraq_arabi_area
+#				# South east syria
+#				province_id = 4058
+#				province_id = 4057
+#			}
+#		}
+#	}
+#	
+#	trigger = {
+#		OR = { region = syria_region region = lower_mesopotamia_region province_id = 2224 province_id = 2655 }
+#		religion_group = christian
+#		NOT = { culture_group = aramaic_group }
+#		NOT = { nationalism = 1 }
+#		NOT = { owner = { religion_group = muslim } }
+#		# NOT = {
+#			# AND = {
+#				# owner = { religion_group = christian }
+#				# has_owner_culture = yes
+#			# }
+#		# }
+#		OR = {
+#			AND = {
+#				NOT = { area = lower_iraq_area }
+#				NOT = { area = basra_area }
+#			}
+#			any_neighbor_province = {
+#				culture_group = aramaic_group
+#			}
+#		}
+#		NOT = { check_key = { lhs = Prov_TRPow value = 21 } }
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.5.opta"
+#		
+#		trigger = {
+#			OR = {
+#				area = palestine_area
+#				province_id = 1334
+#				province_id = 875
+#				province_id = 378
+#			}
+#		}
+#		
+#		change_culture = samaritan_c
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.5.optb"
+#		
+#		trigger = {
+#			OR = {
+#				area = aleppo_area
+#				area = syria_area
+#				province_id = 2224
+#				province_id = 2655
+#			}
+#			NOT = { province_id = 1334 }
+#			NOT = { province_id = 875 }
+#			NOT = { province_id = 378 }
+#		}
+#		
+#		change_culture = syriac
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.5.optc"
+#		
+#		trigger = {
+#			NOT = { area = palestine_area }
+#			NOT = { area = syria_area }
+#			NOT = { area = aleppo_area }
+#			NOT = { province_id = 2224 }
+#		}
+#		
+#		change_culture = aramaic
+#	}
+#}
+
+#province_event = {
+#	id = culture_conversions.6
+#	title = "culture_conversions.6.name"
+#	desc = "culture_conversions.6.desc"
+#	picture = REFORM_eventPicture
+#	
+#	mean_time_to_happen = {
+#		years = 75
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 2 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 3 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.8
+#			base_production = 5 # Urban center
+#		}
+#		
+#		modifier = {
+#			factor = 2
+#			OR = {
+#				area = cyrenaica_area
+#				area = libyan_desert_area
+#				province_id = 3887
+#			}
+#		}
+#	}
+#	
+#	trigger = {
+#		region = egypt_region
+#		religion_group = christian
+#		culture_group = mashreqi
+#		NOT = { owner = { religion_group = muslim } }
+#		NOT = { culture_group = aramaic_group }
+#		NOT = { nationalism = 1 }
+#		#NOT = {
+#			#AND = {
+#			#	owner = { religion_group = christian }
+#			#	has_owner_culture = yes
+#			#}
+#		#}
+#		# Red sea coast
+#		NOT = { province_id = 3004 }
+#		NOT = { province_id = 1211 }
+#		NOT = { province_id = 1208 }
+#		#NOT = { check_key = { lhs = tribals_ratio value = 21 } }
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.6.opta"
+#		
+#		trigger = {
+#			region = egypt_region
+#		}
+#		
+#		change_culture = oriental_culture
+#	}
+#}
+
+#province_event = {
+#	id = culture_conversions.7
+#	title = "culture_conversions.7.name"
+#	desc = "culture_conversions.7.desc"
+#	picture = REFORM_eventPicture
+#	
+#	mean_time_to_happen = {
+#		years = 75
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 2 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.9
+#			owner = { stability = 3 }
+#		}
+#		
+#		modifier = {
+#			factor = 0.8
+#			base_production = 5 # Urban center
+#		}
+#	}
+#	
+#	trigger = {
+#		area = east_adriatic_coast_area
+#		NOT = { culture_group = latin }
+#		NOT = { nationalism = 1 }
+#		owner = { #Latin migrants
+#			OR = {
+#				culture_group = latin
+#				AND = {
+#					culture_group = greek_group
+#					east_italy_region = {
+#						owned_by = PREV
+#					}
+#					west_italy_region = {
+#						owned_by = PREV
+#					}
+#					central_italy_region = {
+#						owned_by = PREV
+#					}
+#				}
+#			}
+#		}
+#	}
+#	
+#	option = {
+#		name = "culture_conversions.7.opta"
+#		
+#		trigger = {
+#			area = east_adriatic_coast_area
+#		}
+#		
+#		change_culture = dalmatian
+#	}
+#}

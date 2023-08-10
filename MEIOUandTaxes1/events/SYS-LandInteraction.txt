@@ -1,0 +1,748 @@
+namespace = SYS_LandInteraction
+country_event = {
+	id = SYS_LandInteraction.100
+	title = no_localisation
+	desc = no_localisation
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.001 }
+	}
+}
+
+# Build UI
+country_event = {
+	id = SYS_LandInteraction.001
+	title = SYS_LandInteraction.001.t
+	desc = SYS_LandInteraction.001.desc
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			set_country_flag = UI_Freeze
+			set_country_flag = LandInt_Block
+			LandInt_Calc = { FirstCalc=yes }
+			LandInt_ReactCalc = yes
+			if = {
+				limit = {
+					is_key_equal = { lhs = LandInt_Mode value = 0 }
+					check_key = { lhs = LandInt_Amount value = 100 }
+				}
+				set_key = { lhs = LandInt_Amount value = 100 }
+			}
+			else_if = {
+				limit = {
+					NOT = { is_key_equal = { lhs = LandInt_Mode value = 0 } }
+					check_key = { lhs = LandInt_Amount value = 50 }
+				}
+				set_key = { lhs = LandInt_Amount value = 50 }
+			}
+
+			if = {
+				limit = {
+					ai = yes
+				}
+
+				export_to_key = {
+					lhs = Tmp_0
+					value = stability
+				}
+				multiply_key = { lhs = Tmp_0 value = 5 } # 5 % base per stability
+				if = {
+					limit = {
+						NOT = { check_key = { lhs = Tmp_0 value = 0 } }
+					}
+					set_key = { lhs = Tmp_0 value = 0 }
+					set_country_flag = SYS_LandInteraction_AI_Aborted
+				}
+				else = {
+					change_key = { lhs = Tmp_0 value = 5 } # If Stability > 0 add 5 % flat base value
+					if = {
+						limit = {
+							is_key_equal = { lhs = LandInt_Class value = 3 } # Nobles
+						}
+						set_key = { lhs = Tmp_1 which = Prov_NOLoy }
+						multiply_key = { lhs = Tmp_1 value = 0.02 }
+					} 
+					else_if = {
+						limit = {
+							is_key_equal = { lhs = LandInt_Class value = 4 } # Burghers						
+						}
+						set_key = { lhs = Tmp_1 which = Prov_BGLoy }
+						multiply_key = { lhs = Tmp_1 value = 0.02 }
+					} 
+					else_if = {
+						limit = {
+							is_key_equal = { lhs = LandInt_Class value = 5 } # Clergy						
+						}
+						set_key = { lhs = Tmp_1 which = Prov_CLLoy }
+						multiply_key = { lhs = Tmp_1 value = 0.02 }
+					}
+
+					if = {
+						limit = {
+							NOT = { check_key = { lhs = Tmp_1 value = 0.25 } }
+						}
+						set_key = { lhs = Tmp_1 value = 0.25 }
+					} 
+					else_if = {
+						limit = {
+							check_key = { lhs = Tmp_1 value = 1.5 }
+						}
+						set_key = { lhs = Tmp_1 value = 1.5 }
+					}
+					multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+
+					set_key = { lhs = LandInt_Amount which = Tmp_0 } # set amount to expropriate from AI
+
+					set_key = { lhs = LandInt_TypeToggle value = 0 } # set mode to "all provinces"
+
+					set_key = { lhs = LandInt_Type value = 1 } # set AI to only expropriate Ressources no Districts
+
+					# Decide which type to expropriate
+					random_list = {
+						45 = {
+							set_key = { lhs = LandInt_Building value = 1 } # Farmland
+						}
+						20 = {
+							set_key = { lhs = LandInt_Building value = 2 } # Forestry
+						}
+						25 = {
+							set_key = { lhs = LandInt_Building value = 3 } # Mines
+						}
+						10 = {
+							set_key = { lhs = LandInt_Building value = 4 } # Fisheries
+						}
+					}
+
+					set_country_flag = SYS_LandInteraction_AI_Decided
+				}
+			}
+		}
+	}
+	
+	option = { # Grant
+		name = SYS_LandInteraction.001.a
+		trigger = {
+			check_key = { lhs = LandInt_Type value = 1 }
+			check_key = { lhs = LandInt_Building value = 1 }
+			check_key = { lhs = LandInt_Amount value = 0.001 }
+			OR = {
+				ai = no
+				AND = {
+					check_key = { lhs = LandInt_Units value = 0.001 }
+					check_key = { lhs = LandInt_Share value = 0.001 }
+				}
+			}
+			NOT = { has_country_flag = SYS_LandInteraction_AI_Aborted }
+		}
+		ai_chance = {
+			factor = 1
+		}
+		hidden_effect = {
+			LandInt_Calc = { FirstCalc=no }
+			LandInt_ReactCalc = yes
+		}
+		if = {
+			limit = {
+				ai = yes
+			}
+			clr_country_flag = SYS_LandInteraction_AI_Decided
+		}
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = LandInt_Units value = 0.001 } }
+			}
+			custom_tooltip = SYS_LandInteraction.001.aNOPEAMOUNT
+			if = {
+				limit = {
+					ai = no
+				}
+				hidden_country_event = { id = SYS_LandInteraction.100 }
+			}
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = LandInt_Type value = 1 }
+				check_key = { lhs = LandInt_Building value = 1 }
+				check_key = { lhs = LandInt_Amount value = 0.001 }
+				check_key = { lhs = LandInt_Units value = 0.001 }
+				check_key = { lhs = LandInt_Share value = 0.001 }
+			}
+			custom_tooltip = SYS_LandInteraction.001.aYEP
+			clr_country_flag = LandInt_Block
+			LandInt_React = yes
+			hidden_effect = { # store values for potential cw
+				if = {
+					limit = { any_elite_civil_war_threat = { type = Land } }
+					LandInt_SaveChange = yes
+				}
+			}
+			hidden_effect = {
+				LandInt_Do = yes # Dont look into this one
+				log = "SYS-Politics:[GetYear]:[This.GetName]:expropriated:Class[GV_LandInt_Class]:-:[This.GovernmentName]:[GV_LandInt_Amount]%:of [GV_LandInt_Building]:(1 = Farm, 2 = Forest, 3 = Mines, 4 = Fish), (Class3 = NO, Class4 = BG, Class5 = CL)"	
+			}
+		}
+		else_if = {
+			limit = {
+				ai = no
+			}
+			custom_tooltip = SYS_LandInteraction.001.aNOPEWHY
+			hidden_country_event = { id = SYS_LandInteraction.100 }
+		}
+	}
+	
+	option = { # Change Configuration
+		name = SYS_LandInteraction.001.b
+		trigger = {
+			ai = no
+		}
+		ai_chance = {
+			factor = 0
+		}
+		custom_tooltip = SYS_LandInteraction.001.btooltip
+		hidden_country_event = { id = SYS_LandInteraction.002 }
+	}
+	
+	option = {
+		name = PTM_EXIT
+		trigger = {
+			OR = {
+				AND = {
+					has_country_flag = SYS_LandInteraction_AI_Aborted 
+					ai = yes
+				}
+				ai = no
+			}
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				has_country_flag = SYS_LandInteraction_AI_Aborted
+				factor = 1000
+			}
+		}
+		if = {
+			limit = {
+				ai = yes
+			}
+			clr_country_flag = SYS_LandInteraction_AI_Aborted
+		}
+		highlight = yes
+	}
+	after = {
+		clr_country_flag = UI_Freeze
+		clr_country_flag = LandInt_Block
+		every_owned_province = {
+			if = {
+				limit = {
+					check_key = { lhs = LandInt_Units value = 0.001 }
+				}
+				set_key = { lhs = LandInt_Units value = 0 }
+				set_key = { lhs = LandInt_Share value = 0 }
+			}
+			if = {
+				limit = {
+					has_province_flag = LandInt
+				}
+				clr_province_flag = LandInt
+			}
+		}
+		country_event = { id = POP_Census.994 }
+	}
+}
+
+country_event = { # Types
+	id = SYS_LandInteraction.002
+	title = SYS_LandInteraction.002.t
+	desc = SYS_LandInteraction.002.desc
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		
+	}
+	
+	option = { # Resources
+		name = SYS_LandInteraction.002.a
+		ai_chance = {
+			factor = 1
+		}
+		custom_tooltip = SYS_LandInteraction.002.atooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Type value = 1 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.003 }
+	}
+	
+	option = { # Districts
+		name = SYS_LandInteraction.002.b
+		ai_chance = {
+			factor = 0
+		}
+		custom_tooltip = SYS_LandInteraction.002.btooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Type value = 2 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.004 }
+	}
+	
+	option = {
+		name = PTM_BACK
+		trigger = { ai = no }
+		ai_chance = {
+			factor = 0
+		}
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.001 }
+	}
+}
+
+country_event = { # Resources
+	id = SYS_LandInteraction.003
+	title = SYS_LandInteraction.003.t
+	desc = SYS_LandInteraction.003.desc
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			set_key = { lhs = LandInt_Amount value = 0 }
+			set_key = { lhs = LandInt_Scope value = 0 }
+			set_key = { lhs = LandInt_Building value = 0 }
+		}
+	}
+	
+	option = { # Farmland
+		name = LandInt_Building11
+		ai_chance = {
+			factor = 0.35
+		}
+		custom_tooltip = SYS_LandInteraction.003.atooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 1 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = { # Forestries
+		name = LandInt_Building12
+		ai_chance = {
+			factor = 0.25
+		}
+		custom_tooltip = SYS_LandInteraction.003.btooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 2 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = { # Mines
+		name = LandInt_Building13
+		ai_chance = {
+			factor = 0.3
+		}
+		custom_tooltip = SYS_LandInteraction.003.ctooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 3 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = { # Fisheries
+		name = LandInt_Building14
+		ai_chance = {
+			factor = 0.10
+		}
+		custom_tooltip = SYS_LandInteraction.003.dtooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 4 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = {
+		name = PTM_BACK
+		trigger = { ai = no }
+		ai_chance = {
+			factor = 0
+		}
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.002 }
+	}
+}
+
+country_event = { # Districts
+	id = SYS_LandInteraction.004
+	title = SYS_LandInteraction.004.t
+	desc = SYS_LandInteraction.004.desc
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			set_key = { lhs = LandInt_Amount value = 0 }
+			set_key = { lhs = LandInt_Scope value = 0 }
+			set_key = { lhs = LandInt_Building value = 0 }
+		}
+	}
+	
+	option = { # Manufacturies
+		name = LandInt_Building21
+		ai_chance = {
+			factor = 0.9
+		}
+		custom_tooltip = SYS_LandInteraction.004.atooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 1 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = { # Commercial
+		name = LandInt_Building22
+		ai_chance = {
+			factor = 0
+		}
+		custom_tooltip = SYS_LandInteraction.004.btooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 2 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = { # Academic
+		name = LandInt_Building23
+		ai_chance = {
+			factor = 0.10
+		}
+		custom_tooltip = SYS_LandInteraction.004.ctooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_Building value = 3 }
+		}
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+	
+	option = {
+		name = PTM_BACK
+		trigger = { ai = no }
+		ai_chance = {
+			factor = 0
+		}
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.002 }
+	}
+}
+
+country_event = {
+	id = SYS_LandInteraction.105
+	title = no_localisation
+	desc = no_localisation
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.005 }
+	}
+}
+
+country_event = { # Change Amount
+	id = SYS_LandInteraction.005
+	title = SYS_LandInteraction.005.t
+	desc = SYS_LandInteraction.005.desc
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					is_key_equal = { lhs = LandInt_Mode value = 0 }
+					check_key = { lhs = LandInt_Amount value = 100 }
+				}
+				set_key = { lhs = LandInt_Amount value = 100 }
+			}
+			else_if = {
+				limit = {
+					NOT = { is_key_equal = { lhs = LandInt_Mode value = 0 } }
+					check_key = { lhs = LandInt_Amount value = 50 }
+				}
+				set_key = { lhs = LandInt_Amount value = 50 }
+			}
+			else_if = {
+				limit = {
+					NOT = { check_key = { lhs = LandInt_Amount value = 0 } }
+				}
+				set_key = { lhs = LandInt_Amount value = 0 }
+			}
+		}
+	}
+	
+	option = { # Done
+		name = SYS_LandInteraction.005.a
+		trigger = {
+			OR = {
+				check_key = { lhs = LandInt_Amount value = 0.001 }
+				ai = yes
+			}
+		}
+		ai_chance = {
+			factor = 1
+		}
+		hidden_country_event = { id = SYS_LandInteraction.006 }
+	}
+	
+	option = { # 10% More
+		name = SYS_LandInteraction.005.b
+		trigger = {
+			ai = no
+		}
+		hidden_effect = {
+			change_key = { lhs = LandInt_Amount value = 10 }
+			hidden_country_event = { id = SYS_LandInteraction.105 }
+		}
+	}
+	
+	option = { # 5% More
+		name = SYS_LandInteraction.005.c
+		trigger = {
+			ai = no
+		}
+		hidden_effect = {
+			change_key = { lhs = LandInt_Amount value = 5 }
+			hidden_country_event = { id = SYS_LandInteraction.105 }
+		}
+	}
+	
+	option = { # 5% Less
+		name = SYS_LandInteraction.005.d
+		trigger = {
+			ai = no
+		}
+		hidden_effect = {
+			subtract_key = { lhs = LandInt_Amount value = 5 }
+			hidden_country_event = { id = SYS_LandInteraction.105 }
+		}
+	}
+	
+	option = { # 10% Less
+		name = SYS_LandInteraction.005.e
+		trigger = {
+			ai = no
+		}
+		hidden_effect = {
+			subtract_key = { lhs = LandInt_Amount value = 10 }
+			hidden_country_event = { id = SYS_LandInteraction.105 }
+		}
+	}
+	
+	option = { # Reset Target Amount
+		name = SYS_LandInteraction.005.f
+		trigger = {
+			ai = no
+		}
+		hidden_effect = {
+			set_key = { lhs = LandInt_Amount value = 0 }
+			hidden_country_event = { id = SYS_LandInteraction.105 }
+		}
+	}
+	
+	option = {
+		name = PTM_BACK
+		trigger = { ai = no }
+		ai_chance = {
+			factor = 0
+		}
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.002 }
+	}
+}
+
+country_event = {
+	id = SYS_LandInteraction.106
+	title = no_localisation
+	desc = no_localisation
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.006 }
+	}
+}
+
+country_event = { # Change Scope
+	id = SYS_LandInteraction.006
+	title = SYS_LandInteraction.006.t
+	desc = SYS_LandInteraction.006.desc
+	picture = FARMING_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					check_key = { lhs = LandInt_Scope value = 80 }
+				}
+				set_key = { lhs = LandInt_Scope value = 80 }
+			}
+			else_if = {
+				limit = {
+					NOT = { check_key = { lhs = LandInt_Scope value = 5 } }
+				}
+				set_key = { lhs = LandInt_Scope value = 5 }
+			}
+		}
+	}
+	
+	
+	option = { # Done
+		name = SYS_LandInteraction.006.d
+		trigger = {
+			OR = {
+				NOT = { is_key_equal = { lhs = LandInt_TypeToggle value = 1 } }
+				check_key = { lhs = LandInt_Scope value = 0.001 }
+			}
+		}
+		ai_chance = {
+			factor = 1
+		}
+		hidden_country_event = { id = SYS_LandInteraction.001 }
+	}
+	
+	option = { # Every Province
+		name = SYS_LandInteraction.006.a
+		trigger = {
+			NOT = { check_key = { lhs = LandInt_TypeToggle value = 1 } }
+			ai = no
+		}
+		custom_tooltip = SYS_LandInteraction.006.atooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_TypeToggle value = 1 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = { # % of Provinces
+		name = SYS_LandInteraction.006.b
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 1 }
+			ai = no
+		}
+		custom_tooltip = SYS_LandInteraction.006.btooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_TypeToggle value = 2 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = { # Selected Provinces
+		name = SYS_LandInteraction.006.c
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 2 }
+			ai = no
+		}
+		custom_tooltip = SYS_LandInteraction.006.ctooltip
+		hidden_effect = {
+			set_key = { lhs = LandInt_TypeToggle value = 0 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	option = { # 10% More
+		name = SYS_LandInteraction.006.e
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 1 }
+			ai = no
+		}
+		hidden_effect = {
+			change_key = { lhs = LandInt_Amount value = 10 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = { # 5% More
+		name = SYS_LandInteraction.006.f
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 1 }
+			ai = no
+		}
+		hidden_effect = {
+			change_key = { lhs = LandInt_Amount value = 5 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = { # 5% Less
+		name = SYS_LandInteraction.006.g
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 1 }
+			ai = no
+		}
+		hidden_effect = {
+			subtract_key = { lhs = LandInt_Scope value = 5 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = { # 10% Less
+		name = SYS_LandInteraction.006.h
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 1 }
+			ai = no
+		}
+		hidden_effect = {
+			subtract_key = { lhs = LandInt_Scope value = 10 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = { # Reset Target  Scope
+		name = SYS_LandInteraction.006.i
+		trigger = {
+			is_key_equal = { lhs = LandInt_TypeToggle value = 1 }
+			ai = no
+		}
+		hidden_effect = {
+			set_key = { lhs = LandInt_Scope value = 5 }
+			hidden_country_event = { id = SYS_LandInteraction.106 }
+		}
+	}
+	
+	option = {
+		name = PTM_BACK
+		trigger = { ai = no }
+		ai_chance = {
+			factor = 0
+		}
+		highlight = yes
+		hidden_country_event = { id = SYS_LandInteraction.002 }
+	}
+}

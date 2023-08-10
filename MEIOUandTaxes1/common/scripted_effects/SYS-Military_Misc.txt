@@ -1,0 +1,1297 @@
+### This function calculates the potential of noble recruitment and levy of peasants by the nobles
+#$class$_MP: Capable manpower (fightning age men)
+# Output values:
+# NO_MPNO | NO_MPSF- Leviable manpower of noble / peasant class
+# Mil_Noble - Total leviable manpower
+Military_DoPreNO = {
+	set_key = { lhs = Mil_Noble value = 0 }
+	set_key = { lhs = Mil_NobleHigh value = 0 }
+	set_key = { lhs = NO_MPSpecial value = 0 }
+	set_key = { lhs = NO_MPNO value = 0 }
+	set_key = { lhs = NO_MPSF value = 0 }
+
+	### Handling levied troops of Noble Population Class
+	if = {
+		limit = {
+			isValidProv = yes
+			
+			owner = {
+				Tax_LevyNobleCan = yes # Right Noble Ser < 4 and  Rural Governance < 5
+				Rights_NOObl3HasGreater = no # Noble Obligations < 3
+			}
+		}
+        #set how much of NOBLE manpower can be levied, depending on Noble obligations. Higher privliges for NO, higher the levy amount.
+		if = {
+			limit = {
+				owner = { Rights_NOObl1Has = yes }
+			}
+			set_key = { lhs = NO_MPNO value = 0.8 }
+		}
+		else = {
+			set_key = { lhs = NO_MPNO value = 0.4 }
+		}
+		
+		multiply_key = { lhs = NO_MPNO which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = NO_MPNO value = 1 }
+			}
+			set_key = { lhs = NO_MPNO value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = NO_MPNO value = 0.01 } }
+			}
+			set_key = { lhs = NO_MPNO value = 0 }
+		}
+		multiply_key = { lhs = NO_MPNO which = NO_MP } # Derive potentially leviable noble pops by fighting age men * base rate
+
+
+		#Reduce levy size the higher the Tribal power is.
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 50.001 } }
+				}
+				set_key = { lhs = Tmp_0 value = 50 }
+				subtract_key = { lhs = Tmp_0 which = Prov_TRPow }
+				multiply_key = { lhs = Tmp_0 value = 2 }
+				multiply_key = { lhs = NO_MPNO which = Tmp_0 }
+				multiply_key = { lhs = NO_MPNO value = 0.01 }
+			}
+			else = {
+				set_key = { lhs = NO_MPNO value = 0 }
+			}
+		}
+	}
+	else = {
+		set_key = { lhs = NO_MPNO value = 0 }
+	}
+	
+	#Calculate how much Nobles can raise from peasantry based on Military Organisation privs. NO_MPSF is how much nobles can raise from peasantry, the exploiting bastards. Where is William Wallace when we need it.
+	if = {
+		limit = {
+			isValidProv = yes
+			
+			owner = { Tax_LevyNobleCan = yes } # Right Noble Ser < 4 and  Rural Governance < 5
+		}
+		set_key = { lhs = NO_MPSF which = NO_RuralPowerScalar }
+		
+
+		### Get base manpower tax rate from rights and privileges
+		
+		# Processing Monopoly (already in 100 scale)
+		if = {
+			limit = {
+				owner = { Privilege_Has = { Privilege=NOProcessing Lvl=2 } }
+			}
+			multiply_key = { lhs = NO_MPSF value = 0.4 }
+		}
+		else_if = {
+			limit = {
+				owner = { Privilege_Has = { Privilege=NOProcessing Lvl=1 } }
+			}
+			multiply_key = { lhs = NO_MPSF value = 0.375 }
+		}
+		else = {
+			multiply_key = { lhs = NO_MPSF value = 0.35 }
+		}
+        # Military Organisation Reform
+		if = {
+			limit = {
+				owner = {
+					Rights_NOSer1Has = yes
+				}
+			}
+			set_key = { lhs = Tmp_4 value = 1 }
+		}
+		else_if = {
+			limit = {
+				owner = {
+					Rights_NOSer2Has = yes
+				}
+			}
+			set_key = { lhs = Tmp_4 value = 0.7 }
+		}
+		else = {
+			set_key = { lhs = Tmp_4 value = 0.4 }
+		}
+
+		### If inverted state reach modifier is smaller than military organisation reform modifier use it, else use MilOrg modifier 
+		set_key = { lhs = Prov_BUPowInv value = 100 }
+		subtract_key = { lhs = Prov_BUPowInv which = Prov_BUPow }
+		multiply_key = { lhs = Prov_BUPowInv value = 0.006 }
+		change_key = { lhs = Prov_BUPowInv value = 0.4 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_4 which = Prov_BUPowInv }
+			}
+			multiply_key = { lhs = NO_MPSF which = Prov_BUPowInv }
+		}
+		else = {
+			multiply_key = { lhs = NO_MPSF which = Tmp_4 }
+		}
+
+		# Clan Power multiplier on Noble levies - (100 - TRPow)*0.01
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 50.001 } }
+				}
+				set_key = { lhs = Tmp_0 value = 50 }
+				subtract_key = { lhs = Tmp_0 which = Prov_TRPow }
+				multiply_key = { lhs = Tmp_0 value = 2 }
+				multiply_key = { lhs = NO_MPSF which = Tmp_0 }
+				multiply_key = { lhs = NO_MPSF value = 0.01 }
+			}
+			else = {
+				set_key = { lhs = NO_MPSF value = 0 }
+			}
+		}
+		
+		# Derived base tax multiplied with 0,01 (not sure why, probably balance ?)
+		multiply_key = { lhs = NO_MPSF value = 0.01 }
+		multiply_key = { lhs = NO_MPSF which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = NO_MPSF value = 1 }
+			}
+			set_key = { lhs = NO_MPSF value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = NO_MPSF value = 0.01 } }
+			}
+			set_key = { lhs = NO_MPSF value = 0 }
+		}
+		
+        
+		set_key = { lhs = Tmp_0 which = SF_MP } # Get leviable SF raw manpower pool
+		if = {
+			limit = { ### Familial Estates dont get levied
+				is_capital = yes
+				check_key = { lhs = SF_Total value = 4 }
+			}
+			subtract_key = { lhs = Tmp_0 value = 3 }
+		}
+		if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = Tmp_0 value = 0.01 } }
+			}
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
+		multiply_key = { lhs = NO_MPSF which = Tmp_0 } # Peasantry manpower that can be raised by the Noblity, 
+
+		# Calculate theoretically recruited manpower lvls for AI
+		change_key = { lhs = Mil_Noble which = NO_MPSF } ## Add levied peasants to the total
+		change_key = { lhs = Mil_Noble which = NO_MPNO } ## Add noble manpower to the total
+		change_key = { lhs = Mil_Noble which = NO_MPSpecial }
+
+		set_key = { lhs = Mil_NobleHigh which = Mil_Noble }
+		
+		set_key = { lhs = Prov_BUPowInv value = 0 }
+	}
+	else = {
+		set_key = { lhs = NO_MPSF value = 0 }
+	}
+}
+
+### This function calculates the potential of burgher recruitment and levy of peasants by the nobles
+# $class$_MP: Capable manpower (fightning age men)
+# Output values:
+# BG_MPBG | BG_MPRE - Leviable manpower of burgher / resident class
+# Mil_Burgher - Total potential citizen militia
+Military_DoPreBG = {
+	set_key = { lhs = Mil_Burgher value = 0 }
+	set_key = { lhs = BG_MPSpecial value = 0 }
+	### Handle City recruitments
+	if = {
+		limit = {
+			isValidProv = yes
+			
+			owner = { Tax_LevyUrbanCan = yes }
+		}
+
+		# Derive base rate from rights
+		if = {
+			limit = {
+				owner = {
+					Rights_BGGov6HasGreater = yes
+				}
+			}
+			set_key = { lhs = BG_MPBG value = 0.5 }
+			set_key = { lhs = BG_MPRE value = 0.5 }
+		}
+		else = {
+			set_key = { lhs = BG_MPBG value = 0.3 }
+			set_key = { lhs = BG_MPRE value = 0.3 }
+		}
+		multiply_key = { lhs = BG_MPBG which = Modi_Manpower }
+		multiply_key = { lhs = BG_MPRE which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = BG_MPBG value = 1 }
+			}
+			set_key = { lhs = BG_MPBG value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = BG_MPBG value = 0.01 } }
+			}
+			set_key = { lhs = BG_MPBG value = 0 }
+		}
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = BG_MPRE value = 1 }
+			}
+			set_key = { lhs = BG_MPRE value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = BG_MPRE value = 0.01 } }
+			}
+			set_key = { lhs = BG_MPRE value = 0 }
+		}
+		
+		# Multiply Base Rate with Raw Manpower pool
+		multiply_key = { lhs = BG_MPBG which = BG_MP }
+		multiply_key = { lhs = BG_MPRE which = RE_MP }
+		
+		# Multiply potential manpower with (Burgher Power * 0.01)
+		multiply_key = { lhs = BG_MPRE which = Prov_BGPow }
+		multiply_key = { lhs = BG_MPRE value = 0.01 }
+		
+		# Clan Power multiplier on Citizen militias: (100 - TRPow)*0.01
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 50.001 } }
+				}
+				set_key = { lhs = Tmp_0 value = 50 }
+				subtract_key = { lhs = Tmp_0 which = Prov_TRPow }
+				multiply_key = { lhs = Tmp_0 value = 2 }
+				multiply_key = { lhs = BG_MPBG which = Tmp_0 }
+				multiply_key = { lhs = BG_MPRE which = Tmp_0 }
+				multiply_key = { lhs = BG_MPBG value = 0.01 }
+				multiply_key = { lhs = BG_MPRE value = 0.01 }
+			}
+			else = {
+				set_key = { lhs = BG_MPBG value = 0 }
+				set_key = { lhs = BG_MPRE value = 0 }
+			}
+		}
+		
+		# Calculate potentially recruited manpower for AI
+		set_key = { lhs = Mil_Burgher which = BG_MPBG }
+		change_key = { lhs = Mil_Burgher which = BG_MPRE }
+		change_key = { lhs = Mil_Burgher which = BG_MPSpecial }
+		set_key = { lhs = Mil_BurgherHigh which = Mil_Burgher }
+	}
+	else = {
+		set_key = { lhs = BG_MPBG value = 0 }
+		set_key = { lhs = BG_MPRE value = 0 }
+		set_key = { lhs = Mil_BurgherHigh value = 0 }
+	}
+}
+
+
+### This function calculates the potential of Clan Host recruitment and levy of peasants by the nobles
+# $class$_MP: Capable manpower (fightning age men)
+# Output values:
+# TR_MPSF | TR_MPRE | TR_MPNM | TR_MPNO | TR_MPBG | TR_MPCL - tribal manpower of various class
+# Mil_Clan - Total potential Clan Host manpower
+# Mil_ClanHigh | Med | Low - Leviable tribal manpower by different tax levels
+Military_DoPreTR = {
+	set_key = { lhs = Mil_Clan value = 0 }
+	set_key = { lhs = TR_MPSpecial value = 0 }
+
+	### HANDLE Clan Host recruitment
+	if = {
+		limit = {
+			owner = { Tax_LevyHordeCan = yes }
+		}
+		# Base rate 0.5 * TribalPower * 0.01
+		set_key = { lhs = Tmp_0 value = 0.4 }
+		set_key = { lhs = Tmp_1 which = Prov_TRPow }
+		multiply_key = { lhs = Tmp_1 value = 0.02 } ## kicks in at 55%
+		if = { # underflow protection
+			limit = {
+				check_key = { lhs = Tmp_1 value = 1.001 }
+			}
+			set_key = { lhs = Tmp_1 value = 1 }
+		}
+		multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+		
+		 # Get raw manpower pool values for all classes
+		set_key = { lhs = TR_MPSF which = SF_MP }
+		if = {
+			limit = { ### Familial Estates get levies for clans in Clan Hosts
+				is_capital = yes
+				check_key = { lhs = SF_Total value = 4 }
+				owner = { is_tribal = yes }
+			}
+			subtract_key = { lhs = TR_MPSF value = 3 }
+		}
+		if = { # underflow protection
+			limit = {
+				NOT = { check_key = { lhs = TR_MPSF value = 0.001 } }
+			}
+			set_key = { lhs = TR_MPSF value = 0 }
+		}
+		set_key = { lhs = TR_MPRE which = RE_MP }
+		set_key = { lhs = TR_MPNM which = NM_MP }
+		set_key = { lhs = TR_MPNO which = NO_MP }
+		set_key = { lhs = TR_MPBG which = BG_MP }
+		set_key = { lhs = TR_MPCL which = CL_MP }
+		
+		# Apply nomad government reform multpliers on raw manpower pool
+		if = {
+			limit = {
+				owner = { has_country_flag = Modi_NomadMP }
+			}
+			if = {
+				limit = {
+					OR = {						
+						owner = { has_reform = Pol_Identity3 }
+						owner = { has_reform = Pol_Identity4 }
+						}
+						#check_key = { lhs = Pol_Identity value = 2 }
+					}
+				multiply_key = { lhs = TR_MPNM value = 1.5 }
+			}
+			else = {
+				multiply_key = { lhs = TR_MPNM value = 1.2 }
+			}
+		}
+
+		multiply_key = { lhs = Tmp_0 which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = Tmp_0 value = 0.5 }
+			}
+			set_key = { lhs = Tmp_0 value = 0.5 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = Tmp_0 value = 0.01 } }
+			}
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
+		
+		# Multiply raw manpower with base tax rate
+		multiply_key = { lhs = TR_MPSF which = Tmp_0 }
+		multiply_key = { lhs = TR_MPRE which = Tmp_0 }
+		multiply_key = { lhs = TR_MPNM which = Tmp_0 }
+		multiply_key = { lhs = TR_MPNO which = Tmp_0 }
+		multiply_key = { lhs = TR_MPNO value = 2 } # 80% mobilisation rate
+		multiply_key = { lhs = TR_MPBG which = Tmp_0 }
+		multiply_key = { lhs = TR_MPCL which = Tmp_0 }
+
+		if = {
+			limit = { ### Familial Estates get levies for clans in Clan Hosts
+				is_capital = yes
+				check_key = { lhs = SF_Total value = 4 }
+				owner = { is_tribal = yes }
+			}
+			change_key = { lhs = TR_MPSF value = 3 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = TR_MPSF which = SF_MP }
+			}
+			set_key = { lhs = TR_MPSF which = SF_MP }
+		}
+		
+		# Sum up possible manpower of all classes
+		change_key = { lhs = Mil_Clan which = TR_MPSF }
+		change_key = { lhs = Mil_Clan which = TR_MPRE }
+		change_key = { lhs = Mil_Clan which = TR_MPNM }
+		change_key = { lhs = Mil_Clan which = TR_MPNO }
+		change_key = { lhs = Mil_Clan which = TR_MPBG }
+		change_key = { lhs = Mil_Clan which = TR_MPCL }
+		change_key = { lhs = Mil_Clan which = TR_MPSpecial }
+
+		# Calculate potential manpower on tax lvls for AI		
+		set_key = { lhs = Mil_ClanHigh which = Mil_Clan }
+	}
+	else = {
+		set_key = { lhs = TR_MPSF value = 0 }
+		set_key = { lhs = TR_MPRE value = 0 }
+		set_key = { lhs = TR_MPNM value = 0 }
+		set_key = { lhs = TR_MPNO value = 0 }
+		set_key = { lhs = TR_MPBG value = 0 }
+		set_key = { lhs = TR_MPCL value = 0 }
+		set_key = { lhs = Mil_ClanHigh value = 0 }
+	}
+}
+
+
+### Handle State Recruitment into actual manpower values
+# Sources: Draft, Volunteer, Levy
+Military_DoPreBU = {
+	set_key = { lhs = BU_MPSF value = 0 }
+	set_key = { lhs = BU_MPRE value = 0 }
+	set_key = { lhs = BU_MPNO value = 0 }
+	set_key = { lhs = BU_MPBG value = 0 }
+	set_key = { lhs = BU_MPCL value = 0 }
+	set_key = { lhs = BU_MPSpecial value = 0 }
+	set_key = { lhs = Mil_Levy value = 0 }
+	set_key = { lhs = Mil_Volunteer value = 0 }
+	set_key = { lhs = Mil_Conscript value = 0 }
+	if = {
+		limit = {
+			owner = { check_key = { lhs = BU_MercRate value = 0.01 } }
+			check_key = { lhs = Merc_MPShare value = 0.01 }
+		}
+		change_key = { lhs = BU_MPSpecial which = Merc_MP }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = Ghazi_MP value = 0.01 }
+		}
+		change_key = { lhs = BU_MPSpecial which = Ghazi_MP }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = Teuton_MP value = 0.01 }
+		}
+		change_key = { lhs = BU_MPSpecial which = Teuton_MP }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = Knights_MP value = 0.01 }
+		}
+		change_key = { lhs = BU_MPSpecial which = Knights_MP }	
+	}
+	
+	### Handle Draft Recruitment
+	# Tmp_0 = Recruitment rate
+	if = {
+		limit = {
+			isValidProv = yes
+			
+			owner = { Tax_LevyDraftCan = yes } # Enabled Enlistment
+		}
+        set_key = { lhs = Tmp_0 value = 0.5 } # Base 50% recruitment rate
+
+		# 10% bonus to recruitment 
+		if = {
+			limit = {
+				is_capital = yes
+			}
+			change_key = { lhs = Tmp_0 value = 0.1 }
+		}
+		if = { # Service Reform 4 Mulitplier 150% on base recruitment rate
+			limit = {
+				owner = { Rights_BUSer4HasGreater = yes }
+			}
+			multiply_key = { lhs = Tmp_0 value = 1.5 }
+		}
+		
+		# Clan Power multiplier on BU recruitment - (100 - TRPow)*0.01
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 50.001 } }
+				}
+				set_key = { lhs = Tmp_1 value = 50 }
+				subtract_key = { lhs = Tmp_1 which = Prov_TRPow }
+				multiply_key = { lhs = Tmp_1 value = 2 }
+				multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+				multiply_key = { lhs = Tmp_0 value = 0.01 }
+			}
+			else = {
+				set_key = { lhs = Tmp_0 value = 0 }
+			}
+		}
+		
+		# Save capable manpower pool (fighting age men)
+		set_key = { lhs = Tmp_1 which = SF_MP }
+		set_key = { lhs = Tmp_2 which = RE_MP }
+		set_key = { lhs = Tmp_3 which = NO_MP }
+		set_key = { lhs = Tmp_4 which = BG_MP }
+		
+		# Clergy manpower pool only when having Clergy Obligation 3
+		if = {
+			limit = {
+				owner = { Rights_CLObl3Has = yes }
+			}
+			set_key = { lhs = Tmp_5 which = CL_MP }
+		}
+		else = {
+			set_key = { lhs = Tmp_5 value = 0 }
+		}
+
+		multiply_key = { lhs = Tmp_0 which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = Tmp_0 value = 1 }
+			}
+			set_key = { lhs = Tmp_0 value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = Tmp_0 value = 0.01 } }
+			}
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
+		
+		# Multiply raw manpower pool with recruitment rate
+		multiply_key = { lhs = Tmp_1 which = Tmp_0 } # SF
+		multiply_key = { lhs = Tmp_2 which = Tmp_0 } # RE
+		multiply_key = { lhs = Tmp_3 which = Tmp_0 } # NO
+		multiply_key = { lhs = Tmp_3 which = Privilege_NOService } # NO multiplier by Service privilege
+		multiply_key = { lhs = Tmp_4 which = Tmp_0 } # BG
+		multiply_key = { lhs = Tmp_4 which = Privilege_BGService } # BG multiplier by Service privilege
+		multiply_key = { lhs = Tmp_5 which = Tmp_0 } # CL
+		multiply_key = { lhs = Tmp_5 which = Privilege_CLService } # CL multiplier by Service privilege
+		
+		Mil_GetTaxRate = { TaxName=LevyDraft }
+		
+		# Sum up Manpower Pool * Recruitmentrate in Key Mil_Conscript
+		set_key = { lhs = Mil_Conscript which = Tmp_1 }
+		change_key = { lhs = Mil_Conscript which = Tmp_2 }
+		change_key = { lhs = Mil_Conscript which = Tmp_3 }
+		change_key = { lhs = Mil_Conscript which = Tmp_4 }
+		change_key = { lhs = Mil_Conscript which = Tmp_5 }
+		change_key = { lhs = Mil_Conscript which = BU_MPSpecial }
+
+		# Save potential MP values for the AI by multiplying theoretic pool with theoretic rates
+		set_key = { lhs = Mil_ConscriptHigh which = Mil_Conscript }
+
+		# Calculate actually recruited BU manpower
+		set_key = { lhs = Mil_Conscript which = Mil_ConscriptHigh }
+		multiply_key = { lhs = Mil_Conscript which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_1 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_2 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_3 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_4 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_5 which = Mil_RateTmp }
+		
+		# Assign calculated values to actual keys
+		change_key = { lhs = BU_MPSF which = Tmp_1 }
+		change_key = { lhs = BU_MPRE which = Tmp_2 }
+		change_key = { lhs = BU_MPNO which = Tmp_3 }
+		change_key = { lhs = BU_MPBG which = Tmp_4 }
+		change_key = { lhs = BU_MPCL which = Tmp_5 }
+	}
+	else = {
+		set_key = { lhs = Mil_ConscriptHigh value = 0 }
+	}
+	
+	### Handle Volunteer Recruitment
+	# Tmp_0 = Recruitment rate
+	if = {
+		limit = {
+			isValidProv = yes
+			
+			owner = { Tax_LevyVoluntCan = yes }
+		}
+		# Base recruitment rate = 10%
+        set_key = { lhs = Tmp_0 value = 0.10 }
+
+		# Capital bonus on recruitment rate = 2%
+		if = {
+			limit = {
+				is_capital = yes
+			}
+			change_key = { lhs = Tmp_0 value = 0.02 }
+		}
+		
+		# Clan Power multiplier on Noble levies - (100 - TRPow)*0.01
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 50.001 } }
+				}
+				set_key = { lhs = Tmp_1 value = 50 }
+				subtract_key = { lhs = Tmp_1 which = Prov_TRPow }
+				multiply_key = { lhs = Tmp_1 value = 2 }
+				multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+				multiply_key = { lhs = Tmp_0 value = 0.01 }
+			}
+			else = {
+				set_key = { lhs = Tmp_0 value = 0 }
+			}
+		}
+		
+		# Welfare multiplier on BU recruitment = 1+(Welfare*0,1) (Upper Limit 10, lower limit -10 Welfare)
+		set_key = { lhs = Tmp_1 which = Concern_WelfareTreatR }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 value = 10 }
+			}
+			set_key = { lhs = Tmp_1 value = 10 }
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_1 value = -10 } }
+			}
+			set_key = { lhs = Tmp_1 value = -10 }
+		}
+		multiply_key = { lhs = Tmp_1 value = 0.1 }
+		change_key = { lhs = Tmp_1 value = 1 }
+		
+		# Save capable manpower pool (fighting age men)
+		set_key = { lhs = Tmp_2 which = SF_MP }
+		set_key = { lhs = Tmp_3 which = RE_MP }
+		set_key = { lhs = Tmp_4 which = NO_MP }
+		set_key = { lhs = Tmp_5 which = BG_MP }
+		set_key = { lhs = Tmp_6 which = CL_MP }
+
+		multiply_key = { lhs = Tmp_0 which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = Tmp_0 value = 1 }
+			}
+			set_key = { lhs = Tmp_0 value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = Tmp_0 value = 0.01 } }
+			}
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
+		
+		# Multiply raw manpower pool with recruitment rate
+		multiply_key = { lhs = Tmp_2 which = Tmp_0 } # SF
+		multiply_key = { lhs = Tmp_3 which = Tmp_0 } # RE
+		multiply_key = { lhs = Tmp_4 which = Tmp_0 } # NO
+		multiply_key = { lhs = Tmp_5 which = Tmp_0 } # BG
+		multiply_key = { lhs = Tmp_6 which = Tmp_0 } # CL
+		
+		multiply_key = { lhs = Tmp_2 which = Tmp_1 } # SF * Welfare Multiplier
+		multiply_key = { lhs = Tmp_3 which = Tmp_1 } # RE * Welfare Multiplier
+		multiply_key = { lhs = Tmp_4 which = Prov_NOLoy } # NO * Noble Loyalty
+		multiply_key = { lhs = Tmp_4 which = Privilege_NOService } # NO * ServicePrivilege Modi
+		multiply_key = { lhs = Tmp_5 which = Prov_BGLoy } # BG * Burgher Loyalty
+		multiply_key = { lhs = Tmp_5 which = Privilege_BGService } # BG * Burgher * ServicePrivilege Modi
+		multiply_key = { lhs = Tmp_6 which = Prov_CLLoy } # CL * Clergy Loyalty
+		multiply_key = { lhs = Tmp_6 which = Privilege_CLService } # CL * Clergy Service Privilege Modi
+		multiply_key = { lhs = Tmp_4 value = 0.05 } # Multiplier on elites 5%
+		multiply_key = { lhs = Tmp_5 value = 0.05 } # Multiplier on elites 5%
+		multiply_key = { lhs = Tmp_6 value = 0.05 } # Multiplier on elites 5%
+		
+		Mil_GetTaxRate = { TaxName=LevyVolunt }
+		
+		# Sum up Manpower Pool * Recruitmentrate in Key Mil_Conscript
+		set_key = { lhs = Mil_Volunteer which = Tmp_2 }
+		change_key = { lhs = Mil_Volunteer which = Tmp_3 }
+		change_key = { lhs = Mil_Volunteer which = Tmp_4 }
+		change_key = { lhs = Mil_Volunteer which = Tmp_5 }
+		change_key = { lhs = Mil_Volunteer which = Tmp_6 }
+		change_key = { lhs = Mil_Volunteer which = BU_MPSpecial }
+
+		# Save potential MP values for the AI by multiplying theoretic pool with theoretic rates
+		set_key = { lhs = Mil_VolunteerHigh which = Mil_Volunteer }
+	
+		# Calculate actually recruited BU manpower
+		set_key = { lhs = Mil_Volunteer which = Mil_VolunteerHigh }
+		multiply_key = { lhs = Mil_Volunteer which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_2 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_3 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_4 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_5 which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_6 which = Mil_RateTmp }
+		
+		# Assign calculated values to actual keys
+		change_key = { lhs = BU_MPSF which = Tmp_2 }
+		change_key = { lhs = BU_MPRE which = Tmp_3 }
+		change_key = { lhs = BU_MPNO which = Tmp_4 }
+		change_key = { lhs = BU_MPBG which = Tmp_5 }
+		change_key = { lhs = BU_MPCL which = Tmp_6 }
+	}
+	else = {
+		set_key = { lhs = Mil_VolunteerHigh value = 0 }
+	}
+	
+	# Handle Feudal Levy Recruitment
+	if = {
+		limit = {
+			isValidProv = yes
+			owner = { Tax_LevyFeudalCan = yes }
+		}
+		# Set base recruitment rate based on NOGov Right
+		if = {
+			limit = {
+				owner = { Rights_NOGov1Has = yes }
+			}
+			set_key = { lhs = Tmp_0 value = 0.7 } # NOGov1 - 70%
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOGov2Has = yes }
+			}
+			set_key = { lhs = Tmp_0 value = 0.6 } # NOGov2 - 60%
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOGov3Has = yes }
+			}
+			set_key = { lhs = Tmp_0 value = 0.5 } # NOGov3 - 50%
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOGov4Has = yes }
+			}
+			set_key = { lhs = Tmp_0 value = 0.35 } # NOGov4 or higher - 35%
+		}
+
+		# Capital bonus on base recruitment rate = 10%
+		if = {
+			limit = {
+				is_capital = yes
+			}
+			change_key = { lhs = Tmp_0 value = 0.1 }
+		}
+		
+		# Multilpier on base recruitment rate State Property Share * 0.01
+		multiply_key = { lhs = Tmp_0 which = BU_PrpResources }
+        multiply_key = { lhs = Tmp_0 value = 0.01 }
+
+		# Multiply base rate by noble service reforms
+		if = {
+			limit = {
+				owner = { Rights_NOSer1Has = yes }
+			}
+			multiply_key = { lhs = Tmp_0 value = 1 } # No Modification on NOSer1
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOSer2Has = yes }
+			}
+			multiply_key = { lhs = Tmp_0 value = 0.7 } # -30% Modification on NOSer2
+		}
+		else = {
+			multiply_key = { lhs = Tmp_0 value = 0.40 } # -60% Modification on NOSer3
+		}
+		
+		# Clan Power multiplier on Noble levies - (100 - TRPow)*0.01
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 50.001 } }
+				}
+				set_key = { lhs = Tmp_1 value = 50 }
+				subtract_key = { lhs = Tmp_1 which = Prov_TRPow }
+				multiply_key = { lhs = Tmp_1 value = 2 }
+				multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+				multiply_key = { lhs = Tmp_0 value = 0.01 }
+			}
+			else = {
+				set_key = { lhs = Tmp_0 value = 0 }
+			}
+		}
+		# Get Peasant base fighting age men (nobles only recruit from peasants)
+		set_key = { lhs = Tmp_1 which = SF_MP }
+
+		if = {
+			limit = { ### Familial Estates get levies for states in State Levies
+				is_capital = yes
+				check_key = { lhs = SF_Total value = 4 }
+				owner = { is_tribal = no }
+			}
+			subtract_key = { lhs = Tmp_1 value = 3 }
+		}
+
+		multiply_key = { lhs = Tmp_0 which = Modi_Manpower }
+		if = { ### Handle Max Boundary
+			limit = {
+				check_key = { lhs = Tmp_0 value = 1 }
+			}
+			set_key = { lhs = Tmp_0 value = 1 }
+		}
+		else_if = { ### HANDLE Lower boundary
+			limit = {
+				NOT = { check_key = { lhs = Tmp_0 value = 0.01 } }
+			}
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
+
+		# Calc theoretically recruited levy manpower
+		multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+
+		Mil_GetTaxRate = { TaxName=LevyFeudal }
+
+		if = {
+			limit = { ### Familial Estates get levies for states in State Levies
+				is_capital = yes
+				check_key = { lhs = SF_Total value = 4 }
+				owner = { is_tribal = no }
+			}
+			change_key = { lhs = Tmp_1 value = 3 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 which = SF_MP }
+			}
+			set_key = { lhs = Tmp_1 which = SF_MP }
+		}
+
+		# Calculate theoretically recruited manpower lvls for AI
+		set_key = { lhs = Mil_Levy which = Tmp_1 }
+		set_key = { lhs = Mil_LevyHigh which = Mil_Levy }
+
+		# Calculate actuall recruited manpower
+		set_key = { lhs = Mil_Levy which = Mil_LevyHigh }
+		multiply_key = { lhs = Mil_Levy which = Mil_RateTmp }
+		multiply_key = { lhs = Tmp_1 which = Mil_RateTmp }
+		
+		# Set actual key to calculated value
+		change_key = { lhs = BU_MPSF which = Tmp_1 }
+	}
+	else = {
+		set_key = { lhs = Mil_LevyHigh value = 0 }
+	}
+}
+## Derive potential and actual taxrates from buildings
+Mil_GetTaxRate = {
+	set_key = { lhs = Mil_RateTmp which = Tax_Cost$TaxName$Rate }
+	multiply_key = { lhs = Mil_RateTmp value = 0.01 }
+}
+
+Military_TotalsSum = {
+	change_key = { lhs = $from$_MPDisband which = $from$_MP$who$Disband }
+	change_key = { lhs = $from$_MPBuildSize which = $from$_MP$who$BuildSize }
+	change_key = { lhs = $from$_MPCur which = $from$_MP$who$Cur }
+}
+Military_MaintBuildClean = {
+	set_key = { lhs = $from$_MP$who$Disband value = 0 }
+	set_key = { lhs = $from$_MP$who$BuildSize value = 0 }
+	set_key = { lhs = $from$_MP$who$MaintSize value = 0 }
+}
+Military_MaintBuildSum = {
+	change_key = { lhs = $from$_BudgetedMP which = $from$_MP$who$ }
+	change_key = { lhs = $from$_MPMaint which = $from$_MP$who$Cur }
+}
+
+Military_MaintBuildCalcer = {
+	# $from$_BudgetedMP === Potential Manpower
+	# $from$_MPMaint === Current Manpower
+	# We will fund all Current Manpower, but may not fund some of what we disband
+	[[who0] Military_MaintBuildSum = { from = $from$ who = $who0$ } ]
+	[[who1] Military_MaintBuildSum = { from = $from$ who = $who1$ } ]
+	[[who2] Military_MaintBuildSum = { from = $from$ who = $who2$ } ]
+	[[who3] Military_MaintBuildSum = { from = $from$ who = $who3$ } ]
+	[[who4] Military_MaintBuildSum = { from = $from$ who = $who4$ } ]
+	[[who5] Military_MaintBuildSum = { from = $from$ who = $who5$ } ]
+	[[who6] Military_MaintBuildSum = { from = $from$ who = $who6$ } ]
+
+	#Public_Tmp2 === Cost it would take to Mantain 1 unit
+	set_key = { lhs = Public_Tmp2 which = Mil_CostMaint } 
+	multiply_key = { lhs = Public_Tmp2 which = Modi_Mil$from$Cost }
+	multiply_key = { lhs = Public_Tmp2 which = Modi_Mil$from$Maint }
+	#Public_Tmp3 === Cost it would take to Build 1 Unit
+	set_key = { lhs = Public_Tmp3 which = Mil_CostBuild }
+	multiply_key = { lhs = Public_Tmp3 which = Modi_Mil$from$Cost }
+	multiply_key = { lhs = Public_Tmp3 which = Modi_Mil$from$Build }
+
+	# $from$_BudgetedMP === Convert this now into Budgeted Manpower
+	if = {
+		limit = {
+			check_key = { lhs = $from$_BudgetedMP value = 0.001 } # if there is any possible manpower to actually budget
+			check_key = { lhs = $from$_MilBudget value = 0.1 } # real budget, dont piss around with micro amounts
+		}
+		set_key = { lhs = $from$_BudgetedMPCost which = $from$_BudgetedMP }
+		multiply_key = { lhs = $from$_BudgetedMPCost which = Public_Tmp2 }
+		if = {
+			limit = {
+				check_key = { lhs = $from$_BudgetedMPCost which = $from$_MilBudget } # cant be more than 100% of the budget
+			}
+			set_key = { lhs = $from$_MilBudgetScalar which = $from$_MilBudget }
+			divide_key = { lhs = $from$_MilBudgetScalar which = $from$_BudgetedMPCost }
+			multiply_key = { lhs = $from$_BudgetedMP which = $from$_MilBudgetScalar } # Set Fully Budgeted to what Manpower the budget can afford
+		}
+		else = {
+			### Leave $from$_BudgetedMP alone, its fully budgeted
+			set_key = { lhs = $from$_MilBudgetScalar value = 1 }
+		}
+	}
+	else = {
+		set_key = { lhs = $from$_MilBudgetScalar value = 0 } # nothing
+		set_key = { lhs = $from$_BudgetedMP value = 0 } # no potential manpower
+	}
+
+	# Now finally, how much of the total pool are we building?
+	if = {
+		limit = {
+			check_key = { lhs = $from$_MPMaint which = $from$_BudgetedMP } # if its over budget, assume budget var has something
+			NOT = { is_key_equal = { lhs = $from$_MPMaint which = $from$_BudgetedMP } }
+		}
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = $from$_MPMaint value = 0.05 } }
+			}
+			set_key = { lhs = Tmp_0 value = 1 } 
+		}
+		else = {
+			# how much are we over by?
+			set_key = { lhs = Tmp_3 which = $from$_MPMaint } 
+			subtract_key = { lhs = Tmp_3 which = $from$_BudgetedMP }
+			
+			set_key = { lhs = Tmp_4 which = $from$_BudgetedMP } # calc what 10% of budgeted looks like
+			multiply_key = { lhs = Tmp_4 value = 0.1 }
+			set_key = { lhs = Tmp_0 which = $from$_MPMaint } 
+			multiply_key = { lhs = Tmp_0 value = 0.2 } # calc what taking 20% of the overfunded manpower looks like
+
+			# if 20% of overfunded is < 10% of budgeted, just take the full amount, no exponential weirdness.
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_4 which = Tmp_0 }
+				}
+				set_key = { lhs = Tmp_0 which = Tmp_3 } 
+			}
+			# Work out how much we are disbanding of the current military
+			divide_key = { lhs = Tmp_0 which = $from$_MPMaint } 
+		}
+
+		### Apply to all classes equally, note it Actually Disbands here
+		[[who0] Military_DisbandCalcer = { from = $from$ who = $who0$ } ]
+		[[who1] Military_DisbandCalcer = { from = $from$ who = $who1$ } ]
+		[[who2] Military_DisbandCalcer = { from = $from$ who = $who2$ } ]
+		[[who3] Military_DisbandCalcer = { from = $from$ who = $who3$ } ]
+		[[who4] Military_DisbandCalcer = { from = $from$ who = $who4$ } ]
+		[[who5] Military_DisbandCalcer = { from = $from$ who = $who5$ } ]
+		[[who6] Military_DisbandCalcer = { from = $from$ who = $who6$ } ]
+	}
+	# Under Budget, so can Recruit
+	else_if = {
+		limit = {
+			NOT = { check_key = { lhs = $from$_MPMaint which = $from$_BudgetedMP } } # if its over budget, assume budget var has something
+		}
+		# Calc how much manpower is on the table
+		set_key = { lhs = $from$_MPBuild which = $from$_BudgetedMP } 
+		subtract_key = { lhs = $from$_MPBuild which = $from$_MPMaint }
+
+		### Set minimum funding rate based on rights --> this determines how fast consript units can be build
+		# Its a % of Budgeted manpower, like, 12.5% a year of that manpower, if > then cap, otherwise just finish it.
+		set_key = { lhs = Tmp_4 which = $from$_BudgetedMP }
+		if = {
+			limit = {
+				owner = { has_country_modifier = ExtraFresh_State } # sped up at lower mil org
+			}
+			multiply_key = { lhs = Tmp_4 value = 1 } # First year after spawning, will instantly train its troops
+		}
+		else_if = {
+			limit = {
+				owner = { has_country_modifier = Fresh_State } # sped up at lower mil org
+			}
+			multiply_key = { lhs = Tmp_4 value = 0.5 } # First five years after spawning, will swiftly train its troops
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOSer1Has = yes } # sped up at lower mil org
+			}
+			multiply_key = { lhs = Tmp_4 value = 0.334 } # how much to fund at once, minimum
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOSer2Has = yes } # sped up at lower mil org
+			}
+			multiply_key = { lhs = Tmp_4 value = 0.275 } # how much to fund at once, minimum
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOSer3Has = yes } # sped up at lower mil org
+			}
+			multiply_key = { lhs = Tmp_4 value = 0.25 } # how much to fund at once, minimum
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_NOSer4Has = yes } # sped up at lower mil org
+			}
+			multiply_key = { lhs = Tmp_4 value = 0.225 } # how much to fund at once, minimum
+		}
+		else = {  # slow at higher mil org
+			multiply_key = { lhs = Tmp_4 value = 0.2 } # how much to fund at once, minimum
+		}
+		if = {
+			limit = {
+				check_key = { lhs = $from$_MPBuild which = Tmp_4 } ## If Difference funding > potential manpower funding
+			}
+			set_key = { lhs = $from$_MPBuild which = Tmp_4 } # Limit funding to this %
+		}
+
+		### Calc now how much the new manpower is as a portion of spare budget size
+		# First how much it'll cost to build them
+		set_key = { lhs = Tmp_3 which = $from$_MPBuild }
+		multiply_key = { lhs = Tmp_3 which = Public_Tmp3 }
+
+		# Figure out how much ongoing maintenance costs
+		set_key = { lhs = Tmp_4 which = $from$_MPMaint }
+		multiply_key = { lhs = Tmp_4 which = Public_Tmp2 }
+		### Fun part, for designated recruiters, the Mil Slider will reduce their ongoing mainenance costs
+		### This is so pivotal, because it allows them to now use this money to fund recruitment
+		if = { limit = { always = $milSlider$ }
+			multiply_key = { lhs = Tmp_4 which = Mil_BUSliderSave }
+		}
+		
+		# Create a wealth sum that doesnt count this
+		set_key = { lhs = Tmp_2 which = $from$_MilBudget }
+		if = { limit = { NOT = { always = $milSlider$ } } # Elites will go a bit over budget to recruit
+			multiply_key = { lhs = Tmp_2 value = 1.1 }
+		}
+		subtract_key = { lhs = Tmp_2 which = Tmp_4 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_2 which = Tmp_3 }
+			}
+			# Scale to this sub-maint budget size
+			set_key = { lhs = Tmp_3 value = 1 }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Tmp_2 value = 0.001 }
+				check_key = { lhs = Tmp_3 value = 0.001 }
+			}
+			# Scale to this sub-maint budget size
+			set_key = { lhs = Tmp_4 which = Tmp_2 }
+			divide_key = { lhs = Tmp_4 which = Tmp_3 }
+			set_key = { lhs = Tmp_3 which = Tmp_4 }
+		}
+		else = {
+			set_key = { lhs = Tmp_3 value = 0 }
+		}
+
+		# Only build this amount, obviously we cannot build what we cant afford
+		multiply_key = { lhs = $from$_MPBuild which = Tmp_3 }
+
+		# Create a sum of on-the-table manpower from classes
+		# We need to know how to disperse the BuildSize amount
+		set_key = { lhs = Tmp_4 value = 0 }
+		[[who0] Military_BuildCalcer1 = { from = $from$ who = $who0$ } ]
+		[[who1] Military_BuildCalcer1 = { from = $from$ who = $who1$ } ]
+		[[who2] Military_BuildCalcer1 = { from = $from$ who = $who2$ } ]
+		[[who3] Military_BuildCalcer1 = { from = $from$ who = $who3$ } ]
+		[[who4] Military_BuildCalcer1 = { from = $from$ who = $who4$ } ]
+		[[who5] Military_BuildCalcer1 = { from = $from$ who = $who5$ } ]
+		[[who6] Military_BuildCalcer1 = { from = $from$ who = $who6$ } ]
+
+		[[who0] Military_BuildCalcer2 = { from = $from$ who = $who0$ } ]
+		[[who1] Military_BuildCalcer2 = { from = $from$ who = $who1$ } ]
+		[[who2] Military_BuildCalcer2 = { from = $from$ who = $who2$ } ]
+		[[who3] Military_BuildCalcer2 = { from = $from$ who = $who3$ } ]
+		[[who4] Military_BuildCalcer2 = { from = $from$ who = $who4$ } ]
+		[[who5] Military_BuildCalcer2 = { from = $from$ who = $who5$ } ]
+		[[who6] Military_BuildCalcer2 = { from = $from$ who = $who6$ } ]
+	}
+	### Apply reduction in ongoing maintenance costs
+	if = { limit = { always = $milSlider$ }
+		multiply_key = { lhs = $from$_MPMaint which = Mil_BUSliderSave }
+	}
+	[[who0] Military_MaintCalcer = { from = $from$ who = $who0$ } ]
+	[[who1] Military_MaintCalcer = { from = $from$ who = $who1$ } ]
+	[[who2] Military_MaintCalcer = { from = $from$ who = $who2$ } ]
+	[[who3] Military_MaintCalcer = { from = $from$ who = $who3$ } ]
+	[[who4] Military_MaintCalcer = { from = $from$ who = $who4$ } ]
+	[[who5] Military_MaintCalcer = { from = $from$ who = $who5$ } ]
+	[[who6] Military_MaintCalcer = { from = $from$ who = $who6$ } ]
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = $from$_MPMaint value = 0 } }
+		}
+		set_key = { lhs = $from$_MPMaint value = 0 }
+	}
+}
+Military_DisbandCalcer = {
+	set_key = { lhs = $from$_MP$who$Disband which = $from$_MP$who$Cur }
+	multiply_key = { lhs = $from$_MP$who$Disband which = Tmp_0 }
+	subtract_key = { lhs = $from$_MP$who$Cur which = $from$_MP$who$Disband }
+	# Dont fund disbanded troops
+	subtract_key = { lhs = $from$_MPMaint which = $from$_MP$who$Disband }
+}
+Military_MaintCalcer = {
+	set_key = { lhs = $from$_MP$who$MaintSize which = $from$_MP$who$Cur }
+	### Fun part, for designated recruiters, the Mil Slider will reduce their ongoing mainenance costs
+	### This is so pivotal, because it allows them to now use this money to fund recruitment as above
+}
+Military_BuildCalcer1 = {
+	set_key = { lhs = $from$_MP$who$BuildSize which = $from$_MP$who$ }
+	subtract_key = { lhs = $from$_MP$who$BuildSize which = $from$_MP$who$Cur }
+	# If there are spare troops, add them to the sum
+	change_key = { lhs = Tmp_4 which = $from$_MP$who$BuildSize } # add to sum
+}
+Military_BuildCalcer2 = {
+	# If there are spare troops, add them to the sum
+	if = {
+		limit = {
+			check_key = { lhs = $from$_MP$who$BuildSize value = 0.001 } # if its over budget, assume budget var has something
+		}
+		divide_key = { lhs = $from$_MP$who$BuildSize which = Tmp_4 } # figure out the share of troops
+		multiply_key = { lhs = $from$_MP$who$BuildSize which = $from$_MPBuild } # Build that amount of them
+	}
+}
+
+Military_DoPreHelperNO = {
+	Military_DoPreHelper = { from = NO milSlider=no who0 = NO who1 = SF who2 = Special elite = yes wealth = NO_Wealth }
+}
+Military_DoPreHelperBG = {
+	Military_DoPreHelper = { from = BG milSlider=no who0 = BG who1 = RE who2 = Special elite = yes wealth = BG_Wealth }
+}
+Military_DoPreHelperTR = {
+	Military_DoPreHelper = { from = TR milSlider=no who0 = SF who1 = RE who2 = NM who3 = NO who4 = BG who5 = CL who6 = Special clans = yes wealth = NO_Wealth }
+}
+Military_DoPreHelperBU = {
+	Military_DoPreHelper = { from = BU milSlider=yes who0 = SF who1 = RE who2 = NO who3 = BG who4 = CL who5 = Special }
+}
+##### This function handles recruit, disband and maintenance calculations
+### Inputs:
+# from = class controlling the manpower
+# who0, who1, who2, who3, who4, who5 = subclasses manpower to be trained
+Military_DoPreHelper = {
+	# Pre Clean data
+	set_key = { lhs = $from$_MPMaint value = 0 }
+	set_key = { lhs = $from$_MPBuild value = 0 }
+	set_key = { lhs = $from$_MilBudgetScalar value = 0 }
+	set_key = { lhs = $from$_BudgetedMP value = 0 }
+	set_key = { lhs = $from$_BudgetedMPCost value = 0 }
+	
+	[[who0] Military_MaintBuildClean = { from = $from$ who = $who0$ } ]
+	[[who1] Military_MaintBuildClean = { from = $from$ who = $who1$ } ]
+	[[who2] Military_MaintBuildClean = { from = $from$ who = $who2$ } ]
+	[[who3] Military_MaintBuildClean = { from = $from$ who = $who3$ } ]
+	[[who4] Military_MaintBuildClean = { from = $from$ who = $who4$ } ]
+	[[who5] Military_MaintBuildClean = { from = $from$ who = $who5$ } ]
+	[[who6] Military_MaintBuildClean = { from = $from$ who = $who6$ } ]
+	if = {
+		limit = { # if any class mp is > 0 execute
+			[[elite] check_key = { lhs = $from$_Total value = 0.001 } ]
+			[[clans] check_key = { lhs = Prov_TRPow value = 0.001 } ]
+			OR = {
+				[[who0] check_key = { lhs = $from$_MP$who0$ value = 0.001 } ]
+				[[who1] check_key = { lhs = $from$_MP$who1$ value = 0.001 } ]
+				[[who2] check_key = { lhs = $from$_MP$who2$ value = 0.001 } ]
+				[[who3] check_key = { lhs = $from$_MP$who3$ value = 0.001 } ]
+				[[who4] check_key = { lhs = $from$_MP$who4$ value = 0.001 } ]
+				[[who5] check_key = { lhs = $from$_MP$who5$ value = 0.001 } ]
+				[[who6] check_key = { lhs = $from$_MP$who6$ value = 0.001 } ]
+                [[who0] check_key = { lhs = $from$_MP$who0$Cur value = 0.001 } ] ## TY Taikand
+                [[who1] check_key = { lhs = $from$_MP$who1$Cur value = 0.001 } ]
+                [[who2] check_key = { lhs = $from$_MP$who2$Cur value = 0.001 } ]
+                [[who3] check_key = { lhs = $from$_MP$who3$Cur value = 0.001 } ]
+                [[who4] check_key = { lhs = $from$_MP$who4$Cur value = 0.001 } ]
+                [[who5] check_key = { lhs = $from$_MP$who5$Cur value = 0.001 } ]
+                [[who6] check_key = { lhs = $from$_MP$who6$Cur value = 0.001 } ]
+			}
+		}
+
+		# Bureau already have budget set up prior
+
+		[[clans] # has special TR Pow conditions
+		if = { # Get Budget based on clans wealth
+			limit = {
+				always = $clans$
+			}
+			Military_GetBudget = { from = $from$ wealth = $wealth$ clans = $clans$ }
+		}
+		]
+		[[elite] # depends on class totals and shit
+		if = { # Get Budget based on elite wealth
+			limit = {
+				always = $elite$
+			}
+			Military_GetBudget = { from = $from$ wealth = $wealth$ elite = $elite$ }
+		}
+		]
+		Military_MaintBuildCalcer = {
+			from = $from$
+			[[who0] who0=$who0$ ]
+			[[who1] who1=$who1$ ]
+			[[who2] who2=$who2$ ]
+			[[who3] who3=$who3$ ]
+			[[who4] who4=$who4$ ]
+			[[who5] who5=$who5$ ]
+			[[who6] who6=$who6$ ]
+			milSlider=$milSlider$
+		}
+	}
+}
+Mil_ManpowerLossCalc = {
+	every_owned_province = {
+		limit = {
+			check_key = { lhs = Stat_MP value = 0.001 }
+			NOT = { has_global_flag = POP_Sim }
+		}
+
+		# Get previously assigned manpower stat
+		set_key = { lhs = Tmp_2 which = Stat_MP }
+		change_key = { lhs = Tmp_2 which = MP_Losses } # deduct manpower losses over the year
+
+		# Calculate loss fraction based on how many losses vs. previous manpower stat
+		if = {
+			limit = {
+				is_key_equal = { lhs = Tmp_2 value = 0 }
+			}
+			set_key = { lhs = Tmp_2 value = -1 }
+		}
+		else = {
+			divide_key = { lhs = Tmp_2 which = Stat_MP }
+			subtract_key = { lhs = Tmp_2 value = 1 }
+		}
+
+		### Distribute manpower losses over all provinces and classes
+		if = {
+			limit = {
+				check_key = { lhs = Stat_MPNO value = 0.001 }
+			}
+			set_key = { lhs = Tmp_0 which = Stat_MPNO }
+			multiply_key = { lhs = Tmp_0 which = Tmp_2 }
+			
+			MP_Distrib = { from = NO who0 = SF who1 = NO who2 = Special amount = Tmp_0 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Stat_MPBG value = 0.001 }
+			}
+			set_key = { lhs = Tmp_0 which = Stat_MPBG }
+			multiply_key = { lhs = Tmp_0 which = Tmp_2 }
+			
+			MP_Distrib = { from = BG who0 = RE who1 = BG who2 = Special amount = Tmp_0 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Stat_MPTR value = 0.001 }
+			}
+			set_key = { lhs = Tmp_0 which = Stat_MPTR }
+			multiply_key = { lhs = Tmp_0 which = Tmp_2 }
+			
+			MP_Distrib = { from = TR who0 = SF who1 = RE who2 = NM who3 = NO who4 = BG who5 = CL who6 = Special amount = Tmp_0 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Tax_MP value = 0.001 }
+			}
+			set_key = { lhs = Tmp_0 which = Tax_MP }
+			multiply_key = { lhs = Tmp_0 which = Tmp_2 }
+			
+			MP_Distrib = { from = BU who0 = SF who1 = RE who2 = NO who3 = BG who4 = CL who5 = Special amount = Tmp_0 }
+		}
+		
+		### Refresh manpower key percentage values after distributing losses
+		MP_Refresh = { class = SF }
+		MP_Refresh = { class = RE }
+		MP_Refresh = { class = NM }
+		MP_Refresh = { class = NO }
+		MP_Refresh = { class = BG }
+		MP_Refresh = { class = CL }
+	}
+	set_key = { lhs = MP_Losses value = 0 }
+}

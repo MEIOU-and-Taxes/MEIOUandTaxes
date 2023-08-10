@@ -1,0 +1,2062 @@
+StartUp_InitRural = {
+	set_key = { lhs = SF_Total value = 100 }
+	subtract_key = { lhs = SF_Total which = NM_Ratio }
+	multiply_key = { lhs = SF_Total value = 0.01 }
+
+	multiply_key = { lhs = SF_Total which = $pop$ }
+
+	if = {
+		limit = {
+			is_capital = yes
+			NOT = { check_key = { lhs = SF_Total value = 10 } }
+			NOT = { check_key = { lhs = NM_Ratio value = 35 } }
+		}
+		set_key = { lhs = SF_Total value = 10 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = NM_Ratio value = 0.001 }
+		}
+		set_key = { lhs = NM_Total which = NM_Ratio }
+		multiply_key = { lhs = NM_Total which = $pop$ }
+		multiply_key = { lhs = NM_Total value = 0.01 }
+	}
+	else = {
+		set_key = { lhs = NM_Total value = 0 }
+	}
+}
+
+StartUp_InitUrban = {
+	if = {
+		limit = {
+			check_key = { lhs = $pop$ value = 0.1 }
+		}
+		set_key = { lhs = RE_Total which = $pop$ }
+	}
+	else = {
+		set_key = { lhs = $pop$ value = 0 }
+	}
+}
+
+StartUp_InitUpperHelper = {
+	if = {
+		limit = {
+			check_key = { lhs = $from$_Total value = 1 }
+		}
+		set_key = { lhs = Tmp_4 which = $from$_Total }
+		multiply_key = { lhs = Tmp_4 value = $rate$ }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 0.001 }
+			}
+			multiply_key = { lhs = Tmp_4 which = Tmp_0 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 value = 0.001 }
+			}
+			change_key = { lhs = Tmp_4 which = Tmp_1 }
+		}
+		change_key = { lhs = $return$ which = Tmp_4 }
+
+		set_key = { lhs = Tmp_4 value = 0 }
+	}
+	set_key = { lhs = Tmp_0 value = 1 }
+}
+StartUp_InitUpperSubHelper = {
+	if = {
+		limit = {
+			check_key = { lhs = $from$_Total value = 0.001 }
+		}
+		set_key = { lhs = Tmp_0 which = $from$_Total }
+		divide_key = { lhs = Tmp_0 which = Tmp_2 }
+		change_key = { lhs = Tmp_1 which = Tmp_0 }
+	}
+}
+
+StartUp_InitUpper = {
+	set_key = { lhs = Tmp_2 which = SF_Total }
+	change_key = { lhs = Tmp_2 which = RE_Total }
+	change_key = { lhs = Tmp_2 which = NM_Total }
+	set_key = { lhs = Tmp_0 value = 1 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	set_key = { lhs = NO_Total value = 0 }
+
+	if = { # Blood
+		limit = {
+			OR = {
+				isValidProv = no
+				owner = {
+					has_reform = Pol_Nobility1
+					#is_key_equal = { lhs = Pol_Nobility value = 0 } 
+				}
+			}
+		}
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.02
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = NM
+			rate = 0.005
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.02
+			return = NO_Total
+		}
+	}
+	else_if = { # Possession
+		limit = {
+			owner = { 
+				has_reform = Pol_Nobility2
+				#is_key_equal = { lhs = Pol_Nobility value = 1 } 
+			}
+		}
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.02
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = NM
+			rate = 0.005
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.02
+			return = NO_Total
+		}
+	}
+	else_if = { # Office
+		limit = {
+			owner = {
+				has_reform = Pol_Nobility3
+				#is_key_equal = { lhs = Pol_Nobility value = 2 } 
+			}
+		}
+		set_key = { lhs = Tmp_0 which = Prov_BUPow }
+		multiply_key = { lhs = Tmp_0 value = 0.005 }
+		change_key = { lhs = Tmp_0 value = 1 }
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.01
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = NM
+			rate = 0.005
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.01
+			return = NO_Total
+		}
+	}
+	else = { # None
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.005
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = NM
+			rate = 0.005
+			return = NO_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.005
+			return = NO_Total
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = NO_Total value = 0.03 }
+			}
+		}
+		set_key = { lhs = NO_Total value = 0.03 }
+	}
+
+	set_key = { lhs = Tmp_0 value = 1 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	set_key = { lhs = CL_Total value = 0 }
+
+	if = {
+		limit = {
+			isValidProv = yes
+			owner = { Rights_CLHie1Has = yes }
+		}
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.01
+			return = CL_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.01
+			return = CL_Total
+		}
+	}
+	else_if = {
+		limit = {
+			isValidProv = yes
+			owner = { Rights_CLHie2Has = yes }
+		}
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.008
+			return = CL_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.008
+			return = CL_Total
+		}
+	}
+	else = {
+		StartUp_InitUpperHelper = {
+			from = SF
+			rate = 0.006
+			return = CL_Total
+		}
+		StartUp_InitUpperHelper = {
+			from = RE
+			rate = 0.006
+			return = CL_Total
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = CL_Total value = 0.04 }
+			}
+		}
+		set_key = { lhs = CL_Total value = 0 }
+	}
+
+	set_key = { lhs = Tmp_0 value = 1 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	set_key = { lhs = BG_Total value = 0 }
+
+	trigger_switch = {
+		on_trigger = has_province_flag
+
+		TN_Minor = {
+			change_key = { lhs = Tmp_1 value = 0.1 }
+			if = {
+				limit = {
+					has_province_flag = TN_Port
+				}
+				change_key = { lhs = Tmp_1 value = 0.05 }
+			}
+		}
+		TN_Important = {
+			change_key = { lhs = Tmp_1 value = 0.2 }
+			if = {
+				limit = {
+					has_province_flag = TN_Port
+				}
+				change_key = { lhs = Tmp_1 value = 0.05 }
+			}
+		}
+		TN_Major = {
+			change_key = { lhs = Tmp_1 value = 0.3 }
+			if = {
+				limit = {
+					has_province_flag = TN_Port
+				}
+				change_key = { lhs = Tmp_1 value = 0.1 }
+			}
+		}
+	}
+	if = {
+		limit = {
+			NOT = { has_province_flag = TN_Minor }
+			NOT = { has_province_flag = TN_Important }
+			NOT = { has_province_flag = TN_Major }
+			check_key = { lhs = RE_Total value = 1.5 }
+		}
+		change_key = { lhs = Tmp_1 value = 0.08 }
+	}
+	if = {
+		limit = {
+			OR = {
+				province_id = 1402
+				province_id = 1380
+				province_id = 384
+				province_id = 509
+				province_id = 105
+				province_id = 236
+				province_id = 137
+				province_id = 442
+				province_id = 2745
+				province_id = 2220
+				province_id = 3843
+				province_id = 451
+				province_id = 3213
+				province_id = 445
+				province_id = 3287
+				province_id = 425
+				province_id = 2257
+				province_id = 2279
+				province_id = 1199
+				province_id = 396
+				province_id = 398
+				province_id = 431
+				province_id = 416
+				province_id = 1396
+				province_id = 2869
+				province_id = 350
+				province_id = 2863
+				province_id = 1533
+				province_id = 5492
+				province_id = 5494
+				province_id = 710
+				province_id = 670
+				province_id = 145
+				province_id = 334
+				province_id = 2865
+				province_id = 337
+				province_id = 340
+				province_id = 2904
+				province_id = 454
+				province_id = 3292
+				province_id = 4743
+				province_id = 2254
+				province_id = 699
+				province_id = 1041
+				province_id = 697
+				province_id = 5469
+				province_id = 2477
+				province_id = 5376
+				province_id = 2418
+				province_id = 613
+				province_id = 604
+				province_id = 596
+				province_id = 370
+				province_id = 2612
+				province_id = 138
+				province_id = 2264
+				province_id = 3873
+				province_id = 3383
+				province_id = 3384
+				province_id = 1437
+				province_id = 2574
+				province_id = 328
+				province_id = 3395
+				province_id = 3811
+				province_id = 1298
+				province_id = 3795
+				province_id = 1299
+				province_id = 2573
+				province_id = 2274
+				province_id = 2749
+				province_id = 164
+				province_id = 1425
+				province_id = 154
+				province_id = 2381
+				province_id = 160
+				province_id = 136
+				province_id = 4034
+				province_id = 3870
+				province_id = 1320
+				province_id = 3102
+				province_id = 2114
+				province_id = 2114
+				province_id = 2713
+				province_id = 3238
+				province_id = 2510
+				province_id = 5460
+				province_id = 670
+				province_id = 692
+				province_id = 5435
+				province_id = 2480
+				province_id = 2613
+				province_id = 1172
+				province_id = 667
+				province_id = 663
+				province_id = 2083
+				province_id = 1586
+				province_id = 2976
+				province_id = 2974
+				province_id = 1177
+				province_id = 1176
+				province_id = 2990
+				province_id = 82
+				province_id = 976
+				province_id = 63
+				province_id = 1468
+				province_id = 1471
+				province_id = 2415
+				province_id = 2642
+				province_id = 3233
+				province_id = 2361
+				province_id = 3892
+				province_id = 1568
+				province_id = 3041
+				province_id = 1426
+				province_id = 3781
+				province_id = 156
+				province_id = 146
+				province_id = 320
+				province_id = 2664
+				province_id = 419
+				province_id = 3805
+				province_id = 5075
+				province_id = 5076
+				province_id = 2227
+				province_id = 405
+				province_id = 4234
+				province_id = 3094
+				province_id = 526
+				province_id = 5318
+				province_id = 550
+				province_id = 5242
+				province_id = 3915
+				province_id = 649
+				province_id = 2097
+				province_id = 617
+				province_id = 1313
+				province_id = 2635
+				province_id = 1211
+				province_id = 360
+				province_id = 1213
+				province_id = 1208
+				province_id = 1574
+				province_id = 3044
+				province_id = 2650
+				province_id = 2544
+				province_id = 359
+				province_id = 363
+				province_id = 3709
+				province_id = 1300
+				province_id = 2318
+				province_id = 2417
+				province_id = 612
+				province_id = 3226
+				province_id = 3215
+				province_id = 560
+				province_id = 542
+				province_id = 529
+				province_id = 2716
+				province_id = 2653
+				province_id = 4097
+				province_id = 3311
+				province_id = 460
+				province_id = 379
+				province_id = 83
+				province_id = 1274
+				province_id = 2436
+				province_id = 73
+				province_id = 81
+				province_id = 134
+				province_id = 268
+				province_id = 3752
+				province_id = 1359
+				province_id = 2380
+				province_id = 1350
+				province_id = 110
+				province_id = 125
+				province_id = 2531
+				province_id = 2856
+				province_id = 2359
+				province_id = 4006
+				province_id = 1365
+				province_id = 85
+				province_id = 1372
+				province_id = 245
+				province_id = 248
+				province_id = 375
+				province_id = 373
+				province_id = 53
+				province_id = 1
+				province_id = 16
+				province_id = 6
+				province_id = 2755
+				province_id = 1357
+				province_id = 1374
+				province_id = 201
+				province_id = 2514
+				province_id = 334
+				province_id = 1533
+				province_id = 196
+				province_id = 845
+				province_id = 843
+				province_id = 842
+				province_id = 3529
+				province_id = 1554
+				province_id = 1553
+				province_id = 1135
+				province_id = 1132
+				province_id = 2921
+				province_id = 1546
+				province_id = 2924
+				province_id = 2790
+				province_id = 2787
+				province_id = 1550
+				province_id = 2888
+				province_id = 1131
+				province_id = 2919
+				province_id = 3033
+				province_id = 192
+				province_id = 1131
+				province_id = 1310
+				province_id = 1293
+				province_id = 1292
+				province_id = 1307
+				province_id = 280
+				province_id = 378
+				province_id = 2551
+				province_id = 5074
+				province_id = 1755
+				province_id = 325
+				province_id = 2636
+				province_id = 559
+				province_id = 549
+				province_id = 2682
+				province_id = 3167
+				province_id = 2687
+				province_id = 5316
+				province_id = 2557
+				province_id = 558
+				province_id = 2694
+				province_id = 3296
+				province_id = 685
+				province_id = 1337
+				province_id = 2252
+				province_id = 672
+				province_id = 1053
+				province_id = 601
+				province_id = 2324
+				province_id = 2395
+				province_id = 2418
+				province_id = 615
+				province_id = 636
+				province_id = 629
+				province_id = 640
+				province_id = 595
+				province_id = 2828
+				province_id = 627
+				province_id = 641
+				province_id = 638
+				province_id = 3928
+				province_id = 648
+				province_id = 649
+				province_id = 1228
+				province_id = 5242
+				province_id = 1112
+				province_id = 2904
+				province_id = 2910
+				province_id = 2760
+				province_id = 1561
+				province_id = 2888
+				province_id = 260
+				province_id = 1550
+				province_id = 1554
+				province_id = 1546
+				province_id = 2921
+				province_id = 1221
+				province_id = 1130
+				province_id = 1114
+				province_id = 2770
+				province_id = 3204
+				province_id = 5323
+				province_id = 3177
+				province_id = 2673
+				province_id = 1497
+				province_id = 1117
+				province_id = 5009
+				province_id = 1495
+				province_id = 1130
+				province_id = 5008
+				province_id = 183
+				province_id = 2354
+				province_id = 3157
+			}
+		}
+		change_key = { lhs = Tmp_1 value = 0.15 }
+	}
+	if = {
+		limit = {
+			OR = {
+				province_id = 1325
+				province_id = 2373
+				province_id = 4075
+				province_id = 3876
+				province_id = 1435
+				province_id = 2334
+				province_id = 176
+				province_id = 846
+				province_id = 3799
+				province_id = 3874
+				province_id = 356
+				province_id = 402
+				province_id = 2665
+				province_id = 385
+				province_id = 2272
+				province_id = 2163
+				province_id = 2113
+				province_id = 577
+				province_id = 451
+				province_id = 5318
+				province_id = 3226
+				province_id = 414
+				province_id = 3843
+				province_id = 457
+				province_id = 436
+				province_id = 454
+				province_id = 1079
+				province_id = 4035
+				province_id = 2913
+				province_id = 535
+				province_id = 3237
+				province_id = 568
+			}
+		}
+		change_key = { lhs = Tmp_1 value = 0.2 }
+	}
+	if = {
+		limit = {
+			OR = {
+				province_id = 457
+				province_id = 112
+				province_id = 101
+				province_id = 44
+				province_id = 45
+				province_id = 2163
+				province_id = 3506
+				province_id = 2263
+				province_id = 2740
+				province_id = 414
+				province_id = 382
+				province_id = 358
+				province_id = 82
+				province_id = 1006
+				province_id = 2355
+				province_id = 2415
+				province_id = 1497
+				province_id = 1117
+				province_id = 2113
+				province_id = 1344
+				province_id = 410
+				province_id = 388
+				province_id = 2272
+				province_id = 2759
+				province_id = 515
+				province_id = 537
+				province_id = 2121
+			}
+		}
+		change_key = { lhs = Tmp_1 value = 0.3 }
+	}
+
+	StartUp_InitUpperHelper = {
+		from = RE
+		rate = 0.003
+		return = BG_Total
+	}
+
+	if = {
+		limit = {
+			OR = {
+				province_id = 361
+				province_id = 183
+				province_id = 708
+				province_id = 2150
+				province_id = 708
+				province_id = 1089
+			}
+		}
+		multiply_key = { lhs = BG_Total value = 0.666 }
+	}
+
+	if = {
+		limit = {
+			is_capital = yes
+		}
+		set_key = { lhs = Tmp_1 value = 0.2 }
+
+		#StartUp_InitUpperHelper = {
+		#	from = SF
+		#	rate = 0
+		#	return = BG_Total
+		#}
+	}
+	if = {
+		limit = {
+			OR = {
+				NOT = { check_key = { lhs = BG_Total value = 0.03 } }
+				NOT = { check_key = { lhs = RE_Total value = 0.1 } }
+			}
+		}
+		set_key = { lhs = BG_Total value = 0 }
+	}
+	
+	set_key = { lhs = Tmp_0 value = 0 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	
+	set_key = { lhs = Tmp_1 value = 0 }
+	StartUp_InitUpperSubHelper = { from = NO }
+	StartUp_InitUpperSubHelper = { from = BG }
+	StartUp_InitUpperSubHelper = { from = CL }
+	set_key = { lhs = Tmp_0 value = 1 }
+	subtract_key = { lhs = Tmp_0 which = Tmp_1 }
+    multiply_key = { lhs = SF_Total which = Tmp_0 }
+    multiply_key = { lhs = NM_Total which = Tmp_0 }
+    multiply_key = { lhs = RE_Total which = Tmp_0 }
+}
+
+StartUp_InitWealth = {
+	set_key = { lhs = SF_Wealth which = SF_Total }
+	set_key = { lhs = NM_Wealth which = NM_Total }
+    set_key = { lhs = RE_Wealth which = RE_Total }
+    set_key = { lhs = NO_Wealth which = NO_Total }
+    set_key = { lhs = CL_Wealth which = CL_Total }
+    set_key = { lhs = BG_Wealth which = BG_Total }
+
+    multiply_key = { lhs = SF_Wealth value = 4 }
+	if = {
+		limit = {
+			check_key = { lhs = SF_Total value = 5 }
+		}
+		change_key = { lhs = SF_Wealth value = 30 }
+	}
+	else = {
+		change_key = { lhs = SF_Wealth value = 15 }
+	}
+			
+	multiply_key = { lhs = NM_Wealth value = 3 }
+	if = {
+		limit = {
+			check_key = { lhs = NM_Total value = 1 }
+		}
+		change_key = { lhs = NM_Wealth value = 10 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = RE_Total value = 100 }
+		}
+		subtract_key = { lhs = RE_Wealth value = 100 }
+   		multiply_key = { lhs = RE_Wealth value = 14 }
+		change_key = { lhs = RE_Wealth value = 1700 }
+	}
+	else = {
+   		multiply_key = { lhs = RE_Wealth value = 20 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = RE_Total value = 1 }
+		}
+		change_key = { lhs = RE_Wealth value = 50 }
+	}
+	if = {
+		limit = {
+			OR = {
+				region = east_italy_region
+				region = west_italy_region
+				region = central_italy_region
+			}
+		}
+		multiply_key = { lhs = NO_Wealth value = 250 }
+	}
+	else = {
+		multiply_key = { lhs = NO_Wealth value = 180 }
+	}
+    multiply_key = { lhs = CL_Wealth value = 160 }
+    multiply_key = { lhs = BG_Wealth value = 1300 }
+	
+    #multiply_key = { lhs = SF_Wealth value = 1.15 }
+    #multiply_key = { lhs = RE_Wealth value = 1.15 }
+    #multiply_key = { lhs = NM_Wealth value = 1.15 }
+    #multiply_key = { lhs = BG_Wealth value = 1.15 }
+    #multiply_key = { lhs = NO_Wealth value = 1.15 }
+    #multiply_key = { lhs = CL_Wealth value = 1.15 }
+	
+	set_key = { lhs = Tmp_2 value = 100 }
+	subtract_key = { lhs = Tmp_2 which = NM_Ratio }
+	multiply_key = { lhs = Tmp_2 value = 0.005 }
+	change_key = { lhs = Tmp_2 value = 0.5 }
+	multiply_key = { lhs = SF_Wealth which = Tmp_2 }
+	multiply_key = { lhs = CL_Wealth which = Tmp_2 }
+}
+
+StartUp_InitClass = {
+	if = {
+		limit = {
+			OR = {
+				region = canada_region
+				region = great_lakes_region
+				region = northeast_america_region
+				region = southeast_america_region
+				region = mississippi_region
+				region = great_plains_region
+				region = cascadia_region
+				region = california_region
+				region = texas_region
+				region = maritimes_region
+				region = zacatecas_region
+				area = nicaragua_area
+				area = honduras_area
+				area = eastern_llanos
+				area = western_llanos
+				area = panama_area
+				region = guyana_region
+				region = carribeans_region
+				region = brazil_region
+				region = la_plata_region
+				region = chile_region
+				region = papua_region
+				region = australia_region
+				province_id = 831
+				province_id = 2165
+			}
+			NOT = { area = jalisco_area }
+		}
+		if = {
+			limit = {
+				OR = {
+					region = great_plains_region
+					area = hudson_bay_area
+					region = california_region
+					region = cascadia_region
+					region = carribeans_region
+					area = cote_nord_area
+					area = newfoundland_area
+					area = lower_acadia_area
+					area = upper_guyana_area
+					region = brazil_region
+					region = la_plata_region
+					region = australia_region
+					area = southern_chile_area
+					area = central_chile_area
+					area = rio_grande_area
+					area = northeast_mexico_area
+					area = sonora_area
+					province_id = 881
+					province_id = 882
+					province_id = 880
+				}
+				NOT = { area = amazon_area }
+				NOT = { area = guapore_area }
+				NOT = { area = hispaniola_area }
+				NOT = { area = grao_para_area }
+				NOT = { province_id = 1483 }
+				NOT = { province_id = 3492 }
+				NOT = { province_id = 2346 }
+				NOT = { province_id = 1469 }
+				NOT = { area = inland_australia_area } # Evidence of agricultural practice for Aboriginals
+			}
+			set_key = { lhs = NM_Ratio value = 100 }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					area = amazon_area
+					area = guapore_area
+				}
+			}
+			set_key = { lhs = NM_Ratio value = 20 }
+		}
+		else_if = {
+			limit = {
+				area = zacatecas_area
+			}
+			set_key = { lhs = NM_Ratio value = 65 }
+		}
+		else = {
+			set_key = { lhs = NM_Ratio value = 40 }
+		}
+	}
+	change_key = { lhs = starting_rural_pop value = 0.1 }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = starting_rural_pop value = 5 } }
+		}
+		set_key = { lhs = starting_rural_pop value = 5 }
+	}
+	
+	StartUp_InitRural = {
+		pop = starting_rural_pop
+	}
+	if = {
+		limit = {
+			check_key = { lhs = SF_Total value = 1 }
+			NOT = { check_key = { lhs = SF_Total value = 4 } }
+			check_key = { lhs = NM_Total value = 16 }
+		}
+		set_key = { lhs = SF_Total value = 4 }
+	}
+	else_if = {
+		limit = {
+			NOT = { check_key = { lhs = SF_Total value = 2 } }
+			check_key = { lhs = NM_Total value = 2 }
+		}
+		change_key = { lhs = NM_Total which = SF_Total }
+		set_key = { lhs = NM_Ratio value = 100 }
+		set_key = { lhs = SF_Total value = 0 }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = SF_Total value = 4 } }
+			check_key = { lhs = SF_Total value = 0.01 }
+		}
+		set_key = { lhs = SF_Total value = 4 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = NM_Total value = 0.01 }
+			NOT = { check_key = { lhs = NM_Total value = 3 } }
+		}
+		set_key = { lhs = NM_Total value = 3 }
+	}
+
+	set_key = { lhs = Tmp_0 which = SF_Total }
+
+	if = {
+		limit = {
+			is_capital = yes
+		}
+		multiply_key = { lhs = Tmp_0 value = 0.02 }
+		change_key = { lhs = Tmp_0 value = 0.1 }
+	}
+	else_if = {
+		limit = {
+			OR = {
+				is_city = yes
+				is_colony = yes
+			}
+		}
+		multiply_key = { lhs = Tmp_0 value = 0.01 }
+	}
+	else = {
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+
+	if = {
+		limit = {
+			check_key = { lhs = Tmp_0 value = 1 }
+		}
+		set_key = { lhs = Tmp_0 value = 1 }
+	}
+
+	if = {
+		limit = {
+			check_key = { lhs = Tmp_0 value = 0.001 }
+		}
+		POP_GetRandomRange = {
+			to = 0.1 from = 0
+			return = Tmp_1
+		}
+	}
+	change_key = { lhs = Tmp_0 which = Tmp_1 }
+
+	change_key = { lhs = Tmp_0 which = starting_urban_pop }
+
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = Tmp_0 value = 1.1 }
+			}
+		}
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = Tmp_0 value = 2.5 }
+			}
+		}
+		set_key = { lhs = Tmp_0 value = 2.5 }
+	}
+
+	StartUp_InitUrban = {
+		pop = Tmp_0
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = RE_Total value = 1 } }
+		}
+		set_key = { lhs = RE_Total value = 0 }
+	}
+
+	set_key = { lhs = Tmp_0 value = 0 }
+	set_key = { lhs = Tmp_1 value = 0 }
+
+	StartUp_InitUpper = yes
+	
+	POP_SetClass = yes
+
+	StartUp_InitWealth = yes
+
+	set_key = { lhs = SF_MPPerc value = 10 }
+	if = {
+		limit = {
+			is_capital = yes
+			check_key = { lhs = SF_Total value = 4 }
+		}
+		set_key = { lhs = Tmp_9 value = 3 }
+		divide_key = { lhs = Tmp_9 which = SF_Total }
+		multiply_key = { lhs = Tmp_9 value = 100 }
+		change_key = { lhs = SF_MPPerc which = Tmp_9 }
+	}
+	set_key = { lhs = NM_MPPerc value = 20 }
+	set_key = { lhs = RE_MPPerc value = 10 }
+	set_key = { lhs = NO_MPPerc value = 25 }
+	set_key = { lhs = BG_MPPerc value = 10 }
+	set_key = { lhs = CL_MPPerc value = 10 }
+
+	set_key = { lhs = starting_rural_pop value = 0 }
+	set_key = { lhs = starting_rural_pop_1850 value = 0 }
+	set_key = { lhs = starting_urban_pop value = 0 }
+	set_key = { lhs = starting_urban_pop_1850 value = 0 }
+}
+
+StartUp_SetDeath = {
+	every_province = {
+		limit = {
+			isValidEmpty = yes
+		}
+		set_key = { lhs = POP_DeathFactor value = 1.0 }
+	}
+	south_england_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	236 = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	north_england_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	lowlands_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	north_lowlands_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	highlands_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	isles_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	ireland_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	scandinavia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	danish_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	norwegian_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	east_france_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	provence_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	aquitaine_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	languedoc_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	ouest_france_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	183 = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	201 = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	976 = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	high_countries_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	low_countries_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.87 }
+	}
+	belgii_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	lower_saxon_circle_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	upper_saxon_circle_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	brandenburg_pommern_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.88 }
+	}
+	westphalian_circle_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	upper_rhenish_circle_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	swabia_bavarian_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	polonia_major_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	polonia_minor_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	west_prussia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	east_prussia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	lithuania_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	halych_volhynia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	belarus_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	west_dniepr_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	east_dniepr_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	podolia_volhynia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	bohemia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.91 }
+	}
+	lower_silesia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	upper_silesia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.96 }
+	}
+	red_ruthenia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	polesie_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	lithuania_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	crimea_region = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.85 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.89 }
+		}
+	}
+	crimea_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.88 }
+	}
+	nogai_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	lower_don_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	kazan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	mordovia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	astrakhan_area = {
+		if = {
+			limit = {
+				check_key = { lhs = TN_River value = 1 }
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.8 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.89 }
+		}
+	}
+	north_russia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	beloozero_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	pomor_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	russia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.94 }
+	}
+	east_russia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.96 }
+	}
+	perm_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	galich_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	baltic_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	switzerland_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.88 }
+	}
+	austrian_circle_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.81 }
+	}
+	transdanubia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	alfold_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.87 }
+	}
+	kisalfold_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	west_slovakia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.91 }
+	}
+	east_slovakia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	transylvania_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	west_transylvania_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	#north_transylvania_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.89 }
+	#}
+	south_carpathia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	basarabia_area = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.85 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.89 }
+		}
+	}
+	castille_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	leon_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	andalucia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.83 }
+	}
+	aragon_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.83 }
+	}
+	portugal_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	east_italy_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	venetia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	friuli_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	112 = {
+		set_key = { lhs = POP_DeathFactor value = 0.77 }
+	}
+	west_italy_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	liguria_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	112 = {
+		set_key = { lhs = POP_DeathFactor value = 0.78 }
+	}
+	central_italy_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	1380 = {
+		set_key = { lhs = POP_DeathFactor value = 0.80 }
+	}
+	105 = {
+		set_key = { lhs = POP_DeathFactor value = 0.80 }
+	}
+	naples_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	naples_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	sicily_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	east_balkan_region = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.86 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.89 }
+		}
+	}
+	north_macedonia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	#west_macedonia_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.93 }
+	#}
+	dobrogea_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	west_balkan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	east_adriatic_coast_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	central_balkan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	greece_region = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.87 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.91 }
+		}
+	}
+	thrace_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.82 }
+	}
+	1402 = {
+		set_key = { lhs = POP_DeathFactor value = 0.78 }
+	}
+	2238 = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	north_anatolia_region = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.85 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.93 }
+		}
+	}
+	west_anatolia_region = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.85 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.93 }
+		}
+	}
+	south_anatolia_region = {
+		if = {
+			limit = {
+				has_port = yes
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.85 }
+		}
+		else = {
+			set_key = { lhs = POP_DeathFactor value = 0.93 }
+		}
+	}
+	upper_mesopotamia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	cilicia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	south_caucasus_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	north_caucasus_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	west_circassia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	east_circassia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	#central_circassia_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.89 }
+	#}
+	#south_circassia_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.89 }
+	#}
+	#north_circassia_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.89 }
+	#}
+	shirvan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	east_georgia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	west_georgia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	#abkhazia_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.7 }
+	#}
+	west_armenia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	east_armenia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	trebizond_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	syria_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	lower_mesopotamia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	hejaz_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	asir_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	tabuk_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	nejd_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	hadhramaut_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	iran_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	fars_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	khorasani_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	sistan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	tabarestan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	east_tabarestan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	3092 = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	nishapur_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	merv_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	herat_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	hormuz_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	2235 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	kerman_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	egypt_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	358 = {
+		set_key = { lhs = POP_DeathFactor value = 0.86 }
+	}
+	361 = {
+		set_key = { lhs = POP_DeathFactor value = 0.84 }
+	}
+	libyan_desert_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	upper_egypt_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.93 }
+	}
+	west_maghreb_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	elrif_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	central_maghreb_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	atlas_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	east_maghreb_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.89 }
+	}
+	sus_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	tafilalt_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	jetysuu_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	zungaria_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	yarkand_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	tarim_basin_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	syrdarya_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	amodarya_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	transcaspia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	kish_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	khiva_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	balkh_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	ferghana_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	3280 = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	3844 = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	444 = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	811 = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	kazakh_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	balchasj_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	syrdarya_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	
+	# CHINA
+	shaangan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	guanzhong_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	hanzhong_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	sichuan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	xishu_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.88 }
+	}
+	ba_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	northeast_sichuan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	guangxi_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	guangdong_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	west_guangdong_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	east_guangdong_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	huguang_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	jiangxi_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	fujian_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	zhejiang_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	south_zhejiang_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.825 }
+	}
+	jiangnan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	huaizuo_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	haozhou_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	huaibei_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	north_henan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	heluo_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.65 }
+	}
+	south_henan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	2485 = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	2605 = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	700 = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	jiaoliao_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	luxinan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	north_shandong_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	south_shandong_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	5387 = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	1041 = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	5389 = {
+		set_key = { lhs = POP_DeathFactor value = 0.6 }
+	}
+	5404 = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	689 = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	5382 = {
+		set_key = { lhs = POP_DeathFactor value = 0.7 }
+	}
+	hebei_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.75 }
+	}
+	#yanshan_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.8 }
+	#}
+	yanyun_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	shanxi_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.8 }
+	}
+	north_shanxi_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	liaoning_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	#dalian_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.9 }
+	#}
+	inner_mongolia_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	gobi_desert_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	east_tumed_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	#west_tumed_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 1.00 }
+	#}
+	#hulunbuir_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 1.00 }
+	#}
+	korea_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	2276 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	west_jurcen_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	west_hulun_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	west_hulun_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	731 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	2266 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3243 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	outer_liaoning_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	#yanshan_area = {
+	#	set_key = { lhs = POP_DeathFactor value = 0.95 }
+	#}
+	671 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	2117 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	674 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	3939 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	673 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	1099 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	2650 = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	macaronesia_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	subarctic_islands_area = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	1255 = {
+		set_key = { lhs = POP_DeathFactor value = 1.00 }
+	}
+	290 = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	315 = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	1291 = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	386 = {
+		set_key = { lhs = POP_DeathFactor value = 0.97 }
+	}
+	larestan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.92 }
+	}
+	lower_nubia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	upper_nubia_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	kurdufan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	white_nile_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	funj_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	3692 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3009 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3694 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	guzai_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	hamasien_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	semien_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	tigray_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	amhara_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	hadiya_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	shewa_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3066 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	1206 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3982 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3017 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3064 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	afar_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	ifat_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	afar_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3044 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3047 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	1201 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3050 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	1218 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	2500 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	purniah_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.85 }
+	}
+	upper_doab_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	delhi_area = {
+		if = {
+			limit = {
+				owned_by = DLH
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.85 }
+		}
+	}
+	central_doab_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	gwalior_area = {
+		if = {
+			limit = {
+				owned_by = DLH
+			}
+			set_key = { lhs = POP_DeathFactor value = 0.95 }
+		}
+	}
+	awadh_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	bihar_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	jalpaiguri_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	bardwan_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	north_bengal_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	north_cuttack_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	5244 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	2226 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	3105 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	2700 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	upper_sindh_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	west_deccan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	east_deccan_region = {
+		limit = {
+			NOT = { area= godavari_area }
+		}
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	konkan_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	mysore_region = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	5305 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	553 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3174 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	5302 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	527 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	2716 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3152 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	538 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	2714 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	516 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	515 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3124 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3125 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	2568 = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	577 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	666 = {
+		set_key = { lhs = POP_DeathFactor value = 0.98 }
+	}
+	4054 = {
+		set_key = { lhs = POP_DeathFactor value = 0.98 }
+	}
+	2463 = {
+		set_key = { lhs = POP_DeathFactor value = 0.98 }
+	}
+	cochinchina_region = {
+		limit = {
+			owned_by = KHM
+			NOT = { area = indrapura_area }
+		}
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+	3930 = {
+		set_key = { lhs = POP_DeathFactor value = 0.9 }
+	}
+	champa_area = {
+		set_key = { lhs = POP_DeathFactor value = 0.95 }
+	}
+}
+StartUp_ApplyDeathTrauma = {
+	every_province = {
+		limit = {
+			isValidEmpty = yes
+			NOT = { check_key = { lhs = POP_DeathFactor value = 1 } }
+		}
+		set_key = { lhs = Tmp_0 value = 1 }
+		subtract_key = { lhs = Tmp_0 which = POP_DeathFactor }
+		multiply_key = { lhs = Tmp_0 value = 150 } # 1.5x effect
+		POP_SetDevastation = {
+			type = which
+			inp = Tmp_0
+		}
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+}

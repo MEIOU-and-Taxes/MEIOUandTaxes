@@ -1,0 +1,208 @@
+country_decisions = { 
+	centralise_empire = {
+		major = yes
+		potential = {
+			has_reform = Pol_NominalEmpire
+			#is_key_equal = { lhs = Pol_Privileges value = 10 }
+			NOT = { technology_group = austranesian }
+			NOT = { technology_group = southeast_asian }
+			NOT = { technology_group = chinese }
+			NOT = { technology_group = japanese }
+			NOT = { technology_group = mesoamerican }
+		}
+		allow = {
+			OR = {
+				has_institution = Meritocracy_Inst
+				AND = {
+					adm_tech = 20
+					has_institution = Banking
+				}
+				adm_tech = 30
+			}
+			dip_power = 200
+		}
+		effect = {
+			add_dip_power = -200
+			Stab_Subtract1 = yes
+			custom_tooltip = centralise_empire_effect
+			hidden_effect = { 
+				remove_government_reform = Pol_NominalEmpire
+				add_government_reform = Pol_Privileges1
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	centralise_empire_cultural = {
+		major = yes
+		potential = {
+			has_reform = Pol_NominalEmpire
+			#is_key_equal = { lhs = Pol_Privileges value = 10 }
+			OR = {
+				technology_group = austranesian
+				technology_group = southeast_asian
+				technology_group = chinese
+				technology_group = japanese
+				technology_group = mesoamerican
+			}
+		}
+		allow = {
+			OR = {
+				has_institution = Meritocracy_Inst
+				adm_tech = 30
+				custom_trigger_tooltip = {
+					tooltip = Rights_BUTax3HasGreater
+					Rights_BUTax3HasGreater = yes
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = POP_BUHasPowG_80
+				check_key = { lhs = Prov_BUPow value = 80 }
+			}
+			adm_power = 50
+			dip_power = 150
+			stability = 1
+		}
+		effect = {
+			add_adm_power = -50
+			add_dip_power = -150
+			Stab_Subtract2 = yes
+			custom_tooltip = centralise_empire_effect
+			hidden_effect = { 
+				remove_government_reform = Pol_NominalEmpire
+				add_government_reform = Pol_Privileges1
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+	dependency_petition_overlord = {
+		major = yes
+		potential = {
+			#always = no
+			is_non_sovereign_subject_trigger = yes
+			NOT = { has_ruler_flag = dependency_requested }
+			overlord = {
+				is_non_sovereign_subject_trigger = yes
+			}
+		}
+		allow = {
+			adm_power = 50
+			dip_power = 150
+			stability = 1
+			OR = {
+				overlord = {
+					NOT = { stability = 0 }
+				}
+				AND = {
+					prestige = 50
+					overlord = { NOT = { prestige = 25 } }
+				}
+				AND = {
+					legitimacy = 50
+					overlord = { NOT = { legitimacy = 25 } }
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = dependency_petition_overlord_tt_1
+				overlord = {
+					is_non_sovereign_subject_trigger = yes
+					overlord = {
+						NOT = { has_opinion = { who = PREV value = 25 } }
+						has_opinion = { who = ROOT value = 75 }
+					}
+				}
+			}
+		}
+		effect = {
+			set_ruler_flag = dependency_requested
+			save_global_event_target_as = dep_petitioner
+			overlord = {
+				if = {
+					limit = {
+						is_non_sovereign_subject_trigger = yes
+					}
+					save_global_event_target_as = dep_overlord
+					overlord = {
+						save_global_event_target_as = dep_suzerain
+						country_event = { id = mec_vassals.26 }
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+	dependency_petition_emperor = {
+		major = yes
+		potential = {
+			#always = no
+			is_non_sovereign_subject_trigger = yes
+			NOT = { has_ruler_flag = dependency_requested }
+			overlord = {
+				is_non_sovereign_subject_trigger = no
+				NOT = { is_emperor = yes }
+				capital_scope = { is_part_of_hre = yes }
+				PREV = { capital_scope = { is_part_of_hre = yes } }
+			}
+		}
+		allow = {
+			adm_power = 50
+			dip_power = 150
+			stability = 1
+			OR = {
+				overlord = {
+					NOT = { stability = -1 }
+				}
+				AND = {
+					prestige = 50
+					overlord = { NOT = { prestige = 25 } }
+				}
+				AND = {
+					legitimacy = 50
+					overlord = { NOT = { legitimacy = 25 } }
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = dependency_petition_emperor_tt_1
+				overlord = {
+					is_non_sovereign_subject_trigger = no
+					NOT = { is_emperor = yes }
+					capital_scope = { is_part_of_hre = yes }
+					PREV = { capital_scope = { is_part_of_hre = yes } }
+					emperor = {
+						NOT = { has_opinion = { who = PREV value = 25 } }
+						has_opinion = { who = ROOT value = 75 }
+					}
+				}
+			}
+		}
+		effect = {
+			set_ruler_flag = dependency_requested
+			save_global_event_target_as = hre_petitioner
+			overlord = {
+				if = {
+					limit = {
+						is_non_sovereign_subject_trigger = no
+						NOT = { is_emperor = yes }
+						capital_scope = { is_part_of_hre = yes }
+						PREV = { capital_scope = { is_part_of_hre = yes } }
+					}
+					save_global_event_target_as = hre_overlord
+					overlord = {
+						save_global_event_target_as = hre_suzerain
+						country_event = { id = mec_vassals.41 }
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+}

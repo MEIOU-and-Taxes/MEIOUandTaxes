@@ -1,0 +1,1091 @@
+# Author: Phlopsi
+
+# parameter: sqrt_radicand
+# result: sqrt_result
+sqrt = {
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = sqrt_radicand value = 0 }
+			}
+		}
+		
+		set_global_flag = _ERROR_SQRT_NEGATIVE_RADICAND
+		
+		set_key = { lhs = sqrt_result value = 0 }
+	}
+	
+	if = {
+		limit = {
+			is_key_equal = { lhs = sqrt_radicand value = 0 }
+		}
+		
+		set_key = { lhs = sqrt_result value = 0 }
+	}
+	
+	if = {
+		limit = {
+			check_key = { lhs = sqrt_radicand value = 0.001 }
+		}
+		
+		set_key = { lhs = sqrt_precision value = 0.001 }
+		set_key = { lhs = sqrt_length which = sqrt_radicand }
+		set_key = { lhs = sqrt_width value = 1 }
+		set_key = { lhs = sqrt_delta which = sqrt_radicand }
+		subtract_key = { lhs = sqrt_delta value = 1 }
+		
+		while = {
+			limit = {
+				NOT = {
+					check_key = { lhs = sqrt_precision which = sqrt_delta }
+				}
+			}
+			
+			# sqrt_length = (sqrt_length + sqrt_width) / 2
+			change_key = { lhs = sqrt_length which = sqrt_width }
+			multiply_key = { lhs = sqrt_length value = 0.5 }
+			
+			# sqrt_width = sqrt_radicand / sqrt_length
+			set_key = { lhs = sqrt_width which = sqrt_radicand }
+			if = {
+				limit = {
+					is_key_equal = { lhs = sqrt_length value = 0 }
+				}
+				
+				# log = "<ERROR><8E818B20><THIS:[This.GetName]><PREV:[Prev.GetName]><ROOT:[Root.GetName]><FROM:[From.GetName]> Division by zero!"
+				
+			}
+			else = {
+				divide_key = { lhs = sqrt_width which = sqrt_length }
+			}
+			
+			# sqrt_delta = sqrt_length - sqrt_width
+			set_key = { lhs = sqrt_delta which = sqrt_length }
+			subtract_key = { lhs = sqrt_delta which = sqrt_width }
+			
+			# sqrt_delta = abs(sqrt_delta)
+			if = {
+				limit = {
+					NOT = {
+						check_key = { lhs = sqrt_delta value = 0 }
+					}
+				}
+				
+				multiply_key = { lhs = sqrt_delta value = -1 }
+			}
+		}
+		
+		if = {
+			limit = {
+				NOT = {
+					check_key = { lhs = sqrt_precision which = sqrt_delta }
+				}
+			}
+			
+			set_global_flag = _ERROR_SQRT_INFINITE_LOOP
+		}
+		
+		set_key = { lhs = sqrt_result which = sqrt_length }
+		
+		# cleanup
+		set_key = { lhs = sqrt_precision value = 0 }
+		set_key = { lhs = sqrt_length value = 0 }
+		set_key = { lhs = sqrt_width value = 0 }
+		set_key = { lhs = sqrt_delta value = 0 }
+	}
+}
+
+sqrt_cleanup = {
+	set_key = { lhs = sqrt_radicand value = 0 }
+	set_key = { lhs = sqrt_result value = 0 }
+}
+
+# By Dezuman
+# Computationally cheap distance approximation without sqrt, needed because Paradox
+# Error margin: About 5% tops. 
+# Parameters: Xdiff and Ydiff
+# Result: Distance
+
+pythagoras_approx = {
+	# Computes the absolute (non-negative) values of X and Y
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Xdiff value = 0 } }
+		}
+		multiply_key = { lhs = Xdiff value = -1 }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Ydiff value = 0 } }
+		}
+		multiply_key = { lhs = Ydiff value = -1 }
+	}
+	
+	# The formula is x + y - (1.135*x*y) / (x+y). 
+	set_key = { lhs = XYsum which = Xdiff }
+	change_key = { lhs = XYsum which = Ydiff }
+	
+	set_key = { lhs = XYmult which = Xdiff }
+	multiply_key = { lhs = XYmult which = Ydiff }
+	multiply_key = { lhs = XYmult value = 1.135 }
+	
+	if = { # same effect as what game does, but without the report in the error log
+		limit = {
+			is_key_equal = { lhs = XYsum value = 0 }
+		}
+		set_key = { lhs = XYsum value = 0.001 }
+	}
+	
+	divide_key = { lhs = XYmult which = XYsum }
+	subtract_key = { lhs = XYsum which = XYmult }
+	
+	set_key = { lhs = distance which = XYsum } # Redundant if XYsum is called distance from the start, this is just for clarity
+	
+	set_key = { lhs = XYmult value = 0 }
+	set_key = { lhs = XYsum value = 0 }
+}
+pythagoras_approx_opt = {
+	# Computes the absolute (non-negative) values of X and Y
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Xdiff value = 0 } }
+		}
+		multiply_key = { lhs = Xdiff value = -1 }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Ydiff value = 0 } }
+		}
+		multiply_key = { lhs = Ydiff value = -1 }
+	}
+	
+	# The formula is x + y - (1.135*x*y) / (x+y). 
+	set_key = { lhs = $return$ which = Xdiff }
+	change_key = { lhs = $return$ which = Ydiff }
+	
+	set_key = { lhs = XYmult which = Xdiff }
+	multiply_key = { lhs = XYmult which = Ydiff }
+	multiply_key = { lhs = XYmult value = 1.135 }
+	
+	if = { # same effect as what game does, but without the report in the error log
+		limit = {
+			is_key_equal = { lhs = $return$ value = 0 }
+		}
+		set_key = { lhs = $return$ value = 0.001 }
+	}
+	
+	divide_key = { lhs = XYmult which = $return$ }
+	subtract_key = { lhs = $return$ which = XYmult }
+	
+	set_key = { lhs = XYmult value = 0 }
+}
+
+# By KJH
+# Parameters: expnt, prec
+# Result: e
+# Use Brothers method to calculate e
+e_funct = {
+	set_key = { lhs = math_e_expnt $type$ = $expnt$ }
+	set_key = { lhs = math_e_return value = 1 }
+	
+	if = {	# No point doing the calc, since pdx
+		limit = {
+			NOT = { check_key = { lhs = math_e_expnt value = -6.999 } }
+		}
+		set_key = { lhs = $return$ value = 0 }
+	}
+	else = {
+		# Reduce the range of expnt so that it is greater than equal to 0 and lesser than 1
+		# Brothers method yields extremely low error for low exponent
+		# Even with low precision
+		while = {
+			limit = {
+				check_key = { lhs = math_e_expnt value = 1 }
+			}
+			subtract_key = { lhs = math_e_expnt value = 1 }
+			
+			# e^1 ~ 2.718
+			multiply_key = { lhs = math_e_return value = 2.718 }
+		}
+		while = {
+			limit = {
+				NOT = { check_key = { lhs = math_e_expnt value = 0 } }
+			}
+			change_key = { lhs = math_e_expnt value = 1 }
+			
+			# e^1 ~ 2.718
+			divide_key = { lhs = math_e_return value = 2.718 }
+		}
+		
+		# Use brothers formula now that exponent is between 0 and 1
+		set_key = { lhs = math_e_sm value = 1 }
+		
+		if = {
+			limit = {
+				NOT = { is_key_equal = { lhs = math_e_expnt value = 0 } }
+			}
+			set_key = { lhs = math_e_sq which = math_e_expnt }
+			multiply_key = { lhs = math_e_sq which = math_e_expnt }
+			
+			set_key = { lhs = math_e_fct value = 2 }
+			set_key = { lhs = math_e_fctl value = 2 }
+			
+			set_key = { lhs = math_e_a1 which = math_e_sq }
+			set_key = { lhs = math_e_a2 which = math_e_expnt }
+			set_key = { lhs = math_e_a3 value = 2 }
+			
+			set_key = { lhs = math_e_tmp which = math_e_a2 }
+			multiply_key = { lhs = math_e_tmp which = math_e_a3 }
+			change_key = { lhs = math_e_tmp which = math_e_a1 }
+			if = {
+				limit = {
+					NOT = { is_key_equal = { lhs = math_e_tmp value = 0 } }
+				}
+				divide_key = { lhs = math_e_tmp which = math_e_fct }
+			}
+			
+			change_key = { lhs = math_e_sm which = math_e_tmp }
+			
+			set_key = { lhs = math_e_prec value = $prec$ }
+			subtract_key = { lhs = math_e_prec value = 1 }	# The above procedure is precision 1
+			
+			while = {
+				limit = {
+					check_key = { lhs = math_e_prec value = 1 }
+				}
+				subtract_key = { lhs = math_e_prec value = 1 }
+				
+				change_key = { lhs = math_e_fctl value = 1 }
+				multiply_key = { lhs = math_e_fct which = math_e_fctl }
+				change_key = { lhs = math_e_fctl value = 1 }
+				multiply_key = { lhs = math_e_fct which = math_e_fctl }
+				
+				multiply_key = { lhs = math_e_a1 which = math_e_sq }
+				multiply_key = { lhs = math_e_a2 which = math_e_sq }
+				change_key = { lhs = math_e_a3 value = 2 }
+				
+				set_key = { lhs = math_e_tmp which = math_e_a2 }
+				multiply_key = { lhs = math_e_tmp which = math_e_a3 }
+				change_key = { lhs = math_e_tmp which = math_e_a1 }
+				if = {
+					limit = {
+						NOT = { is_key_equal = { lhs = math_e_tmp value = 0 } }
+					}
+					divide_key = { lhs = math_e_tmp which = math_e_fct }
+				}
+				
+				change_key = { lhs = math_e_sm which = math_e_tmp }
+			}
+		}
+		
+		# Return
+		multiply_key = { lhs = math_e_return which = math_e_sm }
+		
+		set_key = { lhs = $return$ which = math_e_return }
+		
+		
+		# Clean
+		set_key = { lhs = math_e_sm value = 0 }
+		set_key = { lhs = math_e_tmp value = 0 }
+		set_key = { lhs = math_e_a1 value = 0 }
+		set_key = { lhs = math_e_a2 value = 0 }
+		set_key = { lhs = math_e_a3 value = 0 }
+		set_key = { lhs = math_e_fctl value = 0 }
+		set_key = { lhs = math_e_fct value = 0 }
+		set_key = { lhs = math_e_prec value = 0 }
+		set_key = { lhs = math_e_sq value = 0 }
+	}
+	
+	
+	set_key = { lhs = math_e_expnt value = 0 }
+	set_key = { lhs = math_e_return value = 0 }
+}
+
+# Parameters: steepns, midpnt, maxval, inp
+# Result: logistic_val
+logistic_funct = {
+	set_key = { lhs = expntLogi $type1$ = $inp$ }
+	subtract_key = { lhs = expntLogi $type2$ = $midpnt$ }
+	multiply_key = { lhs = expntLogi $type3$ = $steepns$ }
+	multiply_key = { lhs = expntLogi value = -1 }
+	
+	if = {
+		limit = {
+			check_key = { lhs = expntLogi value = 14.58 }
+		}
+		set_key = { lhs = divisor value = 2143267.367 }
+	}
+	else = {
+		e_funct = {
+			type=which
+			expnt=expntLogi prec=3
+			return=divisor
+		}
+	}
+	
+	set_key = { lhs = $return$ $type4$ = $maxval$ }
+	change_key = { lhs = divisor value = 1 }
+	divide_key = { lhs = $return$ which = divisor }
+	
+	set_key = { lhs = e value = 0 }
+	set_key = { lhs = divisor value = 0 }
+	set_key = { lhs = expntLogi value = 0 }
+}
+
+logistic_funct2 = {
+	set_key = { lhs = newmaxval $type4$ = $maxval$ }
+	multiply_key = { lhs = newmaxval value = 2 }
+
+	logistic_funct = {
+		type1=$type1$ type2=$type2$ type3=$type3$ type4=which
+		inp=$inp$ midpnt=$midpnt$ steepns=$steepns$ maxval=newmaxval
+		return = $return$
+	}
+
+	subtract_key = { lhs = $return$ $type4$ = $maxval$ }
+
+	set_key = { lhs = newmaxval value = 0 }
+}
+
+# Parameters: inp, prec
+# Result: blog_val
+blog_funct = {
+	set_key = { lhs = inp $type1$ = $inp$ }
+	
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = inp value = 0.001 } }
+		}
+		set_key = { lhs = $return$ value = 0 }
+		change_key = { lhs = err_math_blog_undef value = 1 }
+	}
+	else = {
+		set_key = { lhs = prec $type2$ = $prec$ }
+		
+		set_key = { lhs = $return$ value = 0 }
+		
+		if = {
+			limit = {
+				check_key = { lhs = inp value = 0.001 }
+			}
+			# Fit inp to a value that is greater than or equal to 1 and lesser than 2
+			while = {
+				limit = {
+					NOT = { check_key = { lhs = inp value = 1 } }
+				}
+				multiply_key = { lhs = inp value = 2 }
+				
+				subtract_key = { lhs = $return$ value = 1 }
+			}
+			while = {
+				limit = {
+					check_key = { lhs = inp value = 2 }
+				}
+				multiply_key = { lhs = inp value = 0.5 }
+				
+				change_key = { lhs = $return$ value = 1 }
+			}
+			
+			# Apply al Kashi's method to calculate the mantissa
+			set_key = { lhs = bit value = 0.5 }
+			
+			while = {
+				limit = {
+					check_key = { lhs = prec value = 1 }
+				}
+				subtract_key = { lhs = prec value = 1 }
+				
+				multiply_key = { lhs = inp which = inp }
+				
+				if = {
+					limit = {
+						check_key = { lhs = inp value = 2 }
+					}
+					change_key = { lhs = $return$ which = bit }
+					
+					multiply_key = { lhs = inp value = 0.5 }
+				}
+				
+				multiply_key = { lhs = bit value = 0.5 }
+			}
+			
+			set_key = { lhs = bit value = 0 }
+		}
+		
+		set_key = { lhs = inp value = 0 }
+		set_key = { lhs = prec value = 0 }
+	}
+}
+
+# Parameter: lt_ind
+# Result: lt_val
+# Log table for 1 + 2^-i for some integers i
+lt_funct = {
+	set_key = { lhs = lt_ind $type$ = $lt_ind$ }
+	
+	if = {
+		limit = {
+			check_key = { lhs = lt_ind value = 6 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = lt_ind value = 8 }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = lt_ind value = 9 }
+				}
+				if = {
+					limit = {
+						check_key = { lhs = lt_ind value = 10 }
+					}
+					set_key = { lhs = lt_val value = 9.761 }
+				}
+				else = {
+					set_key = { lhs = lt_val value = 19.512 }
+				}
+			}
+			else = {
+				set_key = { lhs = lt_val value = 38.986 }
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					check_key = { lhs = lt_ind value = 7 }
+				}
+				set_key = { lhs = lt_val value = 77.821 }
+			}
+			else = {
+				set_key = { lhs = lt_val value = 155.042 }
+			}
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				check_key = { lhs = lt_ind value = 3 }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = lt_ind value = 4 }
+				}
+				if = {
+					limit = {
+						check_key = { lhs = lt_ind value = 5 }
+					}
+					set_key = { lhs = lt_val value = 307.717 }
+				}
+				else = {
+					set_key = { lhs = lt_val value = 606.246 }
+				}
+			}
+			else = {
+				set_key = { lhs = lt_val value = 1177.83 }
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					check_key = { lhs = lt_ind value = 2 }
+				}
+				set_key = { lhs = lt_val value = 2231.436 }
+			}
+			else = {
+				set_key = { lhs = lt_val value = 4054.651 }
+			}
+		}
+	}
+	
+	set_key = { lhs = lt_ind value = 0 }
+}
+
+# Parameter: inp
+# Result: ln_val
+# Use Feyman's method with precalculated log table to calculate ln
+ln_funct = {
+	set_key = { lhs = inp $type$ = $inp$ }
+	
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = inp value = 0.001 } }
+		}
+		set_key = { lhs = ln_val value = 0 }
+		change_key = { lhs = err_math_ln_undef value = 1 }
+	}
+	else = {
+		set_key = { lhs = ln_val value = 0 }
+		
+		set_key = { lhs = scale value = 10000 }
+	
+		set_key = { lhs = k value = 0 }
+		set_key = { lhs = k_div which = scale }
+		
+		# Normalize inp so that 1 <= inp <= 2
+		while = {
+			limit = {
+				check_key = { lhs = inp value = 2.001 }
+			}
+			multiply_key = { lhs = inp value = 0.5 }
+			
+			# ln 2 ~ 0.693
+			change_key = { lhs = ln_val value = 6931.472 }
+		}
+		while = {
+			limit = {
+				NOT = { check_key = { lhs = inp value = 1 } }
+			}
+			multiply_key = { lhs = inp value = 2 }
+			
+			# ln 2 ~ 0.693
+			subtract_key = { lhs = ln_val value = 6931.472 }
+		}
+		
+		multiply_key = { lhs = inp which = scale }
+		
+		while = {
+			limit = {
+				NOT = { check_key = { lhs = k value = 10 } } # precision = 10
+			}
+			change_key = { lhs = k value = 1 }
+			multiply_key = { lhs = k_div value = 0.5 }
+			
+			set_key = { lhs = t_m_ln which = scale }
+			change_key = { lhs = t_m_ln which = k_div }
+			
+			if = {
+				limit = {
+					check_key = { lhs = inp which = t_m_ln }
+				}
+				divide_key = { lhs = inp which = t_m_ln }
+				multiply_key = { lhs = inp which = scale }
+				
+				lt_funct = {
+					type=which
+					lt_ind=k
+				}
+				
+				change_key = { lhs = ln_val which = lt_val }
+			}
+			
+			set_key = { lhs = t_m_ln value = 0 }
+		}
+		
+		divide_key = { lhs = ln_val value = 10000 }
+		
+		
+		set_key = { lhs = scale value = 0 }
+
+		set_key = { lhs = k value = 0 }
+		set_key = { lhs = k_div value = 0 }
+		set_key = { lhs = lt_val value = 0 }
+	}
+	
+	set_key = { lhs = inp value = 0 }
+}
+
+# Parameters: inp, exp
+# Result: exp_val
+# x^(int + dec) = (x^int)*(x^dec) = (x^int)*(e^(dec * ln x))
+# Do not support negative input
+exp_funct = {
+	set_key = { lhs = inp_m_exp $type1$ = $inp$ }
+	set_key = { lhs = exp_m_exp $type2$ = $exp$ }
+	
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = inp_m_exp value = 0 } }
+		}
+		set_key = { lhs = exp_val value = 0 }
+		change_key = { lhs = err_math_exp_undef value = 1 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = exp_m_exp value = 0 }
+		}
+		set_key = { lhs = exp_val value = 1 }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = inp_m_exp value = 0 }
+		}
+		set_key = { lhs = exp_val value = 0 }
+	}
+	else = {
+		set_key = { lhs = int_m_exp which = exp_m_exp }
+		multiply_key = { lhs = int_m_exp value = 0.001 }
+		multiply_key = { lhs = int_m_exp value = 1000 }
+		
+		set_key = { lhs = dec_m_exp which = exp_m_exp }
+		subtract_key = { lhs = dec_m_exp which = int_m_exp }
+		
+		ln_funct = {
+			type=which
+			inp=inp_m_exp
+		}
+		
+		multiply_key = { lhs = dec_m_exp which = ln_val }
+		
+		e_funct = {
+			type=which
+			expnt=dec_m_exp prec=3
+			return=exp_val
+		}
+		
+		while = {
+			limit = {
+				check_key = { lhs = int_m_exp value = 1 }
+			}
+			subtract_key = { lhs = int_m_exp value = 1 }
+			
+			multiply_key = { lhs = exp_val which = inp_m_exp }
+		}
+		
+		
+		set_key = { lhs = int_m_exp value = 0 }
+		set_key = { lhs = dec_m_exp value = 0 }
+		set_key = { lhs = ln_val value = 0 }
+	}
+	
+	
+	set_key = { lhs = inp_m_exp value = 0 }
+	set_key = { lhs = exp_m_exp value = 0 }
+}
+
+# Parameters: steepns, midpnt, maxval, logistic_val
+# Result: inp
+# Inverse logistic_funct, aka logit
+logit_funct = {
+	set_key = { lhs = t_lf $type4$ = $maxval$ }
+	subtract_key = { lhs = t_lf $type1$ = $logistic_val$ }
+	divide_key = { lhs = t_lf $type1$ = $logistic_val$ }
+	
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = t_lf value = 0.001 } }
+		}
+		set_key = { lhs = $inp$ value = 0 }
+		change_key = { lhs = err_math_logit_undef value = 1 }
+	}
+	else = {
+		ln_funct = {
+			type=which
+			inp=t_lf 
+		}
+		
+		set_key = { lhs = t_lf which = ln_val }
+		
+		divide_key = { lhs = t_lf $type3$ = $steepns$ }
+		divide_key = { lhs = t_lf value = -1 }
+		
+		change_key = { lhs = t_lf $type2$ = $midpnt$ }
+		
+		set_key = { lhs = $inp$ which = t_lf }
+		
+		
+		set_key = { lhs = t_lf value = 0 }
+		set_key = { lhs = ln_val value = 0 }
+	}
+}
+
+# Parameters: inp, rad
+# Result: $return$
+# Return root inp over rad
+# It tries to, at least
+rt_funct = {
+	set_key = { lhs = t_rtf value = 1 }
+	divide_key = { lhs = t_rtf $type2$ = $rad$ }
+	
+	exp_funct = {
+		type1=$type1$ type2=which
+		inp=$inp$ exp=t_rtf
+	}
+	
+	set_key = { lhs = $return$ which = exp_val }
+	
+	
+	set_key = { lhs = t_rtf value = 0 }
+	set_key = { lhs = exp_val value = 0 }
+}
+
+# Parameters: inp, mean, std
+# Result: $return$
+# CDF for normal distribution
+# Don't do things that you shouldn't be doing with CDF for normal distribution
+
+# Original, in python
+
+#	def cdf(x, mean=0, std=1):
+#		import math
+#
+#		x = (x - mean) / std
+#
+#		a1 =  0.254829592
+#		a2 = -0.284496736
+#		a3 =  1.421413741
+#		a4 = -1.453152027
+#		a5 =  1.061405429
+#		p  =  0.3275911
+#
+#		sign = 1
+#
+#		if x < 0:
+#			sign = -1
+#
+#		x = abs(x) / math.sqrt(2)
+#
+#		t = 1 / (1 + p*x)
+#		y = 1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*math.exp(-x*x)
+#
+#		return 0.5*(1.0 + sign*y)
+
+normcdf_funct = {
+	set_key = { lhs = x_ncdf $type1$ = $inp$ }
+	subtract_key = { lhs = x_ncdf $type2$ = $mean$ }
+	divide_key = { lhs = x_ncdf $type3$ = $std$ }
+	
+	if = {
+		limit = {
+			check_key = { lhs = x_ncdf value = 5 }
+		}
+		set_key = { lhs = $return$ value = 1 }
+	}
+	else_if = {
+		limit = {
+			NOT = { check_key = { lhs = x_ncdf value = -5 } }
+		}
+		set_key = { lhs = $return$ value = 0 }
+	}
+	else = {
+		set_key = { lhs = sign_ncdf value = 0.5 }
+	
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = x_ncdf value = 0 } }
+			}
+			set_key = { lhs = sign_ncdf value = -0.5 }
+			multiply_key = { lhs = x_ncdf value = -1 }
+		}
+		
+		divide_key = { lhs = x_ncdf value = 1.414 }
+		
+		set_key = { lhs = t1_ncdf value = 0.327 }
+		multiply_key = { lhs = t1_ncdf which = x_ncdf }
+		change_key = { lhs = t1_ncdf value = 1 }
+		
+		set_key = { lhs = t2_ncdf value = 1 }
+		divide_key = { lhs = t2_ncdf which = t1_ncdf }
+		
+		multiply_key = { lhs = x_ncdf which = x_ncdf }
+		multiply_key = { lhs = x_ncdf value = -1 }
+		
+		e_funct = {
+			type=which 
+			expnt=x_ncdf prec=3
+			return=x_ncdf
+		}
+		
+		set_key = { lhs = t3_ncdf value = 1.061 }
+		multiply_key = { lhs = t3_ncdf which = t2_ncdf }
+		change_key = { lhs = t3_ncdf value = -1.453 }
+		multiply_key = { lhs = t3_ncdf which = t2_ncdf }
+		change_key = { lhs = t3_ncdf value = 1.421 }
+		multiply_key = { lhs = t3_ncdf which = t2_ncdf }
+		change_key = { lhs = t3_ncdf value = -0.284 }
+		multiply_key = { lhs = t3_ncdf which = t2_ncdf }
+		change_key = { lhs = t3_ncdf value = 0.254 }
+		multiply_key = { lhs = t3_ncdf which = t2_ncdf }
+		multiply_key = { lhs = t3_ncdf which = x_ncdf }
+		
+		set_key = { lhs = t4_ncdf value = 1 }
+		subtract_key = { lhs = t4_ncdf which = t3_ncdf }
+		multiply_key = { lhs = t4_ncdf which = sign_ncdf }
+		change_key = { lhs = t4_ncdf value = 0.5 }
+		
+		set_key = { lhs = $return$ which = t4_ncdf }
+		
+		
+		set_key = { lhs = x_ncdf value = 0 }
+		set_key = { lhs = sign_ncdf value = 0 }
+		set_key = { lhs = t1_ncdf value = 0 }
+		set_key = { lhs = t2_ncdf value = 0 }
+		set_key = { lhs = t3_ncdf value = 0 }
+		set_key = { lhs = t4_ncdf value = 0 }
+	}
+}
+
+normpdf_funct = {
+	set_key = { lhs = inp_normpdf $type1$ = $inp$ }
+	subtract_key = { lhs = inp_normpdf $type2$ = $mean$ }
+	divide_key = { lhs = inp_normpdf $type3$ = $std$ }
+	
+	multiply_key = { lhs = inp_normpdf which = inp_normpdf }
+	divide_key = { lhs = inp_normpdf value = -2 }
+	
+	e_funct = {
+		type=which
+		expnt=inp_normpdf prec=3
+		return=$return$
+	}
+	
+	multiply_key = { lhs = $return$ value = 10 }
+	divide_key = { lhs = $return$ value = 25.066 }
+	
+	divide_key = { lhs = $return$ $type3$ = $std$ }
+	
+	set_key = { lhs = inp_normpdf value = 0 }
+}
+
+polevl = {
+	set_key = { lhs = $return$ value = 0 }
+	
+	multiply_key = { lhs = $return$ which = $x$ }
+	change_key = { lhs = $return$ value = $coef1$ }
+	
+	multiply_key = { lhs = $return$ which = $x$ }
+	change_key = { lhs = $return$ value = $coef2$ }
+	
+	multiply_key = { lhs = $return$ which = $x$ }
+	change_key = { lhs = $return$ value = $coef3$ }
+	
+	multiply_key = { lhs = $return$ which = $x$ }
+	change_key = { lhs = $return$ value = $coef4$ }
+	
+	multiply_key = { lhs = $return$ which = $x$ }
+	change_key = { lhs = $return$ value = $coef5$ }
+	
+	if = {
+		limit = {
+			always = $cont$
+		}
+		multiply_key = { lhs = $return$ which = $x$ }
+		change_key = { lhs = $return$ value = $coef6$ }
+		
+		multiply_key = { lhs = $return$ which = $x$ }
+		change_key = { lhs = $return$ value = $coef7$ }
+		
+		multiply_key = { lhs = $return$ which = $x$ }
+		change_key = { lhs = $return$ value = $coef8$ }
+		
+		multiply_key = { lhs = $return$ which = $x$ }
+		change_key = { lhs = $return$ value = $coef9$ }
+	}
+}
+
+invcdf_funct = {
+	set_key = { lhs = y0_invcdf $type1$ = $inp$ }
+	
+	if = {
+		limit = {
+			is_key_equal = { lhs = y0_invcdf value = 0.5 }
+		}
+		set_key = { lhs = $return$ value = 0 }
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = y0_invcdf value = 1 }
+				
+				is_key_equal = { lhs = y0_invcdf value = 0 }
+			}
+				
+			check_key = { lhs = y0_invcdf value = 0 }
+		}
+		set_key = { lhs = negate_invcdf value = 1 }
+		
+		set_key = { lhs = y_invcdf which = y0_invcdf }
+		
+		if = {
+			limit = {
+				check_key = { lhs = y_invcdf value = 0.865 }
+			}
+			subtract_key = { lhs = y_invcdf value = 1 }
+			multiply_key = { lhs = y_invcdf value = -1 }
+			
+			set_key = { lhs = negate_invcdf value = 0 }
+		}
+		
+		if = {
+			limit = {
+				check_key = { lhs = y_invcdf value = 0.135 }
+			}
+			subtract_key = { lhs = y_invcdf value = 0.5 }
+			
+			set_key = { lhs = y2_invcdf which = y_invcdf }
+			multiply_key = { lhs = y2_invcdf which = y_invcdf }
+			
+			polevl = {
+				x = y2_invcdf
+				coef1 = 59.963
+				coef2 = 98.001
+				coef3 = -56.676
+				coef4 = 13.931
+				coef5 = -1.239
+				coef6 = 0
+				coef7 = 0
+				coef8 = 0
+				coef9 = 0
+				cont = no
+				return = $return$
+			}
+			
+			multiply_key = { lhs = $return$ which = y2_invcdf }
+			
+			polevl = {
+				x = y2_invcdf
+				coef1 = 1
+				coef2 = 1.954
+				coef3 = 4.676
+				coef4 = 86.36
+				coef5 = -225.463
+				coef6 = 200.26
+				coef7 = -82.037
+				coef8 = 15.906
+				coef9 = -1.183
+				cont = yes
+				return = div_invcdf
+			}
+			
+			divide_key = { lhs = $return$ which = div_invcdf }
+			
+			multiply_key = { lhs = $return$ which = y_invcdf }
+			change_key = { lhs = $return$ which = y_invcdf }
+			
+			multiply_key = { lhs = $return$ value = 2.507 }
+		}
+		else = {
+			ln_funct = {
+				type = which
+				inp = y_invcdf
+			}
+			
+			multiply_key = { lhs = ln_val value = -2 }
+			
+			rt_funct = {
+				type1=which type2=value
+				inp=ln_val rad=2
+				return = x_invcdf
+			}
+			
+			ln_funct = {
+				type = which
+				inp = x_invcdf
+			}
+			divide_key = { lhs = ln_val which = x_invcdf }
+			subtract_key = { lhs = ln_val which = x_invcdf }
+			multiply_key = { lhs = ln_val value = -1 }
+			
+			set_key = { lhs = x0_invcdf which = ln_val }
+			
+			set_key = { lhs = z_invcdf value = 1 }
+			divide_key = { lhs = z_invcdf which = x_invcdf }
+			
+			if = {
+				limit = {
+					NOT = {
+						check_key = { lhs = x_invcdf value = 8 }
+					}
+				}
+				polevl = {
+					x = z_invcdf
+					coef1 = 4.055
+					coef2 = 31.525
+					coef3 = 57.162
+					coef4 = 44.08
+					coef5 = 14.684
+					coef6 = 2.187
+					coef7 = -0.14
+					coef8 = -0.035
+					coef9 = -0.001
+					cont = yes
+					return = x1_invcdf
+				}
+				multiply_key = { lhs = x1_invcdf which = z_invcdf }
+				
+				polevl = {
+					x = z_invcdf
+					coef1 = 1
+					coef2 = 15.78
+					coef3 = 45.391
+					coef4 = 41.317
+					coef5 = 15.043
+					coef6 = 2.505
+					coef7 = -0.142
+					coef8 = -0.038
+					coef9 = -0.001
+					cont = yes
+					return = div_invcdf
+				}
+				
+				divide_key = { lhs = x1_invcdf which = div_invcdf }
+			}
+			else = {
+				polevl = {
+					x = z_invcdf
+					coef1 = 3.238
+					coef2 = 6.915
+					coef3 = 3.939
+					coef4 = 1.333
+					coef5 = 0.201
+					coef6 = 0.012
+					coef7 = 0
+					coef8 = 0
+					coef9 = 0
+					cont = yes
+					return = x1_invcdf
+				}
+				multiply_key = { lhs = x1_invcdf which = z_invcdf }
+				
+				polevl = {
+					x = z_invcdf
+					coef1 = 1
+					coef2 = 6.024
+					coef3 = 3.68
+					coef4 = 1.377
+					coef5 = 0.216
+					coef6 = 0.013
+					coef7 = 0
+					coef8 = 0
+					coef9 = 0
+					cont = yes
+					return = div_invcdf
+				}
+				
+				divide_key = { lhs = x1_invcdf which = div_invcdf }
+			}
+			
+			set_key = { lhs = $return$ which = x0_invcdf }
+			subtract_key = { lhs = $return$ which = x1_invcdf }
+			
+			if = {
+				limit = {
+					is_key_equal = { lhs = negate_invcdf value = 1 }
+				}
+				multiply_key = { lhs = $return$ value = -1 }
+			}
+		}
+	}
+	
+	multiply_key = { lhs = $return$ $type3$ = $std$ }
+	change_key = { lhs = $return$ $type2$ = $mean$ }
+	
+	set_key = { lhs = y_invcdf value = 0 }
+	set_key = { lhs = y0_invcdf value = 0 }
+	set_key = { lhs = y1_invcdf value = 0 }
+	set_key = { lhs = y2_invcdf value = 0 }
+	set_key = { lhs = x_invcdf value = 0 }
+	set_key = { lhs = x0_invcdf value = 0 }
+	set_key = { lhs = x1_invcdf value = 0 }
+	set_key = { lhs = negate_invcdf value = 0 }
+	set_key = { lhs = div_invcdf value = 0 }
+	set_key = { lhs = z_invcdf value = 0 }
+	set_key = { lhs = ln_val value = 0 }
+}
+mod_func = { #var #mod #overflows above var=20000
+	set_key = { lhs = Temp which = $var$ } # temp = x
+	multiply_key = { lhs = Temp value = 0.001 }
+	divide_key = { lhs = Temp value = $mod$ }
+	multiply_key = { lhs = Temp value = 1000 } # temp // y
+	multiply_key = { lhs = Temp value = $mod$ } # temp * y
+	subtract_key = { lhs = Temp which = $var$ } # x - temp
+}

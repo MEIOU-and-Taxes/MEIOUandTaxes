@@ -1,0 +1,428 @@
+# Triggers and effects will be given the Actor's scope (ROOT), with the Recipient's as FROM
+negotiate_alliance = {
+	category = alliance
+	
+	alert_index = 44
+	alert_tooltip = ICON_SUBJUGATION
+	
+	require_acceptance = yes # Whether the recipient gets an option to decline
+	
+	is_visible = {
+		is_emperor_of_china = no
+		FROM = { 
+			isValidCountry = yes 
+			is_free_or_tributary_trigger = yes
+			NOT = { is_subject_of = ROOT }
+			NOT = { overlord_of = ROOT }
+			NOT = { alliance_with = ROOT }
+			NOT = { check_key = { lhs = Diplo_Poss_Ally value = 1 } }
+		}
+	}
+	
+	is_allowed = {
+		is_at_war = no
+		is_year = 1357
+		NOT = { is_subject = yes }
+		is_emperor_of_china = no
+		NOT = { has_global_flag = mec_diplomacy_alliance_negotiations }
+		custom_trigger_tooltip = {
+			tooltip = ALLIANCE_LIMIT_NEGOTIATE
+			check_key = { lhs = Diplo_Poss_Ally value = 1 }
+		}
+		FROM = { 
+			is_at_war = no 
+			is_emperor_of_china = no
+			custom_trigger_tooltip = {
+				tooltip = FROM_ALLIANCE_LIMIT_NEGOTIATE
+				NOT = { check_key = { lhs = Diplo_Poss_Ally value = 1 } }
+			}
+		}
+		NOT = { is_rival = FROM }
+		NOT = { FROM = { is_rival = ROOT } }
+
+		if = {# Japan Shogun Blocks
+			limit = {
+				OR = { 
+					has_global_flag = nanbokucho
+					has_global_flag = sengoku_jidai
+				}
+				OR = {
+					culture_group = japanese_g
+					FROM = {
+						culture_group = japanese_g
+					}
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = JAPANSHOGUN
+				OR = {
+					culture_group = FROM
+					is_neighbor_of = FROM
+					any_subject_country = {
+						is_subject_other_than_tributary_trigger = yes
+						is_neighbor_of = FROM
+					}
+					FROM = {
+						any_subject_country = {
+							is_subject_other_than_tributary_trigger = yes
+							is_neighbor_of = ROOT
+						}
+					}
+				}
+			}
+		}
+		if = { # Japan NANBOKUCHO Blocks
+			limit = {
+				culture_group = japanese_g
+				OR = {
+					has_country_modifier = title_5
+					has_country_modifier = title_6
+				}
+				FROM = {
+					culture_group = japanese_g
+					OR = {
+						has_country_modifier = title_5
+						has_country_modifier = title_6
+					}
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = NANBOKUCHO
+				always = no
+			}
+		}
+
+		if = {
+			limit = {
+				OR = {
+					Timur_Has = yes
+					FROM = {
+						Timur_Has = yes
+					}
+				}
+				OR = {
+					culture_group = persian_group
+					FROM = { culture_group = persian_group }
+				}
+				ai = yes
+				FROM = { ai = yes }
+			}
+			custom_trigger_tooltip = {
+				tooltip = TIMURNOPEIRAN
+				always = no
+			}
+		}
+		
+		if = {
+			limit = {
+				NOT = { is_year = 1400 }
+				EastWest = yes
+				NorthOrthodox = no				
+			}
+			custom_trigger_tooltip = {
+				tooltip = EASTWESTGAP
+				FROM = {
+					OR = {
+						EastWest = no
+						NorthOrthodox = no
+					}
+				}
+			}			
+		}
+
+		if = {
+			limit = {
+				NOT = { is_year = 1400 }
+				EastWest = yes
+				NorthOrthodox = yes				
+			}
+			custom_trigger_tooltip = {
+				tooltip = EASTWESTGAPFROM
+				FROM = {
+					OR = {
+						EastWest = no
+						NorthOrthodox = yes
+					}
+				}
+			}			
+		}
+		if = {
+			limit = {
+				NOT = { is_year = 1600 }
+				capital_scope = {
+					superregion = north_africa_superregion
+				}
+				FROM = {
+					capital_scope = {
+						superregion = west_africa_superregion
+					}
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = SAHARANOPE
+				FROM = { is_neighbor_of = ROOT }
+			}
+		}
+		if = {
+			limit = {
+				NOT = { is_year = 1600 }
+				capital_scope = {
+				 superregion = west_africa_superregion
+				}
+				FROM = {
+					capital_scope = {
+					  superregion = north_africa_superregion
+				   }
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = SAHARANOPEFROM
+				FROM = { is_neighbor_of = ROOT }
+			}
+		}
+
+		if = {
+			limit = {
+				NOT = { is_year = 1550 }
+				culture_group = caucasus_group
+			}
+			custom_trigger_tooltip = {
+				tooltip = CAUCASIANISOLATION
+				FROM = {
+					OR = {
+						culture_group = caucasus_group
+						is_neighbor_of = ROOT
+						capital_scope = { region = south_caucasus_region }
+						capital_scope = {superregion = european_steppe_superregion }
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				NOT = { is_year = 1550 }
+				FROM = { culture_group = caucasus_group }
+			}
+			custom_trigger_tooltip = {
+				tooltip = CAUCASIANISOLATIONFROM
+				OR = {
+					culture_group = caucasus_group
+					is_neighbor_of = FROM
+					capital_scope = { region = south_caucasus_region }
+					capital_scope = {superregion = european_steppe_superregion }
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				OR = {
+					tag = CHG
+					tag = WHI
+					tag = GOL
+					tag = BLU
+					tag = MGH
+					FROM = { tag = CHG }
+					FROM = { tag = WHI }
+					FROM = { tag = GOL }
+					FROM = { tag = BLU }
+					FROM = { tag = MGH }
+				}
+			}
+			custom_trigger_tooltip = {
+				tooltip = UNSTABLEHORDE
+				is_year = 1360
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+				FROM = {
+					NOT = { has_country_flag = Horde_Collapse_Ongoing }
+					NOT = { has_country_flag = Horde_Ruler_Murdered }
+					NOT = { has_country_modifier = horde_collapse }
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				ai = yes
+				FROM = {
+					ai = yes
+				}
+				OR = {
+					culture_group = tibetic
+					culture_group = pahari_group
+					FROM = { culture_group = tibetic }
+					FROM = { culture_group = pahari_group }
+				}				
+			}
+
+			custom_trigger_tooltip = {
+				tooltip = TIBETNOPE
+				OR = {
+					culture_group = FROM
+					FROM = { culture_group = ROOT }
+					NOT = { technology_group = indian }
+					is_year = 1800
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				ROOT = {
+					OR = {
+						primary_culture = irish 
+						primary_culture = hiberno_norman
+					}
+				}
+				FROM = { 
+						NOT = {
+							OR = {
+								primary_culture = irish 
+								primary_culture = hiberno_norman
+							}
+						}
+				}				
+			}
+
+			custom_trigger_tooltip = {
+				tooltip = IRELANDNOPE
+				OR = {
+					FROM = { has_institution = Banking }
+					tag = IRE
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				FROM = {
+					always = yes 
+				}
+				FROM = { 
+						OR = {
+							primary_culture = irish 
+							primary_culture = hiberno_norman
+						}
+				}
+				NOT = { 
+						OR = {
+							primary_culture = irish 
+							primary_culture = hiberno_norman
+						}
+				}				
+			}
+			custom_trigger_tooltip = {
+				tooltip = IRELANDNOPE
+				OR = {
+					FROM = { has_institution = Banking }
+					tag = IRE
+				}
+			}			
+		}
+
+		variable_arithmetic_trigger = {
+			custom_tooltip = OUTSIDE_DIPLOMATIC_RANGE
+			export_to_variable = {
+				variable_name = border_distance
+				value = border_distance
+				who = FROM
+				with = ROOT
+			}
+			check_variable = {
+				which = oko
+				which = border_distance
+			}
+		}
+	}
+	
+	on_accept = {
+		add_dip_power = -25
+		#FROM = {
+		#	if = { limit = { ai = yes }
+		#		every_ally = { #use trust to break alliance, because pdx wtf no break_alliance effect
+		#			set_key = { lhs = Diplo_Tmp0 which = Diplo_Mil_Strength }
+		#
+		#			if = { limit = { check_key = { lhs = Diplo_Tmp0 which = FROM } }
+		#				FROM = { set_key = { lhs = Diplo_Tmp0 which = PREV } }
+		#				save_event_target_as = cancel_alliance_target
+		#			}
+		#			set_key = { lhs = Diplo_Tmp0 value = 0 }
+		#		}
+		#		event_target:cancel_alliance_target = {
+		#			#use opinion to break alliance, because pdx wtf no break_alliance effect -> takes a while to take effect
+		#			add_opinion = {
+		#				who = FROM
+		#				modifier = alliance_broken
+		#			}				
+		#		}
+		#	} else = {
+		#		country_event = { id = mec_diplomacy.100 days = 1 }
+		#	}
+		#}
+		## create new alliance
+		#create_alliance = FROM
+		country_event = { id = mec_diplomacy.101 days = 2 }
+		save_global_event_target_as = alliance_negotiation_root
+		FROM = { save_global_event_target_as = alliance_negotiation_target }
+		set_global_flag = mec_diplomacy_alliance_negotiations
+	}
+	on_decline = {
+		add_dip_power = -25	
+	}
+	
+	ai_acceptance = {
+		add_entry = {
+			name = BASE_AI_ACCEPTANCE
+			export_to_variable = { # Activate ai_value variable
+				variable_name = ai_value
+				value = opinion
+				who = FROM
+				with = ROOT
+			}
+			set_variable = { which = ai_value value = -25 }
+		}
+		add_entry = {
+			name = OPINION
+			export_to_variable = {
+				variable_name = ai_value
+				value = opinion
+				who = FROM
+				with = ROOT
+			}
+			divide_variable = { which = ai_value value = 4 }
+		}
+#		add_entry = {
+#			name = AI_ATTITUDE
+#			if = { limit = { FROM = { ai_attitude = { who = ROOT attitude = attitude_friendly }	} }
+#				set_variable = { which = ai_value value = 50 }
+#			} else_if = { limit = { FROM = { ai_attitude = { who = ROOT attitude = attitude_hostile } } }
+#				set_variable = { which = ai_value value = -100 }
+#			}
+#		}
+		add_entry = {
+			name = MYDIPLOREP_TT
+			export_to_variable = {
+				variable_name = ai_value
+				value = modifier:diplomatic_reputation
+			}
+			multiply_variable = { which = ai_value value = 3 }
+		}
+		add_entry = {
+			name = BORDERDISTANCE_TT
+			export_to_variable = {
+				which = ai_value
+				value = border_distance
+				who = FROM
+				with = ROOT
+			}
+			divide_variable = { which = ai_value value = -8 }
+		}
+	}
+	
+	ai_will_do = { # this is a trigger
+		always = no
+	}
+}

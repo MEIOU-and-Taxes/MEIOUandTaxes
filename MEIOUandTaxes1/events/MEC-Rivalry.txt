@@ -1,0 +1,141 @@
+namespace = rivalry
+country_event = {		#Franco-Spanish rivalry upon formation of Spain
+	id = rivalry.1		#Triggered by form_SPA_effect
+	title = rivalry.1.t
+	desc = rivalry.1.d
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = rivalry.1.opta
+		if = {
+			limit = {
+				historical_friend_with = SPA
+			}
+			remove_historical_friend = SPA
+		}
+		add_historical_rival = SPA
+		SPA = { country_event = { id = rivalry.2 days = 3 } }
+		ai_chance = {
+			factor = 1
+		}
+		log = "MEC-Rivalry:[GetYear]:[Root.GetName]:declared Spain their historical rival after Spanish unification:rivalry.1"
+	}
+
+	option = {
+		name = rivalry.1.optb
+		ai_chance = {
+			factor = 0
+		}
+	}
+}
+
+country_event = {		#Notification event for Spain
+	id = rivalry.2
+	title = rivalry.2.t
+	desc = rivalry.2.d
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = rivalry.2.opta
+		if = {
+			limit = {
+				historical_friend_with = FRA
+			}
+			remove_historical_friend = FRA
+		}
+		add_historical_rival = FRA
+		log = "MEC-Rivalry:[GetYear]:[Root.GetName]:declared France their historical rival in response to the French:rivalry.2"
+	}
+}
+
+country_event = {		#Event to get rid of historical rivalry when sharing a dynasty. AI will always do so
+	id = rivalry.3
+	title = rivalry.3.t
+	desc = rivalry.3.d
+	picture = GOOD_WITH_MONARCH_eventPicture
+	is_triggered_only = yes #By on_new_monarch
+	trigger = {
+		has_regency = no
+		has_consort_regency = no
+		any_known_country = {
+			historical_rival_with = ROOT
+			dynasty = ROOT
+			has_regency = no
+			has_consort_regency = no
+		}
+	}
+
+	option = {
+		name = rivalry.3.opta
+		random_known_country = {
+			limit = {
+				historical_rival_with = ROOT
+				dynasty = ROOT
+				has_regency = no
+				has_consort_regency = no
+			}
+			ROOT = { remove_historical_rival = PREV }
+			every_owned_province = {
+				limit = {
+					is_claim = ROOT
+				}
+				remove_claim = ROOT
+			}
+			add_trust = {
+				who = ROOT
+				value = 25
+			}
+			country_event = { id = rivalry.4 days = 3 }
+			log = "MEC-Rivalry:[GetYear]:[Root.GetName]:decided to end their historical rivalry with [This.Tag.GetName] because they now share a dynasty:rivalry.3"
+		}
+		ai_chance = {
+			factor = 1
+		}
+	}
+
+	option = {
+		name = rivalry.3.optb
+		ai_chance = {
+			factor = 0
+		}
+	}
+}
+
+country_event = {			#If one side decides to end the rivalry in event 3 than the other will get this event. AI will always agree
+	id = rivalry.4
+	title = rivalry.4.t
+	desc = rivalry.4.d
+	picture = GOOD_WITH_MONARCH_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = rivalry.4.opta
+		remove_historical_rival = FROM
+		FROM = {
+			every_owned_province = {
+				limit = {
+					is_claim = ROOT
+				}
+				remove_claim = ROOT
+			}
+			add_trust = {
+				who = ROOT
+				value = 25
+			}
+			log = "MEC-Rivalry:[GetYear]:[Root.GetName]:decided to end their historical rivalry with [From.Tag.GetName] because they now share a dynasty:rivalry.4"
+		}
+		
+		ai_chance = {
+			factor = 1
+		}
+	}
+
+	option = {
+		name = rivalry.4.optb
+		ai_chance = {
+			factor = 0
+		}
+	}
+}

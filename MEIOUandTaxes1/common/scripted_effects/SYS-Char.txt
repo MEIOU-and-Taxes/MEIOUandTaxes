@@ -1,0 +1,277 @@
+Char_EffectAll = {
+	$Effect$ = { Slot=0 }
+	$Effect$ = { Slot=1 }
+	$Effect$ = { Slot=2 }
+	$Effect$ = { Slot=3 }
+	$Effect$ = { Slot=4 }
+	$Effect$ = { Slot=5 }
+	$Effect$ = { Slot=6 }
+	$Effect$ = { Slot=7 }
+	$Effect$ = { Slot=8 }
+	$Effect$ = { Slot=9 }
+	$Effect$ = { Slot=10 }
+	$Effect$ = { Slot=11 }
+	$Effect$ = { Slot=12 }
+	$Effect$ = { Slot=13 }
+	$Effect$ = { Slot=14 }
+	$Effect$ = { Slot=15 }
+	$Effect$ = { Slot=16 }
+	$Effect$ = { Slot=17 }
+	$Effect$ = { Slot=18 }
+	$Effect$ = { Slot=19 }
+	$Effect$ = { Slot=20 }
+	$Effect$ = { Slot=21 }
+	$Effect$ = { Slot=22 }
+	$Effect$ = { Slot=23 }
+	$Effect$ = { Slot=24 }
+}
+Char_Clear = {
+	set_key = { lhs = Char_S$Slot$ value = 0 }
+	set_key = { lhs = Char_S$Slot$Age value = 0 }
+	set_key = { lhs = Char_S$Slot$Culture value = 0 }
+	set_key = { lhs = Char_S$Slot$Religion value = 0 }
+	set_key = { lhs = Char_S$Slot$Class value = 0 }
+	set_key = { lhs = Char_S$Slot$Faction value = 0 }
+	set_key = { lhs = Char_S$Slot$ADM value = 0 }
+	set_key = { lhs = Char_S$Slot$DIP value = 0 }
+	set_key = { lhs = Char_S$Slot$MIL value = 0 }
+	set_key = { lhs = Char_S$Slot$Role1 value = 0 }
+	set_key = { lhs = Char_S$Slot$Role2 value = 0 }
+	set_key = { lhs = Char_S$Slot$Role3 value = 0 }
+	if = {
+		limit = {
+			ai = no
+		}
+		clear_saved_name = Char_S$Slot$Name
+	}
+}
+Char_Age = {
+	if = {
+		limit = {
+			check_key = { lhs = Char_S$Slot$ value = 1 }
+		}
+		change_key = { lhs = Char_S$Slot$Age value = 1 }
+	}
+}
+Char_DeathHelper = {
+	set_key = { lhs = Char_Tmp0 which = Char_S$Slot$Age }
+	divide_key = { lhs = Char_Tmp0 value = 200 }
+	multiply_key = { lhs = Char_Tmp0 which = Char_Tmp0 }
+	POP_GetRandomNumber = { return=Char_Tmp1 }
+	if = {
+		limit = {
+			check_key = { lhs = Char_Tmp0 which = Char_Tmp1 }
+		}
+		Char_Clear = { Slot=$Slot$ }
+	}
+}
+Char_Death = {
+	if = {
+		limit = {
+			check_key = { lhs = Char_S$Slot$ value = 1 }
+		}
+		if = {
+			limit = {
+				is_month = 11
+			}
+			if = {
+				limit = {
+					NOT = { has_country_flag = Char_S$Slot$Aged }
+				}
+				Char_DeathHelper = { Slot=$Slot$ }
+			}
+			else = {
+				clr_country_flag = Char_S$Slot$Aged
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_country_flag = Char_S$Slot$Aged }
+			}
+			random_list = {
+				8 = { Char_DeathHelper = { Slot=$Slot$ } }
+				92 = {}
+			}
+			set_country_flag = Char_S$Slot$Aged
+		}
+	}
+}
+Char_Generate = {
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Char_S$Slot$ value = 1 } }
+		}
+		set_key = { lhs = Char_S$Slot$ value = 1 }
+		if = {
+			limit = {
+				ai = no
+			}
+			set_saved_name = {
+				key = Char_S$Slot$Name
+				type = advisor
+				scope = THIS
+			}
+		}
+		# Age generation
+		random_list = {
+			10 = { set_key = { lhs = Char_S$Slot$Age value = 20 } }
+			20 = { set_key = { lhs = Char_S$Slot$Age value = 25 } }
+			30 = { set_key = { lhs = Char_S$Slot$Age value = 30 } }
+			20 = { set_key = { lhs = Char_S$Slot$Age value = 35 } }
+			10 = { set_key = { lhs = Char_S$Slot$Age value = 40 } }
+			5 = { set_key = { lhs = Char_S$Slot$Age value = 45 } }
+			5 = { set_key = { lhs = Char_S$Slot$Age value = 50 } }
+		}
+		random_list = {
+			5 = { subtract_key = { lhs = Char_S$Slot$Age value = 5 } }
+			10 = { subtract_key = { lhs = Char_S$Slot$Age value = 4 } }
+			10 = { subtract_key = { lhs = Char_S$Slot$Age value = 3 } }
+			10 = { subtract_key = { lhs = Char_S$Slot$Age value = 2 } }
+			10 = { subtract_key = { lhs = Char_S$Slot$Age value = 1 } }
+			10 = { }
+			10 = { change_key = { lhs = Char_S$Slot$Age value = 1 } }
+			10 = { change_key = { lhs = Char_S$Slot$Age value = 2 } }
+			10 = { change_key = { lhs = Char_S$Slot$Age value = 3 } }
+			10 = { change_key = { lhs = Char_S$Slot$Age value = 4 } }
+			5 = { change_key = { lhs = Char_S$Slot$Age value = 5 } }
+		}
+		export_to_key = {
+			lhs = Char_S$Slot$Culture
+			value = primary_culture
+		}
+		export_to_key = {
+			lhs = Char_S$Slot$Religion
+			value = religion
+		}
+		random_list = {
+			14 = { set_key = { lhs = Char_S$Slot$ADM value = 0 } }
+			14 = { set_key = { lhs = Char_S$Slot$ADM value = 1 } }
+			14 = { set_key = { lhs = Char_S$Slot$ADM value = 2 } }
+			15 = { set_key = { lhs = Char_S$Slot$ADM value = 3 } }
+			15 = { set_key = { lhs = Char_S$Slot$ADM value = 4 } }
+			14 = { set_key = { lhs = Char_S$Slot$ADM value = 5 } }
+			14 = { set_key = { lhs = Char_S$Slot$ADM value = 6 } }
+		}
+		random_list = {
+			14 = { set_key = { lhs = Char_S$Slot$DIP value = 0 } }
+			14 = { set_key = { lhs = Char_S$Slot$DIP value = 1 } }
+			14 = { set_key = { lhs = Char_S$Slot$DIP value = 2 } }
+			15 = { set_key = { lhs = Char_S$Slot$DIP value = 3 } }
+			15 = { set_key = { lhs = Char_S$Slot$DIP value = 4 } }
+			14 = { set_key = { lhs = Char_S$Slot$DIP value = 5 } }
+			14 = { set_key = { lhs = Char_S$Slot$DIP value = 6 } }
+		}
+		random_list = {
+			14 = { set_key = { lhs = Char_S$Slot$MIL value = 0 } }
+			14 = { set_key = { lhs = Char_S$Slot$MIL value = 1 } }
+			14 = { set_key = { lhs = Char_S$Slot$MIL value = 2 } }
+			15 = { set_key = { lhs = Char_S$Slot$MIL value = 3 } }
+			15 = { set_key = { lhs = Char_S$Slot$MIL value = 4 } }
+			14 = { set_key = { lhs = Char_S$Slot$MIL value = 5 } }
+			14 = { set_key = { lhs = Char_S$Slot$MIL value = 6 } }
+		}
+		Char_AssignClass = { Slot=$Slot$ Fac=NO FacID=1 }
+		Char_AssignClass = { Slot=$Slot$ Fac=BG FacID=2 }
+		Char_AssignClass = { Slot=$Slot$ Fac=CL FacID=3 }
+		Char_AssignClass = { Slot=$Slot$ Fac=TR FacID=4 }
+		Char_AssignClass = { Slot=$Slot$ Fac=BU FacID=5 }
+	}
+}
+Char_AssignClass = {
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Char_S$Slot$Class value = 1 } }
+		}
+		POP_GetFacInf = { FAC=$Fac$ return=Char_Tmp0 }
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 10 } }
+			}
+			random_list = {
+				90 = {  }
+				10 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 20 } }
+			}
+			random_list = {
+				85 = {  }
+				15 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 30 } }
+			}
+			random_list = {
+				80 = {  }
+				20 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 40 } }
+			}
+			random_list = {
+				70 = {  }
+				30 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 50 } }
+			}
+			random_list = {
+				60 = {  }
+				40 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 60 } }
+			}
+			random_list = {
+				50 = {  }
+				50 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 70 } }
+			}
+			random_list = {
+				40 = {  }
+				60 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 80 } }
+			}
+			random_list = {
+				30 = {  }
+				70 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 90 } }
+			}
+			random_list = {
+				20 = {  }
+				80 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = Char_Tmp0 value = 100 } }
+			}
+			random_list = {
+				10 = {  }
+				90 = { set_key = { lhs = Char_S$Slot$Class value = $FacID$ } set_key = { lhs = Char_S$Slot$Faction value = $FacID$ } }
+			}
+		}
+	}
+}

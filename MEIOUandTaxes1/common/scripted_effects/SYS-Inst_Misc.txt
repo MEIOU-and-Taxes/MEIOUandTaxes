@@ -1,0 +1,2320 @@
+Centralism_Check = {
+	if = {
+		limit = {
+			is_nomad = yes
+			has_reform = Pol_Identity3
+		}
+		add_country_modifier = {
+			name = Centralism_NotReady
+			duration = -1
+			hidden = yes
+		}
+	}
+	else_if = {
+		limit = {
+			has_country_modifier = Centralism_NotReady
+		}
+		remove_country_modifier = Centralism_NotReady
+	}
+}
+Inst_Get_Legalism = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, is capital
+    if = {
+        limit = {
+            OR = {
+                check_key = { lhs = Infra_Capitol value = 2 }
+
+                AND = {
+                    is_capital = yes
+
+                    check_key = { lhs = Infra_Capitol value = 1 }
+                }
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    } 
+
+    # Base 2, ruler adm value
+    if = {
+        limit = {
+            owner = {
+                adm = 4
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 5
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 6
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    }
+
+    # Factor 1, tribal power
+    set_key = { lhs = Tmp_1 value = 100 }
+    subtract_key = { lhs = Tmp_1 which = Prov_TRPow }
+    multiply_key = { lhs = Tmp_1 value = 0.01 }
+    multiply_key = { lhs = Tmp_1 which = Tmp_1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+    # Factor 2, state reach
+    set_key = { lhs = Tmp_1 which = Prov_BUPow }
+    multiply_key = { lhs = Tmp_1 value = 0.01 }
+    change_key = { lhs = Tmp_1 value = 1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Meritocracy_Inst = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, is capital
+    if = {
+        limit = {
+            OR = {
+                check_key = { lhs = Infra_Capitol value = 2 }
+
+                AND = {
+                    is_capital = yes
+
+                    check_key = { lhs = Infra_Capitol value = 1 }
+                }
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    }
+
+    # Base 2, ruler adm value
+    if = {
+        limit = {
+            owner = {
+                adm = 4
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 5
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 6
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    }
+    multiply_key = { lhs = $return$ value = 2 } # two factors for meritocracy inst gain
+
+    # Factor 1, Local Corruption
+    set_key = { lhs = Tmp_1 value = 100 }
+    subtract_key = { lhs = Tmp_1 which = Prov_BULoy }
+	multiply_key = { lhs = Tmp_1 value = 0.01 }
+    multiply_key = { lhs = Tmp_1 which = Tmp_1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 2, State Corruption
+    set_key = { lhs = Tmp_1 value = 100 }
+    subtract_key = { lhs = Tmp_1 which = State_Crpt }
+	multiply_key = { lhs = Tmp_1 value = 0.01 }
+    multiply_key = { lhs = Tmp_1 which = Tmp_1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Banking = {
+    set_key = { lhs = $return$ value = 0 }
+    
+    # Base 1, province trade value
+    export_to_key = { lhs = Tmp_1 value = modifier:trade_value }
+    subtract_key = { lhs = Tmp_1 value = 5 }
+    multiply_key = { lhs = Tmp_1 value = 0.2 }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_1 value = 2 }
+        }
+        set_key = { lhs = Tmp_1 value = 2 }
+    }
+
+    change_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 1, province subsistence rating
+    set_key = { lhs = Tmp_1 value = 60 }
+    subtract_key = { lhs = Tmp_1 which = TN_SubsistenceDisp }
+    divide_key = { lhs = Tmp_1 value = 60 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 2, province burgher power
+    set_key = { lhs = Tmp_1 which = Prov_BGPow }
+    subtract_key = { lhs = Tmp_1 value = 40 }
+    divide_key = { lhs = Tmp_1 value = 60 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+	
+	# Factor 3, commerce reform
+	if = {
+        limit = {
+            owner = {
+                Rights_BGCom8HasGreater = yes
+            }
+        }
+        multiply_key = { lhs = $return$ value = 1.5 }
+    }
+	if = {
+        limit = {
+            owner = {
+                Rights_BGCom9HasGreater = yes
+            }
+        }
+        multiply_key = { lhs = $return$ value = 1.25 }
+    }
+	if = {
+        limit = {
+            owner = {
+                Rights_BGCom10HasGreater = yes
+            }
+        }
+        multiply_key = { lhs = $return$ value = 1.25 }
+    }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Casual_Literacy = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, knowledge production size
+    set_key = { lhs = $return$ which = TN_ProvSply41 }
+    subtract_key = { lhs = $return$ value = 2 }
+    divide_key = { lhs = $return$ value = 8 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 1 }
+        }
+        set_key = { lhs = $return$ value = 1 }
+    }
+
+    multiply_key = { lhs = $return$ which = $return$ }
+
+    # Factor 1, flat value
+    multiply_key = { lhs = $return$ value = 2 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Columbian_Exchange = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, province trade value
+    export_to_key = { lhs = Tmp_1 value = modifier:trade_value }
+    subtract_key = { lhs = Tmp_1 value = 4 }
+    multiply_key = { lhs = Tmp_1 value = 0.25 }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_1 value = 2 }
+        }
+        set_key = { lhs = Tmp_1 value = 2 }
+    }
+    if = {
+        limit = {
+            NOT = { Banking = 100 }
+			NOT = { continent = north_america }
+			NOT = { continent = south_america }
+        }
+        multiply_key = { lhs = Tmp_1 value = 0.5 }
+    }
+
+    change_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 1, flat value
+    multiply_key = { lhs = $return$ value = 1.5 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Scientific_Method = {
+    set_key = { lhs = $return$ value = 0 }
+    
+    # Base 1, amount of academic infrastructure
+    set_key = { lhs = $return$ which = Building_Academic }
+    subtract_key = { lhs = $return$ value = 4 }
+    divide_key = { lhs = $return$ value = 2 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 1 }
+        }
+        set_key = { lhs = $return$ value = 1 }
+    }
+}
+
+Inst_Get_Global_Trade = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, province trade value
+    export_to_key = { lhs = Tmp_1 value = modifier:trade_value }
+    subtract_key = { lhs = Tmp_1 value = 5 }
+    multiply_key = { lhs = Tmp_1 value = 0.2 }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_1 value = 2 }
+        }
+        set_key = { lhs = Tmp_1 value = 2 }
+    }
+
+    change_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 1, flat value
+    multiply_key = { lhs = $return$ value = 1.5 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Academia = {
+    set_key = { lhs = $return$ value = 0 }
+    
+    # Base 1, amount of academic infrastructure 
+    #Same as Scientific Method, but requires twice as much Academic Infrastructure
+    set_key = { lhs = $return$ which = Building_Academic }
+    subtract_key = { lhs = $return$ value = 9 }
+    divide_key = { lhs = $return$ value = 4 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 1 }
+        }
+        set_key = { lhs = $return$ value = 1 }
+    }
+}
+
+Inst_Get_Nationalism = {
+    set_key = { lhs = $return$ value = 0 }
+    set_key = { lhs = percentage_own_culture_group which = owner }
+
+	#increase = (percentage_own_culture_group -20)/20, capped at 2
+	#everything above 60% caps at 2, everything below 20% has no increase, linear relation in between
+    set_key = { lhs = $return$ which = percentage_own_culture_group }
+    subtract_key = { lhs = $return$ value = 20 }
+    divide_key = { lhs = $return$ value = 20 }
+
+    if = { 
+        limit = { 
+            check_key = { lhs = $return$ value = 2 }
+        }
+        set_key = { lhs = $return$ value = 2 }
+    }
+}
+
+Inst_Get_Industrialisation = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, amount of industrial infrastructure
+    set_key = { lhs = $return$ which = Building_Industrial }
+    subtract_key = { lhs = $return$ value = 24 }
+    divide_key = { lhs = $return$ value = 10 }
+
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 2 }
+        }
+        set_key = { lhs = $return$ value = 2 }
+    }
+}
+
+Inst_Init = {
+	Inst_LegalismInit = yes
+	Inst_Meritocracy_Inst_Init = yes
+	Inst_BankingInit = yes
+}
+Inst_LegalismInit = {
+	every_province = {
+		limit = {
+			isValidProv = yes
+		}
+		if = {
+			limit = {
+				OR = {
+					NOT = { check_key = { lhs = Prov_TRPow value = 1 } }
+					area = west_jurcen_area
+					#area = east_jurcen_area
+					province_id = 4031
+					province_id = 3258
+					province_id = 4758
+					province_id = 731
+					province_id = 4685
+					province_id = 725
+					province_id = 4680
+					province_id = 3244
+					province_id = 4036
+					province_id = 729
+					province_id = 4683
+					region = korea_region
+					area = epirus_area
+					province_id = 160
+					province_id = 425
+					province_id = 2083
+					province_id = 2082
+					#Britain
+					province_id = 3337
+					province_id = 249
+					province_id = 3335
+					province_id = 3328
+					province_id = 373
+					#Iraq
+					province_id = 411
+					province_id = 3089
+					province_id = 1320
+					province_id = 1329
+					province_id = 3087
+					province_id = 1322
+					province_id = 398
+					province_id = 3086
+					province_id = 415
+					province_id = 4618
+					province_id = 4646
+					province_id = 3085
+					province_id = 3084
+					province_id = 392
+					province_id = 3826
+					province_id = 3885
+					province_id = 3900
+					#Anatolia
+					region = west_anatolia_region
+					region = north_anatolia_region
+					region = south_anatolia_region
+					region = upper_mesopotamia_region
+					region = south_caucasus_region
+					#Syria
+					province_id = 3091
+					province_id = 2655
+					province_id = 2224
+					province_id = 3885
+					province_id = 2635
+					province_id = 364
+					province_id = 2634
+					province_id = 2636
+					province_id = 4058
+					province_id = 2726
+					#North Africa
+					province_id = 359
+					province_id = 1214
+					province_id = 2662
+					province_id = 2663
+					province_id = 2864
+					province_id = 2866
+					province_id = 2859
+					province_id = 356
+					province_id = 1526
+					province_id = 355
+					province_id = 1339
+					province_id = 1211
+					province_id = 1119
+					province_id = 2971 
+					province_id = 4071
+					province_id = 2972
+					province_id = 344
+					province_id = 336
+					province_id = 344
+					province_id = 335
+					province_id = 4072
+					province_id = 347
+					province_id = 5101
+					province_id = 4068
+					province_id = 1515
+					province_id = 2933
+					province_id = 339
+					#Persia/Central Asia
+					region = iran_region
+					region = fars_region
+					province_id = 431
+					province_id = 5120
+					province_id = 4232
+					province_id = 3849
+					province_id = 3830
+					province_id = 3838
+					province_id = 3094
+					province_id = 3213
+					province_id = 2743
+					province_id = 2119
+					province_id = 2257
+					province_id = 4817
+					province_id = 5494
+					province_id = 2232
+					province_id = 3301
+					province_id = 451
+					province_id = 3104
+					province_id = 3843
+					province_id = 450
+					province_id = 3288
+					province_id = 444
+					province_id = 436
+					province_id = 457
+					province_id = 3290
+					province_id = 3293
+					province_id = 454
+					province_id = 455
+					province_id = 3289
+					province_id = 3299
+					province_id = 3300
+					province_id = 3847
+					province_id = 3297
+					province_id = 442
+					province_id = 3279
+					province_id = 2254
+					province_id = 440
+					province_id = 5114
+					province_id = 3294
+					province_id = 3095
+					province_id = 551
+					province_id = 458
+					province_id = 3292
+					province_id = 476
+					province_id = 3280
+					province_id = 456
+					province_id = 3278
+					province_id = 2231
+					province_id = 578
+					province_id = 2114
+					province_id = 3096
+					province_id = 2115
+					province_id = 2226
+					province_id = 509
+					province_id = 4563
+					#Arabia
+					province_id = 385
+					province_id = 384
+					province_id = 3077
+					province_id = 380
+					province_id = 2665
+					province_id = 388
+					province_id = 2653
+					province_id = 5242
+					province_id = 4098
+					province_id = 4097
+					province_id = 428
+					province_id = 400
+					province_id = 466
+					province_id = 3068
+					province_id = 402
+					province_id = 397
+					province_id = 393
+					province_id = 2539
+					province_id = 4565
+					#Zanzibar
+					#province_id = 1187
+					area = yarkand_area
+					area = tarim_basin_area
+					#Sudan & Abyssinia
+					culture = nubian
+					culture = kenzi_c
+					culture = gumuz
+					culture = beja_c
+					culture_group = abyssinian_group
+					culture = afar
+					culture = dir_c
+					#West Africa
+					culture = akaa
+					province_id = 805
+					province_id = 2374
+					province_id = 3778
+					province_id = 805
+					province_id = 4618
+					province_id = 2726
+					province_id = 4862
+					province_id = 4874
+					province_id = 4872
+					province_id = 4869
+					province_id = 4875
+					province_id = 4891
+					province_id = 2579
+					province_id = 3841
+					province_id = 445
+					province_id = 4563
+					province_id = 4874
+					#Swahili
+					region = east_africa_region
+					province_id = 1228
+					#Somalia
+					area = mogadishu_area
+					area = ajuuran_area
+					area = shabeele_area
+					area = galjal_area
+					area = pepper_area
+					province_id = 3044
+					province_id = 3047
+					province_id = 1201
+					area = ifat_area
+					province_id = 3018
+					province_id = 3013
+					culture_group = north_central_tradition_group
+					culture_group = andean_group
+					culture_group = maya
+					AND = {
+						culture_group = nahua_group
+						NOT = { culture = tecos }
+						NOT = { culture = nawa }
+						NOT = { culture = pipil }
+					}
+					culture_group = purepechan_group
+					culture_group = totonac_group
+					AND = {
+						culture_group = mixtec_group
+						NOT = { culture = zoque }
+					}
+					culture = jurcen
+					province_id = 805
+					province_id = 3311
+					province_id = 3296
+					province_id = 3303
+					province_id = 461
+					# Americas
+					province_id = 3533
+					province_id = 2405
+					province_id = 2404
+					province_id = 2409
+					province_id = 2202
+					province_id = 3521
+					province_id = 856
+					province_id = 2640
+					province_id = 2642
+					province_id = 859
+					province_id = 793
+					province_id = 797
+					province_id = 4598
+					province_id = 4597
+					province_id = 1415
+					province_id = 2770
+					province_id = 1499
+					province_id = 2895
+					province_id = 2407
+					province_id = 2597
+					province_id = 2402
+					province_id = 3534
+					province_id = 2407
+					#India
+					province_id = 3167
+					province_id = 2558
+					province_id = 2554
+					province_id = 526
+					province_id = 512
+					province_id = 2707
+					province_id = 512
+					province_id = 550
+					province_id = 2704
+					province_id = 519
+					province_id = 2709
+					province_id = 520
+				}
+				NOT = {
+					province_id = 717
+					province_id = 3026 
+					province_id = 2926 
+					province_id = 5089 
+					province_id = 2748 
+					province_id = 5048 
+					province_id = 5024 
+					culture = oromo_c
+					owned_by = MAP 
+					culture = chichimecha
+					owned_by = CBS 
+				}
+			}
+			add_institution_embracement = {
+				which = Legalism
+				value = 100
+			}
+		}
+		else = {
+			set_key = { lhs = Tmp_0 value = 125 } # 25 base
+			subtract_key = { lhs = Tmp_0 which = Prov_TRPow }
+			multiply_key = { lhs = Tmp_0 value = 0.01 }
+			multiply_key = { lhs = Tmp_0 which = Tmp_0 }
+			multiply_key = { lhs = Tmp_0 value = 100 }
+			subtract_key = { lhs = Tmp_0 which = NM_Ratio }
+			
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_0 value = 100 }
+				}
+				set_key = { lhs = Tmp_0 value = 100 }
+			}
+			else_if = {
+				limit = {
+					NOT = { check_key = { lhs = Tmp_0 value = 0 } }
+				}
+				set_key = { lhs = Tmp_0 value = 0 }
+			}
+			if = { limit = { check_key = { lhs = Tmp_0 value = 50 } }
+				if = { limit = { check_key = { lhs = Tmp_0 value = 75 } }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 88 } }
+						if = { limit = { check_key = { lhs = Tmp_0 value = 94 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 97 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 99 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 1.00 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 100
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 99
+										}
+									}
+								}
+								else = {
+									if = { limit = { check_key = { lhs = Tmp_0 value = 98 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 98
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 97
+										}
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 95 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 96 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 96
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 95
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 94
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 91 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 92 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 93 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 93
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 92
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 91
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 89 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 90 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 90
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 89
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 88
+									}
+								}
+							}
+						}
+					}
+					else = {
+						if = { limit = { check_key = { lhs = Tmp_0 value = 81 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 84 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 86 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 87 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 87
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 86
+										}
+									}
+								}
+								else = {
+									if = { limit = { check_key = { lhs = Tmp_0 value = 85 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 85
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 84
+										}
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 82 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 83 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 83
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 82
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 81
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 78 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 79 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 80 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 80
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 79
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 78
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 76 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 77 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 77
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 76
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 75
+									}
+								}
+							}
+						}
+					}
+				}
+				else = {
+					if = { limit = { check_key = { lhs = Tmp_0 value = 62 } }
+						if = { limit = { check_key = { lhs = Tmp_0 value = 68 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 71 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 73 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 74 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 74
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 73
+										}
+									}
+								}
+								else = {
+									if = { limit = { check_key = { lhs = Tmp_0 value = 72 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 72
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 71
+										}
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 69 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 70 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 70
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 69
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 68
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 65 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 66 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 67 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 67
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 66
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 65
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 63 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 64 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 64
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 63
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 62
+									}
+								}
+							}
+						}
+					}
+					else = {
+						if = { limit = { check_key = { lhs = Tmp_0 value = 56 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 59 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 60 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 61 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 61
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 60
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 59
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 57 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 58 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 58
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 57
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 56
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 53 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 54 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 55 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 55
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 54
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 53
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 51 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 52 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 52
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 51
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 50
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else = {
+				if = { limit = { check_key = { lhs = Tmp_0 value = 25 } }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 37 } }
+						if = { limit = { check_key = { lhs = Tmp_0 value = 43 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 46 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 48 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 49 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 49
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 48
+										}
+									}
+								}
+								else = {
+									if = { limit = { check_key = { lhs = Tmp_0 value = 47 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 47
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 46
+										}
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 44 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 45 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 45
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 44
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 43
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 40 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 41 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 42 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 42
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 41
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 40
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 38 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 39 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 39
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 38
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 37
+									}
+								}
+							}
+						}
+					}
+					else = {
+						if = { limit = { check_key = { lhs = Tmp_0 value = 31 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 34 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 35 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 36 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 36
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 35
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 34
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 32 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 33 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 33
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 32
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 31
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 28 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 29 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 30 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 30
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 29
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 28
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 26 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 27 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 27
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 26
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 25
+									}
+								}
+							}
+						}
+					}
+				}
+				else = {
+					if = { limit = { check_key = { lhs = Tmp_0 value = 12 } }
+						if = { limit = { check_key = { lhs = Tmp_0 value = 18 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 21 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 23 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 24 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 24
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 23
+										}
+									}
+								}
+								else = {
+									if = { limit = { check_key = { lhs = Tmp_0 value = 22 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 22
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 21
+										}
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 19 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 20 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 20
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 19
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 18
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 15 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 16 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 17 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 17
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 16
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 15
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 13 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 14 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 14
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 13
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 12
+									}
+								}
+							}
+						}
+					}
+					else = {
+						if = { limit = { check_key = { lhs = Tmp_0 value = 6 } }
+							if = { limit = { check_key = { lhs = Tmp_0 value = 9 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 10 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 11 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 11
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 10
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 9
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 7 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 8 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 8
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 7
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 6
+									}
+								}
+							}
+						}
+						else = {
+							if = { limit = { check_key = { lhs = Tmp_0 value = 3 } }
+								if = { limit = { check_key = { lhs = Tmp_0 value = 4 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 5 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 5
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 4
+										}
+									}
+								}
+								else = {
+									add_institution_embracement = {
+										which = Legalism
+										value = 3
+									}
+								}
+							}
+							else = {
+								if = { limit = { check_key = { lhs = Tmp_0 value = 1 } }
+									if = { limit = { check_key = { lhs = Tmp_0 value = 2 } }
+										add_institution_embracement = {
+											which = Legalism
+											value = 2
+										}
+									}
+									else = {
+										add_institution_embracement = {
+											which = Legalism
+											value = 1
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+Inst_Meritocracy_Inst_Init = {
+	north_china_superregion = {
+		limit = {
+			Legalism = 100
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	east_china_superregion = {
+		limit = {
+			Legalism = 100
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	southwest_china_superregion = {
+		limit = {
+			Legalism = 100
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	korea_region = {
+		limit = {
+			Legalism = 100
+			culture_group = korean_group
+			owner = {
+				culture_group = korean_group
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	greece_region = {
+		limit = {
+			owner = {
+				religion = orthodox
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 75
+		}
+	}
+	greece_region = {
+		limit = {
+			owner = {
+				religion = catholic
+			}
+			NOT = { area = epirus_area }
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 50
+		}
+	}
+	epirus_area = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 75
+		}
+	}
+	3871 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 75
+		}
+	}
+	1401 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 25
+		}
+	}
+	145 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 75
+		}
+	}
+	5081 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	2238 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	2257 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	5120 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	3386 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	2552 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	5555 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	4067 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	4920 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	4864 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	4926 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	2553 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	1446 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	5081 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	4927 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	3871 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	west_anatolia_region = {
+		limit = {
+			OR = {
+				AND = {
+					culture_group = greek_group
+					NOT = { culture = cappadocian }
+				}
+				culture = osmanli
+				culture = turkish
+				culture = laz
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 65
+		}
+	}
+	north_anatolia_region = {
+		limit = {
+			OR = {
+				AND = {
+					culture_group = greek_group
+					NOT = { culture = cappadocian }
+				}
+				culture = osmanli
+				culture = turkish
+				culture = laz
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 50
+		}
+	}
+	north_anatolia_region = {
+		limit = {
+			OR = {
+				culture = cappadocian
+				culture = turkoman
+				culture = yorouk
+				culture = medieval_armenian
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 35
+		}
+	}
+	west_anatolia_region = {
+		limit = {
+			OR = {
+				culture = cappadocian
+				culture = turkoman
+				culture = yorouk
+				culture = medieval_armenian
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 35
+		}
+	}
+	south_anatolia_region = {
+		limit = {
+			OR = {
+				AND = {
+					culture_group = greek_group
+					NOT = { culture = cappadocian }
+					NOT = { area = taurus_area }
+				}
+				culture = osmanli
+				culture = turkish
+				culture = laz
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 50
+		}
+	}
+	south_anatolia_region = {
+		limit = {
+			OR = {
+				culture = cappadocian
+				culture = turkoman
+				culture = yorouk
+				culture = medieval_armenian
+			}
+		}
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 35
+		}
+	}
+	upper_armenia_area = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 25
+		}
+	}
+	malatya_area = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 25
+		}
+	}
+	crimea_area = {
+		if = {
+			limit = {
+				NOT = { province_id = 282 }
+			}
+			add_institution_embracement = {
+				which = Meritocracy_Inst
+				value = 25
+			}
+		}
+	}
+	3795 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 25
+		}
+	}
+	1427 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 25
+		}
+	}
+	north_macedonia_area = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 25
+		}
+	}
+	#west_macedonia_area = {
+	#	add_institution_embracement = {
+	#		which = Meritocracy_Inst
+	#		value = 25
+	#	}
+	#}
+	5045 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	145 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+	1399 = {
+		add_institution_embracement = {
+			which = Meritocracy_Inst
+			value = 100
+		}
+	}
+}
+Inst_BankingInit = {
+	#ITALY
+	venetia_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	emilia_romagna_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	marche_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	1414 = { #Urbino
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	3700 = { #Pesaro
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	105 = { #Ancona
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	3702 = { #Ferno
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	2564 = { #Masa
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	101 = { #Liguria
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1513 = { #Punente
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	102 = { #Nicea
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	padan_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	104 = { #Lumbardia/Milan
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1347 = { #Pavia
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	3703 = { #Ast
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1377 = { #Monfra
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	103 = { #Piemont
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	5140 = { #Cuneo
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	110 = { #Trent
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	1390 = { #Nuvara
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	3381 = { #Berghem
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	tuscany_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	siena_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	117 = { #Siena
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	3697 = { #Volterra
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	lazio_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	1379 = { #Umbria
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	3699 = { #Perugia
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	123 = { #Calabria
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	##Croatian Coast and Provence
+	137 = { #Ragusa
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	2452 = { #Triest
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	130 = { #Istria
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	1355 = { #Guriza
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	136 = { #Spalatro
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	2571 = { #Jadera
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	201 = { #Proensa
+		add_institution_embracement = {
+			which = Banking
+			value = 70
+		}
+	}
+	##HRE
+	2359 = { #Basel
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	2756 = { #Mainz
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	lower_rhine_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 30
+		}
+	}
+	85 = { #Kolle
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1357 = { #Bremen
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	44 = { #Hamburg
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	45 = { #Lubeck
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	82 = { #Augsburg
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1353 = { #Luneburg
+		add_institution_embracement = {
+			which = Banking
+			value = 30
+		}
+	}
+	81 = { #Nurnberg
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	3732 = { #Falkenstein
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	3723 = { #Worms
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	80 = { #Ulm
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1365 = { #Frankfurt
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	1006 = { #Regensburg
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	4006 = { #Strassburg
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	##Low Countries
+	flanders_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	holland_area = {
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	91 = { #Henau
+		add_institution_embracement = {
+			which = Banking
+			value = 70
+		}
+	}
+	92 = { #Bruxelle
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	95 = { #Breda
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	2367 = { #Leive
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	99 = { #Neder-Gerle
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	51 = { #Kleve
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	##British Isles
+	236 = { #London
+		add_institution_embracement = {
+			which = Banking
+			value = 60
+		}
+	}
+	239 = { #Gloucester/Bristol
+		add_institution_embracement = {
+			which = Banking
+			value = 30
+		}
+	}
+	3325 = { #Witshire/Wilton
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	234 = { #Wessex/Southampton
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	399 = { #Norfolk/Norwich
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	245 = { #East Riding/York
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	##France
+	183 = {		#Paris
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	976 = { #Lyon
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	3375 = { #Rouen
+		add_institution_embracement = {
+			which = Banking
+			value = 10
+		}
+	}
+	88 = { #Artoe
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	202 = { #Veneisi/Avignion
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	63 = { #Calais
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	2354 = { #Champaigne/Troyes
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	186 = { #Argonne
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	1387 = { #Valoys
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	3815 = { #Guise
+		add_institution_embracement = {
+			which = Banking
+			value = 20
+		}
+	}
+	176 = {	#Bordeaux 
+		add_institution_embracement = {
+			which = Banking
+			value = 40
+		}
+	}
+	##Others
+	2355 = { #Danzig
+		add_institution_embracement = {
+			which = Banking
+			value = 100
+		}
+	}
+	##Iberia
+	213 = { #Barcelona
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	181 = { #Tarragona
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	220 = { #Valencia
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	2311 = { #Sevilla
+		add_institution_embracement = {
+			which = Banking
+			value = 50
+		}
+	}
+	2310 = { #Cadiz
+		add_institution_embracement = {
+			which = Banking
+			value = 25
+		}
+	}
+}
