@@ -1,23 +1,12 @@
-### Map dependent Red Turban events, moved to a file to allow better submod compatibility
-# Submods can override this code to change the surrender
+### Red Turbans 3006
+
+#### Yuan degenerates ####
 country_event = {
 	id = red_turban.6
 	title = "red_turban.6.t"
+	desc = "red_turban.6.d"
 	picture = SIEGE_eventPicture
-	
-	desc = {
-		trigger = {
-			tag = YUA
-			NOT = { is_year = 1400 }
-		}
-		desc = red_turban.6.da
-	}
-	desc = {
-		trigger = {
-			always = yes
-		}
-		desc = red_turban.6.db
-	}	
+	major = yes
 	
 	fire_only_once = yes
 	is_triggered_only = yes
@@ -32,8 +21,12 @@ country_event = {
 	}
 	
 	trigger = {
+		tag = YUA
+		exists = yes
+		NOT = { has_country_flag = Yuan_Degenerate }
 		OR = {
 			culture_group = altaic
+			culture_group = jurchen_group
 			culture_group = tungusic
 		}
 		OR = {
@@ -47,1236 +40,219 @@ country_event = {
 		OR = {
 			NOT = { check_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 50 } }
 			capital_scope = { NOT = { controlled_by = ROOT } }
+			capital_scope = { NOT = { culture_group = chinese_group } }
+			num_of_rebel_controlled_provinces = 20
 		}
-		is_at_war = no
+		NOT = { owns = 701 }
+	}
+
+	immediate = {
+		hidden_effect = {
+			steppe_effect = yes
+			change_religion = tengri_pagan
+			force_converted = yes
+			set_country_flag = Yuan_Degenerate
+			if = {
+				limit = {
+					culture_group = altaic
+					owns = 4713
+				}
+				Effect_set_capital = { target=4713 }
+			}
+			else_if = {
+				limit = {
+					capital_scope = {
+						chinese_region_trigger = yes
+					}
+					any_owned_province = {
+						region = inner_mongolia_region
+					}
+				}
+				random_owned_province = {
+					limit = {
+						NOT = { chinese_region_trigger = yes }
+						region = inner_mongolia_region
+						has_owner_culture = yes
+						isValidProv = yes
+					}
+					ROOT = { Effect_set_capital = { target=PREV } }
+				}
+			}
+			else_if = {
+				limit = {
+					capital_scope = {
+						chinese_region_trigger = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						NOT = { chinese_region_trigger = yes }
+						has_owner_culture = yes
+						isValidProv = yes
+					}
+					ROOT = { Effect_set_capital = { target=PREV } }
+				}
+			}
+			Yuan_Degenerate = yes
+		}
 	}
 	
 	option = {
-		name = "red_turban.3a"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Administration dissolved:red_turban.6"
-
-		steppe_effect = yes
-		change_religion = tengri_pagan
-		force_converted = yes
-		if = {
-			limit = {
-				culture_group = altaic
-				capital_scope = {
-					chinese_region_trigger = yes
-				}
-				owns = 3273
-			}
-			Effect_set_capital = { target=3273 }
+		name = "red_turban.6.a"
+		add_prestige = -10
+	}
+	
+	option = {
+		name = "red_turban.6.b"
+		trigger = {
+			ai = no
 		}
-		else_if = {
-			limit = {
-				capital_scope = {
-					chinese_region_trigger = yes
-				}
-			}
-			random_owned_province = {
-				limit = {
-					NOT = { chinese_region_trigger = yes }
-					has_owner_culture = yes
-					isValidProv = yes
-				}
-				ROOT = { Effect_set_capital = { target=PREV } }
-			}
+		MXI = {
+			add_country_modifier = { name = Northern_Yuan_mod duration = -1 }
 		}
-		yua_degeneration = yes
-		
-		every_subject_country = {
-			limit = {
-				is_subject_of_type = warlord
-				isValidCountry = yes
-			}
-			grant_independence = yes
-			log = "FE-Red Turbans:[GetYear]:[Root.GetName]:granted independence to warlord [This.GetName]:red_turban.6"
-		}
-		if = {
-			limit = {
-				tag = YUA
-				NOT = { is_year = 1400 }
-				NOT = { exists = MXI }
-				any_owned_province = {
-					OR = {
-						culture_group = jurchen_group
-						culture_group = altaic
-						culture_group = chinese_group
-						province_id = 730
-						province_id = 732
-					}
-					OR = {
-						region = korea_region
-						region = east_manchuria_region
-						region = west_manchuria_region
-					}
-					OR = {
-						NOT = { 
-							area = xinhai_area 
-							area = nen_area 
-						}
-						province_id = 3260
-						province_id = 3259
-					}
-					NOT = { is_core = MXI }
-					isValidProv = yes
-				}
-			}
-			every_owned_province = {
-				limit = {
-					OR = {
-						culture_group = jurchen_group
-						culture_group = altaic
-						culture_group = chinese_group
-						province_id = 730
-						province_id = 732
-					}
-					OR = {
-						region = korea_region
-						region = east_manchuria_region
-						region = west_manchuria_region
-					}
-					OR = {
-						NOT = { 
-							area = xinhai_area 
-							area = nen_area 
-						}
-						province_id = 3260
-						province_id = 3259
-					}
-					NOT = { is_core = MXI }
-					isValidProv = yes
-				}
-				add_core = MXI
-			}
-			hidden_effect = {
-				every_owned_province = {
-					limit = {
-						isValidProv = yes
-						is_core = MXI
-					}
-					cede_province = MXI
-				}
-			}
-			create_subject = {
-				who = MXI
-				subject_type = warlord
-			}
-			log = "FE-Red Turbans:[GetYear]:[Root.GetName]:released Urianqad as warlord:red_turban.6"
-			MXI = {
-				hidden_effect = { steppe_effect = yes }
-				define_ruler = {
-					name = "Naghacu"
-					dynasty = "Jalayirid"
-					culture = uriankhai
-					mil = 4
-					adm = 2
-					dip = 3
-					age = 55
-				}
-				hidden_effect = {
-					change_primary_culture = uriankhai
-					if = {
-						limit = {
-							NOT = { has_country_flag = POP_Init }
-						}
-						country_event = { id = Init.1 }
-					}
-				}
-				Effect_set_capital = { target=3259 }
-				hidden_effect = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-				}
-			}
-			if = {
-				limit = {
-					CSE = { is_subject_of = YUA }
-				}
-				CSE = { country_event = { id = red_turban.15 } }
-			}
-		}
+		switch_tag = MXI
 	}
 }
+#### Yuan dissolves ####
 
 country_event = {
-	id = red_turban.42
+	id = red_turban.7
 	title = "red_turban.7.t"
 	desc = "red_turban.7.d"
 	picture = SIEGE_eventPicture
+	major = yes
 	
 	is_triggered_only = yes
 	
-	trigger = {
-		tag = YUA
-		NOT = { num_of_cities = 50 }
-		OR = {
-			MXI = {
-				exists = yes
-				NOT = { is_subject_of = YUA }
-			}
-			NOT = { owns = 3273 } # Kharkhorum
-			is_subject = yes
-		}
-		OR = {
-			is_subject = no
-			overlord = {
-				NOT = { tag = CHG }
-				NOT = { tag = MGH }
-				NOT = { tag = WHI }
-				NOT = { tag = BLU }
-				NOT = { tag = GOL }
-				NOT = { tag = CHU }
-				NOT = { tag = TIM }
-				NOT = { tag = GGK }
-			}
-		}
-		NOT = { war_with = TIM }
-		NOT = { war_with = GGK }
-	}
-	
 	immediate = {
 		hidden_effect = {
-			set_global_flag = YUA_Cleanup
 			every_province = {
 				limit = {
-					isValidProv = yes
-					is_core = YUA
+					owned_by = YUA
 				}
-				remove_core = YUA
-			}
-			every_province = {
-				limit = {
-					isValidProv = yes
-					province_group = khalka_group
-					culture = mongol
-				}
-				change_culture = khalka
-				add_core = KHA
-			}
-			every_province = {
-				limit = {
-					isValidProv = yes
-					province_group = tumed_group
-					culture = mongol
-				}
-				change_culture = tumed
-				add_core = TMD
-			}
-			3274 = {
-				change_culture = tumed
-			}
-			every_province = {
-				limit = {
-					isValidProv = yes
-					province_group = chakhar_group
-					culture = mongol
-				}
-				change_culture = chahar
-				add_core = CHH
-			}
-			every_province = {
-				limit = {
-					isValidProv = yes
-					OR = {
-						culture = buryat
-						culture = khamnigan
-					}
-				}
-				add_core = BRT
-			}
-			MYR = {
-				every_owned_province = {
-					limit = {
-						isValidProv = yes
-						culture = mongol
-					}
-					change_culture = daur
-					add_core = MYR
-				}
-			}
-			every_province = {
-				limit = {
-					isValidProv = yes
-					culture = mongol
-					OR = {
-						area = xinhai_area 
-						area = nen_area
-						owned_by = MXI
-					}
-				}
-				change_culture = uriankhai
-				add_core = MXI
-			}
-			random_list = {
-				34 = {
-					715 = {
-						add_core = KHA
-						change_culture = khalka
-					}
-					3272 = {
-						add_core = KHA
-						change_culture = khalka
-					}
-				}
-				33 = {
-					715 = {
-						add_core = OIR
-						change_culture = oirats
-					}
-					3272 = {
-						add_core = OIR
-						change_culture = oirats
-					}
-				}
-				33 = {
-					715 = {
-						add_core = TMD
-						change_culture = tumed
-					}
-					3272 = {
-						add_core = TMD
-						change_culture = tumed
-					}
-				}
-			}
-			2743 = {
-				add_core = HMI
-			}
-			2119 = {
-				add_core = HMI
-			}
-			3213 = {
-				add_core = HMI
-			}
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					culture_group = chinese_group
-				}
-				random_country = {
-					limit = {
-						isValidCountry = yes
-						any_owned_province = {
-							isValidProv = yes
-							region = hebei_region
-						}
-						culture_group = chinese_group
-					}
-					PREV = { cede_province = PREV }
-				}
+				cede_province = KHA
 			}
 		}
 	}
 	
 	option = {
 		name = "red_turban.7a"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide among the Khalkha:red_turban.7"
-		release = TMD
-		hidden_effect = { TMD = { steppe_effect = yes } }
-		release = CHH
-		hidden_effect = { CHH = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = BRT }
-			}
-			release = BRT
-			hidden_effect = {
-				BRT = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = BRT
-				}
-				cede_province = BRT
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = OIR }
-			}
-			release = OIR
-			hidden_effect = {
-				OIR = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = OIR
-				}
-				cede_province = OIR
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = MXI }
-			}
-			release = MXI
-			hidden_effect = { MXI = { steppe_effect = yes } }
-			hidden_effect = {
-				MXI = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = MXI
-				}
-				cede_province = MXI
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = HMI }
-			}
-			release = HMI
-			hidden_effect = {
-				HMI = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [KHA.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=KHA }
-		change_primary_culture = khalka
-		release_all_subjects = yes
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				culture = mongol
-			}
-			change_culture = khalka
-		}
 		ai_chance = { 
-			factor = 10
+			factor = 100
 		}
+		custom_tooltip = red_turban.7atooltip
+		add_prestige = 10
 	}
 	option = {
 		name = "red_turban.7b"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide among the Chakhar:red_turban.7"
-		release = TMD
-		hidden_effect = { TMD = { steppe_effect = yes } }
-		release = KHA
-		hidden_effect = { KHA = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = BRT }
-			}
-			release = BRT
-			hidden_effect = {
-				BRT = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
+		trigger = {
+			ai = no
+			OR = {
+				exists = TMD
+				exists = ORD
+				exists = SUD
+				exists = HMI
 			}
 		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = BRT
-				}
-				cede_province = BRT
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = OIR }
-			}
-			release = OIR
-			hidden_effect = {
-				OIR = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = OIR
-				}
-				cede_province = OIR
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = MXI }
-			}
-			release = MXI
-			hidden_effect = { MXI = { steppe_effect = yes } }
-			hidden_effect = {
-				MXI = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = MXI
-				}
-				cede_province = MXI
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = HMI }
-			}
-			release = HMI
-			hidden_effect = {
-				HMI = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [CHH.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=CHH }
-		change_primary_culture = chahar
-		release_all_subjects = yes
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				culture = mongol
-			}
-			change_culture = chahar
+		custom_tooltip = red_turban.7btooltip
+		country_event = {
+			id = red_turban.37
 		}
 		ai_chance = { 
-			factor = 10
+			factor = 0
 		}
 	}
 	option = {
 		name = "red_turban.7c"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide among the Tumed:red_turban.7"
-		release = KHA
-		hidden_effect = { KHA = { steppe_effect = yes } }
-		release = CHH
-		hidden_effect = { CHH = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = BRT }
-			}
-			release = BRT
-			hidden_effect = {
-				BRT = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
+		trigger = {
+			ai = no
+			OR = {
+				exists = KHN
+				exists = NAI
+				exists = ONN
+				exists = MXI
 			}
 		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = BRT
-				}
-				cede_province = BRT
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = OIR }
-			}
-			release = OIR
-			hidden_effect = {
-				OIR = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = OIR
-				}
-				cede_province = OIR
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = MXI }
-			}
-			release = MXI
-			hidden_effect = { MXI = { steppe_effect = yes } }
-			hidden_effect = {
-				MXI = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = MXI
-				}
-				cede_province = MXI
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = HMI }
-			}
-			release = HMI
-			hidden_effect = {
-				HMI = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [TMD.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=TMD }
-		change_primary_culture = tumed
-		release_all_subjects = yes
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				culture = mongol
-			}
-			change_culture = tumed
+		custom_tooltip = red_turban.7ctooltip
+		country_event = {
+			id = red_turban.38
 		}
 		ai_chance = { 
-			factor = 10
+			factor = 0
 		}
 	}
 	option = {
 		name = "red_turban.7d"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide among the Oirad:red_turban.7"
 		trigger = {
-			NOT = { exists = OIR }
-		}
-		release = KHA
-		hidden_effect = { KHA = { steppe_effect = yes } }
-		release = CHH
-		hidden_effect = { CHH = { steppe_effect = yes } }
-		release = TMD
-		hidden_effect = { TMD = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = BRT }
-			}
-			release = BRT
-			hidden_effect = {
-				BRT = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
+			ai = no
+			OR = {
+				exists = JHA
+				exists = JYE
+				exists = JHI
+				exists = JLA
 			}
 		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = BRT
-				}
-				cede_province = BRT
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = MXI }
-			}
-			release = MXI
-			hidden_effect = { MXI = { steppe_effect = yes } }
-			hidden_effect = {
-				MXI = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = MXI
-				}
-				cede_province = MXI
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [OIR.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=OIR }
-		change_primary_culture = oirats
-		release_all_subjects = yes
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				culture = mongol
-			}
-			change_culture = oirats
+		custom_tooltip = red_turban.7dtooltip
+		country_event = {
+			id = red_turban.39
 		}
 		ai_chance = { 
-			factor = 10
+			factor = 0
 		}
 	}
 	option = {
 		name = "red_turban.7e"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide among the Buryaad:red_turban.7"
 		trigger = {
-			NOT = { exists = BRT }
-		}
-		release = KHA
-		hidden_effect = { KHA = { steppe_effect = yes } }
-		release = CHH
-		hidden_effect = { CHH = { steppe_effect = yes } }
-		release = TMD
-		hidden_effect = { TMD = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = OIR }
-			}
-			release = OIR
-			hidden_effect = {
-				OIR = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
+			ai = no
+			OR = {
+				exists = JAL
+				exists = BRN
+				exists = GLS
+				exists = KHR
+				exists = DRB
 			}
 		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = OIR
-				}
-				cede_province = OIR
-			}
+		custom_tooltip = red_turban.7etooltip
+		country_event = {
+			id = red_turban.40
 		}
-		if = {
-			limit = {
-				NOT = { exists = MXI }
-			}
-			release = MXI
-			hidden_effect = { MXI = { steppe_effect = yes } }
-			hidden_effect = {
-				MXI = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = MXI
-				}
-				cede_province = MXI
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = HMI }
-			}
-			release = HMI
-			hidden_effect = {
-				HMI = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [BRT.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=BRT }
-		change_primary_culture = buryat
-		release_all_subjects = yes
 		ai_chance = { 
-			factor = 10
+			factor = 0
 		}
 	}
 	option = {
 		name = "red_turban.7f"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide among the Uriankhad:red_turban.7"
 		trigger = {
-			NOT = { exists = MXI }
-		}
-		release = KHA
-		hidden_effect = { KHA = { steppe_effect = yes } }
-		release = CHH
-		hidden_effect = { CHH = { steppe_effect = yes } }
-		release = TMD
-		hidden_effect = { TMD = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = OIR }
-			}
-			release = OIR
-			hidden_effect = {
-				OIR = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
+			ai = no
+			OR = {
+				exists = MYR
+				exists = BGA
+				exists = ORQ
+				exists = BRT
 			}
 		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = OIR
-				}
-				cede_province = OIR
-			}
+		custom_tooltip = red_turban.7ftooltip
+		country_event = {
+			id = red_turban.41
 		}
-		if = {
-			limit = {
-				NOT = { exists = BRT }
-			}
-			release = BRT
-			hidden_effect = {
-				BRT = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = BRT
-				}
-				cede_province = BRT
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = HMI }
-			}
-			release = HMI
-			hidden_effect = {
-				HMI = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [MXI.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=MXI }
-		change_primary_culture = uriankhai
-		release_all_subjects = yes
 		ai_chance = { 
-			factor = 10
+			factor = 0
 		}
 	}
 	option = {
 		name = "red_turban.7g"
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:Empire dissolved, hide in Kara Del:red_turban.7"
 		trigger = {
-			NOT = { exists = HMI }
+			ai = no
+			exists = OIR
 		}
-		release = KHA
-		hidden_effect = { KHA = { steppe_effect = yes } }
-		release = CHH
-		hidden_effect = { CHH = { steppe_effect = yes } }
-		release = TMD
-		hidden_effect = { TMD = { steppe_effect = yes } }
-		if = {
-			limit = {
-				NOT = { exists = OIR }
-			}
-			release = OIR
-			hidden_effect = {
-				OIR = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = OIR
-				}
-				cede_province = OIR
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = BRT }
-			}
-			release = BRT
-			hidden_effect = {
-				BRT = {
-					steppe_effect = yes
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = BRT
-				}
-				cede_province = BRT
-			}
-		}
-		if = {
-			limit = {
-				NOT = { exists = MXI }
-			}
-			release = MXI
-			hidden_effect = { MXI = { steppe_effect = yes } }
-			hidden_effect = {
-				MXI = {
-					if = {
-						limit = {
-							exists = MJZ
-							MJZ = { ai = yes }
-						}
-						add_truce_with = MJZ
-					}
-					if = {
-						limit = {
-							exists = MWK
-							MWK = { ai = yes }
-						}
-						add_truce_with = MWK
-					}
-					if = {
-						limit = {
-							exists = MHR
-							MHR = { ai = yes }
-						}
-						add_truce_with = MHR
-					}
-					if = {
-						limit = {
-							exists = MUD
-							MUD = { ai = yes }
-						}
-						add_truce_with = MUD
-					}
-					if = {
-						limit = {
-							exists = MNA
-							MNA = { ai = yes }
-						}
-						add_truce_with = MNA
-					}
-					if = {
-						limit = {
-							exists = MHX
-							MHX = { ai = yes }
-						}
-						add_truce_with = MHX
-					}
-					Reset_Religion_to_Capital = yes
-					clr_country_flag = POP_Init
-				}
-			}
-		}
-		else = {
-			every_owned_province = {
-				limit = {
-					isValidProv = yes
-					is_core = MXI
-				}
-				cede_province = MXI
-			}
-		}
-		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:changed into [HMI.GetName]:red_turban.7"
-		ChangeTagEffect = { scope=HMI }
-		change_primary_culture = chaghatai
-		release_all_subjects = yes
+		custom_tooltip = red_turban.7gtooltip
+		switch_tag = OIR
 		ai_chance = { 
 			factor = 0
 		}
 	}
 }
+
 ### Uriankhai surrender
 country_event = {
 	id = red_turban.16
@@ -1286,6 +262,18 @@ country_event = {
 	
 	fire_only_once = yes
 	is_triggered_only = yes
+
+	immediate = {
+		MXI = {
+			every_subject_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				grant_independence = yes
+			}
+			remove_country_modifier = Northern_Yuan_mod
+		}
+	}
 	
 	option = { #Make them our client state
 		name = "red_turban.16a"
@@ -1294,7 +282,7 @@ country_event = {
 		}
 		create_subject = {
 			who = MXI
-			subject_type = close_tributary_state
+			subject_type = commission
 		}
 		MXI = { country_event = { id = red_turban.17 } }
 		every_country = {
@@ -1305,7 +293,7 @@ country_event = {
 			white_peace = MXI
 		}
 		ai_chance = {
-			factor = 10
+			factor = 0.05
 		}
 	}
 	option = { #Continue fight
@@ -1320,133 +308,61 @@ country_event = {
 		hidden_effect = {
 			white_peace = MXI
 		}
-		create_subject = {
-			who = MXI
-			subject_type = close_tributary_state
-		}
-		if = {
-			limit = {
-				OR = {
-					liaoning_area = {
-						owned_by = PREV
+		liaoning_area = {
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = { is_core = ROOT }
 					}
-					3241 = {
-						owned_by = PREV
-					}
-					4031 = {
-						owned_by = PREV
-					}
-					3258 = {
-						owned_by = PREV
-					}
-					4038 = {
-						owned_by = PREV
-					}
-					2248 = {
-						owned_by = PREV
-					}
-					3240 = {
-						owned_by = PREV
-					}
-					706 = {
-						owned_by = PREV
-					}
-				}
-			}
-			liaoning_area = {
-				hidden_effect = {
-					if = {
-						limit = {
-							NOT = { is_core = ROOT }
-						}
-						add_core = ROOT
-					}
-					if = {
-						limit = {
-							culture = uriankhai
-						}
-						change_culture = jurcen
-					}
+					add_core = ROOT
 				}
 				if = {
 					limit = {
-						owned_by = MXI
+						culture = uriankhai
 					}
-					cede_province = ROOT
+					change_culture = hulun
 				}
 			}
-		}
-		else_if = {
-			limit = {
-				any_known_country = {
-					OR = {
-						liaoning_area = {
-							owned_by = PREV
-						}
-						706 = {
-							owned_by = PREV
-						}
-					}
-				}
-			}
-			random_known_country = {
+			if = {
 				limit = {
-					OR = {
-						liaoning_area = {
-							owned_by = PREV
-						}
-						706 = {
-							owned_by = PREV
-						}
-					}
+					owned_by = MXI
 				}
-				liaoning_area = {
-					hidden_effect = {
-						if = {
-							limit = {
-								NOT = { is_core = PREV }
-							}
-							add_core = PREV
-						}
-						if = {
-							limit = {
-								culture = uriankhai
-							}
-							change_culture = jurcen
-						}
-					}
-					if = {
-						limit = {
-							owned_by = MXI
-						}
-						cede_province = PREV
-					}
-				}
+				cede_province = ROOT
 			}
 		}
-		else = {
-			liaoning_area = {
-				hidden_effect = {
-					if = {
-						limit = {
-							NOT = { is_core = ROOT }
-						}
-						add_core = ROOT
+		dalian_area = {
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = { is_core = ROOT }
 					}
-					if = {
-						limit = {
-							culture = uriankhai
-						}
-						change_culture = jurcen
-					}
+					add_core = ROOT
 				}
 				if = {
 					limit = {
-						owned_by = MXI
+						culture = uriankhai
 					}
-					cede_province = ROOT
+					change_culture = hulun
 				}
 			}
+			if = {
+				limit = {
+					owned_by = MXI
+				}
+				cede_province = ROOT
+			}
+		}
+		731 = {
+			change_culture = hulun
+		}
+		4758 = {
+			change_culture = hulun
+		}
+		3259 = {
+			change_culture = baarin
+		}
+		4688 = {
+			change_culture = gorlos
 		}
 		if = {
 			limit = {
@@ -1467,449 +383,6 @@ country_event = {
 				}
 			}
 		}
-		hidden_effect = {
-			donggye_area = {
-				limit = {
-					culture = uriankhai
-				}
-				change_culture = jurcen
-			}
-			korea_region = {
-				remove_core = MXI
-			}
-			every_province = {
-				limit = {
-					isValidProv = yes
-					culture = mongol
-					OR = {
-						area = xinhai_area
-						 area = nen_area
-						owned_by = MXI
-					}
-				}
-				change_culture = uriankhai
-				add_core = MXI
-			}
-		}
-		if = {
-			limit = {
-				NOT = {
-					calc_true_if = {
-						all_country = {
-							exists = yes
-							culture_group = jurchen_group
-						}
-						amount = 6
-					}
-				}
-			}
-			if = {
-				limit = {
-					NOT = { exists = MJZ }
-				}
-				hidden_effect = {
-					east_manchuria_region = {
-						remove_core = MJZ
-					}
-					west_manchuria_region = {
-						remove_core = MJZ
-					}
-				}
-				MXI = {
-					jianzhou_group = {
-						limit = {
-							owned_by = PREV
-						}
-						remove_core = MXI
-						add_core = MJZ
-						cede_province = MJZ
-					}
-				}
-				MJZ = {
-					change_primary_culture = jurcen
-				}
-				create_subject = {
-					subject_type = close_tributary_state
-					subject = MJZ
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { exists = MWK }
-				}
-				hidden_effect = {
-					east_manchuria_region = {
-						remove_core = MWK
-					}
-					west_manchuria_region = {
-						remove_core = MWK
-					}
-				}
-				MXI = {
-					jianzhou_group = {
-						limit = {
-							owned_by = PREV
-						}
-						remove_core = MXI
-						add_core = MWK
-						cede_province = MWK
-					}
-				}
-				MWK = {
-					change_primary_culture = jurcen
-				}
-				create_subject = {
-					subject_type = close_tributary_state
-					subject = MWK
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { exists = MHR }
-				}
-				hidden_effect = {
-					east_manchuria_region = {
-						remove_core = MHR
-					}
-					west_manchuria_region = {
-						remove_core = MHR
-					}
-				}
-				MXI = {
-					jianzhou_group = {
-						limit = {
-							owned_by = PREV
-						}
-						remove_core = MXI
-						add_core = MHR
-						cede_province = MHR
-					}
-				}
-				MHR = {
-					change_primary_culture = jurcen
-				}
-				create_subject = {
-					subject_type = close_tributary_state
-					subject = MHR
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { exists = MUD }
-				}
-				hidden_effect = {
-					east_manchuria_region = {
-						remove_core = MUD
-					}
-					west_manchuria_region = {
-						remove_core = MUD
-					}
-				}
-				MXI = {
-					jianzhou_group = {
-						limit = {
-							owned_by = PREV
-						}
-						remove_core = MXI
-						add_core = MUD
-						cede_province = MUD
-					}
-				}
-				MUD = {
-					change_primary_culture = jurcen
-				}
-				create_subject = {
-					subject_type = close_tributary_state
-					subject = MUD
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { exists = MNA }
-				}
-				hidden_effect = {
-					east_manchuria_region = {
-						remove_core = MNA
-					}
-					west_manchuria_region = {
-						remove_core = MNA
-					}
-				}
-				MXI = {
-					jianzhou_group = {
-						limit = {
-							owned_by = PREV
-						}
-						remove_core = MXI
-						add_core = MNA
-						cede_province = MNA
-					}
-				}
-				MNA = {
-					change_primary_culture = jurcen
-				}
-				create_subject = {
-					subject_type = close_tributary_state
-					subject = MNA
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { exists = MHX }
-				}
-				hidden_effect = {
-					east_manchuria_region = {
-						remove_core = MHX
-					}
-					west_manchuria_region = {
-						remove_core = MHX
-					}
-				}
-				MXI = {
-					jianzhou_group = {
-						limit = {
-							owned_by = PREV
-						}
-						remove_core = MXI
-						add_core = MHX
-						cede_province = MHX
-					}
-				}
-				MHX = {
-					change_primary_culture = jurcen
-				}
-				create_subject = {
-					subject_type = close_tributary_state
-					subject = MHX
-				}
-			}
-			if = {
-				limit = {
-					NOT = {
-						calc_true_if = {
-							all_country = {
-								exists = yes
-								culture_group = jurchen_group
-							}
-							amount = 6
-						}
-					}
-				}
-				if = {
-					limit = {
-						NOT = { exists = MJZ }
-					}
-					hidden_effect = {
-						east_manchuria_region = {
-							remove_core = MJZ
-						}
-						west_manchuria_region = {
-							remove_core = MJZ
-						}
-					}
-					MXI = {
-						haixi_group = {
-							limit = {
-								owned_by = PREV
-							}
-							remove_core = MXI
-							add_core = MJZ
-							cede_province = MJZ
-						}
-					}
-					MJZ = {
-						change_primary_culture = hulun
-					}
-					create_subject = {
-						subject_type = close_tributary_state
-						subject = MJZ
-					}
-				}
-				else_if = {
-					limit = {
-						NOT = { exists = MWK }
-					}
-					hidden_effect = {
-						east_manchuria_region = {
-							remove_core = MWK
-						}
-						west_manchuria_region = {
-							remove_core = MWK
-						}
-					}
-					MXI = {
-						haixi_group = {
-							limit = {
-								owned_by = PREV
-							}
-							remove_core = MXI
-							add_core = MWK
-							cede_province = MWK
-						}
-					}
-					MWK = {
-						change_primary_culture = hulun
-					}
-					create_subject = {
-						subject_type = close_tributary_state
-						subject = MWK
-					}
-				}
-				else_if = {
-					limit = {
-						NOT = { exists = MHR }
-					}
-					hidden_effect = {
-						east_manchuria_region = {
-							remove_core = MHR
-						}
-						west_manchuria_region = {
-							remove_core = MHR
-						}
-					}
-					MXI = {
-						haixi_group = {
-							limit = {
-								owned_by = PREV
-							}
-							remove_core = MXI
-							add_core = MHR
-							cede_province = MHR
-						}
-					}
-					MHR = {
-						change_primary_culture = hulun
-					}
-					create_subject = {
-						subject_type = close_tributary_state
-						subject = MHR
-					}
-				}
-				else_if = {
-					limit = {
-						NOT = { exists = MUD }
-					}
-					hidden_effect = {
-						east_manchuria_region = {
-							remove_core = MUD
-						}
-						west_manchuria_region = {
-							remove_core = MUD
-						}
-					}
-					MXI = {
-						haixi_group = {
-							limit = {
-								owned_by = PREV
-							}
-							remove_core = MXI
-							add_core = MUD
-							cede_province = MUD
-						}
-					}
-					MUD = {
-						change_primary_culture = hulun
-					}
-					create_subject = {
-						subject_type = close_tributary_state
-						subject = MUD
-					}
-				}
-				else_if = {
-					limit = {
-						NOT = { exists = MNA }
-					}
-					hidden_effect = {
-						east_manchuria_region = {
-							remove_core = MNA
-						}
-						west_manchuria_region = {
-							remove_core = MNA
-						}
-					}
-					MXI = {
-						haixi_group = {
-							limit = {
-								owned_by = PREV
-							}
-							remove_core = MXI
-							add_core = MNA
-							cede_province = MNA
-						}
-					}
-					MNA = {
-						change_primary_culture = hulun
-					}
-					create_subject = {
-						subject_type = close_tributary_state
-						subject = MNA
-					}
-				}
-				else_if = {
-					limit = {
-						NOT = { exists = MHX }
-					}
-					hidden_effect = {
-						east_manchuria_region = {
-							remove_core = MHX
-						}
-						west_manchuria_region = {
-							remove_core = MHX
-						}
-					}
-					MXI = {
-						haixi_group = {
-							limit = {
-								owned_by = PREV
-							}
-							remove_core = MXI
-							add_core = MHX
-							cede_province = MHX
-						}
-					}
-					MHX = {
-						change_primary_culture = hulun
-					}
-					create_subject = {
-						subject_type = close_tributary_state
-						subject = MHX
-					}
-				}
-			}
-			else = {
-				random_country = {
-					limit = {
-						isValidCountry = yes
-						culture_group = jurchen_group
-						NOT = { capital_scope = { province_group = jianzhou_group } }
-					}
-					country_event = { id = red_turban.18 }
-				}
-			}
-		}
-		else = {
-			random_country = {
-				limit = {
-					isValidCountry = yes
-					culture_group = jurchen_group
-				}
-				country_event = { id = red_turban.18 }
-			}
-		}
-		every_known_country = {
-			limit = {
-				isValidCountry = yes
-				accepted_culture = uriankhai
-				NOT = {
-					any_owned_province = {
-						isValidProv = yes
-						culture = uriankhai
-					}
-				}
-			}
-			remove_accepted_culture = uriankhai
-			add_accepted_culture = jurcen
-		}
 		every_country = {
 			limit = {
 				isValidCountry = yes
@@ -1917,515 +390,1356 @@ country_event = {
 			}
 			white_peace = MXI
 		}
+		hidden_effect = {
+			if = {
+				limit = {
+					MXI = { ai = yes }
+				}
+				every_province = {
+					limit = {
+						owned_by = MXI
+					}
+					cede_province = PREV
+				}
+				release = MXI
+			}
+		}
+		MXI = {
+			hidden_effect = {
+				every_owned_province = {
+					limit = {
+						NOT = { culture = uriankhai }
+					}
+					remove_core = MXI
+				}
+				Effect_set_capital = { target=3259 }
+				if = {
+					limit = {
+						owns = 4693
+					}
+					4693 = {
+						remove_core = GLS
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = { exists = JOL }
+					any_owned_province = { is_core = JOL }
+				}
+				release = JOL
+			}
+			if = {
+				limit = {
+					NOT = { exists = JHA }
+					any_owned_province = { is_core = JHA }
+				}
+				release = JHA
+				hidden_effect = { JHA = { jurchen_effect = yes } }
+			}
+			if = {
+				limit = {
+					NOT = { exists = JHI }
+					any_owned_province = { is_core = JHI }
+				}
+				release = JHI
+				hidden_effect = { JHI = { jurchen_effect = yes } }
+			}
+			if = {
+				limit = {
+					NOT = { exists = JLA }
+					any_owned_province = { is_core = JLA }
+				}
+				release = JLA
+				hidden_effect = { JLA = { jurchen_effect = yes } }
+			}
+			if = {
+				limit = {
+					NOT = { exists = JYE }
+					any_owned_province = { is_core = JYE }
+				}
+				release = JYE
+				hidden_effect = { JYE = { jurchen_effect = yes } }
+			}
+			if = {
+				limit = {
+					NOT = { exists = JTU }
+					any_owned_province = { is_core = JTU }
+				}
+				release = JTU
+			}
+			if = {
+				limit = {
+					NOT = { exists = JOD }
+					any_owned_province = { is_core = JOD }
+				}
+				release = JOD
+			}
+			if = {
+				limit = {
+					NOT = { exists = JHO }
+					any_owned_province = { is_core = JHO }
+				}
+				release = JHO
+			}
+			if = {
+				limit = {
+					NOT = { exists = JHU }
+					any_owned_province = { is_core = JHU }
+				}
+				release = JHU
+			}
+			if = {
+				limit = {
+					NOT = { exists = MJZ }
+					any_owned_province = { is_core = MJZ }
+				}
+				release = MJZ
+			}
+			if = {
+				limit = {
+					NOT = { exists = MWK }
+					any_owned_province = { is_core = MWK }
+				}
+				release = MWK
+			}
+			if = {
+				limit = {
+					NOT = { exists = MHX }
+					any_owned_province = { is_core = MHX }
+				}
+				release = MHX
+			}
+			if = {
+				limit = {
+					NOT = { exists = MUD }
+					any_owned_province = { is_core = MUD }
+				}
+				release = MUD
+			}
+			if = {
+				limit = {
+					NOT = { exists = MHR }
+					any_owned_province = { is_core = MHR }
+				}
+				release = MHR
+			}
+			Stab_Subtract1 = yes
+			add_legitimacy = -15
+			add_prestige = -15
+			hidden_effect = {
+				4693 = {
+					add_core = GLS
+				}
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						exists = YUA
+					}
+					every_owned_province = {
+						limit = {
+							NOT = { culture = uriankhai }
+							OR = {
+								culture_group = altaic
+								culture = oroqen
+							}
+						}
+						cede_province = YUA
+					}
+				}
+				else = {
+					if = {
+						limit = {
+							NOT = { exists = TMD }
+							any_owned_province = { is_core = TMD }
+						}
+						release = TMD
+						hidden_effect = {
+							TMD = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = ORD }
+							any_owned_province = { is_core = ORD }
+						}
+						release = ORD
+						hidden_effect = {
+							ORD = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = SUD }
+							any_owned_province = { is_core = SUD }
+						}
+						release = SUD
+						hidden_effect = {
+							SUD = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = KHN }
+							any_owned_province = { is_core = KHN }
+						}
+						release = KHN
+						hidden_effect = {
+							KHN = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = ONN }
+							any_owned_province = { is_core = ONN }
+						}
+						release = ONN
+						hidden_effect = {
+							ONN = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = NAI }
+							any_owned_province = { is_core = NAI }
+						}
+						release = NAI
+						hidden_effect = {
+							NAI = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = BRN }
+							any_owned_province = { is_core = BRN }
+						}
+						release = BRN
+						hidden_effect = {
+							BRN = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JAL }
+							any_owned_province = { is_core = JAL }
+						}
+						release = JAL
+						hidden_effect = {
+							JAL = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = KHR }
+							any_owned_province = { is_core = KHR }
+						}
+						release = KHR
+						hidden_effect = {
+							KHR = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = GLS }
+							any_owned_province = { is_core = GLS }
+						}
+						release = GLS
+						hidden_effect = {
+							GLS = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = DRB }
+							any_owned_province = { is_core = DRB }
+						}
+						release = DRB
+						hidden_effect = {
+							DRB = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = BGA }
+							any_owned_province = { is_core = BGA }
+						}
+						release = BGA
+						hidden_effect = {
+							BGA = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = BRT }
+							any_owned_province = { is_core = BRT }
+						}
+						release = BRT
+						hidden_effect = {
+							BRT = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = MYR }
+							any_owned_province = { is_core = MYR }
+						}
+						release = MYR
+						hidden_effect = {
+							MYR = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = ORQ }
+							any_owned_province = { is_core = ORQ }
+						}
+						release = ORQ
+						hidden_effect = {
+							ORQ = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = OIR }
+							any_owned_province = { is_core = OIR }
+						}
+						release = OIR
+						hidden_effect = {
+							OIR = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = HMI }
+							any_owned_province = { is_core = HMI }
+						}
+						release = HMI
+						hidden_effect = {
+							HMI = {
+								steppe_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JOL }
+							any_owned_province = { is_core = JOL }
+						}
+						release = JOL
+						hidden_effect = {
+							JOL = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JHA }
+							any_owned_province = { is_core = JHA }
+						}
+						release = JHA
+						hidden_effect = {
+							JHA = {
+								jurchen_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JHI }
+							any_owned_province = { is_core = JHI }
+						}
+						release = JHI
+						hidden_effect = {
+							JHI = {
+								jurchen_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JLA }
+							any_owned_province = { is_core = JLA }
+						}
+						release = JLA
+						hidden_effect = {
+							JLA = {
+								jurchen_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JYE }
+							any_owned_province = { is_core = JYE }
+						}
+						release = JYE
+						hidden_effect = {
+							JYE = {
+								jurchen_effect = yes
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JTU }
+							any_owned_province = { is_core = JTU }
+						}
+						release = JTU
+						hidden_effect = {
+							JTU = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JOD }
+							any_owned_province = { is_core = JOD }
+						}
+						release = JOD
+						hidden_effect = {
+							JOD = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JHO }
+							any_owned_province = { is_core = JHO }
+						}
+						release = JHO
+						hidden_effect = {
+							JHO = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = JHU }
+							any_owned_province = { is_core = JHU }
+						}
+						release = JHU
+						hidden_effect = {
+							JHU = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = MJZ }
+							any_owned_province = { is_core = MJZ }
+						}
+						release = MJZ
+						hidden_effect = {
+							MJZ = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = MWK }
+							any_owned_province = { is_core = MWK }
+						}
+						release = MWK
+						hidden_effect = {
+							MWK = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = MHX }
+							any_owned_province = { is_core = MHX }
+						}
+						release = MHX
+						hidden_effect = {
+							MHX = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = MUD }
+							any_owned_province = { is_core = MUD }
+						}
+						release = MUD
+						hidden_effect = {
+							MUD = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					if = {
+						limit = {
+							NOT = { exists = MHR }
+							any_owned_province = { is_core = MHR }
+						}
+						release = MHR
+						hidden_effect = {
+							MHR = {
+								if = {
+									limit = {
+										exists = yes
+									}
+									country_event = { id = Init.2 }
+								}
+							}
+						}
+					}
+					KHA = {
+						every_country = {
+							limit = {
+								OR = {
+									culture_group = altaic
+									primary_culture = oroqen
+								}
+								NOT = { tag = MGH }
+								NOT = { tag = CHG }
+								NOT = { tag = TIM }
+								NOT = { tag = GGK }
+								is_subject = no
+								OR = {
+									capital_scope = { continent = asia }
+									capital_scope = { continent = north_asia }
+									tag = OIR
+									tag = HMI
+								}
+							}
+							country_event = { id = red_turban.31 days = 1 }
+						}
+					}
+				}
+			}
+		}
+		every_known_country = {
+			limit = {
+				culture_group = jurchen_group
+				NOT = { tag = JOL }
+			}
+			country_event = { id = red_turban.32 days = 15 }
+		}
+		every_known_country = {
+			limit = {
+				culture_group = nivkh_group
+				NOT = { tag = JOL }
+			}
+			country_event = { id = red_turban.32 days = 30 }
+		}
 		ai_chance = {
-			factor = 90
+			factor = 0.95
 		}
 	}
 	after = {
 	}
 }
-
-### Possibility of settlement
+### Demand for submission
 country_event = {
-	id = red_turban.18
-	title = "red_turban.18.t"
-	desc = "red_turban.18.d"
+	id = red_turban.31
+	title = "red_turban.31.t"
+	desc = "red_turban.31.d"
 	picture = SIEGE_eventPicture
 	
 	is_triggered_only = yes
 	
-	option = { #Jianzhou
-		name = "red_turban.18a"
-		trigger = {
-			jianzhou_group = {
-				owned_by = MXI
-			}
-		}
-		MXI = {
-			jianzhou_group = {
-				limit = {
-					owned_by = PREV
-					isValidProv = yes
-				}
-				remove_core = MXI
-				add_core = ROOT
-				cede_province = ROOT
-			}
-		}
-		change_primary_culture = jurcen
-		hidden_effect = {
-			east_manchuria_region = {
-				limit = {
-					NOT = { province_group = jianzhou_group }
-				}
-				remove_core = ROOT
-			}
-			west_manchuria_region = {
-				limit = {
-					NOT = { province_group = jianzhou_group }
-				}
-				remove_core = ROOT
-			}
-		}
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				OR = {
-					province_id = 3256 # Saghalien Ula
-					culture = daur
-				}
-			}
-			cede_province = MYR
-			change_culture = daur
-			add_core = MYR
-		}
-		random_owned_province = {
-			limit = {
-				isValidProv = yes
-				NOT = { province_group = jianzhou_group }
-				any_neighbor_province = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group }
-				}
-			}
-			random_neighbor_province = {
-				limit = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group NOT = { capital_scope = { province_group = haixi_group } } }
-				}
-				owner = { 
-					every_province = {
-						limit = {
-							isValidProv = yes
-							owned_by = ROOT
-							NOT = { is_core = ROOT }
-						}
-						add_core = PREV
-						cede_province = PREV
-					}
-				}
-			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					haixi_group = {
-						owned_by = MXI
-					}
-				}
-				random_country = {
-					limit = {
-						isValidCountry = yes
-						NOT = { tag = ROOT }
-						culture_group = jurchen_group
-					}
-					country_event = { id = red_turban.19 }
-				}
-			}
-		}
-		random_country = {
-			limit = {
-				exists = yes
-				is_emperor_of_china = yes
-			}
-			ROOT = { 
-				if = {
-					limit = {
-						is_subject = yes
-					}
-					grant_independence = yes
-				}
-			}
-			create_subject = {
-				subject_type = close_tributary_state
-				subject = ROOT
-			}
-		}
-		ai_chance = {
+	option = {
+		name = "red_turban.31a" # Submit
+		ai_chance = { 
 			factor = 100
 		}
+		if = {
+			limit = {
+				is_subject = yes
+			}
+			grant_independence = yes
+		}
+		if = {
+			limit = {
+				exists = KHA
+			}
+			KHA = {
+				create_subject = {
+					subject_type = commission
+					subject = PREV
+				}
+			}
+		}
+		Stab_Add1 = yes
+		KHA = {
+			country_event = {
+				id = red_turban.33
+			}
+		}
 	}
-	option = { #Haixi
-		name = "red_turban.18b"
-		trigger = {
-			haixi_group = {
-				owned_by = MXI
-			}
+	option = {
+		name = "red_turban.31b" # nope
+		ai_chance = { 
+			factor = 0
 		}
-		MXI = {
-			haixi_group = {
-				limit = {
-					owned_by = PREV
-					isValidProv = yes
-				}
-				remove_core = MXI
-				add_core = ROOT
-				cede_province = ROOT
-			}
-		}
-		change_primary_culture = hulun
-		hidden_effect = {
-			east_manchuria_region = {
-				limit = {
-					NOT = { province_group = haixi_group }
-				}
-				remove_core = ROOT
-			}
-			west_manchuria_region = {
-				limit = {
-					NOT = { province_group = haixi_group }
-				}
-				remove_core = ROOT
-			}
-		}
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				OR = {
-					province_id = 3256 # Saghalien Ula
-					culture = daur
-				}
-			}
-			cede_province = MYR
-			change_culture = daur
-			add_core = MYR
-		}
-		random_owned_province = {
-			limit = {
-				isValidProv = yes
-				NOT = { province_group = haixi_group }
-				any_neighbor_province = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group }
-				}
-			}
-			random_neighbor_province = {
-				limit = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group NOT = { capital_scope = { province_group = jianzhou_group } } }
-				}
-				owner = { 
-					every_province = {
-						limit = {
-							isValidProv = yes
-							owned_by = ROOT
-							NOT = { is_core = ROOT }
-						}
-						add_core= PREV
-						cede_province = PREV
-					}
-				}
-			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					jianzhou_group = {
-						owned_by = MXI
-					}
-				}
-				random_country = {
-					limit = {
-						isValidCountry = yes
-						NOT = { tag = ROOT }
-						culture_group = jurchen_group
-					}
-					country_event = { id = red_turban.19 }
-				}
-			}
-		}
-		random_country = {
-			limit = {
-				exists = yes
-				is_emperor_of_china = yes
-			}
-			ROOT = { 
-				if = {
-					limit = {
-						is_subject = yes
-					}
-					grant_independence = yes
-				}
-			}
-			create_subject = {
-				subject_type = close_tributary_state
-				subject = ROOT
-			}
-		}
-		ai_chance = {
+		add_prestige = 30
+	}
+}
+### Nurgan
+country_event = {
+	id = red_turban.32
+	title = "red_turban.32.t"
+	desc = "red_turban.32.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.32a" # Submit
+		ai_chance = { 
 			factor = 100
 		}
-	}
-	option = { #No thanks
-		name = "red_turban.18c"
-		trigger = {
-			NOT = { ai = yes }
-		}
-		hidden_effect = {
-			random_country = {
-				limit = {
-					isValidCountry = yes
-					NOT = { tag = ROOT }
-					culture_group = jurchen_group
-				}
-				country_event = { id = red_turban.19 }
+		if = {
+			limit = {
+				is_subject = yes
 			}
+			grant_independence = yes
+		}
+		if = {
+			limit = {
+				exists = FROM
+			}
+			FROM = {
+				create_subject = {
+					subject_type = commission
+					subject = PREV
+				}
+			}
+		}
+		FROM = {
+			country_event = {
+				id = red_turban.34
+			}
+		}
+	}
+	option = {
+		name = "red_turban.32b" # nope
+		ai_chance = { 
+			factor = 0
+		}
+		add_prestige = 30
+	}
+}
+### Yuan
+country_event = {
+	id = red_turban.33
+	title = "red_turban.33.t"
+	desc = "red_turban.33.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.33ab" # yea
+		add_prestige = 2
+	}
+}
+### Nurgan
+country_event = {
+	id = red_turban.34
+	title = "red_turban.34.t"
+	desc = "red_turban.34.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.34ab" # yea
+		add_prestige = 4
+	}
+}
+### Demand for submission
+country_event = {
+	id = red_turban.35
+	title = "red_turban.35.t"
+	desc = "red_turban.35.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.35a" # Submit
+		ai_chance = { 
+			factor = 100
+		}
+		if = {
+			limit = {
+				is_subject = yes
+			}
+			grant_independence = yes
+		}
+		if = {
+			limit = {
+				exists = MXI
+			}
+			MXI = {
+				create_subject = {
+					subject_type = muscovite_tributary_state
+					subject = PREV
+				}
+			}
+		}
+		Stab_Add1 = yes
+		MXI = {
+			country_event = {
+				id = red_turban.36
+			}
+		}
+	}
+	option = {
+		name = "red_turban.35b" # nope
+		ai_chance = { 
+			factor = 0
+		}
+		add_prestige = 30
+	}
+}
+### Nurgan
+country_event = {
+	id = red_turban.36
+	title = "red_turban.36.t"
+	desc = "red_turban.36.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.34ab" # yea
+		add_prestige = 4
+	}
+}
+country_event = {
+	id = red_turban.37
+	title = "red_turban.37.t"
+	desc = "red_turban.37.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.37a"
+		trigger = {
+			ai = no
+			exists = TMD
+		}
+		switch_tag = TMD
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.37b"
+		trigger = {
+			ai = no
+			exists = ORD
+		}
+		switch_tag = ORD
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.37c"
+		trigger = {
+			ai = no
+			exists = SUD
+		}
+		switch_tag = SUD
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.37d"
+		trigger = {
+			ai = no
+			exists = HMI
+		}
+		switch_tag = HMI
+		ai_chance = { 
+			factor = 0
 		}
 	}
 }
-### Copy of above
 country_event = {
-	id = red_turban.19
-	title = "red_turban.18.t"
-	desc = "red_turban.18.d"
+	id = red_turban.38
+	title = "red_turban.38.t"
+	desc = "red_turban.38.d"
 	picture = SIEGE_eventPicture
 	
 	is_triggered_only = yes
 	
-	option = { #Jianzhou
-		name = "red_turban.18a"
+	option = {
+		name = "red_turban.38a"
 		trigger = {
-			jianzhou_group = {
-				owned_by = MXI
+			ai = no
+			exists = MXI
+		}
+		switch_tag = MXI
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.38b"
+		trigger = {
+			ai = no
+			exists = KHN
+		}
+		switch_tag = KHN
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.38c"
+		trigger = {
+			ai = no
+			exists = NAI
+		}
+		switch_tag = NAI
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.38d"
+		trigger = {
+			ai = no
+			exists = ONN
+		}
+		switch_tag = ONN
+		ai_chance = { 
+			factor = 0
+		}
+	}
+}
+country_event = {
+	id = red_turban.39
+	title = "red_turban.39.t"
+	desc = "red_turban.39.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.39a"
+		trigger = {
+			ai = no
+			exists = JHA
+		}
+		switch_tag = JHA
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.39b"
+		trigger = {
+			ai = no
+			exists = JYE
+		}
+		switch_tag = JYE
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.39c"
+		trigger = {
+			ai = no
+			exists = JHI
+		}
+		switch_tag = JHI
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.39d"
+		trigger = {
+			ai = no
+			exists = JLA
+		}
+		switch_tag = JLA
+		ai_chance = { 
+			factor = 0
+		}
+	}
+}
+country_event = {
+	id = red_turban.40
+	title = "red_turban.40.t"
+	desc = "red_turban.40.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.40a"
+		trigger = {
+			ai = no
+			exists = JAL
+		}
+		switch_tag = JAL
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.40b"
+		trigger = {
+			ai = no
+			exists = BRN
+		}
+		switch_tag = BRN
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.40c"
+		trigger = {
+			ai = no
+			exists = GLS
+		}
+		switch_tag = GLS
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.40d"
+		trigger = {
+			ai = no
+			exists = KHR
+		}
+		switch_tag = KHR
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.40e"
+		trigger = {
+			ai = no
+			exists = DRB
+		}
+		switch_tag = DRB
+		ai_chance = { 
+			factor = 0
+		}
+	}
+}
+country_event = {
+	id = red_turban.41
+	title = "red_turban.41.t"
+	desc = "red_turban.41.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "red_turban.41a"
+		trigger = {
+			ai = no
+			exists = MYR
+		}
+		switch_tag = MYR
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.41b"
+		trigger = {
+			ai = no
+			exists = BGA
+		}
+		switch_tag = BGA
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.41c"
+		trigger = {
+			ai = no
+			exists = ORQ
+		}
+		switch_tag = ORQ
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.41d"
+		trigger = {
+			ai = no
+			exists = BRT
+		}
+		switch_tag = BRT
+		ai_chance = { 
+			factor = 0
+		}
+	}
+}
+country_event = {
+	id = red_turban.42
+	title = "red_turban.42.t"
+	desc = "red_turban.42.d"
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = yes
+	hidden = yes
+    fire_only_once = yes
+
+	
+	trigger = {
+		tag = YUA
+		exists = yes
+		has_country_flag = Yuan_Degenerate
+		NOT = { num_of_cities = 60 }
+		OR = {
+			MXI = {
+				exists = yes
+				NOT = { owns = 4035 }
+			}
+			NOT = { controls = 4713 } # Sandu
+			NOT = { controls = 4743 } # Kharkhorum 
+			NOT = { owns = 4743 }
+			NOT = { owns = 4713 }
+			is_subject = yes
+		}
+		OR = {
+			is_subject = no
+			overlord = {
+				NOT = { tag = CHG }
+				NOT = { tag = MGH }
+				NOT = { tag = WHI }
+				NOT = { tag = BLU }
+				NOT = { tag = GOL }
+				NOT = { tag = CHU }
+				NOT = { tag = TIM }
+				NOT = { tag = GGK }
 			}
 		}
-		MXI = {
-			jianzhou_group = {
-				limit = {
-					owned_by = PREV
-					isValidProv = yes
-				}
-				remove_core = MXI
-				add_core = ROOT
-				cede_province = ROOT
-			}
-		}
-		change_primary_culture = jurcen
+		NOT = { war_with = TIM }
+		NOT = { war_with = GGK }
+	}
+
+
+	option = {
 		hidden_effect = {
-			east_manchuria_region = {
-				limit = {
-					NOT = { province_group = jianzhou_group }
-				}
-				remove_core = ROOT
-			}
-			west_manchuria_region = {
-				limit = {
-					NOT = { province_group = jianzhou_group }
-				}
-				remove_core = ROOT
-			}
-		}
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				OR = {
-					province_id = 3256 # Saghalien Ula
-					culture = daur
-				}
-			}
-			cede_province = MYR
-			change_culture = daur
-			add_core = MYR
-		}
-		random_owned_province = {
-			limit = {
-				isValidProv = yes
-				NOT = { province_group = jianzhou_group }
-				any_neighbor_province = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group }
-				}
-			}
-			random_neighbor_province = {
+			every_owned_province = {
 				limit = {
 					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group NOT = { capital_scope = { province_group = haixi_group } } }
-				}
-				owner = { 
-					every_province = {
-						limit = {
-							isValidProv = yes
-							owned_by = ROOT
-							NOT = { is_core = ROOT }
-						}
-						add_core= PREV
-						cede_province = PREV
-					}
-				}
-			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					haixi_group = {
-						owned_by = MXI
+					OR = {
+						culture_group = chinese_group
+						area = dalian_area
 					}
 				}
 				random_country = {
 					limit = {
 						isValidCountry = yes
-						NOT = { tag = ROOT }
-						culture_group = jurchen_group
-					}
-					country_event = { id = red_turban.19 }
-				}
-			}
-		}
-		random_country = {
-			limit = {
-				exists = yes
-				is_emperor_of_china = yes
-			}
-			ROOT = { 
-				if = {
-					limit = {
-						is_subject = yes
-					}
-					grant_independence = yes
-				}
-			}
-			create_subject = {
-				subject_type = close_tributary_state
-				subject = ROOT
-			}
-		}
-		ai_chance = {
-			factor = 100
-		}
-	}
-	option = { #Haixi
-		name = "red_turban.18b"
-		trigger = {
-			haixi_group = {
-				owned_by = MXI
-			}
-		}
-		MXI = {
-			haixi_group = {
-				limit = {
-					owned_by = PREV
-					isValidProv = yes
-				}
-				remove_core = MXI
-				add_core = ROOT
-				cede_province = ROOT
-			}
-		}
-		change_primary_culture = hulun
-		hidden_effect = {
-			east_manchuria_region = {
-				limit = {
-					NOT = { province_group = haixi_group }
-				}
-				remove_core = ROOT
-			}
-			west_manchuria_region = {
-				limit = {
-					NOT = { province_group = haixi_group }
-				}
-				remove_core = ROOT
-			}
-		}
-		every_owned_province = {
-			limit = {
-				isValidProv = yes
-				OR = {
-					province_id = 3256 # Saghalien Ula
-					culture = daur
-				}
-			}
-			cede_province = MYR
-			change_culture = daur
-			add_core = MYR
-		}
-		random_owned_province = {
-			limit = {
-				isValidProv = yes
-				NOT = { province_group = haixi_group }
-				any_neighbor_province = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group }
-				}
-			}
-			random_neighbor_province = {
-				limit = {
-					isValidProv = yes
-					NOT = { owned_by = ROOT }
-					owner = { culture_group = jurchen_group NOT = { capital_scope = { province_group = jianzhou_group } } }
-				}
-				owner = { 
-					every_province = {
-						limit = {
+						any_owned_province = {
 							isValidProv = yes
-							owned_by = ROOT
-							NOT = { is_core = ROOT }
+							region = hebei_region
 						}
-						add_core = PREV
-						cede_province = PREV
+						culture_group = chinese_group
 					}
+					PREV = { cede_province = PREV }
 				}
 			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					jianzhou_group = {
-						owned_by = MXI
-					}
-				}
-				random_country = {
-					limit = {
-						isValidCountry = yes
-						NOT = { tag = ROOT }
-						culture_group = jurchen_group
-					}
-					country_event = { id = red_turban.19 }
-				}
-			}
-		}
-		random_country = {
-			limit = {
-				exists = yes
-				is_emperor_of_china = yes
-			}
-			ROOT = { 
-				if = {
-					limit = {
-						is_subject = yes
-					}
-					grant_independence = yes
-				}
-			}
-			create_subject = {
-				subject_type = close_tributary_state
-				subject = ROOT
-			}
-		}
-		ai_chance = {
-			factor = 100
+			Yuan_DissolveSetup = yes
 		}
 	}
-	option = { #No thanks
-		name = "red_turban.18c"
-		trigger = {
-			NOT = { ai = yes }
+}
+country_event = {
+	id = red_turban.43
+	title = "red_turban.43.t"
+	desc = "red_turban.43.desc"
+	picture = SIEGE_eventPicture
+
+	fire_only_once = yes
+	
+	trigger = {
+		ai = no
+		culture_group = jurchen_group
+		NOT = { has_global_flag = Hulun_Switch }
+		NOT = { OR = { tag = JYE tag = JHA tag = JHI tag = JLA } }
+		OR = {
+			exists = JYE
+			exists = JHA
+			exists = JHI
+			exists = JLA
 		}
-		hidden_effect = {
-			random_country = {
-				limit = {
-					isValidCountry = yes
-					NOT = { tag = ROOT }
-					culture_group = jurchen_group
-				}
-				country_event = { id = red_turban.18 }
-			}
+	}
+
+	mean_time_to_happen = {
+		months = 1
+	}
+
+	immediate = {
+		set_global_flag = Hulun_Switch
+	}
+
+	option = {
+		name = "red_turban.43.a"
+	}
+	option = {
+		name = "red_turban.43.b"
+		trigger = {
+			ai = no
+			exists = JHA
+		}
+		switch_tag = JHA
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.43.c"
+		trigger = {
+			ai = no
+			exists = JYE
+		}
+		switch_tag = JYE
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.43.d"
+		trigger = {
+			ai = no
+			exists = JHI
+		}
+		switch_tag = JHI
+		ai_chance = { 
+			factor = 0
+		}
+	}
+	option = {
+		name = "red_turban.43e"
+		trigger = {
+			ai = no
+			exists = JLA
+		}
+		switch_tag = JLA
+		ai_chance = { 
+			factor = 0
 		}
 	}
 }
