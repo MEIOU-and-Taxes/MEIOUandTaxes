@@ -28,4 +28,4 @@ This mod has been formed by the merger of two major EUIII mods: MEIOU created in
 - Overhauled graphics and map courtesy of EOOQE.
 - New Disease system modelling different strains and spread models
 - Revamped and Reworked Colonial System
-- A unique musical score composed by ciadude2.# MEIOU-DLC
+- A unique musical score composed by ciadude2.
