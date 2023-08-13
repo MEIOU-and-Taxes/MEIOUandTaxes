@@ -1,5 +1,5 @@
 # MEIOU and Taxes v3.0
-*Open Alpha*
+*Under Development*
 
 <img alt="Discord" src="https://img.shields.io/discord/361227452795715584?label=discord&style=flat-square">
 
