@@ -1,3 +1,28 @@
+Courthouse_MinTick = {
+	if = {
+		limit = {
+			check_key = { lhs = Modi_AdminStructureMin value = 1 }
+			NOT = { check_key = { lhs = Infra_Courthouse which = Modi_AdminStructureMin } }
+		}
+		set_key = { lhs = Tmp_0 which = Infra_CourthouseSize }
+		set_key = { lhs = Tmp_1 which = Modi_AdminStructureMin }
+		Infra_GetGoalCourthouse = { inp = Tmp_1 return = Tmp_2 }
+
+		subtract_key = { lhs = Tmp_2 which = Tmp_0 }
+		multiply_key = { lhs = Tmp_2 value = 0.1 } ## 10% of the difference
+		# round off
+		multiply_key = { lhs = Tmp_2 value = 0.001 }
+		multiply_key = { lhs = Tmp_2 value = 1000 }
+		if = { ## min 1 size change
+			limit = {
+				NOT = { check_key = { lhs = Tmp_2 value = 1 } }
+			}
+			set_key = { lhs = Tmp_2 value = 1 }
+		}
+		change_key = { lhs = Infra_CourthouseSize which = Tmp_2 }
+	}
+}
+
 Courthouse_Calc = {
 	set_key = { lhs = Courthouse_Cost value = 0 }
     set_key = { lhs = Courthouse_Tmp4 value = 0 }
@@ -23,7 +48,7 @@ Courthouse_Calc = {
 	}
 }
 
-Courthouse_CalcADM = {
+Courthouse_CalcADM = { #171 #990
 	set_key = { lhs = Courthouse_Tmp6 value = 0 }
 	every_province = {
 		limit = {
@@ -38,12 +63,13 @@ Courthouse_CalcADM = {
 			}
 		}
 		#((1 - (dev / 100 max 100)) * 0.5 + 0.5 * dev * 0.3) )
+		# dev is scaled to 100 from 0-50, to flatten the curve
 		set_key = { lhs = Courthouse_Tmp5 which = Dev_Total }
 		if = { # Simple raw numbers
 			limit = {
-				check_key = { lhs = Courthouse_Tmp5 value = 100 }
+				check_key = { lhs = Courthouse_Tmp5 value = 50 }
 			}
-			set_key = { lhs = Courthouse_Tmp5 value = 100 }
+			set_key = { lhs = Courthouse_Tmp5 value = 50 }
 		}
 		if = { # Simple raw numbers
 			limit = {
@@ -51,13 +77,36 @@ Courthouse_CalcADM = {
 			}
 			set_key = { lhs = Courthouse_Tmp5 value = 1 }
 		}
-		divide_key = { lhs = Courthouse_Tmp5 value = 100 }
+		multiply_key = { lhs = Courthouse_Tmp5 value = 0.02 }
 		set_key = { lhs = Courthouse_Tmp6 value = 1 }
 		subtract_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp5 }
 		multiply_key = { lhs = Courthouse_Tmp6 value = 0.5 }
 		change_key = { lhs = Courthouse_Tmp6 value = 0.5 }
-		multiply_key = { lhs = Courthouse_Tmp6 which = Dev_Total }
-		multiply_key = { lhs = Courthouse_Tmp6 value = 5 } # balancing
+		set_key = { lhs = Courthouse_Tmp4 which = Dev_Total }
+		multiply_key = { lhs = Courthouse_Tmp4 value = 2 }
+		multiply_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp4 }
+		multiply_key = { lhs = Courthouse_Tmp6 value = 0.75 } # balancing
+
+		# Land size input, exponential input to normalise
+		if = {
+			limit = {
+				check_key = { lhs = Land_PSize value = 1000 }
+			}
+			set_key = { lhs = Courthouse_Tmp5 value = 100 } # 1000*0.1
+		}
+		else = {
+			set_key = { lhs = Courthouse_Tmp4 value = 1000 }
+			subtract_key = { lhs = Courthouse_Tmp4 which = Land_PSize }
+			multiply_key = { lhs = Courthouse_Tmp4 value = 0.001 }
+			multiply_key = { lhs = Courthouse_Tmp4 which = Courthouse_Tmp4 }
+			multiply_key = { lhs = Courthouse_Tmp4 which = Courthouse_Tmp4 }
+			multiply_key = { lhs = Courthouse_Tmp4 value = 1000 }
+
+			set_key = { lhs = Courthouse_Tmp5 value = 1000 }
+			subtract_key = { lhs = Courthouse_Tmp5 which = Courthouse_Tmp4 }
+			multiply_key = { lhs = Courthouse_Tmp5 value = 0.003 } # balancing
+		}
+		change_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp5 }
 
 		set_key = { lhs = Courthouse_Tmp5 which = Infra_Courthouse }
 		change_key = { lhs = Courthouse_Tmp5 which = Courthouse_Amount }
@@ -333,3 +382,4 @@ Courthouse_BuildInfraHelper = {
 	Infra_StartProject = { id = $id$ height = Courthouse_Amount width = Courthouse_Parallel }
 	change_key = { lhs = Infra_Wealth which = Courthouse_Cost }
 }
+

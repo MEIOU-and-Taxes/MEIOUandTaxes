@@ -1,0 +1,562 @@
+Admin_Init = {
+	set_key = { lhs = Admin_DecayEntrenchmentR value = 0 }
+}
+Admin_SumAdminHelper1 = {
+	set_key = { lhs = Admin_Tmp1 which = $inp$ }
+	multiply_key = { lhs = Admin_Tmp1 which = Admin_ExpandBase }
+
+	PREV = {
+		set_key = { lhs = Admin_Tmp1 which = PREV }
+		change_key = { lhs = $inp$ which = Admin_Tmp1 }
+		set_key = { lhs = Admin_Tmp1 value = 0 }
+	}
+	set_key = { lhs = Admin_Tmp1 value = 0 }
+}
+Admin_SumAdminHelper2 = {
+	divide_key = { lhs = $inp$ which = Admin_ExpandBase }
+}
+Admin_Calc = {
+	set_key = { lhs = Admin_Expand value = 0 }
+	set_key = { lhs = Admin_ExpandShare value = 0 }
+	set_key = { lhs = Admin_ExpandCost value = 0 }
+	set_key = { lhs = Admin_ExpandCostDucat value = 0 }
+	set_key = { lhs = Admin_ExpandBase value = 0 }
+	set_key = { lhs = Admin_ExpandBaseDucat value = 0 }
+	set_key = { lhs = Admin_ExpandBaseDucatR value = 0 }
+	set_key = { lhs = Admin_ExpandBaseDucatU value = 0 }
+	set_key = { lhs = Admin_ExpandBaseDucatN value = 0 }
+	set_key = { lhs = Admin_ExpandBasePOP value = 0 }
+	set_key = { lhs = Admin_ExpandBaseLand value = 0 }
+	set_key = { lhs = Admin_ExpandBaseCapital value = 0 }
+	set_key = { lhs = Admin_ExpandFactors value = 0 }
+	set_key = { lhs = Admin_ExpandCE value = 0 }
+	set_key = { lhs = Admin_ExpandAutonomy value = 0 }
+	set_key = { lhs = Admin_ExpandLoyalty value = 0 }
+	set_key = { lhs = Admin_ExpandNationalism value = 0 }
+	set_key = { lhs = Admin_ExpandCulture value = 0 }
+	set_key = { lhs = Admin_ExpandReligion value = 0 }
+	every_country = {
+		limit = {
+			isValidCountry = yes
+		}
+		Admin_PreCalc = yes
+	}
+	every_province = {
+		limit = {
+			isValidProv = yes
+		}
+		set_key = { lhs = Admin_Expand value = 0 }
+		set_key = { lhs = Admin_ExpandShare value = 0 }
+		Admin_DecayCalc = yes
+	}
+	every_country = {
+		limit = {
+			isValidCountry = yes
+		}
+		Admin_ExpandCalc = yes
+		Admin_Core = yes
+	}
+}
+Admin_DecayCalc = {
+	set_key = { lhs = Admin_Decay value = 0 }
+	set_key = { lhs = Admin_DecayBase value = 0.5 } # 0.5% every tick
+	if = {
+		limit = {
+			check_key = { lhs = Admin_Rank which = Admin_DecayEntrenchmentR }
+		}
+	}
+}
+Admin_DecayFactors = {
+
+}
+Admin_PreCalc = {
+	if = {
+		limit = {
+			Rights_BUAdm1Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 0 }
+		set_key = { lhs = Admin_MaxRank value = 2 }
+	}
+	else_if = {
+		limit = {
+			Rights_BUAdm2Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 0 }
+		set_key = { lhs = Admin_MaxRank value = 3 }
+	}
+	else_if = {
+		limit = {
+			Rights_BUAdm3Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 1 }
+		set_key = { lhs = Admin_MaxRank value = 4 }
+	}
+	else_if = {
+		limit = {
+			Rights_BUAdm4Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 1 }
+		set_key = { lhs = Admin_MaxRank value = 5 }
+	}
+	else_if = {
+		limit = {
+			Rights_BUAdm5Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 2 }
+		set_key = { lhs = Admin_MaxRank value = 6 }
+	}
+	else_if = {
+		limit = {
+			Rights_BUAdm6Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 2 }
+		set_key = { lhs = Admin_MaxRank value = 6 }
+	}
+	else_if = {
+		limit = {
+			Rights_BUAdm7Has = yes
+		}
+		set_key = { lhs = Admin_BaseRank value = 3 }
+		set_key = { lhs = Admin_MaxRank value = 7 }
+	}
+	else = { ## Adm8 has
+		set_key = { lhs = Admin_BaseRank value = 3 }
+		set_key = { lhs = Admin_MaxRank value = 7 }
+	}
+}
+Admin_ExpandCalc = {
+	set_key = { lhs = Admin_Tmp0 value = 0 }
+	set_key = { lhs = Admin_Tmp1 value = 0 }
+	every_owned_province = {
+		limit = {
+			isValidProv = yes
+		}
+		Admin_ExpandBase = yes
+		Admin_ExpandBaseDucat = yes
+		Admin_ExpandFactors = yes
+		Admin_ExpandProvSum = yes
+	}
+	Admin_ExpandBudget = yes
+	Admin_ExpandNatSum = yes
+	every_owned_province = {
+		limit = {
+			isValidProv = yes
+		}
+		Admin_ExpandShare = yes
+		Admin_ExpandApply = yes
+	}
+}
+Admin_ExpandBudget = {
+	if = {
+		limit = {
+			OR = {
+				always = yes # testing
+				ai = yes
+			}
+		}
+		set_key = { lhs = Admin_ManaBudget value = 0 }
+		# Export ruler mana
+		export_to_key = { lhs = Admin_Tmp1 value = ADM }
+		export_to_key = { lhs = Admin_Tmp2 value = DIP }
+		export_to_key = { lhs = Admin_Tmp3 value = MIL }
+		
+		# Add base mana
+		change_key = { lhs = Admin_Tmp1 value = 3 }
+		change_key = { lhs = Admin_Tmp2 value = 3 }
+		change_key = { lhs = Admin_Tmp3 value = 3 }
+		
+		## Add advisor mana
+		if = { 
+			limit = {
+				has_global_flag = POP_Sim # if sim assume lvl 2 advisor
+			}
+			change_key = { lhs = Admin_Tmp1 value = 2 }
+			change_key = { lhs = Admin_Tmp2 value = 2 }
+			change_key = { lhs = Admin_Tmp3 value = 2 }
+		}
+		else = {
+			change_key = { lhs = Admin_Tmp1 which = Advisor_ADM }
+			change_key = { lhs = Admin_Tmp2 which = Advisor_DIP }
+			change_key = { lhs = Admin_Tmp3 which = Advisor_MIL }
+		}
+		change_key = { lhs = Admin_ManaBudget which = Admin_Tmp1 }
+		change_key = { lhs = Admin_ManaBudget which = Admin_Tmp2 }
+		change_key = { lhs = Admin_ManaBudget which = Admin_Tmp3 }
+		multiply_key = { lhs = Admin_ManaBudget value = 12 }
+		multiply_key = { lhs = Admin_ManaBudget value = 0.1 } # Portion of mana
+
+		export_to_key = {
+			lhs = Admin_DucatBudget
+			value = treasury
+		}
+		multiply_key = { lhs = Admin_DucatBudget value = 0.2 }
+	}
+	set_key = { lhs = Admin_ExpandScalar value = 1 }
+	set_key = { lhs = Admin_ExpandLimiter value = 0 }
+	if = {
+		limit = {
+			OR = {
+				NOT = { check_key = { lhs = Admin_DucatBudget which = Admin_ExpandCostDucat } }
+				NOT = { check_key = { lhs = Admin_ManaBudget which = Admin_ExpandCost } }
+			}
+		}
+		set_key = { lhs = Admin_Tmp1 which = Admin_DucatBudget }
+		divide_key = { lhs = Admin_Tmp1 which = Admin_ExpandCostDucat }
+		set_key = { lhs = Admin_Tmp2 which = Admin_ManaBudget }
+		divide_key = { lhs = Admin_Tmp2 which = Admin_ExpandCost }
+		if = {
+			limit = {
+				check_key = { lhs = Admin_Tmp1 which = Admin_Tmp2 }
+			}
+			set_key = { lhs = Admin_ExpandScalar which = Admin_Tmp2 }
+			set_key = { lhs = Admin_ExpandLimiter value = 1 }
+			set_key = { lhs = Admin_Tmp3 which = Admin_ExpandCost }
+		}
+		else = {
+			set_key = { lhs = Admin_ExpandScalar which = Admin_Tmp1 }
+			set_key = { lhs = Admin_ExpandLimiter value = 2 }
+			set_key = { lhs = Admin_Tmp3 which = Admin_ExpandCostDucat }
+		}
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Admin_ExpandScalar value = 0.1 } }
+		}
+		set_key = { lhs = Admin_ExpandScalar value = 0.1 }
+	}
+	set_key = { lhs = Admin_ExpandScalar value = 1 }
+}
+# If Mana, use a mana distrib to compare, else use Ducat distrib
+# Figure out the Expansion Cost Share for the given type
+# Figure out what proportion we are adjusting our distrib of the national pool to. 
+TwoDistribBlendCalc = {
+    set_key = { lhs = $TmpVar$ which = $BudgetVar$ }
+    multiply_key = { lhs = $TmpVar$ value = -1 }
+    change_key = { lhs = $TmpVar$ value = 1 }
+
+    set_key = { lhs = $ResultVar$ which = $DistribShare$ }
+    divide_key = { lhs = $ResultVar$ which = $Distrib2Share$ } # / Distrib Share
+    if = {
+        limit = {
+            PREV = { check_key = { lhs = $ResultVar$ which = $DistribShare$ } }
+        }
+        divide_key = { lhs = $ResultVar$ which = $TmpVar$ }
+    }
+    else = {
+        multiply_key = { lhs = $ResultVar$ which = $TmpVar$ }
+    }
+    multiply_key = { lhs = $ResultVar$ which = $DistribTotal$ }
+    multiply_key = { lhs = $ResultVar$ which = $BudgetVar$ }
+}
+Admin_ExpandApply = {
+	set_key = { lhs = Admin_ExpandScalar which = PREV }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Admin_ExpandScalar value = 1 } }
+		}
+		set_key = { lhs = Admin_Tmp3 which = PREV }
+		if = {
+			limit = {
+				PREV = { is_key_equal = { lhs = Admin_ExpandLimiter value = 1 } }
+			}
+			set_key = { lhs = Admin_Tmp1 which = Admin_ExpandCost }
+		}
+		else = {
+			set_key = { lhs = Admin_Tmp1 which = Admin_ExpandCostDucat }
+		}
+		divide_key = { lhs = Admin_Tmp1 which = Admin_Tmp3 } # Expansion Share
+		TwoDistribBlendCalc = {
+			TmpVar = Admin_Tmp2
+			BudgetVar = Admin_ExpandScalar
+			DistribShare = Admin_Tmp1
+			DistribTotal = Admin_Tmp3
+			Distrib2Share = Admin_ExpandShare
+			ResultVar = Admin_Expand
+		}
+		if = {
+			limit = {
+				PREV = { is_key_equal = { lhs = Admin_ExpandLimiter value = 1 } }
+			}
+			divide_key = { lhs = Admin_Expand which = Admin_ExpandCost }
+		}
+		else = {
+			divide_key = { lhs = Admin_Expand which = Admin_ExpandCostDucat }
+		}
+	}
+	else = {
+		set_key = { lhs = Admin_Expand value = 1 }
+	}
+}
+Admin_ExpandProvSum = {
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandFactors }
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandCE }
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandAutonomy }
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandLoyalty }
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandNationalism }
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandCulture }
+	Admin_SumAdminHelper1 = { inp=Admin_ExpandReligion }
+	set_key = { lhs = Admin_Tmp0 which = Dev_Total }
+	divide_key = { lhs = Admin_Tmp0 which = Admin_ExpandFactors }
+	PREV = { change_key = { lhs = Admin_ExpandCost which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandCostDucat which = PREV } }
+	PREV = { change_key = { lhs = Admin_Tmp0 which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBase which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBasePOP which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBaseLand which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBaseCapital which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBaseDucat which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBaseDucatR which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBaseDucatU which = PREV } }
+	PREV = { change_key = { lhs = Admin_ExpandBaseDucatN which = PREV } }
+}
+Admin_ExpandNatSum = {
+	set_key = { lhs = Admin_Tmp1 which = Admin_Tmp0 }
+	if = {
+		limit = {
+			check_key = { lhs = Admin_ExpandCost value = 0.001 }
+		}
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandFactors }
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandCE }
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandAutonomy }
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandLoyalty }
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandNationalism }
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandCulture }
+		Admin_SumAdminHelper2 = { inp=Admin_ExpandReligion }
+	}
+}
+Admin_ExpandShare = {
+	if = {
+		limit = {
+			check_key = { lhs = Admin_ExpandCost value = 0.001 }
+		}
+		set_key = { lhs = Admin_Tmp1 which = PREV }
+		set_key = { lhs = Admin_ExpandShare which = Admin_Tmp0 }
+		divide_key = { lhs = Admin_ExpandShare which = Admin_Tmp1 }
+		multiply_key = { lhs = Admin_ExpandShare value = 100 }
+	}
+}
+Admin_ExpandFactors = {
+	Admin_ExpandFactorCE = yes
+	Admin_ExpandFactorAutonomy = yes
+	Admin_ExpandFactorLoyalty = yes
+	Admin_ExpandFactorNationalism = yes
+	Admin_ExpandFactorCulture = yes
+	Admin_ExpandFactorReligion = yes
+
+	# Sum and Calc
+	set_key = { lhs = Admin_ExpandCost which = Admin_ExpandBase }
+	set_key = { lhs = Admin_ExpandCostDucat which = Admin_ExpandBaseDucat }
+
+	set_key = { lhs = Admin_ExpandFactors which = Admin_ExpandCE }
+	multiply_key = { lhs = Admin_ExpandFactors which = Admin_ExpandAutonomy }
+	multiply_key = { lhs = Admin_ExpandFactors which = Admin_ExpandLoyalty }
+	multiply_key = { lhs = Admin_ExpandFactors which = Admin_ExpandNationalism }
+	multiply_key = { lhs = Admin_ExpandFactors which = Admin_ExpandCulture }
+	multiply_key = { lhs = Admin_ExpandFactors which = Admin_ExpandReligion }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Admin_ExpandFactors value = 1 } }
+		}
+		set_key = { lhs = Admin_ExpandFactors value = 1 }
+	}
+
+	multiply_key = { lhs = Admin_ExpandCost which = Admin_ExpandFactors }
+	multiply_key = { lhs = Admin_ExpandCostDucat which = Admin_ExpandFactors }
+}
+Admin_ExpandBase = { # POP and Dev
+	set_key = { lhs = Admin_ExpandBase value = 0 }
+	# PSize land contribution
+	set_key = { lhs = Admin_Tmp1 which = SF_Ratio }
+	multiply_key = { lhs = Admin_Tmp1 value = 0.01 }
+	set_key = { lhs = Admin_ExpandBaseLand which = Land_PSize }
+
+	if = { ## Paris is size 30
+		limit = {
+			NOT = { check_key = { lhs = Admin_ExpandBaseLand value = 10 } }
+		}
+		set_key = { lhs = Admin_ExpandBaseLand value = 10 }
+	}
+	# Toledo is 180
+	if = {
+		limit = {
+			check_key = { lhs = Admin_ExpandBaseLand value = 350 }
+		}
+		set_key = { lhs = Admin_ExpandBaseLand value = 350 }
+	}
+	# Guizhou is 374
+	divide_key = { lhs = Admin_ExpandBaseLand value = 350 } # Normalise to 0-1
+	multiply_key = { lhs = Admin_ExpandBaseLand which = Admin_Tmp1 } # Less rurals, less this matters
+	
+	# PSize land contribution
+	set_key = { lhs = Admin_ExpandBasePOP which = Class_Total }
+	if = { ## Paris is size 30
+		limit = {
+			NOT = { check_key = { lhs = Admin_ExpandBasePOP value = 5 } }
+		}
+		set_key = { lhs = Admin_ExpandBasePOP value = 0.05 }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = Admin_ExpandBasePOP value = 100.001 } # All pop beyond 100k is 1-1.5k base
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Admin_ExpandBasePOP value = 200.001 }
+			}
+			subtract_key = { lhs = Admin_ExpandBasePOP value = 200 }
+			divide_key = { lhs = Admin_ExpandBasePOP value = 400 } # Normalise to 0-0.5
+			change_key = { lhs = Admin_ExpandBasePOP value = 1.5 } # Add the 1x
+		}
+		else = {
+			subtract_key = { lhs = Admin_ExpandBasePOP value = 100 }
+			divide_key = { lhs = Admin_ExpandBasePOP value = 200 } # Normalise to 0-0.5
+			change_key = { lhs = Admin_ExpandBasePOP value = 1 } # Add the 1x
+		}
+	}
+	else = {
+		divide_key = { lhs = Admin_ExpandBasePOP value = 100 } # Normalise to 0-1
+	}
+
+	multiply_key = { lhs = Admin_ExpandBaseLand value = 0.5 } # Define scaling, replace with a full-on define
+	multiply_key = { lhs = Admin_ExpandBasePOP value = 0.5 } # Define scaling, replace with a full-on define
+	if = {
+		limit = {
+			is_capital = yes
+		}
+		set_key = { lhs = Admin_ExpandBaseCapital value = 5 }
+	}
+	else = {
+		set_key = { lhs = Admin_ExpandBaseCapital value = 0 }
+	}
+	change_key = { lhs = Admin_ExpandBase which = Admin_ExpandBaseLand }
+	change_key = { lhs = Admin_ExpandBase which = Admin_ExpandBasePOP }
+	change_key = { lhs = Admin_ExpandBase which = Admin_ExpandBaseCapital }
+}
+Admin_ExpandBaseDucat = {
+	set_key = { lhs = Admin_ExpandBaseDucatR value = 0.02 }
+	multiply_key = { lhs = Admin_ExpandBaseDucatR which = Dev_Rural }
+	set_key = { lhs = Admin_ExpandBaseDucatU value = 0.12 }
+	multiply_key = { lhs = Admin_ExpandBaseDucatU which = Dev_Urban }
+	set_key = { lhs = Admin_ExpandBaseDucatN value = 0.2 }
+	multiply_key = { lhs = Admin_ExpandBaseDucatN which = Dev_Notables }
+	set_key = { lhs = Admin_ExpandBaseDucat which = Admin_ExpandBaseDucatR }
+	change_key = { lhs = Admin_ExpandBaseDucat which = Admin_ExpandBaseDucatU }
+	change_key = { lhs = Admin_ExpandBaseDucat which = Admin_ExpandBaseDucatN }
+}
+Admin_ExpandFactorCE = {
+	set_key = { lhs = Admin_ExpandCE which = pv_ce }
+	multiply_key = { lhs = Admin_ExpandCE value = -0.01 }
+	change_key = { lhs = Admin_ExpandCE value = 2 }
+}
+Admin_ExpandFactorAutonomy = {
+	export_to_key = { lhs = Admin_ExpandAutonomy value = local_autonomy }
+	multiply_key = { lhs = Admin_ExpandAutonomy value = 0.01 }
+	change_key = { lhs = Admin_ExpandAutonomy value = 1 }
+	multiply_key = { lhs = Admin_ExpandNationalism value = 0.5 }# Define scaling, replace with a full-on define
+}
+Admin_ExpandFactorLoyalty = {
+	set_key = { lhs = Admin_ExpandLoyalty value = 0 }
+	set_key = { lhs = Admin_Tmp0 which = Prov_NOPow }
+	multiply_key = { lhs = Admin_Tmp0 value = 0.01 }
+	multiply_key = { lhs = Admin_Tmp1 which = Prov_NOLoy }
+	multiply_key = { lhs = Admin_Tmp1 value = -0.01 }
+	change_key = { lhs = Admin_Tmp1 value = 1 }
+	multiply_key = { lhs = Admin_Tmp0 which = Admin_Tmp1 }
+	change_key = { lhs = Admin_ExpandLoyalty which = Admin_Tmp0 }
+	set_key = { lhs = Admin_Tmp0 which = Prov_BGPow }
+	multiply_key = { lhs = Admin_Tmp0 value = 0.01 }
+	multiply_key = { lhs = Admin_Tmp1 which = Prov_BGLoy }
+	multiply_key = { lhs = Admin_Tmp1 value = -0.01 }
+	change_key = { lhs = Admin_Tmp1 value = 1 }
+	multiply_key = { lhs = Admin_Tmp0 which = Admin_Tmp1 }
+	change_key = { lhs = Admin_ExpandLoyalty which = Admin_Tmp0 }
+	set_key = { lhs = Admin_Tmp0 which = Prov_CLPow }
+	multiply_key = { lhs = Admin_Tmp0 value = 0.01 }
+	multiply_key = { lhs = Admin_Tmp1 which = Prov_CLLoy }
+	multiply_key = { lhs = Admin_Tmp1 value = -0.01 }
+	change_key = { lhs = Admin_Tmp1 value = 1 }
+	multiply_key = { lhs = Admin_Tmp0 which = Admin_Tmp1 }
+	change_key = { lhs = Admin_ExpandLoyalty which = Admin_Tmp0 }
+	set_key = { lhs = Admin_Tmp0 which = Prov_TRPow }
+	multiply_key = { lhs = Admin_Tmp0 value = 0.01 }
+	multiply_key = { lhs = Admin_Tmp1 which = Prov_TRLoy }
+	multiply_key = { lhs = Admin_Tmp1 value = -0.01 }
+	change_key = { lhs = Admin_Tmp1 value = 1 }
+	multiply_key = { lhs = Admin_Tmp0 which = Admin_Tmp1 }
+	change_key = { lhs = Admin_ExpandLoyalty which = Admin_Tmp0 }
+
+	multiply_key = { lhs = Admin_ExpandLoyalty value = 0.5 }
+
+	# Loyalty only matters as much as Bureaucratisation allows it to
+	set_key = { lhs = Admin_Tmp0 which = Prov_BUPow }
+	multiply_key = { lhs = Admin_Tmp0 value = -0.01 }
+	change_key = { lhs = Admin_Tmp0 value = 1 }
+
+	multiply_key = { lhs = Admin_ExpandLoyalty which = Admin_Tmp0 }
+
+	change_key = { lhs = Admin_ExpandLoyalty value = 1 }
+}
+Admin_ExpandFactorNationalism = {
+	export_to_key = {
+		lhs = Admin_ExpandNationalism
+		value = nationalism
+	}
+	multiply_key = { lhs = Admin_ExpandNationalism value = 0.02 }# Define scaling, replace with a full-on define
+	change_key = { lhs = Admin_ExpandNationalism value = 1 }
+}
+Admin_ExpandFactorCulture = {
+	if = {
+		limit = {
+			NOT = {
+				culture_group = owner
+			}
+		}
+		if = {
+			limit = {
+				has_owner_accepted_culture = yes
+			}
+			set_key = { lhs = Admin_ExpandCulture value = 1.15 }
+		}
+		else = {
+			set_key = { lhs = Admin_ExpandCulture value = 1.5 }
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = { has_owner_culture = yes }
+		}
+		if = {
+			limit = {
+				OR = {
+					has_owner_accepted_culture = yes
+					owner = { total_development = 1200 }
+				}
+			}
+			set_key = { lhs = Admin_ExpandCulture value = 1.05 }
+		}
+		else = {
+			set_key = { lhs = Admin_ExpandCulture value = 1.2 }
+		}
+	}
+	else = {
+		set_key = { lhs = Admin_ExpandCulture value = 1 }
+	}
+}
+	
+Admin_ExpandFactorReligion = {
+	set_key = { lhs = Admin_ExpandReligion which = MN_Tolerance }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Admin_ExpandReligion value = 0 } }
+		}
+		multiply_key = { lhs = Admin_ExpandReligion value = -1 }
+		multiply_key = { lhs = Admin_ExpandReligion value = 0.125 }# Define scaling, replace with a full-on define
+
+		change_key = { lhs = Admin_ExpandReligion value = 1 }
+	}
+	else = {
+		set_key = { lhs = Admin_ExpandReligion value = 1 }
+	}
+}
+Admin_RankCalc = {
+}
