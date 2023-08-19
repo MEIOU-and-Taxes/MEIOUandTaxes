@@ -3212,32 +3212,41 @@ TN_effect20 = {
 }
 TN_effect21 = {
 	# Find if it is connected
-	tradenode_mult_$id$ = {	  
-		limit = {
-			has_province_flag = TN_SectorCent
-			OR = {
-				owned_by = PREV
-				has_province_flag = TradePost@event_target:ProvNew
-			}
-		}
-		
+
+	set_province_flag = TN_SectorCentReachWithin
+    save_event_target_as = Plague
+    
+    tradenode_mult_$id$ = {      
+        limit = {
+            has_province_flag = TN_SectorCent
+            OR = {
+                owned_by = PREV
+                has_province_flag = TradePost@event_target:ProvNew
+            }
+        }
 		# Add +1 to the distance connection
-		PREV = {
-			set_province_flag = TN_SectorCentReachWithin
-			set_key = { lhs = Public_Tmp1 which = PREV }
-			change_key = { lhs = Public_Tmp1 value = 1 }
-			save_event_target_as = Plague	
-		}
-		owner = {
-			every_owned_province = {
-				limit = {
-					has_province_flag = TN_SectorCent                            
-					NOT = { check_key = { lhs = Public_Tmp1 which = event_target:Plague } } # Shorter distance	
-				}
-				set_province_flag = jumped_success
-			}
-		}         
-	}
+        PREV = {
+            set_key = { lhs = Public_Tmp1 which = PREV }
+            change_key = { lhs = Public_Tmp1 value = 1 }
+        }
+        
+        owner = {
+            every_owned_province = {
+                limit = {
+                    has_province_flag = TN_SectorCent                            
+                    NOT = { check_key = { lhs = Public_Tmp1 which = event_target:Plague } } # Shorter distance    
+                }
+                set_province_flag = jumped_success
+            }
+        }         
+    }
+    
+    if = {
+        limit = {
+            NOT = { check_key = { lhs = Public_Tmp1 value = 1 } }
+        }
+        set_key = { lhs = Public_Tmp1 value = 2 }
+    }
 }
 TN_effect22 = { # Connect, jump and spread.
 	# Find if it is connected
