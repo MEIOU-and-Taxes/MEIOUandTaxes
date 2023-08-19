@@ -15,7 +15,9 @@ on_startup = {
 			Modi_Global = yes
 			set_global_flag = Global_Modi_Set
 		}
-		TN_PassApply = yes
+        country_event = { ### Apply Pass system
+            id = POP_StartInit.001
+        }
 	}
 	emperor = {
 		save_global_event_target_as = Emperor
@@ -298,6 +300,9 @@ on_startup = {
 			tag = AAA
 			has_country_flag = Done_SimInit
 		}
+		country_event = {
+			id = POP_DG.007
+		}
         set_key = { lhs = ID_TN value = 1 }
 
 		every_province = {
@@ -374,12 +379,6 @@ on_startup = {
 		}
 		country_event = {
 			id = POP_Census.002
-		}
-		every_province = {
-			limit = {
-				isValidEmpty = yes
-			}
-			POP_GetLandTime = yes
 		}
 		country_event = { id = distance_calc.1 }  # Reset province position values from generated files
 	}
@@ -520,20 +519,6 @@ on_startup = {
 	}
 	if = {
 		limit = {
-			NOT = { has_global_flag = DG_Autonomy }
-		}
-		set_global_flag = DG_Autonomy
-		every_province = {
-			limit = {
-				isValidProv = yes
-			}
-			set_key = { lhs = MN_AddReligionVar value = 0 }
-			set_province_flag = MN_AutonomyUpdate
-			MN_Autonomy = yes
-		}
-	}
-	if = {
-		limit = {
 			ai = yes
 		}
 		set_key = { lhs = Mil_BUBudgetMult value = 60 }
@@ -587,9 +572,13 @@ on_religion_change = {
 		}
 	}
 	capital_scope = {
-		DG_on_province_religion_converted_effect = yes
+		province_event = {
+			id = DG_Convert.005
+		}
 	}
-	every_owned_province = { DG_on_province_owner_change_effect = yes }
+	country_event = {
+		id = DG_Convert.011
+	}
 	swap_non_generic_missions = yes
 	if = {
 		limit = {
@@ -2791,7 +2780,9 @@ on_lose_great_power_status = {
 # province
 # Triggers only on missionary conversion. No Centers of Reformation, Trade Religion Propagation or Effects. - Inimicus
 on_province_religion_converted = {
-	DG_on_province_religion_converted_effect = yes
+	events = {
+		DG_Convert.005
+	}
 }
 
 on_province_religion_changed = {
@@ -2960,42 +2951,18 @@ on_province_owner_change = {
 		owner = { country_event = { id = DG_Catholics.082 } }
 	}
 	if = {
-		limit = { exists = AVI }
-		if = {
-			limit = { owner = { religion = avignonist } }
-			if = {
-				limit = { religion = catholic }
-				change_religion = avignonist
-			}
-			hidden_effect = { MN_RlgChange = { from = 1 to = 7 } }
-		}
-		else_if = {
-			limit = { owner = { religion = catholic } }
-			if = {
-				limit = { religion = avignonist }
-				change_religion = catholic
-			}
-			hidden_effect = { MN_RlgChange = { from = 7 to = 1 } }
-		}
-	}
-	DG_on_province_owner_change_effect = yes
-	if = {
 		limit = {
 			is_overseas = yes
 			trade_company_region_trigger = yes
 		}
 		add_to_trade_company = owner
 	}
-	if = {
-		limit = {
-			NOT = { is_colony = yes }
-		}
-		MN_AddOwnerConq = yes
-		MN_ConvColo = yes
-	}
 	events = {
+		DG_Convert.013
 		DG_Convert.003
 		SYS_Colony.001
+		DG_Convert.012
+		DG_Convert.014
 	}
 }
 
@@ -3669,40 +3636,8 @@ on_capital_moved = {
 		}
 	}
 
-	if = {
-		limit = { 
-			owner = { ai = yes } 
-		}
-		if = {
-			limit = {
-				Prod_Can_26 = yes
-				Prod_NotHasProd = { Prod = 26 }	
-			}
-			Public_AddProduce = { prod = 26 size = 5 soph = 0 wealth = 0 }
-			Infra_AddPrp = { Type=Industrial Amount=1 }
-			owner = { add_treasury = -5 }
-		}
-		if = {
-			limit = {
-				Prod_Can_39 = yes
-				Prod_NotHasProd = { Prod = 39 }	
-			}
-			Public_AddProduce = { prod = 39 size = 5 soph = 0 wealth = 0 }
-			Infra_AddPrp = { Type=Industrial Amount=1 }
-			owner = { add_treasury = -5 }
-		}
-		if = {
-			limit = {
-				Prod_Can_32 = yes
-				Prod_NotHasProd = { Prod = 32 }	
-			}
-			Public_AddProduce = { prod = 32 size = 5 soph = 0 wealth = 0 }
-			Infra_AddPrp = { Type=Commercial Amount=1 }
-			owner = { add_treasury = -5 }
-		}
-		owner = {
-			country_event = { id = capital_city.001 days = 1 }
-		}
+	events = {
+		SYS_Colony.004 ## Spawn new industries
 	}
 }
 
