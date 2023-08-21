@@ -36,6 +36,7 @@ CE_Main = {
 	## Loop through every non empty province hold by overlord and all his subjects - Treat HRE and Japan as an area
 	every_province = {
 		limit = {
+			isValidProv = yes
 			OR = {
 				country_or_vassal_holds = event_target:tt_highest
 				owner = { overlord = { is_subject_of = event_target:tt_highest } }
@@ -48,7 +49,6 @@ CE_Main = {
 					event_target:tt_highest = { daimyo_trigger = yes }
 				}
 			}
-			isValidProv = yes
 		}
 		set_key = { lhs = tv_ship which = PREV }
 
@@ -77,11 +77,14 @@ CE_Main = {
 
 		set_key = { lhs = pv_ce value = 0 }
 		set_key = { lhs = pv_prev value = 0 }
+		set_key = { lhs = pv_ce_pre value = 0 }
 
 		ce_get_cost_land = { return = tv_cost_land }
 		ce_get_cost_pass = { return = tv_cost_pass }
 		ce_get_cost_port_embark = { return = tv_cost_port_embark }
 		ce_get_cost_port_to = { return = tv_cost_port_to }
+
+		set_province_flag = CE_Cand
 	}
 
 	# Set runner_dispatching_province
@@ -160,11 +163,8 @@ CE_Main = {
 				check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 }
 			}
 			ce_set_runner_dispatching_province_land = {
-				scope = every_owned_province
-				max = 1440
-				overlord = yes
-				subject = yes
-				hre = yes
+				scope = every_province
+				max = 1800
 			}
 			
 			if = {
@@ -172,7 +172,7 @@ CE_Main = {
 					check_key = { lhs = tv_port value = 1 }
 				}
 				ce_set_runner_disptaching_province_sea = {
-					max = 1440
+					max = 1800
 				}
 			}
 		}
@@ -191,6 +191,30 @@ CE_Main = {
 		}
 		clr_province_flag = tf_pass
 	}
+	
+	set_key = { lhs = Tmp_0 value = 1 }
+
+	capital_scope = {
+		if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 1 } } PREV = { set_key = { lhs = Tmp_0 value = 0.94 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 2 } } PREV = { set_key = { lhs = Tmp_0 value = 0.88 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 3 } } PREV = { set_key = { lhs = Tmp_0 value = 0.82 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 4 } } PREV = { set_key = { lhs = Tmp_0 value = 0.77 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 5 } } PREV = { set_key = { lhs = Tmp_0 value = 0.73 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 6 } } PREV = { set_key = { lhs = Tmp_0 value = 0.69 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 7 } } PREV = { set_key = { lhs = Tmp_0 value = 0.65 } } }
+	}
+
+	every_owned_province = {
+		limit = {
+			check_key = { lhs = tv_tt value = 0.001 }
+		}
+		set_key = { lhs = Tmp_0 which = PREV }
+
+		multiply_key = { lhs = tv_tt which = Tmp_0 }
+
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+
 	clr_country_flag = ce_capitols 
 	if = {
 		limit = {
@@ -201,6 +225,12 @@ CE_Main = {
 				
 				is_capital = no
 			}
+		}
+		every_province = {
+			limit = {
+				is_capital = no
+			}
+			set_key = { lhs = tv_tt_save value = 1733 }
 		}
 		PREV = { set_country_flag = ce_capitols }
 		every_province = {
@@ -239,11 +269,8 @@ CE_Main = {
 		}
 
 		ce_set_runner_dispatching_province_land = {
-			scope = every_owned_province
-			max = 1440
-			overlord = yes
-			subject = yes
-			hre = yes
+			scope = every_province
+			max = 960
 		}
 
 		while = {
@@ -271,14 +298,11 @@ CE_Main = {
 			}
 
 			ce_set_runner_dispatching_province_land = {
-				scope = every_owned_province
-				max = 1440
-				overlord = yes
-				subject = yes
-				hre = yes
+				scope = every_province
+				max = 960
 			}
 			ce_set_runner_disptaching_province_sea = {
-				max = 1440
+				max = 960
 			}
 		}
 
@@ -303,29 +327,6 @@ CE_Main = {
 			}
 			clr_province_flag = tf_pass
 		}
-	}
-	
-	set_key = { lhs = Tmp_0 value = 1 }
-
-	capital_scope = {
-		if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 1 } } PREV = { set_key = { lhs = Tmp_0 value = 0.94 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 2 } } PREV = { set_key = { lhs = Tmp_0 value = 0.88 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 3 } } PREV = { set_key = { lhs = Tmp_0 value = 0.82 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 4 } } PREV = { set_key = { lhs = Tmp_0 value = 0.77 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 5 } } PREV = { set_key = { lhs = Tmp_0 value = 0.73 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 6 } } PREV = { set_key = { lhs = Tmp_0 value = 0.69 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 7 } } PREV = { set_key = { lhs = Tmp_0 value = 0.65 } } }
-	}
-
-	every_owned_province = {
-		limit = {
-			check_key = { lhs = tv_tt value = 0.001 }
-		}
-		set_key = { lhs = Tmp_0 which = PREV }
-
-		multiply_key = { lhs = tv_tt which = Tmp_0 }
-
-		set_key = { lhs = Tmp_0 value = 0 }
 	}
 	
 	if = {
@@ -421,6 +422,7 @@ CE_Main = {
 			}
 			isValidProv = yes
 		}
+
 		if = {
 			limit = {
 				NOT = {
@@ -456,14 +458,26 @@ CE_Main = {
 			
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
+		if = {
+			limit = {
+				PREV = { has_country_flag = ce_capitols }
+			}
+			## Calc difference in CE
+			set_key = { lhs = CE_Diff which = pv_ce }
+			subtract_key = { lhs = CE_Diff which = pv_ce_pre }
+		}
+		else = {
+			set_key = { lhs = CE_Diff value = 0 }
+		}
 
 		set_key = { lhs = pv_ce_save value = 0 }
 		set_key = { lhs = pv_prev_save value = 0 }
+		set_key = { lhs = pv_ce_pre_save value = 0 }
 	}
 	clr_country_flag = ce_capitols 
 
 	# Clear all temporary variables
-	#ce_cleanup = yes
+	ce_cleanup = yes
 }
 
 compare_and_set_travel_time = {
@@ -548,7 +562,7 @@ ce_finalize_effect = {
 				set_key = { lhs = $time$ value = 0 }
 			}
 			else = {
-				multiply_key = { lhs = $time$ value = 0.104 } # /9.6
+				divide_key = { lhs = $time$ value = 9.6 }
 			}
 		}
 		else_if = {
@@ -567,7 +581,7 @@ ce_cleanup = {
 	
 	every_province = {
 		limit = {
-			check_key = { lhs = tv_cost_land value = 0.001 }
+			has_province_flag = CE_Cand
 		}
 		clr_province_flag = tf_communication_efficiency_final
 		clr_province_flag = tf_communication_efficiency_final_save
@@ -590,6 +604,7 @@ ce_cleanup = {
 		set_key = { lhs = tv_port_z_other value = 0 }
 		
 		set_key = { lhs = tv_tt_save value = 0 }
+		clr_province_flag = CE_Cand
 	}
 
 	sea_starts = {
@@ -617,106 +632,10 @@ ce_cleanup = {
 }
 
 ce_set_runner_dispatching_province_land = {
-	if = {
-		limit = {
-			always = $overlord$
-		}
-		overlord = {
-			every_owned_province = {
-				limit = {
-					has_lowest_travel_time = { max = $max$ }
-					isValidProv = yes
-				}
-				save_event_target_as = runner_dispatching_province
-			}
-
-			overlord = {
-				every_owned_province = {
-					limit = {
-						has_lowest_travel_time = { max = $max$ }
-						isValidProv = yes
-					}
-					save_event_target_as = runner_dispatching_province
-				}
-			}
-		}
-	}
-	if = {
-		limit = {
-			always = $subject$
-		}
-		every_subject_country = {
-			limit = {
-				isValidCountry = yes
-			}
-			every_owned_province = {
-				limit = {
-					has_lowest_travel_time = { max = $max$ }
-					isValidProv = yes
-				}
-				save_event_target_as = runner_dispatching_province
-			}
-
-			every_subject_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				every_owned_province = {
-					limit = {
-						has_lowest_travel_time = { max = $max$ }
-						isValidProv = yes
-					}
-					save_event_target_as = runner_dispatching_province
-				}
-			}
-		}
-	}
-	if = {
-		limit = {
-			always = $hre$
-		}
-		if = {
-			limit = {
-				is_part_of_hre = yes
-			}
-			every_country = {
-				limit = {
-					isValidCountry = yes
-					is_part_of_hre = yes
-				}
-				every_owned_province = {
-					limit = {
-						has_lowest_travel_time = { max = $max$ }
-						isValidProv = yes
-					}
-					save_event_target_as = runner_dispatching_province
-				}
-			}
-		}
-		if = {
-			limit = {
-				daimyo_trigger = yes
-			}
-			every_country = {
-				limit = {
-					daimyo_trigger = yes
-					isValidCountry = yes
-				}
-				every_owned_province = {
-					limit = {
-						has_lowest_travel_time = { max = $max$ }
-						isValidProv = yes
-					}
-					save_event_target_as = runner_dispatching_province
-				}
-			}
-		}
-	}
-
 	$scope$ = {
 		limit = {
+			has_province_flag = CE_Cand
 			has_lowest_travel_time = { max = $max$ }
-			isValidProv = yes
 		}
 		save_event_target_as = runner_dispatching_province
 	}
@@ -756,10 +675,9 @@ ce_do_sea = {
 
 		every_neighbor_province = {
 			limit = {
+				has_province_flag = CE_Cand
 				NOT = { 
 					has_province_flag = tf_communication_efficiency_final 
-
-					is_key_equal = { lhs = tv_ship value = 0 }
 				}
 				isValidProv = yes
 			}
@@ -943,9 +861,7 @@ ce_do_sea = {
 		limit = {
 			has_port = yes
 
-			NOT = {
-				is_key_equal = { lhs = tv_ship value = 0 }
-			}
+			has_province_flag = CE_Cand
 		}
 		sea_zone = {
 			if = {
@@ -974,8 +890,8 @@ ce_do_land = {
 		}
 		every_neighbor_province = {
 			limit = {
+				has_province_flag = CE_Cand
 				NOT = { has_province_flag = tf_communication_efficiency_final }
-				NOT = { is_key_equal = { lhs = tv_cost_land value = 0 } }
 				isValidProv = yes
 			}
 			export_province_distance_land_province_effect = {
@@ -1019,12 +935,11 @@ ce_do_river = {
 			event_target:Prov = {
 				every_neighbor_province = {
 					limit = {
+						has_province_flag = CE_Cand
 						check_key = { lhs = TN_River value = 1 }
 						
 						NOT = { 
 							has_province_flag = tf_river_done 
-							
-							is_key_equal = { lhs = tv_cost_land value = 0 }
 						}
 				
 						OR = {
@@ -1127,13 +1042,12 @@ ce_do_pass = {
 			event_target:Prov = {
 				every_neighbor_province = {
 					limit = {
+						has_province_flag = CE_Cand
 						check_key = { lhs = TN_Pass value = 1 }
 						check_key = { lhs = Infra_Pathing value = 1 }
 						
 						NOT = { 
 							has_province_flag = tf_pass_done 
-							
-							is_key_equal = { lhs = tv_cost_land value = 0 }
 						}
 				
 						OR = {

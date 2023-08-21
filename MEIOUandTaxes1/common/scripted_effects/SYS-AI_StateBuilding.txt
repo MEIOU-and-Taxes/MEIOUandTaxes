@@ -5,6 +5,8 @@ AI_StateBuilding_CE = {
 	### Calculate CE for deciding where to build pathing and harbourage
 	# Initialization
 
+	ce_cleanup = yes
+
 	set_key = { lhs = tv_owned_provinces_in_state_in_progress value = 0 }
 	set_key = { lhs = tv_port value = 0 }
 
@@ -80,6 +82,8 @@ AI_StateBuilding_CE = {
 		ce_get_cost_port_to_best = { return = tv_cost_port_to } # Get Pathing landing CE reduction
 		
 		set_key = { lhs = Tmp_7 value = 0 }
+
+		set_province_flag = CE_Cand
 	}
 
 	# Set runner_dispatching_province
@@ -142,11 +146,8 @@ AI_StateBuilding_CE = {
 			limit = { check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 } } # while there are still provinces left to do the calculation
 
 			ce_set_runner_dispatching_province_land = { # send land runners
-				scope = every_owned_province
+				scope = every_province
 				max = 1440
-				overlord = yes
-				subject = yes
-				hre = yes
 			}
 
 			if = {
@@ -162,7 +163,7 @@ AI_StateBuilding_CE = {
 	# Get DEV of provinces (Tmp_0) with travel-time, clear Tmp_1 and Tmp_2 variables from CE calculation
 	every_province = {
 		limit = {
-			check_key = { lhs = tv_cost_land value = 0.001 }
+			has_province_flag = CE_Cand
 		}
 		if = {
 			limit = {
@@ -196,7 +197,7 @@ AI_StateBuilding_CE = {
 		
 		every_province = { # everyprovince that has land costs and DEV > 0
 			limit = {
-				check_key = { lhs = tv_cost_land value = 0.001 }
+				has_province_flag = CE_Cand
 				check_key = { lhs = Tmp_0 value = 0.001 }
 				
 				NOT = { has_province_flag = tf_run } # hasnt already been considered
@@ -211,7 +212,7 @@ AI_StateBuilding_CE = {
 						any_province = { # No province exists which is the previous province and has not been run yet
 							NOT = { province_id = PREV }
 							
-							check_key = { lhs = tv_cost_land value = 0.001 }
+							has_province_flag = CE_Cand
 							check_key = { lhs = Tmp_0 value = 0.001 }
 							
 							is_key_equal = { lhs = Tmp_7 which = PREV }
@@ -276,7 +277,7 @@ AI_StateBuilding_CE = {
     # Clear flags and Tmp_0 key for all calculated provinces
 	every_province = {
 		limit = {
-			check_key = { lhs = tv_cost_land value = 0.001 }
+			has_province_flag = CE_Cand
 		}
 		if = {
 			limit = {
@@ -301,7 +302,7 @@ AI_StateBuilding_CE = {
     # Tmp_7 = costs to built pathing units
 	every_owned_province = {
 		limit = {
-			check_key = { lhs = tv_cost_land value = 0.001 }
+			has_province_flag = CE_Cand
 			
 			OR = {
 				check_key = { lhs = Tmp_1 value = 0.001 }
@@ -495,7 +496,7 @@ AI_StateBuilding_CE = {
         # This loops always gets the province with the highest relevance
 		every_owned_province = { # everyowned province where CE cost > 0, Relevance > 0 and Relevance > previous highest stored in event_target:Prov
 			limit = {
-				check_key = { lhs = tv_cost_land value = 0.001 }
+				has_province_flag = CE_Cand
 				check_key = { lhs = Tmp_0 value = 0.001 }
 				check_key = { lhs = Tmp_0 which = event_target:Prov }
 			}
