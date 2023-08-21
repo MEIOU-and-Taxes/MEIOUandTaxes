@@ -102,7 +102,7 @@ on_startup = {
 				country_event = { id = cb_types.3 }
 				country_event = { id = cb_types.4 }
 				
-				country_event = { id = POP_Stockpile.0031 }
+				country_event = { id = SYS_Pulse.005 }
 				
 				# Reload DG data
 				country_event = { id = POP_DG.001 }
@@ -306,6 +306,9 @@ on_startup = {
         set_key = { lhs = ID_TN value = 1 }
 
 		every_province = {
+			limit = {
+				is_wasteland = no
+			}
             remove_province_modifier = river_notify
             set_key = { lhs = ID_TN value = 0 }
 			set_key = { lhs = Land_SoilD which = Land_Soil }
@@ -365,18 +368,6 @@ on_startup = {
                 change_key = { lhs = ID_TN value = 1 }
             }
         }
-		every_province = {
-			if = {
-				limit = {
-					OR = {
-						owned_by = AAA
-						is_wasteland = yes
-					}
-				}
-				set_key = { lhs = Land_PSize value = 0 }
-				clr_province_flag = Data
-			}
-		}
 		country_event = {
 			id = POP_Census.002
 		}
@@ -1195,9 +1186,10 @@ on_siege_won_country = {
 	}
 	if = {
 		limit = {
+			FROM = { province_id = 1402 }
+			FROM = { has_building = theodosian_walls_b }
 			NOT = { owns = ROOT }
 			mil_tech = 21
-			FROM = { has_building = theodosian_walls_b }
 		}
 		FROM = { remove_building = theodosian_walls_b }
 	}
@@ -1230,8 +1222,6 @@ on_siege_won_country = {
 
 		civil_war_handle_province_siege = yes
 	}
-	events = {
-	}
 }
 
 # country
@@ -1251,17 +1241,8 @@ on_siege_lost_country = {
 # province
 # root = location, from = losing country
 on_siege_won_province = {
-	if = {
-		limit = {
-			NOT = {
-				controlled_by = owner
-			}
-		}
-		province_event = {
-			id = POP_Looting.004 days = 0 random = 3
-		}
-	}
 	events = {
+		POP_Looting.004
 	}
 }
 
@@ -2290,7 +2271,7 @@ on_bi_yearly_pulse = {
 	events = {
 		PTM_Politics.100 	# Trigger rivalry
 		ostsiedlung.1001
-		POP_Census.709		# Forced exploration idea group progression
+		SYS_Pulse.013		# Forced exploration idea group progression
 		Ottomans.028
 		red_turban.28
 		flavor_tre.1
