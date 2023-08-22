@@ -1,4 +1,7 @@
 namespace = time_of_troubles
+
+### TIME OF TROUBLES ###
+
 country_event = {
 	id = time_of_troubles.1
 	title = "flavor_rus.EVTNAME1101"
@@ -8,27 +11,41 @@ country_event = {
 	mean_time_to_happen = {
 		days = 1
 	}
+	major = yes
 	immediate = {
 		Stab_Subtract1 = yes
-		set_country_flag = time_of_troubles
+		set_country_flag = time_of_troubles	 
 	}
 	option = {
 		name = "flavor_rus.EVTOPTA1101"
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:disaster started, stability reduced:time_of_troubles.1"
+		if = {
+			limit = {
+				has_heir = yes
+			}
+			kill_heir = {}
+		}
+		hidden_effect = {
+		    country_event = {
+			    id = time_of_troubles.2
+			    days = 90
+		    }
+        }		
 	}
 }
+
+### THE INSANITY OF THE RULER ###
+
 country_event = {
 	id = time_of_troubles.2 #The Insanity of the ruler
 	title = "flavor_rus.EVTNAME1102"
 	desc = "flavor_rus.EVTDESC1102"
 	picture = ACCUSATION_eventPicture
 	is_triggered_only = yes
+	major = yes
 	fire_only_once = yes
-
 	trigger = {
 		has_regency = no
-		has_heir = no
-		is_female = no
 	}
 	mean_time_to_happen = {
 		days = 1
@@ -36,8 +53,9 @@ country_event = {
 	option = {
 		name = "flavor_rus.EVTOPTA1102"
 		ai_chance = {
-			factor = 25
+			factor = 10
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
 		Stab_Subtract1 = yes
 		add_ruler_modifier = {
 			name = insane_ruler
@@ -48,22 +66,42 @@ country_event = {
 	option = {
 		name = "flavor_rus.EVTOPTB1102"
 		ai_chance = {
-			factor = 75
+			factor = 90
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:Insane ruler ([Root.Monarch.GetName] [Root.Monarch.Dynasty.GetName]) sidelined, Boris Godunov takes over:time_of_troubles.2"
 		define_ruler = {
 			name = "Boris"
 			dynasty = "Godunov"
 		}
+		random_list = {
+			30 = {}
+			40 = {
+				Stab_Subtract50Percent = yes
+			}
+			30 = {
+				Stab_Subtract1 = yes
+			}
+		}
+		random_core_province = {
+		    limit = { continent = europe }
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1
+			}
+		}
 	}
 }
+
+### ARMED BRIGANDS ###
+
 country_event = {
 	id = time_of_troubles.5 #Armed Brigands
 	title = "flavor_rus.EVTNAME1105"
 	desc = "flavor_rus.EVTDESC1105"
 	picture = ANGRY_MOB_eventPicture
 	is_triggered_only = yes
-	fire_only_once = yes
+	#fire_only_once = yes
 
 	trigger = {
 		any_owned_province = {
@@ -97,17 +135,24 @@ country_event = {
 			limit = {
 				has_province_flag = unsafe_roads
 			}
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1
+			}
 			add_province_modifier = {
 				name = unsafe_roads
 				duration = 1825
 			}
 			custom_tooltip = unsafe_roads_tt
 			hidden_effect = {
-				clr_province_flag = unsafe_roads #event fires only once, no reason to keep the flag
+				clr_province_flag = unsafe_roads
 			}
 		}
 	}
 }
+
+### FIRST DIMITRI ###
+
 country_event = {
 	id = time_of_troubles.6 #First Dimitri
 	title = "flavor_rus.EVTNAME1106"
@@ -115,7 +160,7 @@ country_event = {
 	picture = ACCUSATION_eventPicture
 	is_triggered_only = yes
 	fire_only_once = yes
-
+    major = yes
 	trigger = {
 		any_enemy_country = {
 			OR = {
@@ -134,8 +179,9 @@ country_event = {
 	option = {
 		name = "flavor_rus.EVTOPTA1106"
 		ai_chance = {
-			factor = 10
+			factor = 50
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
 		if = {
 			limit = {
 				has_regency = no
@@ -154,10 +200,41 @@ country_event = {
 			name = "Dimitri I"
 			dynasty = "Rurikovich"
 		}
+		define_consort = {
+			name = "Maryna"
+			dynasty = "Mniszech"
+			country_of_origin = POL
+			culture = polish
+		}
 		add_ruler_modifier = {
 			name = usurper_on_the_throne
 		}
 		add_legitimacy = -50
+		random_enemy_country = {
+				limit = {
+					OR = {
+						is_rival = ROOT
+						NOT = {
+							has_opinion = {
+								who = ROOT
+								value = 0
+							}
+						}
+					}
+					NOT = {	alliance_with = ROOT }
+					NOT = { is_subject_of = ROOT }
+					capital_scope = { continent = europe }
+				}
+				set_country_flag = supporter_of_dimitri
+				add_opinion = {
+				    who = ROOT
+				    modifier = diplomacy_first
+			    }
+				reverse_add_opinion = {
+				    who = PREV
+				    modifier = diplomacy_first
+			    }
+		}
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:First Dimitri was recognised as the legitmate ruler:time_of_troubles.6"
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:ruler treated as an usurper on the throne:time_of_troubles.6"
 	}
@@ -165,8 +242,9 @@ country_event = {
 		name = "flavor_rus.EVTOPTB1106"
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:First Dimitri was expelled:time_of_troubles.6"
 		ai_chance = {
-			factor = 90
+			factor = 50
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		if = {
 			limit = {
 				NOT = { has_country_flag = dimitri_supporter_found }
@@ -219,12 +297,16 @@ country_event = {
 		}
 	}
 }
+
+### FALSE DIMITRI (MUSCOVY) ###
+
 country_event = {
 	id = time_of_troubles.7 #False Dimitri
 	title = "flavor_rus.EVTNAME1107"
 	desc = "flavor_rus.EVTDESC1107"
 	picture = ACCUSATION_eventPicture
 	is_triggered_only = yes
+	major = yes
 	option = {
 		name = "flavor_rus.EVTOPTA1107"
 		ai_chance = {
@@ -232,6 +314,15 @@ country_event = {
 		}
 		set_country_flag = supporter_of_dimitri
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:supported false Dimitri:time_of_troubles.7"
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 5 }
+		
+		add_casus_belli = {
+				type = cb_fabricated_claims
+				months = 24
+				target = FROM
+		}
+		
 		if = {
 			limit = {
 				army_strength = {
@@ -294,6 +385,8 @@ country_event = {
 		}
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:have not supported false Dimitri:time_of_troubles.7"
 
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -5 }
+		
 		if = {
 			limit = {
 				FROM = {
@@ -402,6 +495,9 @@ country_event = {
 		}
 	}
 }
+
+### FALSE DIMITRI (RUSSIA) ###
+
 country_event = {
 	id = time_of_troubles.11
 	title = "flavor_rus.EVTNAME1107"
@@ -414,6 +510,15 @@ country_event = {
 			factor = 75
 		}
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:supported false Dimitri:time_of_troubles.11"
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 5 }
+		
+		add_casus_belli = {
+				type = cb_fabricated_claims
+				months = 24
+				target = FROM
+		}
+		
 		set_country_flag = supporter_of_dimitri
 		if = {
 			limit = {
@@ -478,6 +583,9 @@ country_event = {
 			factor = 25
 		}
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:have not supported false Dimitri:time_of_troubles.11"
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -5 }
+		
 		if = {
 			limit = {
 				FROM = {
@@ -586,12 +694,16 @@ country_event = {
 		}
 	}
 }
+
+### DIMITRI RETURNS ###
+
 country_event = {
 	id = time_of_troubles.8 #Dimitri Returns
 	title = "flavor_rus.EVTNAME1108"
 	desc = "flavor_rus.EVTDESC1108"
 	picture = ACCUSATION_eventPicture
 	is_triggered_only = yes
+	major = yes
 	option = {
 		name = "flavor_rus.EVTOPTA1108"
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:False Dimitri attacked with support from [From.GetName]:time_of_troubles.8"
@@ -602,15 +714,17 @@ country_event = {
 			random_owned_province = {
 				limit = {
 					any_neighbor_province = {
-						owner = {
-							tag = FROM
-						}
+					    OR = {
+						    owner = { tag = FROM }
+							owner = { tag = LIT }
+						}	
 					}
 				}
 				spawn_rebels = {
 					type = pretender_rebels
-					size = 2 #reduced from 3, as rebels were massive
-					leader = "Dimitri I"
+					size = 3
+					leader = "Dimitri"
+					leader_dynasty = "Rurikovich"
 					friend = FROM
 				}
 			}
@@ -622,15 +736,17 @@ country_event = {
 			random_owned_province = {
 				limit = {
 					any_neighbor_province = {
-						owner = {
-							tag = FROM
-						}
+					    OR = {
+						    owner = { tag = FROM }
+							owner = { tag = LIT }
+						}	
 					}
 				}
 				spawn_rebels = {
 					type = pretender_rebels
-					size = 1 #reduced from 2, as rebels were massive
-					leader = "Dimitri I"
+					size = 2
+					leader = "Dimitri"
+					leader_dynasty = "Rurikovich"
 					friend = FROM
 				}
 			}
@@ -642,27 +758,33 @@ country_event = {
 			random_owned_province = {
 				limit = {
 					any_neighbor_province = {
-						owner = {
-							tag = FROM
-						}
+					    OR = {
+						    owner = { tag = FROM }
+							owner = { tag = LIT }
+						}	
 					}
 				}
 				spawn_rebels = {
 					type = pretender_rebels
 					size = 1
-					leader = "Dimitri I"
+					leader = "Dimitri"
+					leader_dynasty = "Rurikovich"
 					friend = FROM
 				}
 			}
 		}
 	}
 }
+
+### FALSE DIMITRI OVERTHROWN ###
+
 country_event = {
 	id = time_of_troubles.9 #False Dimitri Overthrown
 	title = "flavor_rus.EVTNAME1109"
 	desc = "flavor_rus.EVTDESC1109"
 	picture = ACCUSATION_eventPicture
 	is_triggered_only = yes
+	major = yes
 	fire_only_once = yes
 
 	trigger = {
@@ -682,6 +804,7 @@ country_event = {
 				type = pretender_rebels
 				size = 2
 				leader = "Vasily Shuisky"
+				leader_dynasty = "Shuisky"
 			}
 		}
 	}
@@ -723,21 +846,36 @@ country_event = {
 				target = ROOT
 			}
 		}
+		random_core_province = {
+		    limit = { 
+			    is_capital = no
+			    continent = europe 
+			}
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1
+			}
+		}
 	}
 }
+
+# END OF TIME OF TROUBLES #
+
 country_event = {
-	id = time_of_troubles.10 #End of the Time of Troubles
+	id = time_of_troubles.10
 	title = "flavor_rus.EVTNAME1110"
 	desc = "flavor_rus.EVTDESC1110"
 	picture = CITY_DEVELOPMENT_eventPicture
 	is_triggered_only = yes
+	major = yes
 
 	option = {
 		name = "flavor_rus.EVTOPTA1110"
 		ai_chance = {
 			factor = 10
 		}
-		add_adm_power = 100
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
+		add_adm_power = 50
 		log = "FE-TimeOfTroubles:[GetYear]:[Root.GetName]:End of the Time of Troubles, [Root.Monarch.Dynasty.GetName] dynasty kept as rulers:time_of_troubles.10"
 	}
 	
@@ -746,6 +884,7 @@ country_event = {
 		ai_chance = {
 			factor = 90
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 20 }
 		add_adm_power = 50
 		if = { 
 			limit = {
