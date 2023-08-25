@@ -1362,27 +1362,23 @@ TN_effect11 = {
 							has_global_flag = 1_jump
 							has_global_flag = 2_jump
 						}
-						OR = {
-							has_province_modifier = TN_Important
-							has_province_modifier = TN_Dominant
-							has_province_modifier = TN_Major								
-						}
+						has_province_flag = TN_COT_M
 					}
 				}
 
-				OR = {
-					has_global_flag = POP_Sim
-					owner = {
-						OR = {
-							transfers_trade_power_to = event_target:ProvNew
-							event_target:ProvNew = { transfers_trade_power_to = PREV }
-							AND = {
+				owner = {
+					OR = {
+						transfers_trade_power_to = event_target:ProvNew
+						event_target:ProvNew = { transfers_trade_power_to = PREV }
+						AND = {
+							OR = {
+								has_global_flag = POP_Sim
 								NOT = { war_with = event_target:ProvNew }
-								NOT = { trade_embargoing = event_target:ProvNew }
-								NOT = { trade_embargo_by = event_target:ProvNew }
-								has_opinion = { who = event_target:ProvNew value = -150 }
-								reverse_has_opinion = { who = event_target:ProvNew value = -150 }
 							}
+							NOT = { trade_embargoing = event_target:ProvNew }
+							NOT = { trade_embargo_by = event_target:ProvNew }
+							has_opinion = { who = event_target:ProvNew value = -150 }
+							reverse_has_opinion = { who = event_target:ProvNew value = -150 }
 						}
 					}
 				}
@@ -1590,7 +1586,7 @@ TN_effect14 = {
 							AND = {
 								has_province_flag = TN_SectorCent #Is the sector trade center
 								check_key = { lhs = Tmp_0 value = 15 } #min 5 power
-								check_key = { lhs = Tmp_2 value = 0.5 } # 5% of node
+								check_key = { lhs = Tmp_2 value = 0.5 } # 50% of node
 								check_key = { lhs = PublicHelper_Tmp1 value = 60 } #min 60 power in sector
 								check_key = { lhs = PublicHelper_Tmp2 value = 0.4 } #min 40% sector trade power in node
 								owner = {
@@ -1631,12 +1627,12 @@ TN_effect14 = {
 					limit = {
 						OR = {
 							AND = {
-								check_key = { lhs = Tmp_0 value = 5 } # min 6 power
-								check_key = { lhs = Tmp_2 value = 0.05 } # 5% of node
+								check_key = { lhs = Tmp_0 value = 3.5 } # min 3.5 power
+								check_key = { lhs = Tmp_2 value = 0.075 } # 7.5% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 6.2 } # min 6.2 power
-								check_key = { lhs = Tmp_2 value = 0.045 } # 4.5% of node
+								check_key = { lhs = Tmp_0 value = 6 } # min 6 power
+								check_key = { lhs = Tmp_2 value = 0.05 } # 5% of node
 							}
 							is_key_equal = { lhs = Tmp_8 which = ID_Prov }
 						}
@@ -1647,8 +1643,16 @@ TN_effect14 = {
 					limit = {
 						OR = {
 							AND = {
-								check_key = { lhs = Tmp_0 value = 1.75 } # min 1.8 power
+								check_key = { lhs = Tmp_0 value = 1.75 } # min 1.75 power
 								check_key = { lhs = Tmp_2 value = 0.025 } # 2.5% of node
+							}
+							AND = {
+								check_key = { lhs = Tmp_0 value = 1.25 } # min 1.25 power
+								check_key = { lhs = Tmp_2 value = 0.1 } # 10% of node
+							}
+							AND = {
+								check_key = { lhs = Tmp_0 value = 1.5 } # min 1.25 power
+								check_key = { lhs = Tmp_2 value = 0.075 } # 10% of node
 							}
 							
 							AND = {
@@ -1736,6 +1740,7 @@ TN_effect14 = {
 		set_key = { lhs = Tmp_5 value = 0 }
 		set_key = { lhs = Tmp_6 value = 0 }
 		clr_province_flag = TN_COT_M
+		clr_province_flag = TN_COT_D
 		if = {
 			limit = { 
 				OR = {
@@ -1780,6 +1785,7 @@ TN_effect14 = {
 					is_key_equal = { lhs = Tmp_3 value = 3 } # major
 				}
 				set_province_flag = TN_COT_M
+				set_province_flag = TN_COT_D
 				add_permanent_province_modifier = {
 					name = TN_Major
 					duration = -1
@@ -1794,6 +1800,7 @@ TN_effect14 = {
 					is_key_equal = { lhs = Tmp_3 value = 4 } # dominant
 				}
 				set_province_flag = TN_COT_M
+				set_province_flag = TN_COT_D
 				add_permanent_province_modifier = {
 					name = TN_Dominant
 					duration = -1
@@ -3000,62 +3007,52 @@ TN_effect20 = {
 					knows_country = PREV
 				}
 			}
-
-			OR = {
-				AND = {
-					has_global_flag = POP_Sim
-					
-					OR = {
-						owned_by = PREV
-						has_province_flag = TradePost@event_target:ProvNew
-						has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 }
+			owner = {
+				OR = {
+					transfers_trade_power_to = event_target:ProvNew
+					event_target:ProvNew = { transfers_trade_power_to = PREV }
+					AND = {
+						OR = {
+							has_global_flag = POP_Sim
+							NOT = { war_with = event_target:ProvNew }
+						}
+						NOT = { trade_embargoing = event_target:ProvNew }
+						NOT = { trade_embargo_by = event_target:ProvNew }
+						has_opinion = { who = event_target:ProvNew value = -150 }
+						reverse_has_opinion = { who = event_target:ProvNew value = -150 }
 					}
 				}
-
-				AND = {
-
-					OR = {
-						has_global_flag = POP_Sim
-
-						owner = {
-							OR = {
-								transfers_trade_power_to = event_target:ProvNew
-								event_target:ProvNew = { transfers_trade_power_to = PREV }
-								AND = {
-									NOT = { war_with = event_target:ProvNew }
-									NOT = { trade_embargoing = event_target:ProvNew }
-									NOT = { trade_embargo_by = event_target:ProvNew }
-									has_opinion = { who = event_target:ProvNew value = -150 }
-									reverse_has_opinion = { who = event_target:ProvNew value = -150 }
-								}
-							}
+			}
+			
+			OR = {
+				has_province_flag = TN_COT_M
+				has_global_flag = Is_TN_Major
+				has_global_flag = Is_TN_Dominant
+				has_province_flag = TradePost@event_target:ProvNew
+				event_target:ProvNew = {
+					AND = {
+						NOT = { num_of_cities = 2 }
+						capital_scope = {
+							same_trade_node_as = PREV_PREV
+							has_province_flag = TN_SectorCent
 						}
 					}
-					
-					OR = {
-						has_province_modifier = TN_Dominant
-						has_province_modifier = TN_Major
-						has_province_modifier = TN_Important
-						has_global_flag = Is_TN_Major
-						has_global_flag = Is_TN_Dominant
-						has_province_flag = TradePost@event_target:ProvNew
-						
-						event_target:ProvNew = {
-							any_owned_province = {
-								same_trade_node_as = PREV_PREV
-								has_province_flag = TN_SectorCent
-							}
-						}						
+				}
+				AND = {
+					event_target:ProvNew = { num_of_cities = 2 }
+					any_trade_node_member_province = {
+						owned_by = event_target:ProvNew
+						has_province_flag = TN_SectorCent
 					}
+				}
+			}
 
-					#OR = {
-					#	has_trade_modifier = { who = event_target:ProvNew key = trade_capital }
-					#	PREV = {
-					#		has_trade_modifier = { who = event_target:ProvNew key = trade_capital }
-					#	}
-					#}					
-				}				
-			}			
+			#OR = {
+			#	has_trade_modifier = { who = event_target:ProvNew key = trade_capital }
+			#	PREV = {
+			#		has_trade_modifier = { who = event_target:ProvNew key = trade_capital }
+			#	}
+			#}			
 		}
 		if = {
 			limit = { # Check if that sector also can spread trude further  Can keep spreading only if both have sea access.
@@ -3156,26 +3153,19 @@ TN_effect22 = { # Connect, jump and spread.
 				OR = {
 					owned_by = event_target:ProvNew
 					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
-				}				
+				}
 
 				AND = {		
 					OR = {	
 						AND = {
 							has_global_flag = 1_jump
-							OR = {
-								has_province_modifier = TN_Dominant
-								has_province_modifier = TN_Major
-								has_province_modifier = TN_Important							
-							}
+							has_province_flag = TN_COT_M
 											
 						}
 	
 						AND = {
 							has_global_flag = 2_jump
-							OR = {
-								has_province_modifier = TN_Dominant
-								has_province_modifier = TN_Major
-							}	
+							has_province_flag = TN_COT_D
 							
 						}
 					}		
@@ -3185,7 +3175,10 @@ TN_effect22 = { # Connect, jump and spread.
 							transfers_trade_power_to = event_target:ProvNew
 							event_target:ProvNew = { transfers_trade_power_to = PREV }
 							AND = {
-								NOT = { war_with = event_target:ProvNew }
+								OR = {
+									has_global_flag = POP_Sim
+									NOT = { war_with = event_target:ProvNew }
+								}
 								NOT = { trade_embargoing = event_target:ProvNew }
 								NOT = { trade_embargo_by = event_target:ProvNew }
 								has_opinion = { who = event_target:ProvNew value = -150 }
@@ -3200,7 +3193,7 @@ TN_effect22 = { # Connect, jump and spread.
 		set_province_flag = TN_SectorCentReachWithin
 		set_key = { lhs = Public_Tmp1 which = PREV }
 		change_key = { lhs = Public_Tmp1 value = 1 }
-		PREV = { set_province_flag = jumped_success }		
+		PREV = { set_province_flag = jumped_success }
 		
 		if = {
 			limit = {
@@ -3233,27 +3226,22 @@ TN_effect23 = {
 			has_province_flag = TN_SectorCent
 			NOT = { has_province_flag = TN_SectorCentReachWithin }			
 			#NOT = { has_province_flag = TN_SectorCentNoTC }
+			has_province_flag = TN_COT_D
 
 			trade_range = event_target:ProvNew
 			owner = {
 				knows_country = event_target:ProvNew
-			}			
-			OR = {
-				has_global_flag = POP_Sim
-
-				owner = {
-					AND = {
+			}		
+			owner = {
+				AND = {
+					OR = {
+						has_global_flag = POP_Sim
 						NOT = { war_with = event_target:ProvNew }
-						NOT = { trade_embargoing = event_target:ProvNew }
-						NOT = { trade_embargo_by = event_target:ProvNew }
 					}
+					NOT = { trade_embargoing = event_target:ProvNew }
+					NOT = { trade_embargo_by = event_target:ProvNew }
 				}
 			}
-
-			OR = {
-				has_province_modifier = TN_Dominant
-				has_province_modifier = TN_Major
-			}	
 			isValidProv = yes		
 		}
 		set_province_flag = TN_SectorCentReachWithin
