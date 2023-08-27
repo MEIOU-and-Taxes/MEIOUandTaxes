@@ -368,11 +368,11 @@ TN_effect14 = {
 								check_key = { lhs = Tmp_2 value = 0.33 } # 33% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 10 } # min 12 power
+								check_key = { lhs = Tmp_0 value = 9 } # min 12 power
 								check_key = { lhs = Tmp_2 value = 0.25 } # 20% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 15 } # min 12 power
+								check_key = { lhs = Tmp_0 value = 14 } # min 12 power
 								check_key = { lhs = Tmp_2 value = 0.20 } # 20% of node
 							}
 							AND = {
@@ -1890,7 +1890,7 @@ TN_effect21 = {
         set_key = { lhs = Public_Tmp1 value = 2 }
     }
 }
-TN_effect22 = { # Connect, jump and spread.
+TN_effect22 = { # Connect, jump and spread. Dominants
 	# Find if it is connected
 	tradenode_mult_$id$ = {
 		limit = {
@@ -1916,20 +1916,8 @@ TN_effect22 = { # Connect, jump and spread.
 					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
 				}
 
-				AND = {		
-					OR = {	
-						AND = {
-							has_global_flag = 1_jump
-							has_province_flag = TN_COT_M
-											
-						}
-	
-						AND = {
-							has_global_flag = 2_jump
-							has_province_flag = TN_COT_D
-							
-						}
-					}		
+				AND = {
+					has_province_flag = TN_COT_D
 					
 					owner = {
 						OR = {
@@ -1962,13 +1950,7 @@ TN_effect22 = { # Connect, jump and spread.
 					owned_by = event_target:ProvNew		
 					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
 				}
-			}
-			if = {
-				limit = {
-					NOT = { has_global_flag = 2_jump }
-				}				
-				set_province_flag = TN_SectorCentReachSpread2
-			}		
+			}	
 		}
 		else_if = {
 			limit = {
@@ -2012,5 +1994,79 @@ TN_effect23 = {
 		}
 		set_key = { lhs = Public_Tmp1 which = PREV }
 		change_key = { lhs = Public_Tmp1 value = 1.5 }
+	}
+}
+TN_effect24 = { # Connect, jump and spread.
+	# Find if it is connected
+	tradenode_mult_$id$ = {
+		limit = {
+			OR = {
+				has_province_flag = TN_SectorCent
+				has_province_flag = SMM_SectorCent
+				has_province_flag = TN_SectorCentNoTC
+			}
+			NOT = { has_province_flag = TN_SectorCentReachWithin }
+			isValidProv = yes
+			OR = {
+				has_province_flag = HasSeaAccess
+				has_province_flag = HasSilkAccess
+			}
+			check_key = { lhs = TN_SectorScore value = -1 }
+			PREV = { trade_range = PREV }
+			owner = {
+				event_target:ProvNew = {
+					knows_country = PREV
+				}
+			}
+
+			OR = {
+				owned_by = event_target:ProvNew
+				has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
+
+				AND = {		
+					has_province_flag = TN_COT_M	
+					
+					owner = {
+						OR = {
+							transfers_trade_power_to = event_target:ProvNew
+							event_target:ProvNew = { transfers_trade_power_to = PREV }
+							AND = {
+								OR = {
+									has_global_flag = POP_Sim
+									NOT = { war_with = event_target:ProvNew }
+								}
+								NOT = { trade_embargoing = event_target:ProvNew }
+								NOT = { trade_embargo_by = event_target:ProvNew }
+								has_opinion = { who = event_target:ProvNew value = -150 }
+								reverse_has_opinion = { who = event_target:ProvNew value = -150 }
+							}
+						}
+					}							
+				}
+			}
+		}
+
+		set_province_flag = TN_SectorCentReachWithin
+		set_key = { lhs = Public_Tmp1 which = PREV }
+		change_key = { lhs = Public_Tmp1 value = 1 }
+		PREV = { set_province_flag = jumped_success }
+		
+		if = {
+			limit = {
+				OR = {
+					owned_by = event_target:ProvNew		
+					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
+				}
+			}			
+			set_province_flag = TN_SectorCentReachSpread2
+		}
+		else_if = {
+			limit = {
+				has_province_flag = TradePost@event_target:ProvNew # Connect with everything inside
+			}
+			set_global_flag = HasTradePost # Then it will do a spread but can't really jump.
+			set_province_flag = TN_SectorCentReachWithin			
+			TN_effect11 = yes
+		}		
 	}
 }
