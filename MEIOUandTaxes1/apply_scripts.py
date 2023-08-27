@@ -4,6 +4,7 @@ import glob
 from queue import *
 from threading import Thread
 import time
+
 py_block = re.compile('\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
 py_string2 = re.compile('#.*')
@@ -227,54 +228,60 @@ def pathend (text):
 
 
 if __name__ == '__main__':
-	start = time.time()
-	dont = ['Tools for Modding', 'graphicalculturetype.txt', pathcont('bookmarks'), pathcont('countries'), pathcont('country_colors'), pathcont('country_tags'),
-		pathcont('cultures'), pathcont('event_modifiers'), pathcont('opinion_modifiers'), pathstart('map'), pathstart('interface'), pathstart('gfx'), pathcont('units'),
-		pathcont('static_modifiers'), pathcont('countries'), pathcont('country_tags'), pathcont('province_names'), pathcont('tradenodes'), 'SYS-CensusDisplay.txt',
-		pathcont('event_modifiers'),'DISP-Trade_Bought.txt', 'DISP-Trade_Bought_2.txt', 'DISP-Trade_Bought_3.txt','DISP-Trade_Sold.txt', 'DISP-Trade_Sold_2.txt', 'DISP-Trade_Sold_3.txt']
-	paths = [path for path in glob.glob(os.path.join('*', '**', '*.txt'), recursive=True) if not check_dont(path, dont)]
+    try:
+        output_path = os.path.expanduser(r'~\Documents\Paradox Interactive\Europa Universalis IV\mod\MEIOUandTaxes1')
+        start = time.time()
+        dont = ['Tools for Modding', 'graphicalculturetype.txt', pathcont('bookmarks'), pathcont('countries'), pathcont('country_colors'), pathcont('country_tags'),
+                pathcont('cultures'), pathcont('event_modifiers'), pathcont('opinion_modifiers'), pathstart('map'), pathstart('interface'), pathstart('gfx'), pathcont('units'),
+                pathcont('static_modifiers'), pathcont('countries'), pathcont('country_tags'), pathcont('province_names'), pathcont('tradenodes'), 'SYS-CensusDisplay.txt',
+                pathcont('event_modifiers'), 'DISP-Trade_Bought.txt', 'DISP-Trade_Bought_2.txt', 'DISP-Trade_Bought_3.txt', 'DISP-Trade_Sold.txt', 'DISP-Trade_Sold_2.txt', 'DISP-Trade_Sold_3.txt']
+        paths = [path for path in glob.glob(os.path.join('*', '**', '*.txt'), recursive=True) if not check_dont(path, dont)]
 
-	files = dict()
-	scripts = dict()
-	
-	for path in paths:
-		print(path)
-		files[path] = parse_file(path)
+        files = dict()
+        scripts = dict()
 
-	dont = ['00-triggers.txt']
-	print("Loading effects and triggers...")
-	for path in glob.glob(os.path.join('common', 'scripted_effects', '*.txt')):
-		paths.remove(path)
-		for script in files[path]:
-			scripts[script[0]] = script[2]
+        for path in paths:
+            print(path)
+            files[path] = parse_file(path)
 
-	for path in glob.glob(os.path.join('common', 'scripted_triggers', '*.txt')):
-		paths.remove(path)
-		for script in files[path]:
-			if len(script[2]) > 1 and type(script[2]) == type(list()) and not check_dont(path, dont):
-				scripts[script[0]] = [['AND', '=', script[2]]]
-			else:
-				scripts[script[0]] = script[2]
-	
-	
-	print("Applying scripts to files...")
-	q = Queue(maxsize=0)
-	num_threads = min(20, len(paths))
+        dont = ['00-triggers.txt']
+        print("Loading effects and triggers...")
+        for path in glob.glob(os.path.join('common', 'scripted_effects', '*.txt')):
+            paths.remove(path)
+            for script in files[path]:
+                scripts[script[0]] = script[2]
 
-	for i in range(len(paths)):
-		q.put(paths[i])
+        for path in glob.glob(os.path.join('common', 'scripted_triggers', '*.txt')):
+            paths.remove(path)
+            for script in files[path]:
+                if len(script[2]) > 1 and type(script[2]) == type(list()) and not check_dont(path, dont):
+                    scripts[script[0]] = [['AND', '=', script[2]]]
+                else:
+                    scripts[script[0]] = script[2]
 
-	for i in range (num_threads):
-		worker = Thread(target=run,args=(q,files))
-		worker.start()
+        print("Applying scripts to files...")
+        q = Queue(maxsize=0)
+        num_threads = min(20, len(paths))
 
-	q.join()
+        for i in range(len(paths)):
+            q.put(paths[i])
 
-	print("Saving files...")
-	for path in paths:
-		with open(path, 'w', encoding='ISO-8859-1') as f:
-			f.write(reconstruct(files[path]))
-	end = time.time()
-	print((end - start))
+        for i in range(num_threads):
+            worker = Thread(target=run, args=(q, files))
+            worker.start()
+
+        q.join()
+
+        print("Saving files...")
+        for path in paths:
+            save_path = os.path.join(output_path, os.path.relpath(path))
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            with open(save_path, 'w', encoding='ISO-8859-1') as f:
+                f.write(reconstruct(files[path]))
+        end = time.time()
+        print((end - start))
+    except Exception as e:
+        print("An error occurred:", e)
+        input("Press Enter to exit...")
 
 
