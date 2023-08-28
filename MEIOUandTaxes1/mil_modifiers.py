@@ -94,6 +94,6 @@ if __name__ == "__main__":
             iterator = 0
             for i in range(5, 100, 3):
                 iterator = iterator+1
-                f.write(f'''knowledge_penalty_{i}: "Insuficciently supplied armies (Knowledge). \\nTier {33-iterator}"\n''')
+                f.write(f'''knowledge_penalty_{i}: "Insufficiently supplied armies (Knowledge). \\nTier {33-iterator}"\n''')
 
 

@@ -16,14 +16,18 @@ country_event = {
 		log = "Event 1"
 		# Setup POP
 		StartUp_ApplyDeathTrauma = yes # Trauma from POP loss
-		Inst_Init = yes # need these to be present during sim - Initialize institutions in provinces
+        country_event = {
+            id = POP_StartInit.003 ## initialise institution spread
+        }
 
         set_key = { lhs = ID_Region value = 1 }
         set_key = { lhs = ID_SR value = 1 }
         set_key = { lhs = ID_Cont value = 1 }
         set_key = { lhs = ID_TN value = 1 }
         
-		POP_SetIDTag = yes # Assign unique tag ID's
+        country_event = { # Assign unique tag ID's
+            id = POP_StartInit.012
+        }
 		
 
         regiongroup = { # Assign unique region ID's
@@ -126,13 +130,9 @@ country_event = {
         set_key = { lhs = ID_Cont value = 0 }
         set_key = { lhs = ID_TN value = 0 }
         
-        every_province = {
-            limit = {
-				isValidEmpty = yes
-            }
-            POP_GetLandTime = yes # Calc base land travel time for CE
-		}
-		TN_PassApply = yes
+        country_event = { ### Apply Pass system
+            id = POP_StartInit.001
+        }
 
         country_event = {
             id = POP_StartUp.013 # Calc land to sea distance for coastal provinces
@@ -156,12 +156,18 @@ country_event = {
         }
 		
         # Initialize political system for reforms, privileges etc.
-		Rights_RegionInitData = yes
-		Rights_RegionInitReforms = yes
+        country_event = { # Initialize provincial Rights data
+            id = POP_StartInit.005
+        }
+        country_event = { # Initialize country Rights data
+            id = POP_StartInit.006
+        }
         Rights_Presim = yes
         Rights_Init = yes
         
-        Post_Init = yes
+        country_event = { ## Apply Post system
+            id = POP_StartInit.004
+        }
 
         every_country = {
             limit = {
@@ -181,14 +187,15 @@ country_event = {
 			if = { limit = { check_key = { lhs = Tmp_0 value = 0.2 } } add_corruption = 0.2 subtract_key = { lhs = Tmp_0 value = 0.2 } }
 			if = { limit = { check_key = { lhs = Tmp_0 value = 0.1 } } add_corruption = 0.1 subtract_key = { lhs = Tmp_0 value = 0.1 } }
         }
+        country_event = {
+            id = POP_StartInit.008 # Apply preset class ratio's and map populations
+        }
 
         every_province = {
             limit = {
 				isValidEmpty = yes
             }
             save_event_target_as = Prov
-            
-            StartUp_InitClass = yes # Apply preset class ratio's and map populations
 
             if = { # Initialize provincial local autonomy
                 limit = {
@@ -1031,7 +1038,10 @@ country_event = {
                 }
                 set_key = { lhs = Tmp_2 which = Tmp_3 }
             }
-            Startup_LandSizeBoosts = yes
+            ### Apply local and province based modifications
+            province_event = {
+                id = POP_StartInit.009
+            }
             set_key = { lhs = Tmp_0 which = Land_Size }
 			subtract_key = { lhs = Tmp_0 value = 2500 }
 			if = {
@@ -1320,7 +1330,9 @@ country_event = {
         
 
         ## Initialization of countries sector trade centers
-        StartUp_SimMerchants = yes
+        country_event = {
+            id = POP_StartInit.010
+        }
     }
 
     option = {
@@ -1461,7 +1473,7 @@ country_event = {
                 }
             }
 			country_event = {
-				id = POP_Stockpile.0031 # Calculate and set the state maintenance and military maintenance of tags (units on the map)
+				id = SYS_Pulse.005 # Calculate and set the state maintenance and military maintenance of tags (units on the map)
 			}
             country_event = {
                 id = POP_Census.002 # Recalc all API Modifiers
@@ -1482,19 +1494,16 @@ country_event = {
                 id = POP_Census.0012 # Set Grain Dole, Tarifs, Sector Score and Rates, Sector Subsistance
             }
             country_event = {
-                id = POP_Census.705 # trade calculation for trade centers
+                id = SYS_Centers.001 # trade calculation for trade centers
             }
             country_event = {
-                id = POP_Census.706 # trade calculation for production centers
+                id = SYS_Centers.002 # trade calculation for production centers
             }
             country_event = {
-                id = POP_Census.707 # trade calculation for cities centres
+                id = SYS_Centers.003 # trade calculation for cities centres
             }
             country_event = {
                 id = POP_Census.0013 # Assign trade center modifiers
-            }
-            country_event = {
-                id = POP_Census.0014 # Special trade network connections (?)
             }
             country_event = {
                 id = POP_Census.0015 # Actual trade calculation "Do trade by resolving bids and offers in each sectors" - scripted_effects/SYS-Trade.txt/TN_DoTrade effect
@@ -1518,7 +1527,7 @@ country_event = {
                 id = POP_Census.0022 # Run tax script
             }
             country_event = {
-                id = POP_Census.112 # Run Trade Post script
+                id = SYS_Post.001 # Run Trade Post script
             }
             country_event = { # Calculate income, spending, and class fulfillments for each fulfillment types
                 id = POP_Census.0019
@@ -1902,7 +1911,7 @@ country_event = {
         }
 
         country_event = {
-            id = POP_Census.004
+            id = SYS_Pulse.014
         }
 
         every_country = {
@@ -1929,16 +1938,16 @@ country_event = {
         }
 
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
 
 		clr_global_flag = POP_Sim
@@ -2026,7 +2035,7 @@ country_event = {
                 country_event = { id = cb_types.3 }
                 country_event = { id = cb_types.4 }
                 
-                country_event = { id = POP_Stockpile.0031 }
+                country_event = { id = SYS_Pulse.005 }
                 
                 # Reload DG data
                 country_event = { id = POP_DG.001 }
@@ -2288,12 +2297,18 @@ country_event = {
     is_triggered_only = yes
     
     immediate = {
-        POP_SetIDTag = yes
+        country_event = { # Assign unique tag ID's
+            id = POP_StartInit.012
+        }
         
-        Inst_Init = yes # need these to be present during sim
-        Post_Init = yes
         country_event = {
-            id = POP_Census.112
+            id = POP_StartInit.003 ## initialise institution spread
+        }
+        country_event = { ## Apply Post system
+            id = POP_StartInit.004
+        }
+        country_event = {
+            id = SYS_Post.001
         }
         
         every_province = {
@@ -2325,8 +2340,12 @@ country_event = {
         }
 		
         # Reinitialize political system for reforms, privileges etc.
-		Rights_RegionInitReforms = yes
-        Rights_RedTurbanInit = yes
+        country_event = { # Initialize country Rights data
+            id = POP_StartInit.006
+        }
+        country_event = { # Initialize Red Turban Rights data
+            id = POP_StartInit.007
+        }
         every_country = {
             limit = {
                 exists = yes
@@ -2347,7 +2366,9 @@ country_event = {
                     isValidCountry = yes
                 }
             }
-            misc_setup_effect = yes
+            country_event = { ## Various Flavour setup
+                id = POP_StartInit.013
+            }
             
             if = {
                 limit = {
@@ -2382,7 +2403,9 @@ country_event = {
         #country_event = {
         #	id = distance_calc.1
         #}
-		TN_PassApply = yes
+        country_event = { ### Apply Pass system
+            id = POP_StartInit.001
+        }
         every_country = {
             limit = {
                 isValidCountry = yes
@@ -2657,13 +2680,13 @@ country_event = {
         
         # Update center setup
         country_event = {
-            id = POP_Census.705
+            id = SYS_Centers.001
         }
         country_event = {
-            id = POP_Census.706
+            id = SYS_Centers.002
         }
         country_event = {
-            id = POP_Census.707
+            id = SYS_Centers.003
         }
         NaturalFeatures = yes
         # For Timur
@@ -2941,15 +2964,6 @@ country_event = {
         set_global_flag = POP_Sim8
         set_global_flag = POP_Sim10
         set_global_flag = POP_Sim20
-        every_province = {
-            if = {
-                limit = {
-                    NOT = { owned_by = AAA }
-                    is_wasteland = no
-                }
-                set_province_flag = Data
-            }
-        }
         
         YUA = {
             every_province = {
@@ -3600,9 +3614,9 @@ country_event = {
                 country_event = { id = POP_Census.893 days = 6 }
                 hidden_effect = { country_event = { id = POP_Census.934 } }
             }
-            country_event = { id = Privilege.998 }
-            country_event = { id = Rights.999 }
-            country_event = { id = POP_Census.992 }
+            country_event = { id = SYS_UI.001 }
+            country_event = { id = SYS_UI.003 }
+            country_event = { id = SYS_UI.004 }
             #Edu_DoCountry = yes
             MP_Init = yes
             Centralism_Check = yes

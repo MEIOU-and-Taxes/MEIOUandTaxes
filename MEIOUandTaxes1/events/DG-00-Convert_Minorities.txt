@@ -59,14 +59,24 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		if = {
-			limit = {
-				has_country_flag = biannual
-			}
-			regiongroup = {
-				region = {
+		regiongroup = {
+			region = {
+				limit = {
+					isValidProv = yes
+				}
+				if = {
 					limit = {
-						isValidProv = yes
+						OR = {
+							#always = yes # testing
+							AND = {
+								AAA = { has_country_flag = biannual }
+								check_key = { lhs = ID_Prov_Opt which = ID_Bi1 }
+							}
+							AND = {
+								AAA = { NOT = { has_country_flag = biannual } }
+								NOT = { check_key = { lhs = ID_Prov_Opt which = ID_Bi1 } }
+							}
+						}
 					}
 					export_to_key = { lhs = DG_Tmp1 value = religion who = owner }
 					if = {
@@ -316,7 +326,7 @@ province_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		DG_on_province_religion_converted_effect = yes
+		hidden_effect = { DG_on_province_religion_converted_effect = yes }
 	}
 
 	option = {
@@ -435,50 +445,96 @@ province_event = {
 }
 
 country_event = {
-	id = DG_Convert.010
-	title = "DG_Convert.010.title"
-	desc = "DG_Convert.010.desc"
+	id = DG_Convert.011
+	title = "DG_Convert.004.title"
+	desc = "DG_Convert.004.desc"
 	picture = MEIOU_AND_TAXES_eventPicture
 
 	hidden = yes
 	is_triggered_only = yes
 	
+	immediate = {
+		every_owned_province = { DG_on_province_owner_change_effect = yes }
+	}
+
+	option = {
+		name = "DG_Convert.004.opta"
+	}
+}
+
+province_event = {
+	id = DG_Convert.012
+	title = "DG_Convert.004.title"
+	desc = "DG_Convert.004.desc"
+	picture = MEIOU_AND_TAXES_eventPicture
+
+	hidden = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = { DG_on_province_religion_converted_effect = yes }
+	}
+
+	option = {
+		name = "DG_Convert.004.opta"
+	}
+}
+province_event = {
+	id = DG_Convert.013
+	title = "DG_Convert.003.title"
+	desc = "DG_Convert.003.desc"
+	picture = MEIOU_AND_TAXES_eventPicture
+
+	hidden = yes
+	is_triggered_only = yes
+
 	trigger = {
-		tag = AAA
+		NOT = { is_colony = yes }
 	}
 	
 	immediate = {
-		every_province = {
-			limit = {
-				has_province_flag = DG_Update
-			}
+		MN_AddOwnerConq = yes
+		MN_ConvColo = yes
+	}
+
+	option = {
+		name = "DG_Convert.003.opta"
+	}
+}
+province_event = {
+	id = DG_Convert.014
+	title = "DG_Convert.003.title"
+	desc = "DG_Convert.003.desc"
+	picture = MEIOU_AND_TAXES_eventPicture
+
+	hidden = yes
+	is_triggered_only = yes
+
+	trigger = {
+		exists = AVI
+	}
+	
+	immediate = {
+		if = {
+			limit = { owner = { religion = avignonist } }
 			if = {
-				limit = {
-					OR = {
-						religion = catholic 
-						religion = avignonist
-					}
-					has_cardinal = yes 
-				}
-				set_province_flag = had_cardinal
+				limit = { religion = catholic }
+				change_religion = avignonist
 			}
-			MN_GetSlotInit = yes
-			set_province_flag = dg_pulse_mute
-			change_religion_effect = yes
-			
-			MN_Regularize = { type = Rural }
-			MN_Regularize = { type = Urban }
-			MN_Regularize = { type = Notables }
-			
-			MN_GetSlotInit = yes
-			MN_CheckSlot = yes
-			set_province_flag = MN_AutonomyUpdate
-			clr_province_flag = DG_Update
+			hidden_effect = { MN_RlgChange = { from = 1 to = 7 } }
+		}
+		else_if = {
+			limit = { owner = { religion = catholic } }
+			if = {
+				limit = { religion = avignonist }
+				change_religion = catholic
+			}
+			hidden_effect = { MN_RlgChange = { from = 7 to = 1 } }
 		}
 	}
 
 	option = {
-		name = "DG_Convert.010.opta"
+		name = "DG_Convert.003.opta"
 	}
 }
 

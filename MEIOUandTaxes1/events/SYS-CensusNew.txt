@@ -10,6 +10,24 @@ country_event = {
     
     immediate = {
 		hidden_effect = {
+			every_province = {
+				if = {
+					limit = {
+						isValidProv = yes
+					}
+					if = {
+						limit = {
+							NOT = { has_province_flag = Colony_Init }
+						}
+						owner = {
+							set_country_flag = tf_recalculate_communication_efficiency
+						}
+						province_event = {
+							id = SYS_Colony.001
+						}
+					}
+				}
+			}
 			regiongroup = {
 				region = {
 					limit = {
@@ -495,814 +513,6 @@ country_event = {
 		name = no_localisation
     }
 }
-country_event = {
-    id = POP_Census.705
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-    
-    is_triggered_only = yes
-    trigger = {
-        tag = AAA
-    }
-    
-    immediate = {
-		hidden_effect = {
-			if = {
-				limit = {
-					OR = {
-						has_global_flag = POP_Sim
-						has_country_flag = triannual1
-						NOT = { is_year = 1357 }
-					}
-				}
-				# Trade centers
-				TNCenters = yes
-			}
-		}
-	}
-
-    option = {
-		name = no_localisation
-    }
-}
-country_event = {
-    id = POP_Census.706
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-    
-    is_triggered_only = yes
-    trigger = {
-        tag = AAA
-    }
-    
-    immediate = {
-		hidden_effect = {
-			if = {
-				limit = {
-					OR = {
-						has_global_flag = POP_Sim
-						has_country_flag = triannual2
-					}
-				}
-				# Production centers
-				PNCenters = yes
-			}
-		}
-	}
-
-    option = {
-		name = no_localisation
-    }
-}
-country_event = {
-    id = POP_Census.707
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-    
-    is_triggered_only = yes
-    trigger = {
-        tag = AAA
-    }
-    
-    immediate = {
-		hidden_effect = {
-			if = {
-				limit = {
-					OR = {
-						has_global_flag = POP_Sim
-						has_country_flag = triannual3
-					}
-				}
-				# City centers
-				CityCenters = yes
-			}
-		}
-	}
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = { ### Forced tech upgrades
-	id = POP_Census.708
-	title = "no_localisation"
-	desc = "no_localisation"
-	picture = CITY_DEVELOPMENT_eventPicture
-	
-	hidden = yes
-	
-	is_triggered_only = yes
-	
-	trigger = {
-	}
-	
-	immediate = {
-		every_country = {
-			limit = {
-				ai = yes
-				OR = {
-					adm_power = 600
-					dip_power = 600
-					mil_power = 600
-				}
-			}
-			hidden_effect = { export_tech_cost = yes }
-			adm_available = { output=Tech_Tmp1 }
-			multiply_key = { lhs = Tech_Tmp1 value = 0.75 }
-			set_key = { lhs = Tech_Tmp2 which = Tech_ADMCost }
-			if = {
-				limit = {
-					check_key = { lhs = Tech_Tmp1 which = Tech_ADMCost }
-				}
-				log = "TECH_FIX added administrative tech to [This.GetName], costing [This.admin_cost.GetValue] adm points"
-				hidden_effect = { scaled_admin_cost_country = { input=Tech_ADMCost } }
-				add_adm_tech = 1
-			}
-			dip_available = { output=Tech_Tmp1 }
-			multiply_key = { lhs = Tech_Tmp1 value = 0.75 }
-			set_key = { lhs = Tech_Tmp2 which = Tech_DIPCost }
-			if = {
-				limit = {
-					check_key = { lhs = Tech_Tmp1 which = Tech_DIPCost }
-				}
-				log = "TECH_FIX added diplomatic tech to [This.GetName], costing [This.diplo_cost.GetValue] dip points"
-				hidden_effect = { scaled_diplo_cost_country = { input=Tech_DIPCost } }
-				add_dip_tech = 1
-			}
-			mil_available = { output=Tech_Tmp1 }
-			multiply_key = { lhs = Tech_Tmp1 value = 0.75 }
-			set_key = { lhs = Tech_Tmp2 which = Tech_MILCost }
-			if = {
-				limit = {
-					check_key = { lhs = Tech_Tmp1 which = Tech_MILCost }
-				}
-				log = "TECH_FIX added military tech to [This.GetName], costing [This.milit_cost.GetValue] mil points"
-				hidden_effect = { scaled_milit_cost_country = { input=Tech_MILCost } }
-				add_mil_tech = 1
-			}
-			
-			hidden_effect = { set_key = { lhs = Tech_Tmp1 value = 0 } }
-		}
-	}
-	option = {
-		name = "no_localisation"
-	}
-}
-
-country_event = { ### Forced exploration idea group progression
-	id = POP_Census.709
-	title = "no_localisation"
-	desc = "no_localisation"
-	picture = CITY_DEVELOPMENT_eventPicture
-	
-	hidden = yes
-	is_triggered_only = yes
-	
-	trigger = {
-		ai = yes
-		dip_power = 300
-		has_idea_group = exploration_ideas
-		NOT = { has_idea = exploration_ideas_3 }
-	}
-	
-	immediate = {
-			if = {
-				limit = {
-					has_idea = exploration_ideas_2
-				}
-				add_idea = exploration_ideas_3
-				add_dip_power = -250
-				log = "SYS-CensusNew:[GetYear]:[This.GetName]:forced progressed to exploration_idea_3"
-			}
-			else_if = {
-				limit = {
-					has_idea = exploration_ideas_1
-				}
-				add_idea = exploration_ideas_2
-				add_dip_power = -250
-				log = "SYS-CensusNew:[GetYear]:[This.GetName]:forced progressed to exploration_idea_2"
-			}
-			else = {
-				add_idea = exploration_ideas_1
-				add_dip_power = -250
-				log = "SYS-CensusNew:[GetYear]:[This.GetName]:forced progressed to exploration_idea_1"
-			}
-		}
-	option = {
-		name = "no_localisation"
-	}
-}
-
-country_event = {
-    id = POP_Census.0014
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-	# For now, needs on-map solutions
-	#trigger = {
-	#	has_global_flag = POP_Sim
-	#}
-    
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				capital_scope = {
-					if = {
-						limit = {
-							NOT = {
-								has_trade_modifier = {
-									who = owner
-									key = trade_capital
-								}
-							}
-						}
-						add_trade_modifier = {
-							who = owner
-							duration = 30
-							power = 1
-							key = trade_capital
-						}
-					}
-				}
-				if = {
-					limit = {
-						is_colonial_nation = yes
-						is_subject = yes
-					}
-					overlord = {
-						save_event_target_as = OverlordE
-					}
-					capital_scope = {
-						if = {
-							limit = {
-								NOT = {
-									has_trade_modifier = {
-										who = event_target:OverlordE
-										key = trade_capital_2
-									}
-								}
-							}
-							add_trade_modifier = {
-								who = event_target:OverlordE
-								duration = 30
-								power = 1
-								key = trade_capital_2
-							}
-						}
-					}
-				}
-			}
-			
-			if = {
-				limit = {
-					has_global_flag = POP_Sim
-				}			
-				#chinese single market trade (internal routes)
-				#Nanjing<->Wuchang
-				2150 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-							}
-							owner = {
-								1172 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				1172 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-							}
-							owner = {
-								2150 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				#Nanjing<->Beijing
-				2150 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-							}
-							owner = {
-								708 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				708 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-							}
-							owner = {
-								2150 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				# Xian<->Beijing
-				2250 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								culture_group = chinese_group
-								isValidProv = yes
-							}
-							owner = {
-								708 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				708 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-							}
-							owner = {
-								2250 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				# Wuchang->Sichuan
-				685 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-								culture_group = chinese_group
-							}
-							owner = {
-								1172 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				# Sichuan->Xian
-				2252 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-								culture_group = chinese_group
-							}
-							owner = {
-								685 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				# Wuchang<->Guangzhou
-				1172 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-								culture_group = chinese_group
-							}
-							owner = {
-								2121 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				2121 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-								culture_group = chinese_group
-							}
-							owner = {
-								1172 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				# Nanjing<->Guangzhou
-				2150 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-								culture_group = chinese_group
-							}
-							owner = {
-								2121 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				2121 = {
-					every_trade_node_member_province = {
-						if = {
-							limit = {
-								is_capital = yes
-								isValidProv = yes
-								culture_group = chinese_group
-							}
-							owner = {
-								2150 = {
-									add_trade_modifier = {
-										who = PREV
-										duration = 2
-										power = 1
-										key = trade_capital
-									}
-								}
-							}
-						}
-					}
-				}
-				#tibet<->bengal
-				2263 = {
-					if = {
-						limit = {
-							is_capital = yes
-						}
-						owner = {
-							561 = {
-								add_trade_modifier = {
-									who = PREV
-									duration = 2
-									power = 1
-									key = trade_capital
-								}
-							}
-						}
-					}
-				}
-			}
-			
-			#inter-italy trade
-			101 = {
-				every_trade_node_member_province = {
-					if = {
-						limit = {
-							is_capital = yes
-							isValidProv = yes
-						}
-						owner = {
-							112 = {
-								add_trade_modifier = {
-									who = PREV
-									duration = 360
-									power = 1
-									key = trade_capital
-								}
-							}
-						}
-					}
-				}
-			}
-			112 = {
-				every_trade_node_member_province = {
-					if = {
-						limit = {
-							is_capital = yes
-							isValidProv = yes
-						}
-						owner = {
-							101 = {
-								add_trade_modifier = {
-									who = PREV
-									duration = 360
-									power = 1
-									key = trade_capital
-								}
-							}
-						}
-					}
-				}
-			}
-			
-			#inter-mexico trade
-			1471 = {
-				every_trade_node_member_province = {
-					if = {
-						limit = {
-							is_capital = yes
-							isValidProv = yes
-						}
-						owner = {
-							2415 = {
-								add_trade_modifier = {
-									who = PREV
-									duration = 360
-									power = 1
-									key = trade_capital
-								}
-							}
-						}
-					}
-				}
-			}
-			2415 = {
-				every_trade_node_member_province = {
-					if = {
-						limit = {
-							is_capital = yes
-							isValidProv = yes
-							owner = {
-								NOT = { tag = CBS }
-							}
-						}
-						owner = {
-							1471 = {
-								add_trade_modifier = {
-									who = PREV
-									duration = 2
-									power = 1
-									key = trade_capital
-								}
-							}
-						}
-					}
-				}
-			}
-			#Interfrance trade
-			#France<->South Med
-			976 = {
-				owner = {
-					183 = {
-						add_trade_modifier = {
-							who = PREV
-							duration = 2
-							power = 1
-							key = trade_capital
-						}
-					}
-				}
-			}
-			2461 = {
-				if = {
-					limit = {
-						isValidProv = yes
-					}
-					owner = {
-						2293 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-			2272 = {
-				if = {
-					limit = {
-						isValidProv = yes
-					}
-					owner = {
-						2293 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-			3970 = {
-				if = {
-					limit = {
-						isValidProv = yes
-					}
-					owner = {
-						735 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-						2150 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-			1015 = {
-				if = {
-					limit = {
-						isValidProv = yes
-					}
-					owner = {
-						735 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-						2150 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-			1020 = {
-				if = {
-					limit = {
-						isValidProv = yes
-					}
-					owner = {
-						735 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-						2150 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-			85 = {
-				if = {
-					limit = {
-						is_capital = yes
-						isValidProv = yes
-					}
-					owner = {
-						183 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-			82 = {
-				if = {
-					limit = {
-						is_capital = yes
-						isValidProv = yes
-					}
-					owner = {
-						83 = {
-							add_trade_modifier = {
-								who = PREV
-								duration = 2
-								power = 1
-								key = trade_capital
-							}
-						}
-					}
-				}
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
 country_event = {
     id = POP_Census.0015
     title = no_localisation
@@ -2510,36 +1720,6 @@ country_event = {
 		name = no_localisation
 	}
 }
-
-country_event = {
-    id = POP_Census.004
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-    
-    immediate = {
-		hidden_effect = {
-			Inst_DoInstitution = { name = Legalism }
-			Inst_DoInstitution = { name = Meritocracy_Inst }
-			Inst_DoInstitution = { name = Banking }
-			Inst_DoInstitution = { name = Columbian_Exchange }
-			Inst_DoInstitution = { name = Casual_Literacy }
-			Inst_DoInstitution = { name = Global_Trade pre = Global_Trade }
-			Inst_DoInstitution = { name = Academia }
-			Inst_DoInstitution = { name = Scientific_Method }
-			Inst_DoInstitution = { name = Nationalism pre = Nationalism }
-			Inst_DoInstitution = { name = Industrialisation }
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
 country_event = {
     id = POP_Census.005
     title = no_localisation
@@ -3116,15 +2296,11 @@ country_event = {
 
     immediate = {
 		hidden_effect = {
-			# Temp
-			#every_province = {
-			#	set_key = { lhs = Land_SoilD which = Land_SoilD }
-			#	multiply_key = { lhs = Land_SoilD value = 100 }
-			#}
 			every_country = {
 				limit = {
 					isValidCountry = yes
 				}
+				set_key = { lhs = ID_Tag_Opt_Max which = PREV }
 				### CE
 				if = {
 					limit = {
@@ -3140,7 +2316,7 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											check_key = { lhs = ID_Tag value = 750 }
+											check_key = { lhs = ID_Tag_Opt which = ID_Quad1 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3150,8 +2326,8 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 750 } }
-											check_key = { lhs = ID_Tag value = 500 }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Quad1 } }
+											check_key = { lhs = ID_Tag_Opt which = ID_Quad2 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3161,8 +2337,8 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 500 } }
-											check_key = { lhs = ID_Tag value = 250 }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Quad2 } }
+											check_key = { lhs = ID_Tag_Opt which = ID_Quad3 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3172,7 +2348,7 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 250 } }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Quad3 } }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3189,7 +2365,7 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											check_key = { lhs = ID_Tag value = 800 }
+											check_key = { lhs = ID_Tag_Opt which = ID_Pent1 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3199,8 +2375,8 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 800 } }
-											check_key = { lhs = ID_Tag value = 600 }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent1 } }
+											check_key = { lhs = ID_Tag_Opt which = ID_Pent2 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3210,8 +2386,8 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 600 } }
-											check_key = { lhs = ID_Tag value = 400 }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent2 } }
+											check_key = { lhs = ID_Tag_Opt which = ID_Pent3 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3221,8 +2397,8 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 400 } }
-											check_key = { lhs = ID_Tag value = 200 }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent3 } }
+											check_key = { lhs = ID_Tag_Opt which = ID_Pent4 }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3232,7 +2408,7 @@ country_event = {
 								PREV = {
 									if = {
 										limit = {
-											NOT = { check_key = { lhs = ID_Tag value = 200 } }
+											NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent4 } }
 										}
 										set_country_flag = tf_recalculate_communication_efficiency
 									}
@@ -3260,7 +2436,7 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												check_key = { lhs = ID_Tag value = 600 }
+												check_key = { lhs = ID_Tag_Opt which = ID_Tri1 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3270,8 +2446,8 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 600 } }
-												check_key = { lhs = ID_Tag value = 300 }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Tri1 } }
+												check_key = { lhs = ID_Tag_Opt which = ID_Tri2 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3281,7 +2457,7 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 300 } }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Tri2 } }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3302,7 +2478,7 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												check_key = { lhs = ID_Tag value = 750 }
+												check_key = { lhs = ID_Tag_Opt which = ID_Quad1 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3312,8 +2488,8 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 750 } }
-												check_key = { lhs = ID_Tag value = 500 }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Quad1 } }
+												check_key = { lhs = ID_Tag_Opt which = ID_Quad2 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3323,8 +2499,8 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 500 } }
-												check_key = { lhs = ID_Tag value = 250 }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Quad2 } }
+												check_key = { lhs = ID_Tag_Opt which = ID_Quad3 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3334,7 +2510,7 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 250 } }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Quad3 } }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3351,7 +2527,7 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												check_key = { lhs = ID_Tag value = 1000 }
+												check_key = { lhs = ID_Tag_Opt which = ID_Pent1 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3361,8 +2537,8 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 1000 } }
-												check_key = { lhs = ID_Tag value = 800 }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent1 } }
+												check_key = { lhs = ID_Tag_Opt which = ID_Pent2 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3372,8 +2548,8 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 600 } }
-												check_key = { lhs = ID_Tag value = 400 }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent2 } }
+												check_key = { lhs = ID_Tag_Opt which = ID_Pent3 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3383,8 +2559,8 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 400 } }
-												check_key = { lhs = ID_Tag value = 200 }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent3 } }
+												check_key = { lhs = ID_Tag_Opt which = ID_Pent4 }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3394,7 +2570,7 @@ country_event = {
 									PREV = {
 										if = {
 											limit = {
-												NOT = { check_key = { lhs = ID_Tag value = 200 } }
+												NOT = { check_key = { lhs = ID_Tag_Opt which = ID_Pent4 } }
 											}
 											set_country_flag = AITax_Yearly
 										}
@@ -3497,61 +2673,6 @@ country_event = {
 }
 
 country_event = {
-    id = POP_Census.007
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				Stab_DoMain = yes
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
-    id = POP_Census.008
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			regiongroup = {
-				region = {
-					limit = {
-						isValidProv = yes
-					}
-					MN_DeduplicateSlot = yes
-					MN_CheckSlot = yes
-				}
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
     id = POP_Census.009
     title = no_localisation
     desc = no_localisation
@@ -3617,6 +2738,7 @@ country_event = {
 				limit = {
 					isValidCountry = yes
 				}
+				Advisor_UpdateTimers = yes
 				POP_GetAdminEffic = { return = Tax_AdminEffic }
 				every_owned_province = {
 					Tax_CalcCosts = yes
@@ -5065,52 +4187,6 @@ country_event = {
 		}
     }
 }
-country_event = {
-    id = POP_Census.102
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			POP_SetIDTag = yes
-			set_key = { lhs = Post_S0Owner which = Change_Tmp0 }
-			set_key = { lhs = Post_S1Owner which = Change_Tmp0 }
-			set_key = { lhs = Post_S2Owner which = Change_Tmp0 }
-			set_key = { lhs = Post_S3Owner which = Change_Tmp0 }
-			set_key = { lhs = Post_S4Owner which = Change_Tmp0 }
-			set_key = { lhs = Change_Tmp1 which = ID_Tag }
-			every_province = {
-				limit = {
-					Post_Has = yes
-					OR = {
-						is_key_equal = { lhs = Post_S0Owner which = PREV }
-						is_key_equal = { lhs = Post_S1Owner which = PREV }
-						is_key_equal = { lhs = Post_S2Owner which = PREV }
-						is_key_equal = { lhs = Post_S3Owner which = PREV }
-						is_key_equal = { lhs = Post_S4Owner which = PREV }
-					}
-				}
-				set_key = { lhs = Change_Tmp0 which = PREV }
-				set_key = { lhs = Change_Tmp1 which = PREV }
-				Post_Effect = { Effect=Post_TransferSlot }
-			}
-			set_key = { lhs = Post_S0Owner which = ID_Tag }
-			set_key = { lhs = Post_S1Owner which = ID_Tag }
-			set_key = { lhs = Post_S2Owner which = ID_Tag }
-			set_key = { lhs = Post_S3Owner which = ID_Tag }
-			set_key = { lhs = Post_S4Owner which = ID_Tag }
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
 
 country_event = {
     id = POP_Census.103
@@ -5152,42 +4228,6 @@ country_event = {
 					}
 					Dev_DoMain = { iterate=yes }
 				}
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
-    id = POP_Census.106
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				every_owned_province = {
-					limit = {
-						OR = {
-							has_province_flag = Unrest_Update
-							PREV = { has_country_flag = Unrest_Update }
-						}
-					}
-					clr_province_flag = Unrest_Update
-					Unrest_DoMain = yes
-				}
-				clr_country_flag = Unrest_Update
 			}
 		}
     }
@@ -5465,51 +4505,6 @@ country_event = {
     }
 }
 
-# Mercenary stats and AI disbanding census
-country_event = {
-    id = POP_Census.108
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				Merc_Update = yes
-
-				## AI section to disband mercs after being at peace
-				if = {
-					limit = {
-						is_month = 11
-						ai = yes
-						is_at_war = no
-						had_recent_war = 3
-					}
-					while = {
-						limit = {
-							num_of_mercenaries = 1
-						}
-						random_hired_mercenary_company = {
-							disband_mercenary_company = THIS
-						}
-					}
-				}
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
 country_event = {
     id = POP_Census.110
     title = POP_Census.110.t
@@ -5618,55 +4613,6 @@ country_event = {
 }
 
 country_event = {
-    id = POP_Census.111
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-	
-	hidden = yes
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				add_country_modifier = {
-					name = Advisordata
-					duration = -1
-				}
-				Advisor_SetData = yes
-			}
-		}
-	}
-
-    option = {
-		name = PTM_EXIT
-	}
-}
-
-country_event = {
-    id = POP_Census.112
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-	
-	hidden = yes
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			Post_Main = yes
-		}
-	}
-
-    option = {
-		name = PTM_EXIT
-	}
-}
-
-country_event = {
     id = POP_Census.113
     title = no_localisation
     desc = no_localisation
@@ -5680,51 +4626,6 @@ country_event = {
 		hidden_effect = {
 			every_owned_province = {
 				Unrest_DoMain = yes
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
-    id = POP_Census.114
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}
-				if = {
-					limit = { NOT = { is_month = 5 } }
-					if = { # Remove Exploration idea group from CNs who get it on spawn
-						limit = {
-							is_colonial_nation = yes
-							has_idea_group = exploration_ideas
-						}
-						remove_idea_group = exploration_ideas
-					}
-					if = { # Every other year expeditions are skipped during exploration ideas
-						limit = {
-							has_country_flag = MEC_Expeditions_skip_year
-						}
-						clr_country_flag = MEC_Expeditions_skip_year
-					}
-					else = {
-						country_event = { id = MEC_Expeditions.003 days = 20 } # Expedition selection event from exploration ideas
-					}
-				}
-				tech_add_modifiers_all = yes
 			}
 		}
     }
@@ -5761,23 +4662,23 @@ country_event = { # Performance testing
 				country_event = { id = POP_Census.020 days = 8 }
 				country_event = { id = POP_Census.0012 days = 9 } # Tarif Rate, Subsistance, 
 				country_event = { id = POP_Census.0013 days = 10 } # Trade set centers (sim only)
-				country_event = { id = POP_Census.0014 days = 11 } # Trade set links
-				country_event = { id = POP_Census.0015 days = 12 } # Trade main do
-				country_event = { id = POP_Census.0016 days = 13 } # Trade after
-				country_event = { id = POP_Census.0017 days = 14 }
-				country_event = { id = POP_Census.0018 days = 15 }
-				country_event = { id = POP_Stockpile.0012 days = 16 }
-				country_event = { id = POP_Census.0021 days = 17 }
-				country_event = { id = POP_Census.0022 days = 18 }
-				country_event = { id = POP_Census.112 days = 19 }
-				country_event = { id = POP_Census.0019 days = 20 }
-				country_event = { id = POP_Census.105 days = 21 }
-				country_event = { id = POP_Census.0023 days = 22 }
-				country_event = { id = POP_Census.0024 days = 23 }
-				country_event = { id = PTM_Politics.002 days = 24 }
-				#country_event = { id = POP_Census.109 days = 25 } # Enable for simming
-				country_event = { id = POP_Census.106 days = 26 }
-				country_event = { id = POP_Census.1102 days = 27 }
+				country_event = { id = POP_Census.0015 days = 11 } # Trade main do
+				country_event = { id = POP_Census.0016 days = 12 } # Trade after
+				country_event = { id = POP_Census.0017 days = 13 }
+				country_event = { id = POP_Census.0018 days = 14 }
+				country_event = { id = POP_Stockpile.0012 days = 15 }
+				country_event = { id = POP_Census.0021 days = 16 }
+				country_event = { id = POP_Census.0022 days = 17 }
+				country_event = { id = SYS_Post.001 days = 18 }
+				country_event = { id = POP_Census.0019 days = 19 }
+				country_event = { id = POP_Census.105 days = 20 }
+				country_event = { id = POP_Census.0023 days = 21 }
+				country_event = { id = POP_Census.0024 days = 22 }
+				country_event = { id = PTM_Politics.002 days = 23 }
+				#country_event = { id = POP_Census.109 days = 24 } # Enable for simming
+				country_event = { id = SYS_Pulse.009 days = 25 }
+				country_event = { id = POP_Census.1102 days = 26 }
+				country_event = { id = POP_Census.107 days = 27 }
 			}
 		}
     }
@@ -5785,91 +4686,6 @@ country_event = { # Performance testing
     option = {
 		name = no_localisation
     }
-}
-
-# Estate UI Piechart Data Update
-country_event = {
-    id = POP_Census.992
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					ai = no
-					isValidCountry = yes
-				}
-				PieChart_ReloadData = yes
-			}
-		}
-	}
-
-    option = {
-		name = no_localisation
-	}
-}
-
-# Estate UI Piechart Data Update - for specific country
-country_event = {
-    id = POP_Census.9921
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			if = {
-				limit = {
-					ai = no
-				}
-				PieChart_ReloadData = yes
-			}
-		}
-	}
-
-    option = {
-		name = no_localisation
-	}
-}
-
-# Province census
-country_event = {
-    id = POP_Census.993
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					has_country_flag = Nat_Update
-					ai = yes
-					isValidCountry = yes
-				}
-				clr_country_flag = Nat_Update
-				Nat_Fast = yes
-			}
-		}
-	}
-
-    option = {
-		name = no_localisation
-	}
 }
 # Single Country
 country_event = {
@@ -5961,7 +4777,6 @@ country_event = {
 						is_city = yes
 						is_colony = yes
 					}
-					has_province_flag = Data
 				}
 				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Peasants :[This.Owner.GetName]:[This.GetContinentName]:[GV_SF_Total]:[GV_SF_Ratio]:[GV_SF_Wealth]:[SF_FillFood]:[GV_SF_FillLife]:[GV_SF_FillLifeC]:[GV_SF_FillComfort]:[GV_SF_FillLuxury]"
 				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Residents:[This.Owner.GetName]:[This.GetContinentName]:[GV_NM_Total]:[GV_NM_Ratio]:[GV_NM_Wealth]:[NM_FillFood]:[GV_RE_FillLife]:[GV_NM_FillLifeC]:[GV_RE_FillComfort]:[GV_RE_FillLuxury]"
@@ -5978,7 +4793,6 @@ country_event = {
 						is_city = yes
 						is_colony = yes
 					}
-					has_province_flag = Data
 				}
 				log = "EconomyData:[GV_ID_Prov]-[This.GetName]:[This.agp.GetValue]:[This.agq.GetValue]:[This.agr.GetValue]:[This.ags.GetValue]:[This.agt.GetValue]:[This.agu.GetValue]:[This.agv.GetValue]:[This.agw.GetValue]:[This.agx.GetValue]:[This.agy.GetValue]:[This.agz.GetValue]:[This.aha.GetValue]:[This.ahb.GetValue]"
 			}
@@ -5987,230 +4801,4 @@ country_event = {
 	after = {
 		set_global_flag = DATA_COLLECTION_CD
 	}
-}
-
-# Province census
-country_event = {
-    id = POP_Census.996
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-	
-	trigger = {
-		tag = AAA
-	}
-
-    immediate = {
-		hidden_effect = {
-			every_province = {
-				limit = {
-					isValidEmpty = yes
-				}
-				if = {
-					limit = {
-						isValidProv = yes
-					}
-					if = {
-						limit = {
-							NOT = { has_province_flag = Colony_Init }
-						}
-						owner = {
-							set_country_flag = tf_recalculate_communication_efficiency
-						}
-						province_event = {
-							id = SYS_Colony.001
-						}
-					}
-				}
-				Plague_Tick = yes
-				Modi_UpdatePopWealth = yes
-			}
-		}
-	}
-	
-	option = {
-		name = no_localisation
-	}
-}
-
-# Country census
-country_event = {
-    id = POP_Census.997
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-	
-	trigger = {
-		tag = AAA
-	}
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				limit = {
-					NOT = { has_country_flag = POP_Init }
-					isValidCountry = yes
-				}
-				country_event = {
-					id = Init.3
-				}
-			}
-			every_country = {
-				limit = {
-					isValidCountry = yes
-				}			
-				rank_change_effect = yes   # handle international importance changes
-				#add_country_modifier = {
-				#	name = Advisordata
-				#	duration = -1
-				#}
-				if = {
-					limit = {
-						OR = {
-							ai = no
-							NOT = { is_month = 2 }
-							AND = {
-								is_month = 7
-								NOT = { is_month = 8 }
-							}
-						}
-					}
-					Advisor_SetData = yes
-				}
-				#FC_MiniCensus = yes
-				if = {
-					limit = {
-						ai = no
-						check_key = { lhs = Rights_Timer value = 1 }
-					}
-					subtract_key = { lhs = Rights_Timer value = 1 }
-					if = {
-						limit = {
-							NOT = { check_key = { lhs = Rights_Timer value = 1 } }
-						}
-						Rights_ImplementReform = yes
-					}
-				}
-				Diplomacy_Do_Monthly = yes
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
-    id = POP_Census.998
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-	
-	trigger = {
-		tag = AAA
-	}
-
-    immediate = {
-		hidden_effect = {
-			every_country = {
-				if = {
-					limit = {
-						OR = {
-							NOT = { num_of_cities = 1 }
-							exists = no
-						}
-						NOT = { tag = AAA }
-					}
-					clr_country_flag = POP_Init
-					set_key = { lhs = Vassal_Type value = 0 }
-				}
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
-    id = POP_Census.999
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-
-    immediate = {
-		hidden_effect = {
-			5511 = {
-				kill_units = {
-					who = REB
-				}
-				every_country = {
-					limit = {
-						isValidCountry = yes
-					}
-					PREV = {
-						kill_units = {
-							who = PREV
-						}
-					}
-				}
-				
-				dummy0_rebels = 1
-				dummy1_rebels = 1
-				
-				every_country = {
-					limit = {
-						isValidCountry = yes
-					}
-					PREV = {
-						discover_country = PREV
-						
-						mercenary_infantry = PREV
-					}
-					
-					set_key = { lhs = Tmp_1 value = 10 }
-					multiply_key = { lhs = Tmp_1 value = 1.25 }
-					
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 327.68 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 163.84 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 81.92 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 40.96 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 20.48 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 10.24 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 5.12 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 2.56 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 1.28 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.64 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.32 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.16 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.08 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.04 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.02 }
-					POP_SetMod = { varname = Tmp_1 modname = Mil_Maint type = country value = 0.01 }
-				}
-			}
-		}
-    }
-
-    option = {
-		name = no_localisation
-    }
 }

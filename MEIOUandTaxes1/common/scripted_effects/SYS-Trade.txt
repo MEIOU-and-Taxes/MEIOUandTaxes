@@ -302,6 +302,7 @@ TN_PrepSector = {
                 }
                 clr_province_flag = TN_SectorCent
                 clr_province_flag = HasSeaAccess
+                clr_province_flag = HasSilkAccess
                 
 
                 # Edit for new produce
@@ -473,12 +474,14 @@ TN_PrepSector = {
 
 	tradenode_centers = {
         clr_global_flag = HasSeaAccess
+        clr_global_flag = HasSilkAccess
         every_trade_node_member_country = {
             limit = {
                 NOT = { tag = AAA }
             }
             set_key = { lhs = Tmp_0 value = 0 }
             clr_global_flag = HasSeaAccess
+            clr_global_flag = HasSilkAccess
             
             every_owned_province = {
                 limit = {
@@ -488,8 +491,15 @@ TN_PrepSector = {
                 if = {
                     limit = {
                         has_port = yes 
+                        NOT = { has_province_modifier = lack_of_harbour }
                     }
                     set_global_flag = HasSeaAccess                   
+                }
+                if = {
+                    limit = {
+                        has_province_flag = TN_Silk
+                    }
+                    set_global_flag = HasSilkAccess                   
                 }
                 set_province_flag = TN_SectorPart
                 export_to_key = { lhs = Tmp_0 value = base_production }
@@ -517,6 +527,15 @@ TN_PrepSector = {
                 }
                 else = {
                     clr_province_flag = HasSeaAccess
+                }
+                if = {
+                    limit = {
+                        has_global_flag = HasSilkAccess
+                    }
+                    set_province_flag = HasSilkAccess
+                }
+                else = {
+                    clr_province_flag = HasSilkAccess
                 }
             }
         }        
@@ -1702,6 +1721,7 @@ TN_DoTrade = {
         
         every_province = {
             limit = {
+                is_wasteland = no
                 has_province_flag = TN_SectorCentNodeBest
                 check_key = { lhs = TN_SectorScore which = event_target:Prov }
             }
@@ -2061,41 +2081,33 @@ TN_SetReach = {
 
         if = {
             limit = { # Only Major or higher than jump/spread
-                has_province_flag = HasSeaAccess
+                OR = {
+                    has_province_flag = HasSeaAccess
+                    has_province_flag = HasSilkAccess
+                }
                 OR = {
                     has_global_flag = Is_TN_Dominant
                     has_global_flag = Is_TN_Major                    
                 }
             }
             set_global_flag = 1_jump
-            owner = {
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = TN_SectorCentReachSpread                        
+            every_province = {
+                limit = {
+                    is_wasteland = no
+                    has_province_flag = TN_SectorCentReachSpread
+                    OR = {
+                        owned_by = event_target:ProvNew
+                        AND = {
+                            owner = {
+                                is_colonial_nation_of = event_target:ProvNew
+                            }
+                        }
                     }
-                    clr_province_flag = TN_SectorCentReachSpread
-                    
-                    TN_effect11 = yes
-                    TN_effect = { 
-                        effect = TN_effect22
-                    }                    
                 }
-                event_target:ProvNew = { # Spread through colonial nations
-                    every_subject_country = {
-                        limit = {
-                            is_colonial_nation_of = PREV
-                        }
-                        every_owned_province = {
-                            limit = {
-                                has_province_flag = TN_SectorCentReachSpread
-                            }
-                            clr_province_flag = TN_SectorCentReachSpread
-                            TN_effect11 = yes
-                            TN_effect = { 
-                                effect = TN_effect22
-                            }
-                        }
-                    }                    
+                clr_province_flag = TN_SectorCentReachSpread
+                TN_effect11 = yes
+                TN_effect = {
+                    effect = TN_effect24
                 }
             }
             clr_global_flag = 1_jump
@@ -2103,36 +2115,27 @@ TN_SetReach = {
             if = {
                 limit = { # Only dominants can spread twice
                     has_global_flag = Is_TN_Dominant
+                    has_province_flag = HasSeaAccess
                 }
                 set_global_flag = 2_jump
-                owner = {
-                    every_owned_province = {
-                        limit = {
-                            has_province_flag = TN_SectorCentReachSpread2                            
+                every_province = {
+                    limit = {
+                        is_wasteland = no
+                        has_province_flag = TN_SectorCentReachSpread2
+                        OR = {
+                            owned_by = event_target:ProvNew
+                            AND = {
+                                owner = {
+                                    is_colonial_nation_of = event_target:ProvNew
+                                }
+                            }
                         }
-                        clr_province_flag = TN_SectorCentReachSpread2                        
-                        TN_effect11 = yes
-                        TN_effect = { 
-                            effect = TN_effect22
-                        }                                         
-                    }  
-                    event_target:ProvNew = {
-                        every_subject_country = {
-                            limit = {
-                                is_colonial_nation_of = PREV
-                            }
-                            every_owned_province = {
-                                limit = {
-                                    has_province_flag = TN_SectorCentReachSpread2
-                                }
-                                clr_province_flag = TN_SectorCentReachSpread2
-                                TN_effect11 = yes
-                                TN_effect = { 
-                                    effect = TN_effect22
-                                }
-                            }
-                        }                    
-                    }                  
+                    }
+                    clr_province_flag = TN_SectorCentReachSpread2
+                    TN_effect11 = yes
+                    TN_effect = { 
+                        effect = TN_effect22
+                    }
                 }
                 clr_global_flag = 2_jump
             }
@@ -2181,7 +2184,7 @@ TN_SetReach = {
 
     if = { # Connect to all trade posts
         limit = {
-            has_global_flag = HasTradePost            
+            has_global_flag = HasTradePost
         }
         clr_global_flag = HasTradePost
         regiongroup = {
