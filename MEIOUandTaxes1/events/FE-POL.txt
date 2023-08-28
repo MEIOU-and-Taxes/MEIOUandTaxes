@@ -1585,10 +1585,6 @@ country_event = {
 		}
 		hidden_effect = {
 			LIT = {
-				if = {
-					limit = { TRK = { ai = yes exists = yes} }
-					inherit = TRK
-				}
 				exile_heir_as = heir_move_to_poland
 				#kill_heir = {}
 				exile_ruler_as = { name = ruler_move_to_poland }
@@ -1722,10 +1718,6 @@ country_event = {
 		}
 		hidden_effect = {
 			LIT = {
-				if = {
-					limit = { TRK = { ai = yes } }
-					inherit = TRK
-				}
 				exile_heir_as = heir_move_to_poland
 				exile_ruler_as = { name = ruler_move_to_poland }
 				grant_independence = yes
@@ -1889,12 +1881,6 @@ country_event = {
 				religion_group = european_pagan
 			}
 		}
-		LIT = {
-			if = {
-				limit = { TRK = { ai = yes } }
-				inherit = TRK
-			}
-		}
 		create_subject = { 
 			subject_type = permanent_union
 			subject = LIT
@@ -1979,12 +1965,6 @@ country_event = {
 			}
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Accepted the crown of Lithuanian Grand Duchy, have not demanded its christianisation:flavor_pol.101"
-		LIT = {
-			if = {
-				limit = { TRK = { ai = yes } }
-				inherit = TRK
-			}
-		}
 		create_subject = { 
 			subject_type = permanent_union
 			subject = LIT
@@ -2330,6 +2310,7 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}
 		}
 		dip_tech = 24
@@ -2557,7 +2538,13 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
-			}		}
+				is_subject_of_type = decentralized_vassal
+			}		
+		}
+		OR = {
+		    has_global_flag = ostrow_agreement
+			dip_tech = 22
+		}
 		OR = {
 			claim = LIT
 			core_claim = LIT
@@ -2577,13 +2564,9 @@ country_event = {
 	mean_time_to_happen = {
 		months = 12
 	}
-	option = {
-		name = "flavor_pol.306.a"
-		ai_chance = {
-			factor = 100
-		}
-
-		if = {
+	
+	immediate = {
+	    if = {
 			limit = {
 				GVO = {
 					is_subject_of = LIT
@@ -2591,11 +2574,54 @@ country_event = {
 					ai = yes
 				}
 			}
-			log = "FE-POL:[GetYear]:[Root.GetName]:removed cores and claims from Lithuania provinces:flavor_pol.306"
-			log = "FE-POL:[GetYear]:[Root.GetName]:Lithuania removed cores and claims from  Polish provinces:flavor_pol.306"
-			log = "FE-POL:[GetYear]:[Root.GetName]:inherited Halych-Volhyna while settling border dispute with Lithunia:flavor_pol.306"
-			POL = {
+			LIT = {
 				inherit = GVO
+			}
+		}
+	}
+	
+	option = { #Demand Galicia and Podolia
+		name = "flavor_pol.306.a"
+		ai_chance = {
+			factor = 75
+		}
+		trigger = {
+		    any_province = {
+			    area = red_ruthenia_area
+				owned_by = LIT
+		    }
+		}
+		LIT = { add_liberty_desire = 10 }
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				is_core = POL
+				NOT = { area = red_ruthenia_area }
+				NOT = { area = podolia_volhynia_area }
+			}
+			cede_province = POL
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				OR = {
+				    area = red_ruthenia_area
+					province_id = 1433 #Podolia
+				}
+				NOT = { province_id = 2507 } #Belz
+			}
+			cede_province = POL
+		}
+		if = {
+		    limit = {
+			    MAZ = {
+				    exists = yes
+					is_subject_of = ROOT
+				}
+			}
+			2507 = { cede_province = MAZ }
+			else = {
+			    cede_province = POL
 			}
 		}
 		LIT = {
@@ -2622,79 +2648,90 @@ country_event = {
 				}
 			}
 		}
-		2535 = { #Cholm
-			if = {
-				limit = {
-					OR = {
-						owned_by = LIT
-						owner = {
-							is_subject_of = LIT
-						}
-					}
-					any_neighbor_province = {
-						owned_by = POL
-					}
-				}
-				log = "FE-POL:[GetYear]:[Root.GetName]:inherited Cholm while settling border dispute with Lithunia:flavor_pol.306"
-				cede_province = POL
-				add_core = POL
-				remove_core = LIT
-			}
-		}
-		1281 = { #Ratne
-			if = {
-				limit = {
-					OR = {
-						owned_by = LIT
-						owner = {
-							is_subject_of = LIT
-						}
-					}
-					any_neighbor_province = {
-						owned_by = POL
-					}
-				}
-				log = "FE-POL:[GetYear]:[Root.GetName]:inherited Ratne while settling border dispute with Lithunia:flavor_pol.306"
-				cede_province = POL
-				add_core = POL
-				remove_core = LIT
-			}
-		}
-		2507 = { #Belz
-			if = {
-				limit = {
-					OR = {
-						owned_by = LIT
-						owner = {
-							is_subject_of = LIT
-						}
-					}
-					any_neighbor_province = {
-						owned_by = POL
-					}
-				}
-				if = {
-					limit = {
-						MAZ = {
-							vassal_of = POL
-						}
-					}
-					log = "FE-POL:[GetYear]:[MAZ.GetName]:inherited Belz while settling border dispute with Lithunia:flavor_pol.306"
-					cede_province = MAZ
-					add_core = MAZ
-					remove_core = LIT
-				}
-				else = {
-					log = "FE-POL:[GetYear]:[Root.GetName]:inherited Belz while settling border dispute with Lithunia:flavor_pol.306"
-					cede_province = POL
-					add_core = POL
-					remove_core = LIT
-				}
-			}
-		}
+		log = "FE-POL:[GetYear]:[Root.GetName]:removed cores and claims from Lithuania provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:Lithuania removed cores and claims from  Polish provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:acquired Galician and Podolian provinces while settling border dispute with Lithuania:flavor_pol.306"
 	}
-	option = {
+	
+	option = { #Demand Galicia, Volhynia and Podolia
 		name = "flavor_pol.306.b"
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 2
+				LIT = { NOT = { liberty_desire = 25 } }
+			}
+		}
+		trigger = {
+		    any_province = {
+			    area = podolia_volhynia_area
+				owned_by = LIT
+		    }
+		}
+		LIT = { add_liberty_desire = 25 }
+		if = {
+		    limit = {
+			    MAZ = {
+				    exists = yes
+					is_subject_of = ROOT
+				}
+			}
+			MAZ = { add_liberty_desire = 25 }
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				is_core = POL
+				NOT = { area = red_ruthenia_area }
+				NOT = { area = podolia_volhynia_area }
+			}
+			cede_province = POL
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				area = red_ruthenia_area
+			}
+			cede_province = POL
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				area = podolia_volhynia_area
+			}
+			cede_province = POL
+		}
+		LIT = {
+			custom_tooltip = flavor_pol.306.tooltip.a
+			hidden_effect = {
+				every_owned_province = {
+					limit = {
+						OR = {
+							is_claim = POL
+							is_core = POL
+						}
+					}
+					remove_claim = POL
+					remove_core = POL
+				}
+			}
+		}
+		POL = {
+			custom_tooltip = flavor_pol.306.tooltip.b
+			hidden_effect = {
+				every_owned_province = {
+					remove_claim = LIT
+					remove_core = LIT
+				}
+			}
+		}
+		log = "FE-POL:[GetYear]:[Root.GetName]:removed cores and claims from Lithuania provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:Lithuania removed cores and claims from  Polish provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:acquired Galician, Volhynian and Podolian provinces while settling border dispute with Lithuania:flavor_pol.306"
+	}
+	
+	option = {
+		name = "flavor_pol.306.c"
 		ai_chance = {
 			factor = 0
 		}		
@@ -2768,6 +2805,7 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}
 		}
 		has_country_flag = 1_union_krewo
@@ -2824,6 +2862,7 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}		
 		}
 		has_country_flag = 2_union_horodlo
@@ -2943,13 +2982,7 @@ country_event = {
 		is_at_war = no
 		has_regency = no
 		has_heir = no
-		AND = {
-			OR = {
-				is_subject = no
-				is_subject_of_type = tributary_state
-				is_subject_of_type = close_tributary_state
-			}
-		}
+		is_free_or_tributary_trigger = yes
 		has_country_flag = 4_union_krakow
 		LIT = { 
 			is_subject_of = POL 
@@ -3171,6 +3204,7 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}	
 		}
 		NOT = { exists = PLC }
@@ -3258,6 +3292,7 @@ country_event = {
 					OR = {
 						is_subject_of_type = permanent_union 
 						is_subject_of_type = permanent_union_limited
+						is_subject_of_type = decentralized_vassal
 					}
 				}
 			}
@@ -3336,6 +3371,7 @@ country_event = {
 					OR = {
 						is_subject_of_type = permanent_union 
 						is_subject_of_type = permanent_union_limited
+						is_subject_of_type = decentralized_vassal
 					}
 				}
 			 }
@@ -3581,6 +3617,7 @@ country_event = {
 				OR = {
 					is_subject_of_type = permanent_union 
 					is_subject_of_type = permanent_union_limited
+					is_subject_of_type = decentralized_vassal
 				}
 			}
 		 }
@@ -6588,4 +6625,431 @@ country_event = {
 		name = "flavor_pol.EVTOPTB1" # Abandon the plans
 		add_prestige = -5
 	}
+}
+
+### LITHUANIAN CIVIL WAR ###
+
+###TRAKAI GOES TO WAR
+country_event = {
+	id = flavor_pol.724
+	title = "flavor_pol.724.title"
+	desc = "flavor_pol.724.desc"
+	picture = SIEGE_eventPicture
+    major = yes
+    trigger = { 
+        tag = TRK
+		is_subject_of = LIT
+		is_subject_of_type = decentralized_vassal
+		is_at_war = no
+		LIT = { 
+		    junior_union_with = POL 
+			NOT = { dip_tech = 25 }
+		}
+        POL = {
+            has_country_flag = 1_union_krewo
+        }		
+    }
+
+    fire_only_once = yes
+	
+    mean_time_to_happen = {
+		years = 20
+		modifier = {
+			factor = 0.5
+			NOT = { has_opinion = { who = LIT value = 50 } }
+		}
+		modifier = {
+			factor = 0.5
+			NOT = { has_opinion = { who = LIT value = 100 } }
+		}
+		modifier = {
+			factor = 0.5
+			NOT = { has_opinion = { who = LIT value = 200 } }
+		}
+	}
+    
+	option = { #Fight alone
+        ai_chance = { factor = 5 }
+        name = "flavor_pol.724.a" 
+	    LIT = { country_event = { id = flavor_pol.727 days = 10 } }
+		grant_independence = yes
+	} 	
+	
+	option = { #Ask Teutons for Help
+        ai_chance = { factor = 90 }
+		name = "flavor_pol.724.b" 
+		trigger = {
+		    TEU = {
+			    exists = yes
+				is_free_or_tributary_trigger = yes
+			    NOT = { has_country_flag = broken_by_polish }
+				num_of_cities = 5
+				is_at_war = no
+			}
+		}
+	    LIT = { country_event = { id = flavor_pol.727 days = 10 } }
+		TEU = { country_event = { id = flavor_pol.725 } }
+		grant_independence = yes
+	}
+	
+	option = { #Compromise with Grand Duke
+        ai_chance = { factor = 5 }
+        name = "flavor_pol.724.c" 
+		set_country_flag = lithuanian_civil_war_peace
+		POL = { country_event = { id = flavor_pol.728 days = 10 } }
+	} 
+}
+
+###HELP FROM TEUTONIC KNIGHTS
+country_event = {
+	id = flavor_pol.725
+	title = "flavor_pol.725.title"
+	desc = "flavor_pol.725.desc"
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes #from flavor_pol.724
+    fire_only_once = yes
+
+	option = { #Demand territorial concessions
+        ai_chance = { factor = 90 }
+        name = "flavor_pol.725.a" 
+		trigger = { FROM = { owns = 1265 } }
+		FROM = { country_event = { id = flavor_pol.726 } }	
+	} 
+	
+	option = { #Help them anyway
+        ai_chance = { factor = 10 }
+        name = "flavor_pol.725.b"
+		create_alliance = FROM
+		FROM = {
+		    add_opinion = {
+				who = ROOT
+				modifier = supported_our_cause
+		    }
+		}
+        set_ai_attitude = {
+            attitude = attitude_friendly
+            who = TRK
+        }
+		add_trust = {
+            who = TRK
+            value = 50
+            mutual = yes
+        }
+		add_opinion = {
+			who = TRK
+			modifier = alliance_with_trakai
+		}		
+	}	
+	
+	option = { #Remain neutral
+        ai_chance = { factor = 0 }
+		name = "flavor_pol.726.c" 
+	}
+
+}
+
+###TEUTONS DEMAND SAMOGITIA
+country_event = {
+	id = flavor_pol.726
+	title = "flavor_pol.726.title"
+	desc = "flavor_pol.726.desc"
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes
+    fire_only_once = yes
+
+	option = { #Agree
+        ai_chance = { factor = 90 }
+        name = "flavor_pol.726.a"
+        set_global_flag = treaty_of_salynas
+		create_alliance = FROM
+        TEU = {
+            set_ai_attitude = {
+            attitude = attitude_friendly
+            who = TRK
+            } 
+		    add_trust = {
+            who = TRK
+            value = 50
+            mutual = yes
+            }
+            add_opinion = {
+				who = TRK
+				modifier = alliance_with_trakai
+		    }
+            set_country_flag = promised_samogitia			
+	    } 
+	}	
+	option = { #Refuse
+        ai_chance = { factor = 10 }
+        name = "flavor_pol.726.b" 
+	}	 
+}
+
+##LITHUANIAN CIVIL WAR
+country_event = {
+	id = flavor_pol.727
+	title = "flavor_pol.727.title"
+	desc = "flavor_pol.727.desc"
+	picture = SIEGE_eventPicture
+    major = yes
+	is_triggered_only = yes
+    fire_only_once = yes
+   
+	option = { #Then war it is!
+        name = "flavor_pol.727.a" 
+		declare_war_with_cb = {
+			who = TRK
+			casus_belli = cb_disloyal_vassal
+		}
+        POL = { set_country_flag = lithuanian_civil_war }
+        TRK = { set_country_flag = lithuanian_civil_war }	
+	}	
+}
+
+##THE OSTROW AGREEMENT (Victory of the Polish king)
+country_event = {
+	id = flavor_pol.728
+	title = "flavor_pol.728.title"
+	desc = "flavor_pol.728.desc"
+	picture = BATTLE_eventPicture
+    major = yes
+    fire_only_once = yes
+    
+	trigger = {
+	    tag = POL
+	    has_country_flag = lithuanian_civil_war
+		war_score_against = {
+	        who = TRK
+	        value = 40
+        }
+	}
+    
+	mean_time_to_happen = { days = 30 }
+	
+	immediate = {
+		white_peace = TRK
+		set_global_flag = ostrow_agreement
+		hidden_effect = {
+		    every_country = {
+		        limit = { 
+			        is_subject_of = LIT
+				    is_subject_of_type = appanage_subject
+			    }
+			    set_country_flag = lithuanian_appanage
+		    }
+		}
+    }
+	
+	option = { #Peace at last!
+        name = "flavor_pol.728.a"
+		add_prestige = 20
+		TRK = {
+            inherit = LIT
+		    change_tag = LIT
+		}
+        create_subject = {
+			subject_type = decentralized_vassal
+			subject = LIT
+		}
+		LIT = {
+            add_liberty_desire = -100
+			set_ruler_flag = grand_duke_of_lithuania
+			if = {
+		        limit = {
+                    OR = {
+			            has_country_modifier = title_5
+			            has_country_modifier = title_6
+			        } 
+		        }
+		        change_title_4 = yes
+	        }
+		}
+		POL = { clr_country_flag = lithuanian_civil_war }
+        LIT = { clr_country_flag = lithuanian_civil_war }	
+    }
+    after = {
+	    every_country = {
+		    limit = { 
+			    has_country_flag = lithuanian_appanage 
+				ai = yes
+			}
+		    clr_country_flag = lithuanian_appanage
+			LIT = {
+			    inherit = PREV
+			}
+		}
+		LIT = {
+			add_country_modifier = {
+			    name = "grand_duchy_of_lithuania"
+			    duration = -1
+		    }
+		}
+    }	
+}
+
+##THE OSTROW AGREEMENT (Victory of the duke of Trakai)
+country_event = {
+	id = flavor_pol.729
+	title = "flavor_pol.729.title"
+	desc = "flavor_pol.729.desc"
+	picture = BATTLE_eventPicture
+    major = yes
+    fire_only_once = yes
+    
+	trigger = {
+	    tag = TRK
+	    has_country_flag = lithuanian_civil_war
+		war_score_against = {
+	        who = POL
+	        value = 40
+        }
+	}
+    
+	mean_time_to_happen = { days = 30 }
+	
+	immediate = {
+		white_peace = POL
+		set_global_flag = ostrow_agreement
+		hidden_effect = {
+		    every_country = {
+		        limit = { 
+			        is_subject_of = LIT
+				    is_subject_of_type = appanage_subject
+			    }
+			    set_country_flag = lithuanian_appanage
+		    }
+		}
+    }
+	
+	option = { #Peace at last!
+        name = "flavor_pol.729.a"
+		add_prestige = 20
+		LIT  = {
+		    break_union = POL
+		}		
+        inherit = LIT
+		change_tag = LIT
+        LIT = { clr_country_flag = lithuanian_civil_war }		
+		POL = {
+		    clr_country_flag = lithuanian_civil_war
+		    add_casus_belli = {
+				target = LIT
+				type = cb_restore_personal_union
+				months = 240
+			}
+		}
+    }
+    after = {
+	    every_country = {
+		    limit = { has_country_flag = lithuanian_appanage }
+		    clr_country_flag = lithuanian_appanage
+			ROOT = {
+			    create_subject = {
+			        subject_type = appanage_subject
+			        subject = PREV
+		        }
+			}
+		}
+    }	
+}
+
+###TREATY OF SALYNAS (main event}
+country_event = {
+	id = flavor_pol.730
+	title = "flavor_pol.730.title"
+	desc = "flavor_pol.730.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    fire_only_once = yes
+    
+	trigger = {
+	    tag = LIT
+	    has_global_flag = treaty_of_salynas
+		has_global_flag = ostrow_agreement
+		is_at_war = no
+	}
+    
+	mean_time_to_happen = { months = 6 }
+	
+	immediate = {
+	    clr_global_flag = treaty_of_salynas
+	}
+	
+	option = {
+        name = "flavor_pol.730.a"
+		every_province = {
+		    limit = {
+			    owned_by = ROOT
+				is_core = TEU
+			}
+			cede_province = TEU
+		}
+		1265 = { #Samogitia
+            cede_province = TEU
+		}
+	    1280 = { #Sudovia
+            cede_province = TEU
+		}
+		3397 = { #Kaunas
+            cede_province = TEU
+		}
+		add_truce_with = TEU
+		TEU = { add_truce_with = ROOT }
+		if = {
+            limit = { is_subject_of = POL }
+			POL = { add_truce_with = TEU }
+            TEU = { add_truce_with = POL }			
+        }
+		TEU = { country_event = { id = flavor_pol.731 days = 1 } }
+        if = {
+            limit = { is_subject_of = POL }
+			POL = { country_event = { id = flavor_pol.731 days = 1 } }	
+        }		
+    }	
+}
+
+###TREATY OF SALYNAS (informative event}
+country_event = {
+	id = flavor_pol.731
+	title = "flavor_pol.731.title"
+	desc = "flavor_pol.731.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    is_triggered_only = yes #from flavor_pol.730
+    fire_only_once = yes
+
+	option = {
+        name = "flavor_pol.731.a"		
+    }	
+}
+
+###GRAND DUCHY OF LITHUANIA RETURNED TO THE KING OF POLAND
+country_event = {
+	id = flavor_pol.732
+	title = "flavor_pol.732.title"
+	desc = "flavor_pol.732.desc"
+	picture = CONQUEST_eventPicture
+    
+	trigger = {
+	    tag = POL
+		has_global_flag = ostrow_agreement
+	    LIT = { 
+			is_subject_of = POL 
+			is_subject_of_type = decentralized_vassal
+			NOT = { has_ruler_flag = grand_duke_of_lithuania }
+		}
+	}
+	
+	mean_time_to_happen = { days = 1 }
+	
+	option = {
+        name = "flavor_pol.732.a"
+        create_subject = {
+			subject_type = permanent_union
+			subject = LIT
+		}
+        LIT = {
+			remove_country_modifier = grand_duchy_of_lithuania
+		}		
+    }	
 }
