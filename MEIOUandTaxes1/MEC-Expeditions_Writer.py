@@ -945,25 +945,25 @@ select_expedition_option_frame_bottom = """\
 				80 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_arrival}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 				10 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_trade_failure}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 				5 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_map_failure}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 				5 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_total_failure}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 			}}
@@ -973,25 +973,25 @@ select_expedition_option_frame_bottom = """\
 				40 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_arrival}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 				15 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_trade_failure}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 				15 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_map_failure}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 				30 = {{
 					country_event = {{
 						id = MEC_Expeditions.{event_num_total_failure}
-						days = {expedition_duration} random = 50
+						days = {expedition_duration} random = 25
 					}}
 				}}
 			}}
