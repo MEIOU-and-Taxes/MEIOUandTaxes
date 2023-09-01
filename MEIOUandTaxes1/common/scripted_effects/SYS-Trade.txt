@@ -302,6 +302,7 @@ TN_PrepSector = {
                 }
                 clr_province_flag = TN_SectorCent
                 clr_province_flag = HasSeaAccess
+                clr_province_flag = HasSilkAccess
                 
 
                 # Edit for new produce
@@ -473,12 +474,14 @@ TN_PrepSector = {
 
 	tradenode_centers = {
         clr_global_flag = HasSeaAccess
+        clr_global_flag = HasSilkAccess
         every_trade_node_member_country = {
             limit = {
                 NOT = { tag = AAA }
             }
             set_key = { lhs = Tmp_0 value = 0 }
             clr_global_flag = HasSeaAccess
+            clr_global_flag = HasSilkAccess
             
             every_owned_province = {
                 limit = {
@@ -488,8 +491,15 @@ TN_PrepSector = {
                 if = {
                     limit = {
                         has_port = yes 
+                        NOT = { has_province_modifier = lack_of_harbour }
                     }
                     set_global_flag = HasSeaAccess                   
+                }
+                if = {
+                    limit = {
+                        has_province_flag = TN_Silk
+                    }
+                    set_global_flag = HasSilkAccess                   
                 }
                 set_province_flag = TN_SectorPart
                 export_to_key = { lhs = Tmp_0 value = base_production }
@@ -517,6 +527,15 @@ TN_PrepSector = {
                 }
                 else = {
                     clr_province_flag = HasSeaAccess
+                }
+                if = {
+                    limit = {
+                        has_global_flag = HasSilkAccess
+                    }
+                    set_province_flag = HasSilkAccess
+                }
+                else = {
+                    clr_province_flag = HasSilkAccess
                 }
             }
         }        
@@ -2062,7 +2081,10 @@ TN_SetReach = {
 
         if = {
             limit = { # Only Major or higher than jump/spread
-                has_province_flag = HasSeaAccess
+                OR = {
+                    has_province_flag = HasSeaAccess
+                    has_province_flag = HasSilkAccess
+                }
                 OR = {
                     has_global_flag = Is_TN_Dominant
                     has_global_flag = Is_TN_Major                    
@@ -2084,8 +2106,8 @@ TN_SetReach = {
                 }
                 clr_province_flag = TN_SectorCentReachSpread
                 TN_effect11 = yes
-                TN_effect = { 
-                    effect = TN_effect22
+                TN_effect = {
+                    effect = TN_effect24
                 }
             }
             clr_global_flag = 1_jump
@@ -2093,12 +2115,13 @@ TN_SetReach = {
             if = {
                 limit = { # Only dominants can spread twice
                     has_global_flag = Is_TN_Dominant
+                    has_province_flag = HasSeaAccess
                 }
                 set_global_flag = 2_jump
                 every_province = {
                     limit = {
                         is_wasteland = no
-                        has_province_flag = TN_SectorCentReachSpread
+                        has_province_flag = TN_SectorCentReachSpread2
                         OR = {
                             owned_by = event_target:ProvNew
                             AND = {
@@ -3819,7 +3842,9 @@ TN_DoTradeAfterHelper3 = {
             subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
 
             # Add these as earnings at Base Price
-            multiply_key = { lhs = Public_Tmp3 which = $BasePrice$ }
+            TN_DirectBuyPriceMath = { output=Public_Tmp4 BasePrice=$BasePrice$ prod=$prod$ }
+            multiply_key = { lhs = Public_Tmp3 which = Public_Tmp4 }
+
             change_key = { lhs = Prod_S$slot$IncomeProd which = Public_Tmp3 } # set as income in the specific slot
             change_key = { lhs = Prod_S$slot$SplyC$prod$ which = Public_Tmp3 } # supply cost ?? idk what this is
         }
@@ -3840,7 +3865,9 @@ TN_DoTradeAfterHelper3 = {
             subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
 
             # Add these as earnings at Base Price
-            multiply_key = { lhs = Public_Tmp3 which = $BasePrice$ }
+            TN_DirectBuyPriceMath = { output=Public_Tmp4 BasePrice=$BasePrice$ prod=$prod$ }
+            multiply_key = { lhs = Public_Tmp3 which = Public_Tmp4 }
+
             change_key = { lhs = Prod_S$slot$IncomeProd which = Public_Tmp3 } # set as income in the specific slot
             change_key = { lhs = Prod_S$slot$SplyC$prod$ which = Public_Tmp3 } # supply cost ?? idk what this is
         }
@@ -3890,9 +3917,56 @@ TN_DoTradeAfterHelper5 = {
             check_key = { lhs = $class$_Total value = 0.001 }
             check_key = { lhs = $class$_DirectBuy$prod$ value = 0.001 }
         }
-        set_key = { lhs = Public_Tmp1 which = $class$_DirectBuy$prod$ }
-        multiply_key = { lhs = Public_Tmp1 which = $BasePrice$ }
+        TN_DirectBuyPriceMath = { output=Public_Tmp1 BasePrice=$BasePrice$ prod=$prod$ }
+        multiply_key = { lhs = Public_Tmp1 which = $class$_DirectBuy$prod$ }
         change_key = { lhs = $class$_SpendProd which = Public_Tmp1 }
+    }
+}
+
+TN_DirectBuyPriceMath = {
+    if = {
+        limit = {
+            check_key = { lhs = TN_ProvPrc$prod$ value = $BasePrice$ }
+        }
+        set_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
+        subtract_key = { lhs = $output$ value = $BasePrice$ }
+        if = {
+            limit = {
+                has_global_flag = POP_Sim10
+            }
+            multiply_key = { lhs = $output$ value = 1 }
+        }
+        else_if = {
+            limit = {
+                has_global_flag = POP_Sim15
+            }
+            multiply_key = { lhs = $output$ value = 0.75 }
+        }
+        else = {
+            multiply_key = { lhs = $output$ value = 0.5 }
+        }
+        change_key = { lhs = $output$ value = $BasePrice$ }
+    }
+    else = {
+        set_key = { lhs = $output$ value = $BasePrice$ }
+        subtract_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
+        if = {
+            limit = {
+                has_global_flag = POP_Sim6
+            }
+            multiply_key = { lhs = $output$ value = 1 }
+        }
+        else_if = {
+            limit = {
+                has_global_flag = POP_Sim8
+            }
+            multiply_key = { lhs = $output$ value = 0.75 }
+        }
+        else = {
+            multiply_key = { lhs = $output$ value = 0.5 }
+        }
+        multiply_key = { lhs = $output$ value = -1 }
+        change_key = { lhs = $output$ value = $BasePrice$ }
     }
 }
 
@@ -4970,7 +5044,7 @@ TN_DoDole = {
         limit = {
             check_key = { lhs = $class$_Dole value = 0.001 }
         }
-        TN_DoDoleHelper = { class = $class$ prod = 1 }
+        TN_DoDoleHelper = { class = $class$ prod = 1 DirectBuy=yes }
     }
 	else = {
 		set_key = { lhs = $class$_IncomeDole value = 0 }
@@ -4984,7 +5058,7 @@ TN_DoDoleHelper = {
 		limit = {
 			always = $DirectBuy$
 		}
-        subtract_key = { lhs = Tmp_0 which = $class$_DirectBuy1 }
+        subtract_key = { lhs = Tmp_0 which = $class$_DirectBuy$prod$ }
     }
     ]
 
@@ -5005,7 +5079,8 @@ TN_DoDoleHelper = {
             check_key = { lhs = Tmp_0 value = 0.01 }
         }
         multiply_key = { lhs = Tmp_0 which = $class$_Dole }
-        multiply_key = { lhs = Tmp_0 which = TN_ProvPrc1 }
+        TN_DirectBuyPriceMath = { output=Tmp_1 BasePrice=2.5 prod=$prod$ } ### BASE Good PRICE
+        multiply_key = { lhs = Tmp_0 which = Tmp_1 }
 
         change_key = { lhs = $class$_IncomeDole which = Tmp_0 }
     }
