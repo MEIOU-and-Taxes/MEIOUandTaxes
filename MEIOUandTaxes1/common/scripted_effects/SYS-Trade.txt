@@ -49,10 +49,9 @@ TN_DoSupplyDemand = {
     # Get supply and demand from slots for each trade good
     # Edit for new produce
     TN_GetProdSlotDirectR = { prod = 1 } ## Calc how much the Rural labour types contributed
-    #TN_GetProdSlot = { prod = 1 } ## Calc how much the Rural labour types contributed
-    TN_GetProdSlot = { prod = 2 }
-    TN_GetProdSlot = { prod = 4 }
-    TN_GetProdSlot = { prod = 5 }
+    TN_GetProdSlotDirectR = { prod = 2 }
+    TN_GetProdSlotDirectR = { prod = 4 }
+    TN_GetProdSlotDirectR = { prod = 5 }
     TN_GetProdSlot = { prod = 6 }
     TN_GetProdSlot = { prod = 9 }
     TN_GetProdSlot = { prod = 10 }
@@ -88,6 +87,9 @@ TN_DoSupplyDemand = {
 
     ### Remove Direct Buy'd goods from the market
     TN_ApplyDirectFulfilR = { prod = 1 }
+    TN_ApplyDirectFulfilR = { prod = 2 }
+    TN_ApplyDirectFulfilR = { prod = 4 }
+    TN_ApplyDirectFulfilR = { prod = 5 }
 
     # Edit for new produce
 	change_key = { lhs = TN_ProvDmnd1 which = Building_Agriculture1 }
@@ -3995,12 +3997,12 @@ TN_DoIncomeSpending = {
     TN_SetHowMuchBought = { class = CL prod = 10 type = Luxury }
 
     # Calculate 3 class fulfillments
-    TN_CalcFulfillType = { class = SF DirectBuy1=yes }
-    TN_CalcFulfillType = { class = NM DirectBuy1=yes }
+    TN_CalcFulfillType = { class = SF DirectBuy1=yes DirectBuy2=yes DirectBuy4=yes DirectBuy5=yes }
+    TN_CalcFulfillType = { class = NM DirectBuy1=yes DirectBuy2=yes DirectBuy4=yes DirectBuy5=yes }
     TN_CalcFulfillType = { class = RE }
-    TN_CalcFulfillType = { class = NO DirectBuy1=yes }
+    TN_CalcFulfillType = { class = NO DirectBuy1=yes DirectBuy2=yes DirectBuy4=yes DirectBuy5=yes }
     TN_CalcFulfillType = { class = BG }
-    TN_CalcFulfillType = { class = CL DirectBuy1=yes }
+    TN_CalcFulfillType = { class = CL DirectBuy1=yes DirectBuy2=yes DirectBuy4=yes DirectBuy5=yes }
 	
 	set_key = { lhs = Class_FillLife value = 0 }
 	
@@ -4680,6 +4682,27 @@ TN_CalcFulfillType = {
         TN_GetDmnd$class$23 = { return = Public_Tmp2 }
         TN_GetDmnd$class$24 = { return = Public_Tmp5 }
         TN_GetDmnd$class$25 = { return = Tmp_8 }
+
+        ### Precalc what % of life each good fulfils
+        set_key = { lhs = Tax_Tmp0 value = 0 }
+        change_key = { lhs = Tax_Tmp0 which = Tmp_3 }
+        change_key = { lhs = Tax_Tmp0 which = Public_Tmp1 }
+        change_key = { lhs = Tax_Tmp0 which = Tmp_5 }
+        set_key = { lhs = Tax_Tmp1 which = Tmp_3 }
+        if = {
+            limit = { check_key = { lhs = Tax_Tmp1 value = 0.001 } }
+            divide_key = { lhs = Tax_Tmp1 which = Tax_Tmp0 }
+        }
+        set_key = { lhs = Tax_Tmp2 which = Public_Tmp1 }
+        if = {
+            limit = { check_key = { lhs = Tax_Tmp2 value = 0.001 } }
+            divide_key = { lhs = Tax_Tmp2 which = Tax_Tmp0 }
+        }
+        set_key = { lhs = Tax_Tmp3 which = Tmp_4 }
+        if = {
+            limit = { check_key = { lhs = Tax_Tmp3 value = 0.001 } }
+            divide_key = { lhs = Tax_Tmp3 which = Tax_Tmp0 }
+        }
 		
 		set_key = { lhs = Tmp_0 which = Tmp_2 }
         # Edit for new produce
@@ -4728,7 +4751,27 @@ TN_CalcFulfillType = {
         # Edit for new produce
         if = {
             limit = {
-                check_key = { lhs = $class$_FillLife value = 0.001 }
+                OR = {
+                    check_key = { lhs = $class$_FillLife value = 0.001 }
+                    [[DirectBuy2]
+                    AND = {
+                        always = $DirectBuy2$ 
+                        check_key = { lhs = $class$_DirectFill2 value = 0.001 }
+                    }
+                    ]
+                    [[DirectBuy4]
+                    AND = {
+                        always = $DirectBuy4$ 
+                        check_key = { lhs = $class$_DirectFill4 value = 0.001 }
+                    }
+                    ]
+                    [[DirectBuy5]
+                    AND = {
+                        always = $DirectBuy5$ 
+                        check_key = { lhs = $class$_DirectFill5 value = 0.001 }
+                    }
+                    ]
+                }
                 check_key = { lhs = Tmp_0 value = 0.001 }
             }
 			set_key = { lhs = Public_Tmp4 value = 0 }
@@ -4766,9 +4809,28 @@ TN_CalcFulfillType = {
             set_key = { lhs = $class$_FillLife value = 0 }
         }
 
+        set_key = { lhs = $class$_FillLifeDirectD value = 0 }
+        [[DirectBuy2]
+        set_key = { lhs = Tax_Tmp4 which = $class$_DirectFill2 }
+        multiply_key = { lhs = Tax_Tmp4 which = Tax_Tmp1 }
+        change_key = { lhs = $class$_FillLifeDirectD which = Tax_Tmp4 }
+        ]
+        [[DirectBuy4]
+        set_key = { lhs = Tax_Tmp4 which = $class$_DirectFill4 }
+        multiply_key = { lhs = Tax_Tmp4 which = Tax_Tmp2 }
+        change_key = { lhs = $class$_FillLifeDirectD which = Tax_Tmp4 }
+        ]
+        [[DirectBuy5]
+        set_key = { lhs = Tax_Tmp4 which = $class$_DirectFill5 }
+        multiply_key = { lhs = Tax_Tmp4 which = Tax_Tmp3 }
+        change_key = { lhs = $class$_FillLifeDirectD which = Tax_Tmp4 }
+        ]
+        change_key = { lhs = $class$_FillLife which = $class$_FillLifeDirectD }
+        multiply_key = { lhs = $class$_FillLifeDirectD value = 100 }
+
         set_key = { lhs = $class$_FillLifeD which = $class$_FillLife }
         multiply_key = { lhs = $class$_FillLifeD value = 100 }
-
+        
 		
 		set_key = { lhs = Tmp_0 which = Tmp_5 }
 		change_key = { lhs = Tmp_0 which = Public_Tmp2 }
