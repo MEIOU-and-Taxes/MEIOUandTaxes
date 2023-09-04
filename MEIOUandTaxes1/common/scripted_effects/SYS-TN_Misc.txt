@@ -137,16 +137,16 @@ TN_GetDmndBudgetAll = {
 
     # Then workers, who have to feed off the scraps left over
     # Peasants consume their food and their clothes, and a small amount of the rest
-    TN_GetDmndWorkerDirect = { class = SF good=1 BasePrice=Modi_Tmp0 DirectBuyPerc=0.85 elite1 = NO elite2 = CL }
-    TN_GetDmndWorkerDirect = { class = SF good=2 BasePrice=Modi_Tmp1 DirectBuyPerc=0.2 elite1 = NO elite2 = CL } ### a small amount of salt, enough for initial fulfil is consumed
-    TN_GetDmndWorkerDirect = { class = SF good=4 BasePrice=Modi_Tmp2 DirectBuyPerc=0.5 elite1 = NO elite2 = CL } ### half their life, then export
-    TN_GetDmndWorkerDirect = { class = SF good=5 BasePrice=Modi_Tmp3 DirectBuyPerc=0.5 elite1 = NO elite2 = CL } ###  a small amount of fuel, enough for initial fulfil is consumed
+    TN_GetDmndWorkerDirect = { class = SF good=1 BasePrice=Modi_Tmp0 BaseDirectBuyPerc=0.8 MaxDirectBuyPerc=2.0 ScaleFactor=0.5 elite1 = NO elite2 = CL }
+    TN_GetDmndWorkerDirect = { class = SF good=2 BasePrice=Modi_Tmp1 BaseDirectBuyPerc=0.2 MaxDirectBuyPerc=0.2 ScaleFactor=1.0 ScalingBuy=no elite1 = NO elite2 = CL } ### a small amount of salt, enough for initial fulfil is consumed
+    TN_GetDmndWorkerDirect = { class = SF good=4 BasePrice=Modi_Tmp2 BaseDirectBuyPerc=0.5 MaxDirectBuyPerc=1.5 ScaleFactor=0.3 elite1 = NO elite2 = CL } ### half their life, then export
+    TN_GetDmndWorkerDirect = { class = SF good=5 BasePrice=Modi_Tmp3 BaseDirectBuyPerc=0.5 MaxDirectBuyPerc=1.0 ScaleFactor=0.75 elite1 = NO elite2 = CL } ###  a small amount of fuel, enough for initial fulfil is consumed
 
     # Nomads try and consume all their goods as much as possible
-    TN_GetDmndWorkerDirect = { class = NM good=1 BasePrice=Modi_Tmp0 DirectBuyPerc=1.0 elite1 = NO }
-    TN_GetDmndWorkerDirect = { class = NM good=2 BasePrice=Modi_Tmp1 DirectBuyPerc=1.0 elite1 = NO }
-    TN_GetDmndWorkerDirect = { class = NM good=4 BasePrice=Modi_Tmp2 DirectBuyPerc=1.0 elite1 = NO }
-    TN_GetDmndWorkerDirect = { class = NM good=5 BasePrice=Modi_Tmp3 DirectBuyPerc=1.0 elite1 = NO }
+    TN_GetDmndWorkerDirect = { class = NM good=1 BasePrice=Modi_Tmp0 BaseDirectBuyPerc=1.0 MaxDirectBuyPerc=2.0 ScaleFactor=0.75 elite1 = NO }
+    TN_GetDmndWorkerDirect = { class = NM good=2 BasePrice=Modi_Tmp1 BaseDirectBuyPerc=1.0 MaxDirectBuyPerc=1.5 ScaleFactor=0.75 elite1 = NO }
+    TN_GetDmndWorkerDirect = { class = NM good=4 BasePrice=Modi_Tmp2 BaseDirectBuyPerc=1.0 MaxDirectBuyPerc=2.0 ScaleFactor=0.75 elite1 = NO }
+    TN_GetDmndWorkerDirect = { class = NM good=5 BasePrice=Modi_Tmp3 BaseDirectBuyPerc=1.0 MaxDirectBuyPerc=2.0 ScaleFactor=0.75 elite1 = NO }
 
     set_key = { lhs = Class_DirectBuyR1 which = SF_DirectBuy1 }
     change_key = { lhs = Class_DirectBuyR1 which = NO_DirectBuyFromSF1 }
@@ -284,6 +284,7 @@ TN_GetDmndWorkerDirect = {
         [[elite1] subtract_key = { lhs = Tmp_4 which = $elite1$_DirectBuyFrom$class$$good$ } ]
         [[elite2] subtract_key = { lhs = Tmp_4 which = $elite2$_DirectBuyFrom$class$$good$ } ]
         [[elite3] subtract_key = { lhs = Tmp_4 which = $elite3$_DirectBuyFrom$class$$good$ } ]
+        multiply_key = { lhs = Tmp_4 value = 0.95 } ### always leave 5% on the table
         ### The rest we can tap, as its our own produce
         if = {
             limit = { NOT = { check_key = { lhs = Tmp_4 value = 0.01 } } }
@@ -293,8 +294,39 @@ TN_GetDmndWorkerDirect = {
         else ={
             # How much 100% fulfilment will cost
             TN_GetDmnd$class$$good$ = { return = Tmp_3 }
+
+            ### Calc Direct Buy Perc
+            set_key = { lhs = Tmp_5 which = Tmp_4 }
+            divide_key = { lhs = Tmp_5 which = Tmp_3 }
+            
+            if = {
+                limit = {
+                    check_key = { lhs = Tmp_5 value = $BaseDirectBuyPerc$ } # if we cant?
+                    [[ScalingBuy] always = $ScalingBuy$ ]
+                }
+                change_key = { lhs = Tmp_5 value = 0.01 }
+                if = {
+                    limit = {
+                        check_key = { lhs = Tmp_5 value = $MaxDirectBuyPerc$ } # if we cant?
+                    }
+                    set_key = { lhs = Tmp_5 value = $MaxDirectBuyPerc$ }
+                }
+                subtract_key = { lhs = Tmp_5 value = $BaseDirectBuyPerc$ }
+
+                set_key = { lhs = Tmp_6 value = $MaxDirectBuyPerc$ }
+                subtract_key = { lhs = Tmp_6 value = $BaseDirectBuyPerc$ }
+                
+                divide_key = { lhs = Tmp_5 which = Tmp_6 }
+               ### multiply_key = { lhs = Tmp_5 which = Tmp_5 } ### Exponential rise
+                multiply_key = { lhs = Tmp_5 value = $ScaleFactor$ }
+                change_key = { lhs = Tmp_5 value = $BaseDirectBuyPerc$ }
+            }
+            else = {
+                set_key = { lhs = Tmp_5 value = $BaseDirectBuyPerc$ }
+            }
+
             set_key = { lhs = Tmp_1 which = Tmp_3 }
-            multiply_key = { lhs = Tmp_1 value = $DirectBuyPerc$ } ### % of Good Demand
+            multiply_key = { lhs = Tmp_1 which = Tmp_5 } ### % of Good Demand
             ### Tmp_1 is now the total amount of goods we are demanded
             # Also how much will this cost
             set_key = { lhs = Tmp_2 which = Tmp_1 }
@@ -319,7 +351,7 @@ TN_GetDmndWorkerDirect = {
                     check_key = { lhs = Tmp_4 which = Tmp_1 } # If we produce more than we need, then great, 100% of DirectBuy% is met. Thats our fulfil
                 }
                 ## Dont change DirectBuy, we can buy all of it
-                set_key = { lhs = $class$_DirectFill$good$ value = $DirectBuyPerc$ }
+                set_key = { lhs = $class$_DirectFill$good$ which = Tmp_5 }
             }
             else = { # if we dont, then we will eat all of our produce
                 set_key = { lhs = $class$_DirectBuy$good$ which = Tmp_4 }
@@ -354,12 +386,13 @@ TN_GetDmndEliteDirect = {
         [[elite1] subtract_key = { lhs = Tmp_4 which = $elite1$_DirectBuyFrom$worker$$good$ } ]
         [[elite2] subtract_key = { lhs = Tmp_4 which = $elite2$_DirectBuyFrom$worker$$good$ } ]
         [[elite3] subtract_key = { lhs = Tmp_4 which = $elite3$_DirectBuyFrom$worker$$good$ } ]
+        multiply_key = { lhs = Tmp_4 value = 0.95 } ### always leave 5% on the table
         if = {
             limit = { NOT = { check_key = { lhs = Tmp_4 value = 0.01 } } }
             set_key = { lhs = $class$_DirectBuyFrom$worker$$good$ value = 0 }
             set_key = { lhs = Tmp_5 value = 0 }
         }
-        else ={
+        else = {
             set_key = { lhs = Tmp_0 value = $DirectBuyPerc$ }
             subtract_key = { lhs = Tmp_0 which = $class$_DirectFill$good$ } ### how much have we already fulfilled, factor that out. can be repeat demanded from multiple classes
             # How much 100% fulfilment will cost
