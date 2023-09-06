@@ -7048,8 +7048,393 @@ country_event = {
 			subject_type = permanent_union
 			subject = LIT
 		}
-        LIT = {
-			remove_country_modifier = grand_duchy_of_lithuania
-		}		
+		hidden_effect = {
+            LIT = {
+			    remove_country_modifier = grand_duchy_of_lithuania
+		    }
+        }		
     }	
+}
+
+###SVITRIGAILA ASKS FOR OUR HELP
+country_event = {
+	id = flavor_pol.760
+	title = "flavor_pol.760.title"
+	desc = "flavor_pol.760.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    fire_only_once  = yes
+	
+	trigger = {
+	    tag = TEU
+		NOT = { is_year = 1452 } #death of Svitrigaila
+		has_global_flag = ostrow_agreement
+	    LIT = { 
+			is_subject_of = POL 
+			is_subject_of_type = decentralized_vassal
+			NOT = { stability = 3 }
+			NOT = { war_with = ROOT }
+			is_neighbor_of = ROOT
+			any_owned_province = {
+			    region = lithuania_region
+			}
+		}
+	}
+	
+	mean_time_to_happen = { years = 10 }
+	
+	option = { #Help him
+        name = "flavor_pol.760.a"	
+        set_global_flag = svitrigaila_received_help
+		add_treasury = -50
+        LIT = { country_event = { id = flavor_pol.761 days = 30 } }		
+    }
+    option = { #Refuse
+        name = "flavor_pol.760.b"
+        LIT = { country_event = { id = flavor_pol.761 days = 30 } }				
+    }		
+}
+
+###SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.761
+	title = "flavor_pol.761.title"
+	desc = "flavor_pol.761.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    is_triggered_only = yes #from flavor.pol.733
+	fire_only_once  = yes
+	
+	trigger = {
+	    tag = LIT
+		is_subject_of = POL
+        any_owned_province = {
+		    region = lithuania_region
+		}		
+	}
+	
+	option = {
+        name = "flavor_pol.761.a"	
+        if = {
+		    limit =  {
+			    has_global_flag = svitrigaila_received_help
+			}
+			random_owned_province = {
+			    limit = {
+				    region = lithuania_region
+				}
+				spawn_rebels = {
+				    type = pretender_rebels
+				    size = 3
+				    leader = "Svitrigaila Gediminai"
+				    leader_dynasty = "Gediminai"
+					friend = TEU
+					should_take_capital = yes
+					win = yes
+			    }
+			}
+			clr_global_flag = svitrigaila_received_help
+		}
+		else = {
+			random_owned_province = {
+			    limit = {
+				    region = lithuania_region
+				}
+				spawn_rebels = {
+				    type = pretender_rebels
+				    size = 2
+				    leader = "Svitrigaila Gediminai"
+				    leader_dynasty = "Gediminai"
+					should_take_capital = yes
+					win = yes
+			    }
+			}
+		}
+		hidden_effect = {
+            POL = { country_event = { id = flavor_pol.762 days = 1 } }
+        }		
+    }
+    after = {
+        set_country_flag = svitrigaila_rebellion 
+    }	
+}
+
+###SVITRIGAILA'S REBELLION (INFORMATIVE EVENT)
+country_event = {
+	id = flavor_pol.762
+	title = "flavor_pol.761.title"
+	desc = "flavor_pol.761.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    is_triggered_only = yes #from flavor.pol.734
+	fire_only_once  = yes
+	
+	option = {
+        name = "flavor_pol.761.a"
+    }	
+}
+
+###END OF SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.763
+	title = "flavor_pol.763.title"
+	desc = "flavor_pol.763.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+
+	trigger = {
+	    tag = POL
+	    LIT = { 
+			is_subject_of = POL
+            has_country_flag = svitrigaila_rebellion			
+			NOT = { has_ruler = "Svitrigaila" }
+			NOT = { num_of_rebel_armies = 1 }
+			NOT = { num_of_rebel_controlled_provinces = 1 }
+		}
+	}
+	
+	immediate = {
+	    LIT = { clr_country_flag = svitrigaila_rebellion }
+	}
+	
+	option = { #Pardon him
+        name = "flavor_pol.763.a"
+		add_legitimacy = 5
+		add_prestige = -10
+		LIT = {
+		    Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
+			add_liberty_desire = -10
+			set_country_flag = pardoned_svitrigaila
+		}
+    }
+    option = { #Execute him
+        name = "flavor_pol.763.b"
+		add_legitimacy = -10
+		add_prestige = 5
+		LIT = {
+		    Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-20 }
+			add_liberty_desire = 20
+		}
+    }	
+}
+
+###SECOND SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.764
+	title = "flavor_pol.764.title"
+	desc = "flavor_pol.764.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+    
+	trigger = {
+	    tag = LIT
+		NOT = { is_year = 1452 } #death of Svitrigaila
+		NOT = { stability = 3 }
+		has_country_flag = pardoned_svitrigaila
+		is_subject_of = POL 
+		OR = {
+			is_subject_of_type = permanent_union 
+			is_subject_of_type = permanent_union_limited
+		}
+		any_owned_province = {
+			OR = {
+			    region = ruthenia_region
+				region = belarus_region
+			}
+		}
+		POL = {
+		    has_country_flag = 2_union_horodlo
+		}
+	}
+	
+	mean_time_to_happen = { years = 2 }
+	
+	option = {
+        name = "flavor_pol.764.a"	
+        random_owned_province = {
+			    limit = {
+				    OR = {
+			            region = ruthenia_region
+				        region = belarus_region
+			        }
+				}
+				spawn_rebels = {
+				    type = pretender_rebels
+				    size = 2
+				    leader = "Svitrigaila Gediminai"
+				    leader_dynasty = "Gediminai"
+					win = yes
+			    }
+	    }
+		hidden_effect = {
+            POL = { country_event = { id = flavor_pol.765 days = 1 } }
+        }		
+    }
+    after = {
+        set_country_flag = second_svitrigaila_rebellion 
+    }		
+}
+
+###SECOND SVITRIGAILA'S REBELLION (INFORMATIVE EVENT)
+country_event = {
+	id = flavor_pol.765
+	title = "flavor_pol.764.title"
+	desc = "flavor_pol.764.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+    is_triggered_only = yes #from flavor.pol.737
+	fire_only_once  = yes
+	
+	option = {
+        name = "flavor_pol.764.a"
+    }	
+}
+
+###END OF SECOND SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.766
+	title = "flavor_pol.766.title"
+	desc = "flavor_pol.766.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+
+	trigger = {
+	    tag = POL
+	    LIT = { 
+			is_subject_of = POL
+            has_country_flag = second_svitrigaila_rebellion			
+			NOT = { has_ruler = "Svitrigaila" }
+			NOT = { num_of_rebel_armies = 1 }
+			NOT = { num_of_rebel_controlled_provinces = 1 }
+		}
+	}
+	
+	immediate = {
+	    LIT = { clr_country_flag = second_svitrigaila_rebellion }
+	}
+	
+	option = { #Choose Sigismund Kestutatis as a Grand Duke
+        name = "flavor_pol.766.a"
+		add_prestige = 10
+		hidden_effect = {
+		    break_union = LIT
+		}
+		create_subject = {
+			subject_type = decentralized_vassal
+			subject = LIT
+		}
+		LIT = {
+		    define_ruler = {
+                name = "Sigismund Kestutatis"
+                dynasty = "Gediminai"
+                adm = 3
+                dip = 4
+                mil = 4
+                age = 50
+                claim = 95
+            }
+            add_liberty_desire = -100
+			set_ruler_flag = grand_duke_of_lithuania
+			if = {
+		        limit = {
+                    OR = {
+			            has_country_modifier = title_5
+			            has_country_modifier = title_6
+			        } 
+		        }
+		        change_title_4 = yes
+	        }
+		}
+    }
+    after = {
+		LIT = {
+			add_country_modifier = {
+			    name = "grand_duchy_of_lithuania"
+			    duration = -1
+		    }
+		}
+    }	  	
+}
+
+###ELECTION IN LITHUANIA
+country_event = {
+	id = flavor_pol.767
+	title = "flavor_pol.767.title"
+	desc = "flavor_pol.767.desc"
+	picture = LIBERUM_VETO_eventPicture
+	fire_only_once  = yes
+	is_triggered_only = yes #on_monarch_death
+
+	trigger = {
+	    tag = POL
+		has_regency = no
+		NOT = { has_ruler = "Aleksander" }
+	    LIT = { 
+			is_subject_of = POL 
+			OR = {
+				is_subject_of_type = permanent_union 
+				is_subject_of_type = permanent_union_limited
+			}		
+		}
+		has_country_flag = 4_union_krakow
+		NOT = {
+			exists = PLC
+		}
+	}
+	
+	option = {
+        name = "flavor_pol.767.a"
+		add_legitimacy = 10
+		hidden_effect = {
+		    break_union = LIT
+		}
+		create_subject = {
+			subject_type = decentralized_vassal
+			subject = LIT
+		}
+		if = {
+		    limit = { NOT = { has_ruler = "Aleksander" } }
+			LIT = {
+			    define_ruler = { 
+			        name = "Aleksander"
+                    dynasty = ROOT
+				    culture = ROOT
+				    religion = ROOT
+                    age = 16
+				    male = yes
+                    claim = 95
+                }
+			}
+		}
+		else = {
+		    LIT = {
+			    define_ruler = { 
+			        name = "Jan Olbracht"
+                    dynasty = ROOT
+				    culture = ROOT
+				    religion = ROOT
+                    age = 16
+				    male = yes
+                    claim = 95
+                }
+			}
+		}
+		LIT = {
+            add_liberty_desire = -100
+			set_ruler_flag = grand_duke_of_lithuania
+			if = {
+		        limit = {
+                    OR = {
+			            has_country_modifier = title_5
+			            has_country_modifier = title_6
+			        } 
+		        }
+		        change_title_4 = yes
+	        }
+		}
+    }
+    after = {
+		LIT = {
+			add_country_modifier = {
+			    name = "grand_duchy_of_lithuania"
+			    duration = -1
+		    }
+		}
+    }	  	
 }
