@@ -5,6 +5,141 @@
 # Refresh 'TN_ProvDmnd$prod$' and 'TN_ProvSply$prod$' variables in each province
 # Those variables represent province's supply and demand for each trade goods,
 # Which other effects later reference for trade, fulfillment, and income calculations
+TN_AssignSectorID = {
+    every_province = {
+        limit = {
+            isValidProv = yes
+        }
+        set_key = { lhs = Sector_ID value = 0 }
+        set_key = { lhs = Sector_TagID value = 0 }
+    }
+    every_country = {
+        limit = {
+            isValidCountry = yes
+        }
+        set_key = { lhs = Sector_ID value = 0 }
+        set_key = { lhs = Sector_TagID which = ID_Tag }
+    }
+    set_key = { lhs = Sector_ID value = 1 }
+    every_province = {
+        limit = {
+            has_province_flag = TN_COT
+            isValidProv = yes
+            NOT = { check_key = { lhs = Sector_ID value = 1 } }
+        }
+        set_province_flag = In_TN_COT
+        set_key = { lhs = Sector_ID which = PREV }
+        set_key = { lhs = Sector_TagID which = owner }
+        add_province_modifier = {
+            name = Plague_mod0
+            duration = -1
+        }
+        every_trade_node_member_province = {
+            limit = {
+                owned_by = PREV
+                NOT = { province_id = PREV }
+            }
+            set_key = { lhs = Sector_ID which = PREV }
+            set_province_flag = In_TN_COT
+            set_key = { lhs = Sector_TagID which = PREV }
+            add_province_modifier = {
+                name = Plague_mod_m0
+                duration = -1
+            }
+        }
+        PREV = { change_key = { lhs = Sector_ID value = 1 } }
+    }
+    every_province = {
+        limit = {
+            isValidProv = yes
+            NOT = { check_key = { lhs = Sector_ID value = 1 } }
+        }
+        if = {
+            limit = {
+                any_trade_node_member_province = {
+                    check_key = { lhs = Sector_ID value = 1 }
+                }
+            }
+            set_global_flag = Find_TN_COT
+            save_event_target_as = Prov
+            save_event_target_as = ProvNew
+            while = {
+                limit = {
+                    has_global_flag = Find_TN_COT
+                }
+                clr_global_flag = Find_TN_COT
+                
+                event_target:Prov = {
+                    every_empty_neighbor_province = {
+                        limit = {
+                            same_trade_node_as = PREV
+                            isValidEmpty = yes
+                        }
+                        set_province_flag = Find_TN_COT
+                        set_global_flag = Find_TN_COT
+                    }
+                    every_neighbor_province = {
+                        limit = {
+                            same_trade_node_as = PREV
+                            isValidProv = yes
+                        }
+                        if = {
+                            limit = {
+                                OR = {
+                                    NOT = { has_province_flag = In_TN_COT }
+                                    NOT = { check_key = { lhs = Sector_ID value = 1 } }
+                                }
+                            }
+                            set_province_flag = Find_TN_COT
+                            set_global_flag = Find_TN_COT
+                        }
+                        else = {
+                            event_target:ProvNew = {
+                                set_key = { lhs = Sector_ID which = PREV }
+                                set_key = { lhs = Sector_TagID which = PREV }
+                                set_key = { lhs = Modi_TradeScoreExternal which = PREV }
+                                set_key = { lhs = Modi_TradeScoreInternal which = PREV }
+                                add_province_modifier = {
+                                    name = Plague_mod_s0
+                                    duration = -1
+                                }
+                            }
+                            clr_global_flag = Find_TN_COT
+                            every_trade_node_member_province = {
+                                clr_province_flag = Find_TN_COT
+                            }
+                        }
+                    }
+                }
+			
+                random_trade_node_member_province = {
+                    limit = {
+                        has_province_flag = Find_TN_COT
+                    }
+                    clr_province_flag = Find_TN_COT
+                    
+                    set_global_flag = Find_TN_COT
+                    
+                    save_event_target_as = Prov
+                }
+                
+            }
+        }
+        else = {
+            set_key = { lhs = Sector_ID which = PREV }
+            PREV = { change_key = { lhs = Sector_ID value = 1 } }
+        }
+    }
+    every_province = {
+        limit = {
+            isValidProv = yes
+        }
+        clr_province_flag = Find_TN_COT
+        clr_province_flag = In_TN_COT
+    }
+}
+
+
 TN_DoSupplyDemand = {
     # Start by setting all demand and supply variables to 0
     # Edit for new produce
@@ -342,23 +477,6 @@ TN_PrepSector = {
                 set_key = { lhs = TN_SectorSply41 value = 0 }
                 set_key = { lhs = TN_SectorSply51 value = 0 }
 
-                # Edit for new produce
-                set_key = { lhs = TN_SectorSubsistSply1 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply2 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply4 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply5 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply6 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply9 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply10 value = 0 }
-                
-                set_key = { lhs = TN_SectorSubsistSply21 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply22 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply23 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply24 value = 0 }
-                set_key = { lhs = TN_SectorSubsistSply25 value = 0 }
-
-                set_key = { lhs = TN_SectorSubsistSply41 value = 0 }
-
                 set_key = { lhs = TN_SectorTrade value = 0 }
                 set_key = { lhs = TN_SectorScore value = 0 }
 
@@ -583,7 +701,7 @@ TN_RefreshPrice = {
 			every_trade_node_member_province = {
 				if = {	
 					limit = {
-						owned_by = PREV
+						is_key_equal = { lhs = Sector_ID which = PREV }
 						has_province_flag = TN_SectorPart
 
 						NOT = {
@@ -634,7 +752,7 @@ TN_RefreshPrice = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						owned_by = PREV
+						is_key_equal = { lhs = Sector_ID which = PREV }
 						has_province_flag = TN_SectorPart
 					}
 					if = {
@@ -736,7 +854,7 @@ TN_SumSector = {
             every_trade_node_member_province = {
 				if = {
 					limit = {
-						owned_by = PREV
+						is_key_equal = { lhs = Sector_ID which = PREV }
 						has_province_flag = TN_SectorPart
 						NOT = {
 							province_id = PREV
@@ -834,50 +952,7 @@ TN_SumSector = {
 					}
 					set_key = { lhs = Public_Tmp1 value = 0 }
 				}
-			}           
-           
-            # TN_SubsistenceProd is a factor of how much of the Sply for each prod is subsistent. Then it gets removed from the SectorSply
-			set_key = { lhs = TN_SectorSubsistSply1 which = TN_Subsistence1 }
-			set_key = { lhs = TN_SectorSubsistSply2 which = TN_Subsistence2 }
-			set_key = { lhs = TN_SectorSubsistSply4 which = TN_Subsistence4 }
-			set_key = { lhs = TN_SectorSubsistSply5 which = TN_Subsistence5 }
-			set_key = { lhs = TN_SectorSubsistSply6 which = TN_Subsistence6 }
-			set_key = { lhs = TN_SectorSubsistSply9 which = TN_Subsistence9 }
-			set_key = { lhs = TN_SectorSubsistSply10 which = TN_Subsistence10 }
-			set_key = { lhs = TN_SectorSubsistSply21 which = TN_Subsistence21 }
-			set_key = { lhs = TN_SectorSubsistSply22 which = TN_Subsistence22 }
-			set_key = { lhs = TN_SectorSubsistSply23 which = TN_Subsistence23 }
-			set_key = { lhs = TN_SectorSubsistSply24 which = TN_Subsistence24 }
-			set_key = { lhs = TN_SectorSubsistSply25 which = TN_Subsistence25 }
-			set_key = { lhs = TN_SectorSubsistSply41 which = TN_Subsistence41 }
-			
-			multiply_key = { lhs = TN_SectorSubsistSply1 which = TN_SectorSply1 }
-			multiply_key = { lhs = TN_SectorSubsistSply2 which = TN_SectorSply2 }
-			multiply_key = { lhs = TN_SectorSubsistSply4 which = TN_SectorSply4 }
-			multiply_key = { lhs = TN_SectorSubsistSply5 which = TN_SectorSply5 }
-			multiply_key = { lhs = TN_SectorSubsistSply6 which = TN_SectorSply6 }
-			multiply_key = { lhs = TN_SectorSubsistSply9 which = TN_SectorSply9 }
-			multiply_key = { lhs = TN_SectorSubsistSply10 which = TN_SectorSply10 }
-			multiply_key = { lhs = TN_SectorSubsistSply21 which = TN_SectorSply21 }
-			multiply_key = { lhs = TN_SectorSubsistSply22 which = TN_SectorSply22 }
-			multiply_key = { lhs = TN_SectorSubsistSply23 which = TN_SectorSply23 }
-			multiply_key = { lhs = TN_SectorSubsistSply24 which = TN_SectorSply24 }
-			multiply_key = { lhs = TN_SectorSubsistSply25 which = TN_SectorSply25 }
-			multiply_key = { lhs = TN_SectorSubsistSply41 which = TN_SectorSply41 }
-			
-			subtract_key = { lhs = TN_SectorSply1 which = TN_SectorSubsistSply1 }
-			subtract_key = { lhs = TN_SectorSply2 which = TN_SectorSubsistSply2 }
-			subtract_key = { lhs = TN_SectorSply4 which = TN_SectorSubsistSply4 }
-			subtract_key = { lhs = TN_SectorSply5 which = TN_SectorSubsistSply5 }
-			subtract_key = { lhs = TN_SectorSply6 which = TN_SectorSubsistSply6 }
-			subtract_key = { lhs = TN_SectorSply9 which = TN_SectorSubsistSply9 }
-			subtract_key = { lhs = TN_SectorSply10 which = TN_SectorSubsistSply10 }
-			subtract_key = { lhs = TN_SectorSply21 which = TN_SectorSubsistSply21 }
-			subtract_key = { lhs = TN_SectorSply22 which = TN_SectorSubsistSply22 }
-			subtract_key = { lhs = TN_SectorSply23 which = TN_SectorSubsistSply23 }
-			subtract_key = { lhs = TN_SectorSply24 which = TN_SectorSubsistSply24 }
-			subtract_key = { lhs = TN_SectorSply25 which = TN_SectorSubsistSply25 }
-			subtract_key = { lhs = TN_SectorSply41 which = TN_SectorSubsistSply41 }
+			}
 			
 			# Set stockpile size + goods decay system
             # Minimum stockpile size is 4 times the current Demand or Supply, whichever is highest.
@@ -1113,7 +1188,7 @@ TN_SpreadStockpile = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						owned_by = PREV
+						is_key_equal = { lhs = Sector_ID which = PREV }
 						has_province_flag = TN_SectorPart
 						NOT = {
 							province_id = PREV
@@ -1194,7 +1269,7 @@ TN_SpreadStockpile = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						owned_by = PREV
+						is_key_equal = { lhs = Sector_ID which = PREV }
 						has_province_flag = TN_SectorPart
 					}
                     
@@ -1420,7 +1495,7 @@ TN_ScoreSector = {
                     
                     NOT = {
                         any_trade_node_member_province = {
-                            owned_by = PREV
+						    is_key_equal = { lhs = Sector_ID which = PREV }
                             has_province_flag = TN_COT
                             has_province_flag = TN_SectorPart
                         }
@@ -1511,21 +1586,6 @@ TN_DoTrade = {
             set_key = { lhs = TN_SectorEarn24 value = 0 }
             set_key = { lhs = TN_SectorEarn25 value = 0 }
             set_key = { lhs = TN_SectorEarn41 value = 0 }
-
-            # Edit for new produce
-            set_key = { lhs = TN_SectorSubsistEarn1 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn2 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn4 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn5 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn6 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn9 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn10 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn21 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn22 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn23 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn24 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn25 value = 0 }
-            set_key = { lhs = TN_SectorSubsistEarn41 value = 0 }
 
             set_key = { lhs = TN_SectorTraffic1 value = 0 }
             set_key = { lhs = TN_SectorTraffic2 value = 0 }
@@ -1781,7 +1841,7 @@ TN_DoTrade = {
 									province_id = event_target:Prov
 								}
                                 NOT = {
-                                    owned_by = event_target:ProvOwner 
+                                    is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
                                 }
 							}
 							set_key = { lhs = Public_Tmp8 which = Modi_TradeScoreExternal }
@@ -2098,7 +2158,7 @@ TN_SetReach = {
                     is_wasteland = no
                     has_province_flag = TN_SectorCentReachSpread
                     OR = {
-                        owned_by = event_target:ProvNew
+                        is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
                         AND = {
                             owner = {
                                 is_colonial_nation_of = event_target:ProvNew
@@ -2125,7 +2185,7 @@ TN_SetReach = {
                         is_wasteland = no
                         has_province_flag = TN_SectorCentReachSpread2
                         OR = {
-                            owned_by = event_target:ProvNew
+                            is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
                             AND = {
                                 owner = {
                                     is_colonial_nation_of = event_target:ProvNew
@@ -2218,7 +2278,7 @@ TN_SetReach = {
             multiply_key = { lhs = Public_Tmp3 value = 0.01 } 
             change_key = { lhs = Public_Tmp3 value = 1 } 
             # Uncomment below to find connections. Can only do it once since the variables aren't refreshed. Let a year pass.
-            #set_province_flag = traded_with_@event_target:Prov 
+            set_province_flag = traded_with_@event_target:Prov 
         }
     }
 }
@@ -2589,32 +2649,6 @@ TN_DoTradeAfter = {
 
 # Helper for resolving sector bids/offers with those of their merchant
 TN_DoTradeHelper1 = {
-	# Subsistence supply cannot be exported, so it is the first that is used to resolve its own bid
-    if = {
-        limit = {
-            check_key = { lhs = TN_SectorSubsistSply$prod$ value = 0.001 }
-            check_key = { lhs = TN_SectorBid$prod$ value = 0.001 }
-        }
-        set_key = { lhs = Public_Tmp4 which = TN_SectorSubsistSply$prod$ }
-
-        if = {
-            limit = {
-                check_key = { lhs = Public_Tmp4 which = TN_SectorBid$prod$ }
-            }
-            set_key = { lhs = Public_Tmp4 which = TN_SectorBid$prod$ }
-        }
-
-        subtract_key = { lhs = TN_SectorBid$prod$ which = Public_Tmp4 }
-
-        multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ }
-
-        change_key = { lhs = TN_SectorSubsistEarn$prod$ which = Public_Tmp4 }
-        change_key = { lhs = TN_SectorSpend$prod$ which = Public_Tmp4 }
-		
-		set_key = { lhs = TradeDisplay_SectorSubsistEarn$prod$ which = Public_Tmp4 }
-		set_key = { lhs = TradeDisplay_SectorSpend$prod$ which = Public_Tmp4 }
-    }
-	
 	# Resolve merchant bid
     # The sector sells it's produced goods to the merchants
     # Whatever they can't sell just gets wasted
@@ -2789,7 +2823,7 @@ TN_DoTradeSetScoreImport = {
 				
 				if = {
 					limit = {
-						NOT = { owned_by = event_target:ProvOwner }
+                        NOT = { is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner } }
 					}
 					set_key = { lhs = Public_Tmp0 which = event_target:Prov } ## Tarrifs
 					set_key = { lhs = Public_Tmp1 which = event_target:Prov } ## Price
@@ -2824,7 +2858,7 @@ TN_DoTradeSetScoreImport = {
 					change_key = { lhs = $return$ value = 0.1 }
 					if = {
 						limit = {
-							owned_by = event_target:ProvOwner
+							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
 						}
                         
 						multiply_key = { lhs = $return$ which = Modi_TradeScoreInternal } # API
@@ -2871,7 +2905,7 @@ TN_DoTradeSetScoreExport = {
 				
 				if = {
 					limit = {
-						NOT = { owned_by = event_target:ProvOwner }
+						NOT = { is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner } }
 					}
                     
 					change_key = { lhs = Public_Tmp0 which = $price$ }
@@ -2898,7 +2932,7 @@ TN_DoTradeSetScoreExport = {
 					change_key = { lhs = $return$ value = 0.1 }
 					if = {
 						limit = {
-							owned_by = event_target:ProvOwner
+							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
 						}
                         
 						multiply_key = { lhs = $return$ which = Modi_TradeScoreInternal }
@@ -3301,7 +3335,7 @@ TN_DoTradeByAmountImport = {
 				if = {
 					limit = {
 						NOT = {
-							owned_by = event_target:ProvOwner
+							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
 						}
 					}
 					set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
@@ -3376,7 +3410,7 @@ TN_DoTradeByAmountImport = {
 					if = {
 						limit = {
 							NOT = {
-								owned_by = PREV
+								is_key_equal = { lhs = Sector_ID which = PREV }
 							}
 						}                       
                         set_key = { lhs = Public_Tmp7 which = PREV }
@@ -3478,7 +3512,7 @@ TN_DoTradeByAmountExport = {
 				if = {
 					limit = {
 						NOT = {
-							owned_by = event_target:ProvOwner
+							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
 						}
 					}
 					set_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
@@ -3636,7 +3670,7 @@ TN_SetTradeIncome = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						owned_by = PREV
+						is_key_equal = { lhs = Sector_ID which = PREV }
 						has_province_flag = TN_SectorPart
 						check_key = { lhs = TN_ProvSply51 value = 0.001 }
 					}
@@ -3711,20 +3745,6 @@ TN_SumSectorHelper = {
         set_key = { lhs = Public_Tmp1 which = PREV }
         change_key = { lhs = TN_Sector$type$$prod$ which = Public_Tmp1 }
     }
-
-    [[subsistence]
-        if = {
-            limit = {
-                always = $subsistence$
-            }
-            set_key = { lhs = Public_Tmp1 which = TN_ProvSubsist$type$$prod$ }
-
-            PREV = {
-                set_key = { lhs = Public_Tmp1 which = PREV }
-                change_key = { lhs = TN_SectorSubsist$type$$prod$ which = Public_Tmp1 }
-            }
-        }
-    ]
 }
 TN_SumSectorHelper2 = {
     if = {
@@ -3809,8 +3829,7 @@ TN_DoTradeAfterHelper3 = {
         limit = {
             check_key = { lhs = Prod_S$slot$Sply$prod$ value = 0.001 }
         }
-        set_key = { lhs = Public_Tmp1 which = TN_SectorSubsistEarn$prod$ } # Amount of income made by selling 1 supply of subsistence goods
-        change_key = { lhs = Public_Tmp1 which = TN_SectorEarn$prod$ } # Amount of income based on the selling of 1 supply of NON subsistence goods
+        set_key = { lhs = Public_Tmp1 which = TN_SectorEarn$prod$ } # Amount of income based on the selling of 1 supply of goods
         
         set_key = { lhs = Public_Tmp2 which = Prod_S$slot$Sply$prod$ } # Multiplied by the output of the good
         [[DirectBuyR]
@@ -3891,24 +3910,7 @@ TN_DoTradeAfterHelper0 = { # new
         limit = {
             check_key = { lhs = TN_Sector$type$$prod$ value = 0.001 } # if supply of good in province > 0
         }
-
-		divide_key = { lhs = TN_Sector$moneyVar$$prod$ which = TN_Sector$type$$prod$ } # normalize total profit against total supply (includes subsistance)
-
-		set_key = { lhs = Public_Tmp1 value = 1 } ## scale profit by either subsistence or non subsistence
-
-        ## Remove subsistance from total supply to get normalized cost
-		[[subsistence]
-		if = {
-			limit = {
-				always = $subsistence$
-			}
-			multiply_key = { lhs = Public_Tmp1 which = TN_Subsistence$prod$ } ## 1*Subsistence - this should be a fraction
-		}
-		else = {
-			subtract_key = { lhs = Public_Tmp1 which = TN_Subsistence$prod$ } ## 1-Subsistence - this should be a fraction
-		}
-		]
- 		multiply_key = { lhs = TN_Sector$moneyVar$$prod$ which = Public_Tmp1 } # scale moneyvar by subsistance multiplier
+		divide_key = { lhs = TN_Sector$moneyVar$$prod$ which = TN_Sector$type$$prod$ } # normalize total profit against total supply
    }
 }
 
@@ -4986,119 +4988,6 @@ TN_CalcFulfillType = {
         
         set_key = { lhs = $class$_FillLifeC value = 0.4 }
     }
-}
-
-# Subsistence is updated based on sector's total production compared to sector's commerce production
-TN_UpdateSubsistence = {
-    set_key = { lhs = Tmp_0 which = TN_SectorSply1 }
-    change_key = { lhs = Tmp_0 which = TN_SectorSply4 }
-    change_key = { lhs = Tmp_0 which = TN_SectorSply5 }
-    change_key = { lhs = Tmp_0 which = TN_SectorSply21 }
-    change_key = { lhs = Tmp_0 which = TN_SectorSply23 }
-    change_key = { lhs = Tmp_0 which = TN_SectorSply24 }
-    
-    if = {
-        limit = {
-            check_key = { lhs = Tmp_0 value = 0.001 }
-        }
-        set_key = { lhs = Tmp_1 which = TN_SectorSply51 }
-        change_key = { lhs = Tmp_1 value = 1 }
-        multiply_key = { lhs = Tmp_1 value = 8 }
-
-        divide_key = { lhs = Tmp_0 which = Tmp_1 }
-        subtract_key = { lhs = Tmp_0 value = 1 }
-        multiply_key = { lhs = Tmp_0 value = 0.5 }
-
-        if = {
-            limit = {
-                check_key = { lhs = Tmp_0 value = 1 }
-            }
-            set_key = { lhs = Tmp_0 value = 1 }
-        }
-        multiply_key = { lhs = Tmp_0 value = 0.02 }
-    }
-    else = {
-        set_key = { lhs = Tmp_0 value = -0.01 }
-    }
-
-	if = {
-		limit = {
-			check_key = { lhs = Tmp_0 value = 0 }
-		}
-		set_key = { lhs = Tmp_1 value = 1 }
-		subtract_key = { lhs = Tmp_1 which = TN_Subsistence }
-	}
-	else = {
-		set_key = { lhs = Tmp_1 which = TN_Subsistence }
-	}
-
-	multiply_key = { lhs = Tmp_1 which = Tmp_0 }
-
-	change_key = { lhs = TN_Subsistence which = Tmp_1 }
-
-	if = {
-		limit = {
-			check_key = { lhs = TN_Subsistence value = 0.9 }
-		}
-		set_key = { lhs = TN_Subsistence value = 0.9 }
-	}
-	else_if = {
-		limit = {
-			NOT = {
-				check_key = { lhs = TN_Subsistence value = 0 }
-			}
-		}
-		set_key = { lhs = TN_Subsistence value = 0 }
-	}
-
-	set_key = { lhs = Tmp_1 value = 0 }
-	set_key = { lhs = Tmp_0 value = 0 }
-	
-	set_key = { lhs = TN_Subsistence1 which = TN_Subsistence }
-	set_key = { lhs = TN_Subsistence2 value = 0 }
-	set_key = { lhs = TN_Subsistence4 which = TN_Subsistence }
-	set_key = { lhs = TN_Subsistence5 which = TN_Subsistence }
-	set_key = { lhs = TN_Subsistence6 value = 0 }
-	set_key = { lhs = TN_Subsistence9 value = 0 }
-	set_key = { lhs = TN_Subsistence10 value = 0 }
-	set_key = { lhs = TN_Subsistence21 which = TN_Subsistence }
-	set_key = { lhs = TN_Subsistence22 value = 0 }
-	set_key = { lhs = TN_Subsistence23 which = TN_Subsistence }
-	set_key = { lhs = TN_Subsistence24 which = TN_Subsistence }
-	set_key = { lhs = TN_Subsistence25 value = 0 }
-	set_key = { lhs = TN_Subsistence41 value = 0 }
-	
-	set_key = { lhs = TN_SubsistenceDisp which = TN_Subsistence }
-	
-	multiply_key = { lhs = TN_SubsistenceDisp value = 100 }
-    
-    every_trade_node_member_province = {
-		if = {
-			limit = {
-				owned_by = PREV
-				has_province_flag = TN_SectorPart
-				NOT = { province_id = PREV }
-			}
-			set_key = { lhs = TN_Subsistence1 which = PREV }
-			set_key = { lhs = TN_Subsistence2 which = PREV }
-			set_key = { lhs = TN_Subsistence4 which = PREV }
-			set_key = { lhs = TN_Subsistence5 which = PREV }
-			set_key = { lhs = TN_Subsistence6 which = PREV }
-			set_key = { lhs = TN_Subsistence9 which = PREV }
-			set_key = { lhs = TN_Subsistence10 which = PREV }
-			set_key = { lhs = TN_Subsistence21 which = PREV }
-			set_key = { lhs = TN_Subsistence22 which = PREV }
-			set_key = { lhs = TN_Subsistence23 which = PREV }
-			set_key = { lhs = TN_Subsistence24 which = PREV }
-			set_key = { lhs = TN_Subsistence25 which = PREV }
-			set_key = { lhs = TN_Subsistence41 which = PREV }
-			set_key = { lhs = TN_Subsistence which = PREV }
-			set_key = { lhs = TN_SubsistenceDisp which = PREV }
-		}
-	}
-
-    set_key = { lhs = Tmp_0 value = 0 }
-    set_key = { lhs = Tmp_1 value = 0 }
 }
 
 TN_DoDole = {
