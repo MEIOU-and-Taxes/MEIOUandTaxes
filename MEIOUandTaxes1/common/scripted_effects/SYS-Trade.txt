@@ -132,6 +132,35 @@ TN_AssignSectorID = {
                     
                     save_event_target_as = Prov
                 }
+                if = {
+                    limit = {
+                        NOT = { has_global_flag = Find_TN_COT }
+                        event_target:ProvNew = {
+                            NOT = { check_key = { lhs = Sector_ID value = 1 } }
+                        }
+                    }
+                    random_trade_node_member_province = {
+                        limit = {
+                            check_key = { lhs = Sector_ID value = 1 }
+                        }
+                        event_target:ProvNew = {
+                            set_key = { lhs = Sector_ID which = PREV }
+                            set_key = { lhs = Sector_TagID which = PREV }
+                            set_key = { lhs = Modi_TradeScoreExternal which = PREV }
+                            set_key = { lhs = Modi_TradeScoreInternal which = PREV }
+                            # add_province_modifier = {
+                            #     name = Plague_mod_s0
+                            #     duration = -1
+                            # }
+                        }
+                        clr_province_flag = Find_TN_COT
+                        clr_province_flag = Visited_TN
+                        every_trade_node_member_province = {
+                            clr_province_flag = Find_TN_COT
+                            clr_province_flag = Visited_TN
+                        }
+                    }
+                }
                 
             }
         }
@@ -1079,7 +1108,7 @@ TN_SpreadStockpile = {
 			# Desired stockpile size is capped by total commerce production
             set_key = { lhs = Public_Tmp1 which = TN_SectorSply51 }
             change_key = { lhs = Public_Tmp1 value = 1 }
-            multiply_key = { lhs = Public_Tmp1 value = 50 } # Stockpile size
+            multiply_key = { lhs = Public_Tmp1 value = 35 } # Stockpile size
             multiply_key = { lhs = Public_Tmp1 which = Modi_StockpileSize } # Stockpile size modi
             
             # Edit for new produce
@@ -1686,7 +1715,7 @@ TN_DoTrade = {
             }
             else = {
                 owner = { set_key = { lhs = Tmp_8 which = Commerce_Risk_Factor } } # Comes from Compute_Commercial_Risk
-                set_key = { lhs = Tmp_8 which = owner }                
+                set_key = { lhs = Tmp_8 which = owner }
             }
             
             Set_Offer_And_Bid = { prod = 1 }
@@ -1707,7 +1736,7 @@ TN_DoTrade = {
             # Merchant bids/offers are first matched with the bids/offers of the sector they're located in
             # Edit for new produce
             
-            TN_DoTradeHelper1 = { prod = 1 food = 1 } # Bought food from sectors gets immediately added to stockpile.
+            TN_DoTradeHelper1 = { prod = 1 } # Bought food from sectors gets immediately added to stockpile.
             TN_DoTradeHelper1 = { prod = 2 }
             TN_DoTradeHelper1 = { prod = 4 }
             TN_DoTradeHelper1 = { prod = 5 }
@@ -2687,7 +2716,7 @@ TN_DoTradeHelper1 = {
             subtract_key = { lhs = TN_SectorStockpileBid$prod$ which = Public_Tmp4 }
             subtract_key = { lhs = TN_SectorOffer$prod$ which = Public_Tmp4 }
             set_key = { lhs = TN_SectorTraffic$prod$ which = Public_Tmp4 }
-            [[food] change_key = { lhs = TN_SectorStockpileOffer$food$ which = Public_Tmp4 } ]
+            change_key = { lhs = TN_SectorStockpileOffer$prod$ which = Public_Tmp4 }
 
             multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ }            
             multiply_key = { lhs = Public_Tmp4 value = 0.99 }
@@ -3769,7 +3798,7 @@ TN_SumSectorHelper2 = {
         set_key = { lhs = Public_Tmp2 which = TN_SectorSply$prod$ } # if supply > demand
     }
 
-    multiply_key = { lhs = Public_Tmp2 value = 4 }
+    multiply_key = { lhs = Public_Tmp2 value = 2 }
     
     if = {
         limit = {
@@ -5027,18 +5056,10 @@ TN_UpdateSubsistence = {
         }
         set_key = { lhs = Tmp_1 which = TN_SectorSply51 }
         change_key = { lhs = Tmp_1 value = 1 }
-        multiply_key = { lhs = Tmp_1 value = 50 }
+        multiply_key = { lhs = Tmp_1 value = 35 }
         multiply_key = { lhs = Tmp_1 which = Modi_StockpileSize } # Stockpile size modi
 
         divide_key = { lhs = TN_Subsistence which = Tmp_1 }
-        if = {
-            limit = {
-                check_key = { lhs = TN_Subsistence value = 1 }
-            }
-            set_key = { lhs = TN_Subsistence value = 1 }
-        }
-        subtract_key = { lhs = TN_Subsistence value = 1 }
-        multiply_key = { lhs = TN_Subsistence value = -1 }
         if = {
             limit = {
                 check_key = { lhs = TN_Subsistence value = 0.9 }
