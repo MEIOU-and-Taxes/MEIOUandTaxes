@@ -190,8 +190,6 @@ TN_DoSupplyDemand = {
     set_key = { lhs = TN_ProvSply51 value = 0.001 }
 
     
-    set_key = { lhs = SF_Produce1 value = 0 }
-    set_key = { lhs = NM_Produce1 value = 0 }
 
     # Get supply and demand from slots for each trade good
     # Edit for new produce
@@ -3975,13 +3973,13 @@ TN_DirectBuyPriceMath = {
         subtract_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
         if = {
             limit = {
-                has_global_flag = POP_Sim6
+                has_global_flag = POP_Sim10
             }
             multiply_key = { lhs = $output$ value = 1 }
         }
         else_if = {
             limit = {
-                has_global_flag = POP_Sim8
+                has_global_flag = POP_Sim15
             }
             multiply_key = { lhs = $output$ value = 0.75 }
         }
@@ -4350,6 +4348,7 @@ TN_SetIncome = {
     # Reduce wealth by 0.99999
     if = {
         limit = {
+            always = no
             has_global_flag = POP_Sim
         }
         multiply_key = { lhs = SF_Wealth value = 0.999 }
@@ -4490,6 +4489,8 @@ TN_GetProdSlot = {
 }
 
 TN_GetProdSlotDirectR = {
+    set_key = { lhs = SF_Produce$prod$ value = 0 }
+    set_key = { lhs = NM_Produce$prod$ value = 0 }
     TN_GetProdCheckSlotSplyR = { slot = 0 prod = $prod$ }
     TN_GetProdCheckSlotSplyR = { slot = 1 prod = $prod$ }
     TN_GetProdCheckSlotSplyR = { slot = 2 prod = $prod$ }
@@ -4526,6 +4527,7 @@ TN_GetProdSlotDirectR = {
 }
 
 TN_GetProdSlotDirectU = {
+    set_key = { lhs = RE_Produce$prod$ value = 0 }
     TN_GetProdCheckSlotSplyU = { slot = 0 prod = $prod$ }
     TN_GetProdCheckSlotSplyU = { slot = 1 prod = $prod$ }
     TN_GetProdCheckSlotSplyU = { slot = 2 prod = $prod$ }
@@ -5008,6 +5010,77 @@ TN_CalcFulfillType = {
         set_key = { lhs = $class$_FillLifeC value = 0.4 }
     }
 }
+# Subsistence is updated based on sector's total production compared to sector's commerce production
+TN_UpdateSubsistence = {
+    set_key = { lhs = TN_Subsistence which = TN_SectorSply1 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply2 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply4 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply5 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply6 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply9 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply10 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply21 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply22 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply23 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply24 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply25 }
+    change_key = { lhs = TN_Subsistence which = TN_SectorSply41 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = TN_Subsistence value = 0.001 }
+        }
+        set_key = { lhs = Tmp_1 which = TN_SectorSply51 }
+        change_key = { lhs = Tmp_1 value = 1 }
+        multiply_key = { lhs = Tmp_1 value = 15 }
+
+        divide_key = { lhs = TN_Subsistence which = Tmp_1 }
+        if = {
+            limit = {
+                check_key = { lhs = TN_Subsistence value = 1 }
+            }
+            set_key = { lhs = TN_Subsistence value = 1 }
+        }
+        subtract_key = { lhs = TN_Subsistence value = 1 }
+        multiply_key = { lhs = TN_Subsistence value = -1 }
+        if = {
+            limit = {
+                check_key = { lhs = TN_Subsistence value = 0.9 }
+            }
+            set_key = { lhs = TN_Subsistence value = 0.9 }
+        }
+        else_if = {
+            limit = {
+                NOT = {
+                    check_key = { lhs = TN_Subsistence value = 0 }
+                }
+            }
+            set_key = { lhs = TN_Subsistence value = 0 }
+        }
+    }
+    else = {
+		set_key = { lhs = TN_Subsistence value = 0.9 }
+    }
+
+	set_key = { lhs = Tmp_1 value = 0 }
+
+	set_key = { lhs = TN_SubsistenceDisp which = TN_Subsistence }
+	
+	multiply_key = { lhs = TN_SubsistenceDisp value = 100 }
+    
+    every_trade_node_member_province = {
+		if = {
+			limit = {
+				is_key_equal = { lhs = Sector_ID which = PREV }
+				has_province_flag = TN_SectorPart
+				NOT = { province_id = PREV }
+			}
+			set_key = { lhs = TN_Subsistence which = PREV }
+			set_key = { lhs = TN_SubsistenceDisp which = PREV }
+		}
+	}
+}
+
 
 TN_DoDole = {
     if = {
