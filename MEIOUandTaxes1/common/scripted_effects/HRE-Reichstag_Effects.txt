@@ -1,0 +1,972 @@
+### Created by Beorsferth ###
+
+Reichstag_Invitation = {
+	every_country = {
+		limit = {
+			OR = { 
+				has_country_flag = Rht_FV
+				has_country_flag = Rht_KV
+			}
+			is_part_of_hre = yes
+			NOT = { is_emperor = yes }
+		}
+		
+		country_event = { id = HRE_mechanics.6031 days = 14 }
+	}
+	hidden_effect = {
+		### Fasten up progress towards Reforms
+		ERG = { change_key = { lhs = HRE_ADM_RefDes value = 0.75 } }
+	}
+}
+
+Reichstag_Site_Chosing = {
+	set_country_flag = Reichstag_Site_$where$
+	trigger_switch = {
+		on_trigger = has_country_flag
+		Reichstag_Site_Aachen = {
+			set_country_flag = Rht_Place_Setup		
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+					tag = AAC
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_Reichstag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = Reichstag_site 				duration = -1  }
+					add_province_modifier = { name = Reichstag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+		Reichstag_Site_Frankfurt = {
+			set_country_flag = Rht_Place_Setup		
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+					tag = FRF
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_Reichstag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = Reichstag_site 				duration = -1  }
+					add_province_modifier = { name = Reichstag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+		Reichstag_Site_Nuernberg = {
+			set_country_flag = Rht_Place_Setup		
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+					tag = NUR
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_Reichstag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = Reichstag_site 				duration = -1  }
+					add_province_modifier = { name = Reichstag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+		Reichstag_Site_Random = {
+			set_country_flag = Rht_Place_Setup		
+			random_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_Reichstag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = Reichstag_site 				duration = -1  }
+					add_province_modifier = { name = Reichstag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+	}
+	clr_country_flag = Reichstag_Site_$where$
+}
+
+### Meta Script - Input $topic$
+
+Reichstag_Add_Agenda_Topic = {
+	hidden_effect = {
+		if = {
+			limit = { ERG = { is_key_equal = { lhs = Rht_Agen value = 0 } } }
+			set_country_flag = Rht_Agen_$topic$_1
+		}
+		else_if = {
+			limit = { ERG = { is_key_equal = { lhs = Rht_Agen value = 1 } } }
+			set_country_flag = Rht_Agen_$topic$_2
+		}
+		else_if = {
+			limit = { ERG = { is_key_equal = { lhs = Rht_Agen value = 2 } } }
+			set_country_flag = Rht_Agen_$topic$_3
+		}
+		else_if = {
+			limit = { ERG = { is_key_equal = { lhs = Rht_Agen value = 3 } } }
+			set_country_flag = Rht_Agen_$topic$_4
+		}
+		else_if = {
+			limit = { ERG = { is_key_equal = { lhs = Rht_Agen value = 4 } } }
+			set_country_flag = Rht_Agen_$topic$_5
+		}
+		ERG = { change_key = { lhs = Rht_Agen value = 1 } }
+	}
+}
+
+### Meta Script - Necessary Inputs: who, where, agenda1 - voluntary inputs: agenda2/3
+Reichstag_Setup_Script = {
+	Reichstag_Invitation = { who = $who$ }
+	Reichstag_Site_Chosing = { where = $where$ }
+	Reichstag_Add_Agenda_Topic = { topic = $agenda1$ }
+	[[agenda2]
+		Reichstag_Add_Agenda_Topic = { topic = $agenda2$ }
+	]
+	[[agenda3]
+		Reichstag_Add_Agenda_Topic = { topic = $agenda3$ }
+	]
+
+	#country_event = { id = HRE_mechanics.300 }
+	
+	set_country_flag = Rht_Setup
+	clr_country_flag = Rht_Place_Setup
+	clr_country_flag = Rht_Inv_Setup
+	clr_country_flag = Rht_Agen_Setup
+}
+
+clear_privileges_variables = {
+	set_key = { lhs = supplied_money_privileges value = 0 }
+	
+	every_country = {
+		set_key = { lhs = yearly_income_tribute_contr value = 0 }
+		set_key = { lhs = supplied_money_privileges value = 0 }
+	}
+}
+
+### Needs to be executed in Emperor Scope
+Rht_change_phase = {
+	if = { limit = { ERG = { check_key = { lhs = Rht_Agen value = 5 } } }
+		ERG = {
+			trigger_switch = {
+				on_trigger = has_country_flag
+				Rht_Phase_1 = { clr_country_flag = Rht_Phase_1 set_country_flag = Rht_Phase_2 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_2 = { clr_country_flag = Rht_Phase_2 set_country_flag = Rht_Phase_3 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_3 = { clr_country_flag = Rht_Phase_3 set_country_flag = Rht_Phase_4 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_4 = { clr_country_flag = Rht_Phase_4 set_country_flag = Rht_Phase_5 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } }	}		
+				Rht_Phase_5 = { clr_country_flag = Rht_Phase_5 emperor = { country_event = { id = HRE_mechanics.606 days = 2 } }
+								every_country = { limit = { is_part_of_hre = yes NOT = { is_emperor = yes } } country_event = { id = HRE_mechanics.607 days = 2 } }
+							}
+			}
+		}
+	}
+	else_if = { limit = { ERG = { check_key = { lhs = Rht_Agen value = 4 } } }
+		ERG = {
+			trigger_switch = {
+				on_trigger = has_country_flag
+				Rht_Phase_1 = { clr_country_flag = Rht_Phase_1 set_country_flag = Rht_Phase_2 emperor = {  country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_2 = { clr_country_flag = Rht_Phase_2 set_country_flag = Rht_Phase_3 emperor = {  country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_3 = { clr_country_flag = Rht_Phase_3 set_country_flag = Rht_Phase_4 emperor = {  country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_4 = { clr_country_flag = Rht_Phase_4 emperor = { country_event = { id = HRE_mechanics.606 days = 2 } }
+								every_country = { limit = { is_part_of_hre = yes NOT = { is_emperor = yes } } country_event = { id = HRE_mechanics.607 days = 2 } } 
+							  }
+			}
+		}
+	}
+	else_if = { limit = { ERG = { check_key = { lhs = Rht_Agen value = 3 } } }
+		ERG = {
+			trigger_switch = {
+				on_trigger = has_country_flag
+				Rht_Phase_1 = { clr_country_flag = Rht_Phase_1 set_country_flag = Rht_Phase_2 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_2 = { clr_country_flag = Rht_Phase_2 set_country_flag = Rht_Phase_3 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_3 = { clr_country_flag = Rht_Phase_3 emperor = { country_event = { id = HRE_mechanics.606 days = 2 } }
+								every_country = { limit = { is_part_of_hre = yes NOT = { is_emperor = yes } } country_event = { id = HRE_mechanics.607 days = 2 } }
+							}
+			}
+		}
+	}
+	else_if = { limit = { ERG  = { check_key = { lhs = Rht_Agen value = 2 } } }
+		ERG = {
+			trigger_switch = {
+				on_trigger = has_country_flag
+				Rht_Phase_1 = { clr_country_flag = Rht_Phase_1 set_country_flag = Rht_Phase_2 emperor = { country_event = { id = HRE_mechanics.604 days = 7 } } }
+				Rht_Phase_2 = { clr_country_flag = Rht_Phase_2 				emperor = { country_event = { id = HRE_mechanics.606 days = 2 } }
+								every_country = { limit = { is_part_of_hre = yes NOT = { is_emperor = yes } } country_event = { id = HRE_mechanics.607 days = 2 } }
+							}
+			}
+		}
+	}
+	else_if = { limit = { ERG = { check_key = { lhs = Rht_Agen value = 1 } } }
+		ERG = { clr_country_flag = Rht_Phase_1 } 
+		emperor = { country_event = { id = HRE_mechanics.606 days = 2 } }
+		every_country = { limit = { is_part_of_hre = yes NOT = { is_emperor = yes } } country_event = { id = HRE_mechanics.607 days = 2 } }
+		
+	}
+}
+
+Rht_Change_Phase_Clean_Variables = {
+	hidden_effect = {
+		ERG = {
+			set_key = { lhs = Rht_AgenPoint_TV_CUR value = 0 }
+			set_key = { lhs = Rht_AgenPoint_TV_PRI value = 0 }
+			set_key = { lhs = Rht_AgenPoint_TV_CIT value = 0 }
+			set_key = { lhs = Rht_AgenPoint_CUR_APPR value = 0 }
+			set_key = { lhs = Rht_AgenPoint_CUR_REJC value = 0 }
+			set_key = { lhs = Rht_AgenPoint_PRI_APPR value = 0 }
+			set_key = { lhs = Rht_AgenPoint_PRI_REJC value = 0 }
+			set_key = { lhs = Rht_AgenPoint_CIT_APPR value = 0 }
+			set_key = { lhs = Rht_AgenPoint_CIT_REJC value = 0 }
+			set_key = { lhs = Rht_AgenPoint_CUR_INFL_APPR value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CUR_INFL_REJC value = 1 }
+			set_key = { lhs = Rht_AgenPoint_PRI_INFL_APPR value = 1 }
+			set_key = { lhs = Rht_AgenPoint_PRI_INFL_REJC value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CIT_INFL_APPR value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CIT_INFL_REJC value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CUR_Perc_APPR value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CUR_Perc_REJC value = 1 }
+			set_key = { lhs = Rht_AgenPoint_PRI_Perc_APPR value = 1 }
+			set_key = { lhs = Rht_AgenPoint_PRI_Perc_REJC value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CIT_Perc_APPR value = 1 }
+			set_key = { lhs = Rht_AgenPoint_CIT_Perc_REJC value = 1 }
+		}
+	}
+}
+
+#Input: $chamber$
+Rht_Add_Votes_APPR = {
+	hidden_effect = {
+		if = {
+			limit = { has_country_flag = Rht_FV }
+			ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_APPR value = 1 } }
+		}
+		else_if = {
+			limit = { has_country_flag = Rht_KV }
+			ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_APPR value = 0.1 } }					
+		}		
+	}
+}
+
+#Input: $chamber$
+Rht_Add_Votes_REJC = {
+	hidden_effect = {
+		if = {
+			limit = { has_country_flag = Rht_FV }
+			ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_REJC value = 1 } }
+		}
+		else_if = {
+			limit = { has_country_flag = Rht_KV }
+			ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_REJC value = 0.1 } }					
+		}		
+	}
+}
+
+#Input: $chamber$ $value$ or $variable$
+# value in percent for FY and in 1/10 percent for KV
+Rht_INFL_Chamber_APPR = {
+	[[value]
+		hidden_effect = {
+			if = {
+				limit = { has_country_flag = Rht_FV }
+				ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_APPR value = 0.$value$ } }
+			}
+			else_if = {
+				limit = { has_country_flag = Rht_KV }
+				ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_APPR value = 0.0$value$ } }					
+			}		
+		}			
+	]
+	[[variable]
+		hidden_effect = {
+			if = {
+				limit = { has_country_flag = Rht_FV }
+				ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_APPR which = $variable$ } }
+			}
+			else_if = {
+				limit = { has_country_flag = Rht_KV }
+				ERG = { 
+					divide_key = { lhs = $variable$ value = 10 }
+					change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_APPR which = $variable$ } 
+				}	
+			}		
+		}	
+	]
+}
+
+#Input: $chamber$ $value$ or $variable$
+# value in percent for FY and in 1/10 percent for KV
+Rht_INFL_Chamber_REJC = {
+	[[value]
+		hidden_effect = {
+			if = {
+				limit = { has_country_flag = Rht_FV }
+				ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_REJC value = 0.$value$ } }
+			}
+			else_if = {
+				limit = { has_country_flag = Rht_KV }
+				ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_REJC value = 0.0$value$ } }					
+			}		
+		}			
+	]
+	[[variable]
+		hidden_effect = {
+			if = {
+				limit = { has_country_flag = Rht_FV }
+				ERG = { change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_REJC which = $variable$ } }
+			}
+			else_if = {
+				limit = { has_country_flag = Rht_KV }
+				ERG = { 
+					divide_key = { lhs = $variable$ value = 10 }
+					change_key = { lhs = Rht_AgenPoint_$chamber$_INFL_REJC which = $variable$ } 
+				}					
+			}		
+		}	
+	]	
+}
+
+#Input: $chamber$ $level$
+Rht_INFL_Chamber_APPR_Random = {
+	set_country_flag = Rht_Infl_Lvl_$level$
+	ERG = { 
+		set_key = { lhs = Rht_Infl_Std_1 value = 0.01 }
+		set_key = { lhs = Rht_Infl_Std_2 value = 0.025 }
+		set_key = { lhs = Rht_Infl_Std_3 value = 0.05 }
+		set_key = { lhs = Rht_Infl_Std_4 value = 0.075 }
+		set_key = { lhs = Rht_Infl_Std_5 value = 0.10 }
+	} 
+	
+	
+	trigger_switch = {
+		on_trigger = has_country_flag
+		Rht_Infl_Lvl_3 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.2 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_2 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.15 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_1 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.10 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_0 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.0 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_-1 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = -0.25 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_-2 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = -0.5 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_-3 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = -0.75 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_APPR = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+	}
+}
+
+#Input: $chamber$ $level$
+Rht_INFL_Chamber_REJC_Random = {
+	set_country_flag = Rht_Infl_Lvl_$level$
+	ERG = { 
+		set_key = { lhs = Rht_Infl_Std_1 value = 0.01 }
+		set_key = { lhs = Rht_Infl_Std_2 value = 0.025 }
+		set_key = { lhs = Rht_Infl_Std_3 value = 0.05 }
+		set_key = { lhs = Rht_Infl_Std_4 value = 0.075 }
+		set_key = { lhs = Rht_Infl_Std_5 value = 0.10 }
+	} 
+	
+	
+	trigger_switch = {
+		on_trigger = has_country_flag
+		Rht_Infl_Lvl_3 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.2 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_2 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.15 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_1 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.10 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_0 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = 1.0 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_-1 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = -0.25 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_-2 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = -0.5 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+		Rht_Infl_Lvl_-3 = {
+			ERG = { set_key = { lhs = Rht_Infl_Modifier value = -0.75 }
+					multiply_key = { lhs = Rht_Infl_Std_1 which = Rht_Infl_Modifier } 
+					multiply_key = { lhs = Rht_Infl_Std_2 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_3 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_4 which = Rht_Infl_Modifier }
+					multiply_key = { lhs = Rht_Infl_Std_5 which = Rht_Infl_Modifier }
+			}
+			random_list = {
+				5 =  { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_5 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_4 } } }
+				40 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_3 } } }
+				20 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_2 } } }
+				15 = { hidden_effect = { Rht_INFL_Chamber_REJC = { chamber = $chamber$ variable = Rht_Infl_Std_1 } } }
+			}
+		}
+	}
+}
+
+#Input: $chamber$ $type$
+Rht_INFL_Chamber_Total = {
+	trigger_switch = { on_trigger = has_country_flag
+		imperial_city = {
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 1 } }
+			}
+		}
+		imperial_free_city = { 
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 1 } }
+			}
+		}
+		imperial_count = {
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 1 } }
+			}
+		}
+		imperial_bishopric = {
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 1 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 2 } }
+			}
+		}
+		imperial_prince = {
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 1 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 2 } }
+			}
+		}
+		imperial_elector = { 
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -3 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 1 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 2 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 3 } }
+			}
+		}
+		imperial_emperor = {
+			trigger_switch = { on_trigger = dip
+				0 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -2 } }
+				1 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				2 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 0 } }
+				3 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = -1 } }
+				4 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 2 } }
+				5 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 3 } }
+				6 = { Rht_INFL_Chamber_$type$_Random = { chamber = $chamber$ level = 3 } }
+			}
+		}
+	}
+}
+
+#Input: $chamber$
+Rht_INFL_Chamber_Cost = {
+	hidden_effect = {
+		# 5 DIP per vote in chamber
+		set_key = { lhs = Rht_AgenPoint_TV_$chamber$ which = event_target:HRE_ERG }
+		multiply_key = { lhs = Rht_AgenPoint_TV_$chamber$ value = 5 }
+	}
+	scaled_GameCurrency_change = { type = dip_power variable = Rht_AgenPoint_TV_$chamber$ }
+	
+	hidden_effect = {
+		# 2.5 Ducats per vote in chamber
+		set_key = { lhs = Rht_AgenPoint_TV_$chamber$ which = event_target:HRE_ERG }
+		multiply_key = { lhs = Rht_AgenPoint_TV_$chamber$ value = 2.5 } 
+	}
+	scaled_GameCurrency_change = { type = treasury variable = Rht_AgenPoint_TV_$chamber$ }
+}
+
+# Input: $chamber$
+Rht_Phase_Chamber_Evaluation = {
+	hidden_effect = {
+		ERG = {
+			# calculate amount of approved votes
+			set_key = { lhs = Rht_calculation_helper value = 0 }
+			set_key = { lhs = Rht_calculation_helper2 value = 0 }	
+			set_key = { lhs = Rht_calculation_helper3 value = 0 }
+			
+			#Set helper 3 to total votes
+			set_key = { lhs = Rht_calculation_helper3 which = Rht_AgenPoint_TV_$chamber$ }
+			
+			#Set influence decimal to 1 and add above decimal influence modifiers from the voting
+			set_key = { lhs = Rht_calculation_infl_helper value = 1 }
+			set_key = { lhs = Rht_calculation_infl_helper2 value = 1 }
+			change_key = { lhs = Rht_calculation_infl_helper which = Rht_AgenPoint_$chamber$_INFL_APPR }
+			change_key = { lhs = Rht_calculation_infl_helper2 which = Rht_AgenPoint_$chamber$_INFL_REJC }
+			set_key = { lhs = Rht_calculation_infl_helper3 which = Rht_calculation_infl_helper }
+			
+			# Subtract APPR vs REJC from one another so that there is an inverse relationship between the two
+			subtract_key = { lhs = Rht_calculation_infl_helper which = Rht_calculation_infl_helper2 }			
+			subtract_key = { lhs = Rht_calculation_infl_helper2 which = Rht_calculation_infl_helper3 }	
+			
+			# Multiply total votes with influence APPRV and add the result to Approve Votes
+			multiply_key = { lhs = Rht_calculation_helper3 which = Rht_calculation_infl_helper }
+			set_key = { lhs = Rht_calculation_helper which = Rht_calculation_helper3 }
+			change_key = { lhs = Rht_AgenPoint_$chamber$_APPR which = Rht_calculation_helper }
+			
+			#Reset helper 3 to total votes
+			set_key = { lhs = Rht_calculation_helper3 which = Rht_AgenPoint_TV_$chamber$ }
+
+			# Multiply total votes with influence Rejc and add the result to reject Votes
+			multiply_key = { lhs = Rht_calculation_helper3 which = Rht_calculation_infl_helper2 }
+			set_key = { lhs = Rht_calculation_helper2 which = Rht_calculation_helper3 }
+			change_key = { lhs = Rht_AgenPoint_$chamber$_REJC which = Rht_calculation_helper3 }			
+			
+			# Calculate the % of approve from total after influencing
+			set_key = { lhs = Rht_calculation_helper which = Rht_AgenPoint_$chamber$_APPR }
+			set_key = { lhs = Rht_calculation_helper3 which = Rht_AgenPoint_TV_$chamber$ }
+			
+			divide_key = { lhs = Rht_calculation_helper which = Rht_calculation_helper3 }
+			set_key = { lhs = Rht_AgenPoint_$chamber$_Perc_APPR which = Rht_calculation_helper }
+			multiply_key = { lhs = Rht_AgenPoint_$chamber$_Perc_APPR value = 100 }
+			set_key = { lhs = Rht_AgenPoint_$chamber$_Perc_REJC value = 100 }
+			subtract_key = { lhs = Rht_AgenPoint_$chamber$_Perc_REJC which = Rht_AgenPoint_$chamber$_Perc_APPR }
+			
+			# if 50% support approve agenda point
+			if = { limit = { check_key = { lhs = Rht_calculation_helper value = 0.5 } }
+				set_country_flag = Rht_AgenPoint_$chamber$_APPROVED
+				custom_tooltip = Rht_AgenPoint_CTP_$chamber$_APPROVED
+			}
+			else = {
+				set_country_flag = Rht_AgenPoint_$chamber$_REJECTED
+				custom_tooltip = Rht_AgenPoint_CTP_$chamber$_REJECTED
+			}
+			
+			# clean variables
+			set_key = { lhs = Rht_calculation_helper value = 0 }
+			set_key = { lhs = Rht_calculation_helper2 value = 0 }
+			set_key = { lhs = Rht_calculation_helper3 value = 0 }
+			set_key = { lhs = Rht_calculation_infl_helper value = 0 }			
+			set_key = { lhs = Rht_calculation_infl_helper2 value = 0 }
+			set_key = { lhs = Rht_calculation_infl_helper3 value = 0 }			
+		}
+	}
+}
+
+Rht_Phase_Cross_Chamber_Evaluation = {
+	hidden_effect = {
+		ERG = {
+			if = {
+				limit = {
+					has_country_flag = Rht_AgenPoint_CUR_APPROVED
+				    has_country_flag = Rht_AgenPoint_PRI_APPROVED
+				    has_country_flag = Rht_AgenPoint_CIT_APPROVED
+					has_country_flag = Rht_AgenPoint_EMP_APPROVED
+				}
+				set_country_flag = Rht_AgenPoint_APPROVED
+			}                                    
+			else = {                             
+				set_country_flag = Rht_AgenPoint_REJECTED
+			}
+		}
+	}
+}
+
+Rht_Agenda_success = {
+	emperor = {
+		trigger_switch = {
+			on_trigger = has_country_flag
+			Rht_Agen_Trib_1    = { clr_country_flag = Rht_Agen_Trib_1    set_country_flag = Rht_Agen_Trib_Suc }
+			Rht_Agen_Consc_1   = { clr_country_flag = Rht_Agen_Consc_1   set_country_flag = Rht_Agen_Consc_Suc }
+			Rht_Agen_Centr_1   = { clr_country_flag = Rht_Agen_Centr_1   set_country_flag = Rht_Agen_Centr_Suc }			
+			Rht_Agen_Defense_1 = { clr_country_flag = Rht_Agen_Defense_1 set_country_flag = Rht_Agen_Defense_Suc }
+			Rht_Agen_Romzug_1  = { clr_country_flag = Rht_Agen_Romzug_1  set_country_flag = Rht_Agen_Romzug_Suc }
+			Rht_Agen_Trib_2    = { clr_country_flag = Rht_Agen_Trib_2    set_country_flag = Rht_Agen_Trib_Suc }
+			Rht_Agen_Consc_2   = { clr_country_flag = Rht_Agen_Consc_2   set_country_flag = Rht_Agen_Consc_Suc }
+			Rht_Agen_Centr_2   = { clr_country_flag = Rht_Agen_Centr_2   set_country_flag = Rht_Agen_Centr_Suc }			
+			Rht_Agen_Defense_2 = { clr_country_flag = Rht_Agen_Defense_2 set_country_flag = Rht_Agen_Defense_Suc }
+			Rht_Agen_Romzug_2  = { clr_country_flag = Rht_Agen_Romzug_2  set_country_flag = Rht_Agen_Romzug_Suc }
+			Rht_Agen_Trib_3    = { clr_country_flag = Rht_Agen_Trib_3    set_country_flag = Rht_Agen_Trib_Suc }
+			Rht_Agen_Consc_3   = { clr_country_flag = Rht_Agen_Consc_3   set_country_flag = Rht_Agen_Consc_Suc }
+			Rht_Agen_Centr_3   = { clr_country_flag = Rht_Agen_Centr_3   set_country_flag = Rht_Agen_Centr_Suc }			
+			Rht_Agen_Defense_3 = { clr_country_flag = Rht_Agen_Defense_3 set_country_flag = Rht_Agen_Defense_Suc }
+			Rht_Agen_Romzug_3  = { clr_country_flag = Rht_Agen_Romzug_3  set_country_flag = Rht_Agen_Romzug_Suc }
+			Rht_Agen_Trib_4    = { clr_country_flag = Rht_Agen_Trib_4    set_country_flag = Rht_Agen_Trib_Suc }
+			Rht_Agen_Consc_4   = { clr_country_flag = Rht_Agen_Consc_4   set_country_flag = Rht_Agen_Consc_Suc }
+			Rht_Agen_Centr_4   = { clr_country_flag = Rht_Agen_Centr_4   set_country_flag = Rht_Agen_Centr_Suc }			
+			Rht_Agen_Defense_4 = { clr_country_flag = Rht_Agen_Defense_4 set_country_flag = Rht_Agen_Defense_Suc }
+			Rht_Agen_Romzug_4  = { clr_country_flag = Rht_Agen_Romzug_4  set_country_flag = Rht_Agen_Romzug_Suc }
+			Rht_Agen_Trib_5    = { clr_country_flag = Rht_Agen_Trib_5    set_country_flag = Rht_Agen_Trib_Suc }
+			Rht_Agen_Consc_5   = { clr_country_flag = Rht_Agen_Consc_5   set_country_flag = Rht_Agen_Consc_Suc }
+			Rht_Agen_Centr_5   = { clr_country_flag = Rht_Agen_Centr_5   set_country_flag = Rht_Agen_Centr_Suc }			
+			Rht_Agen_Defense_5 = { clr_country_flag = Rht_Agen_Defense_5 set_country_flag = Rht_Agen_Defense_Suc }
+			Rht_Agen_Romzug_5  = { clr_country_flag = Rht_Agen_Romzug_5  set_country_flag = Rht_Agen_Romzug_Suc }		
+		}
+	}
+}
+
+Rht_Agenda_Failure = {
+	emperor = {
+		trigger_switch = {
+			on_trigger = has_country_flag
+			Rht_Agen_Trib_1    = { clr_country_flag = Rht_Agen_Trib_1    set_country_flag = Rht_Agen_Trib_fail }
+			Rht_Agen_Consc_1   = { clr_country_flag = Rht_Agen_Consc_1   set_country_flag = Rht_Agen_Consc_fail }
+			Rht_Agen_Centr_1   = { clr_country_flag = Rht_Agen_Centr_1   set_country_flag = Rht_Agen_Centr_fail }			
+			Rht_Agen_Defense_1 = { clr_country_flag = Rht_Agen_Defense_1 set_country_flag = Rht_Agen_Defense_fail }
+			Rht_Agen_Romzug_1  = { clr_country_flag = Rht_Agen_Romzug_1  set_country_flag = Rht_Agen_Romzug_fail }
+			Rht_Agen_Trib_2    = { clr_country_flag = Rht_Agen_Trib_2    set_country_flag = Rht_Agen_Trib_fail }
+			Rht_Agen_Consc_2   = { clr_country_flag = Rht_Agen_Consc_2   set_country_flag = Rht_Agen_Consc_fail }
+			Rht_Agen_Centr_2   = { clr_country_flag = Rht_Agen_Centr_2   set_country_flag = Rht_Agen_Centr_fail }			
+			Rht_Agen_Defense_2 = { clr_country_flag = Rht_Agen_Defense_2 set_country_flag = Rht_Agen_Defense_fail }
+			Rht_Agen_Romzug_2  = { clr_country_flag = Rht_Agen_Romzug_2  set_country_flag = Rht_Agen_Romzug_fail }
+			Rht_Agen_Trib_3    = { clr_country_flag = Rht_Agen_Trib_3    set_country_flag = Rht_Agen_Trib_fail }
+			Rht_Agen_Consc_3   = { clr_country_flag = Rht_Agen_Consc_3   set_country_flag = Rht_Agen_Consc_fail }
+			Rht_Agen_Centr_3   = { clr_country_flag = Rht_Agen_Centr_3   set_country_flag = Rht_Agen_Centr_fail }			
+			Rht_Agen_Defense_3 = { clr_country_flag = Rht_Agen_Defense_3 set_country_flag = Rht_Agen_Defense_fail }
+			Rht_Agen_Romzug_3  = { clr_country_flag = Rht_Agen_Romzug_3  set_country_flag = Rht_Agen_Romzug_fail }
+			Rht_Agen_Trib_4    = { clr_country_flag = Rht_Agen_Trib_4    set_country_flag = Rht_Agen_Trib_fail }
+			Rht_Agen_Consc_4   = { clr_country_flag = Rht_Agen_Consc_4   set_country_flag = Rht_Agen_Consc_fail }
+			Rht_Agen_Centr_4   = { clr_country_flag = Rht_Agen_Centr_4   set_country_flag = Rht_Agen_Centr_fail }			
+			Rht_Agen_Defense_4 = { clr_country_flag = Rht_Agen_Defense_4 set_country_flag = Rht_Agen_Defense_fail }
+			Rht_Agen_Romzug_4  = { clr_country_flag = Rht_Agen_Romzug_4  set_country_flag = Rht_Agen_Romzug_fail }
+			Rht_Agen_Trib_5    = { clr_country_flag = Rht_Agen_Trib_5    set_country_flag = Rht_Agen_Trib_fail }
+			Rht_Agen_Consc_5   = { clr_country_flag = Rht_Agen_Consc_5   set_country_flag = Rht_Agen_Consc_fail }
+			Rht_Agen_Centr_5   = { clr_country_flag = Rht_Agen_Centr_5   set_country_flag = Rht_Agen_Centr_fail }			
+			Rht_Agen_Defense_5 = { clr_country_flag = Rht_Agen_Defense_5 set_country_flag = Rht_Agen_Defense_fail }
+			Rht_Agen_Romzug_5  = { clr_country_flag = Rht_Agen_Romzug_5  set_country_flag = Rht_Agen_Romzug_fail }		
+		}
+	}
+}
+
+Rht_Agend_Suc_Execution = {
+	emperor = {
+		country_event = { id = HRE_mechanics.609 days = 30 }
+		if = {
+			limit = { has_country_flag = Rht_Agen_Trib_Suc }
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						NOT = { is_emperor = yes }
+						OR = {
+							has_country_flag = imperial_prince
+							has_country_flag = imperial_elector
+							has_country_flag = imperial_count
+							has_country_flag = imperial_city
+							has_country_flag = imperial_free_city
+							has_country_flag = imperial_bishopric
+						}
+					}
+					change_key = { lhs = imp_dem_duc value = 0.1 }
+					change_key = { lhs = imp_dem_man value = 0 }
+					change_key = { lhs = imp_dem_cen value = 0 }
+					country_event = { id = HRE_mechanics.608 days = 14 }
+				}
+		}
+		if = {
+			limit = { has_country_flag = Rht_Agen_Consc_Suc }
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						NOT = { is_emperor = yes }
+						OR = {
+							has_country_flag = imperial_prince
+							has_country_flag = imperial_elector
+							has_country_flag = imperial_count
+							has_country_flag = imperial_city
+							#has_country_flag = imperial_free_city - free cities have no heerfolge plicht
+							has_country_flag = imperial_bishopric
+						}
+					}
+					change_key = { lhs = imp_dem_duc value = 0 }
+					change_key = { lhs = imp_dem_man value = 0.05 }
+					change_key = { lhs = imp_dem_cen value = 0 }
+					country_event = { id = HRE_mechanics.608 days = 14 }
+				}			
+		}
+		if = {
+			limit = { has_country_flag = Rht_Agen_Centr_Suc }
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					NOT = { is_emperor = yes }
+					OR = {
+						has_country_flag = imperial_prince
+						has_country_flag = imperial_elector
+						has_country_flag = imperial_count
+						has_country_flag = imperial_city
+						has_country_flag = imperial_free_city
+						has_country_flag = imperial_bishopric
+					}
+				}
+				change_key = { lhs = imp_dem_duc value = 0 }
+				change_key = { lhs = imp_dem_man value = 0 }
+				change_key = { lhs = imp_dem_cen value = 0.01 }
+				country_event = { id = HRE_mechanics.608 days = 14 }
+			}			
+		}
+		if = {
+			limit = { has_country_flag = Rht_Agen_Defense_Suc }
+
+			hidden_effect = {
+				set_country_flag = imperial_war				
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						is_emperor = no
+						NOT = { capital_scope = { superregion = italy_superregion } }
+					}
+					country_event = { id = HRE_war_mechanics.002 days = 14 }
+					
+		
+				}
+				country_event = { id = HRE_war_mechanics.003 days = 75
+				}
+			}
+		}
+		if = {
+			limit = { has_country_flag = Rht_Agen_Romzug_Suc }
+			
+			set_country_flag = imperial_romzug
+			set_country_flag = romzug_support_gathered
+			
+			hidden_effect = {
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						is_emperor = no
+						OR = {
+							capital_scope = { superregion = germany_superregion } 
+							capital_scope = { superregion = greater_austrian_circle_superregion }
+						}
+					}
+					country_event = { id = HRE_Romzug.213 days = 14 }
+				}
+				
+				emperor = { 
+					country_event = { id = HRE_Romzug.214 days = 50 } 
+				}
+			}
+		}
+	}
+}
+
+HRE_Reichstag_Cleanup = {
+	Rht_Change_Phase_Clean_Variables = yes
+	emperor = {
+		clr_country_flag = Rht_Agen_Romzug_Suc
+		clr_country_flag = Rht_Agen_Defense_Suc
+		clr_country_flag = Rht_Agen_Centr_Suc
+		clr_country_flag = Rht_Agen_Consc_Suc
+		clr_country_flag = Rht_Agen_Trib_Suc
+	}
+
+	every_country = {
+		clr_country_flag = Rht_Invited
+		
+		set_key = { lhs = imp_dem_duc value = 0 }
+		set_key = { lhs = imp_dem_man value = 0 }
+		set_key = { lhs = imp_dem_cen value = 0 }
+		set_key = { lhs = their_money_contr value = 0 }
+		set_key = { lhs = their_manpower_contr value = 0 }
+		set_key = { lhs = their_cen_contr value = 0 }
+	}
+}

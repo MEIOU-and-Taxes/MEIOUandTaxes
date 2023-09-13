@@ -1,0 +1,1429 @@
+# Written by Beorsferth and Ekinda
+
+country_event = {
+	id = HRE_maintenance.1
+	title = HRE_maintenance.1.t
+	desc = HRE_maintenance.1.d
+	hidden = yes
+	
+	is_triggered_only = yes  ### on startup
+	
+	fire_only_once = yes
+	
+	immediate = {
+		hidden_effect = {
+			save_global_event_target_as = HRE_ERG
+		
+			##### EMPEROR CAN ALWAYS RECLAIM IMPERIAL TERRITORY
+			imperial_ban_allowed = yes
+			
+			##### Modifiers
+			BOH = {
+				add_country_modifier = { name = HRE_emperor_1 duration = -1 }
+				add_country_modifier = { name = HRE_lombard_iron_crown duration = -1 }
+			}
+			
+			##### Imperial Influence - Display for imperial centralization
+			emperor = {
+				add_imperial_influence = -100
+				add_imperial_influence = 10
+			}
+			
+			##### VARIABLES
+			ERG = {
+				## Reform Desire starting values
+				set_key = { lhs = HRE_ADM_RefDes value = 50 }
+				set_key = { lhs = HRE_MIL_RefDes value = 0 }
+				
+				## Centralization
+				set_key = { lhs = HRE_Centralization value = 10 } # 0 to 100 - 100 is centralized into a single tag
+				set_key = { lhs = HRE_Emperor_Estate_Slider value = 30 } # 0 to 100 - 100 is full emperor control, 0 full estate control
+				set_key = { lhs = HRE_RuleOfLaw value = 40 } # 0 to 100 - Rule of Law by Institutional Effectiveness
+				
+				
+				## Kingdom Integration
+				set_key = { lhs = HRE_GER_Integration value = 100 }
+				set_key = { lhs = HRE_ITA_Integration value = 30 }
+				set_key = { lhs = HRE_ARL_Integration value = 10 }
+			}
+			
+			##### FLAGS
+
+			###Reichsgesetze
+			set_global_flag = HRE_wormser_konkordat
+			set_global_flag = HRE_statutum_principum
+			set_global_flag = HRE_ecclesiasticis
+			set_global_flag = HRE_golden_bull
+
+			## Define Bohemia as first Prev emperor
+			emperor = { set_country_flag = HRE_prev_emperor }
+			
+			## Define kingdom policies:
+			set_global_flag = HRE_KP_ITA_PI
+			set_global_flag = HRE_KP_ARL_NI
+			set_global_flag = HRE_KP_GER_SI
+			
+			##### Other Startup Events:
+			
+			#ERG = {
+			#	country_event = {
+			#		id = HRE_maintenance.3
+			#	}
+			#}
+		
+			#####SETUP LOYALTY OF IMPERIAL Standing
+			every_country = {
+				limit = {
+					OR = {
+						is_part_of_hre = yes
+						is_emperor = yes
+						any_neighbor_country = {
+							is_part_of_hre = yes
+						}
+					}
+				}
+				#add_estate_loyalty = {
+				#	estate = imperial_estates
+				#	loyalty = -100
+				#}
+				#add_estate_loyalty = {
+				#	estate = imperial_estates
+				#	loyalty = 50
+				#}
+				set_key = { lhs = HRE_imperial_standing value = 50 }
+			}
+			
+			# Charles IV.
+			emperor = {
+				#add_estate_loyalty = {
+				#	estate = imperial_estates
+				#	loyalty = 20
+				#}
+				change_key = { lhs = HRE_imperial_standing value = 20 }
+			}
+			
+			####### SETUP ESTATE GROUPS #######
+			
+			every_country = {
+				limit = {
+					NOT = { has_country_flag = imperial_elector }
+					NOT = { has_country_flag = imperial_prince }
+					NOT = { has_country_flag = imperial_count }
+					NOT = { has_country_flag = imperial_city }
+					NOT = { has_country_flag = imperial_bishopric }
+					NOT = { has_country_flag = imperial_emperor }
+				}
+				
+				######### EMPEROR
+				if = {
+					limit = {
+						tag = BOH
+						is_emperor = yes
+					}
+					set_country_flag = imperial_emperor
+				}
+				
+				######### ELECTORS
+				if = {
+					limit = {
+						OR = {
+							tag = SAX
+							tag = BRA
+							tag = BOH
+							tag = TRI
+							tag = PAL
+							tag = MAI
+							tag = KOL
+						}
+					}
+					set_country_flag = imperial_elector
+				}
+				
+				####### Imperial Bishops
+				if = {
+					limit = {
+						OR = {
+							tag = BSI
+							tag = MTV
+							tag = STR
+							tag = BMB
+							tag = WBG
+							tag = MBG
+							tag = HIL
+							tag = PKA
+							tag = SHW
+							tag = BRE
+							tag = OSN
+							tag = MUN
+							tag = UTR
+							tag = LIE
+							tag = PSS
+							tag = SLZ
+							tag = TTE
+							tag = GNV
+							tag = BSL
+						}
+						
+					}
+					set_country_flag = imperial_bishopric
+				}
+
+				
+				#### Imperial Prince
+				if = {
+					limit = {
+						OR = {
+							tag = LOR
+							tag = BAR
+							tag = HES
+							tag = SAV
+							tag = ANS
+							tag = LUN
+							tag = MST
+							tag = SHW
+							tag = WRL
+							tag = PST
+							tag = PWO
+							tag = LAU
+							tag = SHL
+							tag = JUL
+							tag = BRB
+							tag = GEL
+							tag = FRI
+							tag = LUX
+							tag = FUR
+							tag = WUR
+							tag = SWI
+							tag = BAW
+							tag = BAX
+							tag = BAY
+							tag = BAZ
+							tag = HAB
+						}
+					}
+					set_country_flag = imperial_prince
+				}
+				
+				#### Imperial Cities
+				if = {
+					limit = {
+						OR = {
+							tag = AAC
+							tag = AUG
+							tag = NUR
+							tag = FRW
+							tag = FRF
+							tag = FRD
+							tag = DCP
+							tag = ULM
+							tag = RTH
+						}
+					}
+					set_country_flag = imperial_city
+				}			
+			
+				
+				#### Free Cities
+				if = {
+					limit = {
+						OR = {
+							tag = FRL
+							tag = FRB
+							tag = FRK
+							tag = FST
+							tag = HAM
+							tag = FRR
+							tag = FRS
+						}
+					}
+					set_country_flag = imperial_free_city  ### Damit Tradeleague funktioniert
+				}			
+							
+				
+				#### imperial counts
+				if = {
+					limit = {
+						OR = {
+							tag = NAS
+							tag = WDK
+							tag = HNU
+							tag = HOH
+							tag = FAL
+							tag = SCH
+							tag = SBG
+							tag = HOY
+							tag = OLD
+							tag = TCK
+							tag = OLD
+							tag = TCK
+							tag = BNT
+							tag = KLE
+							tag = BRG
+							tag = MRK
+							tag = HOL
+							tag = NAM
+							tag = HAI
+							tag = FRE
+							tag = HOH
+							tag = OET
+							tag = NUS
+							tag = TIR
+							tag = GOR
+							tag = VER
+							tag = MAN
+							tag = MOD
+							tag = PAD
+							tag = MAN
+							tag = MFT
+							tag = MAS
+							tag = PRO
+							tag = SAL
+							tag = AQU
+							tag = ERF
+							tag = GEN
+							tag = LUC
+						}
+					}
+					set_country_flag = imperial_count
+				}	
+			}
+			
+			#### SETUP DEPENCIES AND ALLIANCES
+			## SETUP IMPERIAL CITIES
+			#every_country = {
+			#	limit = {
+			#		has_country_flag = imperial_city
+			#	}
+			#	emperor = {
+			#		create_subject = {
+			#			who = PREV
+			#			subject_type = imperial_cities
+			#		}
+			#	}
+			#}
+			every_country = {
+				limit = { 
+					is_part_of_hre = yes
+					is_elector = no
+					is_emperor = no
+					NOT = { is_subject = yes }
+					free_city_trigger = no
+				}
+				emperor = {
+					create_subject = {
+						subject_type = daimyo_vassal
+						subject = PREV
+					}
+				}
+			}
+			every_country = {
+				limit = { 
+					is_part_of_hre = yes
+					is_elector = yes
+					is_emperor = no
+					NOT = { is_subject = yes }
+					free_city_trigger = no
+				}
+				emperor = {
+					create_subject = {
+						subject_type = nominal_subject
+						subject = PREV
+					}
+				}
+			}		
+			
+			## SETUP DYNASTIC ALLIANCES
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					is_subject_other_than_tributary_trigger = no
+				}
+				every_known_country = {
+					limit = {
+						is_part_of_hre = yes
+						dynasty = PREV
+						is_subject_other_than_tributary_trigger = no
+					}
+					create_alliance = PREV
+					if = {
+						limit = { PREV = { government = monarchy } }
+						create_marriage = PREV					
+					}
+				}
+			}
+			
+			#####SETUP IMPERIAL IMMEDIACY
+			every_country = {
+				limit = {
+					OR = {
+						has_country_flag = imperial_prince
+						has_country_flag = imperial_bishopric
+						has_country_flag = imperial_elector
+						has_country_flag = imperial_city
+					}
+				}
+				add_country_modifier = {
+					name = imperial_immediacy
+					duration = -1
+				}
+			}
+			every_country = {
+				limit = {
+					OR = {
+						has_country_flag = imperial_free_city
+						has_country_flag = imperial_count
+					}
+				}
+				add_country_modifier = {
+					name = imperial_immediacy
+					duration = 1825
+				}
+			}
+			
+			
+			### SETUP ITALY GUELPHS AND GHIBELLINES
+			every_country = {
+				limit = {
+					NOT = { has_country_flag = Hre_italy_ghibelines }
+					NOT = { has_country_flag = Hre_italy_guelfs }
+					NOT = { has_country_flag = Hre_italy_neutral }
+				}
+			
+				### GHIBELLINES
+				if = {
+					limit = {
+						OR = {
+							tag = MFT
+							tag = MAN
+							tag = PIS
+							tag = MOD
+						}
+					}
+					set_country_flag = Hre_italy_ghibelines
+				}
+				
+				### GUELPHS
+				if = {
+					limit = {
+						OR = {
+							tag = FIR
+							tag = BLG
+						}
+					}
+					set_country_flag = Hre_italy_guelfs
+				}
+				
+				### Swinging States
+				if = {
+					limit = {
+						OR = {
+							tag = MLO
+							tag = SAV
+							tag = GEN
+							tag = VER
+							tag = PAD
+							tag = FER
+							tag = SIE
+							tag = PAR
+							tag = ATI
+						}
+					}
+					set_country_flag = Hre_italy_neutral
+				}	
+			}
+		}
+	}
+	
+	option = {
+		name = "EVT_AI"
+	}
+
+}
+
+# country_event = {
+	# id = HRE_maintenance.2
+	# title = HRE_maintenance.2.t
+	# desc = HRE_maintenance.2.d
+	
+	# hidden = yes
+	# is_triggered_only = yes ###bi-yearly on action
+	
+	
+	# immediate = {
+		# ERG = {
+			# change_key = { lhs = HRE_ADM_RefDes which = hre_adrefdes_change }			
+			# change_key = { lhs = HRE_MIL_RefDes which = hre_milrefdes_change }
+		# }
+	# }
+	
+	# option = {
+		# name = "EVT_AI"
+	# }
+	
+# }
+
+
+### Yearly calc event
+country_event = {
+	id = HRE_maintenance.3
+	title = no_localization
+	desc = no_localization
+	
+	hidden = yes
+	is_triggered_only = yes ### Pulse System
+	
+	immediate = {
+		
+		if = {
+			limit = { has_global_flag = HRE_wormser_konkordat }
+		
+			change_key = { lhs = HRE_ADM_RefDes value = -0.2 }
+		}
+		if = {
+			limit = { has_global_flag = HRE_statutum_principum }
+		
+			change_key = { lhs = HRE_ADM_RefDes value = 0.5 }
+		}
+		if = {
+			limit = { has_global_flag = HRE_ecclesiasticis }
+		
+			change_key = { lhs = HRE_ADM_RefDes value = 0.3 }			
+		}
+		if = {
+			limit = { has_global_flag = HRE_golden_bull }
+		
+			change_key = { lhs = HRE_ADM_RefDes value = 0.2 }			
+		}
+
+
+		
+		# For every foreign HRE province, 0.08 military reform desire is gained every year.
+		if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 50
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 4 }
+			}
+		}
+		else_if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 40
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 3.2 }
+			}
+		}
+		else_if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 30
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 2.4 }
+			}
+		}
+		else_if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 20
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 1.6 }
+			}
+		}
+		else_if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 10
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 0.8 }
+			}
+		}
+		else_if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 5
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 0.4 }
+			}
+		}
+		else_if = {
+			limit = {
+				num_of_foreign_hre_provinces  = 3
+			}
+			ERG = {
+				change_key = { lhs = HRE_MIL_RefDes value = 0.24 }
+			}
+		}
+		
+		emperor = {
+			trigger_switch = {
+				on_trigger = has_active_policy
+				HRE_RP_ADM_EMPEROR_1 = {
+					# System effects
+					# ++  imperial standing		# +  centralization		# + power of the king/emperor
+					change_key = { lhs = HRE_imperial_standing		value = 0.25 }
+					
+					ERG = {
+						change_key = { lhs = HRE_Centralization			value = 0.125 }
+						change_key = { lhs = HRE_Emperor_Estate_Slider	value = 0.125 }
+					}			
+				} 
+				HRE_RP_ADM_EMPEROR_2 = {
+					# System effects
+					# ---  imperial standing	# +  centralization		# +++ power of the king/emperor
+					change_key = { lhs = HRE_imperial_standing		value = -0.375 }
+
+					ERG = {
+						change_key = { lhs = HRE_Centralization			value = 0.125 }
+						change_key = { lhs = HRE_Emperor_Estate_Slider	value = 0.375 }
+					}			
+				} 
+				HRE_RP_DIP_EMPEROR_1 = {
+					# System effects
+					# ++ Imperial Standing	# + Centralization	# + Power of the Emperor
+					change_key = { lhs = HRE_imperial_standing		value = 0.25 }
+					
+					ERG = {
+						change_key = { lhs = HRE_Centralization			value = 0.125 }
+						change_key = { lhs = HRE_Emperor_Estate_Slider	value = 0.125 }
+					}			
+				} 
+				HRE_RP_DIP_EMPEROR_2 = {
+					# System effects
+					# "-- imperial standing # ++ Centralization # ++ Power of the emperor"
+					change_key = { lhs = HRE_imperial_standing		value = -0.25 }
+					
+					ERG = {
+						change_key = { lhs = HRE_Centralization			value = 0.25 }
+						change_key = { lhs = HRE_Emperor_Estate_Slider	value = 0.25 }
+					}			
+				} 
+				HRE_RP_MIL_EMPEROR_1 = {
+					# System effects
+					# "+++ Imperial Standing	# ~ Centralization	# ~ Power of the Emperor"
+					change_key = { lhs = HRE_imperial_standing		value = 0.375 }
+						
+					ERG = {
+						change_key = { lhs = HRE_Centralization			value = 0 }
+						change_key = { lhs = HRE_Emperor_Estate_Slider	value = 0 }
+					}			
+				}
+				HRE_RP_MIL_EMPEROR_2 = {
+					# System effects
+					# -- imperial standing	# ~ Centralization	# ++ Power of the emperor
+					
+					change_key = { lhs = HRE_imperial_standing		value = -0.25 }		
+					ERG = {
+						change_key = { lhs = HRE_Centralization			value = 0 }
+						change_key = { lhs = HRE_Emperor_Estate_Slider	value = 0.25 }
+					}
+				} 		
+			}
+		}
+	}
+	
+	after = {
+		#emperor = { set_imperial_standing_binary = yes }
+		#set_HRE_Centralization = yes
+		#set_HRE_Emp_Est_Slider = yes
+	}
+
+	option = {
+		name = "EVT_AI"
+	}
+}
+
+#####
+#country_event = {
+#	id = HRE_maintenance.4
+#	title = HRE_maintenance.4.t
+#	desc = HRE_maintenance.4.d
+#	
+#	hidden = yes
+#	
+#	trigger = {
+#		is_emperor = yes
+#		imperial_influence = 90
+#	}
+#	
+#	mean_time_to_happen = {
+#		years = 1 
+#	}
+#	
+#	immediate = {
+#		add_imperial_influence = -10
+#	}
+#	
+#	option = {
+#		name = "EVT_AI"
+#	}
+#}
+
+### Emperor tag change
+country_event = {
+	id = HRE_maintenance.5
+	title = HRE_maintenance.5.t
+	desc = HRE_maintenance.5.d
+	
+	hidden = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		AND = {
+			has_country_flag = HRE_prev_emperor
+			NOT = { is_emperor = yes }
+		}
+	}
+	
+	immediate = {
+		# First, clear everything from the previous emperor.
+		clr_country_flag = HRE_prev_emperor
+		clr_country_flag = imperial_emperor
+		clr_country_flag = HRE_emperor_flag_1
+		clr_country_flag = HRE_emperor_flag_2
+		clr_country_flag = HRE_emperor_flag_3
+		clr_country_flag = HRE_emperor_flag_4
+		clr_country_flag = HRE_emperor_flag_5
+		
+		trigger_switch = {
+			on_trigger = has_country_modifier
+			HRE_emperor_1 = { remove_country_modifier = HRE_emperor_1 }
+			HRE_emperor_2 = { remove_country_modifier = HRE_emperor_2 }
+			HRE_emperor_3 = { remove_country_modifier = HRE_emperor_3 }
+			HRE_emperor_4 = { remove_country_modifier = HRE_emperor_4 }
+			HRE_emperor_5 = { remove_country_modifier = HRE_emperor_5 }
+		}
+		
+		# Then add flag/modifier to the new emperor
+		if = {
+			limit = { has_global_flag = Elected_Emperorship_Reform }
+			emperor = {
+				add_country_modifier = { name = HRE_emperor_1 duration = -1 }
+			}
+		}
+		emperor = {
+			set_country_flag = HRE_prev_emperor
+			set_country_flag = HRE_emperor_flag_1
+			set_country_flag = imperial_emperor
+		}
+		
+		# Transfer Subjects to new emperor
+		#every_country = {
+		#	limit = {
+		#		OR = {
+		#			has_country_flag = imperial_city
+		#			has_country_flag = imperial_free_city
+		#		}
+		#		is_subject_of_type = imperial_cities
+		#		is_subject_of = ROOT
+		#	}
+		#	emperor = {
+		#		create_subject = {
+		#			who = PREV
+		#			subject_type = imperial_cities
+		#		}
+		#	}
+		#}
+	}
+	option = {
+		name = "EVT_AI"
+	}	
+}
+
+### Assign long term emperorship boni
+country_event = {
+	id = HRE_maintenance.501
+	title = HRE_maintenance.501.t
+	desc = HRE_maintenance.501.d
+	
+	hidden = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		AND = {
+			has_country_flag = HRE_prev_emperor
+			is_emperor = yes
+		}
+	}
+	
+	immediate = {
+		# If the reform is passed, give the flag and the modifier
+		# Note: We might make the elected emperor coronation into an event later
+		
+		if = {
+			limit = { has_global_flag = Elected_Emperorship_Reform }
+			trigger_switch = {
+				on_trigger = has_country_modifier
+				HRE_emperor_1 = { remove_country_modifier = HRE_emperor_1 add_country_modifier = { name = HRE_emperor_2 duration = -1 } }
+				HRE_emperor_2 = { remove_country_modifier = HRE_emperor_2 add_country_modifier = { name = HRE_emperor_3 duration = -1 } }
+				HRE_emperor_3 = { remove_country_modifier = HRE_emperor_3 add_country_modifier = { name = HRE_emperor_4 duration = -1 } }
+				HRE_emperor_4 = { remove_country_modifier = HRE_emperor_4 add_country_modifier = { name = HRE_emperor_5 duration = -1 } }
+				HRE_emperor_5 = { }
+			}
+		}
+		# If the reform is not passed, give only the flag.
+		else = {
+			trigger_switch = {
+				on_trigger = has_country_modifier
+				HRE_emperor_1 = { remove_country_modifier = HRE_emperor_1 clr_country_flag = HRE_emperor_flag_1 set_country_flag = HRE_emperor_flag_2 }
+				HRE_emperor_2 = { remove_country_modifier = HRE_emperor_2 clr_country_flag = HRE_emperor_flag_2 set_country_flag = HRE_emperor_flag_3 }
+				HRE_emperor_3 = { remove_country_modifier = HRE_emperor_3 clr_country_flag = HRE_emperor_flag_3 set_country_flag = HRE_emperor_flag_4 }
+				HRE_emperor_4 = { remove_country_modifier = HRE_emperor_4 clr_country_flag = HRE_emperor_flag_4 set_country_flag = HRE_emperor_flag_5 }
+				HRE_emperor_5 = { remove_country_modifier = HRE_emperor_5 }
+			}
+		}
+	}
+	option = {
+		name = "EVT_AI"
+	}
+}
+
+
+### Calculate Hausmacht -> runs in 2 year pulse and on monarch death (if dead monarch is within HRE)
+country_event = {
+	id = HRE_maintenance.6
+	title = HRE_maintenance.6.t
+	desc = HRE_maintenance.6.d
+	
+	hidden = yes
+	is_triggered_only = yes	### Pulse System Yearly
+	
+	# New system: development = 1 hausmacht, subject dev = 0.5, allied dev = 0.25
+	immediate = {
+		ERG = {
+			set_key = { lhs = HRE_total_development value = 0 }
+		}
+		
+		every_province = {
+			limit = {
+				is_part_of_hre = yes
+			}
+			export_to_key = {
+				which = HRE_total_development
+				value = development
+			}
+			ERG = {
+				change_key = { lhs = HRE_total_development which = PREV }
+				save_global_event_target_as = HRE_ERG
+			}
+		}
+		
+		every_country = {
+			limit = {
+				any_owned_province = {
+					is_part_of_hre = yes
+				}
+				government = monarchy
+			}
+			
+			set_key = { lhs = HRE_Hausmacht value = 0 }
+			set_key = { lhs = HRE_total_development which = event_target:HRE_ERG }
+			remove_country_modifier = HRE_hausmacht_1
+			remove_country_modifier = HRE_hausmacht_2
+			remove_country_modifier = HRE_hausmacht_3
+			remove_country_modifier = HRE_hausmacht_4
+			remove_country_modifier = HRE_hausmacht_5
+			
+			
+
+			if = {
+				limit = { total_development = 400 }
+				change_key = { lhs = HRE_Hausmacht value = 400 }
+			}
+			else_if = {
+				limit = { total_development = 300 }
+				change_key = { lhs = HRE_Hausmacht value = 300 }
+			}
+			else_if = {
+				limit = { total_development = 200 }
+				change_key = { lhs = HRE_Hausmacht value = 200 }
+			}
+			else_if = {
+				limit = { total_development = 150 }
+				change_key = { lhs = HRE_Hausmacht value = 150 }
+			}
+			else_if = {
+				limit = { total_development = 100 }
+				change_key = { lhs = HRE_Hausmacht value = 100 }
+			}
+			else_if = {
+				limit = { total_development = 75 }
+				change_key = { lhs = HRE_Hausmacht value = 75 }
+			}
+			else_if = {
+				limit = { total_development = 50 }
+				change_key = { lhs = HRE_Hausmacht value = 50 }
+			}
+			else_if = {
+				limit = { total_development = 25 }
+				change_key = { lhs = HRE_Hausmacht value = 25 }
+			}
+			
+			every_subject_country = {
+				if = {
+					limit = { total_development = 400 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 200 } }
+				}
+				else_if = {
+					limit = { total_development = 300 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 150 } }
+				}
+				else_if = {
+					limit = { total_development = 200 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 100 } }
+				}
+				else_if = {
+					limit = { total_development = 160 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 80 } }
+				}
+				else_if = {
+					limit = { total_development = 120 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 60 } }
+				}
+				else_if = {
+					limit = { total_development = 80 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 40 } }
+				}
+				else_if = {
+					limit = { total_development = 40 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 20 } }
+				}
+				else_if = {
+					limit = { total_development = 20 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 10 } }
+				}
+			}
+			
+			every_ally = {
+				limit = {
+					OR = {
+						dynasty = PREV
+						AND = {
+							has_opinion = { who = PREV value = 100 }
+							marriage_with = PREV
+						}
+					}
+				}
+				if = {
+					limit = { total_development = 400 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 100 } }
+				}
+				else_if = {
+					limit = { total_development = 300 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 75 } }
+				}
+				else_if = {
+					limit = { total_development = 200 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 50 } }
+				}
+				else_if = {
+					limit = { total_development = 160 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 40 } }
+				}
+				else_if = {
+					limit = { total_development = 120 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 30 } }
+				}
+				else_if = {
+					limit = { total_development = 80 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 20 } }
+				}
+				else_if = {
+					limit = { total_development = 40 }
+					PREV = { change_key = { lhs = HRE_Hausmacht value = 10 } }
+				}
+			}
+			
+			divide_key = { lhs = HRE_Hausmacht which = HRE_total_development }
+			
+			# Cut-off values are subject to balancing
+			if = {
+				limit = {
+					check_key = { lhs = HRE_Hausmacht value = 0.25 }
+				}
+				add_country_modifier = { name = HRE_hausmacht_5 duration = -1 }
+				every_elector = {
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_1
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_2
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_3
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_4
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_5
+					}
+					
+					add_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_5
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = HRE_Hausmacht value = 0.05 }
+				}
+				add_country_modifier = { name = HRE_hausmacht_4 duration = -1 }
+				every_elector = {
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_1
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_2
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_3
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_4
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_5
+					}
+					
+					add_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_4
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = HRE_Hausmacht value = 0.01 }
+				}
+				add_country_modifier = { name = HRE_hausmacht_3 duration = -1 }
+				every_elector = {
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_1
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_2
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_3
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_4
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_5
+					}
+					
+					add_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_3
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = HRE_Hausmacht value = 0.005 }
+				}
+				add_country_modifier = { name = HRE_hausmacht_2 duration = -1 }
+				every_elector = {
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_1
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_2
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_3
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_4
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_5
+					}
+					
+					add_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_2
+					}
+				}
+			}
+			else = {
+				add_country_modifier = { name = HRE_hausmacht_1 duration = -1 }
+				every_elector = {
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_1
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_2
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_3
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_4
+					}
+					remove_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_5
+					}
+					
+					add_opinion = {
+						who = PREV
+						modifier = HRE_hausmacht_opinion_1
+					}
+				}
+			}
+		}
+		clear_global_event_target = HRE_ERG
+	}
+	# Add Hausmacht modifiers
+	option = {
+		name = "EVT_AI"
+	}
+}
+
+### Calculate Hausmacht on monarch death
+country_event = {
+	id = HRE_maintenance.7
+	title = HRE_maintenance.7.t
+	desc = HRE_maintenance.7.d
+	
+	hidden = yes
+	is_triggered_only = yes	### Bi yearly pulse on action
+	
+	# New system: development = 1 hausmacht, subject dev = 0.5, allied dev = 0.25
+	immediate = {
+		ERG = {
+			set_key = { lhs = HRE_total_development value = 0 }
+		}
+		
+		every_province = {
+			limit = {
+				is_part_of_hre = yes
+			}
+			export_to_key = {
+				which = HRE_total_development
+				value = development
+			}
+			ERG = {
+				change_key = { lhs = HRE_total_development which = PREV }
+			}
+		}
+		
+		set_key = { lhs = HRE_Hausmacht value = 0 }
+		set_key = { lhs = HRE_total_development which = event_target:HRE_ERG }
+		remove_country_modifier = HRE_hausmacht_1
+		remove_country_modifier = HRE_hausmacht_2
+		remove_country_modifier = HRE_hausmacht_3
+		remove_country_modifier = HRE_hausmacht_4
+		remove_country_modifier = HRE_hausmacht_5
+		
+		
+        
+		if = {
+			limit = { total_development = 400 }
+			change_key = { lhs = HRE_Hausmacht value = 400 }
+		}
+		else_if = {
+			limit = { total_development = 300 }
+			change_key = { lhs = HRE_Hausmacht value = 300 }
+		}
+		else_if = {
+			limit = { total_development = 200 }
+			change_key = { lhs = HRE_Hausmacht value = 200 }
+		}
+		else_if = {
+			limit = { total_development = 150 }
+			change_key = { lhs = HRE_Hausmacht value = 150 }
+		}
+		else_if = {
+			limit = { total_development = 100 }
+			change_key = { lhs = HRE_Hausmacht value = 100 }
+		}
+		else_if = {
+			limit = { total_development = 75 }
+			change_key = { lhs = HRE_Hausmacht value = 75 }
+		}
+		else_if = {
+			limit = { total_development = 50 }
+			change_key = { lhs = HRE_Hausmacht value = 50 }
+		}
+		else_if = {
+			limit = { total_development = 25 }
+			change_key = { lhs = HRE_Hausmacht value = 25 }
+		}
+		
+		every_subject_country = {
+			if = {
+				limit = { total_development = 400 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 200 } }
+			}
+			else_if = {
+				limit = { total_development = 300 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 150 } }
+			}
+			else_if = {
+				limit = { total_development = 200 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 100 } }
+			}
+			else_if = {
+				limit = { total_development = 160 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 80 } }
+			}
+			else_if = {
+				limit = { total_development = 120 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 60 } }
+			}
+			else_if = {
+				limit = { total_development = 80 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 40 } }
+			}
+			else_if = {
+				limit = { total_development = 40 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 20 } }
+			}
+			else_if = {
+				limit = { total_development = 20 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 10 } }
+			}
+		}
+		
+		every_ally = {
+			limit = {
+				OR = {
+					dynasty = PREV
+					AND = {
+						has_opinion = { who = PREV value = 100 }
+						marriage_with = PREV
+					}
+				}
+			}
+			if = {
+				limit = { total_development = 400 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 100 } }
+			}
+			else_if = {
+				limit = { total_development = 300 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 75 } }
+			}
+			else_if = {
+				limit = { total_development = 200 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 50 } }
+			}
+			else_if = {
+				limit = { total_development = 160 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 40 } }
+			}
+			else_if = {
+				limit = { total_development = 120 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 30 } }
+			}
+			else_if = {
+				limit = { total_development = 80 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 20 } }
+			}
+			else_if = {
+				limit = { total_development = 40 }
+				PREV = { change_key = { lhs = HRE_Hausmacht value = 10 } }
+			}
+		}
+		
+		divide_key = { lhs = HRE_Hausmacht which = HRE_total_development }
+		
+		# Cut-off values are subject to balancing
+		if = {
+			limit = {
+				check_key = { lhs = HRE_Hausmacht value = 0.25 }
+			}
+			add_country_modifier = { name = HRE_hausmacht_5 duration = -1 }
+			every_elector = {
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_1
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_2
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_3
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_4
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_5
+				}
+				
+				add_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_5
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = HRE_Hausmacht value = 0.05 }
+			}
+			add_country_modifier = { name = HRE_hausmacht_4 duration = -1 }
+			every_elector = {
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_1
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_2
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_3
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_4
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_5
+				}
+				
+				add_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_4
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = HRE_Hausmacht value = 0.01 }
+			}
+			add_country_modifier = { name = HRE_hausmacht_3 duration = -1 }
+			every_elector = {
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_1
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_2
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_3
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_4
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_5
+				}
+				
+				add_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_3
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = HRE_Hausmacht value = 0.005 }
+			}
+			add_country_modifier = { name = HRE_hausmacht_2 duration = -1 }
+			every_elector = {
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_1
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_2
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_3
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_4
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_5
+				}
+				
+				add_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_2
+				}
+			}
+		}
+		else = {
+			add_country_modifier = { name = HRE_hausmacht_1 duration = -1 }
+			every_elector = {
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_1
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_2
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_3
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_4
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_5
+				}
+				
+				add_opinion = {
+					who = PREV
+					modifier = HRE_hausmacht_opinion_1
+				}
+			}
+		}
+	}
+	# Add Hausmacht modifiers
+	option = {
+		name = "EVT_AI"
+	}
+}

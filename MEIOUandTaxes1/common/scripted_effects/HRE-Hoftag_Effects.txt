@@ -1,0 +1,518 @@
+### Created by Beorsferth ###
+
+### Meta Script -  Input $who$
+Hoftag_Invitation = {
+	hidden_effect = {
+		set_country_flag = Hoftag_Invite_$who$
+		trigger_switch = {
+			on_trigger = has_country_flag
+			Hoftag_Invite_everyone = { 
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						has_country_flag = imperial_elector
+						NOT = { is_emperor = yes }
+					}
+					add_opinion = { who = FROM  modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+				}
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						has_country_flag = imperial_prince
+						is_part_of_hre = yes
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited 
+				}
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						has_country_flag = imperial_count
+						NOT = { is_emperor = yes }
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited 
+				}		
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						OR = {
+							has_country_flag = imperial_city
+							has_country_flag = imperial_free_city
+						}
+						NOT = { is_emperor = yes }
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+				}
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						has_country_flag = imperial_bishopric
+						NOT = { is_emperor = yes }
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+				}
+				### Fasten up progress towards Reichstag
+				ERG = { change_key = { lhs = HRE_ADM_RefDes value = 1.85 } }
+				country_event = { id = HRE_mechanics.300 }
+			}
+			Hoftag_Invite_imperial_electors = {
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						has_country_flag = imperial_elector
+						NOT = { is_emperor = yes }
+					}
+					add_opinion = { who = FROM  modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+					
+					### Fasten up progress towards Reichstag
+					ERG = { change_key = { lhs = HRE_ADM_RefDes value = 0.1 } }
+				}
+			}
+			Hoftag_Invite_imperial_princes = {
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						has_country_flag = imperial_prince
+						is_part_of_hre = yes
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited 
+				}
+		
+				### Fasten up progress towards Reichstag
+				ERG = { change_key = { lhs = HRE_ADM_RefDes value = 0.25 } }
+			}
+			Hoftag_Invite_imperial_counts = {
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						has_country_flag = imperial_count
+						NOT = { is_emperor = yes }
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+				}
+				### Fasten up progress towards Reichstag
+				ERG = { change_key = { lhs = HRE_ADM_RefDes value = 0.5 } }
+			}
+			Hoftag_Invite_imperial_bishops = {
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						has_country_flag = imperial_bishopric
+						NOT = { is_emperor = yes }
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+				}
+				### Fasten up progress towards Reichstag
+				ERG = { change_key = { lhs = HRE_ADM_RefDes value = 0.25 } }
+			}
+			Hoftag_Invite_imperial_cities = {
+				every_country = {
+					limit = {
+						NOT = { has_country_flag = Hft_Invited }
+						is_part_of_hre = yes
+						OR = {
+							has_country_flag = imperial_city
+							has_country_flag = imperial_free_city
+						}
+						NOT = { is_emperor = yes }
+					}
+					
+					add_opinion = { who = FROM modifier = Hft_Invitation }
+					set_country_flag = Hft_Invited
+				}
+				### Fasten up progress towards Reichstag
+				ERG = { change_key = { lhs = HRE_ADM_RefDes value = 0.75 } }
+			}
+		}
+		clr_country_flag = Hoftag_Invite_$who$
+	}
+}
+
+### Meta Script - Input $where$
+Hoftag_Site_Chosing = {
+	set_country_flag = Hoftag_Site_$where$
+	trigger_switch = {
+		on_trigger = has_country_flag
+		Hoftag_Site_Capital = {
+			set_country_flag = Hft_Place_Setup
+	
+			capital_scope = {
+				add_province_modifier = { name = hoftag_site 				duration = -1 }
+				add_province_modifier = { name = hoftag_preparation_timer 	duration = 60 }
+			}
+	
+			every_country = {
+				limit = {
+					is_elector = yes
+					NOT = { is_emperor = yes }
+				}
+				add_opinion = { who = FROM modifier = electors_displeased }
+			}
+		}
+		Hoftag_Site_Aachen = {
+			set_country_flag = Hft_Place_Setup		
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+					tag = AAC
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_hoftag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = hoftag_site 				duration = -1  }
+					add_province_modifier = { name = hoftag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+		Hoftag_Site_Frankfurt = {
+			set_country_flag = Hft_Place_Setup		
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+					tag = FRF
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_hoftag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = hoftag_site 				duration = -1  }
+					add_province_modifier = { name = hoftag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+		Hoftag_Site_Nuernberg = {
+			set_country_flag = Hft_Place_Setup		
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+					tag = NUR
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_hoftag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = hoftag_site 				duration = -1  }
+					add_province_modifier = { name = hoftag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+		Hoftag_Site_Random = {
+			set_country_flag = Hft_Place_Setup		
+			random_country = {
+				limit = {
+					is_part_of_hre = yes
+					has_country_flag = imperial_city
+				}
+				add_opinion = { who = FROM modifier = choose_as_place_hoftag }
+				add_prestige = 20
+				capital_scope = {
+					add_province_modifier = { name = hoftag_site 				duration = -1  }
+					add_province_modifier = { name = hoftag_preparation_timer 	duration = 100 }
+				}
+			}
+		}
+	}
+	clr_country_flag = Hoftag_Site_$where$
+}
+
+### Meta Script - Input $topic$
+
+Hoftag_Add_Agenda_Topic = {
+	hidden_effect = {
+		if = {
+			limit = { ERG = { is_key_equal = { lhs = Hft_Agen value = 0 } } }
+			set_country_flag = Hft_Agen_$topic$_1
+		}
+		else_if = {
+			limit = { ERG = { is_key_equal = { lhs = Hft_Agen value = 1 } } }
+			set_country_flag = Hft_Agen_$topic$_2
+		}
+		else_if = {
+			limit = { ERG = { is_key_equal = { lhs = Hft_Agen value = 2 } } }
+			set_country_flag = Hft_Agen_$topic$_3
+		}
+		ERG = { change_key = { lhs = Hft_Agen value = 1 } }
+	}
+}
+
+### Meta Script - Necessary Inputs: who, where, agenda1 - voluntary inputs: agenda2/3
+Hoftag_Setup_Script = {
+	Hoftag_Invitation = { who = $who$ }
+	Hoftag_Site_Chosing = { where = $where$ }
+	Hoftag_Add_Agenda_Topic = { topic = $agenda1$ }
+	[[agenda2]
+		Hoftag_Add_Agenda_Topic = { topic = $agenda2$ }
+	]
+	[[agenda3]
+		Hoftag_Add_Agenda_Topic = { topic = $agenda3$ }
+	]
+
+	country_event = { id = HRE_mechanics.300 }
+	add_country_modifier = {
+		name = hoftag_timer.1
+		duration = 1825	
+	}
+	
+	set_country_flag = Hft_Setup
+	clr_country_flag = Hft_Place_Setup
+	clr_country_flag = Hft_Inv_Setup
+	clr_country_flag = Hft_Agen_Setup
+}
+
+clear_privileges_variables = {
+	set_key = { lhs = supplied_money_privileges value = 0 }
+	
+	every_country = {
+		set_key = { lhs = yearly_income_tribute_contr value = 0 }
+		set_key = { lhs = supplied_money_privileges value = 0 }
+	}
+}
+
+Hft_change_phase = {
+	if = { limit = { ERG = { check_key = { lhs = Hft_Agen value = 3 } } }
+		trigger_switch = {
+			on_trigger = has_country_flag
+			Hft_Phase_1 = { clr_country_flag = Hft_Phase_1 set_country_flag = Hft_Phase_2 country_event = { id = HRE_mechanics.410 days = 7 } }
+			Hft_Phase_2 = { clr_country_flag = Hft_Phase_2 set_country_flag = Hft_Phase_3 country_event = { id = HRE_mechanics.410 days = 7 } }
+			Hft_Phase_3 = { clr_country_flag = Hft_Phase_3 country_event = { id = HRE_mechanics.404 days = 7 } }
+		}
+	}
+	else_if = { limit = { ERG  = { check_key = { lhs = Hft_Agen value = 2 } } }
+		trigger_switch = {
+			on_trigger = has_country_flag
+			Hft_Phase_1 = { clr_country_flag = Hft_Phase_1 set_country_flag = Hft_Phase_2 country_event = { id = HRE_mechanics.410 days = 7 } }
+			Hft_Phase_2 = { clr_country_flag = Hft_Phase_2 country_event = { id = HRE_mechanics.404 days = 7 } }
+		}	
+	}
+	else_if = { limit = { ERG = { check_key = { lhs = Hft_Agen value = 1 } } }
+		clr_country_flag = Hft_Phase_1
+		country_event = { id = HRE_mechanics.404 days = 7 }
+	}
+}
+
+Hft_reverse_bribing_boni = {
+	hidden_effect = {
+		ERG = {
+			subtract_key = { lhs = Hft_Vote_Sup which = Hft_Infl_Helper }
+			change_key = { lhs = Hft_Vote_Opp which = Hft_Infl_Helper }
+		}
+	}
+}
+
+Hft_Agenda_success = {
+	emperor = {
+		trigger_switch = {
+			on_trigger = has_country_flag
+			Hft_Agen_Trib_1  = { clr_country_flag = Hft_Agen_Trib_1  set_country_flag = Hft_Agen_Trib_Suc }
+			Hft_Agen_Trib_2  = { clr_country_flag = Hft_Agen_Trib_2  set_country_flag = Hft_Agen_Trib_Suc }
+		    Hft_Agen_Trib_3  = { clr_country_flag = Hft_Agen_Trib_3  set_country_flag = Hft_Agen_Trib_Suc }
+			Hft_Agen_Consc_1 = { clr_country_flag = Hft_Agen_Consc_1 set_country_flag = Hft_Agen_Consc_Suc }
+			Hft_Agen_Consc_2 = { clr_country_flag = Hft_Agen_Consc_2 set_country_flag = Hft_Agen_Consc_Suc }
+		    Hft_Agen_Consc_3 = { clr_country_flag = Hft_Agen_Consc_3 set_country_flag = Hft_Agen_Consc_Suc }
+			Hft_Agen_Centr_1 = { clr_country_flag = Hft_Agen_Centr_1 set_country_flag = Hft_Agen_Centr_Suc }
+			Hft_Agen_Centr_2 = { clr_country_flag = Hft_Agen_Centr_2 set_country_flag = Hft_Agen_Centr_Suc }
+		    Hft_Agen_Centr_3 = { clr_country_flag = Hft_Agen_Centr_3 set_country_flag = Hft_Agen_Centr_Suc }
+			Hft_Agen_Reichstag_1 = { clr_country_flag = Hft_Agen_Reichstag_1 set_country_flag = Hft_Agen_Reichstag_Suc }
+			Hft_Agen_Defense_1 = { clr_country_flag = Hft_Agen_Defense_1 set_country_flag = Hft_Agen_Reichstag_Suc }
+			Hft_Agen_Romzug_1 = { clr_country_flag = Hft_Agen_Romzug_1 set_country_flag = Hft_Agen_Romzug_Suc }
+			
+		}
+	}
+}
+
+Hft_Agend_Suc_Execution = {
+	emperor = {
+		country_event = { id = HRE_mechanics.407 days = 30 }
+		if = {
+			limit = { has_country_flag = Hft_Agen_Trib_Suc }
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						NOT = { is_emperor = yes }
+						OR = {
+							has_country_flag = imperial_prince
+							has_country_flag = imperial_elector
+							has_country_flag = imperial_count
+							has_country_flag = imperial_city
+							has_country_flag = imperial_free_city
+							has_country_flag = imperial_bishopric
+						}
+					}
+					change_key = { lhs = imp_dem_duc value = 0.1 }
+					change_key = { lhs = imp_dem_man value = 0 }
+					change_key = { lhs = imp_dem_cen value = 0 }
+					country_event = { id = HRE_mechanics.406 days = 14 }
+				}
+		}
+		if = {
+			limit = { has_country_flag = Hft_Agen_Consc_Suc }
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						NOT = { is_emperor = yes }
+						OR = {
+							has_country_flag = imperial_prince
+							has_country_flag = imperial_elector
+							has_country_flag = imperial_count
+							has_country_flag = imperial_city
+							#has_country_flag = imperial_free_city - Free cities have no heerfolge obligation
+							has_country_flag = imperial_bishopric
+						}
+					}
+					change_key = { lhs = imp_dem_duc value = 0 }
+					change_key = { lhs = imp_dem_man value = 0.05 }
+					change_key = { lhs = imp_dem_cen value = 0 }
+					country_event = { id = HRE_mechanics.406 days = 14 }
+				}			
+		}
+		if = {
+			limit = { has_country_flag = Hft_Agen_Centr_Suc }
+			every_country = {
+				limit = {
+					is_part_of_hre = yes
+					NOT = { is_emperor = yes }
+					OR = {
+						has_country_flag = imperial_prince
+						has_country_flag = imperial_elector
+						has_country_flag = imperial_count
+						has_country_flag = imperial_city
+						has_country_flag = imperial_free_city
+						has_country_flag = imperial_bishopric
+					}
+				}
+				change_key = { lhs = imp_dem_duc value = 0 }
+				change_key = { lhs = imp_dem_man value = 0 }
+				change_key = { lhs = imp_dem_cen value = 0.01 }
+				country_event = { id = HRE_mechanics.406 days = 14 }
+			}			
+		}
+		if = {
+			limit = { has_country_flag = Hft_Agen_Reichstag_Suc }
+
+				
+			custom_tooltip = reichstag_formalize_ctp
+			
+			hidden_effect = {
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = imperial_elector
+							has_country_flag = imperial_prince
+							has_country_flag = imperial_bishopric
+						}
+						NOT = { capital_scope = { superregion = italy_superregion } } 
+					}
+					set_country_flag = Rht_FV
+				}
+				every_country = {
+					limit = {
+						OR = {
+							has_country_flag = imperial_city
+							has_country_flag = imperial_free_city 
+							has_country_flag = imperial_count
+						}
+						NOT = { capital_scope = { superregion = italy_superregion } } 
+					}
+					set_country_flag = Rht_KV	
+				}
+				set_global_flag = HRE_INST_RT_A
+				set_key = { lhs = HRE_ADM_RefDes value = 0 }
+			}
+		}
+		if = {
+			limit = { has_country_flag = Hft_Agen_Defense_Suc }
+
+			hidden_effect = {
+				set_country_flag = imperial_war				
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						is_emperor = no
+						NOT = { capital_scope = { superregion = italy_superregion } }
+					}
+					country_event = { id = HRE_war_mechanics.002 days = 14 }
+					
+		
+				}
+				country_event = {
+					id = HRE_war_mechanics.003
+					days = 75
+				}
+			}
+		}
+		if = {
+			limit = { has_country_flag = Hft_Agen_Romzug_Suc }
+			
+			set_country_flag = imperial_romzug
+			set_country_flag = romzug_support_gathered
+			
+			hidden_effect = {
+				every_country = {
+					limit = {
+						is_part_of_hre = yes
+						is_emperor = no
+						OR = {
+							capital_scope = { superregion = germany_superregion } 
+							capital_scope = { superregion = greater_austrian_circle_superregion }
+						}
+					}
+					country_event = { id = HRE_Romzug.213 days = 14 }
+				}
+				
+				emperor = { 
+					country_event = { id = HRE_Romzug.214 days = 50 } 
+				}
+			}
+		}
+	}
+}
+
+HRE_Hoftag_Cleanup = {
+	ERG = { 
+		set_key = { lhs = Hft_Vote_Sup value = 0 }
+		set_key = { lhs = Hft_Vote_Opp value = 0 }
+		set_key = { lhs = Hft_Vote_Ref value = 0 }	
+		set_key = { lhs = Hft_Sup_Perc value = 0 }
+		set_key = { lhs = Hft_Opp_Perc value = 0 }
+		set_key = { lhs = Hft_Ref_Perc value = 0 }					
+		set_key = { lhs = Hft_Votes value = 0 }
+		set_key = { lhs = Hft_Infl_Mod value = 0 }		
+	}
+
+	every_country = {
+		clr_country_flag = Hft_Invited
+		clr_country_flag = Hft_Agen_Streng
+		clr_country_flag = Hft_Agen_Streng_adm
+		clr_country_flag = Hft_Agen_Streng_dip
+		clr_country_flag = Hft_Agen_Streng_mil
+		
+		set_key = { lhs = imp_dem_duc value = 0 }
+		set_key = { lhs = imp_dem_man value = 0 }
+		set_key = { lhs = imp_dem_cen value = 0 }
+		set_key = { lhs = their_money_contr value = 0 }
+		set_key = { lhs = their_manpower_contr value = 0 }
+		set_key = { lhs = their_cen_contr value = 0 }
+	}
+}

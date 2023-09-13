@@ -1,0 +1,2263 @@
+### Prepare for the romzug
+country_event = {
+	id = HRE_Romzug.204
+	title = HRE_Romzug.204.t
+	desc = HRE_Romzug.204.d	
+	picture = HRE_eventPicture
+	
+	hidden = no
+	
+	is_triggered_only = yes ### by italy menu
+	
+	immediate = {
+		if = {
+			limit = { has_country_flag = Hre_romzug_delegations_back }
+			custom_tooltip = HRE_Romzug.204.delegations_back_desc
+		}
+		else = {
+			custom_tooltip = HRE_Romzug.204.no_delegations_desc
+		}
+		
+		if = {
+			limit = { 
+				OR = {
+					has_country_flag = romzug_support_gathered
+					has_country_flag = romzug_use_own_troops
+					has_country_flag = romzug_use_few_troops	
+				}
+			}
+			custom_tooltip = HRE_Romzug.204.retinue_setup_desc
+		}
+		else = {
+			custom_tooltip = HRE_Romzug.204.no_retinue_setup_desc
+		}
+	
+		#if = {
+		#	limit = {
+		#		has_country_flag = romzug_chose_first_destination
+		#	}
+		#	
+		#}
+	}
+	
+	### Send delegations to prepare the Romzug in italy and check the possible resistace --> gives both you and the opposing italians time to prepare
+	option = {
+		name = "HRE_Romzug.204.delegations"
+		
+		trigger = {
+			NOT = { has_country_flag = Hre_romzug_send_delegations }
+		}
+		
+		hidden_effect = {
+			
+			every_country = {
+				limit = {
+					OR = {
+						has_country_flag = Hre_italy_ghibelines
+						has_country_flag = Hre_italy_guelfs
+						has_country_flag = Hre_italy_neutral
+					}
+				}			
+				country_event = { id = HRE_Romzug.205 days = 60 }
+			}
+			
+			set_country_flag = Hre_romzug_send_delegations
+			
+			country_event = { id = HRE_Romzug.206 days = 90 }
+		}
+		add_country_modifier = {
+			name = Hre_romzug_delegations
+			duration = 120
+		}
+	}
+	
+	### Ask the Pope to support our claims in italy and on the imperial crown
+	option = {
+		name = "HRE_Romzug.204.pope"
+		trigger = {
+			NOT = { has_country_flag = Hre_romzug_asked_pope_for_support }
+			papal_influence = 25
+		}
+		
+		hidden_effect = {
+			every_country = {
+				limit = {
+					tag = PAP
+				}			
+				country_event = { id = HRE_Romzug.207 days = 60 }
+			}		
+			set_country_flag = Hre_romzug_asked_pope_for_support
+		}
+		add_prestige = -10
+		### evtl andere Mali
+		add_papal_influence = -25
+	}
+	
+	option = {
+		name = "HRE_Romzug.204.Choose_first_goal"
+		
+		trigger = {
+			NOT = { has_country_flag = romzug_chose_first_destination }
+		}
+		
+		country_event = { id = HRE_Romzug.209 }
+	}
+	
+	option = {
+		name = "HRE_Romzug.204.Decide_on_troops"
+		
+		trigger = {
+		}
+		
+		country_event = { id = HRE_Romzug.210 }
+	}
+	
+	option = {
+		name = HRE_Romzug.204.start_romzug
+		highlight = yes
+		trigger = { 
+			#OR = {
+			#	has_country_flag = Hre_romzug_delegations_back
+			#	has_country_flag = Hre_romzug_pope_answered			
+			#}
+			OR = { 
+				has_country_flag = HRE_EMP_PREP_MIL_CAMPAIGN 
+				has_country_flag = HRE_EMP_PREP_PEAC_CAMPAIGN
+			}
+			OR = {
+				has_country_flag = romzug_support_gathered
+				has_country_flag = romzug_use_own_troops
+				has_country_flag = romzug_use_few_troops
+			}
+			has_country_flag = romzug_chose_first_destination
+		}		
+	
+		clr_country_flag = Hre_romzug_delegations_back
+		clr_country_flag = Hre_romzug_pope_answered
+		clr_country_flag = HRE_EMP_PREP_MIL_CAMPAIGN
+		clr_country_flag = HRE_EMP_PREP_PEAC_CAMPAIGN
+		clr_country_flag = romzug_support_gathered
+		clr_country_flag = romzug_use_few_troops
+		clr_country_flag = romzug_use_own_troops
+		clr_country_flag = romzug_chose_first_destination
+
+		hidden_effect = {
+			add_country_modifier = {
+				name = romzug_way_towards_northern_italy
+				duration = 90
+			}
+			
+			every_province  = {
+				limit = { has_province_flag = Romzug_first_destination }
+				
+				clr_province_flag = Romzug_first_destination
+				
+				province_event = { id = HRE_Romzug.216 days = 90 }
+			}
+			
+			ERG = {
+				set_key = { lhs = romzug_escalation_risk value = 0 }
+				change_key = { lhs = romzug_escalation_risk which = romzug_army_size_total }
+				divide_key = { lhs = romzug_escalation_risk value = 2 }
+			}
+		}
+	}
+	
+	
+	option = {
+		name = exit
+		
+		highlight = yes
+		
+		ai_chance = {
+			factor = 0
+		}
+	}
+}
+
+
+
+### Delegations of the king arrive in our city - italian states
+country_event = {
+	id = HRE_Romzug.205
+	title = HRE_Romzug.205.t
+	desc = HRE_Romzug.205.d	
+	picture = HRE_eventPicture
+	
+	hidden = no
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			ERG = {
+				change_key = { lhs = Hre_romzug_targets value = 1 }			
+			}
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.205.promise_support"
+		
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_country_flag = Hre_italy_ghibelines
+				factor = 2.5
+			}
+			modifier = {
+				has_country_flag = Hre_italy_neutral
+				factor = 0.8
+			}
+		}
+		
+		custom_tooltip = HRE_Romzug.205.support_ctp
+		hidden_effect = {
+		
+			set_country_flag = Hre_romzug_delegations_positive
+			
+			ERG = {
+				change_key = { lhs = Hre_romzug_targets_positive value = 1 }
+			}
+		}
+		
+	}
+	
+	option = {
+		name = "HRE_Romzug.205.oppose_emperor"
+		
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_country_flag = Hre_italy_guelfs
+				factor = 2.5
+			}
+			modifier = {
+				has_country_flag = Hre_italy_neutral
+				factor = 0.9
+			}
+			modifier = {
+				has_country_flag = Romzug_blessed_by_pope
+				factor = 0.5
+			}
+		
+		}
+		custom_tooltip = HRE_Romzug.205.oppose_ctp
+		hidden_effect = {
+			set_country_flag = Hre_romzug_delegations_negative
+			
+			ERG = {
+				change_key = { lhs = Hre_romzug_targets_negative value = 1 }
+			}
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.205.try_staying_neutral"
+		
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_country_flag = Hre_italy_neutral
+				factor = 2.5
+			}
+			modifier = {
+				has_country_flag = Romzug_blessed_by_pope
+				factor = 0.5
+			}
+		
+		}
+		
+		custom_tooltip = HRE_Romzug.205.neutral_ctp
+		
+		set_country_flag = Hre_romzug_delegations_neutral
+	
+	}
+}
+
+### News from our delegations in italy - Emperor
+country_event = {
+	id = HRE_Romzug.206
+	title = HRE_Romzug.206.t
+	desc = HRE_Romzug.206.d	
+	picture = HRE_eventPicture
+	
+	hidden = no
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		set_country_flag = Hre_romzug_delegations_back
+		
+		hidden_effect = {
+			ERG = {			
+				set_key = { lhs = HRE_romzug_delegations_support_oppose_neutral value = 0 }		
+
+				change_key = { lhs = HRE_romzug_delegations_support_oppose_neutral which = Hre_romzug_targets_positive }
+				change_key = { lhs = HRE_romzug_delegations_support_oppose_neutral which = Hre_romzug_targets_negative }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.206.answer"
+		
+		country_event = { id = HRE_Romzug.204 }
+	}
+}
+
+### King asks for blessing of Romzug - Pope
+country_event = {
+	id = HRE_Romzug.207
+	title = HRE_Romzug.207.t
+	desc = HRE_Romzug.207.d	
+	picture = HRE_eventPicture
+	
+	is_triggered_only = yes ## by 204 or 206
+	
+	immediate = {
+		emperor = {
+			country_event = { id = HRE_Romzug.208 days = 50 }
+		}
+	}
+	
+	
+	option = {
+		name = "HRE_Romzug.207.Bless_Romzug"
+		
+		ai_chance = {
+			factor = 40
+			modifier = {
+				factor = 0.1
+				NOT = { emperor = { reverse_has_opinion = { who = FROM value = 25 } } }
+			}
+			modifier = {
+				factor = 0.5
+				NOT = { emperor = { reverse_has_opinion = { who = FROM value = 75 } } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { emperor = { reverse_has_opinion = { who = FROM value = 125 } } }
+			}
+			modifier = {
+				factor = 2
+				emperor = { reverse_has_opinion = { who = FROM value = 125 } }
+			}
+			modifier = {
+				factor = 1.1
+				emperor = { num_of_cardinals = 1 }
+			}
+			modifier = {
+				factor = 1.2
+				emperor = { num_of_cardinals = 2 }
+			}
+			modifier = {
+				factor = 1.3
+				emperor = { num_of_cardinals = 3 }
+			}
+			modifier = {
+				factor = 1.4
+				emperor = { num_of_cardinals = 4 }
+			}
+			modifier = {
+				factor = 1.5
+				emperor = { num_of_cardinals = 5 }
+			}
+		}
+		
+		hidden_effect = {
+			emperor = { set_country_flag = Romzug_blessed_by_pope }
+		}
+		
+		emperor = { 
+			reverse_add_opinion = { who = ROOT modifier = hre_blessed_romzug }
+		}
+		
+	}
+	
+	option = {
+		name = "HRE_Romzug.207.Deny_blessing"
+		
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 2.5
+				NOT = { emperor = { reverse_has_opinion = { who = FROM value = 0 } } }
+			}
+		}
+		
+		hidden_effect = {
+			emperor = { set_country_flag = Romzug_denied_blessing }
+		}
+		
+		emperor = { 
+			reverse_add_opinion = { who = ROOT modifier = hre_denied_blessing }
+		}
+		
+	}	
+}
+
+### Popes answer to asked support - Emperor
+country_event = {
+	id = HRE_Romzug.208
+	title = HRE_Romzug.208.t
+	desc = HRE_Romzug.208.d
+	picture = HRE_eventPicture
+	
+	is_triggered_only = yes ## by 204 or 206
+	
+	immediate = {
+		set_country_flag = Hre_romzug_pope_answered
+		if = {
+			limit = { has_country_flag = Romzug_blessed_by_pope }
+			custom_tooltip = HRE_Romzug.208.d.positive.ctp
+		}
+		if = { 
+			limit = { has_country_flag = Romzug_denied_blessing }
+			custom_tooltip = HRE_Romzug.208.d.negative.ctp
+		}	
+	}
+	
+	option = {
+		name = "HRE_Romzug.208.positive"
+		
+		trigger = {
+			has_country_flag = Romzug_blessed_by_pope
+		}
+		country_event = { id = HRE_Romzug.204 }
+	}
+	
+	option = {
+		name = "HRE_Romzug.208.negative"
+		
+		trigger = {
+			has_country_flag = Romzug_denied_blessing
+		}
+		
+		country_event = { id = HRE_Romzug.204 }
+	}
+	
+	
+}
+
+
+### Choose the first destination - King/Emperor
+country_event = {
+	id = HRE_Romzug.209
+	title = HRE_Romzug.209.t
+	desc = HRE_Romzug.209.d	
+	
+	is_triggered_only = yes
+	
+	picture = HRE_eventPicture
+	
+	### Cross the Alps towards Milano
+	option = {
+		name = "HRE_Romzug.209.a"
+		trigger = {
+		}
+		104 = {
+			set_province_flag = Romzug_first_destination
+		}
+		set_country_flag = romzug_chose_first_destination
+		country_event = { id = HRE_Romzug.204 }
+	}
+	
+	
+	### Cross the Alps towards Verona
+	option = {
+		name = "HRE_Romzug.209.b"
+		108 = {
+			set_province_flag = Romzug_first_destination
+		}
+		set_country_flag = romzug_chose_first_destination
+		country_event = { id = HRE_Romzug.204 }
+	}	
+	
+	### Enter italy through Venezia
+	option = {
+		name = "HRE_Romzug.209.c"
+		1355 = {
+			set_province_flag = Romzug_first_destination
+		}
+		set_country_flag = romzug_chose_first_destination
+		country_event = { id = HRE_Romzug.204 }
+	}
+	
+	###Directly to Rome --> chance of beeing blocked by Guelph states
+	option = {
+		name = "HRE_Romzug.209.d2"
+		2530 = {
+			set_province_flag = Romzug_first_destination
+			owner = {
+				set_country_flag = Romzug_first_destination_Rome
+			}		
+		}
+		set_country_flag = romzug_chose_first_destination
+		country_event = { id = HRE_Romzug.204 }
+	}
+}
+
+
+country_event = {
+	id = HRE_Romzug.210
+	title = HRE_Romzug.210.t
+	desc = HRE_Romzug.210.d
+	
+	hidden = no
+	
+	is_triggered_only = yes ## from 204
+	
+	picture = HRE_eventPicture
+	
+		### Get  support for the Romzug from your vassals
+	option = {
+		name = HRE_Romzug.210.gather_support
+		
+		trigger = {
+			NOT = { has_country_flag = HRE_EMP_PREP_PEAC_CAMPAIGN }
+			AND = {
+				NOT = { has_country_flag = Hft_Agen_Romzug_1 }
+				NOT = { has_country_flag = romzug_support_gathered }
+			}
+			NOT = { has_country_modifier = hoftag_timer.1 }
+		}
+		
+		### Meta Script see HRE Mechanics Scripted effects file
+		Hoftag_Setup_Script = {
+			who = everyone
+			where = Random
+			agenda1 = Romzug
+		}
+	
+		country_event = { id = HRE_Romzug.204 }
+	}
+	
+	option = {
+		name = HRE_Romzug.210.use_own_troops
+		trigger = { 
+			NOT = { has_country_flag = HRE_EMP_PREP_PEAC_CAMPAIGN }
+		}
+		
+		set_country_flag = romzug_use_own_troops
+		
+		country_event = { id = HRE_Romzug.211 days = 14 }
+	}
+	
+	option = {
+		name = HRE_Romzug.210.use_few_troops
+		
+		trigger = { 
+			NOT = { has_country_flag = HRE_EMP_PREP_MIL_CAMPAIGN }
+		}
+		
+		set_country_flag = romzug_use_few_troops
+		
+		add_manpower = -1
+
+		country_event = { id = HRE_Romzug.204 }
+	}
+	
+	option = {
+		name = "back"
+		country_event = { id = HRE_Romzug.204 }
+		
+	}
+	
+	option = {
+		name = "exit"
+		highlight = yes
+		
+		
+	}
+
+}
+
+### Choose the amount of own troops used - King
+country_event = {
+	id = HRE_Romzug.211
+	title = HRE_Romzug.211.t
+	desc = HRE_Romzug.211.d
+	
+	hidden = no
+	
+	is_triggered_only = yes ## from 210
+
+
+	option = {
+		name = "HRE_Romzug.211.1infantry"
+		trigger = {
+			num_of_infantry = 1
+		}
+		
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+						infantry_in_province = 1
+				}
+				kill_units = {
+					who = ROOT
+					type = infantry
+					amount = 1
+				} 
+			
+			}
+			
+			country_event = { id = HRE_Romzug.212 }
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_infantry value = 1 }		
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.211.2infantry"
+		trigger = {
+			num_of_infantry = 2
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 2 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						infantry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = infantry
+						amount = 1
+					}
+				}	
+				subtract_key = { lhs = numb_off_kill_units value = 1 }
+			}
+	
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_infantry value = 2 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.5infantry"
+		trigger = {
+			num_of_infantry = 5
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 5 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						infantry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = infantry
+						amount = 1
+					}
+				}
+				subtract_key = { lhs = numb_off_kill_units value = 1 }			
+			}
+	
+			
+				
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_infantry value = 5 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.211.1cavalry"
+		trigger = {
+			num_of_cavalry = 1
+		}
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+						cavalry_in_province = 1
+				}
+				kill_units = {
+					who = ROOT
+					type = cavalry
+					amount = 1
+				} 
+			
+			}
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_cavalry value = 1 }
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+	option = {
+		name = "HRE_Romzug.211.2cavalry"
+		trigger = {
+			num_of_cavalry = 2
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 2 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						cavalry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = cavalry
+						amount = 1
+					}
+				}	
+				subtract_key = { lhs = numb_off_kill_units value = 1 }
+			}
+	
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_cavalry value = 2 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.5cavalry"
+		trigger = {
+			num_of_cavalry = 5
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 5 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						cavalry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = cavalry
+						amount = 1
+					}
+				}
+				subtract_key = { lhs = numb_off_kill_units value = 1 }			
+			}
+	
+			
+			
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_cavalry value = 5 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.1artillery"
+		trigger = {
+			num_of_artillery = 1
+		}
+		hidden_effect = {		
+			random_owned_province = {
+				limit = {
+						artillery_in_province = 1
+				}
+				kill_units = {
+					who = ROOT
+					type = artillery
+					amount = 1
+				} 
+			
+			}
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_artillery value = 1 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.211.2artillery"
+		trigger = {
+			num_of_artillery = 2
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 2 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						artillery_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = artillery
+						amount = 1
+					}
+				}	
+				subtract_key = { lhs = numb_off_kill_units value = 1 }
+			}
+	
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_artillery value = 2 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.5artillery"
+		trigger = {
+			num_of_artillery = 5
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 5 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						artillery_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = artillery
+						amount = 1
+					}
+				}
+				subtract_key = { lhs = numb_off_kill_units value = 1 }			
+			}
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_artillery value = 5 }		
+			}
+			country_event = { id = HRE_Romzug.212 }
+		}
+	}
+
+	option = {
+		name = "exit"
+		highlight  = yes
+	}
+}
+
+### Choose the amount of own troops used - King
+country_event = {
+	id = HRE_Romzug.212
+	title = HRE_Romzug.212.t
+	desc = HRE_Romzug.212.d
+	
+	hidden = no
+	
+	is_triggered_only = yes ## from 210
+	
+
+	option = {
+		name = "HRE_Romzug.211.1infantry"
+		trigger = {
+			num_of_infantry = 1
+		}
+		hidden_effect = {	
+			random_owned_province = {
+				limit = {
+					infantry_in_province = 1
+				}
+				kill_units = {
+					who = ROOT
+					type = infantry
+					amount = 1
+				} 
+			
+			}
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_infantry value = 1 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.211.2infantry"
+		trigger = {
+			num_of_infantry = 2
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 2 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						infantry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = infantry
+						amount = 1
+					}
+				}	
+				subtract_key = { lhs = numb_off_kill_units value = 1 }
+			}
+	
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_infantry value = 2 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.5infantry"
+		trigger = {
+			num_of_infantry = 5
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 5 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						infantry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = infantry
+						amount = 1
+					}
+				}
+				subtract_key = { lhs = numb_off_kill_units value = 1 }			
+			}
+	
+			
+			
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_infantry value = 5 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.211.1cavalry"
+		trigger = {
+			num_of_cavalry = 1
+		}
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+						cavalry_in_province = 1
+				}
+				kill_units = {
+					who = ROOT
+					type = cavalry
+					amount = 1
+				} 
+			
+			}
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_cavalry value = 1 }
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.2cavalry"
+		trigger = {
+			num_of_cavalry = 2
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 2 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						cavalry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = cavalry
+						amount = 1
+					}
+				}	
+				subtract_key = { lhs = numb_off_kill_units value = 1 }
+			}
+	
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_cavalry value = 2 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.5cavalry"
+		trigger = {
+			num_of_cavalry = 5
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 5 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						cavalry_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = cavalry
+						amount = 1
+					}
+				}
+				subtract_key = { lhs = numb_off_kill_units value = 1 }			
+			}
+	
+			
+			
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_cavalry value = 5 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.1artillery"
+		trigger = {
+			num_of_artillery = 1
+		}
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+						artillery_in_province = 1
+				}
+				kill_units = {
+					who = ROOT
+					type = artillery
+					amount = 1
+				} 
+			
+			}
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_artillery value = 1 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.211.2artillery"
+		trigger = {
+			num_of_artillery = 2
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 2 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						artillery_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = artillery
+						amount = 1
+					}
+				}	
+				subtract_key = { lhs = numb_off_kill_units value = 1 }
+			}
+	
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_artillery value = 2 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.211.5artillery"
+		trigger = {
+			num_of_artillery = 5
+		}
+		hidden_effect = {
+			set_key = { lhs = numb_off_kill_units value = 5 }
+			
+			while = {
+				limit = { check_key = { lhs = numb_off_kill_units value = 1 } }
+				random_owned_province = {
+					limit = {
+						artillery_in_province = 1
+					}
+					kill_units = {
+						who = ROOT
+						type = artillery
+						amount = 1
+					}
+				}
+				subtract_key = { lhs = numb_off_kill_units value = 1 }			
+			}
+	
+			
+			
+			
+			
+			ERG = {
+				change_key = { lhs = romzug_army_size_artillery value = 5 }		
+			}
+			country_event = { id = HRE_Romzug.211 }
+		}
+	}
+
+	option = {
+		name = "exit"
+		highlight  = yes
+	}
+}
+
+
+### Choose to support the Kings Romzug - German Princes
+country_event = {
+	id = HRE_Romzug.213
+	title = HRE_Romzug.213.t
+	desc = HRE_Romzug.213.d
+	
+	hidden = no
+	
+	is_triggered_only = yes ## from Hoftag Decision
+
+	immediate = {
+		hidden_effect = {
+			change_key = { lhs = numb_of_princes_rom value = 1 }
+			
+			export_to_key = {
+				which = their_manpower_contr
+				value = max_manpower		
+			}
+			
+			export_to_key = {
+				which = their_money_contr
+				value = years_of_income	
+			}					
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.213.send_infantry"
+		trigger = {
+			max_manpower = 0.1
+			years_of_income = 0.25		
+		}
+		custom_tooltip = "HRE_Romzug.213.send_infantry.ctp"
+		add_yearly_manpower = -2
+		add_years_of_income = -0.25
+	
+		hidden_effect = {
+			multiply_key = { lhs = their_manpower_contr value = 0.1 }
+			
+			set_key = { lhs = supplied_infantry which = their_manpower_contr }
+			
+			ERG = {
+				change_key = { lhs = supplied_infantry which = PREV }			
+			}
+		
+			set_key = { lhs = supplied_infantry value = 0 }
+		}
+	
+	
+	}
+	
+	option = {
+		name = "HRE_Romzug.213.send_knights"
+		trigger = {
+			max_manpower = 0.05
+			years_of_income = 0.5		
+		}
+		custom_tooltip = "HRE_Romzug.213.send_knights.ctp"
+		add_yearly_manpower = -1
+		add_years_of_income = -0.5
+	
+		hidden_effect = {
+			multiply_key = { lhs = their_manpower_contr value = 0.05 }
+			
+			set_key = { lhs = supplied_cavalry which = their_manpower_contr }
+			
+			ERG = {
+				change_key = { lhs = supplied_cavalry which = PREV }			
+			}
+			set_key = { lhs = supplied_cavalry value = 0 }		
+		}
+	
+	
+	}
+	
+	option = {
+		name = "HRE_Romzug.213.send_artillery"
+		trigger = {
+			max_manpower = 0.025
+			years_of_income = 2	
+			mil_tech = 10
+		}
+		custom_tooltip = "HRE_Romzug.213.send_knights.ctp"
+		add_yearly_manpower = -0.5
+		add_years_of_income = -2
+	
+		hidden_effect = {
+			multiply_key = { lhs = their_manpower_contr value = 0.025 }
+			
+			set_key = { lhs = supplied_artillery which = their_manpower_contr }
+			
+			ERG = { change_key = { lhs = supplied_artillery which = PREV } }
+			
+			set_key = { lhs = supplied_artillery value = 0 }
+		}
+	
+	
+	}
+	
+	option = {
+		name = "HRE_Romzug.213.refuse"
+		
+		custom_tooltip = "HRE_Romzug.213.refuse.ctp"
+		
+		
+		emperor = {
+			add_opinion = {
+				who = ROOT 
+				modifier = Hft_Agen_Defense_refuse_emperor
+			}
+		 }
+		
+	}
+	
+}
+
+### Evalutation of Gathering - ERG Dummy tag
+country_event = {
+	id = HRE_Romzug.214
+	title = HRE_Romzug.214.t
+	desc = HRE_Romzug.214.d
+	
+	hidden = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		ERG = {
+			set_key = { lhs = romzug_supplied_infantry value = 0 }
+			set_key = { lhs = romzug_supplied_cavalry value = 0 }
+			set_key = { lhs = romzug_supplied_artillery value = 0 }		
+			set_key = { lhs = romzug_supplied_infantry which = supplied_infantry }
+			set_key = { lhs = romzug_supplied_cavalry which = supplied_cavalry }
+			set_key = { lhs = romzug_supplied_artillery which = supplied_artillery }
+		
+			while = {
+				limit = {
+					check_key = { lhs = supplied_infantry value = 0 }
+				}
+				
+				subtract_key = { lhs = supplied_infantry value = 1 }
+				change_key = { lhs = romzug_army_size_infantry value = 1 }
+			}
+			
+			while = {
+				limit = {
+					check_key = { lhs = supplied_cavalry value = 0 }
+				}
+				
+				subtract_key = { lhs = supplied_cavalry value = 1 }
+				change_key = { lhs = romzug_army_size_cavalry value = 1 }
+			}
+			
+			if = {
+				limit = { emperor = { mil_tech = 10 } }
+			
+				while = {
+					limit = {
+						check_key = { lhs = supplied_artillery value = 0 }
+					}
+					
+					subtract_key = { lhs = supplied_artillery value = 1 }
+					change_key = { lhs = romzug_army_size_artillery value = 1 }
+				}
+				
+			}
+			change_key = { lhs = romzug_army_size_total which = romzug_army_size_infantry }
+			change_key = { lhs = romzug_army_size_total which = romzug_army_size_cavalry }
+			change_key = { lhs = romzug_army_size_total which = romzug_army_size_artillery }
+			
+		}
+		country_event = { id = HRE_Romzug.215 }
+	}
+	
+	option = {
+		name = "HRE_Romzug.214.a"
+	}
+	
+	
+}
+
+### Evalutation of Gathering - Emperor
+country_event = {
+	id = HRE_Romzug.215
+	title = HRE_Romzug.215.t
+	desc = HRE_Romzug.215.d
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		emperor = {
+			capital_scope = {
+				HRE_set_romzug_army_to_province = yes 
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.215.a"
+		
+		country_event = { id = HRE_Romzug.204 days = 0 }
+		
+		hidden_effect = {
+			every_country = {
+				set_key = { lhs = supplied_infantry value = 0 }
+				set_key = { lhs = supplied_cavalry value = 0 }
+				set_key = { lhs = supplied_artillery value = 0 }
+			}
+			ERG = {
+				set_key = { lhs = romzug_supplied_infantry value = 0 }
+				set_key = { lhs = romzug_supplied_cavalry value = 0 }
+				set_key = { lhs = romzug_supplied_artillery value = 0 }
+			}
+		}
+	}
+}
+
+
+### Send events to surrounding countries and emperor, when arriving first location
+province_event = {
+	id = HRE_Romzug.216
+	title = HRE_Romzug.216.t
+	desc = HRE_Romzug.216.d
+	
+	is_triggered_only = yes
+	
+	hidden = yes
+	
+	immediate = {
+		###Save current location in global event target and set flag
+		save_global_event_target_as = Romzug_cur_location
+		set_province_flag = Romzug_cur_location
+		
+		### Remove HRE Army from Emperor capital if its there
+		if = {
+			limit = { emperor = { capital_scope = { has_province_flag = Romzug_cur_location } } }
+			emperor = { capital_scope = { HRE_remove_romzug_army = yes } }
+		}
+		
+		### Move Romzug Army to local province via Scripted Effect
+		HRE_set_romzug_army_to_province = yes
+		
+		### Let emperor choose local options
+		emperor = { country_event = { id = HRE_Romzug.217 days = 2 } }
+		
+		### Inform local countries about the start of the Romzug
+		if = {
+			limit = { NOT = { emperor = { has_country_flag = romzug_arr_in_ita } } }
+			
+			emperor = { set_country_flag = romzug_arr_in_ita }
+			owner = {
+				country_event = { id = HRE_Romzug.218 }
+				every_neighbor_country = {
+					limit = { NOT = { is_emperor = yes } }
+					country_event = { id = HRE_Romzug.218 }
+				}
+			}		
+		}
+
+	
+	}
+	
+	option = {
+	
+	}	
+}	
+
+### Choose local options - Emperor
+country_event = {
+	id = HRE_Romzug.217
+	title = HRE_Romzug.217.t
+	desc = HRE_Romzug.217.d
+	
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			ERG = {
+				if = {
+					limit = {
+						any_province = {
+							HRE_romzug_army_trigger = yes
+							owner = {
+								has_country_flag = Hre_italy_guelfs
+							}
+						}
+					}
+					change_key = { lhs = romzug_escalation_risk value = 5 }
+				}
+			}
+			
+			if = {
+				limit = {
+					event_target:Romzug_cur_location = {
+						owner = {
+							is_at_war = yes
+						}
+					}
+				}
+				custom_tooltip = HRE_Romzug.217.CTP_Local_war
+			}
+		}
+	}
+	
+	### Option to claim the iron crown when beeing in Milano
+	option = {
+		name = "HRE_Romzug.217.get_the_iron_crown"
+		
+		trigger = {
+			NOT = { emperor = { has_country_modifier = HRE_lombard_iron_crown } }
+			NOT = { emperor = { has_country_flag = emperor_goes_for_iron_crown} }
+			104 = { has_province_flag = Romzug_cur_location }
+		}
+		
+		set_country_flag = emperor_goes_for_iron_crown
+		set_country_flag = emperor_took_local_actions
+		
+		104 = { 
+			province_event = { id = HRE_Romzug.219 }
+		}
+	}
+	
+	### Option to claim the Crown of Charles the Great
+	option = {
+		name = "HRE_Romzug.217.get_the_HRE_crown"
+		
+		trigger = {
+			NOT = { 
+				OR = { 
+					emperor = { has_country_modifier = HRE_emperor_1 }
+					emperor = { has_country_modifier = HRE_emperor_2 } 
+					emperor = { has_country_modifier = HRE_emperor_3 } 
+					emperor = { has_country_modifier = HRE_emperor_4 } 
+					emperor = { has_country_modifier = HRE_emperor_5 } 
+				}
+			}
+			2530 = { has_province_flag = Romzug_cur_location }
+		}
+		
+		set_country_flag = emperor_goes_for_HRE_crown
+		set_country_flag = emperor_took_local_actions
+		
+		2530 = { 
+			province_event = { id = HRE_Romzug.230 }
+		}
+	}
+	
+	### If there is a local war, you have a option to intervene in it (militarilly or with diplomacy/negotiation)
+	option = {
+		name = "HRE_Romzug.217.intervene_in_local_war"
+		
+		trigger = {
+			event_target:Romzug_cur_location = {
+				owner = {
+					is_at_war = yes
+				}
+			}
+		}
+		set_country_flag = emperor_intervenes_local_war
+		set_country_flag = emperor_took_local_actions		
+		
+		country_event = { id = HRE_Romzug.222 }
+	}
+	
+	### If there is peace you can try to claim your imperial tax, in exchange for peace towards the tag
+	option = {
+		name = "HRE_Romzug.217.get_imperial_tax"
+		
+		trigger = {
+			event_target:Romzug_cur_location = {
+				owner = {
+					OR = {
+						has_country_flag = Hre_italy_neutral
+						has_country_flag = Hre_italy_guelfs
+					}
+				}
+			}
+		}
+		set_country_flag = emperor_tries_to_negotiate
+		set_country_flag = emperor_took_local_actions		
+	}
+	
+	option = {
+		name = "HRE_Romzug.217.choose_next_target"
+		
+		trigger = {
+			# has_country_flag = emperor_took_local_actions
+		}
+		
+		clr_country_flag = emperor_took_local_actions
+		country_event = { id = HRE_Romzug.221 }
+	}
+
+}
+
+### Info about emperor arriving - Italians
+country_event = {
+	id = HRE_Romzug.218
+	title = HRE_Romzug.218.t
+	desc = HRE_Romzug.218.d
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "HRE_Romzug.218.good_news"
+	}
+	
+	option = {
+		name = "HRE_Romzug.218.bad_news"
+	}
+}
+
+### Emperor goes for Iron Crown - Owner of Milan
+province_event = {
+	id = HRE_Romzug.219
+	title = HRE_Romzug.219.t
+	desc = HRE_Romzug.219.d
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			### Random eval how citizens will react to the emperors arrival
+			random_list = {
+				30 = {
+					set_province_flag = HRE_Romzug_Citizens_oppose
+					custom_tooltip = HRE_Romzug.219.CTP_Citizens_oppose
+				}
+				50 = {
+					set_province_flag = HRE_Romzug_Citizens_neutral
+					custom_tooltip = HRE_Romzug.219.CTP_Citizens_neutral
+				}
+				20 = {
+					set_province_flag = HRE_Romzug_Citizens_welcome
+					custom_tooltip = HRE_Romzug.219.CTP_Citizens_welcome					
+				}
+			}
+		}
+	}
+	
+	
+	option = {
+		name = "HRE_Romzug.219.positive"
+			
+		ai_chance = {
+			factor = 40
+			modifier = {
+				factor = 5
+				has_country_flag = Hre_italy_ghibelines
+			}
+		}
+		
+		
+		emperor = { country_event = { id = HRE_Romzug.220 days = 2 } }
+				
+	}
+	
+	option = {
+		name = "HRE_Romzug.219.neutral"
+		
+		ai_chance = {
+			factor = 40
+			modifier = {
+				factor = 5
+				has_country_flag = Hre_italy_neutral
+			}
+		}	
+		
+		random_list = {
+			60 = {
+				emperor = { country_event = { id = HRE_Romzug.220 days = 2 } }
+			}
+			40 = {
+				emperor = { country_event = { id = HRE_Romzug.220 days = 2 } }
+				if = {
+					limit = { has_province_flag = HRE_Romzug_Citizens_oppose }
+					clr_province_flag = HRE_Romzug_Citizens_oppose
+					set_province_flag = HRE_Romzug_citizen_rebel
+				}
+				else_if = {
+					limit = { has_province_flag = HRE_Romzug_Citizens_neutral }
+					random_list = {
+						25 = { ### conflict escalates
+							clr_province_flag = HRE_Romzug_Citizens_neutral
+							set_province_flag = HRE_Romzug_Citizens_oppose
+						}
+						75 = { ### no escalation
+						}
+					}
+				}
+				else_if = {
+					limit = { has_province_flag = HRE_Romzug_Citizens_welcome }
+					
+					random_list = {
+						25 = { ### conflict escalates
+							clr_province_flag = HRE_Romzug_Citizens_welcome
+							set_province_flag = HRE_Romzug_Citizens_neutral
+						}
+						75 = { ### no escalation
+						
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.219.negative"
+		
+		ai_chance = {
+			factor = 40
+			modifier = {
+				factor = 5
+				has_country_flag = Hre_italy_guelfs
+			}
+		}
+		
+		random_list = {
+			20 = {
+				emperor = { country_event = { id = HRE_Romzug.220 days = 2 } }
+			}
+			80 = { ### King doesnt get into the city
+				emperor = { country_event = { id = HRE_Romzug.2202 days = 2 } }
+				ERG = { change_key = { lhs = romzug_escalation_risk value = 40 } }
+			} 
+		}
+	}
+}
+
+### Emperor gets inside the City - Emperor
+country_event = {
+	id = HRE_Romzug.220
+	title = HRE_Romzug.220.t
+	desc = HRE_Romzug.220.d
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = { event_target:Romzug_cur_location = { has_province_flag = HRE_Romzug_Citizens_welcome } }
+				
+				### King gets the crown without intervention or delays
+				country_event = { id = HRE_Romzug.2204 days = 5 }
+			}
+			else_if = {
+				limit = { event_target:Romzug_cur_location = { has_province_flag = HRE_Romzug_Citizens_neutral } }
+				random_list = {
+					70 = {
+						### King gets the crown without intervention or delays
+						country_event = { id = HRE_Romzug.2204 days = 5 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_without_delays
+					}
+					15 = {
+						### King gets the crown with a delay because citizens riots
+						country_event = { id = HRE_Romzug.2204 days = 20 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_with_delays
+					}
+					10 = {
+						### King gets the crown with a significant delay because citizens riot
+						country_event = { id = HRE_Romzug.2204 days = 40 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_with_sign_delays
+					}
+					5 = {
+						### Citizen rebel against presence of King and fighting in the streets ignite between Soldiers of the King and the citizens
+						country_event = { id = HRE_Romzug.2201 days = 1 }
+						custom_tooltip = HRE_Romzug.220.CTP_Citizens_rebel
+					}
+				}
+			}
+			else_if = {
+				limit = { event_target:Romzug_cur_location = { has_province_flag = HRE_Romzug_Citizens_oppose } }
+				random_list = {
+					40 = {
+						### King gets the crown without intervention or delays
+						country_event = { id = HRE_Romzug.2204 days = 5 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_without_delays
+					}
+					15 = {
+						### King gets the crown with a delay because citizens riots
+						country_event = { id = HRE_Romzug.2204 days = 20 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_with_delays
+					}
+					25 = {
+						### King gets the crown with a significant delay because citizens riot
+						country_event = { id = HRE_Romzug.2204 days = 40 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_with_sign_delays
+					}
+					20 = {
+						### Citizen rebel against presence of King and fighting in the streets ignite between Soldiers of the King and the citizens
+						country_event = { id = HRE_Romzug.2201 days = 1 }
+						custom_tooltip = HRE_Romzug.220.CTP_Citizens_rebel
+					}
+				}
+			}
+			else_if = {
+				limit = { event_target:Romzug_cur_location = { has_province_flag = HRE_Romzug_citizen_rebel } }
+				random_list = {
+					10 = {
+						### King gets the crown without intervention or delays
+						country_event = { id = HRE_Romzug.2204 days = 5 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_without_delays	
+					}
+					15 = {
+						### King gets the crown with a delay because citizens riots
+						country_event = { id = HRE_Romzug.2204 days = 20 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_with_delays
+					}
+					25 = {
+						### King gets the crown with a significant delay because citizens riot
+						country_event = { id = HRE_Romzug.2204 days = 40 }
+						custom_tooltip = HRE_Romzug.220.CTP_Crowning_with_sign_delays
+					}
+					50 = {
+						### Citizen rebel against presence of King and fighting in the streets ignite between Soldiers of the King and the citizens
+						country_event = { id = HRE_Romzug.2201 days = 1 }
+						custom_tooltip = HRE_Romzug.220.CTP_Citizens_rebel
+					}
+				}
+			}		
+		}
+	}
+	
+	
+	option = {
+		name = "HRE_Romzug.220.a"
+		
+		
+	}
+}
+
+
+country_event = {
+	id = HRE_Romzug.2201
+	title = HRE_Romzug.2201.t
+	desc = HRE_Romzug.2201.d
+	picture = HRE_eventPicture
+	
+	is_triggered_only = yes
+
+	
+	immediate = {
+		HRE_Romzug_Eval_Escalation = yes
+		if = {
+			limit = { emperor = { has_country_flag = HRE_Romzug_Escalation } }
+			custom_tooltip = HRE_Romzug.2201.CTP_Romzug_Escalation_IronCrown
+		}
+		else = {
+			custom_tooltip = HRE_Romzug.2201.CTP_Romzug_No_Escalation_IronCrown
+		}
+
+	}
+	
+	option = {
+		name = HRE_Romzug.2201.a
+		trigger = {
+			emperor = { has_country_flag = HRE_Romzug_Escalation }
+		}
+		
+		HRE_Romzug_start_conflict = yes
+		
+	}
+	
+	option = {
+		name = HRE_Romzug.2201.b
+		trigger = {
+			emperor = { NOT = { has_country_flag = HRE_Romzug_Escalation } }
+		}
+		
+	}
+	
+	
+	after = {
+	
+	}
+}
+
+country_event = {
+	id = HRE_Romzug.2202
+	title = HRE_Romzug.2202.t
+	desc = HRE_Romzug.2202.d
+	picture = HRE_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		HRE_Romzug_Eval_Escalation = yes
+	}
+	
+	option = {
+		name = "HRE_Romzug.2202.a"
+		### Escalation to war with italian states
+		if = { limit = { emperor = { has_country_flag = HRE_Romzug_Escalation } }
+			HRE_Romzug_start_conflict = yes
+		}
+		else = { ### No total escalation. Looting of Milano and crowning of emperor -> shoots up escalation risk
+			custom_tooltip = HRE_Romzug.2202.CTP_No_big_escalation
+			country_event = { id = HRE_Romzug.2203 days = 7 }
+			
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.2202.b"
+		country_event = { id = HRE_Romzug.217 }
+		clr_country_flag = emperor_goes_for_iron_crown		
+	}
+	
+}
+
+country_event = {
+	id = HRE_Romzug.2203
+	title = HRE_Romzug.2203.t
+	desc = HRE_Romzug.2203.d
+	picture = HRE_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			HRE_Romzug_Eval_Escalation = yes
+			change_key = { lhs = romzug_escalation_risk value = 33 }
+			clr_country_flag = emperor_goes_for_iron_crown
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.2203.a" ### Spare them (nearly no looting)
+		
+		add_country_modifier = { name = HRE_lombard_iron_crown duration = -1 }
+
+		add_army_professionalism = 0.05
+		add_years_of_income = -0.10
+		add_imperial_influence = 1
+		event_target:Romzug_cur_location = {
+			province_event = { id = army_professionalism_events.2 }
+			custom_tooltip = province_trauma_20
+		}		
+		country_event = { id = HRE_Romzug.217 days = 7 }		
+	}
+	
+	option = {
+		name = "HRE_Romzug.2203.b" ### Loot them (normal looting)
+		
+		add_country_modifier = { name = HRE_lombard_iron_crown duration = -1 }
+		
+		add_prestige = -15
+		event_target:Romzug_cur_location = {
+			province_event = { id = army_professionalism_events.18 }
+			custom_tooltip = province_trauma_40
+		}
+		tooltip = {
+			event_target:Romzug_cur_location = {
+				owner = {
+					add_opinion = {
+						who = ROOT
+						modifier = sack_of_x
+					}
+				}
+			}
+		}		
+		country_event = { id = HRE_Romzug.217 days = 7 }		
+	}
+	
+	option = {
+		name = "HRE_Romzug.2203.c" ### Burn the city (strong looting)
+		
+		add_country_modifier = { name = HRE_lombard_iron_crown duration = -1 }
+		
+		add_army_professionalism = -0.1
+		add_prestige = -20
+		add_imperial_influence = -1
+		event_target:Romzug_cur_location = {
+			province_event = { id = army_professionalism_events.3 }
+			custom_tooltip = province_trauma_60
+			custom_tooltip = city_sacked
+		}
+		tooltip = {
+			event_target:Romzug_cur_location = {
+				owner = {
+					add_opinion = {
+						who = ROOT
+						modifier = sack_of_x
+					}
+					add_country_modifier = {
+						name = "enemies_sacked_city"
+						duration = 3650
+					}
+				}
+			}
+		}		
+		
+		country_event = { id = HRE_Romzug.217 days = 7 }		
+	}
+}
+
+### Emperor gets Iron Crown without intervention - Emperor
+country_event = {
+	id = HRE_Romzug.2204
+	title = HRE_Romzug.2204.t
+	desc = HRE_Romzug.2204.d
+
+	is_triggered_only = yes
+
+	option = {
+		name = "HRE_Romzug.2204.a"
+
+		clr_country_flag = emperor_goes_for_iron_crown
+		
+		add_prestige = 10
+		add_country_modifier = { name = HRE_lombard_iron_crown duration = -1 }
+		country_event = { id = HRE_Romzug.217 days = 7 }
+	}
+}
+
+
+### Emperor chooses next target - Emperor
+country_event = {
+	id = HRE_Romzug.221
+	title = HRE_Romzug.221.t
+	desc = HRE_Romzug.221.desc
+
+	is_triggered_only = yes
+	
+	immediate = {
+		### Scripted effect see Romzug_effects file
+		HRE_Romzug_Eval_Next_Movement = yes
+	}
+	
+	after = {
+		### Clear variables and flags
+		every_country = { 
+			set_key = { lhs = romzug_target_num value = 0 } 
+			set_key = { lhs = romzug_target_id value = 0 }
+			clr_country_flag = Romzug_target_loc
+		}
+		event_target:Romzug_cur_location = {
+			clr_country_flag = Romzug_cur_location
+			HRE_remove_romzug_army = yes
+		}
+	}
+
+	option = {
+		name = "HRE_Romzug.221.a"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 1 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 1 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_1 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.b"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 2 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 2 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_2 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.c"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 3 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 3 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_3 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.d"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 4 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 4 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_4 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.e"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 5 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 5 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_5 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.f"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 6 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 6 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_6 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.g"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 7 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 7 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_7 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.h"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 8 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 8 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_8 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.i"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 9 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 9 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_9 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+	
+	option = {
+		name = "HRE_Romzug.221.j"
+		trigger = {
+			any_known_country = {
+				has_country_flag = Romzug_target_loc
+				check_key = { lhs = romzug_target_id value = 10 }
+			}
+			ERG = { check_key = { lhs = romzug_target_num value = 10 } }
+		}
+		hidden_effect = {
+			emperor = {
+				add_country_modifier = {
+					name = romzug_way_towards_next_goal
+					duration = 30
+				}
+			}
+			event_target:Romzug_target_city_10 = {
+				province_event = { id = HRE_Romzug.216 days = 30 }
+			}
+		}
+	}
+}
+
+
+###	Local intervention menue for the Emperor
+country_event = {
+	id = HRE_Romzug.222
+	title = HRE_Romzug.222.t
+	desc = HRE_Romzug.222.d
+	
+	is_triggered_only = yes
+	
+	immediate = {
+	
+	}
+	
+	option = {
+	
+	}
+	
+	option = {
+	
+	}
+	
+	after = {
+	
+	}
+}
+
+
+###Emperor goes for imperial crown - Rome province event
+province_event = {
+	id = HRE_Romzug.230
+	title = HRE_Romzug.230.
+	desc = HRE_Romzug.230.d
+	
+	is_triggered_only = yes
+	
+	immediate = {
+	
+	}
+	
+	option = {
+	
+	}
+	
+	after = {
+	
+	}
+}
