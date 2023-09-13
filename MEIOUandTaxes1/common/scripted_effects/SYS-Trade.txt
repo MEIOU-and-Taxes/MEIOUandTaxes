@@ -1108,7 +1108,7 @@ TN_SpreadStockpile = {
 			# Desired stockpile size is capped by total commerce production
             set_key = { lhs = Public_Tmp1 which = TN_SectorSply51 }
             change_key = { lhs = Public_Tmp1 value = 1 }
-            multiply_key = { lhs = Public_Tmp1 value = 16 } # Stockpile size
+            multiply_key = { lhs = Public_Tmp1 value = 20 } # Stockpile size
             multiply_key = { lhs = Public_Tmp1 which = Modi_StockpileSize } # Stockpile size modi
             
             # Edit for new produce
@@ -1116,7 +1116,7 @@ TN_SpreadStockpile = {
             TN_SpreadStockpileHelper2 = { prod = 2 PriceFactor=0.1 }
             TN_SpreadStockpileHelper2 = { prod = 4 PriceFactor=0.1 }
             TN_SpreadStockpileHelper2 = { prod = 5 PriceFactor=0.1 }
-            TN_SpreadStockpileHelper2 = { prod = 6 PriceFactor=0.2 }
+            TN_SpreadStockpileHelper2 = { prod = 6 PriceFactor=0.1 }
             TN_SpreadStockpileHelper2 = { prod = 9 PriceFactor=0.2 }
             TN_SpreadStockpileHelper2 = { prod = 10 PriceFactor=0.2 }
             TN_SpreadStockpileHelper2 = { prod = 21 PriceFactor=0.2 }
@@ -1402,9 +1402,15 @@ TN_SpreadStockpileHelper2 = {
 
     # The higher the price, the lower the desired stockpile.
     set_key = { lhs = Public_Tmp3 which = TN_ProvPrc$prod$ }
-    multiply_key = { lhs = Public_Tmp3 value = 1.05 }
+    #multiply_key = { lhs = Public_Tmp3 value = 1.05 }
     change_key = { lhs = Public_Tmp3 value = 4 }
     multiply_key = { lhs = Public_Tmp3 value = $PriceFactor$ } #divide_key = { lhs = Public_Tmp3 value = 5 }
+    if = {
+        limit = {
+            NOT = { check_key = { lhs = Public_Tmp3 value = 1 } }
+        }
+        set_key = { lhs = Public_Tmp3 value = 1 }
+    }
     divide_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
 
     if = {
@@ -2486,8 +2492,7 @@ TN_SetPrcFill = {
             check_key = { lhs = TN_SectorStockpileSize$prod$ value = 0.001 }
         }
         set_key = { lhs = Public_Tmp1 which = TN_SectorStockpileBid$prod$ }  #unresolved bids ->how much of what it wanted to buy remained unbought
-        change_key = { lhs = Public_Tmp1 which = TN_SectorBid$prod$ } #Unmet demand              
-        [[food]  multiply_key = { lhs = Public_Tmp$food$ value = 1.1 } ] # food scarcity more important
+        change_key = { lhs = Public_Tmp1 which = TN_SectorBid$prod$ } #Unmet demand
         change_key = { lhs = Public_Tmp1 which = TN_SectorStockpileOut$prod$ } # how much it sold
         subtract_key = { lhs = Public_Tmp1 which = TN_SectorStockpileOffer$prod$ } # how much it remained to sell
         subtract_key = { lhs = Public_Tmp1 which = TN_SectorStockpileIn$prod$ } # how much it bought
@@ -2508,8 +2513,9 @@ TN_SetPrcFill = {
             change_key = { lhs = Public_Tmp0 value = 1 }
             divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 
-            multiply_key = { lhs = Public_Tmp1 value = 11 } # Fluctuation factor
-            [[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
+            multiply_key = { lhs = Public_Tmp1 value = 6 } # Fluctuation factor
+            #[[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
+            [[fluctuationFactor] multiply_key = { lhs = Public_Tmp1 value = $fluctuationFactor$ } ]
 
             change_key = { lhs = Public_Tmp1 value = 100 }            
             multiply_key = { lhs = TN_ProvPrc$prod$ which = Public_Tmp1 }
@@ -2522,12 +2528,13 @@ TN_SetPrcFill = {
             #multiply_key = { lhs = Public_Tmp1 value = -1 }
             
             set_key = { lhs = Public_Tmp0 which = TN_ProvPrc$prod$ }
-            multiply_key = { lhs = Public_Tmp0 value = -0.02 }            
+            multiply_key = { lhs = Public_Tmp0 value = -0.02 }
             change_key = { lhs = Public_Tmp0 value = 3 }
             divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 
-            multiply_key = { lhs = Public_Tmp1 value = 11 } # Fluctuation factor
-            [[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
+            multiply_key = { lhs = Public_Tmp1 value = 6 } # Fluctuation factor
+            #[[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
+            [[fluctuationFactor] multiply_key = { lhs = Public_Tmp1 value = $fluctuationFactor$ } ]
 
             multiply_key = { lhs = Public_Tmp1 value = -1 }
             change_key = { lhs = Public_Tmp1 value = 100 }
@@ -3067,7 +3074,7 @@ TN_DoTradeSetAmountImport = {
                         check_key = { lhs = $offer$ value = 0.01 }
     
                         [[food]
-                            NOT = { check_key = { lhs = $distance$ value = 1.05 } }
+                            NOT = { check_key = { lhs = $distance$ value = 1.1 } }
                         ]
                     }
                     set_key = { lhs = $return$ which = $offer$ }
@@ -3160,7 +3167,7 @@ TN_DoTradeSetAmountExport = {
                         check_key = { lhs = $bid$ value = 0.01 }
     
                         [[food]
-                            NOT = { check_key = { lhs = $distance$ value = 1.05 } }
+                            NOT = { check_key = { lhs = $distance$ value = 1.1 } }
                         ]
                     }
                     set_key = { lhs = $return$ which = $bid$ }
@@ -3880,12 +3887,14 @@ TN_DoTradeAfterHelper3 = {
             limit = {
                 always = $DirectBuyR$
                 OR = {
-                    check_key = { lhs = Class_DirectBuyR$prod$ value = 0.001 }
-                    check_key = { lhs = Class_DirectBuyNM$prod$ value = 0.001 }
-                }
-                OR = {
-                    check_key = { lhs = Prod_S$slot$DmndBR value = 0.001 }
-                    check_key = { lhs = Prod_S$slot$DmndBNM value = 0.001 }
+                    AND = { 
+                        check_key = { lhs = Class_DirectBuyR$prod$ value = 0.001 }
+                        check_key = { lhs = Prod_S$slot$DmndBR value = 0.001 }
+                    }
+                    AND = { 
+                        check_key = { lhs = Class_DirectBuyNM$prod$ value = 0.001 }
+                        check_key = { lhs = Prod_S$slot$DmndBNM value = 0.001 }
+                    }
                 }
             }
             # What amount of goods were sold directly to classes?
@@ -3971,49 +3980,55 @@ TN_DoTradeAfterHelper5 = {
 }
 
 TN_DirectBuyPriceMath = {
-    if = {
+    set_key = { lhs = $output$ value = $BasePrice$ }
+     if = {
         limit = {
-            check_key = { lhs = TN_ProvPrc$prod$ value = $BasePrice$ }
+            always = no
         }
-        set_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
-        subtract_key = { lhs = $output$ value = $BasePrice$ }
         if = {
             limit = {
-                has_global_flag = POP_Sim10
+                check_key = { lhs = TN_ProvPrc$prod$ value = $BasePrice$ }
             }
-            multiply_key = { lhs = $output$ value = 1 }
-        }
-        else_if = {
-            limit = {
-                has_global_flag = POP_Sim15
+            set_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
+            subtract_key = { lhs = $output$ value = $BasePrice$ }
+            if = {
+                limit = {
+                    has_global_flag = POP_Sim10
+                }
+                multiply_key = { lhs = $output$ value = 1 }
             }
-            multiply_key = { lhs = $output$ value = 0.75 }
+            else_if = {
+                limit = {
+                    has_global_flag = POP_Sim15
+                }
+                multiply_key = { lhs = $output$ value = 0.75 }
+            }
+            else = {
+                multiply_key = { lhs = $output$ value = 0.5 }
+            }
+            change_key = { lhs = $output$ value = $BasePrice$ }
         }
         else = {
-            multiply_key = { lhs = $output$ value = 0.5 }
-        }
-        change_key = { lhs = $output$ value = $BasePrice$ }
-    }
-    else = {
-        set_key = { lhs = $output$ value = $BasePrice$ }
-        subtract_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
-        if = {
-            limit = {
-                has_global_flag = POP_Sim10
+            set_key = { lhs = $output$ value = $BasePrice$ }
+            subtract_key = { lhs = $output$ which = TN_ProvPrc$prod$ }
+            if = {
+                limit = {
+                    has_global_flag = POP_Sim10
+                }
+                multiply_key = { lhs = $output$ value = 1 }
             }
-            multiply_key = { lhs = $output$ value = 1 }
-        }
-        else_if = {
-            limit = {
-                has_global_flag = POP_Sim15
+            else_if = {
+                limit = {
+                    has_global_flag = POP_Sim15
+                }
+                multiply_key = { lhs = $output$ value = 0.75 }
             }
-            multiply_key = { lhs = $output$ value = 0.75 }
+            else = {
+                multiply_key = { lhs = $output$ value = 0.5 }
+            }
+            multiply_key = { lhs = $output$ value = -1 }
+            change_key = { lhs = $output$ value = $BasePrice$ }
         }
-        else = {
-            multiply_key = { lhs = $output$ value = 0.5 }
-        }
-        multiply_key = { lhs = $output$ value = -1 }
-        change_key = { lhs = $output$ value = $BasePrice$ }
     }
 }
 
@@ -5057,7 +5072,7 @@ TN_UpdateSubsistence = {
         }
         set_key = { lhs = Tmp_1 which = TN_SectorSply51 }
         change_key = { lhs = Tmp_1 value = 1 }
-        multiply_key = { lhs = Tmp_1 value = 18 }
+        multiply_key = { lhs = Tmp_1 value = 20 }
         multiply_key = { lhs = Tmp_1 which = Modi_StockpileSize } # Stockpile size modi
 
         divide_key = { lhs = TN_Subsistence which = Tmp_1 }
