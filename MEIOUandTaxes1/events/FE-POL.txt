@@ -82,7 +82,7 @@ country_event = {
 	}
 }
 
-#SUCCESSION OF LOUIS THE GREAT
+#SUCCESSION OF KAZIMIERZ THE GREAT
 country_event = {
 	id = flavor_pol.500
 	title = "flavor_pol.3023.title"
@@ -271,16 +271,12 @@ country_event = {
 	desc = "flavor_pol.502.desc"
 	picture = DEATH_OF_HEIR_eventPicture
 	is_triggered_only = yes
-	
 		
 	option = {
 		name = "option.flavor_pol.502.a"
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Poland had male heir - no union:flavor_pol.502"		
 		add_prestige = 35
 		add_legitimacy = 30
-		#add_adm_power = 100
-		#add_dip_power = 100
-		#add_mil_power =  100
 	}
 }
 	
@@ -359,16 +355,16 @@ country_event = {
 			}
 		}
 	}
-	immediate = {  }
-	
 	
 	option = { #normal PU when louis alive
-		trigger = { HUN = { has_ruler = "Louis the Great" } }
+		trigger = { 
+		    HUN = { has_ruler = "Louis the Great" } 
+		}
 		name = "flavor_pol.3022.a"
 		HUN = { create_union = POL }
 		set_country_flag = pol_louis_great_king
 		add_liberty_desire = 50
-		country_event = {  id = flavor_pol.504 days = 3 }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (with Louis):flavor_pol.501"	
 	}
 	
@@ -386,13 +382,14 @@ country_event = {
 			}	
 		}
 		trigger = { 
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+			NOT = { HUN = { has_ruler = "Louis the Great" } }
 			NOT = { HUN = { has_regency = yes } }
 			NOT = { HUN = { has_consort_regency = yes } }
+			HUN = { is_lesser_in_union = no }
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.501"	
 		HUN = { create_union = POL }
-		country_event = {  id = flavor_pol.504 days = 3 }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		add_liberty_desire = 100
 		set_country_flag = pol_louis_son_great_king
 	}
@@ -418,29 +415,84 @@ country_event = {
 				OR = { 
 					has_regency = yes 
 					has_consort_regency = yes 
-				} 
+				}
+                is_lesser_in_union = no				
 			}
 		}
 		HUN = { create_union = POL }
-		country_event = {  id = flavor_pol.504 days = 3 }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.501"	
 		add_liberty_desire = 100
 		set_country_flag = pol_louis_son_great_king
 	}
 	
-	
-	option = { #politely decline
+	option = { #We shall choose a Piast!
 		name = "flavor_pol.3022c.c"
 		ai_chance = { factor = 90 }
 		trigger = {
 			NOT = { HUN =  { has_ruler = "Louis the Great" } }
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.501"
-		add_legitimacy = -20
-		add_prestige = 15
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+					NOT = { num_of_cities = 3 }
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+						NOT = { num_of_cities = 3 }
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
 	}
-	
-	
 }
 
 #DEATH OF KAZIMIERZ III (Hungary has no male and Poland has no Piast monarch either female or male)
@@ -451,16 +503,15 @@ country_event = {
 	picture = DEATH_OF_HEIR_eventPicture
 	is_triggered_only = yes
 	
-	immediate = {  
-	}
-	
 	option = { #female woman
 		name = "flavor_pol.30236.a"
 		ai_chance = { factor = 10 }
-		HUN = {
-			create_union = POL
+		trigger = {
+			NOT = { HUN =  { has_country_flag = looking_for_heir } }
+			HUN = { is_lesser_in_union = no }
 		}
-		country_event = {  id = flavor_pol.504 days = 3 }
+		HUN = { create_union = POL }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		add_liberty_desire = 100
 		set_country_flag = woman_great_king
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, union with Hungary (ruled by woman):flavor_pol.503"
@@ -477,8 +528,16 @@ country_event = {
 	option = { #go with bohemia
 		name = flavor_pol.30234.a
 		ai_chance = { factor = 15 }
-		BOH = { create_union = POL }
-		country_event = {  id = flavor_pol.504 days = 3 }
+		trigger = {
+			BOH = { is_lesser_in_union = no }
+		}
+		BOH = {
+			create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}
+		#country_event = { id = flavor_pol.504 days = 3 }
 		add_liberty_desire = 75
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, no union with Hungary (as it was ruled by woman):flavor_pol.503"
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, union with Bohemia:flavor_pol.503"
@@ -487,203 +546,256 @@ country_event = {
 
 
 #DEATH OF KAZIMIERZ (Fired from insta PU. Almost the same as previous event (501) with the difference that it adds possibility for Bohemian PU)
-country_event = { 
-	id = flavor_pol.504
-	title = "flavor_pol.30234.title"
-	desc = {
-		trigger = {
-			HUN = { has_ruler = "Louis the Great" } 
-		}
-		desc = "flavor_pol.3022b.desca"
-	}
-	desc = {
-		trigger = {
-			NOT = { HUN = { has_ruler = "Louis the Great" } }
-			NOT = { HUN = { has_regency = yes } }
-			NOT = { HUN = { has_consort_regency = yes } }
-			NOT = { HUN = { is_female = yes } }
-		}
-		desc = "flavor_pol.30222b.descb"
-	}
-	desc = {
-		trigger = {
-			NOT = { HUN = { has_ruler = "Louis the Great" } }
-			HUN = { 
-				has_heir = yes 
-				has_female_heir = no 
-				OR = { 
-					has_regency = yes 
-					has_consort_regency = yes 
-				} 
-			}
-		}
-		desc = "flavor_pol.302222b.desc"
-	}
-	
-	desc = {
-		trigger = {
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			OR = {
-				HUN = { 
-					has_heir = yes 
-					has_female_heir = yes 
-					OR = { 
-						has_regency = yes 
-						has_consort_regency = yes 
-					} 
-				}
-				AND = {
-					is_female = yes
-					has_regency = no
-					has_consort_regency = no
-				}
-			}
-		}
-		desc = "flavor_pol.3022222b.desc"
-	}
-	picture = POLICY_eventPicture
-	is_triggered_only = yes 
-	fire_only_once = yes
-	major = yes
-	trigger = { 
-		tag = POL
-		junior_union_with = HUN 
-		NOT = { is_year = 1390 }
-		AND = {
-			NOT = { has_country_flag = pol_louis_great_king }
-			NOT = { has_country_flag = pol_louis_son_great_king }
-			NOT = { has_country_flag = woman_great_king }
-		}
-	}
-	
-	immediate = {
-		clr_country_flag = pol_louis_great_heir
-		
-	}
-	
-	option = { #normal PU when louis alive
-		trigger = { HUN = { has_ruler = "Louis the Great" } }
-		name = "flavor_pol.30234.a"
-		#HUN = { create_union = POL }
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (with Louis):flavor_pol.504"	
-		set_country_flag = pol_louis_great_king
-		add_liberty_desire = 40
-	}
-	
-	option = { #make new male ruler PU
-		name = "flavor_pol.3022c.a"
-		ai_chance = { 
-			factor = 10
-			modifier = { 
-				factor = 1.5
-				HUN = { legitimacy = 60 }
-			}
-			modifier = { 
-				factor = 2
-				HUN = { legitimacy = 85 }
-			}	
-		}
-		trigger = { 
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			NOT = { HUN = { has_regency = yes } }
-			NOT = { HUN = { has_consort_regency = yes } }
-			NOT = { is_female = yes }
-		}
-			
-		HUN = { create_union = POL }
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
-		add_liberty_desire = 75
-		set_country_flag = pol_louis_son_great_king
-	}
-	
-	option = { #make male heir PU
-		name = "flavor_pol.3022c.b"
-		ai_chance = { 
-			factor = 10
-			modifier = { 
-				factor = 1.5
-				HUN = { heir_claim = 60 }
-			}
-			modifier = { 
-				factor = 2
-				HUN = { heir_claim = 85 }
-			}
-		}
-		trigger = {	
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			HUN = { 
-				has_heir = yes 
-				has_female_heir = no 
-				OR = { 
-					has_regency = yes 
-					has_consort_regency = yes 
-				} 
-			}
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
-		HUN = { create_union = POL }
-		add_liberty_desire = 75
-		set_country_flag = pol_louis_son_great_king
-	}
-	
-	
-	option = { #politely decline
-		name = "flavor_pol.30234.c"
-		ai_chance = { factor = 90 }
-		trigger = {
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.504"
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, local noble became ruler:flavor_pol.504"
-		break_union = HUN
-		define_ruler = {
-			claim = 20
-			female = no
-			culture = polish
-		}
-	}
-	
-	option = { #Go with woman
-		name = "flavor_pol.30236.a"
-		ai_chance = { factor = 10 }
-		trigger = {
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			OR = {
-				HUN = { 
-					has_heir = yes 
-					has_female_heir = yes 
-					OR = { 
-						has_regency = yes 
-						has_consort_regency = yes 
-					} 
-				}
-				AND = {
-					is_female = yes
-					has_regency = no
-					has_consort_regency = no
-				}
-			}
-		}
-		HUN = {
-			create_union = POL
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (ruler is a woman):flavor_pol.504"
-		add_liberty_desire = 100
-		set_country_flag = woman_great_king
-	}
-	
-	option = { #bohemia
-		name = "flavor_pol.30236.c"
-		trigger = {
-		}
-		ai_chance = { factor = 10 }
-		BOH = {
-			create_union = POL
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Bohemia:flavor_pol.504"
-		add_liberty_desire = 75
-	}
-}
+#country_event = { #this event don't seem to work, it isn't needed to complete the event chain anyway
+#	id = flavor_pol.504
+#	title = "flavor_pol.30234.title"
+#	desc = {
+#		trigger = {
+#			HUN = { has_ruler = "Louis the Great" } 
+#		}
+#		desc = "flavor_pol.3022b.desca"
+#	}
+#	desc = {
+#		trigger = {
+#			NOT = { HUN = { has_ruler = "Louis the Great" } }
+#			NOT = { HUN = { has_regency = yes } }
+#			NOT = { HUN = { has_consort_regency = yes } }
+#			NOT = { HUN = { is_female = yes } }
+#		}
+#		desc = "flavor_pol.30222b.descb"
+#	}
+#	desc = {
+#		trigger = {
+#			NOT = { HUN = { has_ruler = "Louis the Great" } }
+#			HUN = { 
+#				has_heir = yes 
+#				has_female_heir = no 
+#				OR = { 
+#					has_regency = yes 
+#					has_consort_regency = yes 
+#				} 
+#			}
+#		}
+#		desc = "flavor_pol.302222b.desc"
+#	}
+#	
+#	desc = {
+#		trigger = {
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			OR = {
+#				HUN = { 
+#					has_heir = yes 
+#					has_female_heir = yes 
+#					OR = { 
+#						has_regency = yes 
+#						has_consort_regency = yes 
+#					} 
+#				}
+#				AND = {
+#					is_female = yes
+#					has_regency = no
+#					has_consort_regency = no
+#				}
+#			}
+#		}
+#		desc = "flavor_pol.3022222b.desc"
+#	}
+#	picture = POLICY_eventPicture
+#	is_triggered_only = yes 
+#	fire_only_once = yes
+#	major = yes
+#	trigger = { 
+#		tag = POL
+#		junior_union_with = HUN 
+#		NOT = { is_year = 1390 }
+#		AND = {
+#			NOT = { has_country_flag = pol_louis_great_king }
+#			NOT = { has_country_flag = pol_louis_son_great_king }
+#			NOT = { has_country_flag = woman_great_king }
+#		}
+#	}
+#	
+#	immediate = {
+#		clr_country_flag = pol_louis_great_heir
+#		
+#	}
+#	
+#	option = { #normal PU when louis alive
+#		trigger = { HUN = { has_ruler = "Louis the Great" } }
+#		name = "flavor_pol.30234.a"
+#		#HUN = { create_union = POL }
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (with Louis):flavor_pol.504"	
+#		set_country_flag = pol_louis_great_king
+#		add_liberty_desire = 40
+#	}
+#	
+#	option = { #make new male ruler PU
+#		name = "flavor_pol.3022c.a"
+#		ai_chance = { 
+#			factor = 10
+#			modifier = { 
+#				factor = 1.5
+#				HUN = { legitimacy = 60 }
+#			}
+#			modifier = { 
+#				factor = 2
+#				HUN = { legitimacy = 85 }
+#			}	
+#		}
+#		trigger = { 
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			NOT = { HUN = { has_regency = yes } }
+#			NOT = { HUN = { has_consort_regency = yes } }
+#			NOT = { is_female = yes }
+#		}
+#			
+#		HUN = { create_union = POL }
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
+#		add_liberty_desire = 75
+#		set_country_flag = pol_louis_son_great_king
+#	}
+#	
+#	option = { #make male heir PU
+#		name = "flavor_pol.3022c.b"
+#		ai_chance = { 
+#			factor = 10
+#			modifier = { 
+#				factor = 1.5
+#				HUN = { heir_claim = 60 }
+#			}
+#			modifier = { 
+#				factor = 2
+#				HUN = { heir_claim = 85 }
+#			}
+#		}
+#		trigger = {	
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			HUN = { 
+#				has_heir = yes 
+#				has_female_heir = no 
+#				OR = { 
+#					has_regency = yes 
+#					has_consort_regency = yes 
+#				} 
+#			}
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
+#		HUN = { create_union = POL }
+#		add_liberty_desire = 75
+#		set_country_flag = pol_louis_son_great_king
+#	}
+#	
+#	option = { #We shall choose a Piast!
+#		name = "flavor_pol.30234.c"
+#		ai_chance = { factor = 90 }
+#		trigger = {
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.504"
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Piast became ruler:flavor_pol.504"
+#		break_union = HUN
+#		hidden_effect = {
+#		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+#        }
+#		if = {
+#		    limit = { 
+#			    MAZ = {
+#				    exists = yes
+#                   dynasty = "Piast"
+#					is_female = no
+#					ai = yes
+#                }				
+#			}
+#			hidden_effect = {
+#			    MAZ = {
+#				    exile_heir_as = heir_move_to_poland
+#				    exile_ruler_as = { name = ruler_move_to_poland }
+#				}
+#				set_ruler = ruler_move_to_poland
+#			    set_heir = heir_move_to_poland
+#			    set_ruler_flag = elected_ruler
+#			}
+#			inherit = MAZ
+#		}
+#		else_if = {
+#		    limit = { 
+#			    any_known_country = {
+#                    dynasty = "Piast"
+#					is_female = no
+#					ai = yes
+#					NOT = { num_of_cities = 3 }
+#                }				
+#			}
+#			hidden_effect = {
+#			    random_known_country = {
+#				    limit = {
+#					    dynasty = "Piast"
+#						is_female = no
+#						ai = yes
+#						NOT = { num_of_cities = 3 }
+#					}
+#				    exile_heir_as = heir_move_to_poland
+#				    exile_ruler_as = { name = ruler_move_to_poland }
+#					set_country_flag = heir_to_polish_crown
+#				}
+#				set_ruler = ruler_move_to_poland
+#			    set_heir = heir_move_to_poland
+#			    set_ruler_flag = elected_ruler
+#			}
+#			every_country = {
+#			    limit = { has_country_flag = heir_to_polish_crown }
+#				ROOT = { inherit = PREV }
+#			}
+#		}
+#		else = {
+#		    define_ruler = {
+#				dynasty = "Piast"
+#				claim = 25
+#            }
+#		}
+#	}
+#	
+#	option = { #Go with woman
+#		name = "flavor_pol.30236.a"
+#		ai_chance = { factor = 10 }
+#		trigger = {
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			OR = {
+#				HUN = { 
+#					has_heir = yes 
+#					has_female_heir = yes 
+#					OR = { 
+#						has_regency = yes 
+#						has_consort_regency = yes 
+#					} 
+#				}
+#				AND = {
+#					is_female = yes
+#					has_regency = no
+#					has_consort_regency = no
+#				}
+#			}
+#		}
+#		HUN = {
+#			create_union = POL
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (ruler is a woman):flavor_pol.504"
+#		add_liberty_desire = 100
+#		set_country_flag = woman_great_king
+#	}
+#	
+#	option = { #bohemia
+#		name = "flavor_pol.30236.c"
+#		trigger = {
+#		}
+#		ai_chance = { factor = 10 }
+#		BOH = {
+#			create_union = POL
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Bohemia:flavor_pol.504"
+#		add_liberty_desire = 75
+#	}
+#}
 
 #MAZOVIA INDEPENDENCE (hidden event)
 country_event = { 
@@ -723,6 +835,7 @@ country_event = {
 	is_triggered_only = yes
 	trigger = {
 		tag = POL
+		MAZ = { exists = yes }
 	}
 	
 	
@@ -919,16 +1032,13 @@ country_event = {
 			}
 		}
 	}
-
-	immediate = {
-		
-	}
 	
 	option = { # Jadwiga
-		name = "flavor_pol.302.d"
-		ai_chance = { factor = 90 }
+		name = "flavor_pol.302.a"
+		ai_chance = { factor = 85 }
 		trigger = {
 			has_country_flag = pol_louis_great_king
+			is_year = 1374
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Jadwiga became a ruler of Poland:flavor_pol.302"
 		if = {
@@ -940,15 +1050,20 @@ country_event = {
 			}
 		}
 		define_ruler = {
+			name = "Interregnum"
+			regency = yes
+		}
+		define_heir = {
 			name = "Jadwiga"
 			dynasty = "d'Anjou"
 			claim = 20
+			birth_date = 1373.10.3
 			adm = 5
 			dip = 5
 			mil = 4
 			female = yes
 		}
-		add_ruler_personality = generous_personality
+		set_heir_flag = jadwiga
 		#in exchange for nobles support for woman taking a throne, they were granted tax privilege
 		if = {
 			limit = { #if they are already at level 4 of tax exemption, increase tax exemption only once and service exemption instead
@@ -975,6 +1090,7 @@ country_event = {
 			}
 		}
 	}
+	
 	option = { # Random woman
 		name = "flavor_pol.302.c"
 		ai_chance = { factor = 5 }
@@ -1027,6 +1143,10 @@ country_event = {
 	
 	option = { # stay in the pu
 		name = "flavor_pol.302.f"
+		trigger = {
+			NOT = { HUN = { has_country_flag = looking_for_heir } }
+			HUN = { is_lesser_in_union = no }
+		}
 		ai_chance = { 
 			factor = 5
 			modifier = {
@@ -1038,8 +1158,82 @@ country_event = {
 				}
 			}	
 		}
+		HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}
 		add_liberty_desire = -20
 		log = "FE-POL:[GetYear]:[Root.GetName]:stayed in PU (d'Anjou woman had not became a ruler of Poland):flavor_pol.302"
+	}
+	
+	option = { #We shall choose a Piast!
+		name = "flavor_pol.3023.e"
+		ai_chance = { factor = 5 }
+		trigger = {
+			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+		}
+		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.501"
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+					NOT = { num_of_cities = 3 }
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+						NOT = { num_of_cities = 3 }
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
 	}
 	
 	after = {
@@ -1095,14 +1289,6 @@ country_event = {
 	
 	immediate = {
 		hidden_effect = {
-			random_list = {
-				80 = {
-					set_country_flag = pol_jadwiga
-				}
-				20 = {
-					set_country_flag = we_are_polish
-				}
-			}
 			if = {
 				limit = {
 					has_country_flag = pol_louis_great_king
@@ -1147,7 +1333,13 @@ country_event = {
 		trigger = {
 			has_country_flag = pol_louis_great_king
 		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"		
+		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"
+        HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}		
 		add_liberty_desire = -50
 	}
 	option = { # stay in the pu
@@ -1158,7 +1350,13 @@ country_event = {
 		trigger = {
 			has_country_flag = pol_louis_son_great_king
 		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"		
+		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"
+        HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}		
 		add_liberty_desire = -20
 	}
 	
@@ -1170,15 +1368,18 @@ country_event = {
 		trigger = {
 			has_country_flag = woman_great_king
 		}
+		HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}
 		add_liberty_desire = -10
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"	
 	}
 		
 	option = { # polands nobility doesnt accept heir
 		name = "flavor_pol.3023.e"
-		trigger = {
-			has_country_flag = we_are_polish
-		}
 		ai_chance = { 
 			factor = 25
 			modifier = {
@@ -1195,13 +1396,71 @@ country_event = {
 				country_event = { id = flavor_hun.90 days = 5 }
 			}
 		}
-		add_prestige = 20
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+					NOT = { num_of_cities = 3 }
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+						NOT = { num_of_cities = 3 }
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
 	}
 	
 	option = { # jadwiga
-		name = "flavor_pol.302.d"
+		name = "flavor_pol.302.a"
 		trigger = {
-			has_country_flag = pol_jadwiga
+			is_year = 1374
 		}
 		ai_chance = { 
 			factor = 60
@@ -1210,15 +1469,20 @@ country_event = {
 		custom_tooltip = custom.flavor_pol.3023.f
 		break_union = HUN
 		define_ruler = {
+			name = "Interregnum"
+			regency = yes
+		}
+		define_heir = {
 			name = "Jadwiga"
 			dynasty = "d'Anjou"
 			claim = 20
+			birth_date = 1373.10.3
 			adm = 5
 			dip = 5
 			mil = 4
 			female = yes
 		}
-		add_ruler_personality = generous_personality
+		set_heir_flag = jadwiga
 		#in exchange for nobles support for woman taking a throne, they were granted tax privilege
 		if = {
 			limit = { #if they are already at level 4 of tax exemption, increase tax exemption only once and service exemption instead
@@ -1292,8 +1556,6 @@ country_event = {
 		clr_country_flag = pol_louis_great_king
 		clr_country_flag = pol_louis_son_great_king
 		clr_country_flag = woman_great_king
-		clr_country_flag = pol_jadwiga
-		clr_country_flag = we_are_polish
 	}
 }
 
@@ -1505,16 +1767,8 @@ country_event = {
 					is_neighbor_of = ROOT
 				}
 			}
-			OR = {
-				AND = {
-					has_regency = no
-					is_female = no
-				}
-				AND = {
-					has_regency = yes
-					has_female_heir = no
-				}
-			}
+			has_regency = no
+			is_female = no
 		}
 		NOT = { war_with = LIT }
 		is_lesser_in_union = no
@@ -1522,13 +1776,13 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		months = 24
+		months = 36
 		modifier = {
 			factor = 0.5
 			marriage_with = LIT
 		}
 		modifier = {
-			factor = 0.25
+			factor = 0.5
 			LIT = { religion_group = european_pagan }
 		}
 		modifier = {
@@ -1560,11 +1814,29 @@ country_event = {
 				}
 			}
 		}
+		if = {
+		    limit = {
+			    OR = {
+				    AND = {
+			            has_ruler = "Jadwiga"
+				        dynasty = "d'Anjou"
+				    }
+					has_heir_flag = jadwiga
+				}
+			}
+			set_country_flag = jadwiga_marriage
+		}
 	}
 	
-	option = {		# Accept their Duke on the throne of Poland, but demand his christianisation
+	option = { #Accept their Duke on the throne of Poland, but demand his christianisation
 		name = "flavor_pol.100.a"
-		ai_chance = { factor = 100 }
+		ai_chance = { 
+		    factor = 90 
+		    modifier = {
+				factor = 0
+				LIT = { ai = no }
+			}
+		}
 		trigger = {
 			LIT = {
 				religion_group = european_pagan
@@ -1578,7 +1850,7 @@ country_event = {
 			MAZ = { country_event = { id = flavor_pol.509 days = 2 } }
 			if = {
 				limit = {
-					dynasty = "d'Anjou"
+					has_country_flag = jadwiga_marriage
 				}
 				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
 			}
@@ -1586,26 +1858,28 @@ country_event = {
 		hidden_effect = {
 			LIT = {
 				exile_heir_as = heir_move_to_poland
-				#kill_heir = {}
 				exile_ruler_as = { name = ruler_move_to_poland }
 				grant_independence = yes
 			}
 			set_ruler = ruler_move_to_poland
-			#set_heir = heir_move_to_poland
 			set_ruler_flag = elected_ruler
-			define_consort = {
-				name = "Jadwiga"
-				dynasty = "d'Anjou"
-				culture = hungarian
-				country_of_origin = HUN
-				adm = 5
-				dip = 5
-				mil = 4
-				female = yes
+			if = {
+			    limit = { has_country_flag = jadwiga_marriage }
+			    define_consort = {
+				    name = "Jadwiga"
+				    dynasty = "d'Anjou"
+					birth_date = 1373.10.3
+				    culture = hungarian
+				    country_of_origin = HUN
+				    adm = 5
+				    dip = 5
+				    mil = 4
+				    female = yes
+			    }
+				add_queen_personality = generous_personality
+				clr_country_flag = jadwiga_marriage
 			}
 			log = "FE-POL:[GetYear]:[Root.GetName]:Jadwiga d'Anjou set as Queen:flavor_pol.100"
-			add_queen_personality = generous_personality
-
 			if = {
 				limit = {
 					religion = catholic
@@ -1618,8 +1892,6 @@ country_event = {
 				}
 				set_ruler_religion = avignonist
 			}
-
-			#set_heir_religion = catholic
 			create_subject = {
 				subject_type = permanent_union
 				subject = LIT
@@ -1634,7 +1906,6 @@ country_event = {
 				religion = catholic
 				LIT = { NOT = { religion = catholic } }
 			}
-			#LIT = { set_country_flag = lit_become_catholic }
 			LIT = { change_religion = catholic force_converted = yes }
 		}
 		else_if = {
@@ -1649,7 +1920,6 @@ country_event = {
 				religion = orthodox
 				LIT = { NOT = { religion = orthodox } }
 			}
-			#LIT = { set_country_flag = lit_become_orthodox }
 			LIT = { change_religion = orthodox force_converted = yes }
 		}
 		POL = {
@@ -1695,9 +1965,15 @@ country_event = {
 			}
 		}
 	}
-	option = {		# Accept their King on the throne of Poland
-		name = "flavor_pol.100.b" #TODO: what with Jadwiga? in option A she was set as Queen
-		ai_chance = { factor = 100 }
+	option = { # Accept their King on the throne of Poland
+		name = "flavor_pol.100.b"
+		ai_chance = { 
+		    factor = 90 
+		    modifier = {
+				factor = 0
+				LIT = { ai = no }
+			}
+		}
 		trigger = {
 			LIT = {
 				religion_group = christian
@@ -1711,7 +1987,7 @@ country_event = {
 			MAZ = { country_event = { id = flavor_pol.509 days = 2 } } #Mazovia vassalization
 			if = {
 				limit = {
-					dynasty = "d'Anjou"
+					has_country_flag = jadwiga_marriage
 				}
 				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
 			}
@@ -1725,7 +2001,22 @@ country_event = {
 			set_ruler = ruler_move_to_poland
 			set_heir = heir_move_to_poland
 			set_ruler_flag = elected_ruler
-
+			if = {
+			    limit = { has_country_flag = jadwiga_marriage }
+			    define_consort = {
+				    name = "Jadwiga"
+				    dynasty = "d'Anjou"
+					birth_date = 1373.10.3
+				    culture = hungarian
+				    country_of_origin = HUN
+				    adm = 5
+				    dip = 5
+				    mil = 4
+				    female = yes
+			    }
+				add_queen_personality = generous_personality
+				clr_country_flag = jadwiga_marriage
+			}
 			if = {
 				limit = {
 					religion = catholic
@@ -1793,17 +2084,106 @@ country_event = {
 			}
 		}
 	}
-	option = {		# No, let us marry a local noble instead
+	option = { #No, let us marry the Piast
 		name = "flavor_pol.100.c"
-		ai_chance = { factor = 0 }
-		Stab_Add1 = yes
-		log = "FE-POL:[GetYear]:[Root.GetName]:Rejected Lithuanian Duke on the throne, married local noble:flavor_pol.100"
+		ai_chance = { factor = 10 }
+		log = "FE-POL:[GetYear]:[Root.GetName]:Rejected Lithuanian Duke on the throne, married Piast duke:flavor_pol.100"
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		hidden_effect = {
+			if = {
+				limit = {
+					has_country_flag = jadwiga_marriage
+				}
+				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
+			}
+		}
+		if = {
+		    limit = { 
+			    MAZ = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
+		
+		if = {
+			limit = { has_country_flag = jadwiga_marriage }
+			define_consort = {
+		        name = "Jadwiga"
+		        dynasty = "d'Anjou"
+			    birth_date = 1373.10.3
+		        culture = hungarian
+				country_of_origin = HUN
+				adm = 5
+				dip = 5
+				mil = 4
+				female = yes
+			}
+		    add_queen_personality = generous_personality
+			clr_country_flag = jadwiga_marriage
+		}
+		
 		LIT = {
 			add_opinion = {
 				who = ROOT
 				modifier = pol_lit_union_declined
 			}
+			add_casus_belli = {
+					target = POL 
+					type = cb_restore_personal_union
+					months = 120
+			}
 		}
+	}
+	after = {
+	    set_global_flag = plc_union_outcome_flag
 	}
 }
 
@@ -2025,6 +2405,9 @@ country_event = {
 				modifier = pol_lit_union_declined
 			}
 		}
+	}
+	after = {
+	    set_global_flag = plc_union_outcome_flag
 	}
 }
 
@@ -4308,7 +4691,7 @@ country_event = {
                     dip = 6
                     mil = 1
                     age = 21
-               }
+                }
 			}
 		}
 		set_country_flag = teuton_secularization
@@ -4694,6 +5077,7 @@ country_event = {
     
 	option = { #Reach an agreement with Cossacks
         name = "flavor_pol.741.a"
+		ai_chance = { factor = 90 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Nalevajko uprising ended by reaching an agreement with Cossacks:flavor_pol.741"
 		log = "FE-POL:[GetYear]:[Root.GetName]:Cossacks were added to regular army and Sich became a vassal:flavor_pol.741"
 		
@@ -4727,6 +5111,7 @@ country_event = {
 	
 	option = { #Crush them once and for all
         name = "flavor_pol.741.b"
+		ai_chance = { factor = 10 }
 		set_country_flag = angered_cossacks
 		Stab_Subtract1 = yes
 		log = "FE-POL:[GetYear]:[Root.GetName]:Nalevajko uprising ended by crushing the Cossacks:flavor_pol.741"
@@ -6639,7 +7024,7 @@ country_event = {
     trigger = { 
         tag = TRK
 		is_subject_of = LIT
-		is_subject_of_type = decentralized_vassal
+		is_lesser_in_union = no
 		is_at_war = no
 		LIT = { 
 		    junior_union_with = POL 
@@ -7437,4 +7822,34 @@ country_event = {
 		    }
 		}
     }	  	
+}
+
+###TURN TRAKAI INTO APPANAGE (HIDDEN EVENT IN CASE IF LIT CIVIL WAR DIDN'T HAPPEN)
+country_event = {
+	id = flavor_pol.768
+	title = "flavor_pol.768.title"
+	desc = "flavor_pol.768.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+	hidden = yes
+    
+	trigger = {
+	    tag = LIT
+		dip_tech = 25 #around year 1450
+		TRK = {
+		    exists = yes
+			is_subject_of = ROOT
+			is_subject_of_type = decentralized_vassal
+		}
+	}
+	
+	mean_time_to_happen = { days = 1 }
+	
+	option = {
+        name = "flavor_pol.768.a"
+        create_subject = {
+				subject_type = appanage_subject
+				subject = TRK
+		}
+	}	
 }
