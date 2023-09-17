@@ -16,11 +16,8 @@ country_event = {
 			tag = KNP
 			tag = NAP
 		}
-		NOT = {	adm_tech = 30 }
-		NOT = {	dynasty = "d'Anjou"	}
-		NOT = {	dynasty = "d'Armagnac" }
-		NOT = {	dynasty = "de Valois" }
-		NOT = {	dynasty = "de Bourbon" }
+		NOT = {	is_year = 1495 }
+		capetian_dynasty_trigger = no
 		NOT = {	legitimacy = 90	}
 		is_lesser_in_union = no
 		is_female = no
@@ -300,7 +297,7 @@ country_event = {
 		}
 	}
 }
-country_event = {			Commented out because there is no effect set
+country_event = {			#Commented out because there is no effect set
  	id = flavor_nap.4
  	title = flavor_nap.4.t
  	desc = flavor_nap.4.d
@@ -431,7 +428,7 @@ country_event = {
 		define_advisor = {
 			type = high_judge_BU
 			name = "Pedro Alvarez de Toledo"
-			culture = castillan
+			culture = castillian
 			skill = 3
 			discount = yes
 		}
@@ -446,7 +443,7 @@ country_event = {
 		define_advisor = {
 			type = army_organiser_BU
 			name = "Pedro Alvarez de Toledo"
-			culture = castillan
+			culture = castillian
 			skill = 3
 			discount = yes
 		}
@@ -637,5 +634,345 @@ country_event = {
 		name = flavor_nap.11.a
 		add_prestige = 10
 		Stab_Add50Percent = yes
+	}
+}
+
+#Death of Naples' heir.
+country_event = {
+	id = flavor_nap.101
+	title = flavor_nap.101.t
+	desc = flavor_nap.101.d
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	#hidden = yes
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			tag = KNP
+			tag = NAP
+		}
+		heir_age = 42
+		has_ruler = "Jeanne"
+		dynasty = "d'Anjou"
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		
+		modifier = {
+			factor = 0.8
+			NOT = { stability = 0 }
+		}
+	}
+	
+	immediate = {
+		kill_heir = { allow_new_heir = no }	
+	}
+	
+	option = {
+		hidden_effect = {
+			country_event = {
+				id = flavor_nap.102
+				days = 300
+			}
+		}
+		name = flavor_nap.101.a
+	}
+}
+
+#Joana's second husband and co-ruler dies forcing Naples to choose between Louis of Anjou(a Valois prince) or Joana's cousin as heir.
+country_event = {
+	id = flavor_nap.102
+	title = flavor_nap.102.t
+	desc = flavor_nap.102.d
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	#hidden = yes
+	#fire_only_once = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = flavor_nap.102.a
+		ai_chance = { factor = 100 }
+		if = {
+			limit = {
+				NOT = { exists = ANJ }
+				exists = FRA
+				FRA = {
+					is_subject = no
+					capetian_dynasty_trigger = yes
+				}
+			}
+			FRA = {
+				set_country_flag = naple_inheritance
+			}
+			define_heir = {
+				name = "Louis"
+				dynasty = "de Valois"
+				birth_date = 1339.7.23
+				claim = 100
+			}
+			set_heir_flag = valois_naples
+		}
+		else_if = {
+			limit = {
+				exists = ANJ
+				ANJ = {
+					NOT = { is_subject_of = ENG }
+				}
+				FRA = {
+					is_subject = no
+					overlord_of = ANJ
+					capetian_dynasty_trigger = yes
+				}
+			}
+			ANJ = {
+				set_country_flag = naple_inheritance
+			}
+			define_heir = {
+				name = "Louis"
+				dynasty = "de Valois"
+				birth_date = 1339.7.23
+				claim = 100
+			}
+			set_heir_flag = valois_naples
+		}
+	}
+	
+	option = {
+		name = flavor_nap.102.b
+		ai_chance = { factor = 0 }
+		define_heir = {
+			name = "Charles"
+			birth_date = 1345.1.1
+			dynasty = "d'Anjou"
+			claim = 100
+		}
+		PRO = {
+			add_liberty_desire = 100
+		}
+	}
+}
+
+country_event = {
+	id = flavor_nap.103
+	title = flavor_nap.103.t
+	desc = flavor_nap.103.d
+	picture = Jeanne_Anjou_Event_Picture
+	
+	#hidden = yes
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	
+	immediate = {
+		if = {
+			limit = {
+				senior_union_with = PRO
+				exists = ANJ
+				ANJ = {
+					NOT = {
+						is_subject_of = ENG
+					}
+					capetian_dynasty_trigger = yes
+				}
+				FRA = {
+					is_subject = no
+				}
+			}
+			ANJ = {
+				inherit = PRO	
+			}
+			if = {
+				limit = { 
+					NIC = {
+						is_subject_of = PRO
+					}
+				}
+				102 = {
+					add_core = ANJ
+					cede_province = ANJ	
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				senior_union_with = PRO
+				NOT = { exists = ANJ }
+				exists = FRA
+				FRA = {
+					is_subject = no
+					capetian_dynasty_trigger = yes
+				}
+			}
+			FRA = {
+				inherit = PRO	
+			}
+			if = {
+				limit = { 
+					NIC = {
+						is_subject_of = PRO
+					}
+				}
+				102 = {
+					add_core = ANJ
+					cede_province = ANJ	
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { exists = PRO }
+				exists = ANJ
+				ANJ = {
+					NOT = {
+						is_subject_of = ENG
+					}
+					capetian_dynasty_trigger = yes
+				}
+				FRA = {
+					is_subject = no
+					exists = yes
+				}
+			}
+			provence_area = {
+				limit = { owned_by = ROOT }
+				add_core = ANJ
+				cede_province = ANJ	
+			}
+			if = {
+				limit = { 
+					NIC = {
+						is_subject_of = ROOT
+					}
+				}
+				102 = {
+					add_core = ANJ
+					cede_province = ANJ	
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { exists = PRO }
+				NOT = { exists = ANJ }
+				exists = FRA
+				FRA = {
+					is_subject = no
+					capetian_dynasty_trigger = yes
+				}
+			}
+			provence_area = {
+				limit = { owned_by = ROOT }
+				add_core = FRA
+				cede_province = FRA	
+			}
+			if = {
+				limit = { 
+					NIC = {
+						is_subject_of = ROOT
+					}
+				}
+				102 = {
+					add_core = ANJ
+					cede_province = ANJ	
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = flavor_nap.103.a
+		ai_chance = { factor = 5 }
+		random_owned_province = {
+			limit = {
+				region = naples_region 
+				NOT = { units_in_province = 1 }
+			}
+			spawn_rebels = {
+				type = pretender_rebels
+				size = 3
+				leader = "Charles d'Anjou"
+			}
+		}
+	}
+	
+	option = {
+		name = flavor_nap.103.b
+		ai_chance = { factor = 95 }
+		define_ruler = {
+			name = "Charles"
+			age = 37
+			#birth_date = 1345.1.1
+			dynasty = "d'Anjou"
+			claim = 100
+		}
+		ANJ = {
+			if = {
+				limit = {
+					exists = NAP
+					exists = ANJ
+					NOT = { is_subject_of = ENG }
+					capetian_dynasty_trigger = yes
+					FRA = {
+						is_subject = no
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 6000
+					target = NAP
+				}
+			}
+			else_if = {
+				limit = {
+					exists = KNP
+					exists = ANJ
+					NOT = { is_subject_of = ENG }
+					capetian_dynasty_trigger = yes
+					FRA = {
+						is_subject = no
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 6000
+					target = KNP
+				}
+			}
+		}
+		FRA = {
+			if = {
+				limit = {
+					exists = NAP
+					NOT = { exists = ANJ }
+					FRA = {
+						is_subject = no
+						capetian_dynasty_trigger = yes
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 600
+					target = NAP
+				}
+			}
+			else_if = {
+				limit = {
+					exists = KNP
+					NOT = { exists = ANJ }
+					FRA = {
+						is_subject = no
+						capetian_dynasty_trigger = yes
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 600
+					target = KNP
+				}
+			}
+		}
 	}
 }
