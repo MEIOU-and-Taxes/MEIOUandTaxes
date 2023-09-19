@@ -552,14 +552,20 @@ Infra_SetMaintHelper = {
             # Tmp_2 = Desired Change Rate in Size %
 			set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
 			subtract_key = { lhs = Tmp_0 which = Prod_S$slot$Spend }
-			set_key = { lhs = Tmp_1 which = Tmp_0 }
-			divide_key = { lhs = Tmp_1 which = Prod_S$slot$Income }
+
+			if = { limit = { is_key_equal = { lhs = Prod_S$slot$Income value = 0 } }
+				set_key = { lhs = Tmp_1 value = 0 }
+			}
+			else = {
+				set_key = { lhs = Tmp_1 which = Tmp_0 }
+				divide_key = { lhs = Tmp_1 which = Prod_S$slot$Income }
+			}
 						
 			if = {
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0.04 } # profit margin >= 4 % --> expand
 				}
-				multiply_key = { lhs = Tmp_1 value = 0.1 }
+				multiply_key = { lhs = Tmp_1 value = 0.2 }
 				set_key = { lhs = Tmp_2 value = 100 }
 				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
 				multiply_key = { lhs = Tmp_2 value = 0.33 }
@@ -575,7 +581,7 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Tmp_1 value = 0 }
 			}
 			else = {  # Profits < 0
-				multiply_key = { lhs = Tmp_1 value = 0.1 }
+				multiply_key = { lhs = Tmp_1 value = 0.2 }
 				set_key = { lhs = Tmp_2 value = 100 }
 				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
 				multiply_key = { lhs = Tmp_2 value = 0.33 }
@@ -587,7 +593,12 @@ Infra_SetMaintHelper = {
 					check_key = { lhs = Tmp_1 value = 0 }
 				}
 			
-				set_key = { lhs = Prod_S$slot$Change value = Tmp_1 } # Desired rate of change
+				if = { 
+					limit = { check_key = { lhs = Tmp_1 value = 0.1 } }
+					set_key = { lhs = Tmp_1 value = 0.1 }
+				}
+
+				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 	
 				change_key = { lhs = Building_$type$Up which = Prod_S$slot$Change }
@@ -599,7 +610,12 @@ Infra_SetMaintHelper = {
                 # On the other hand, Prod_S$slot$Change reflects the specific change desire of absolute units of an specific industry. 
 			}
 			else = { # if Tmp_1 is negative, will want to shrink.
-				set_key = { lhs = Prod_S$slot$Change value = Tmp_1 } # Desired rate of change -> her 
+				if = { 
+					limit = { check_key = { lhs = Tmp_1 value = -0.05 } }
+					set_key = { lhs = Tmp_1 value = -0.05 }
+				}
+
+				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 			
 				subtract_key = { lhs = Building_$type$Down which = Prod_S$slot$Change } # Building_$type$Down represents an abstract value for shrinkage desire.
