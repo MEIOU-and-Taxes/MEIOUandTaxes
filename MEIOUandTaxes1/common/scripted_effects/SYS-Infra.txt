@@ -539,8 +539,6 @@ Infra_SetMaintHelper = {
             has_province_flag = Prod_S$slot$
             has_province_flag = Prod_S$slot$DmndB$type$
         }
-		set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
-		subtract_key = { lhs = Tmp_0 which = Prod_S$slot$SpendPrev }
 		
 		if = {
 			limit = {
@@ -548,111 +546,65 @@ Infra_SetMaintHelper = {
 					has_global_flag = POP_Sim1
 				}
 			}
-			set_key = { lhs = Tmp_1 which = Tmp_0 }
-			subtract_key = { lhs = Tmp_1 which = Prod_S$slot$RecProfit }
-            
-            set_key = { lhs = Tmp_2 which = Prod_S$slot$RecSizePrev }
-			subtract_key = { lhs = Tmp_2 which = Prod_S$slot$RecSizePrevPrev }
-            
+
             # Tmp_0 = Current Profit
-            # Tmp_1 = Current Profit - Previous Profit * throughtput scaled by 1
-            # Tmp_2 = Size of previous year - Size of previous previous year). This is a measure of previous year changes.
-            
-            if = {
-				limit = {
-					check_key = { lhs = Tmp_2 value = 0 }
-				}
-				change_key = { lhs = Tmp_2 value = 0.01 }
-			}
-            else = {
-				change_key = { lhs = Tmp_2 value = -0.01 }
-			}
-			# (Current Profit - Previous Profit) / (Size change). 
-			# If either of them are negative, industry won't expand, because it either means profitability is decreasing while size increasing, meaning you want
-			# to shrink more to acquire more profitability, or profitability is increasing while size decreasing, meaning you shrinking looks like a good idea.
-			# If both are negative it means profit is decreasing when size decreasing, meaning you want to increase size to see if that changes.	
-			
-        	# if = {
-			#  	limit = {
-			#  		check_key = { lhs = Tmp_1 value = 0 }
-			#  	}
-			# 	multiply_key = { lhs = Tmp_1 value = 1.25 } #HERE. MAKE THIS MULTIPLICATION ONLY IF TMP_1 IS POSITIVE
-			# }
-			#multiply_key = { lhs = Tmp_2 value = 5 }
-			divide_key = { lhs = Tmp_1 which = Tmp_2 } 
-			
+            # Tmp_1 = Current Profit Margin
+            # Tmp_2 = Desired Change Rate in Size %
+			set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
+			subtract_key = { lhs = Tmp_0 which = Prod_S$slot$Spend }
+			set_key = { lhs = Tmp_1 which = Tmp_0 }
+			divide_key = { lhs = Tmp_1 which = Prod_S$slot$Income }
+						
 			if = {
 				limit = {
-					check_key = { lhs = Tmp_1 value = 0 } # If the division was positive
+					check_key = { lhs = Tmp_1 value = 0.04 } # profit margin >= 4 % --> expand
 				}
-				set_key = { lhs = Tmp_2 which = Tmp_1 }
-				change_key = { lhs = Tmp_2 value = 1 }
-				
-				multiply_key = { lhs = Tmp_1 value = 6 }
-				divide_key = { lhs = Tmp_1 which = Tmp_2 } # Tmp_1 will be positive, maximum value is 3.
+				multiply_key = { lhs = Tmp_1 value = 0.1 }
+				set_key = { lhs = Tmp_2 value = 100 }
+				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
+				multiply_key = { lhs = Tmp_2 value = 0.33 }
+				multiply_key = { lhs = Tmp_1 which = Tmp_2 }
 			}
-			else = {                                       # Else if the division was negative
-				set_key = { lhs = Tmp_2 which = Tmp_1 }
-				change_key = { lhs = Tmp_2 value = -1 }
-				
-				multiply_key = { lhs = Tmp_1 value = -6 }
-				divide_key = { lhs = Tmp_1 which = Tmp_2 } # Tmp_1 will come negative, minimum value is -3
+			else_if = {
+				limit = {
+					NOT = { check_key = { lhs = Tmp_1 value = 0.04 } } # profit margin < 4 %
+					check_key = { lhs = Tmp_0 value = 0.00 } # Profits > 0
+				}
+
+				# NO CHANGE IN SIZE
+				set_key = { lhs = Tmp_1 value = 0 }
+			}
+			else = {  # Profits < 0
+				multiply_key = { lhs = Tmp_1 value = 0.1 }
+				set_key = { lhs = Tmp_2 value = 100 }
+				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
+				multiply_key = { lhs = Tmp_2 value = 0.33 }
+				multiply_key = { lhs = Tmp_1 which = Tmp_2 }
 			}
 						
 			if = { # If tmp_1 is positive, building will want to expand.
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0 }
 				}
-				change_key = { lhs = Tmp_1 value = 0.5 }
-				
-				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 }
-				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size }
-				multiply_key = { lhs = Prod_S$slot$Change value = 0.01 }
-
-				#if = { # Limit expansion based on Size. Normalize to 0.20 and 0.99 from 500 to 100 size or higher. At 500 size max expansion get's reduced by 80%
-				#	limit = {
-				#		check_key = { lhs = Prod_S$slot$Size value = 100 }
-				#	}
-				#	set_key = { lhs = Public_Tmp0 which = Prod_S$slot$Size }
-				#	if = {
-				#		limit = {
-				#			check_key = { lhs = Public_Tmp0 value = 500 }
-				#		}
-				#		set_key = { lhs = Public_Tmp0 value = 500 }
-				#	}
-				#	change_key = { lhs = Public_Tmp0 value = -500 }
-				#	multiply_key = { lhs = Public_Tmp0 value = -0.002 }
-				#	change_key = { lhs = Public_Tmp0 value = 0.19 }
-				#	multiply_key = { lhs = Prod_S$slot$Change which = Public_Tmp0 }
-				#}
-				
+			
+				set_key = { lhs = Prod_S$slot$Change value = Tmp_1 } # Desired rate of change
+				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
+	
 				change_key = { lhs = Building_$type$Up which = Prod_S$slot$Change }
                 
-                # Building_$type$Up represents an absolute amount of units that want to be expanded in the industry. This value is maximum 3.5% of it's total size.
+                # Building_$type$Up represents an absolute amount of units that want to be expanded in the industry.
                 # according to all the desirable changes of the industries (either expansion or shrinking) belonging to that same Property.
                 # Example: If farmlands has 4 industries and 2 of them want to grow, Farmlands will have 2 industries that provide a Building_$type$Up 
                 # and 2 of them that provide a Building_$type$Down value. 
                 # On the other hand, Prod_S$slot$Change reflects the specific change desire of absolute units of an specific industry. 
 			}
 			else = { # if Tmp_1 is negative, will want to shrink.
-				change_key = { lhs = Tmp_1 value = -0.5 }
-				
-				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 }
-				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size }
-				
-				multiply_key = { lhs = Tmp_1 value = -1 }
-				change_key = { lhs = Tmp_1 value = 100 }
-				divide_key = { lhs = Prod_S$slot$Change which = Tmp_1 }
-				
+				set_key = { lhs = Prod_S$slot$Change value = Tmp_1 } # Desired rate of change -> her 
+				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
+			
 				subtract_key = { lhs = Building_$type$Down which = Prod_S$slot$Change } # Building_$type$Down represents an abstract value for shrinkage desire.
 			}
 		}
-		
-		set_key = { lhs = Prod_S$slot$RecProfit which = Tmp_0 }
-		
-		set_key = { lhs = Prod_S$slot$RecSizePrevPrev which = Prod_S$slot$RecSizePrev }
-		set_key = { lhs = Prod_S$slot$RecSizePrev which = Prod_S$slot$RecSize }
-		set_key = { lhs = Prod_S$slot$RecSize which = Prod_S$slot$Size }
     }
 }
 
