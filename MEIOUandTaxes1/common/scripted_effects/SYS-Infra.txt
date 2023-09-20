@@ -573,8 +573,8 @@ Infra_SetMaintHelper = {
 				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
 				#Divide the result by 3
 				multiply_key = { lhs = Tmp_2 value = 0.33 }
-				#Multiply profit margin by the result. 
-				multiply_key = { lhs = Tmp_1 which = Tmp_2 }
+
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
 			}
 			else_if = {
 				limit = {
@@ -595,8 +595,9 @@ Infra_SetMaintHelper = {
 				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
 				#Divide the result by 3
 				multiply_key = { lhs = Tmp_2 value = 0.33 }
-				#Multiply profit margin by the result. 
-				multiply_key = { lhs = Tmp_1 which = Tmp_2 }
+
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
+				divide_key = { lhs = Tmp_1 value = 2 } ## Balance factor to make shrinkage slower then expansion
 			}
 						
 			if = { # If Tmp_1 is positive, building will want to expand.
@@ -604,9 +605,9 @@ Infra_SetMaintHelper = {
 					check_key = { lhs = Tmp_1 value = 0 }
 				}
 			
-				if = {	#Set maximum of 10% expansion
-					limit = { check_key = { lhs = Tmp_1 value = 0.1 } }
-					set_key = { lhs = Tmp_1 value = 0.1 }
+				if = { # if desired change rate > 200% limit it to 200%
+					limit = { check_key = { lhs = Tmp_1 value = 2.0 } }
+					set_key = { lhs = Tmp_1 value = 2.0 }
 				}
 
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change
@@ -621,9 +622,9 @@ Infra_SetMaintHelper = {
                 # On the other hand, Prod_S$slot$Change reflects the specific change desire of absolute units of an specific industry. 
 			}
 			else = { # if Tmp_1 is negative, will want to shrink.
-				if = { 		#Set maximum shrinkage of 5%
-					limit = { check_key = { lhs = Tmp_1 value = -0.05 } }
-					set_key = { lhs = Tmp_1 value = -0.05 }
+				if = { # if desired shrink rate lower than -25% limit it
+					limit = { check_key = { lhs = Tmp_1 value = -0.25 } }
+					set_key = { lhs = Tmp_1 value = -0.25 }
 				}
 
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
