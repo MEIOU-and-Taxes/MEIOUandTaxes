@@ -552,6 +552,25 @@ Infra_SetMaintHelper = {
             # Tmp_2 = Desired Change Rate in Size %
 			set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
 			subtract_key = { lhs = Tmp_0 which = Prod_S$slot$Spend }
+			if = { # If Tmp_0 is positive, Add a throughput factor
+				limit = {
+					check_key = { lhs = Tmp_0 value = 0 }
+				}
+				### Add a throughput factor
+				set_key = { lhs = Tmp_3 which = Prod_S$slot$SizeCur }
+				divide_key = { lhs = Tmp_3 which = Prod_S$slot$Size }
+				subtract_key = { lhs = Tmp_3 value = 0.666 }
+				multiply_key = { lhs = Tmp_3 value = 3 } ### at around 82% it will be 50% of profit seen
+				if = {
+					limit = {
+						NOT = { check_key = { lhs = Tmp_3 value = 0.01 } } # dont expand below 66% throughput
+					}
+					set_key = { lhs = Tmp_3 value = 0 }	
+				}
+				multiply_key = { lhs = Tmp_0 which = Tmp_3 }
+				set_key = { lhs = Tmp_3 value = 0 }	
+			}
+			
 
 			if = { limit = { is_key_equal = { lhs = Prod_S$slot$Income value = 0 } }
 				set_key = { lhs = Tmp_1 value = 0 }
@@ -609,7 +628,13 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
-				change_key = { lhs = Building_$type$Up which = Prod_S$slot$Change }
+				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
+				multiply_key = { lhs = Tmp_2 value = 0.1 }
+				if = { # slower changes in sim
+					limit = { has_global_flag = POP_Sim }
+					multiply_key = { lhs = Tmp_2 value = 0.5 }
+				}
+				change_key = { lhs = Building_$type$Up which = Tmp_2 }
                 
                 # Building_$type$Up represents an absolute amount of units that want to be expanded in the industry.
                 # according to all the desirable changes of the industries (either expansion or shrinking) belonging to that same Property.
@@ -626,7 +651,13 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
-				subtract_key = { lhs = Building_$type$Down which = Prod_S$slot$Change } # Building_$type$Down represents an abstract value for shrinkage desire.
+				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
+				multiply_key = { lhs = Tmp_2 value = 0.1 }
+				if = { # slower changes in sim
+					limit = { has_global_flag = POP_Sim }
+					multiply_key = { lhs = Tmp_2 value = 0.5 }
+				}
+				subtract_key = { lhs = Building_$type$Down which = Tmp_2 } # Building_$type$Down represents an abstract value for shrinkage desire.
 			}
 		}
     }
@@ -679,13 +710,37 @@ Infra_SetMaint = {
         Infra_SetMaintHelper = { type = $type$ slot = 13 }
         Infra_SetMaintHelper = { type = $type$ slot = 14 }
         Infra_SetMaintHelper = { type = $type$ slot = 15 }
-
+		[[max]
+        if = {
+            limit = {
+				check_key = { lhs = Building_$type$Up value = 0.001 }
+				always = $max$
+            }
+			set_key = { lhs = Tmp_3 which = Building_$type$Max }
+			subtract_key = { lhs = Tmp_3 which = Building_$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Building_$type$Up which = Tmp_3 }
+					check_key = { lhs = Tmp_3 value = 0.001 }
+				}
+				set_key = { lhs = Building_$type$Up which = Tmp_3 }
+			}
+		}
+		]
+		set_key = { lhs = Tmp_3 which = Building_$type$ }
+		subtract_key = { lhs = Tmp_3 which = Building_$type$Down }
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+			}
+			change_key = { lhs = Building_$type$Down which = Tmp_3 }
+		}
         set_key = { lhs = Tmp_0 which = Building_$type$ }
         multiply_key = { lhs = Tmp_0 value = $rate$ }
 
         set_key = { lhs = Tmp_1 which = Building_$type$Up }
         subtract_key = { lhs = Tmp_1 which = Building_$type$Down }
-        divide_key = { lhs = Tmp_1 value = $factor$ }
+        multiply_key = { lhs = Tmp_1 value = $factor$ }
         change_key = { lhs = Tmp_0 which = Tmp_1 } # expansion or shrinkage
 
         if = {
@@ -1464,17 +1519,16 @@ Infra_DoSpend = {
 			
 			multiply_key = { lhs = Tmp_7 which = Tmp_8 }
 			
-			#if = { # calc % of wealth of each.
-			#	limit = {
-			#		check_key = { lhs = Tmp_7 value = 0.01 }
-			#	}
-			#	# F = (SUM / (1-BUWealth)) - SUM
-			#	set_key = { lhs = Tmp_8 value = 1 }
-			#	subtract_key = { lhs = Tmp_8 which = Tmp_7 }
-			#	set_key = { lhs = Tmp_7 which = Tmp_0 }
-			#	divide_key = { lhs = Tmp_7 which = Tmp_8 }
-			#	subtract_key = { lhs = Tmp_7 which = Tmp_0 }				
-			#}
+			if = { # calc % of wealth of each.
+				limit = {
+					check_key = { lhs = Tmp_7 value = 0.01 }
+				}
+				set_key = { lhs = Tmp_8 value = 1 }
+				subtract_key = { lhs = Tmp_8 which = Tmp_7 }
+				set_key = { lhs = Tmp_7 which = Tmp_0 }
+				divide_key = { lhs = Tmp_7 which = Tmp_8 }
+				subtract_key = { lhs = Tmp_7 which = Tmp_0 }
+			}
 			
 			change_key = { lhs = Tmp_0 which = Tmp_7 }
 			
