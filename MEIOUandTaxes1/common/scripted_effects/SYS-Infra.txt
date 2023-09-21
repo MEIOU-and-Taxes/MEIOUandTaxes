@@ -539,6 +539,45 @@ Infra_SetMaintHelper = {
             has_province_flag = Prod_S$slot$
             has_province_flag = Prod_S$slot$DmndB$type$
         }
+
+		# Labor vars
+		set_key = { lhs = Tmp_4 value = 0 } ## Rural
+		set_key = { lhs = Tmp_5 value = 0 } ## Urban
+		set_key = { lhs = Tmp_6 value = 0 } ## Nomad
+		set_key = { lhs = Tmp_7 value = 0 } ## Literati
+		set_key = { lhs = Tmp_8 value = 0 } ## Clergy
+		### First sum labor into designated pools
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndR value = 0.001 }
+			}
+			change_key = { lhs = Tmp_4 which = Prod_S$slot$DmndR } ## Rural
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndUL value = 0.001 }
+			}
+			change_key = { lhs = Tmp_5 which = Prod_S$slot$DmndUL } ## Urban
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndNM value = 0.001 }
+			}
+			change_key = { lhs = Tmp_6 which = Prod_S$slot$DmndNM } ## Nomad
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndLT value = 0.001 }
+			}
+			change_key = { lhs = Tmp_7 which = Prod_S$slot$DmndLT } ## Literati
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndCL value = 0.001 }
+			}
+			change_key = { lhs = Tmp_8 which = Prod_S$slot$DmndCL } ## Clergy
+		}
+
 		
 		if = {
 			limit = {
@@ -683,6 +722,26 @@ heuristicHelper = {
         }
     }
 }
+Infra_SetMaintLaborHelper = {
+	if = {
+		limit = {
+			check_key = { lhs = $laborVar$ value = 0.1 }
+			NOT = { check_key = { lhs = Prod_Fill$labor$ value = 100 } }
+		}
+		set_key = { lhs = Tmp_2 which = $laborVar$ }
+		divide_key = { lhs = Tmp_2 which = Tmp_9 }
+
+		set_key = { lhs = Tmp_1 which = Building_$type$ }
+		multiply_key = { lhs = Tmp_1 which = Tmp_2 } ## share of labor for this property
+		set_key = { lhs = Tmp_3 which = Prod_Fill$labor$ } ## 100 scale
+		multiply_key = { lhs = Tmp_3 value = 0.01 }
+		multiply_key = { lhs = Tmp_3 which = Tmp_1 }
+		
+		set_key = { lhs = Building_$type$Down which = Tmp_1 }
+		subtract_key = { lhs = Building_$type$Down which = Tmp_3 } ## this is now buildings that are beyond labor capacity
+		multiply_key = { lhs = Building_$type$Down value = 0.25 } # Reduce 25% of the labor shortage per iter
+	}
+}
 
 Infra_SetMaint = {
     set_key = { lhs = Building_$type$Up value = 0 }   # property expansion desire
@@ -695,6 +754,14 @@ Infra_SetMaint = {
 		limit = {
 			check_key = { lhs = Building_$type$ value = 0.01 }
 		}
+
+		# Labor vars
+		set_key = { lhs = Tmp_4 value = 0 } ## Rural
+		set_key = { lhs = Tmp_5 value = 0 } ## Urban
+		set_key = { lhs = Tmp_6 value = 0 } ## Nomad
+		set_key = { lhs = Tmp_7 value = 0 } ## Literati
+		set_key = { lhs = Tmp_8 value = 0 } ## Clergy
+
         Infra_SetMaintHelper = { type = $type$ slot = 0 } # calculate profitability of every slot. Industry heuristic logic.
         Infra_SetMaintHelper = { type = $type$ slot = 1 }  
         Infra_SetMaintHelper = { type = $type$ slot = 2 }
@@ -711,6 +778,23 @@ Infra_SetMaint = {
         Infra_SetMaintHelper = { type = $type$ slot = 13 }
         Infra_SetMaintHelper = { type = $type$ slot = 14 }
         Infra_SetMaintHelper = { type = $type$ slot = 15 }
+
+		# First we need to see if theres a labor shortage, if so we're going to generally shrink this property as a counterforce
+
+		# Sum our labor
+		set_key = { lhs = Tmp_9 which = Tmp_4 } ## Rural
+		change_key = { lhs = Tmp_9 which = Tmp_5 } ## Urban
+		change_key = { lhs = Tmp_9 which = Tmp_6 } ## Nomad
+		change_key = { lhs = Tmp_9 which = Tmp_7 } ## Literati
+		change_key = { lhs = Tmp_9 which = Tmp_8 } ## Clergy
+
+		# Apply a BuildingDown of 15% of the labor shortage of each type based on their share of total labor demanded
+        Infra_SetMaintLaborHelper = { type = $type$ labor=R laborVar=Tmp_4 }
+        Infra_SetMaintLaborHelper = { type = $type$ labor=UL laborVar=Tmp_5 }
+        Infra_SetMaintLaborHelper = { type = $type$ labor=NM laborVar=Tmp_6 }
+        Infra_SetMaintLaborHelper = { type = $type$ labor=LT laborVar=Tmp_7 }
+        Infra_SetMaintLaborHelper = { type = $type$ labor=CL laborVar=Tmp_8 }
+
 		[[max]
         if = {
             limit = {
