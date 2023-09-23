@@ -286,7 +286,7 @@ country_event = {
 				NOT = { stability = 0 }
 			}
 		}
-		Stab_Subtract50Percent = yes
+		Stab_Subtract25Percent = yes
 		event_target:uppity_artisans_province = {
 			spawn_rebels = {
 			    type = mob_rebels
@@ -364,7 +364,7 @@ country_event = {
 			is_overseas = no
 			is_capital = no
 		}
-		NOT = { Rights_NOGov6Has = yes }
+		NOT = { Rights_NOTen4Has = yes }
 	    NOT = { stability = 3 }
 	}
 
@@ -460,6 +460,7 @@ country_event = {
 			}
 		}
 		NO_ProtectSerfs = yes
+		custom_tooltip = NO_ProtectSerfs_effect
 		add_adm_power = -25
 		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-10 }
 	}
@@ -1096,6 +1097,87 @@ country_event = {
 	}		
 }
 
+### NOBLE FAMILIES FEUD
+country_event = {
+	id = 5063
+	title = "EVTNAME5063"
+	desc = "EVTDESC5063"
+	picture = COURT_eventPicture
+	goto = province_in_question
+
+	trigger = {
+		government = monarchy
+		NOT = { stability = 0 }
+		Privilege_HasGreater = { Privilege=NOHierarchy Lvl=1 }
+		any_owned_province = {
+			is_city = yes
+			is_capital = no
+			local_autonomy = 50
+			check_key = { lhs = Prov_NOPow value = 70 }
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					is_city = yes
+			        is_capital = no
+					local_autonomy = 50
+			        check_key = { lhs = Prov_NOPow value = 70 }
+				}
+				save_event_target_as = province_in_question
+			}
+		}
+	}
+
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
+
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	option = {
+		name = "EVTOPTA5063"		# Side with one family
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0
+				is_at_war = yes
+			}
+		}
+		event_target:province_in_question = {
+			spawn_rebels = {
+			    type = warlord_rebels
+			    size = 1
+		    }
+		}
+	}
+	option = {
+		name = "EVTOPTB5063"		# Let them fight it out.
+		trigger = { num_of_cities = 2 }
+		ai_chance = { factor = 50 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		event_target:province_in_question = {
+			add_local_autonomy = 20
+		}
+	}
+	option = {
+		name = "EVTOPTC5063"		# Try to settle the issue.
+		highlight = yes
+		trigger = {
+		    OR = {
+			    ruler_has_personality = charismatic_negotiator_personality
+				ruler_has_personality = fierce_negotiator
+				full_idea_group = aristocracy_ideas
+			}
+		}
+		ai_chance = { factor = 100 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+		add_dip_power = -25
+	}
+}
+
 ### NOBLES ALLY WITH FOREIGN POWER
 country_event = {
 	id = 5064
@@ -1103,11 +1185,11 @@ country_event = {
 	desc = "EVTDESC5064"
 	picture = DIPLOMACY_eventPicture
 
-	is_triggered_only = yes
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
 
 	trigger = {
 		NOT = { check_key = { lhs = Prov_NOLoy value = 40 } }
-		check_key = { lhs = Prov_NOPow value = 40 }
+		check_key = { lhs = Prov_NOPow value = 50 }
 		any_neighbor_country = {
 			NOT = { is_subject_of = root }
 			NOT = { alliance_with = root }
@@ -1177,6 +1259,279 @@ country_event = {
 	}
 }
 
+### NOBLES DEMAND INCREASED PENSIONS
+country_event = {
+	id = 5071
+	title = "EVTNAME5071"
+	desc = "EVTDESC5071"
+	picture = ECONOMY_eventPicture
+
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
+
+	trigger = {
+		government = monarchy
+        Privilege_HasGreater = { Privilege=NOTitles Lvl=2 }
+		check_key = { lhs = Prov_NOPow value = 50 }
+	}
+
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	option = {
+		name = "EVTOPTA5071"		# Accept their demands.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 50 }
+			}
+		}
+		add_treasury = -50
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		capital_scope = {
+			Public_ChangeClassWealthVal = { class=NO type=value inp=50 }
+		}
+	}
+	option = {
+		name = "EVTOPTB5071"		# Refuse their demands.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_NOLoy value = 75 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+	}
+	option = {
+		name = "personality_options.5071.a"		# Negotiate a better deal
+		highlight = yes
+		trigger = {
+		    OR = {
+			    ruler_has_personality = charismatic_negotiator_personality
+				ruler_has_personality = fierce_negotiator
+				full_idea_group = aristocracy_ideas
+			}
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 25 }
+			}
+		}
+		add_treasury = -25
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		capital_scope = {
+			Public_ChangeClassWealthVal = { class=NO type=value inp=25 }
+		}
+	}
+}
+
+### ITALIAN ENGINEER AVAILABLE
+country_event = {
+	id = 5083
+	title = "EVTNAME5083"
+	desc = "EVTDESC5083"
+	picture = ADVISOR_eventPicture
+	goto = italian_engineer_province
+
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
+
+	trigger = {
+		capital_scope = { continent = europe }
+		NOT = { mil_tech = 45 }
+		NOT = { culture_group = latin }
+		any_province = {
+			culture_group = latin
+			owner = { culture_group = latin }
+			has_discovered = ROOT
+			check_key = { lhs = Class_Urban value = 5 }
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+		    random_province = {
+			    limit = {
+				    culture_group = latin
+					owner = { culture_group = latin }
+			        has_discovered = ROOT
+			        check_key = { lhs = Class_Urban value = 5 }
+				}
+				save_event_target_as = italian_engineer_province
+				ROOT = {
+					set_saved_name = {
+						key = italian_engineer
+						type = advisor
+						scope = PREV
+					}
+				}
+			}
+		}
+	}
+	after = {
+		clear_saved_name = italian_engineer
+	}
+
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	option = {
+		name = "EVTOPTA5083"		# Hire the engineer
+		ai_chance = {
+			factor = 75
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 25 }
+			}
+		}
+		add_treasury = -25
+		define_advisor = {
+			type = fortification_expert_BU
+			name = italian_engineer
+			culture = event_target:italian_engineer_province
+			religion = event_target:italian_engineer_province
+			skill = 2
+			discount = yes
+		}
+		event_target:italian_engineer_province = {
+			Public_ChangeClassWealthVal = { class=RE type=value inp=25 }
+		}
+	}
+	option = {
+		name = "EVTOPTB5083"		# Decline the offer
+		ai_chance = { factor = 25 }
+		add_prestige = -5
+	}
+	option = {
+		name = "personality_options.5083.a"		# Renegotiate his price
+		highlight = yes
+		trigger = {
+			OR = {
+			    ruler_has_personality = charismatic_negotiator_personality
+				ruler_has_personality = fierce_negotiator
+			}
+		}
+		add_treasury = -15
+		define_advisor = {
+			type = fortification_expert
+			name = italian_engineer
+			culture = event_target:italian_engineer_province
+			religion = event_target:italian_engineer_province
+			skill = 2
+			discount = yes
+		}
+		event_target:italian_engineer_province = {
+			Public_ChangeClassWealthVal = { class=RE type=value inp=15 }
+		}
+	}
+}
+
+### PETITION FOR REDRESS
+country_event = {
+	id = 5089
+	title = "EVTNAME5089"
+	desc = "EVTDESC5089"
+	picture = COURT_eventPicture
+	goto = uppity_peasants_province
+
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
+
+	trigger = {
+		any_owned_province = {
+		    NOT = { check_key = { lhs = Concern_WelfareTreatR value = 0 } }
+			is_overseas = no
+			is_capital = no
+		}
+		NOT = { Rights_NOTen4Has = yes }
+		NOT = { has_country_modifier = NO_ProtectSerfs_S }
+		NOT = { has_country_modifier = NO_ProtectSerfs_M }
+		NOT = { has_country_modifier = NO_ProtectSerfs_L }
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					NOT = { check_key = { lhs = Concern_WelfareTreatR value = 0 } }
+			        is_overseas = no
+			        is_capital = no
+				}
+				save_event_target_as = uppity_peasants_province
+			}
+		}
+	}
+
+	option = {
+		name = "EVTOPTA5089"		# Accept petition
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_NOLoy value = 75 }
+			}
+			modifier = {
+				factor = 2.0
+				is_at_war = yes
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		NO_ProtectSerfs = yes
+		custom_tooltip = NO_ProtectSerfs_effect
+	}
+	option = {
+		name = "EVTOPTB5089"		# Deny petition
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		if = {
+		    limit = {
+			    NOT = { has_country_modifier = NO_Serfs_S }
+			    NOT = { has_country_modifier = NO_Serfs_M }
+			    NOT = { has_country_modifier = NO_Serfs_L }
+			}
+			NO_Serfs = yes
+		}
+		event_target:uppity_peasants_province = {
+			spawn_rebels = {
+			    type = mob_rebels
+			    size = 1
+		    }
+		}
+	}
+}
+
 ### COURT PAINTER AVAILABLE
 country_event = {
 	id = 6012
@@ -1185,7 +1540,7 @@ country_event = {
 	picture = PAINTER_ARTIST_eventPicture
 	goto = home_of_painter
 
-	is_triggered_only = yes
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
 
 	trigger = {
 		capital_scope = { continent = europe }
@@ -2046,17 +2401,17 @@ country_event = {
 			factor = 50
 			modifier = {
 				factor = 0.1
-				NOT = { treasury = 25 }
+				NOT = { treasury = 40 }
 			}
 		}
-		add_treasury = -25
+		add_treasury = -40
 		add_prestige = 10
 		event_target:renaissance_province = {
 			add_institution_embracement = {
 				which = Casual_Literacy
 				value = 10
 			}
-			Public_ChangeClassWealthVal = { class=RE type=value inp=50 }
+			Public_ChangeClassWealthVal = { class=RE type=value inp=40 }
 		}
 	}
 	option = {
@@ -2074,17 +2429,55 @@ country_event = {
 			factor = 100
 			modifier = {
 				factor = 0.1
-				NOT = { treasury = 25 }
+				NOT = { treasury = 20 }
 			}
 		}
-		add_treasury = -25
+		add_treasury = -20
 		add_prestige = 10
 		event_target:renaissance_province = {
 			add_institution_embracement = {
 				which = Casual_Literacy
 				value = 20
 			}
-			Public_ChangeClassWealthVal = { class=RE type=value inp=50 }
+			Public_ChangeClassWealthVal = { class=RE type=value inp=20 }
 		}
+	}
+}
+
+### MUSKET OR BOW
+country_event = {
+	id = random_event.15
+	title = "random_event.EVTNAME15"
+	desc = "random_event.EVTDESC15"
+	picture = MILITARY_CAMP_eventPicture
+	
+	is_triggered_only = yes #on_four_year_pulse_4 on_action
+	
+	trigger = {
+	    NOT = { government = tribal }
+		mil_tech = 22 #Hand cannons
+		NOT = { mil_tech = 32 } #Wheellock muskets
+		NOT = { has_country_modifier = archery_muskets }
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = "random_event.EVTOPTA15"
+		add_country_modifier = {
+			name = archery_muskets
+			duration = 3650 #10 years
+		}
+	}
+	option = {
+		name = "random_event.EVTOPTB15"
+		add_army_tradition = -20
+	}
+	option = {
+		name = "personality_options.random.15.a"
+		highlight = yes
+		trigger = { ruler_has_personality_ancestor = { key = bold_fighter } }
 	}
 }
