@@ -1110,7 +1110,7 @@ TN_SpreadStockpile = {
 			# Desired stockpile size is capped by total commerce production
             set_key = { lhs = Public_Tmp1 which = TN_SectorSply51 }
             change_key = { lhs = Public_Tmp1 value = 1 }
-            multiply_key = { lhs = Public_Tmp1 value = 20 } # Stockpile size
+            multiply_key = { lhs = Public_Tmp1 value = 80 } # Stockpile size
             multiply_key = { lhs = Public_Tmp1 which = Modi_StockpileSize } # Stockpile size modi
             
             # Edit for new produce
@@ -2515,7 +2515,7 @@ TN_SetPrcFill = {
             change_key = { lhs = Public_Tmp0 value = 1 }
             divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 
-            multiply_key = { lhs = Public_Tmp1 value = 6 } # Fluctuation factor
+            multiply_key = { lhs = Public_Tmp1 value = 8 } # Fluctuation factor
             #[[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
             [[fluctuationFactor] multiply_key = { lhs = Public_Tmp1 value = $fluctuationFactor$ } ]
 
@@ -2534,7 +2534,7 @@ TN_SetPrcFill = {
             change_key = { lhs = Public_Tmp0 value = 3 }
             divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 
-            multiply_key = { lhs = Public_Tmp1 value = 6 } # Fluctuation factor
+            multiply_key = { lhs = Public_Tmp1 value = 8 } # Fluctuation factor
             #[[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
             [[fluctuationFactor] multiply_key = { lhs = Public_Tmp1 value = $fluctuationFactor$ } ]
 
@@ -3627,7 +3627,7 @@ TN_DoTradeByAmountExport = {
 				
 				set_key = { lhs = Public_Tmp7 which = $amount$ }
 				multiply_key = { lhs = Public_Tmp7 which = Public_Tmp0 }
-				multiply_key = { lhs = Public_Tmp7 value = 0.02 }
+				multiply_key = { lhs = Public_Tmp7 value = 0.02 } # 2% of generated worth trade is distributed between the sectors that were 'jumped' for the transaction to happen
 				
 				if = {
 					limit = {
@@ -3840,7 +3840,15 @@ TN_SetTradeIncomeHelper = {
         set_key = { lhs = Public_Tmp1 which = TN_SectorTrade } # TN_SectorTrade = Normalized Value per 1 commerce supply
         multiply_key = { lhs = Public_Tmp1 which = Prod_S$slot$Sply51 } #commerce output - multiply TN_SectorTrade with commerce sipply
 
-        change_key = { lhs = Prod_S$slot$IncomeProd which = Public_Tmp1 } # change income of slot by trade income
+        if = {
+            limit = {
+                check_key = { lhs = TN_SectorTrade value = 0 }
+            }
+            change_key = { lhs = Prod_S$slot$IncomeProd which  = Public_Tmp1 } # change income of slot by trade income
+        }
+        else = {
+            subtract_key = { lhs = Prod_S$slot$SpendProd which = Public_Tmp1 } # change spend of slot by trade income, neg multiply it
+        }
         change_key = { lhs = Prod_S$slot$SplyC51 which = Public_Tmp1 } # not sure what this does?
     }
 }
@@ -4388,10 +4396,11 @@ TN_SetIncome = {
     change_key = { lhs = Infra_Wealth which = Infra_StateSpend }
     subtract_key = { lhs = Infra_Wealth which = Infra_Spend }
 
-    # Reduce wealth by 0.99999
+    # Reduce wealth by 0.998999
     if = {
         limit = {
             has_global_flag = POP_Sim
+            NOT = { has_global_flag = POP_Sim4 }
         }
         multiply_key = { lhs = SF_Wealth value = 0.999 }
         multiply_key = { lhs = NM_Wealth value = 0.999 }
@@ -4671,6 +4680,12 @@ TN_SetIncomeInnateHelperMain = {
             multiply_key = { lhs = $class$_IncomeInnate value = $val2$ }
         }
     }
+	if = {
+		limit = {
+			has_global_flag = POP_Sim
+		}
+        multiply_key = { lhs = $class$_IncomeInnate value = 0.5 } ## balancing
+    }
 }
 TN_SetIncomeInnateHelper = {
     set_key = { lhs = $class$_IncomeInnate which = $class$_Total }
@@ -4682,9 +4697,9 @@ TN_SetIncomeInnateHelper = {
 # val2 = innate income per 1k pops before threshhold
 # Threshhold = pops in k below which higher innate income is applied
 TN_SetIncomeInnate = {
-    TN_SetIncomeInnateHelperMain = { class = SF val = 0.006 val2 = 0.1 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NM val = 0.008 val2 = 0.1 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = RE val = 0.007 val2 = 0.5 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = SF val = 0.006 val2 = 0.08 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = NM val = 0.007 val2 = 0.08 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = RE val = 0.008 val2 = 0.5 Threshold = 3 }
     TN_SetIncomeInnateHelperMain = { class = NO val = 0.012 val2 = 0.8 Threshold = 0.5 }
     if = {
         limit = {
@@ -4693,28 +4708,6 @@ TN_SetIncomeInnate = {
         set_key = { lhs = BG_IncomeInnate value = 0.5 }
     }
     set_key = { lhs = CL_IncomeInnate value = 0 }
-	if = {
-		limit = {
-			has_global_flag = POP_Sim2
-		}
-		multiply_key = { lhs = SF_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = NM_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = RE_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = NO_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = BG_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = CL_IncomeInnate value = 1.35 }
-	}
-	if = {
-		limit = {
-			has_global_flag = POP_Sim6
-		}
-		multiply_key = { lhs = SF_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = NM_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = RE_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = NO_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = BG_IncomeInnate value = 1.35 }
-		multiply_key = { lhs = CL_IncomeInnate value = 1.35 }
-	}
 }
 
 TN_GetWealthPC = {
@@ -5074,7 +5067,7 @@ TN_UpdateSubsistence = {
         }
         set_key = { lhs = Tmp_1 which = TN_SectorSply51 }
         change_key = { lhs = Tmp_1 value = 1 }
-        multiply_key = { lhs = Tmp_1 value = 20 }
+        multiply_key = { lhs = Tmp_1 value = 80 }
         multiply_key = { lhs = Tmp_1 which = Modi_StockpileSize } # Stockpile size modi
 
         divide_key = { lhs = TN_Subsistence which = Tmp_1 }

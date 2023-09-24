@@ -14,7 +14,7 @@ Prod_DoMain = {
 
             if = {
                 limit = {
-                    NOT = { has_global_flag = POP_Sim6 }
+                    NOT = { has_global_flag = POP_Sim }
                 }
 				Prod_DoCheck = { slot = 0 }
 				Prod_DoCheck = { slot = 1 }
@@ -90,13 +90,32 @@ Prod_DoMain = {
             Prod_SetSply = { slot = 14 }
             Prod_SetSply = { slot = 15 }
 
-            Prod_DoLabor = { type = R class = SF LandCrop = yes infra = yes}
-            Prod_DoLabor = { type = NM class = NM LandCrop = no }
-            Prod_DoLabor = { type = UL class = RE LandCrop = no infra = yes }
-            Prod_DoLabor = { type = NO class = NO LandCrop = no }
-            Prod_DoLabor = { type = BG class = BG LandCrop = no }
-            Prod_DoLabor = { type = CL class = CL LandCrop = no }
-            Prod_DoLabor = { type = LT class = LT LandCrop = no }
+			### Reset vars
+			Prod_LaborClassReset = { class=SF }
+			Prod_LaborClassReset = { class=RE }
+			Prod_LaborClassReset = { class=NM }
+			Prod_LaborClassReset = { class=NO }
+			Prod_LaborClassReset = { class=BG }
+			Prod_LaborClassReset = { class=CL }
+			Prod_LaborClassReset = { class=BU }
+
+            Prod_DoLaborSum = { type = R LandCrop = yes infra = yes }
+            Prod_DoLaborSum = { type = NM LandCrop = no }
+            Prod_DoLaborSum = { type = UL LandCrop = no infra = yes }
+            Prod_DoLaborSum = { type = NO LandCrop = no }
+            Prod_DoLaborSum = { type = BG LandCrop = no }
+            Prod_DoLaborSum = { type = CL LandCrop = no }
+            Prod_DoLaborSum = { type = LT LandCrop = no }
+
+            Prod_DoLaborSpend = yes
+
+            Prod_DoLabor = { type = R class = SF BaseWage=6 WageMax=30 WageMaxMulti=5 infra = yes }
+            Prod_DoLabor = { type = NM class = NM BaseWage=6 WageMax=30 WageMaxMulti=5 }
+            Prod_DoLabor = { type = UL class = RE BaseWage=8 WageMax=40 WageMaxMulti=5 infra = yes }
+            Prod_DoLabor = { type = NO class = NO BaseWage=8 WageMax=40 WageMaxMulti=5 }
+            Prod_DoLabor = { type = BG class = BG BaseWage=8 WageMax=40 WageMaxMulti=5 }
+            Prod_DoLabor = { type = CL class = CL BaseWage=8 WageMax=40 WageMaxMulti=5 }
+            Prod_DoLabor = { type = LT class = LT BaseWage=8 WageMax=40 WageMaxMulti=5 }
 			
 			change_key = { lhs = RE_IncomeAcademicLabor which = LT_IncomeAcademicLabor }
 
@@ -199,13 +218,27 @@ Prod_SetBuildingIncome = {
 					check_key = { lhs = Prod_S$slot$DmndBR value = 0.001 }
 				}
 				# nobles only give 10% of income, not 20%
-				set_key = { lhs = Tmp_0 value = 100 }
-				subtract_key = { lhs = Tmp_0 which = NO_PrpResources }
-				multiply_key = { lhs = Tmp_0 value = 0.001 } # 100->1 scale, plus apply on a 0.1 multiplier
-				change_key = { lhs = Tmp_0 value = 0.1 }
+				set_key = { lhs = Tmp_1 value = 100 }
+				subtract_key = { lhs = Tmp_1 which = NO_PrpResources }
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 100->1 scale, plus apply on a 0.1 multiplier
+
+				set_key = { lhs = Tmp_0 value = 0.1 }
+				multiply_key = { lhs = Tmp_0 which = Tmp_1 } # 100->1 scale, plus apply on a 0.1 multiplier
+
+				set_key = { lhs = Tmp_2 value = 1 }
+				subtract_key = { lhs = Tmp_2 which = Tmp_1 }
+				multiply_key = { lhs = Tmp_2 value = 0.05 }
+				change_key = { lhs = Tmp_0 which = Tmp_2 }
 			}
-			else = {
-				set_key = { lhs = Tmp_0 value = 0.3 }
+			else_if = {
+				limit = {
+					check_key = { lhs = Prod_S$slot$DmndBG value = 0.001 }
+				}
+				# burghers share only 5% of profits, not 20%
+				set_key = { lhs = Tmp_0 value = 0.05 }
+			}
+			else = { # residents need profit sharing
+				set_key = { lhs = Tmp_0 value = 0.15 }
 			}
 			multiply_key = { lhs = Tmp_0 which = Prod_S$slot$SpendPrp }
 			
@@ -850,8 +883,154 @@ Prod_SetSply = {
     }
 }
 
-Prod_DoLabor = {
-    set_key = { lhs = Tmp_0 value = 0 } 
+Prod_DoLaborHelper1 = {
+    if = {
+        limit = {
+            has_province_flag = Prod_S$slot$
+            check_key = { lhs = Prod_S$slot$DmndB$type$ value = 0.001 }
+        }
+		# Load up last year's values
+		set_key = { lhs = Prod_S$slot$DmndF$type$ which = Prod_S$slot$Dmnd$type$ } 
+		set_key = { lhs = Prod_S$slot$DmndL$type$ which = Prod_S$slot$DmndL1$type$ }
+		set_key = { lhs = Prod_S$slot$DmndC$type$ which = Prod_S$slot$DmndC1$type$ }
+		
+        set_key = { lhs = Tmp_1 which = Prod_S$slot$Soph } # Skill reduces labour inputs
+		multiply_key = { lhs = Tmp_1 value = 0.2 }
+        change_key = { lhs = Tmp_1 value = 100 }
+
+        set_key = { lhs = Prod_S$slot$Dmnd$type$ value = 100 }
+        divide_key = { lhs = Prod_S$slot$Dmnd$type$ which = Tmp_1 }
+        if = {
+            limit = {
+				always = $LandCrop$
+                is_key_equal = { lhs = Prod_S$slot$ value = 1 }
+            }
+       		multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Land_CropLabour } # dynamic labor cost from Land System
+			multiply_key = { lhs = Prod_S$slot$Dmnd$type$ value = 0.1 }
+		}
+		else = {
+			multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Prod_S$slot$DmndB$type$ } # labour cost hardcoded from SYS-Prod_Misc
+		}
+        multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Prod_S$slot$Size }
+        set_key = { lhs = Prod_S$slot$DmndL1$type$ which = Prod_S$slot$Dmnd$type$ } # save and store in slot 1
+
+        change_key = { lhs = Class_$type$LaborTotal which = Prod_S$slot$Dmnd$type$ }
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBAgriculture value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp1 which = Prod_S$slot$Dmnd$type$ }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBForestry value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp2 which = Prod_S$slot$Dmnd$type$ }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBExtraction value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp3 which = Prod_S$slot$Dmnd$type$ }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBFishery value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp4 which = Prod_S$slot$Dmnd$type$ }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBIndustrial value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp5 which = Prod_S$slot$Dmnd$type$ }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBCommercial value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp6 which = Prod_S$slot$Dmnd$type$ }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBAcademic value = 0.001 }
+			}
+        	change_key = { lhs = Public_Tmp7 which = Prod_S$slot$Dmnd$type$ }
+		}
+		set_key = { lhs = Prod_S$slot$SpendL value = 0 }
+    }
+}
+
+Prod_DoLaborHelper2 = {
+    if = {
+        limit = {
+            has_province_flag = Prod_S$slot$
+            check_key = { lhs = Prod_S$slot$Dmnd$type$ value = 0.001 }
+        }
+        multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Prod_Fill$type$ }
+		multiply_key = { lhs = Prod_S$slot$Dmnd$type$ value = 0.01 }
+
+        set_key = { lhs = Prod_S$slot$DmndC1$type$ which = Prod_S$slot$Dmnd$type$ }
+        multiply_key = { lhs = Prod_S$slot$DmndC1$type$ which = Class_P$type$ }
+		
+		change_key = { lhs = Prod_S$slot$SpendL which = Prod_S$slot$DmndC1$type$ }
+		
+        change_key = { lhs = Tmp_0 which = Prod_S$slot$DmndC1$type$ }
+    }
+}
+
+Prod_LaborClassReset = {
+	set_key = { lhs = $class$_Labor value = 0 }
+	set_key = { lhs = $class$_LaborCost value = 0 }
+	set_key = { lhs = $class$_LaborFund value = 0 }
+	set_key = { lhs = $class$_RLabor value = 0 }
+	set_key = { lhs = $class$_RLaborFund value = 0 }
+	set_key = { lhs = $class$_ULLabor value = 0 }
+	set_key = { lhs = $class$_ULLaborFund value = 0 }
+	set_key = { lhs = $class$_NMLabor value = 0 }
+	set_key = { lhs = $class$_NMLaborFund value = 0 }
+	set_key = { lhs = $class$_LTLabor value = 0 }
+	set_key = { lhs = $class$_LTLaborFund value = 0 }
+	set_key = { lhs = $class$_BGLabor value = 0 }
+	set_key = { lhs = $class$_BGLaborFund value = 0 }
+	set_key = { lhs = $class$_CLLabor value = 0 }
+	set_key = { lhs = $class$_CLLaborFund value = 0 }
+	set_key = { lhs = $class$_NOLabor value = 0 }
+	set_key = { lhs = $class$_NOLaborFund value = 0 }
+}
+
+Prod_CalcLaborNumHelper1 = {
+	### Sum up how much labor is employed by each property type
+	### Take then Prop Share * Building Labor into each pool of each class
+	### Then take 1/5th of wealth and allocate it amongst the labor types and store it
+    set_key = { lhs = Tmp_0 which = $class$_Prp$building$ }
+    multiply_key = { lhs = Tmp_0 value = 0.01 }
+    multiply_key = { lhs = Tmp_0 which = $TmpVar$ }
+    change_key = { lhs = $class$_$type$Labor which = Tmp_0 }
+    change_key = { lhs = $class$_Labor which = Tmp_0 }
+}
+
+Prod_CalcLaborNum = {
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp1 building=Agriculture }
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp2 building=Forestry }
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp3 building=Extraction }
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp4 building=Fishery }
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp5 building=Industrial }
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp6 building=Commercial }
+	Prod_CalcLaborNumHelper1 = { class=$class$ type=$type$ TmpVar=Public_Tmp7 building=Academic }
+}
+
+Prod_DoLaborSum = {
+    set_key = { lhs = Class_$type$LaborTotal value = 0 }
+    set_key = { lhs = Class_$type$LaborCost value = 0 }
+    set_key = { lhs = Class_$type$LaborFund value = 0 }
+	set_key = { lhs = Public_Tmp1 value = 0 }
+	set_key = { lhs = Public_Tmp2 value = 0 }
+	set_key = { lhs = Public_Tmp3 value = 0 }
+	set_key = { lhs = Public_Tmp4 value = 0 }
+	set_key = { lhs = Public_Tmp5 value = 0 }
+	set_key = { lhs = Public_Tmp6 value = 0 }
+	set_key = { lhs = Public_Tmp7 value = 0 }
 
     Prod_DoLaborHelper1 = { slot = 0 type = $type$ LandCrop = $LandCrop$ }
     Prod_DoLaborHelper1 = { slot = 1 type = $type$ LandCrop = $LandCrop$ }
@@ -870,51 +1049,207 @@ Prod_DoLabor = {
     Prod_DoLaborHelper1 = { slot = 14 type = $type$ LandCrop = $LandCrop$ }
     Prod_DoLaborHelper1 = { slot = 15 type = $type$ LandCrop = $LandCrop$ }
 
+	Prod_CalcLaborNum = { class=SF type=$type$ }
+	Prod_CalcLaborNum = { class=RE type=$type$ }
+	Prod_CalcLaborNum = { class=NM type=$type$ }
+	Prod_CalcLaborNum = { class=NO type=$type$ }
+	Prod_CalcLaborNum = { class=BG type=$type$ }
+	Prod_CalcLaborNum = { class=CL type=$type$ }
+	Prod_CalcLaborNum = { class=BU type=$type$ }
+
     [[infra]
         if = {
             limit = {
                 always = $infra$
             }
-            change_key = { lhs = Tmp_0 which = Infra_$type$ }
+            set_key = { lhs = Tmp_0 which = Infra_$type$ }
             change_key = { lhs = Tmp_0 which = Infra_State$type$ }
             change_key = { lhs = Tmp_0 which = Infra_Building$type$ }
             change_key = { lhs = Tmp_0 which = Building_$type$ }
+			
+			change_key = { lhs = Class_$type$LaborTotal which = Tmp_0 } 
+			
+			set_key = { lhs = Tmp_1 which = Tmp_0 } 
+			multiply_key = { lhs = Tmp_1 which = Class_P$type$ } ### how much is the cost of all labor for the class
+			multiply_key = { lhs = Tmp_1 value = 2 }
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_1 which = Infra_Wealth }
+				}
+				set_key = { lhs = Tmp_1 which = Infra_Wealth }
+				multiply_key = { lhs = Tmp_1 value = 0.5 }
+			}
+			else = {
+				multiply_key = { lhs = Tmp_1 value = 0.5 }
+			}
+			change_key = { lhs = Class_$type$LaborFund which = Tmp_1 }
         }
     ]
+	
+    set_key = { lhs = Class_$type$LaborCost which = Class_$type$LaborTotal } 
+    multiply_key = { lhs = Class_$type$LaborCost which = Class_P$type$ } ### how much is the cost of all labor for the class
+}
+
+Prod_DoLaborSpendHelper1 = {
+    set_key = { lhs = $class$_$type$LaborFund which = $class$_$type$Labor } 
+    multiply_key = { lhs = $class$_$type$LaborFund which = Class_P$type$ } ### how much will this labor cost
+	
+    change_key = { lhs = $class$_LaborCost which = $class$_$type$LaborFund } ## for true 'LaborCost' sums, add to that total
+}
+
+Prod_DoLaborSpendHelper2 = {
+	if = {
+		limit = {
+			check_key = { lhs = $class$_$type$LaborFund value = 0.001 }
+		}
+		divide_key = { lhs = $class$_$type$LaborFund which = $class$_LaborCost } ## ignore all that just do it direct
+		multiply_key = { lhs = $class$_$type$LaborFund which = $class$_LaborFund } ### take our share of the total fund
+
+		change_key = { lhs = Class_$type$LaborFund which = $class$_$type$LaborFund } ### add it to the total labor fund for this worker type
+	}
+}
+
+Prod_DoLaborSpendHelper3 = {
+	set_key = { lhs = $class$_$type$LaborFund value = 0 }
+}
+
+Prod_DoLaborSpendClass = {
+	if = {
+		limit = {
+			check_key = { lhs = $class$_Labor value = 0.001 }
+		}
+		set_key = { lhs = Tmp_0 value = 0 }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=R }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=UL }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=NM }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=BG }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=NO }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=CL }
+		Prod_DoLaborSpendHelper1 = { class=$class$ type=LT }
+		
+		set_key = { lhs = $class$_LaborFund which = $WealthVar$ }
+		
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=R }
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=UL }
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=NM }
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=BG }
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=NO }
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=CL }
+		Prod_DoLaborSpendHelper2 = { class=$class$ type=LT }
+	}
+	else = {
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=R }
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=UL }
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=NM }
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=BG }
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=NO }
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=CL }
+		Prod_DoLaborSpendHelper3 = { class=$class$ type=LT }
+	}
+}
+
+### Use 1/5th of wealth to fund labor. If Income (adjusted for Spend>Income) * 0.9 is greater, use that (to fund marginal classes)
+Prod_DoLaborHelper = {
+	set_key = { lhs = Tmp_9 which = $class$_Wealth }
+	multiply_key = { lhs = Tmp_9 value = $WealthFactor$ }
+	
+    if = {
+        limit = {
+            check_key = { lhs = $class$_Spend which = $class$_Income }
+        }
+		set_key = { lhs = Tmp_8 which = $class$_Income }
+
+		set_key = { lhs = Tmp_7 which = $class$_Income }
+		subtract_key = { lhs = Tmp_7 which = $class$_Spend }
+		
+		subtract_key = { lhs = Tmp_8 which = Tmp_7 }
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_8 value = 0 } }
+			}
+			set_key = { lhs = Tmp_8 value = 0 }
+		}
+	}
+	else = {
+		set_key = { lhs = Tmp_8 which = $class$_Income }
+	}
+	multiply_key = { lhs = Tmp_8 value = 0.9 }
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_8 which = Tmp_9 }
+        }
+		set_key = { lhs = Tmp_9 which = Tmp_8 }
+	}
+}
+
+Prod_DoLaborSpend = {
+	Prod_DoLaborHelper = { class=SF WealthFactor=0.2 }
+	Prod_DoLaborSpendClass = { class=SF WealthVar=Tmp_9 }
+	Prod_DoLaborHelper = { class=RE WealthFactor=0.2 }
+	Prod_DoLaborSpendClass = { class=RE WealthVar=Tmp_9 }
+	Prod_DoLaborHelper = { class=NM WealthFactor=0.2 }
+	Prod_DoLaborSpendClass = { class=NM WealthVar=Tmp_9 }
+	Prod_DoLaborHelper = { class=NO WealthFactor=0.2 }
+	Prod_DoLaborSpendClass = { class=NO WealthVar=Tmp_9 }
+	Prod_DoLaborHelper = { class=BG WealthFactor=0.2 }
+	Prod_DoLaborSpendClass = { class=BG WealthVar=Tmp_9 }
+	Prod_DoLaborHelper = { class=CL WealthFactor=0.2 }
+	Prod_DoLaborSpendClass = { class=CL WealthVar=Tmp_9 }
+	Prod_DoLaborSpendClass = { class=BU WealthVar=BU_Income }
+}
+
+Prod_DoLabor = {
+    if = {
+        limit = {
+            check_key = { lhs = Class_$type$LaborCost value = 0.01 }
+        }
+		set_key = { lhs = Class_$type$LaborFundPer which = Class_$type$LaborFund }
+		divide_key = { lhs = Class_$type$LaborFundPer which = Class_$type$LaborCost }
+		multiply_key = { lhs = Class_$type$LaborFundPer value = 100 }
+	}
+	else = {
+        set_key = { lhs = Class_$type$LaborFundPer value = 100 }
+	}
 
     Prod_GetWorker$class$ = { return = Tmp_7 }
     set_key = { lhs = Tmp_1 which = Tmp_7 }
     
         # Tmp_1 = labor supply  
-		# Tmp_0 = demand
+		# Class_$type$LaborTotal = demand
     if = {
         limit = { # if supply > demand
-            check_key = { lhs = Tmp_1 which = Tmp_0 }
+            check_key = { lhs = Tmp_1 which = Class_$type$LaborTotal }
         }
         set_key = { lhs = Prod_Fill$type$ value = 100 }
     }
     else = {
         set_key = { lhs = Prod_Fill$type$ which = Tmp_1 }
+        divide_key = { lhs = Prod_Fill$type$ which = Class_$type$LaborTotal }
         multiply_key = { lhs = Prod_Fill$type$ value = 100 }
-        divide_key = { lhs = Prod_Fill$type$ which = Tmp_0 }
     }
+    if = {
+        limit = { # if supply > fundable supply
+            check_key = { lhs = Prod_Fill$type$ which = Class_$type$LaborFundPer }
+        }
+        set_key = { lhs = Prod_Fill$type$ which = Class_$type$LaborFundPer } ## cap to what can be funded (prevents wealth leaks)
+	}
     
     if = {
         limit = { #if supply is 0
             is_key_equal = { lhs = Tmp_1 value = 0 }
         }
         if = {
-            limit = { # if supply is 0 and demand exists, set maximum wage -> 40
-                check_key = { lhs = Tmp_0 value = 0.001 }
+            limit = { # if supply is 0 and demand exists, set maximum wage -> 30
+                check_key = { lhs = Class_$type$LaborTotal value = 0.001 }
             }
-            set_key = { lhs = Class_P$type$ value = 40 }
+            set_key = { lhs = Class_P$type$ value = $WageMax$ }
         }
         else = { #if there is no supply and no demand, wage is 1
             set_key = { lhs = Class_P$type$ value = 1 }
         }
     }
     else = { # set wage value. Base is demand / supply
-        set_key = { lhs = Class_P$type$ which = Tmp_0 }
+        set_key = { lhs = Class_P$type$ which = Class_$type$LaborTotal }
         divide_key = { lhs = Class_P$type$ which = Tmp_1 }
 
         if = {
@@ -927,12 +1262,12 @@ Prod_DoLabor = {
         }
         else_if = {
             limit = {
-                check_key = { lhs = Class_P$type$ value = 4.875 }
+                check_key = { lhs = Class_P$type$ value = $WageMaxMulti$ }
             }
-            set_key = { lhs = Class_P$type$ value = 4.875 }
+            set_key = { lhs = Class_P$type$ value = $WageMaxMulti$ }
         }
 
-        multiply_key = { lhs = Class_P$type$ value = 8 }
+        multiply_key = { lhs = Class_P$type$ value = $BaseWage$ }
         change_key = { lhs = Class_P$type$ value = 1 }
     }
 
@@ -1122,58 +1457,6 @@ Prod_SetSplyHelper2 = {
         set_key = { lhs = Prod_S$slot$SplyC$prod$ value = 0 } # Save and store
 	}
 }
-Prod_DoLaborHelper1 = {
-    if = {
-        limit = {
-            has_province_flag = Prod_S$slot$
-            check_key = { lhs = Prod_S$slot$DmndB$type$ value = 0.001 }
-        }
-		# Load up last year's values
-		set_key = { lhs = Prod_S$slot$DmndF$type$ which = Prod_S$slot$Dmnd$type$ } 
-		set_key = { lhs = Prod_S$slot$DmndL$type$ which = Prod_S$slot$DmndL1$type$ }
-		set_key = { lhs = Prod_S$slot$DmndC$type$ which = Prod_S$slot$DmndC1$type$ }
-		
-        set_key = { lhs = Tmp_1 which = Prod_S$slot$Soph } # Skill reduces labour inputs
-		multiply_key = { lhs = Tmp_1 value = 0.2 }
-        change_key = { lhs = Tmp_1 value = 100 }
-
-        set_key = { lhs = Prod_S$slot$Dmnd$type$ value = 100 }
-        divide_key = { lhs = Prod_S$slot$Dmnd$type$ which = Tmp_1 }
-        if = {
-            limit = {
-				always = $LandCrop$
-                is_key_equal = { lhs = Prod_S$slot$ value = 1 }
-            }
-       		multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Land_CropLabour } # dynamic labor cost from Land System
-			multiply_key = { lhs = Prod_S$slot$Dmnd$type$ value = 0.1 }
-		}
-		else = {
-			multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Prod_S$slot$DmndB$type$ } # labour cost hardcoded from SYS-Prod_Misc
-		}
-        multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Prod_S$slot$Size }
-        set_key = { lhs = Prod_S$slot$DmndL1$type$ which = Prod_S$slot$Dmnd$type$ } # save and store in slot 1
-
-        change_key = { lhs = Tmp_0 which = Prod_S$slot$Dmnd$type$ }
-    }
-}
-
-Prod_DoLaborHelper2 = {
-    if = {
-        limit = {
-            has_province_flag = Prod_S$slot$
-            check_key = { lhs = Prod_S$slot$Dmnd$type$ value = 0.001 }
-        }
-        multiply_key = { lhs = Prod_S$slot$Dmnd$type$ which = Prod_Fill$type$ }
-		multiply_key = { lhs = Prod_S$slot$Dmnd$type$ value = 0.01 }
-
-        set_key = { lhs = Prod_S$slot$DmndC1$type$ which = Prod_S$slot$Dmnd$type$ }
-        multiply_key = { lhs = Prod_S$slot$DmndC1$type$ which = Class_P$type$ }
-		
-		set_key = { lhs = Prod_S$slot$SpendL which = Prod_S$slot$DmndC1$type$ }
-		
-        change_key = { lhs = Tmp_0 which = Prod_S$slot$SpendL }
-    }
-}
 Prod_DoLandHelper = {
     if = {
         limit = {
@@ -1237,6 +1520,7 @@ Calculate_Labor = {
     change_key = { lhs = WK_SFTDmnd which = Prod_S13DmndLR }
     change_key = { lhs = WK_SFTDmnd which = Prod_S14DmndLR }
     change_key = { lhs = WK_SFTDmnd which = Prod_S15DmndLR }
+    change_key = { lhs = WK_SFTDmnd which = Infra_R }
     change_key = { lhs = WK_SFTDmnd which = Infra_StateR }
     change_key = { lhs = WK_SFTDmnd which = Infra_BuildingR }
     change_key = { lhs = WK_SFTDmnd which = Building_R }
@@ -1305,6 +1589,7 @@ Calculate_Labor = {
     change_key = { lhs = WK_RETDmnd which = Prod_S13DmndLUL }
     change_key = { lhs = WK_RETDmnd which = Prod_S14DmndLUL }
     change_key = { lhs = WK_RETDmnd which = Prod_S15DmndLUL }
+    change_key = { lhs = WK_RETDmnd which = Infra_UL }
     change_key = { lhs = WK_RETDmnd which = Infra_StateUL }
     change_key = { lhs = WK_RETDmnd which = Infra_BuildingUL }
     change_key = { lhs = WK_RETDmnd which = Building_UL }
