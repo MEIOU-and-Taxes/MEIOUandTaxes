@@ -6,9 +6,9 @@ Growth_GetBirthProv = {
 	
     # Handle Birth and Death for each class with seperate values for birth and death rate
     # There is a exception handling for urban birthing
-    Growth_GetBirth = { class = SF rBirth = 1 rDeath = 1.1 rural = yes }
-    Growth_GetBirth = { class = NM rBirth = 1 rDeath = 1.3 rural = yes }
-    Growth_GetBirth = { class = RE rBirth = 1 rDeath = 1.35 urban = yes }
+    Growth_GetBirth = { class = SF rBirth = 1 rDeath = 1.05 rural = yes }
+    Growth_GetBirth = { class = NM rBirth = 1 rDeath = 1.25 rural = yes }
+    Growth_GetBirth = { class = RE rBirth = 1 rDeath = 1.2 urban = yes }
     Growth_GetBirth = { class = NO rBirth = 1 rDeath = 1.1 }
     Growth_GetBirth = { class = BG rBirth = 1 rDeath = 1.6 }
     Growth_GetBirth = { class = CL rBirth = 1 rDeath = 1.5 }
@@ -60,7 +60,13 @@ Growth_GetBirth = {
             # Tmp_0 = LifeCFullfilment - Growth_PointNeutralFill
             # Tmp_1 = LifeCFullfilment
 			set_key = { lhs = Tmp_0 which = $class$_FillLifeC }
-			set_key = { lhs = Tmp_1 which = $class$_FillLifeC }
+            if = {
+                limit = {
+                    check_key = { lhs = $class$_FillLifeC value = 3.0 } # `Growth_PointNeutralFill~value`
+                }
+                set_key = { lhs = Tmp_0 value = 3 }
+            }
+			set_key = { lhs = Tmp_1 which = Tmp_0 }
 			subtract_key = { lhs = Tmp_0 value = 0.75 } # `Growth_PointNeutralFill~value`
 			
 			# Birth Rate formula:
@@ -69,7 +75,7 @@ Growth_GetBirth = {
 			#                             LifeCFulfillment
 			
 			set_key = { lhs = Growth_Birth which = Tmp_0 }
-			multiply_key = { lhs = Growth_Birth value = 0.85 }   # `Growth_MultPositiveFill~value` ## TOO STRONK
+			multiply_key = { lhs = Growth_Birth value = 1.0 }   # `Growth_MultPositiveFill~value` ## TOO STRONK
 			divide_key = { lhs = Growth_Birth which = Tmp_1 }
 			multiply_key = { lhs = Growth_Birth which = Tmp_0 }
 			change_key = { lhs = Growth_Birth value = 1 }
@@ -184,6 +190,12 @@ Growth_GetBirth = {
 			
             # Birth rate formula: LifeCFulfillment * 0.782 + 0.414
             set_key = { lhs = Growth_Birth which = $class$_FillLifeC }
+            if = {
+                limit = {
+                    check_key = { lhs = $class$_FillLifeC value = 3.0 } # `Growth_PointNeutralFill~value`
+                }
+                set_key = { lhs = Growth_Birth value = 3 }
+            }
 			multiply_key = { lhs = Growth_Birth value = 0.782 } # `Growth_MultNegativeFill~value`
 			change_key = { lhs = Growth_Birth value = 0.414 }   # `Growth_BaseNegativeFill~value`
 			
