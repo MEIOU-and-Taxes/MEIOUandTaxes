@@ -34,7 +34,7 @@ PrivilegeL = """l_english:
 """
 PrivilegeEvents = """namespace = Privilege
 country_event = {
-	id = Privilege.998
+	id = SYS_UI.001
 	title = no_localization
 	desc = no_localization
 	picture = ai_only
@@ -56,7 +56,7 @@ country_event = {
 	}
 }
 country_event = { # triggered by monthly pulse
-	id = Privilege.999
+	id = SYS_UI.002
 	title = no_localization
 	desc = no_localization
 	picture = ai_only

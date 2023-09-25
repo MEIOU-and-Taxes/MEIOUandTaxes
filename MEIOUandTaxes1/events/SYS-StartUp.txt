@@ -187,16 +187,15 @@ country_event = {
 			if = { limit = { check_key = { lhs = Tmp_0 value = 0.2 } } add_corruption = 0.2 subtract_key = { lhs = Tmp_0 value = 0.2 } }
 			if = { limit = { check_key = { lhs = Tmp_0 value = 0.1 } } add_corruption = 0.1 subtract_key = { lhs = Tmp_0 value = 0.1 } }
         }
+        country_event = {
+            id = POP_StartInit.008 # Apply preset class ratio's and map populations
+        }
 
         every_province = {
             limit = {
 				isValidEmpty = yes
             }
             save_event_target_as = Prov
-            
-            country_event = {
-                id = POP_StartInit.008 # Apply preset class ratio's and map populations
-            }
 
             if = { # Initialize provincial local autonomy
                 limit = {
@@ -371,6 +370,16 @@ country_event = {
 			#}
 		}
 		NaturalFeatures = yes # Initializing natural features flags / variables
+
+        if = {
+            limit = {
+                OR = {
+                    area = yucatan_area
+                    area = mayapan_area
+                }
+            }
+            multiply_key = { lhs = Land_Rain value = 0.6 }
+        }
             
         every_province = {
             limit = {
@@ -1040,7 +1049,7 @@ country_event = {
                 set_key = { lhs = Tmp_2 which = Tmp_3 }
             }
             ### Apply local and province based modifications
-            country_event = {
+            province_event = {
                 id = POP_StartInit.009
             }
             set_key = { lhs = Tmp_0 which = Land_Size }
@@ -1115,12 +1124,7 @@ country_event = {
 			
 			# Display
 			multiply_key = { lhs = Land_Soil value = 100 }
-
-            # Subsistence
-            set_key = { lhs = TN_Subsistence value = 0.5 }
         }
-
-        TN_SetSubsistence = yes # Initialization of subsitance values
 
         every_province = {
             limit = {
@@ -1474,7 +1478,7 @@ country_event = {
                 }
             }
 			country_event = {
-				id = POP_Stockpile.0031 # Calculate and set the state maintenance and military maintenance of tags (units on the map)
+				id = SYS_Pulse.005 # Calculate and set the state maintenance and military maintenance of tags (units on the map)
 			}
             country_event = {
                 id = POP_Census.002 # Recalc all API Modifiers
@@ -1495,19 +1499,16 @@ country_event = {
                 id = POP_Census.0012 # Set Grain Dole, Tarifs, Sector Score and Rates, Sector Subsistance
             }
             country_event = {
-                id = POP_Census.705 # trade calculation for trade centers
+                id = SYS_Centers.001 # trade calculation for trade centers
             }
             country_event = {
-                id = POP_Census.706 # trade calculation for production centers
+                id = SYS_Centers.002 # trade calculation for production centers
             }
             country_event = {
-                id = POP_Census.707 # trade calculation for cities centres
+                id = SYS_Centers.003 # trade calculation for cities centres
             }
             country_event = {
                 id = POP_Census.0013 # Assign trade center modifiers
-            }
-            country_event = {
-                id = POP_Census.0014 # Special trade network connections (?)
             }
             country_event = {
                 id = POP_Census.0015 # Actual trade calculation "Do trade by resolving bids and offers in each sectors" - scripted_effects/SYS-Trade.txt/TN_DoTrade effect
@@ -1531,7 +1532,7 @@ country_event = {
                 id = POP_Census.0022 # Run tax script
             }
             country_event = {
-                id = POP_Census.112 # Run Trade Post script
+                id = SYS_Post.001 # Run Trade Post script
             }
             country_event = { # Calculate income, spending, and class fulfillments for each fulfillment types
                 id = POP_Census.0019
@@ -1552,6 +1553,66 @@ country_event = {
 			country_event = {
 				id = POP_Stockpile.002
 			}
+            if = { # Give simulation countries some money
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 15 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = yes weight1=1 weight2=1 }
+                }
+            }
+            else_if = { # Initial breakaway
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 26 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=1 weight2=2 }
+                }
+            }
+            else_if = { # Let them have some, but dont let it deviate
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 41 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=2 weight2=3 }
+                }
+            }
+            else_if = { # Mostly deviate, keep a strong buffer
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 61 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=3 weight2=4 }
+                }
+            }
+            else_if = { # Now just a buffer
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 81 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=4 weight2=5 }
+                }
+            }
 			
 			if = {
                 limit = {
@@ -1616,17 +1677,6 @@ country_event = {
                     StartUp_InitArmy = yes
                     StartUp_InitNavy = yes
                 }
-				if = { # Give simulation countries some money
-					limit = {
-						NOT = { check_key = { lhs = iter value = 21 } }
-					}
-					every_province = {
-						limit = {
-							isValidProv = yes
-						}
-                        StartUp_InitWealth = yes
-					}
-				}
                 
 				if = { # Give simulation countries some money
 					limit = {
@@ -1680,6 +1730,18 @@ country_event = {
 						is_key_equal = { lhs = iter value = 100 }
 					}
 					clr_global_flag = POP_Sim10
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 150 }
+					}
+					clr_global_flag = POP_Sim15
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 200 }
+					}
+					clr_global_flag = POP_Sim20
 				}
 			}
 
@@ -1915,7 +1977,7 @@ country_event = {
         }
 
         country_event = {
-            id = POP_Census.004
+            id = SYS_Pulse.014
         }
 
         every_country = {
@@ -1942,16 +2004,16 @@ country_event = {
         }
 
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
         country_event = {
-            id = POP_Census.106
+            id = SYS_Pulse.009
         }
 
 		clr_global_flag = POP_Sim
@@ -2012,7 +2074,7 @@ country_event = {
         custom_tooltip = POP_StartUp.009.playertip
         hidden_effect = {
             AAA = {
-                # set_global_flag = LogGraphing # Enables in-game observer logging
+                set_global_flag = LogGraphing # Enables in-game observer logging
                 set_global_flag = China_Broken
                 ### pre-clean data
                 country_event = { id = POP_StartUp.018 } 
@@ -2039,7 +2101,7 @@ country_event = {
                 country_event = { id = cb_types.3 }
                 country_event = { id = cb_types.4 }
                 
-                country_event = { id = POP_Stockpile.0031 }
+                country_event = { id = SYS_Pulse.005 }
                 
                 # Reload DG data
                 country_event = { id = POP_DG.001 }
@@ -2119,11 +2181,11 @@ country_event = {
                     limit = {
                         is_key_equal = { lhs = iter_max value = 250 }
                     }
-                    set_key = { lhs = iter_max value = 375 }
+                    set_key = { lhs = iter_max value = 350 }
                 }
                 else_if = {
                     limit = {
-                        is_key_equal = { lhs = iter_max value = 375 }
+                        is_key_equal = { lhs = iter_max value = 350 }
                     }
                     set_key = { lhs = iter_max value = 500 }
                 }
@@ -2283,6 +2345,7 @@ country_event = {
             clr_province_flag = small_university
             clr_province_flag = medium_university
             clr_province_flag = large_university
+            clr_province_flag = TN_Silk ### temporary
         }
     }
 
@@ -2312,7 +2375,7 @@ country_event = {
             id = POP_StartInit.004
         }
         country_event = {
-            id = POP_Census.112
+            id = SYS_Post.001
         }
         
         every_province = {
@@ -2684,13 +2747,13 @@ country_event = {
         
         # Update center setup
         country_event = {
-            id = POP_Census.705
+            id = SYS_Centers.001
         }
         country_event = {
-            id = POP_Census.706
+            id = SYS_Centers.002
         }
         country_event = {
-            id = POP_Census.707
+            id = SYS_Centers.003
         }
         NaturalFeatures = yes
         # For Timur
@@ -2967,16 +3030,8 @@ country_event = {
         set_global_flag = POP_Sim6
         set_global_flag = POP_Sim8
         set_global_flag = POP_Sim10
+        set_global_flag = POP_Sim15
         set_global_flag = POP_Sim20
-        every_province = {
-            if = {
-                limit = {
-                    NOT = { owned_by = AAA }
-                    is_wasteland = no
-                }
-                set_province_flag = Data
-            }
-        }
         
         YUA = {
             every_province = {
@@ -3627,9 +3682,9 @@ country_event = {
                 country_event = { id = POP_Census.893 days = 6 }
                 hidden_effect = { country_event = { id = POP_Census.934 } }
             }
-            country_event = { id = Privilege.998 }
-            country_event = { id = Rights.999 }
-            country_event = { id = POP_Census.992 }
+            country_event = { id = SYS_UI.001 }
+            country_event = { id = SYS_UI.003 }
+            country_event = { id = SYS_UI.004 }
             #Edu_DoCountry = yes
             MP_Init = yes
             Centralism_Check = yes

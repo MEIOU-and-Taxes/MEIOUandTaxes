@@ -457,90 +457,50 @@ Infra_SpendProjectHelper = {
     ]
 }
 
-Infra_SetMaintCommercial = {
-	set_key = { lhs = Building_$type$1 value = 0 } # food 
-	set_key = { lhs = Building_$type$6 value = 0 } # raw material
-	set_key = { lhs = Building_$type$24 value = 0 } # industrial products
-	
-	if = {
-		limit = {
-			check_key = { lhs = Building_$type$IncomeAverage value = 0.001 }
-		}
-		set_key = { lhs = Tmp_0 which = Building_$type$IncomeAverage }
-		multiply_key = { lhs = Tmp_0 value = 0.025 }
-		
-		set_key = { lhs = Tmp_1 value = 0 }
-		
-		set_key = { lhs = Tmp_2 which = TN_ProvPrc1 } # food price
-		multiply_key = { lhs = Tmp_2 value = $food$ } # fixed value
-		change_key = { lhs = Tmp_1 which = Tmp_2 }
-		
-		set_key = { lhs = Tmp_2 which = TN_ProvPrc6 } # raw material price
-		multiply_key = { lhs = Tmp_2 value = $raw$ }  # fixed value
-		change_key = { lhs = Tmp_1 which = Tmp_2 }
-		
-		set_key = { lhs = Tmp_2 which = TN_ProvPrc24 } # industral price
-		multiply_key = { lhs = Tmp_2 value = $indust$ } # fixed value
-		change_key = { lhs = Tmp_1 which = Tmp_2 }
-		
-		divide_key = { lhs = Tmp_0 which = Tmp_1 } # calculate the demand level. 2.5% of income average / sum (costs of products).
-        
-		set_key = { lhs = Tmp_1 which = Tmp_0 }
-		multiply_key = { lhs = Tmp_1 value = $food$ }
-		change_key = { lhs = Building_$type$1 which = Tmp_1 } # how much food it used
-		
-		set_key = { lhs = Tmp_1 which = Tmp_0 }
-		multiply_key = { lhs = Tmp_1 value = $raw$ } 
-		change_key = { lhs = Building_$type$6 which = Tmp_1 } # how much raw material it used
-		
-		set_key = { lhs = Tmp_1 which = Tmp_0 }
-		multiply_key = { lhs = Tmp_1 value = $indust$ }
-		change_key = { lhs = Building_$type$24 which = Tmp_1 } # how much industrial product it used
-	}
-	
-	if = {
-		limit = {
-			check_key = { lhs = Building_$type$Wealth value = 0.01 } # state investment. follows same process
-		}
-		set_key = { lhs = Tmp_0 value = 0 }
-		
-		set_key = { lhs = Tmp_1 which = TN_ProvPrc1 }
-		multiply_key = { lhs = Tmp_1 value = $food$ }
-		change_key = { lhs = Tmp_0 which = Tmp_1 }
-		
-		set_key = { lhs = Tmp_1 which = TN_ProvPrc6 }
-		multiply_key = { lhs = Tmp_1 value = $raw$ }
-		change_key = { lhs = Tmp_0 which = Tmp_1 }
-		
-		set_key = { lhs = Tmp_1 which = TN_ProvPrc24 }
-		multiply_key = { lhs = Tmp_1 value = $indust$ }
-		change_key = { lhs = Tmp_0 which = Tmp_1 }
-		
-		set_key = { lhs = Tmp_1 which = Building_$type$Wealth }
-		divide_key = { lhs = Tmp_1 which = Tmp_0 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		multiply_key = { lhs = Tmp_2 value = $food$ }
-		change_key = { lhs = Building_$type$1 which = Tmp_2 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		multiply_key = { lhs = Tmp_2 value = $raw$ }
-		change_key = { lhs = Building_$type$6 which = Tmp_2 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		multiply_key = { lhs = Tmp_2 value = $indust$ }
-		change_key = { lhs = Building_$type$24 which = Tmp_2 }
-	}
-}
-
 Infra_SetMaintHelper = {
     if = {
         limit = {
             has_province_flag = Prod_S$slot$
             has_province_flag = Prod_S$slot$DmndB$type$
         }
-		set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
-		subtract_key = { lhs = Tmp_0 which = Prod_S$slot$SpendPrev }
+		### First sum labor into designated pools
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndR value = 0.001 }
+			}
+			change_key = { lhs = Tmp_4 which = Prod_S$slot$DmndR } ## Rural
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndUL value = 0.001 }
+			}
+			change_key = { lhs = Tmp_5 which = Prod_S$slot$DmndUL } ## Urban
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndNM value = 0.001 }
+			}
+			change_key = { lhs = Tmp_6 which = Prod_S$slot$DmndNM } ## Nomad
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndLT value = 0.001 }
+			}
+			change_key = { lhs = Tmp_7 which = Prod_S$slot$DmndLT } ## Literati
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndCL value = 0.001 }
+			}
+			change_key = { lhs = Tmp_8 which = Prod_S$slot$DmndCL } ## Clergy
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prod_S$slot$DmndBG value = 0.001 }
+			}
+			change_key = { lhs = Public_Tmp1 which = Prod_S$slot$DmndBG } ## Burghers
+		}
+
 		
 		if = {
 			limit = {
@@ -548,204 +508,129 @@ Infra_SetMaintHelper = {
 					has_global_flag = POP_Sim1
 				}
 			}
-			set_key = { lhs = Tmp_1 which = Tmp_0 } 
-			subtract_key = { lhs = Tmp_1 which = Prod_S$slot$RecProfit }
-            
-            set_key = { lhs = Tmp_2 which = Prod_S$slot$RecSizePrev }
-			subtract_key = { lhs = Tmp_2 which = Prod_S$slot$RecSizePrevPrev }
-            
+
             # Tmp_0 = Current Profit
-            # Tmp_1 = Current Profit - Previous Profit * throughtput scaled by 1
-            # Tmp_2 = Size of previous year - Size of previous previous year). This is a measure of previous year changes.
-            
-            if = {
+            # Tmp_1 = Current Profit Margin
+            # Tmp_2 = Desired Change Rate in Size %
+			set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
+			if = { # If Tmp_0 is positive, Add a throughput factor and reduce Income by it
 				limit = {
-					check_key = { lhs = Tmp_2 value = 0 }
+					check_key = { lhs = Tmp_0 value = 0.001 }
 				}
-				change_key = { lhs = Tmp_2 value = 0.01 }
+				### Add a throughput factor
+				set_key = { lhs = Tmp_3 which = Prod_S$slot$SizeCur }
+				divide_key = { lhs = Tmp_3 which = Prod_S$slot$Size }
+				multiply_key = { lhs = Tmp_3 which = Tmp_3 } ### Exponential
+				multiply_key = { lhs = Tmp_0 which = Tmp_3 }
+				set_key = { lhs = Tmp_3 value = 0 }	
 			}
-            else = {
-				change_key = { lhs = Tmp_2 value = -0.01 }
-			}
-			# (Current Profit - Previous Profit) / (Size change). 
-			# If either of them are negative, industry won't expand, because it either means profitability is decreasing while size increasing, meaning you want
-			# to shrink more to acquire more profitability, or profitability is increasing while size decreasing, meaning you shrinking looks like a good idea.
-			# If both are negative it means profit is decreasing when size decreasing, meaning you want to increase size to see if that changes.	
-			multiply_key = { lhs = Tmp_1 value = 1.25 }
-			#multiply_key = { lhs = Tmp_2 value = 5 }
-			divide_key = { lhs = Tmp_1 which = Tmp_2 } 
+			subtract_key = { lhs = Tmp_0 which = Prod_S$slot$Spend }
 			
+			[[IncomeMaint]
+			if = { # Take out 2.5% of building income for Income based Maint (Commercial)
+				limit = {
+					always = $IncomeMaint$
+					check_key = { lhs = Building_$type$IncomeAverage value = 0.001 }
+				}
+				set_key = { lhs = Tmp_3 which = Building_$type$IncomeAverage }
+				multiply_key = { lhs = Tmp_3 value = 0.02 }
+				multiply_key = { lhs = Tmp_3 which = Modi_$type$Cost }
+				multiply_key = { lhs = Tmp_3 which = Modi_BuildingCost }
+				multiply_key = { lhs = Tmp_3 which = Modi_BuildingTime }
+				subtract_key = { lhs = Tmp_0 which = Tmp_3 }
+			}
+			]
+
+			if = { limit = { is_key_equal = { lhs = Prod_S$slot$Income value = 0 } }
+				set_key = { lhs = Tmp_1 value = 0 }
+			}
+			else = {
+				set_key = { lhs = Tmp_1 which = Tmp_0 }
+				divide_key = { lhs = Tmp_1 which = Prod_S$slot$Income }
+			}
+						
 			if = {
 				limit = {
-					check_key = { lhs = Tmp_1 value = 0 } # If the division was positive
+					check_key = { lhs = Tmp_1 value = 0.04 } # profit margin >= 4 % --> expand
 				}
-				set_key = { lhs = Tmp_2 which = Tmp_1 }
-				change_key = { lhs = Tmp_2 value = 1 }
-				
-				multiply_key = { lhs = Tmp_1 value = 4 }
-				divide_key = { lhs = Tmp_1 which = Tmp_2 } # Tmp_1 will be positive, maximum value is 3.
-			}
-			else = {                                       # Else if the division was negative
-				set_key = { lhs = Tmp_2 which = Tmp_1 }
-				change_key = { lhs = Tmp_2 value = -1 }
-				
-				multiply_key = { lhs = Tmp_1 value = -4 }
-				divide_key = { lhs = Tmp_1 which = Tmp_2 } # Tmp_1 will come negative, minimum value is -3
-			}
-			
-            #if = {
-            #    limit = {
-            #        always = $slot0$
-            #    }
-            #    heuristicHelper = { slot = $slot$ }
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot1$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot2$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot3$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot4$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot5$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot6$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot7$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot8$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot9$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot10$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot11$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot12$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot13$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot14$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}
-            #else_if = {
-            #    limit = {
-            #        always = $slot15$
-            #    }
-            #    heuristicHelper = { slot = $slot$ } 
-            #}   
+				set_key = { lhs = Tmp_2 value = 100 }
+				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
+				multiply_key = { lhs = Tmp_2 value = 0.33 }
+				multiply_key = { lhs = Tmp_2 which = Tmp_1 }
 
+				multiply_key = { lhs = Tmp_1 value = 0.2 }
 
-			
-			if = { # If tmp_1 is positive, building will want to expand.
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
+			}
+			else_if = {
+				limit = {
+					NOT = { check_key = { lhs = Tmp_1 value = 0.04 } } # profit margin < 4 %
+					check_key = { lhs = Tmp_0 value = 0.00 } # Profits > 0
+				}
+
+				# NO CHANGE IN SIZE
+				set_key = { lhs = Tmp_1 value = 0 }
+			}
+			else = {  # Profits < 0
+				#Tmp_1 is a negative value here
+				set_key = { lhs = Tmp_2 value = 100 }
+				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
+				multiply_key = { lhs = Tmp_2 value = 0.33 }
+				multiply_key = { lhs = Tmp_2 which = Tmp_1 }
+
+				multiply_key = { lhs = Tmp_1 value = 0.2 }
+
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
+				divide_key = { lhs = Tmp_1 value = 2 } ## Balance factor to make shrinkage slower then expansion
+			}
+						
+			if = { # If Tmp_1 is positive, building will want to expand.
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0 }
 				}
-				change_key = { lhs = Tmp_1 value = 0.5 }
-				
-				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 }
-				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size }
-				multiply_key = { lhs = Prod_S$slot$Change value = 0.01 }
+			
+				if = { # if desired change rate > 200% limit it to 200%
+					limit = { check_key = { lhs = Tmp_1 value = 2.0 } }
+					set_key = { lhs = Tmp_1 value = 2.0 }
+				}
 
-				#if = { # Limit expansion based on Size. Normalize to 0.20 and 0.99 from 500 to 100 size or higher. At 500 size max expansion get's reduced by 80%
-				#	limit = {
-				#		check_key = { lhs = Prod_S$slot$Size value = 100 }
-				#	}
-				#	set_key = { lhs = Public_Tmp0 which = Prod_S$slot$Size }
-				#	if = {
-				#		limit = {
-				#			check_key = { lhs = Public_Tmp0 value = 500 }
-				#		}
-				#		set_key = { lhs = Public_Tmp0 value = 500 }
-				#	}
-				#	change_key = { lhs = Public_Tmp0 value = -500 }
-				#	multiply_key = { lhs = Public_Tmp0 value = -0.002 }
-				#	change_key = { lhs = Public_Tmp0 value = 0.19 }
-				#	multiply_key = { lhs = Prod_S$slot$Change which = Public_Tmp0 }
-				#}
+				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change
+				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
-				change_key = { lhs = Building_$type$Up which = Prod_S$slot$Change }
+				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
+				multiply_key = { lhs = Tmp_2 value = 0.2 }
+				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
+				if = { # slower changes in sim
+					limit = { has_global_flag = POP_Sim }
+					multiply_key = { lhs = Tmp_2 value = 0.5 }
+				}
+				change_key = { lhs = Building_$type$Up which = Tmp_2 }
                 
-                # Building_$type$Up represents an absolute amount of units that want to be expanded in the industry. This value is maximum 3.5% of it's total size.
+                # Building_$type$Up represents an absolute amount of units that want to be expanded in the industry.
                 # according to all the desirable changes of the industries (either expansion or shrinking) belonging to that same Property.
                 # Example: If farmlands has 4 industries and 2 of them want to grow, Farmlands will have 2 industries that provide a Building_$type$Up 
                 # and 2 of them that provide a Building_$type$Down value. 
                 # On the other hand, Prod_S$slot$Change reflects the specific change desire of absolute units of an specific industry. 
 			}
 			else = { # if Tmp_1 is negative, will want to shrink.
-				change_key = { lhs = Tmp_1 value = -0.5 }
+				if = { # if desired shrink rate lower than -25% limit it
+					limit = { NOT = {  check_key = { lhs = Tmp_1 value = -0.25 } } }
+					set_key = { lhs = Tmp_1 value = -0.25 }
+				}
+
+				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
+				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
-				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 }
-				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size }
-				
-				multiply_key = { lhs = Tmp_1 value = -1 }
-				change_key = { lhs = Tmp_1 value = 100 }
-				divide_key = { lhs = Prod_S$slot$Change which = Tmp_1 }
-				
-				subtract_key = { lhs = Building_$type$Down which = Prod_S$slot$Change } # Building_$type$Down represents an abstract value for shrinkage desire.
+				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
+				multiply_key = { lhs = Tmp_2 value = 0.2 }
+				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
+				if = { # slower changes in sim
+					limit = { has_global_flag = POP_Sim }
+					multiply_key = { lhs = Tmp_2 value = 0.5 }
+				}
+				subtract_key = { lhs = Building_$type$Down which = Tmp_2 } # Building_$type$Down represents an abstract value for shrinkage desire.
 			}
 		}
-		
-		set_key = { lhs = Prod_S$slot$RecProfit which = Tmp_0 }
-		
-		set_key = { lhs = Prod_S$slot$RecSizePrevPrev which = Prod_S$slot$RecSizePrev }
-		set_key = { lhs = Prod_S$slot$RecSizePrev which = Prod_S$slot$RecSize }
-		set_key = { lhs = Prod_S$slot$RecSize which = Prod_S$slot$Size }
     }
 }
 
@@ -768,6 +653,28 @@ heuristicHelper = {
         }
     }
 }
+Infra_SetMaintLaborHelper = {
+	if = {
+		limit = {
+			check_key = { lhs = $laborVar$ value = 0.1 }
+			NOT = { check_key = { lhs = Prod_Fill$labor$ value = 100 } }
+		}
+		set_key = { lhs = Tmp_2 which = $laborVar$ }
+		divide_key = { lhs = Tmp_2 which = Tmp_9 }
+
+		set_key = { lhs = Tmp_1 which = Building_$type$ }
+		multiply_key = { lhs = Tmp_1 which = Tmp_2 } ## share of labor for this property
+		set_key = { lhs = Tmp_3 which = Prod_Fill$labor$ } ## 100 scale
+		multiply_key = { lhs = Tmp_3 value = 0.01 }
+		multiply_key = { lhs = Tmp_3 which = Tmp_1 }
+		
+		set_key = { lhs = Tmp_2 which = Tmp_1 }
+		divide_key = { lhs = Tmp_2 which = Tmp_3 } ## this is now buildings that are beyond labor capacity
+		multiply_key = { lhs = Tmp_2 value = 0.2 }# Reduce 20% of the labor shortage per iter
+
+		change_key = { lhs = Building_$type$Down which = Tmp_2 }
+	}
+}
 
 Infra_SetMaint = {
     set_key = { lhs = Building_$type$Up value = 0 }   # property expansion desire
@@ -780,47 +687,153 @@ Infra_SetMaint = {
 		limit = {
 			check_key = { lhs = Building_$type$ value = 0.01 }
 		}
-        Infra_SetMaintHelper = { type = $type$ slot = 0 } # calculate profitability of every slot. Industry heuristic logic.
-        Infra_SetMaintHelper = { type = $type$ slot = 1 }  
-        Infra_SetMaintHelper = { type = $type$ slot = 2 }
-        Infra_SetMaintHelper = { type = $type$ slot = 3 }
-        Infra_SetMaintHelper = { type = $type$ slot = 4 }
-        Infra_SetMaintHelper = { type = $type$ slot = 5 }
-        Infra_SetMaintHelper = { type = $type$ slot = 6 }
-        Infra_SetMaintHelper = { type = $type$ slot = 7 }
-        Infra_SetMaintHelper = { type = $type$ slot = 8 }
-        Infra_SetMaintHelper = { type = $type$ slot = 9 }
-        Infra_SetMaintHelper = { type = $type$ slot = 10 }
-        Infra_SetMaintHelper = { type = $type$ slot = 11 }
-        Infra_SetMaintHelper = { type = $type$ slot = 12 }
-        Infra_SetMaintHelper = { type = $type$ slot = 13 }
-        Infra_SetMaintHelper = { type = $type$ slot = 14 }
-        Infra_SetMaintHelper = { type = $type$ slot = 15 }
+		
+		# Labor vars
+		set_key = { lhs = Tmp_4 value = 0 } ## Rural
+		set_key = { lhs = Tmp_5 value = 0 } ## Urban
+		set_key = { lhs = Tmp_6 value = 0 } ## Nomad
+		set_key = { lhs = Tmp_7 value = 0 } ## Literati
+		set_key = { lhs = Tmp_8 value = 0 } ## Clergy
+		set_key = { lhs = Public_Tmp1 value = 0 } ## Burghers
 
-        set_key = { lhs = Tmp_0 which = Building_$type$ }
-        multiply_key = { lhs = Tmp_0 value = $rate$ }
+		Infra_SetMaintHelper = { type = $type$ slot = 0 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] } # calculate profitability of every slot. Industry heuristic logic.
+		Infra_SetMaintHelper = { type = $type$ slot = 1 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }  
+		Infra_SetMaintHelper = { type = $type$ slot = 2 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 3 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 4 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 5 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 6 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 7 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 8 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 9 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 10 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 11 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 12 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 13 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 14 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
+		Infra_SetMaintHelper = { type = $type$ slot = 15 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
 
-        set_key = { lhs = Tmp_1 which = Building_$type$Up }
-        subtract_key = { lhs = Tmp_1 which = Building_$type$Down }
-        divide_key = { lhs = Tmp_1 value = $factor$ }
-        change_key = { lhs = Tmp_0 which = Tmp_1 } # expansion or shrinkage
+		# First we need to see if theres a labor shortage, if so we're going to generally shrink this property as a counterforce
 
+		# Sum our labor
+		set_key = { lhs = Tmp_9 which = Tmp_4 } ## Rural
+		change_key = { lhs = Tmp_9 which = Tmp_5 } ## Urban
+		change_key = { lhs = Tmp_9 which = Tmp_6 } ## Nomad
+		change_key = { lhs = Tmp_9 which = Tmp_7 } ## Literati
+		change_key = { lhs = Tmp_9 which = Tmp_8 } ## Clergy
+		change_key = { lhs = Tmp_9 which = Public_Tmp1 } ## Burghers
+
+		# Apply a BuildingDown of 15% of the labor shortage of each type based on their share of total labor demanded
+		Infra_SetMaintLaborHelper = { type = $type$ labor=R laborVar=Tmp_4 }
+		Infra_SetMaintLaborHelper = { type = $type$ labor=UL laborVar=Tmp_5 }
+		Infra_SetMaintLaborHelper = { type = $type$ labor=NM laborVar=Tmp_6 }
+		Infra_SetMaintLaborHelper = { type = $type$ labor=LT laborVar=Tmp_7 }
+		Infra_SetMaintLaborHelper = { type = $type$ labor=CL laborVar=Tmp_8 }
+		Infra_SetMaintLaborHelper = { type = $type$ labor=BG laborVar=Public_Tmp1 }
+
+		[[max]
         if = {
             limit = {
-                check_key = { lhs = Tmp_0 value = 0 } # if property wants to expand, add the maintenance of the expansion. Because there is a new size change, the property will now demand more.
+				check_key = { lhs = Building_$type$Up value = 0.001 }
+				always = $max$
             }
-            multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
-            multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
-            multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
-            			
-			set_key = { lhs = Building_$type$1 which = Tmp_0 }
-            set_key = { lhs = Building_$type$6 which = Tmp_0 }
-            set_key = { lhs = Building_$type$24 which = Tmp_0 }
-			
-			multiply_key = { lhs = Building_$type$1 value = $food$ }
-            multiply_key = { lhs = Building_$type$6 value = $raw$ }
-            multiply_key = { lhs = Building_$type$24 value = $indust$ }
-        }
+			set_key = { lhs = Tmp_3 which = Building_$type$Max }
+			subtract_key = { lhs = Tmp_3 which = Building_$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Building_$type$Up which = Tmp_3 }
+					check_key = { lhs = Tmp_3 value = 0.001 }
+				}
+				set_key = { lhs = Building_$type$Up which = Tmp_3 }
+			}
+		}
+		]
+		set_key = { lhs = Tmp_3 which = Building_$type$ }
+		subtract_key = { lhs = Tmp_3 value = 1 } #minimum 1 size when trying to shrink
+		subtract_key = { lhs = Tmp_3 which = Building_$type$Down }
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0	} }
+			}
+			change_key = { lhs = Building_$type$Down which = Tmp_3 }
+		}
+		
+		[[RegularMaint]
+        if = {
+            limit = {
+				always = $RegularMaint$
+			}
+			set_key = { lhs = Tmp_0 which = Building_$type$ }
+			multiply_key = { lhs = Tmp_0 value = $rate$ } ### basically a x on building count to determine maint costs
+
+			set_key = { lhs = Tmp_1 which = Building_$type$Up }
+			subtract_key = { lhs = Tmp_1 which = Building_$type$Down }
+			multiply_key = { lhs = Tmp_1 value = $factor$ } ### how much do new buildings cost
+			change_key = { lhs = Tmp_0 which = Tmp_1 } # expansion or shrinkage
+
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_0 value = 0 } # if property wants to expand, add the maintenance of the expansion. Because there is a new size change, the property will now demand more.
+				}
+				multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
+				multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
+				multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
+							
+				set_key = { lhs = Building_$type$1 which = Tmp_0 }
+				set_key = { lhs = Building_$type$6 which = Tmp_0 }
+				set_key = { lhs = Building_$type$24 which = Tmp_0 }
+				
+				multiply_key = { lhs = Building_$type$1 value = $food$ }
+				multiply_key = { lhs = Building_$type$6 value = $raw$ }
+				multiply_key = { lhs = Building_$type$24 value = $indust$ }
+			}
+		}
+		]
+		[[IncomeMaint]
+        if = {
+            limit = {
+				always = $IncomeMaint$
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Building_$type$IncomeAverage value = 0.001 }
+				}
+				set_key = { lhs = Tmp_0 which = Building_$type$IncomeAverage } ## Commerce pays a % of their income as maintenance
+				multiply_key = { lhs = Tmp_0 value = 0.02 }
+				multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
+				multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
+				multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
+				
+				set_key = { lhs = Tmp_1 value = 0 }
+				
+				set_key = { lhs = Tmp_2 which = TN_ProvPrc1 } # food price
+				multiply_key = { lhs = Tmp_2 value = $food$ } # fixed value
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_2 which = TN_ProvPrc6 } # raw material price
+				multiply_key = { lhs = Tmp_2 value = $raw$ }  # fixed value
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_2 which = TN_ProvPrc24 } # industral price
+				multiply_key = { lhs = Tmp_2 value = $indust$ } # fixed value
+				change_key = { lhs = Tmp_1 which = Tmp_2 }
+				
+				divide_key = { lhs = Tmp_0 which = Tmp_1 } # calculate the demand level. 2.5% of income average / sum (costs of products).
+				
+				set_key = { lhs = Tmp_1 which = Tmp_0 }
+				multiply_key = { lhs = Tmp_1 value = $food$ }
+				change_key = { lhs = Building_$type$1 which = Tmp_1 } # how much food it used
+				
+				set_key = { lhs = Tmp_1 which = Tmp_0 }
+				multiply_key = { lhs = Tmp_1 value = $raw$ } 
+				change_key = { lhs = Building_$type$6 which = Tmp_1 } # how much raw material it used
+				
+				set_key = { lhs = Tmp_1 which = Tmp_0 }
+				multiply_key = { lhs = Tmp_1 value = $indust$ }
+				change_key = { lhs = Building_$type$24 which = Tmp_1 } # how much industrial product it used
+			}
+		}
+		]
 	}
 	
 	if = {
@@ -990,19 +1003,6 @@ Infra_RefreshIndustry = {
         }
     }
 }
-
-Infra_DoSizeHelper0 = { # calculate products maintenance fullfilments
-	if = {
-		limit = {
-			check_key = { lhs = Building_$type$$prod$ value = 0.001 }
-		}
-		set_key = { lhs = Tmp_0 which = TN_ProvFill$prod$ }
-		change_key = { lhs = Tmp_0 value = $base$ }
-		multiply_key = { lhs = Tmp_0 which = Building_$type$$prod$ }
-		divide_key = { lhs = Tmp_0 value = $div$ }
-		change_key = { lhs = Building_$type$Gain which = Tmp_0 } # Building_$type$Gain basically is how much the property could fullfil it's needs.
-	}
-}
 Infra_DoSizeHelper1 = { # expansion or shrinkage
     if = {
         limit = {
@@ -1020,52 +1020,21 @@ Infra_DoSizeHelper1 = { # expansion or shrinkage
 # (4)Building_$type$Down  = represent how much industries shrinked within the Property.
 # New_Property_Size = (1)-(2)+(3)-(4)
 Infra_DoSize = { 
-	set_key = { lhs = Building_$type$Gain value = 0 }
 	set_key = { lhs = Building_$type$Decay value = 0 }
     if = {
         limit = {
-            OR = {
-                has_global_flag = POP_Sim10
-                check_key = { lhs = Building_$type$ value = 0.001 }
-            }
+            check_key = { lhs = Building_$type$ value = 0.001 }
         }
-	
-        if = {
-            limit = {
-                has_global_flag = POP_Sim
-            }
-            Infra_DoSizeHelper0 = { type = $type$ prod = 1 base = 100 div = 200 }
-            Infra_DoSizeHelper0 = { type = $type$ prod = 6 base = 100 div = 200 }
-            Infra_DoSizeHelper0 = { type = $type$ prod = 24 base = 100 div = 200 }
-        }
-        else = {
-            Infra_DoSizeHelper0 = { type = $type$ prod = 1 base = 50 div = 150 }
-            Infra_DoSizeHelper0 = { type = $type$ prod = 6 base = 50 div = 150 }
-            Infra_DoSizeHelper0 = { type = $type$ prod = 24 base = 50 div = 150 }
-        }
-        
-        set_key = { lhs = Tmp_0 which = Building_$type$ }
-        multiply_key = { lhs = Tmp_0 value = -1 } # 1) Store building size as a negative.
-        
-        multiply_key = { lhs = Building_$type$Gain value = $factor$ }
                 
         if = { # annual fixed decay of 2%
             limit = {
+				NOT = { has_global_flag = POP_Sim1 }
                 check_key = { lhs = Building_$type$ value = 0.001 }
             }
             set_key = { lhs = Building_$type$Decay which = Building_$type$ }
             multiply_key = { lhs = Building_$type$Decay value = 0.02 }
         }
-       
-        
-        # Modi modifiers to Gain.
-        if = { limit = { check_key = { lhs = Modi_$type$Cost value = 0.001 } } divide_key = { lhs = Building_$type$Gain which = Modi_$type$Cost } }
-        if = { limit = { check_key = { lhs = Modi_BuildingCost value = 0.001 } } divide_key = { lhs = Building_$type$Gain which = Modi_BuildingCost } }
-        if = { limit = { check_key = { lhs = Modi_BuildingTime value = 0.001 } } divide_key = { lhs = Building_$type$Gain which = Modi_BuildingTime } }
-        
-         
-             
-        change_key = { lhs = Building_$type$ which = Building_$type$Gain }
+
         subtract_key = { lhs = Building_$type$ which = Building_$type$Decay }
         change_key = { lhs = Building_$type$ which = Building_$type$Up }
         subtract_key = { lhs = Building_$type$ which = Building_$type$Down }
@@ -1231,44 +1200,44 @@ Infra_ShareOfferAgriculture = {
 		limit = {
 			owner = { Rights_NOGov1Has = yes }
 		}
-		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.3 InvNomad=yes Tribal=yes }
-		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.45 }
+		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.25 InvNomad=yes Tribal=yes }
+		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.5 }
 	}
 	else_if = {
 		limit = {
 			owner = { Rights_NOGov2Has = yes }
 		}
-		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.375 InvNomad=yes Tribal=yes }
-		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.4 }
+		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.3 InvNomad=yes Tribal=yes }
+		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.45 }
 	}
 	else_if = {
 		limit = {
 			owner = { Rights_NOGov3Has = yes }
+		}
+		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.35 InvNomad=yes Tribal=yes }
+		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.4 }
+	}
+	else_if = {
+		limit = {
+			owner = { Rights_NOGov4Has = yes }
 		}
 		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.4 InvNomad=yes Tribal=yes }
 		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.35 }
 	}
 	else_if = {
 		limit = {
-			owner = { Rights_NOGov4Has = yes }
+			owner = { Rights_NOGov5Has = yes }
 		}
 		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.45 InvNomad=yes Tribal=yes }
 		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.3 }
 	}
-	else_if = {
-		limit = {
-			owner = { Rights_NOGov5Has = yes }
-		}
-		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.5 InvNomad=yes Tribal=yes }
-		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.25 }
-	}
 	else = {
-		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.60 InvNomad=yes Tribal=yes }
-		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.10 }
+		Infra_DoSpendHelper = { type = Agriculture class = SF return = Tmp_1 share = 0.55 InvNomad=yes Tribal=yes }
+		Infra_DoSpendHelper = { type = Agriculture class = NO return = Tmp_4 share = 0.15 }
 	}
 	set_key = { lhs = Tmp_2 value = 0 }
 	Infra_DoSpendHelper = { type = Agriculture class = NM return = Tmp_3 share = 0.70 Nomad=yes }
-	Infra_DoSpendHelper = { type = Agriculture class = BG return = Tmp_5 share = 0.10 InvNomad=yes }
+	Infra_DoSpendHelper = { type = Agriculture class = BG return = Tmp_5 share = 0.20 InvNomad=yes }
 	if = {
 		limit = {
 			owner = { Rights_CLHie1Has = yes }
@@ -1290,7 +1259,7 @@ Infra_ShareOfferForestry = {
 	set_key = { lhs = Tmp_2 value = 0 }
 	set_key = { lhs = Tmp_3 value = 0 }
 	Infra_DoSpendHelper = { type = Forestry class = NO return = Tmp_4 share = 0.35 }
-	Infra_DoSpendHelper = { type = Forestry class = BG return = Tmp_5 share = 0.10 }
+	Infra_DoSpendHelper = { type = Forestry class = BG return = Tmp_5 share = 0.20 }
 	if = {
 		limit = {
 			owner = { Rights_CLHie3Has = yes }
@@ -1308,10 +1277,10 @@ Infra_ShareOfferForestry = {
 	}
 }
 Infra_ShareOfferFishery = {
-	Infra_DoSpendHelper = { type = Fishery class = SF return = Tmp_1 share = 0.7 }
+	Infra_DoSpendHelper = { type = Fishery class = SF return = Tmp_1 share = 0.65 }
 	set_key = { lhs = Tmp_2 value = 0 }
 	set_key = { lhs = Tmp_3 value = 0 }
-	Infra_DoSpendHelper = { type = Fishery class = NO return = Tmp_4 share = 0.2 }
+	Infra_DoSpendHelper = { type = Fishery class = NO return = Tmp_4 share = 0.25 }
 	Infra_DoSpendHelper = { type = Fishery class = BG return = Tmp_5 share = 0.05 }
 	Infra_DoSpendHelper = { type = Fishery class = CL return = Tmp_6 share = 0.1 }
 }
@@ -1320,7 +1289,7 @@ Infra_ShareOfferExtraction = {
 	set_key = { lhs = Tmp_2 value = 0 }
 	set_key = { lhs = Tmp_3 value = 0 }
 	Infra_DoSpendHelper = { type = Extraction class = NO return = Tmp_4 share = 0.35 }
-	Infra_DoSpendHelper = { type = Extraction class = BG return = Tmp_5 share = 0.10 }
+	Infra_DoSpendHelper = { type = Extraction class = BG return = Tmp_5 share = 0.20 }
 	if = {
 		limit = {
 			owner = { Rights_CLHie3Has = yes }
@@ -1390,7 +1359,7 @@ Infra_ShareOfferIndustrial = {
 	else = {
 		Infra_DoSpendHelper = { type = Industrial class = NO return = Tmp_4 share = 0.10 }
 	}
-	Infra_DoSpendHelper = { type = Industrial class = BG return = Tmp_5 share = 0.30 }
+	Infra_DoSpendHelper = { type = Industrial class = BG return = Tmp_5 share = 0.40 }
 	if = {
 		limit = {
 			owner = { Rights_CLHie3Has = yes }
@@ -1418,7 +1387,7 @@ Infra_ShareOfferCommercial = {
 		Infra_DoSpendHelper = { type = Commercial class = NO return = Tmp_4 share = 0.02 }
 	}
 	else = {
-		Infra_DoSpendHelper = { type = Commercial class = NO return = Tmp_4 share = 0.1 }
+		Infra_DoSpendHelper = { type = Commercial class = NO return = Tmp_4 share = 0.08 }
 	}
 	Infra_DoSpendHelper = { type = Commercial class = BG return = Tmp_5 share = 0.93 }
 	set_key = { lhs = Tmp_6 value = 0 }
@@ -1432,7 +1401,7 @@ Infra_ShareOfferAcademic = {
 			has_province_flag = Industry_30Present
 		}
 		Infra_DoSpendHelper = { type = Academic class = RE return = Tmp_2 share = 0.5 }
-		Infra_DoSpendHelper = { type = Academic class = BG return = Tmp_5 share = 0.1 }
+		Infra_DoSpendHelper = { type = Academic class = BG return = Tmp_5 share = 0.2 }
 		Infra_DoSpendHelper = { type = Academic class = CL return = Tmp_6 share = 0.4 }
 	}
 	else = {
@@ -1581,17 +1550,16 @@ Infra_DoSpend = {
 			
 			multiply_key = { lhs = Tmp_7 which = Tmp_8 }
 			
-			#if = { # calc % of wealth of each.
-			#	limit = {
-			#		check_key = { lhs = Tmp_7 value = 0.01 }
-			#	}
-			#	# F = (SUM / (1-BUWealth)) - SUM
-			#	set_key = { lhs = Tmp_8 value = 1 }
-			#	subtract_key = { lhs = Tmp_8 which = Tmp_7 }
-			#	set_key = { lhs = Tmp_7 which = Tmp_0 }
-			#	divide_key = { lhs = Tmp_7 which = Tmp_8 }
-			#	subtract_key = { lhs = Tmp_7 which = Tmp_0 }				
-			#}
+			if = { # calc % of wealth of each.
+				limit = {
+					check_key = { lhs = Tmp_7 value = 0.01 }
+				}
+				set_key = { lhs = Tmp_8 value = 1 }
+				subtract_key = { lhs = Tmp_8 which = Tmp_7 }
+				set_key = { lhs = Tmp_7 which = Tmp_0 }
+				divide_key = { lhs = Tmp_7 which = Tmp_8 }
+				subtract_key = { lhs = Tmp_7 which = Tmp_0 }
+			}
 			
 			change_key = { lhs = Tmp_0 which = Tmp_7 }
 			
@@ -1653,7 +1621,7 @@ Infra_DoSpend = {
 			change_key = { lhs = RE_SpendPrp which = Tmp_2 }
 			change_key = { lhs = NM_SpendPrp which = Tmp_3 }
 			change_key = { lhs = NO_SpendPrp which = Tmp_4 }
-			change_key = { lhs = BG_SpendPrp which = Tmp_5 } 
+			change_key = { lhs = BG_SpendPrp which = Tmp_5 }
 			change_key = { lhs = CL_SpendPrp which = Tmp_6 }
 			change_key = { lhs = BU_SpendPrp which = Tmp_7 }
 			

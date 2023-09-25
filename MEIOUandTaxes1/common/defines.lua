@@ -1545,7 +1545,7 @@ NMilitary = {
 	-- flagship-related defines
 	FLAGSHIP_REQUIRED_NAVY_SIZE_IN_SAILORS = 1500,	-- The number of sailors employed in the navy required to unlock the flagship
 	FLAGSHIP_COST_DUCATS = 100,						-- The cost in ducats of a flagship
-	FLAGSHIP_COST_SAILORS = 300,					-- The cost in sailors of a flagship
+	FLAGSHIP_COST_SAILORS = 0,					-- The cost in sailors of a flagship
 	FLAGSHIP_BUILDTIME = 730,						-- Building time in days of a flagship
 	FLAGSHIP_MAX_MODIFICATION = 3,					-- Maximum number of modifications on a flagship
 	FLAGSHIP_MORALE_HIT_ON_DESTRUCTION = 1.0,		-- Morale hit when the flagship is destroyed

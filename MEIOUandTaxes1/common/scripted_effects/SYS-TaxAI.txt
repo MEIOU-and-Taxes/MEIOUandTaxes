@@ -117,6 +117,18 @@ Tax_DistributeMana = {
 			clr_province_flag = AI_Tax
 		}
 	}
+	if = {
+		limit = {
+			has_global_flag = Tax_AIDisable
+		}
+		AAA = {
+			PREV = {
+				set_key = { lhs = Tax_AssignADM which = PREV }
+				set_key = { lhs = Tax_AssignDIP which = PREV }
+				set_key = { lhs = Tax_AssignMIL which = PREV }
+			}
+		}
+	}
 	
 
 	Tax_GetPre = { Type = ADM }
@@ -577,7 +589,12 @@ Tax_GetManaShare = {
 			}
 			set_key = { lhs = Tax_CostAllocation$Type$ value = 0.001 }
 		}
-		divide_key = { lhs = Tax_CostAllocation$Type$ which = Tax_CostMin$Type$ }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_CostAllocation$Type$ value = 0.001 }
+			}
+			divide_key = { lhs = Tax_CostAllocation$Type$ which = Tax_CostMin$Type$ }
+		}
 		multiply_key = { lhs = Tax_CostAllocation$Type$ which = Tax_Assign$Type$ }
 		if = {
 			limit = {
@@ -901,325 +918,330 @@ Tax_ManaAI = {
 	POP_GetAdminEffic = { return = Tax_AdminEffic }
 	if = {
 		limit = {
-			OR  = {
-				ai = yes
-				[[base]
-				always = $base$
-				]
-				has_global_flag = POP_Sim
-			}
+			NOT = { has_global_flag = Tax_AIDisable }
 		}
-		##########
-		# Evaluate how much tax mana the AI spends
-		##########
-
-		# Export ruler mana
-		export_to_key = { lhs = Tax_AssignADM value = ADM }
-		export_to_key = { lhs = Tax_AssignDIP value = DIP }
-		export_to_key = { lhs = Tax_AssignMIL value = MIL }
-		
-		# Add base mana
-		change_key = { lhs = Tax_AssignADM value = 3 }
-		change_key = { lhs = Tax_AssignDIP value = 3 }
-		change_key = { lhs = Tax_AssignMIL value = 3 }
-		
-		## Add advisor mana
-		if = { 
-			limit = {
-				has_global_flag = POP_Sim # if sim assume lvl 2 advisor
-			}
-			change_key = { lhs = Tax_AssignADM value = 2 }
-			change_key = { lhs = Tax_AssignDIP value = 2 }
-			change_key = { lhs = Tax_AssignMIL value = 2 }
-		}
-		else = {
-			change_key = { lhs = Tax_AssignADM which = Advisor_ADM }
-			change_key = { lhs = Tax_AssignDIP which = Advisor_DIP }
-			change_key = { lhs = Tax_AssignMIL which = Advisor_MIL }
-		}
-
-		# Get yearly mana generation
-		multiply_key = { lhs = Tax_AssignADM value = 12 }
-		multiply_key = { lhs = Tax_AssignDIP value = 12 }
-		multiply_key = { lhs = Tax_AssignMIL value = 12 }
-
-		### Calculate mana budget ratio of yearly mana based on total Dev
-		# Dev+1 / ((Dev+1)*2+200)
-		set_key = { lhs = Tmp_4 value = 0 }
-
-		export_to_key = { lhs = Public_Tmp4 value = total_development } 
-		change_key = { lhs = Public_Tmp4 value = 1 }
-		change_key = { lhs = Tmp_4 which = Public_Tmp4 }
-		
-		multiply_key = { lhs = Public_Tmp4 value = 2 }
-		change_key = { lhs = Public_Tmp4 value = 200 }		
-		divide_key = { lhs = Tmp_4 which = Public_Tmp4 }
-
-		set_key = { lhs = Tmp_5 which = Tmp_4 } # dip ratio
-		set_key = { lhs = Tmp_6 which = Tmp_4 } # mil ratio
-
-		#set_key = { lhs = Public_Tmp4 which = Tmp_4 }
-		
-		### Calculate multiplier on mana budget ratio on average_autonomy
-		# Avg Autonomy * 0.01 + 1
-		export_to_key = { lhs = Public_Tmp9 value = average_autonomy }
 		if = {
 			limit = {
-				NOT = { check_key = { lhs = Public_Tmp9 value = 0.1 } }
+				OR  = {
+					ai = yes
+					[[base]
+					always = $base$
+					]
+					has_global_flag = POP_Sim
+				}
 			}
-			set_key = { lhs = Public_Tmp9 value = 0.1 }
-		}
-		multiply_key = { lhs = Public_Tmp9 value = 0.01 } # Average Autonomy * 0.01
+			##########
+			# Evaluate how much tax mana the AI spends
+			##########
 
-		change_key = { lhs = Public_Tmp9 value = 1 }
-
-		# modify Dev based budget ratio by autonomy
-		multiply_key = { lhs = Tmp_4 which = Public_Tmp9 } 
-		multiply_key = { lhs = Tmp_5 which = Public_Tmp9 } 
-		multiply_key = { lhs = Tmp_6 which = Public_Tmp9 }
-
-		set_key = { lhs = Public_Tmp9 value = 0 }
-		
-
-		####
-		# Modify adm and diplo fraction fraction based on treasury to development ratio
-		# -> decrease mana tax spending when treasury is super high, because no money is needed (mainly a China fix)
-		if = {
-			limit = {
-				monthly_income = 0.001
-				years_of_income = 2.5
-				check_key = { lhs = Tmp_4 value = 0.01 }
+			# Export ruler mana
+			export_to_key = { lhs = Tax_AssignADM value = ADM }
+			export_to_key = { lhs = Tax_AssignDIP value = DIP }
+			export_to_key = { lhs = Tax_AssignMIL value = MIL }
+			
+			# Add base mana
+			change_key = { lhs = Tax_AssignADM value = 3 }
+			change_key = { lhs = Tax_AssignDIP value = 3 }
+			change_key = { lhs = Tax_AssignMIL value = 3 }
+			
+			## Add advisor mana
+			if = { 
+				limit = {
+					has_global_flag = POP_Sim # if sim assume lvl 2 advisor
+				}
+				change_key = { lhs = Tax_AssignADM value = 2 }
+				change_key = { lhs = Tax_AssignDIP value = 2 }
+				change_key = { lhs = Tax_AssignMIL value = 2 }
 			}
-			export_to_key = { lhs = Public_Tmp6 value = total_development  }
-			export_to_key = { lhs = Public_Tmp7 value = treasury }
-			divide_key = { lhs = Public_Tmp7 which = Public_Tmp6 }
+			else = {
+				change_key = { lhs = Tax_AssignADM which = Advisor_ADM }
+				change_key = { lhs = Tax_AssignDIP which = Advisor_DIP }
+				change_key = { lhs = Tax_AssignMIL which = Advisor_MIL }
+			}
+
+			# Get yearly mana generation
+			multiply_key = { lhs = Tax_AssignADM value = 12 }
+			multiply_key = { lhs = Tax_AssignDIP value = 12 }
+			multiply_key = { lhs = Tax_AssignMIL value = 12 }
+
+			### Calculate mana budget ratio of yearly mana based on total Dev
+			# Dev+1 / ((Dev+1)*2+200)
+			set_key = { lhs = Tmp_4 value = 0 }
+
+			export_to_key = { lhs = Public_Tmp4 value = total_development } 
+			change_key = { lhs = Public_Tmp4 value = 1 }
+			change_key = { lhs = Tmp_4 which = Public_Tmp4 }
+			
+			multiply_key = { lhs = Public_Tmp4 value = 2 }
+			change_key = { lhs = Public_Tmp4 value = 200 }		
+			divide_key = { lhs = Tmp_4 which = Public_Tmp4 }
+
+			set_key = { lhs = Tmp_5 which = Tmp_4 } # dip ratio
+			set_key = { lhs = Tmp_6 which = Tmp_4 } # mil ratio
+
+			#set_key = { lhs = Public_Tmp4 which = Tmp_4 }
+			
+			### Calculate multiplier on mana budget ratio on average_autonomy
+			# Avg Autonomy * 0.01 + 1
+			export_to_key = { lhs = Public_Tmp9 value = average_autonomy }
 			if = {
 				limit = {
-					check_key = { lhs = Public_Tmp7 value = 240 }
+					NOT = { check_key = { lhs = Public_Tmp9 value = 0.1 } }
 				}
-				set_key = { lhs = Public_Tmp7 value = 240 }
+				set_key = { lhs = Public_Tmp9 value = 0.1 }
+			}
+			multiply_key = { lhs = Public_Tmp9 value = 0.01 } # Average Autonomy * 0.01
+
+			change_key = { lhs = Public_Tmp9 value = 1 }
+
+			# modify Dev based budget ratio by autonomy
+			multiply_key = { lhs = Tmp_4 which = Public_Tmp9 } 
+			multiply_key = { lhs = Tmp_5 which = Public_Tmp9 } 
+			multiply_key = { lhs = Tmp_6 which = Public_Tmp9 }
+
+			set_key = { lhs = Public_Tmp9 value = 0 }
+			
+
+			####
+			# Modify adm and diplo fraction fraction based on treasury to development ratio
+			# -> decrease mana tax spending when treasury is super high, because no money is needed (mainly a China fix)
+			if = {
+				limit = {
+					monthly_income = 0.001
+					years_of_income = 2.5
+					check_key = { lhs = Tmp_4 value = 0.01 }
+				}
+				export_to_key = { lhs = Public_Tmp6 value = total_development  }
+				export_to_key = { lhs = Public_Tmp7 value = treasury }
+				divide_key = { lhs = Public_Tmp7 which = Public_Tmp6 }
+				if = {
+					limit = {
+						check_key = { lhs = Public_Tmp7 value = 240 }
+					}
+					set_key = { lhs = Public_Tmp7 value = 240 }
+				}
+				if = {
+					limit = {
+						check_key = { lhs = Public_Tmp7 value = 30 }
+					}
+					divide_key = { lhs = Public_Tmp7 value = 24 }
+
+					divide_key = { lhs = Tmp_4 which = Public_Tmp7 }
+					divide_key = { lhs = Tmp_5 which = Public_Tmp7 }
+				}
+				set_key = { lhs = Public_Tmp6 value = 0 }
+				set_key = { lhs = Public_Tmp7 value = 0 }
 			}
 			if = {
 				limit = {
-					check_key = { lhs = Public_Tmp7 value = 30 }
+					treasury = 125000
+					check_key = { lhs = Tmp_4 value = 0.01 }
 				}
-				divide_key = { lhs = Public_Tmp7 value = 24 }
+				export_to_key = { lhs = Public_Tmp6 value = treasury }
+				divide_key = { lhs = Public_Tmp6 value = 9999 }
+				multiply_key = { lhs = Public_Tmp6 value = 0.1 }
 
-				divide_key = { lhs = Tmp_4 which = Public_Tmp7 }
-				divide_key = { lhs = Tmp_5 which = Public_Tmp7 }
+				divide_key = { lhs = Tmp_4 which = Public_Tmp6 }
+				divide_key = { lhs = Tmp_5 which = Public_Tmp6 }
+
+				set_key = { lhs = Public_Tmp6 value = 0 }
 			}
-			set_key = { lhs = Public_Tmp6 value = 0 }
-			set_key = { lhs = Public_Tmp7 value = 0 }
-		}
-		if = {
-			limit = {
-				treasury = 125000
-				check_key = { lhs = Tmp_4 value = 0.01 }
-			}
-			export_to_key = { lhs = Public_Tmp6 value = treasury }
-			divide_key = { lhs = Public_Tmp6 value = 9999 }
-			multiply_key = { lhs = Public_Tmp6 value = 0.1 }
 
-			divide_key = { lhs = Tmp_4 which = Public_Tmp6 }
-			divide_key = { lhs = Tmp_5 which = Public_Tmp6 }
-
-			set_key = { lhs = Public_Tmp6 value = 0 }
-		}
-
-		# This decreases the ratio when above 7.5% and at peace for non rebellious subjects, non militarist nations
-		if = {
-			limit = {
-				check_key = { lhs = Tmp_4 value = 0.075 }
-				is_at_war = no
-				NOT = {
-					AND = {
-						personality = ai_militarist
-						OR = {
-							is_free_or_tributary_trigger = yes
-							is_subject_of_type = rebellious_decentralized_vassal
+			# This decreases the ratio when above 7.5% and at peace for non rebellious subjects, non militarist nations
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_4 value = 0.075 }
+					is_at_war = no
+					NOT = {
+						AND = {
+							personality = ai_militarist
+							OR = {
+								is_free_or_tributary_trigger = yes
+								is_subject_of_type = rebellious_decentralized_vassal
+							}
 						}
 					}
 				}
-			}
-			export_to_key = { lhs = Public_Tmp4 value = trigger_value:liberty_desire }
-			multiply_key = { lhs = Public_Tmp4 value = 0.01 }
-			set_key = { lhs = Public_Tmp5 value = 1 }
-			subtract_key = { lhs = Public_Tmp5 which = Public_Tmp4 }
+				export_to_key = { lhs = Public_Tmp4 value = trigger_value:liberty_desire }
+				multiply_key = { lhs = Public_Tmp4 value = 0.01 }
+				set_key = { lhs = Public_Tmp5 value = 1 }
+				subtract_key = { lhs = Public_Tmp5 which = Public_Tmp4 }
 
-			multiply_key = { lhs = Tmp_6 which = Public_Tmp5 }
+				multiply_key = { lhs = Tmp_6 which = Public_Tmp5 }
 
-			set_key = { lhs = Public_Tmp5 value = 0 }
-		}
+				set_key = { lhs = Public_Tmp5 value = 0 }
+			}
 
-		set_key = { lhs = Public_Tmp4 value = 0 }
-		
-		# Lower Cap -> Dont spend nothing!
-		if = {
-			limit = {
-				NOT = { check_key = { lhs = Tmp_4 value = 0.001 } }
-			}
-			set_key = { lhs = Tmp_4 value = 0.001 }
-		}
-		if = {
-			limit = {
-				NOT = { check_key = { lhs = Tmp_6 value = 0.001 } }
-			}
-			set_key = { lhs = Tmp_6 value = 0.001 }
-		}
-		if = {
-			limit = {
-				NOT = { check_key = { lhs = Tmp_6 value = 0.001 } }
-			}
-			set_key = { lhs = Tmp_6 value = 0.001 }
-		}
-
-		if = {
-			limit = {
-				OR = {
-					NOT = { has_global_flag = POP_Sim }
-					NOT = { tag = YUA }
-				}
-			}
-			# Upper cap for mana spending fraction: 35%
+			set_key = { lhs = Public_Tmp4 value = 0 }
+			
+			# Lower Cap -> Dont spend nothing!
 			if = {
 				limit = {
-					check_key = { lhs = Tmp_4 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+					NOT = { check_key = { lhs = Tmp_4 value = 0.001 } }
 				}
-				set_key = { lhs = Tmp_4 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+				set_key = { lhs = Tmp_4 value = 0.001 }
 			}
 			if = {
 				limit = {
-					check_key = { lhs = Tmp_5 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+					NOT = { check_key = { lhs = Tmp_6 value = 0.001 } }
 				}
-				set_key = { lhs = Tmp_5 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+				set_key = { lhs = Tmp_6 value = 0.001 }
 			}
 			if = {
 				limit = {
-					check_key = { lhs = Tmp_6 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+					NOT = { check_key = { lhs = Tmp_6 value = 0.001 } }
 				}
-				set_key = { lhs = Tmp_6 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+				set_key = { lhs = Tmp_6 value = 0.001 }
 			}
-		}
 
-		#####
-		# FRACTION ADJUSTMENTS AFTER CAP
-		#####
-
-		# Nudge fractions
-		# Nudge fractions
-		[[adm] change_key = { lhs = Tmp_4 which = $adm$ } ]
-		[[dip] change_key = { lhs = Tmp_5 which = $dip$ } ]
-		[[mil] change_key = { lhs = Tmp_6 which = $mil$ } ]
-
-
-		# Adjustments to balance China in sim
-		if = {
-			limit = {
-				has_global_flag = POP_Sim
-				tag = YUA
-			}
-			multiply_key = { lhs = Tmp_4 value = 6.5 }
-			multiply_key = { lhs = Tmp_5 value = 4 }
-			multiply_key = { lhs = Tmp_6 value = 1.7 }
-		}
-
-		# Increase fraction by 5% for free militarist nations (or colonial/rebellious subjects) as long as they earn enough points
-		if = {
-			limit = {
-				personality = ai_militarist
-				adm_power = 156 # 156 = 13 times 12 -> Theoretical maximum mana earned yearly
-				dip_power = 156
-				mil_power = 156
-				OR = {
-					is_free_or_tributary_trigger = yes
-					is_colonial_nation = yes
-					is_subject_of_type = rebellious_decentralized_vassal
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_global_flag = POP_Sim }
+						NOT = { tag = YUA }
+					}
+				}
+				# Upper cap for mana spending fraction: 35%
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+					}
+					set_key = { lhs = Tmp_4 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+				}
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_5 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+					}
+					set_key = { lhs = Tmp_5 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+				}
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_6 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
+					}
+					set_key = { lhs = Tmp_6 value = 0.25 } # `DEFINE_AI_YEARLY_MANA_SPEND_RATIO_CAP~value`
 				}
 			}
-			change_key = { lhs = Tmp_4 value = 0.025 }
-			change_key = { lhs = Tmp_5 value = 0.025 }
-			change_key = { lhs = Tmp_6 value = 0.075 }
-		}
 
-		# Increase fraction by 5% when being at war
-		if = {
-			limit = {
-				is_at_war = yes
+			#####
+			# FRACTION ADJUSTMENTS AFTER CAP
+			#####
+
+			# Nudge fractions
+			# Nudge fractions
+			[[adm] change_key = { lhs = Tmp_4 which = $adm$ } ]
+			[[dip] change_key = { lhs = Tmp_5 which = $dip$ } ]
+			[[mil] change_key = { lhs = Tmp_6 which = $mil$ } ]
+
+
+			# Adjustments to balance China in sim
+			if = {
+				limit = {
+					has_global_flag = POP_Sim
+					tag = YUA
+				}
+				multiply_key = { lhs = Tmp_4 value = 6.5 }
+				multiply_key = { lhs = Tmp_5 value = 4 }
+				multiply_key = { lhs = Tmp_6 value = 1.7 }
 			}
-			change_key = { lhs = Tmp_4 value = 0.025 }
-			change_key = { lhs = Tmp_5 value = 0.025 }
-			change_key = { lhs = Tmp_6 value = 0.075 }
-		}
 
-		# Multiply yearly mana generation with calculated budget fractions
-		multiply_key = { lhs = Tmp_4 which = Modi_TaxAI_RatioSpendingMulti } # adm budget fraction
-		multiply_key = { lhs = Tmp_5 which = Modi_TaxAI_RatioSpendingMulti } # dip budget fraction
-		multiply_key = { lhs = Tmp_6 which = Modi_TaxAI_RatioSpendingMulti } # mil budget fraction
+			# Increase fraction by 5% for free militarist nations (or colonial/rebellious subjects) as long as they earn enough points
+			if = {
+				limit = {
+					personality = ai_militarist
+					adm_power = 156 # 156 = 13 times 12 -> Theoretical maximum mana earned yearly
+					dip_power = 156
+					mil_power = 156
+					OR = {
+						is_free_or_tributary_trigger = yes
+						is_colonial_nation = yes
+						is_subject_of_type = rebellious_decentralized_vassal
+					}
+				}
+				change_key = { lhs = Tmp_4 value = 0.025 }
+				change_key = { lhs = Tmp_5 value = 0.025 }
+				change_key = { lhs = Tmp_6 value = 0.075 }
+			}
 
-		# Multiply yearly mana generation with calculated budget fractions
-		multiply_key = { lhs = Tax_AssignADM which = Tmp_4 } # adm budget fraction
-		multiply_key = { lhs = Tax_AssignDIP which = Tmp_5 } # dip budget fraction
-		multiply_key = { lhs = Tax_AssignMIL which = Tmp_6 } # mil budget fraction
+			# Increase fraction by 5% when being at war
+			if = {
+				limit = {
+					is_at_war = yes
+				}
+				change_key = { lhs = Tmp_4 value = 0.025 }
+				change_key = { lhs = Tmp_5 value = 0.025 }
+				change_key = { lhs = Tmp_6 value = 0.075 }
+			}
 
-		# Base mana spending = 1 mana per category
-		change_key = { lhs = Tax_AssignADM value = 1 }
-		change_key = { lhs = Tax_AssignDIP value = 1 }
-		change_key = { lhs = Tax_AssignMIL value = 1 }
+			# Multiply yearly mana generation with calculated budget fractions
+			multiply_key = { lhs = Tmp_4 which = Modi_TaxAI_RatioSpendingMulti } # adm budget fraction
+			multiply_key = { lhs = Tmp_5 which = Modi_TaxAI_RatioSpendingMulti } # dip budget fraction
+			multiply_key = { lhs = Tmp_6 which = Modi_TaxAI_RatioSpendingMulti } # mil budget fraction
 
-		## Upper absolute cap for mana spending = 45
-		## Lower absolute cap for mana spending = 2.5
-		if = {
-			limit = {
-				OR = {
-					NOT = { has_global_flag = POP_Sim }
-					NOT = { tag = YUA }
+			# Multiply yearly mana generation with calculated budget fractions
+			multiply_key = { lhs = Tax_AssignADM which = Tmp_4 } # adm budget fraction
+			multiply_key = { lhs = Tax_AssignDIP which = Tmp_5 } # dip budget fraction
+			multiply_key = { lhs = Tax_AssignMIL which = Tmp_6 } # mil budget fraction
+
+			# Base mana spending = 1 mana per category
+			change_key = { lhs = Tax_AssignADM value = 1 }
+			change_key = { lhs = Tax_AssignDIP value = 1 }
+			change_key = { lhs = Tax_AssignMIL value = 1 }
+
+			## Upper absolute cap for mana spending = 45
+			## Lower absolute cap for mana spending = 2.5
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_global_flag = POP_Sim }
+						NOT = { tag = YUA }
+					}
+				}
+				if = {
+					limit = { check_key = { lhs = Tax_AssignADM value = 45 } } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+
+					set_key = { lhs = Tax_AssignADM value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+				}
+				else_if = {
+					limit = { NOT = { check_key = { lhs = Tax_AssignADM value = 2.5 } } } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
+					set_key = { lhs = Tax_AssignADM value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+				}
+				if = {
+					limit = { check_key = { lhs = Tax_AssignDIP value = 45 } } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+
+					set_key = { lhs = Tax_AssignDIP value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+				}
+				else_if = {
+					limit = { NOT = { check_key = { lhs = Tax_AssignDIP value = 2.5 } } } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
+					set_key = { lhs = Tax_AssignDIP value = 2.5 } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
+				}
+				if = {
+					limit = { check_key = { lhs = Tax_AssignMIL value = 45 } } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+
+					set_key = { lhs = Tax_AssignMIL value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+				}
+				else_if = {
+					limit = { NOT = { check_key = { lhs = Tax_AssignMIL value = 2.5 } } } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
+					set_key = { lhs = Tax_AssignMIL value = 2.5 } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
 				}
 			}
-			if = {
-				limit = { check_key = { lhs = Tax_AssignADM value = 45 } } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
 
-				set_key = { lhs = Tax_AssignADM value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
-			}
-			else_if = {
-				limit = { NOT = { check_key = { lhs = Tax_AssignADM value = 2.5 } } } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
-				set_key = { lhs = Tax_AssignADM value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
-			}
-			if = {
-				limit = { check_key = { lhs = Tax_AssignDIP value = 45 } } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
+			### WIP - for proper tag-switching ###
+			#set_key = { lhs = Tax_CostAdmInp which = Tax_AssignADM }
+			#set_key = { lhs = Tax_CostDipInp which = Tax_AssignDIP }
+			#set_key = { lhs = Tax_CostMilInp which = Tax_AssignMIL }
+			###	
 
-				set_key = { lhs = Tax_AssignDIP value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
-			}
-			else_if = {
-				limit = { NOT = { check_key = { lhs = Tax_AssignDIP value = 2.5 } } } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
-				set_key = { lhs = Tax_AssignDIP value = 2.5 } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
-			}
-			if = {
-				limit = { check_key = { lhs = Tax_AssignMIL value = 45 } } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
-
-				set_key = { lhs = Tax_AssignMIL value = 45 } # `DEFINE_AI_MANA_TAX_SPENDING_UPPER_CAP~value`
-			}
-			else_if = {
-				limit = { NOT = { check_key = { lhs = Tax_AssignMIL value = 2.5 } } } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
-				set_key = { lhs = Tax_AssignMIL value = 2.5 } # `DEFINE_AI_MANA_TAX_SPENDING_LOWER_CAP~value`
-			}
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = Tmp_6 value = 0 }
 		}
-
-		### WIP - for proper tag-switching ###
-		#set_key = { lhs = Tax_CostAdmInp which = Tax_AssignADM }
-		#set_key = { lhs = Tax_CostDipInp which = Tax_AssignDIP }
-		#set_key = { lhs = Tax_CostMilInp which = Tax_AssignMIL }
-		###	
-
-		set_key = { lhs = Tmp_4 value = 0 }
-		set_key = { lhs = Tmp_5 value = 0 }
-		set_key = { lhs = Tmp_6 value = 0 }
-	}
-	else = {
-		set_key = { lhs = Tax_AssignADM value = 0 }
-		set_key = { lhs = Tax_AssignDIP value = 0 }
-		set_key = { lhs = Tax_AssignMIL value = 0 }
-		[[adm] set_key = { lhs = Tax_AssignADM which = $adm$ } ]
-		[[dip] set_key = { lhs = Tax_AssignDIP which = $dip$ } ]
-		[[mil] set_key = { lhs = Tax_AssignMIL which = $mil$ } ]
+		else = {
+			set_key = { lhs = Tax_AssignADM value = 0 }
+			set_key = { lhs = Tax_AssignDIP value = 0 }
+			set_key = { lhs = Tax_AssignMIL value = 0 }
+			[[adm] set_key = { lhs = Tax_AssignADM which = $adm$ } ]
+			[[dip] set_key = { lhs = Tax_AssignDIP which = $dip$ } ]
+			[[mil] set_key = { lhs = Tax_AssignMIL which = $mil$ } ]
+		}
 	}
 }
