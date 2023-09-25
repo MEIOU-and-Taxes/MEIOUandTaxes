@@ -436,11 +436,21 @@ TN_GetDmndEliteDirect = {
         ### How much produce can we actually tap, usually scaled down by a Scalar (100 being 100 scale)
         set_key = { lhs = Tmp_4 which = $worker$_Produce$good$ }
         [[Scalar100]
-        multiply_key = { lhs = Tmp_4 value = 0.01 } ### Overflow
-        multiply_key = { lhs = Tmp_4 which = $Scalar100$ }
+        if = {
+            limit = {
+                NOT = { check_key = { lhs = $Scalar100$ value = 100 } }
+            }
+            multiply_key = { lhs = Tmp_4 value = 0.01 } ### Overflow
+            multiply_key = { lhs = Tmp_4 which = $Scalar100$ }
+        }
         ]
         [[Scalar]
-        multiply_key = { lhs = Tmp_4 which = $Scalar$ }
+        if = {
+            limit = {
+                NOT = { check_key = { lhs = $Scalar$ value = 1.0 } }
+            }
+            multiply_key = { lhs = Tmp_4 which = $Scalar$ }
+        }
         ]
         ### Still need to factor out what other elite classes already bought
         [[elite1] subtract_key = { lhs = Tmp_4 which = $elite1$_DirectBuyFrom$worker$$good$ } ]
