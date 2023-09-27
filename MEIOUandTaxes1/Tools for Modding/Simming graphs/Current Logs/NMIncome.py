@@ -17,9 +17,19 @@ def get_data(t, i):
 
     return lst
 
+import os
+def read_and_concatenate_old_logs(directory='.'):
+    concatenated_text = ''
+    for file_name in sorted(os.listdir(directory)):
+        if file_name.startswith('game_') and file_name.endswith('.log') and file_name != 'game.log':
+            with open(file_name, 'r') as f:
+                concatenated_text += f.read()
+    return concatenated_text
+
 if __name__ == '__main__':
     with open('game.log') as f:
-        t = f.read()
+        t = read_and_concatenate_old_logs()
+        t += f.read()
         
         Total = get_data(t, 'Nomad Income Total')
         Innate = get_data(t, 'Nomad Income Innate')
