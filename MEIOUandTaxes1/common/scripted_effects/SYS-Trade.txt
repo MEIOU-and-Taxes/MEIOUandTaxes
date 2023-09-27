@@ -473,6 +473,8 @@ TN_PrepSector = {
                 }
                 clr_province_flag = TN_SectorCent
                 clr_province_flag = HasSeaAccess
+                clr_province_flag = HasRiverSeaAccess
+                clr_province_flag = HasRiverSeaBAccess
                 clr_province_flag = HasSilkAccess
                 
 
@@ -628,6 +630,8 @@ TN_PrepSector = {
 
 	tradenode_centers = {
         clr_global_flag = HasSeaAccess
+        clr_global_flag = HasRiverSeaAccess
+        clr_global_flag = HasRiverSeaBAccess
         clr_global_flag = HasSilkAccess
         every_trade_node_member_country = {
             limit = {
@@ -636,6 +640,8 @@ TN_PrepSector = {
             }
             set_key = { lhs = Tmp_0 value = 0 }
             clr_global_flag = HasSeaAccess
+            clr_global_flag = HasRiverSeaAccess
+            clr_global_flag = HasRiverSeaBAccess
             clr_global_flag = HasSilkAccess
             clr_country_flag = Found_TN
             every_province = {
@@ -645,13 +651,23 @@ TN_PrepSector = {
                     isValidProv = yes
                 }
                 if = {
-                    limit = {
-                        OR = {
-                            has_port = yes                            
-                            check_key = { lhs = TN_River value = 1 }
-                        }
+                    limit = {                       
+                        has_port = yes 
+                        NOT = { has_province_modifier = lack_of_harbour }
                     }
                     set_global_flag = HasSeaAccess                   
+                }
+                if = {
+                    limit = {
+                        has_province_flag = TN_RiverJump
+                    }
+                    set_global_flag = HasRiverSeaAccess
+                }
+                if = {
+                    limit = {
+                        has_province_flag = TN_RiverJumpB
+                    }
+                    set_global_flag = HasRiverSeaBAccess                   
                 }
                 if = {
                     limit = {
@@ -691,6 +707,24 @@ TN_PrepSector = {
                     }
                     else = {
                         clr_province_flag = HasSeaAccess
+                    }
+                    if = {
+                        limit = {
+                            has_global_flag = HasRiverSeaAccess
+                        }
+                        set_province_flag = HasRiverSeaAccess
+                    }
+                    else = {
+                        clr_province_flag = HasRiverSeaAccess
+                    }
+                    if = {
+                        limit = {
+                            has_global_flag = HasRiverSeaBAccess
+                        }
+                        set_province_flag = HasRiverSeaBAccess
+                    }
+                    else = {
+                        clr_province_flag = HasRiverSeaBAccess
                     }
                     if = {
                         limit = {
@@ -2196,6 +2230,8 @@ TN_SetReach = {
             limit = { # Only Major or higher than jump/spread
                 OR = {
                     has_province_flag = HasSeaAccess
+                    has_province_flag = HasRiverSeaAccess
+                    has_province_flag = HasRiverSeaBAccess
                     has_province_flag = HasSilkAccess
                 }
                 OR = {
@@ -2286,7 +2322,7 @@ TN_SetReach = {
                 limit = {
                     has_province_flag = TN_SectorCent
                     NOT = { has_province_flag = TN_SectorCentReachWithin }
-                    has_province_flag = HasSeaAccess          
+                    has_province_flag = HasSeaAccess
                 }
                 TN_effect = { 
                     effect = TN_effect21 # Connect every owned place in the world
