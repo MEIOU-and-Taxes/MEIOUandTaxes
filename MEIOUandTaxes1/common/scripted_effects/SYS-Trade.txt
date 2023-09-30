@@ -4650,8 +4650,10 @@ TN_GetProdClass = {
 }
 
 TN_SetIncomeInnateHelperMain = {
+    [[Proportional]
     if = {
         limit = {
+            always = $Proportional$
             check_key = { lhs = $class$_Total value = 0.01 }
         }
         if = {
@@ -4672,7 +4674,16 @@ TN_SetIncomeInnateHelperMain = {
             set_key = { lhs = $class$_IncomeInnate which = $class$_Total }
             multiply_key = { lhs = $class$_IncomeInnate value = $val2$ }
         }
-    }
+    }]
+    [[Fixed]
+    if = {
+        limit = {
+            always = $Fixed$
+            check_key = { lhs = $class$_Total value = 0.01 }
+        }
+        set_key = { lhs = $class$_IncomeInnate value = $val$ }
+    }]
+    multiply_key = { lhs = $class$_IncomeInnate value = 1.333 } ## balancing
 	if = {
 		limit = {
 			NOT = { has_global_flag = POP_Sim }
@@ -4681,14 +4692,20 @@ TN_SetIncomeInnateHelperMain = {
     }
     else_if = {
         limit = {
-            has_global_flag = POP_Sim10
+            has_global_flag = POP_Sim
         }
-        multiply_key = { lhs = $class$_IncomeInnate value = 0.25 } ## balancing
+        multiply_key = { lhs = $class$_IncomeInnate value = 1.0 } ## balancing
         if = {
             limit = {
-                NOT = { has_global_flag = POP_Sim6 }
+                has_global_flag = POP_Sim10
             }
-            multiply_key = { lhs = $class$_IncomeInnate value = 0.5 } ## balancing
+            multiply_key = { lhs = $class$_IncomeInnate value = 0.25 } ## balancing
+            if = {
+                limit = {
+                    NOT = { has_global_flag = POP_Sim6 }
+                }
+                multiply_key = { lhs = $class$_IncomeInnate value = 0.5 } ## balancing
+            }
         }
     }
 }
@@ -4702,16 +4719,11 @@ TN_SetIncomeInnateHelper = {
 # val2 = innate income per 1k pops before threshhold
 # Threshhold = pops in k below which higher innate income is applied
 TN_SetIncomeInnate = {
-    TN_SetIncomeInnateHelperMain = { class = SF val = 0.006 val2 = 0.08 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NM val = 0.007 val2 = 0.08 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = RE val = 0.008 val2 = 0.5 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NO val = 0.012 val2 = 0.8 Threshold = 0.5 }
-    if = {
-        limit = {
-            check_key = { lhs = BG_Total value = 0.001 }
-        }
-        set_key = { lhs = BG_IncomeInnate value = 0.5 }
-    }
+    TN_SetIncomeInnateHelperMain = { class = SF Proportional=yes val = 0.006 val2 = 0.08 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = NM Proportional=yes val = 0.007 val2 = 0.08 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = RE Proportional=yes val = 0.008 val2 = 0.5 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = NO Proportional=yes val = 0.012 val2 = 0.8 Threshold = 0.5 }
+    TN_SetIncomeInnateHelperMain = { class = BG Fixed=yes val = 0.5 }
     set_key = { lhs = CL_IncomeInnate value = 0 }
 }
 
