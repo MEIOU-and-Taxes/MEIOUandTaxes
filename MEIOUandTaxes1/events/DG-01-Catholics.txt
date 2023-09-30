@@ -1,35 +1,44 @@
 namespace = DG_Catholics
 namespace = DG_HeresySpread
 
-#############################
-# Birth of Countreformation #
-#############################
+################################
+# BIRTH OF COUNTER-REFORMATION #
+################################
 #001 - Birth of Counter-Reformation
 #002 - Catholic Nations picking a side
 #003 - Hussite Bohemia picking a side
 #009 - Gain of Reform Desire
+#010 - Founding of the Jesuits
+
 #####################
-# Ownership of Rome #
+# OWNERSHIP OF ROME #
 #####################
 #081 - Warning when controlling Rome
 #083 - Taking ownership of Rome from the Pope
 #085 - Taking ownership of Rome from another Catholic
 #087 - Taking ownership of Rome from a heretic/heathen
 #089 - Inheriting Rome
-########################
-# Religious Conversions #
+
+#########################
+# RELIGIOUS CONVERSIONS #
 #########################
 #118 - Spawn a center of reformation
 #119 - Removes center of reformation
+
 ###################
-# Catholic Unrest #
+# CATHOLIC UNREST #
 ###################
 #301 - Adds trauma linked to Catholic minorities
 #311 - Adds unrest linked to Catholic minorities
 
-#############################
-# Birth of Countreformation #
-#############################
+###############
+# MONASTICISM #
+###############
+#413 - The Jesuit Order
+
+################################
+# BIRTH OF COUNTER-REFORMATION #
+################################
 #01 - Birth of Counter-Reformation
 country_event = {
 	id = DG_Catholics.001
@@ -955,6 +964,34 @@ country_event = {
 					PAP = { add_reform_desire = 0.0015 }
 				}
 			}
+		}
+	}
+}
+
+### FOUNDING OF THE JESUITS
+country_event = {
+	id = DG_Catholics.010
+	title = DG_Catholics.010.title
+	desc = DG_Catholics.010.desc
+	picture = catholic_order_founded
+	fire_only_once = yes
+	is_triggered_only = yes #on_actions on_four_year_pulse
+	major = yes
+	
+	trigger = {
+		is_religion_enabled = reformed
+		tag = PAP
+		NOT = { has_country_flag = jesuits_founded }
+		has_global_flag = ignacio_de_loyola
+	}
+	
+	option = {
+		name = DG_Catholics.010.opta #Give them free reign to fight heresy
+		add_devotion = 10
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=10 }
+		hidden_effect = {
+			set_country_flag = jesuits_founded
+			change_variable = { which = jesuit_support value = 2 }
 		}
 	}
 }
@@ -4621,5 +4658,520 @@ country_event = {
 	
 	option = {
 		name = "AI_Event"
+	}
+}
+
+###############
+# MONASTICISM #
+###############
+
+### MONASTICISM
+province_event = {
+	id = DG_Catholics.401
+	title = DG_Catholics.401.title
+	desc = DG_Catholics.401.desc
+	picture = catholic_monks
+	
+	trigger = {
+	    owner = {
+		    catholic_trigger = yes
+			Rights_CLHie1Has = yes
+			NOT = { has_institution = Academia }
+		}
+		OR = {
+		    farming_province_trigger = yes
+			check_key = { lhs = Class_Urban value = 5 }
+		}
+	    has_owner_culture = yes
+		has_owner_religion = yes
+		is_core = owner
+		NOT = { has_province_modifier = augustinian_order }
+		NOT = { has_province_modifier = dominican_order }
+		NOT = { has_province_modifier = cistercian_order }
+		NOT = { has_province_modifier = franciscan_order }
+		NOT = { has_province_modifier = jesuit_order }
+	}
+	
+	mean_time_to_happen = {
+		years = 20
+		modifier = {
+			factor = 1.2
+			reform_desire = 0.5
+		}
+		modifier = {
+			factor = 1.2
+			reform_desire = 0.75
+		}
+		modifier = {
+			factor = 1.2
+			reform_desire = 1.0
+		}
+		modifier = {
+			factor = 1.5
+			is_religion_enabled = protestant
+		}
+		modifier = {
+			factor = 1.5
+			owner = { has_institution = Scientific_Method }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.401.opta #Augustinians
+		trigger = { farming_province_trigger = yes }
+		ai_chance = {
+			factor = 15
+		}
+		owner = {
+		    add_treasury = -25
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+		add_province_modifier = { name = augustinian_order duration = 18250 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=25 }
+		}
+	}
+	option = {
+		name = DG_Catholics.401.optb #Dominicans
+		trigger = { check_key = { lhs = Class_Urban value = 5 } }
+		ai_chance = {
+			factor = 15
+		}
+		owner = {
+		    add_treasury = -25
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+		add_province_modifier = { name = dominican_order duration = 18250 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=25 }
+		}
+	}
+	option = {
+		name = DG_Catholics.401.optc #Cistercians
+		trigger = {
+			is_colony = no
+            farming_province_trigger = yes
+		}
+		ai_chance = {
+			factor = 15
+		}
+		owner = {
+		    add_treasury = -25
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+		add_province_modifier = { name = cistercian_order duration = 18250 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=25 }
+		}
+	}
+	option = {
+		name = DG_Catholics.401.optd #Franciscans
+		trigger = { check_key = { lhs = Class_Urban value = 5 } }
+		ai_chance = {
+			factor = 15
+		}
+		owner = {
+		    add_treasury = -25
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+		add_province_modifier = { name = franciscan_order duration = 18250 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=25 }
+		}
+	}
+	option = {
+		name = DG_Catholics.401.opte #Jesuits
+		trigger = { owner = { check_variable = { which = jesuit_support value = 1 } } }
+		ai_chance = {
+			factor = 15
+		}
+		owner = {
+		    add_treasury = -25
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+		add_province_modifier = { name = jesuit_order duration = 18250 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=25 }
+		}
+	}
+	option = {
+		name = DG_Catholics.401.optf #No thanks
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 5
+				NOT = { treasury = 50 }
+			}
+			modifier = {
+				factor = 5
+				num_of_loans = 50
+			}
+			modifier = {
+				factor = 5
+				check_key = { lhs = Prov_CLLoy value = 75 }
+			}
+			modifier = {
+				factor = 2.5
+				check_key = { lhs = Prov_CLLoy value = 50 }
+			}
+		}
+		owner = {
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-5 }
+		}
+	}
+}
+
+### AUGUSTINIAN MONKS
+province_event = {
+	id = DG_Catholics.402
+	title = DG_Catholics.402.title
+	desc = DG_Catholics.402.desc
+	picture = catholic_monks
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    has_province_modifier = augustinian_order
+		owner = {
+		    catholic_trigger = yes
+			Rights_CLHie1Has = yes
+			NOT = { has_institution = Academia }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.402.opta #Ask them to pray for us
+		Public_ChangePowCL = { inp = 10 type = value }
+		custom_tooltip = monastic_power_increase
+	}
+}
+
+### DOMINICAN FRIARS
+province_event = {
+	id = DG_Catholics.403
+	title = DG_Catholics.403.title
+	desc = DG_Catholics.402.desc
+	picture = catholic_monks
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    has_province_modifier = dominican_order
+		owner = {
+		    catholic_trigger = yes
+			Rights_CLHie1Has = yes
+			NOT = { has_institution = Academia }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.402.opta #Ask them to pray for us
+		Public_ChangePowCL = { inp = 10 type = value }
+		custom_tooltip = monastic_power_increase
+	}
+}
+
+### CISTERSCIAN MONKS
+province_event = {
+	id = DG_Catholics.404
+	title = DG_Catholics.404.title
+	desc = DG_Catholics.402.desc
+	picture = catholic_monks
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    has_province_modifier = cistercian_order
+		owner = {
+		    catholic_trigger = yes
+			Rights_CLHie1Has = yes
+			NOT = { has_institution = Academia }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.402.opta #Ask them to pray for us
+		Public_ChangePowCL = { inp = 10 type = value }
+	}
+}
+
+### FRANCISCAN FRIARS
+province_event = {
+	id = DG_Catholics.405
+	title = DG_Catholics.405.title
+	desc = DG_Catholics.402.desc
+	picture = catholic_monks
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    has_province_modifier = franciscan_order
+		owner = {
+		    catholic_trigger = yes
+			Rights_CLHie1Has = yes
+			NOT = { has_institution = Academia }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.402.opta #Ask them to pray for us
+		Public_ChangePowCL = { inp = 10 type = value }
+		custom_tooltip = monastic_power_increase
+	}
+}
+
+### JESUIT MONKS
+province_event = {
+	id = DG_Catholics.406
+	title = DG_Catholics.406.title
+	desc = DG_Catholics.402.desc
+	picture = catholic_monks
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    has_province_modifier = franciscan_order
+		owner = {
+		    catholic_trigger = yes
+			Rights_CLHie1Has = yes
+			NOT = { has_institution = Academia }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.402.opta #Ask them to pray for us
+		Public_ChangePowCL = { inp = 15 type = value }
+		custom_tooltip = monastic_power_increase
+		owner = { #Jesuits were particuralry famous for imposing their influence on central government
+		    add_faction_influence = {
+                faction = FC_CL
+                influence = 5
+            }
+		}
+	}
+}
+
+### THE JESUITS
+country_event = {
+	id = DG_Catholics.413
+	title = DG_Catholics.413.title
+	desc = DG_Catholics.413.desc
+	picture = catholic_order_founded
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+		PAP = { has_country_flag = jesuits_founded }
+		religion = catholic
+		NOT = { religious_unity = 1.00 }
+		NOT = { check_variable = { which = jesuit_support value = 1 } }
+		NOT = { has_country_flag = jesuits_suppressed }
+		NOT = { is_colonial_nation = yes }
+		NOT = { is_excommunicated = yes }
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = DG_Catholics.413.opta #Accept the aid of the church
+		ai_chance = {
+			factor = 40
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		hidden_effect = {
+			change_variable = { which = jesuit_support value = 1 }
+		}
+	}
+	option = {
+		name = DG_Catholics.413.optb #Grant the Jesuits special privileges
+		ai_chance = {
+			factor = 30
+			modifier = {
+				NOT = { religious_unity = 0.80 }
+				factor = 1.5
+			}
+			modifier = {
+				NOT = { religious_unity = 0.60 }
+				factor = 1.5
+			}
+			modifier = {
+				NOT = { religious_unity = 0.40 }
+				factor = 1.5
+			}
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=20 }
+		CL_EmpowerClergy = yes
+		custom_tooltip = CL_EmpowerClergy_effect
+		hidden_effect = {
+			change_variable = { which = jesuit_support value = 2 }
+		}
+	}
+	option = {
+		name = DG_Catholics.413.optc #The situation is too delicate
+		ai_chance = {
+			factor = 30
+		}
+		modifier = {
+			factor = 1.5
+			check_key = { lhs = Prov_CLLoy value = 70 }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		set_country_flag = jesuits_suppressed
+		PAP = {
+ 			add_opinion = {
+ 				who = ROOT
+ 				modifier = bav_jesuits_rejected
+			}
+ 		}
+	}
+}
+
+### JESUIT MISSIONARIES
+province_event = {
+	id = DG_Catholics.414
+	title = DG_Catholics.414.title
+	desc = DG_Catholics.414.desc
+	picture = catholic_monks_preaching
+	
+	trigger = {
+		owner = { 
+	        religion = catholic
+			NOT = { is_excommunicated = yes }
+		    check_variable = { which = jesuit_support value = 1 } 
+			NOT = { has_country_flag = jesuits_suppressed }
+		}
+		NOT = { religion_years = { protestant = 120 } }
+		NOT = { has_province_modifier = jesuit_activity }
+        OR = {
+            MN_CheckRelSlot = { Type = value Religion = 2 }
+            MN_CheckRelSlot = { Type = value Religion = 3 }
+            MN_CheckRelSlot = { Type = value Religion = 4 }
+            MN_CheckRelSlot = { Type = value Religion = 5 }
+            MN_CheckRelSlot = { Type = value Religion = 6 }
+        }
+	}
+	
+	mean_time_to_happen = {
+		years = 25
+		modifier = {
+			owner = { check_variable = { which = jesuit_support value = 2 } }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { check_variable = { which = jesuit_support value = 3 } }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { check_variable = { which = jesuit_support value = 4 } }
+			factor = 0.7
+		}
+		modifier = {
+			is_in_capital_area = yes
+			factor = 0.7
+		}
+		modifier = {
+			culture_group = owner
+			factor = 0.7
+		}
+		modifier = {
+		    check_key = { lhs = Prov_CLLoy value = 50 }
+			factor = 0.7
+		}
+		modifier = {
+		    check_key = { lhs = Prov_CLPow value = 50 }
+			factor = 0.7
+		}
+		modifier = {
+		    any_neighbor_province = { has_province_modifier = jesuit_order }
+			factor = 0.7
+		}
+		modifier = {
+		    has_province_modifier = jesuit_order
+			factor = 0.3
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.414.opta
+		custom_tooltip = convert_50
+		add_province_modifier = { name = jesuit_activity duration = 730 } #2 years
+	}
+}
+
+### JESUIT EDUCATION
+country_event = {
+	id = DG_Catholics.415
+	title = DG_Catholics.415.title
+	desc = DG_Catholics.415.desc
+	picture = catholic_monks
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+		religion = catholic
+		check_variable = { which = jesuit_support value = 1 }
+		any_owned_province = {
+		    has_province_modifier = jesuit_activity
+		}
+		is_at_war = no
+		NOT = { has_country_flag = dg_jesuit_education }
+		NOT = { has_country_flag = jesuits_suppressed }
+		NOT = { is_excommunicated = yes }
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}	
+	
+	immediate = { set_country_flag = dg_jesuit_education }
+	
+	option = {
+		name = DG_Catholics.415.opta #Establish a Jesuit college
+		ai_chance = { 
+		    factor = 50 
+		}
+		capital_scope = {
+		    add_province_modifier = { name = jesuit_college duration = 36500 } #100 years
+		}
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		hidden_effect = { 
+		    change_variable = { which = jesuit_support value = 1 }
+			set_country_flag = jesuit_colleges
+		}
+	}
+	option = {
+		name = DG_Catholics.415.optb #Let them run our entire school system
+		ai_chance = {
+			factor = 30
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+		}
+		add_country_modifier = { name = jesuit_schools duration = -1 }
+		
+        Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=20 }
+		CL_EmpowerClergy = yes
+		custom_tooltip = CL_EmpowerClergy_effect
+		hidden_effect = { 
+		    change_variable = { which = jesuit_support value = 2 } 
+		    set_country_flag = jesuit_colleges
+		}
+	}
+	option = {
+		name = DG_Catholics.415.optc #We have no interest in this arrangement
+		ai_chance = {
+			factor = 20
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
 	}
 }
