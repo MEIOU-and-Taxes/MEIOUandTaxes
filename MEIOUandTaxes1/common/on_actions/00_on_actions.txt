@@ -99,10 +99,9 @@ on_startup = {
 				country_event = { id = setup_event.11 }
 				
 				country_event = { id = cb_types.1 }
-				country_event = { id = cb_types.2 }
-				country_event = { id = cb_types.3 }
-				country_event = { id = cb_types.4 }
-								
+				
+				country_event = { id = SYS_Pulse.005 }
+				
 				# Reload DG data
 				country_event = { id = POP_DG.001 }
 				
@@ -307,8 +306,6 @@ on_startup = {
 		every_province = {
             remove_province_modifier = river_notify
             set_key = { lhs = ID_TN value = 0 }
-			set_key = { lhs = Land_SoilD which = Land_Soil }
-			multiply_key = { lhs = Land_SoilD value = 100 }
 			set_key = { lhs = BU_SpendMPMaintSave which = BU_SpendMPMaint }
 		}
         tradenode_centers = { # Assign unique trade node center ID's
@@ -3320,11 +3317,23 @@ on_company_chartered = {
 
 # ROOT = Overlord, FROM = Minor
 on_dependency_gained = {
-	set_country_flag = tf_recalculate_communication_efficiency
-	overlord = { set_country_flag = tf_recalculate_communication_efficiency }
+	if = {
+		limit = {
+			FROM = { is_subject_other_than_tributary_trigger = yes }
+		}
+		set_country_flag = tf_recalculate_communication_efficiency
+		overlord = { set_country_flag = tf_recalculate_communication_efficiency }
+		FROM = { 
+			set_country_flag = tf_recalculate_communication_efficiency 
+			every_subject_country = {
+				limit = {
+					is_subject_other_than_tributary_trigger = yes
+				}
+				set_country_flag = tf_recalculate_communication_efficiency
+			}
+		}
+	}
 	FROM = { 
-		set_country_flag = tf_recalculate_communication_efficiency 
-		every_subject_country = { set_country_flag = tf_recalculate_communication_efficiency }
 		if = {
 			limit = {
 				OR = {
@@ -3388,7 +3397,12 @@ on_dependency_lost = {
 	overlord = { set_country_flag = tf_recalculate_communication_efficiency }
 	FROM = { 
 		set_country_flag = tf_recalculate_communication_efficiency 
-		every_subject_country = { set_country_flag = tf_recalculate_communication_efficiency }
+		every_subject_country = {
+			limit = {
+				is_subject_other_than_tributary_trigger = yes
+			}
+			set_country_flag = tf_recalculate_communication_efficiency
+		}
 		set_key = { lhs = Integration_Progress value = 0 }
 		set_key = { lhs = Remaining_Years value = 0 }
 		vassal_type_tracking_effect = yes 

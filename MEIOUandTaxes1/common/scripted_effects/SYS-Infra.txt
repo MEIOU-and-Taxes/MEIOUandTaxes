@@ -518,9 +518,21 @@ Infra_SetMaintHelper = {
 					check_key = { lhs = Tmp_0 value = 0.001 }
 				}
 				### Add a throughput factor
+				set_key = { lhs = Tmp_4 which = Prod_S$slot$Soph }
+				multiply_key = { lhs = Tmp_4 value = 0.01 }
+				multiply_key = { lhs = Tmp_4 which = Tmp_4 }
+				multiply_key = { lhs = Tmp_4 value = -1 }
+				change_key = { lhs = Tmp_4 value = 1 }
+				### Add a throughput factor
 				set_key = { lhs = Tmp_3 which = Prod_S$slot$SizeCur }
 				divide_key = { lhs = Tmp_3 which = Prod_S$slot$Size }
-				multiply_key = { lhs = Tmp_3 which = Tmp_3 } ### Exponential
+				multiply_key = { lhs = Tmp_3 which = Tmp_3 } ### Exponential		
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_4 which = Tmp_3 } ### If Soph isnt 100%, pick Soph if its higher
+					}
+					set_key = { lhs = Tmp_3 which = Tmp_4 }	
+				}
 				multiply_key = { lhs = Tmp_0 which = Tmp_3 }
 				set_key = { lhs = Tmp_3 value = 0 }	
 			}
@@ -558,7 +570,7 @@ Infra_SetMaintHelper = {
 				multiply_key = { lhs = Tmp_2 value = 0.33 }
 				multiply_key = { lhs = Tmp_2 which = Tmp_1 }
 
-				multiply_key = { lhs = Tmp_1 value = 0.2 }
+				multiply_key = { lhs = Tmp_1 value = 0.15 }
 
 				change_key = { lhs = Tmp_1 which = Tmp_2 }
 			}
@@ -598,11 +610,11 @@ Infra_SetMaintHelper = {
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
-				multiply_key = { lhs = Tmp_2 value = 0.2 }
+				multiply_key = { lhs = Tmp_2 value = 0.15 }
 				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
 					limit = { has_global_flag = POP_Sim }
-					multiply_key = { lhs = Tmp_2 value = 0.5 }
+					multiply_key = { lhs = Tmp_2 value = 0.666 }
 				}
 				change_key = { lhs = Building_$type$Up which = Tmp_2 }
                 
@@ -622,11 +634,11 @@ Infra_SetMaintHelper = {
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
-				multiply_key = { lhs = Tmp_2 value = 0.2 }
+				multiply_key = { lhs = Tmp_2 value = 0.15 }
 				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
 					limit = { has_global_flag = POP_Sim }
-					multiply_key = { lhs = Tmp_2 value = 0.5 }
+					multiply_key = { lhs = Tmp_2 value = 0.666 }
 				}
 				subtract_key = { lhs = Building_$type$Down which = Tmp_2 } # Building_$type$Down represents an abstract value for shrinkage desire.
 			}
@@ -1489,58 +1501,35 @@ Infra_DoSpend = {
 			if = {
 				limit = {
 					has_global_flag = POP_Sim
+					has_province_flag = pm
+					always = $Mine$
 				}
-				if = {
-					limit = {
-						NOT = { has_global_flag = POP_Sim10 }
-					}
-					trigger_switch = {
-						on_trigger = has_building
-						
-						maint_$type$_no = { multiply_key = { lhs = Tmp_7 value = 0.25 } }
-						maint_$type$_low = { multiply_key = { lhs = Tmp_7 value = 0.5 } }
-						maint_$type$_med = { multiply_key = { lhs = Tmp_7 value = 0.75 } }
-						maint_$type$_high = { multiply_key = { lhs = Tmp_7 value = 1 } }
-					}
-				}
-				if = {
-					limit = {
-						has_province_flag = pm
-						always = $Mine$
-					}
-					multiply_key = { lhs = Tmp_1 value = 0.1 }
-					multiply_key = { lhs = Tmp_2 value = 0.1 }
-					multiply_key = { lhs = Tmp_3 value = 0.1 }
-					multiply_key = { lhs = Tmp_4 value = 0.1 }
-					multiply_key = { lhs = Tmp_5 value = 0.1 }
-					multiply_key = { lhs = Tmp_6 value = 0.1 }
-				}#
+				multiply_key = { lhs = Tmp_1 value = 0.1 }
+				multiply_key = { lhs = Tmp_2 value = 0.1 }
+				multiply_key = { lhs = Tmp_3 value = 0.1 }
+				multiply_key = { lhs = Tmp_4 value = 0.1 }
+				multiply_key = { lhs = Tmp_5 value = 0.1 }
+				multiply_key = { lhs = Tmp_6 value = 0.1 }
 			}
-			else = {
+			if = {
+				limit = {
+					NOT = { has_global_flag = POP_Sim10 }
+				}
 				if = {
 					limit = {
-						has_building = maint_$type$_no
+						NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 1 } }
 					}
-					multiply_key = { lhs = Tmp_7 value = 0.10 }
+					multiply_key = { lhs = Tmp_7 value = 0.015 }
 				}
 				else_if = {
 					limit = {
-						has_building = maint_$type$_low
+						NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 75 } }
 					}
-					multiply_key = { lhs = Tmp_7 value = 0.333 }
+					set_key = { lhs = Tmp_8 which = Tax_CostProp$type$Rate }
+					multiply_key = { lhs = Tmp_8 value = 1.333 } ### 75% is 100%, and so on
+					multiply_key = { lhs = Tmp_8 value = 0.01 }
+					multiply_key = { lhs = Tmp_7 which = Tmp_8 }
 				}
-				else_if = {
-					limit = {
-						has_building = maint_$type$_med
-					}
-					multiply_key = { lhs = Tmp_7 value = 0.666 }
-				}
-				else_if = {
-					limit = {
-						has_building = maint_$type$_high
-					}
-					multiply_key = { lhs = Tmp_7 value = 1 }
-				}				
 			}
 			# Tribal power reduces BU power and therefore BU share.
 			set_key = { lhs = Tmp_8 value = 100 }
@@ -1550,16 +1539,16 @@ Infra_DoSpend = {
 			
 			multiply_key = { lhs = Tmp_7 which = Tmp_8 }
 			
-			if = { # calc % of wealth of each.
-				limit = {
-					check_key = { lhs = Tmp_7 value = 0.01 }
-				}
-				set_key = { lhs = Tmp_8 value = 1 }
-				subtract_key = { lhs = Tmp_8 which = Tmp_7 }
-				set_key = { lhs = Tmp_7 which = Tmp_0 }
-				divide_key = { lhs = Tmp_7 which = Tmp_8 }
-				subtract_key = { lhs = Tmp_7 which = Tmp_0 }
-			}
+			# if = { # calc % of wealth of each.
+			# 	limit = {
+			# 		check_key = { lhs = Tmp_7 value = 0.01 }
+			# 	}
+			# 	set_key = { lhs = Tmp_8 value = 1 }
+			# 	subtract_key = { lhs = Tmp_8 which = Tmp_7 }
+			# 	set_key = { lhs = Tmp_7 which = Tmp_0 }
+			# 	divide_key = { lhs = Tmp_7 which = Tmp_8 }
+			# 	subtract_key = { lhs = Tmp_7 which = Tmp_0 }
+			# }
 			
 			change_key = { lhs = Tmp_0 which = Tmp_7 }
 			

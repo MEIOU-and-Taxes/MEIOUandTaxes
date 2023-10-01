@@ -101,6 +101,7 @@ TN_effect11 = {
 		}
 		every_trade_node_member_province = {
 			limit = { # flag all the sectors that belong to the same node as the previous province and flag them as trade partners 
+				isValidProv = yes
 				OR = {
 					has_province_flag = TN_SectorCent
 					has_province_flag = SMM_SectorCent
@@ -111,7 +112,6 @@ TN_effect11 = {
 				}
 				check_key = { lhs = TN_SectorScore value = -1 }
 
-				isValidProv = yes
 
 				OR = {
 					PREV = { province_id = event_target:Prov } # original jump
@@ -229,7 +229,7 @@ TN_effect13 = {
 			limit = {
 				has_province_flag = TN_Natural_Major
 			}
-			multiply_key = { lhs = Tmp_0 value = 1.15 }
+			multiply_key = { lhs = Tmp_0 value = 1.2 }
 		}
 		else_if = {
 			limit = {
@@ -368,18 +368,18 @@ TN_effect14 = {
 								check_key = { lhs = Tmp_2 value = 0.35 } # 35% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 9 } # min 9 power
+								check_key = { lhs = Tmp_0 value = 8 } # min 9 power
 								check_key = { lhs = Tmp_2 value = 0.30 } # 30% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 14 } # min 14 power
+								check_key = { lhs = Tmp_0 value = 11 } # min 14 power
 								check_key = { lhs = Tmp_2 value = 0.25 } # 25% of node
 							}
 							AND = {
 								has_province_flag = TN_SectorCent #Is the sector trade center
 								check_key = { lhs = Tmp_0 value = 5 } #min 5 power
 								check_key = { lhs = Tmp_2 value = 0.05 } # 5% of node
-								check_key = { lhs = PublicHelper_Tmp1 value = 30 } #min 30 power in sector
+								check_key = { lhs = PublicHelper_Tmp1 value = 20 } #min 25 power in sector
 								check_key = { lhs = PublicHelper_Tmp2 value = 0.25 } #min 25% sector trade power in node
 							}
 						}
@@ -406,15 +406,15 @@ TN_effect14 = {
 					limit = {
 						OR = {
 							AND = {
-								check_key = { lhs = Tmp_0 value = 1.75 } # min 1.75 power
+								check_key = { lhs = Tmp_0 value = 2 } # min 1.75 power
 								check_key = { lhs = Tmp_2 value = 0.025 } # 2.5% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 1.5 } # min 1.25 power
+								check_key = { lhs = Tmp_0 value = 1.75 } # min 1.25 power
 								check_key = { lhs = Tmp_2 value = 0.035 } # 3.5% of node
 							}
 							AND = {
-								check_key = { lhs = Tmp_0 value = 1.25 } # min 1.25 power
+								check_key = { lhs = Tmp_0 value = 1.5 } # min 1.25 power
 								check_key = { lhs = Tmp_2 value = 0.05 } # 5% of node
 							}
 							
@@ -1752,6 +1752,7 @@ TN_effect20 = {
 	tradenode_mult_$id$ = { # Find a sector that you can trade with. This province group is all the provinces 
 							# belonging to the adjacent nodes of $id$.							 
 		limit = {
+			isValidProv = yes
 			OR = {
 				has_province_flag = TN_SectorCent
 				has_province_flag = SMM_SectorCent
@@ -1759,8 +1760,6 @@ TN_effect20 = {
 			}
 
 			check_key = { lhs = TN_SectorScore value = -1 }
-			
-			isValidProv = yes
 			
 			NOT = { has_province_flag = TN_SectorCentReachWithin }
 			
@@ -1818,23 +1817,83 @@ TN_effect20 = {
 		if = {
 			limit = { # Check if that sector also can spread trude further  Can keep spreading only if both have sea access.
 				OR = {
-					is_key_equal = { lhs = Sector_ID which = PREV }
+					is_key_equal = { lhs = Sector_TagID which = PREV }
 					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 }
 				}
 				OR = {
 					has_global_flag = Is_TN_Dominant
 					has_global_flag = Is_TN_Major					
 				}
-				has_province_flag = HasSeaAccess
-				event_target:Prov = { has_province_flag = HasSeaAccess }
+				OR = {
+					AND = {
+						has_province_flag = HasSeaAccess
+						event_target:Prov = { 
+							OR = {
+								has_province_flag = HasSeaAccess
+								has_province_flag = HasRiverSeaAccess
+								has_province_flag = HasRiverSeaBAccess
+							}
+						}
+					}
+					AND = {
+						event_target:Prov = { has_province_flag = HasSeaAccess }
+						OR = {
+							has_province_flag = HasSeaAccess
+							has_province_flag = HasRiverSeaAccess
+							has_province_flag = HasRiverSeaBAccess
+						}
+					}
+					AND = {
+						has_province_flag = HasSilkAccess
+						event_target:Prov = { has_province_flag = HasSilkAccess }
+					}
+					AND = {
+						has_province_flag = HasRiverSeaAccess
+						event_target:Prov = { has_province_flag = HasRiverSeaAccess }
+					}
+					AND = {
+						has_province_flag = HasRiverSeaBAccess
+						event_target:Prov = { has_province_flag = HasRiverSeaBAccess }
+					}
+				}
 			}
 			set_province_flag = TN_SectorCentReachSpread
 		}
 		else_if = {
 			limit = {
 				has_province_flag = TradePost@event_target:ProvNew
-				has_province_flag = HasSeaAccess
-				event_target:Prov = { has_province_flag = HasSeaAccess }			
+				OR = {
+					AND = {
+						has_province_flag = HasSeaAccess
+						event_target:Prov = { 
+							OR = {
+								has_province_flag = HasSeaAccess
+								has_province_flag = HasRiverSeaAccess
+								has_province_flag = HasRiverSeaBAccess
+							}
+						}
+					}
+					AND = {
+						event_target:Prov = { has_province_flag = HasSeaAccess }
+						OR = {
+							has_province_flag = HasSeaAccess
+							has_province_flag = HasRiverSeaAccess
+							has_province_flag = HasRiverSeaBAccess
+						}
+					}
+					AND = {
+						has_province_flag = HasSilkAccess
+						event_target:Prov = { has_province_flag = HasSilkAccess }
+					}
+					AND = {
+						has_province_flag = HasRiverSeaAccess
+						event_target:Prov = { has_province_flag = HasRiverSeaAccess }
+					}
+					AND = {
+						has_province_flag = HasRiverSeaBAccess
+						event_target:Prov = { has_province_flag = HasRiverSeaBAccess }
+					}
+				}
 			}
 			set_global_flag = HasTradePost			
 		}
@@ -1846,9 +1905,9 @@ TN_effect20 = {
 
 		if = {
 			limit = {
-				NOT = { is_key_equal = { lhs = Sector_ID which = PREV } }
+				NOT = { is_key_equal = { lhs = Sector_TagID which = PREV } }
 			}
-			change_key = { lhs = Public_Tmp1 value = 0.5 }
+			change_key = { lhs = Public_Tmp1 value = 0.5 } 
 		}		
 	}
 }
@@ -1862,7 +1921,7 @@ TN_effect21 = {
         limit = {
             has_province_flag = TN_SectorCent
             OR = {
-                is_key_equal = { lhs = Sector_ID which = PREV }
+                is_key_equal = { lhs = Sector_TagID which = PREV }
                 has_province_flag = TradePost@event_target:ProvNew
             }
         }
@@ -1894,13 +1953,13 @@ TN_effect22 = { # Connect, jump and spread. Dominants
 	# Find if it is connected
 	tradenode_mult_$id$ = {
 		limit = {
+			isValidProv = yes
 			OR = {
 				has_province_flag = TN_SectorCent
 				has_province_flag = SMM_SectorCent
 				has_province_flag = TN_SectorCentNoTC
 			}
 			NOT = { has_province_flag = TN_SectorCentReachWithin }
-			isValidProv = yes
 			has_province_flag = HasSeaAccess
 			check_key = { lhs = TN_SectorScore value = -1 }
 			PREV = { trade_range = PREV }
@@ -1965,7 +2024,8 @@ TN_effect22 = { # Connect, jump and spread. Dominants
 TN_effect23 = {
 	# Trade posts connect with every neighboring dominants or Major.
 	tradenode_mult_$id$ = {
-		limit = {			
+		limit = {	
+			isValidProv = yes			
 			has_province_flag = TN_SectorCent
 			NOT = { has_province_flag = TN_SectorCentReachWithin }			
 			#NOT = { has_province_flag = TN_SectorCentNoTC }
@@ -1984,8 +2044,7 @@ TN_effect23 = {
 					NOT = { trade_embargoing = event_target:ProvNew }
 					NOT = { trade_embargo_by = event_target:ProvNew }
 				}
-			}
-			isValidProv = yes		
+			}	
 		}
 		set_province_flag = TN_SectorCentReachWithin
 		# Add +1 to the distance connection
@@ -2000,16 +2059,18 @@ TN_effect24 = { # Connect, jump and spread.
 	# Find if it is connected
 	tradenode_mult_$id$ = {
 		limit = {
+			isValidProv = yes
 			OR = {
 				has_province_flag = TN_SectorCent
 				has_province_flag = SMM_SectorCent
 				has_province_flag = TN_SectorCentNoTC
 			}
 			NOT = { has_province_flag = TN_SectorCentReachWithin }
-			isValidProv = yes
 			OR = {
 				has_province_flag = HasSeaAccess
 				has_province_flag = HasSilkAccess
+				has_province_flag = HasRiverSeaAccess
+				has_province_flag = HasRiverSeaBAccess
 			}
 			check_key = { lhs = TN_SectorScore value = -1 }
 			PREV = { trade_range = PREV }
