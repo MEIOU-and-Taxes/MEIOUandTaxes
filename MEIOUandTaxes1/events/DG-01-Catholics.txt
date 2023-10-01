@@ -34,7 +34,18 @@ namespace = DG_HeresySpread
 ###############
 # MONASTICISM #
 ###############
+#401 - Monasticism
+#402 - Augustinian Monks in $PROVINCE$
+#403 - Dominican Friars
+#404 - Cistercian Monks
+#405 - Franciscan Friars
+#406 - Jesuit Monks
+#407 - Agricultural Innovation (Augustinian, Cistercian)
+#408 - Monks protest the conditions of the poor and enslaved (Dominican, Jesuit, Fransiscan)
+#409 - Book Burning (Dominican)
 #413 - The Jesuit Order
+#414 - Jesuit Misssionaries
+#415 - Jesuit Education
 
 ################################
 # BIRTH OF COUNTER-REFORMATION #
@@ -981,6 +992,7 @@ country_event = {
 	trigger = {
 		is_religion_enabled = reformed
 		tag = PAP
+		NOT = { has_country_flag = Conclave_Underway }
 		NOT = { has_country_flag = jesuits_founded }
 		has_global_flag = ignacio_de_loyola
 	}
@@ -4695,6 +4707,10 @@ province_event = {
 	mean_time_to_happen = {
 		years = 20
 		modifier = {
+			factor = 0.7
+			NOT = { reform_desire = 0.25 }
+		}
+		modifier = {
 			factor = 1.2
 			reform_desire = 0.5
 		}
@@ -4930,7 +4946,7 @@ province_event = {
 	is_triggered_only = yes #on_actions on_five_year_pulse
 	
 	trigger = {
-	    has_province_modifier = franciscan_order
+	    has_province_modifier = jesuit_order
 		owner = {
 		    catholic_trigger = yes
 			Rights_CLHie1Has = yes
@@ -4948,6 +4964,455 @@ province_event = {
                 influence = 5
             }
 		}
+	}
+}
+
+### AGRICULTURAL INNOVATION
+country_event = {
+	id = DG_Catholics.407
+	title = DG_Catholics.407.title
+	desc = DG_Catholics.407.desc
+	picture = catholic_monastic_town
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+		any_owned_province = {
+			OR = {
+				has_province_modifier = augustinian_order
+				has_province_modifier = cistercian_order
+			}
+			NOT = { has_province_modifier = rural_development_efforts }
+	    }
+		catholic_trigger = yes
+		NOT = { adm_tech = 35 } #1550 - Enclosures
+		is_at_war = no
+	}
+	
+	option = {
+		name = DG_Catholics.407.opta #Force the peasants to adopt these new techniques
+		ai_chance = {
+			factor = 60
+			modifier = {
+				NOT = { stability = 1 }
+				factor = 0.5
+			}
+			modifier = {
+				NOT = { stability = 0 }
+				factor = 0.1
+			}
+		}
+		Stab_Subtract10Percent = yes
+		random_owned_province = {
+			limit = {
+				OR = {
+					has_province_modifier = augustinian_order
+					has_province_modifier = cistercian_order
+				}
+				NOT = { has_province_modifier = rural_development_efforts }
+			}
+			add_province_modifier = { name = rural_development_efforts	duration = 3650 }
+			custom_tooltip = rural_development_efforts_tt
+			add_unrest = 5
+		}
+	}
+	option = {
+		name = DG_Catholics.407.optb #Give them incentives to adopt them
+		ai_chance = {
+			factor = 30
+			modifier = {
+				NOT = { treasury = 20 }
+				factor = 0.5
+			}
+			modifier = {
+				num_of_loans = 1
+				factor = 0.5
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0
+			}
+		}
+		add_treasury = -20
+		random_owned_province = {
+			limit = {
+				OR = {
+					has_province_modifier = augustinian_order
+					has_province_modifier = cistercian_order
+				}
+				NOT = { has_province_modifier = rural_development_efforts }
+			}
+			add_province_modifier = { name = rural_development_efforts	duration = 3650 }
+			custom_tooltip = rural_development_efforts_tt
+			hidden_effect = {
+			    Public_ChangeClassWealthVal = { class=SF type=value inp=20 }
+			}
+		}
+	}
+	option = {
+		name = DG_Catholics.407.optc #Leave them alone
+		ai_chance = { factor = 10 }
+	}
+}
+
+### MONASTIC PROTESTS
+country_event = {
+	id = DG_Catholics.408
+	title = DG_Catholics.408.title
+	desc = DG_Catholics.408.desc
+	picture = all_church_resistance
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+		any_owned_province = {
+			OR = {
+				has_province_modifier = franciscan_order
+				has_province_modifier = dominican_order
+				has_province_modifier = jesuit_order
+			}
+	    }
+		catholic_trigger = yes
+		NOT = { Rights_NOTen4Has = yes }
+		NOT = { has_country_modifier = NO_ProtectSerfs_S }
+		NOT = { has_country_modifier = NO_ProtectSerfs_M }
+		NOT = { has_country_modifier = NO_ProtectSerfs_L }
+	}
+	
+	option = {
+		name = DG_Catholics.408.opta #Promise to improve the lot of the poor
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_NOLoy value = 70 }
+			}
+		}
+		add_adm_power = -25
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		NO_ProtectSerfs = yes
+		custom_tooltip = NO_ProtectSerfs_effect
+	}
+	option = {
+		name = DG_Catholics.408.optb #Ignore the protests
+		ai_chance = { factor = 50 }
+		add_country_modifier = { name = religious_controversy duration = 1460 } #4 years
+		every_owned_province = {
+			limit = {
+				OR = {
+					has_province_modifier = dominican_order
+					has_province_modifier = franciscan_order
+					has_province_modifier = jesuit_order
+				}
+			}
+			add_unrest = 5
+		}
+	}
+	option = {
+		name = DG_Catholics.408.optc #Arrest the monks
+		ai_chance = { 
+		    factor = 25 
+		    modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+		}
+		add_mil_power = -10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	}
+}
+
+### BOOK BURNING 
+country_event = {
+	id = DG_Catholics.409
+	title = DG_Catholics.409.title
+	desc = DG_Catholics.409.desc
+	picture = book_burning
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+		any_owned_province = {
+			has_province_modifier = dominican_order
+	    }
+		NOT = { has_country_modifier = book_burning }
+		catholic_trigger = yes
+	}
+	
+	option = {
+		name = DG_Catholics.409.opta #Encourage the purge
+		trigger = { NOT = { full_idea_group = humanist_ideas } }
+		ai_chance = {
+			factor = 30
+			modifier = {
+				government = theocracy
+				factor = 2
+			}
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+		}
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 80 } }
+			add_country_modifier = { name = book_burning duration = 4000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 60 } }
+			add_country_modifier = { name = book_burning duration = 3200 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 40 } }
+			add_country_modifier = { name = book_burning duration = 2400 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 20 } }
+			add_country_modifier = { name = book_burning duration = 1600 }
+		}
+		else = {
+			add_country_modifier = { name = book_burning duration = 800 }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+	}
+	option = {
+		name = DG_Catholics.409.optb #Discourage the purge
+		ai_chance = {
+			factor = 40
+			modifier = {
+				check_key = { lhs = Prov_CLPow value = 80 }
+				factor = 0.7
+			}
+			modifier = {
+				check_key = { lhs = Prov_CLPow value = 60 }
+				factor = 0.7
+			}
+		}
+		add_adm_power = -10
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 80 } }
+			add_country_modifier = { name = book_burning duration = 1000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 60 } }
+			add_country_modifier = { name = book_burning duration = 800 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 40 } }
+			add_country_modifier = { name = book_burning duration = 600 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 20 } }
+			add_country_modifier = { name = book_burning duration = 400 }
+		}
+		else = {
+			add_country_modifier = { name = book_burning duration = 200 }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-5 }
+	}
+	option = {
+		name = DG_Catholics.409.optc #Ban the purge
+		ai_chance = { 
+		    factor = 30
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+			modifier = {
+				factor = 2
+				full_idea_group = humanist_ideas
+			}
+		}
+		add_adm_power = -20
+		add_country_modifier = { name = religious_tolerance duration = 1825 } #5 years
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	}
+}
+
+### MONASTIC DISPUTE
+country_event = {
+	id = DG_Catholics.410
+	title = DG_Catholics.410.title
+	desc = DG_Catholics.410.desc
+	picture = catholic_papal_envoy
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    OR = {
+		    num_of_owned_provinces_with = {
+		        value = 2
+			    has_province_modifier = franciscan_order
+		    }
+			num_of_owned_provinces_with = {
+		        value = 2
+			    has_province_modifier = cistercian_order
+		    }
+		}
+		catholic_trigger = yes
+	}
+	
+	immediate = {
+	    if = {
+		    limit = {
+			    num_of_owned_provinces_with = {
+		            value = 2
+			        has_province_modifier = franciscan_order
+		        }
+			}
+			set_country_flag = franciscan_dispute
+		}
+		else_if = {
+		    limit = {
+			    num_of_owned_provinces_with = {
+		            value = 2
+			        has_province_modifier = cistercian_order
+		        }
+			}
+			set_country_flag = cistercian_dispute
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.410.opta #Split the order into two
+		ai_chance = {
+			factor = 25
+		}
+		add_adm_power = -25
+		if = {
+		    limit = { has_country_flag = franciscan_dispute }
+			every_owned_province = {
+			    limit = { has_province_modifier = franciscan_order }
+				add_local_autonomy = 5
+			}
+		}
+		else_if = {
+		    limit = { has_country_flag = cistercian_dispute }
+			every_owned_province = {
+			    limit = { has_province_modifier = cistercian_order }
+				add_local_autonomy = 5
+			}
+		}
+	}
+	option = {
+		name = DG_Catholics.410.optb #Impose one rule upon them
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+		}
+		add_adm_power = -25
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	}
+	option = {
+		name = DG_Catholics.410.optc # Appeal to the pope to decide
+		trigger = { NOT = { tag = PAP } }
+		ai_chance = {
+			factor = 25
+		}
+		add_prestige = -5
+		add_papal_influence = 5
+	}
+	
+	after = {
+	    trigger_switch = {
+			on_trigger = has_country_flag
+			franciscan_dispute = {
+				clr_country_flag = franciscan_dispute
+			}
+			cistercian_dispute = {
+				clr_country_flag = cistercian_dispute
+			}
+		}
+	}
+}
+
+### MONKS PREACH AGAINST HERESY
+country_event = {
+	id = DG_Catholics.411
+	title = DG_Catholics.411.title
+	desc = DG_Catholics.411.desc
+	picture = catholic_monks_preaching
+	
+	is_triggered_only = yes #on_actions on_five_year_pulse
+	
+	trigger = {
+	    any_owned_province = {
+			OR = {
+                has_province_modifier = jesuit_order
+				has_province_modifier = dominican_order
+				has_province_modifier = augustinian_order
+			}
+		}
+		any_owned_province = {
+		    OR = {
+                MN_CheckRelSlot = { Type = value Religion = 2 }
+                MN_CheckRelSlot = { Type = value Religion = 3 }
+                MN_CheckRelSlot = { Type = value Religion = 4 }
+                MN_CheckRelSlot = { Type = value Religion = 5 }
+                MN_CheckRelSlot = { Type = value Religion = 6 }
+            }
+		}
+		NOT = { has_country_modifier = religious_tolerance }
+		catholic_trigger = yes
+	}
+	
+	option = {
+		name = DG_Catholics.411.opta #Encourage them
+		ai_chance = { factor = 70 }
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 80 } }
+			add_country_modifier = { name = religious_intolerance duration = 2000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 60 } }
+			add_country_modifier = { name = religious_intolerance duration = 1600 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 40 } }
+			add_country_modifier = { name = religious_intolerance duration = 1200 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 20 } }
+			add_country_modifier = { name = religious_intolerance duration = 800 }
+		}
+		else = {
+			add_country_modifier = { name = religious_intolerance duration = 400 }
+		}
+		every_owned_province = {
+			limit = {
+				OR = {
+					has_province_modifier = jesuit_order
+					has_province_modifier = dominican_order
+					has_province_modifier = augustinian_order
+				}
+				OR = {
+                    MN_CheckRelSlot = { Type = value Religion = 2 }
+                    MN_CheckRelSlot = { Type = value Religion = 3 }
+                    MN_CheckRelSlot = { Type = value Religion = 4 }
+                    MN_CheckRelSlot = { Type = value Religion = 5 }
+                    MN_CheckRelSlot = { Type = value Religion = 6 }
+                }
+			}
+			add_unrest = 5
+		}
+	}
+	option = {
+		name = DG_Catholics.411.optb #Discourage them
+		ai_chance = { 
+		    factor = 30 
+			modifier = {
+				factor = 0.1
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+			modifier = {
+				factor = 2
+				full_idea_group = humanist_ideas
+			}
+		}
+		add_country_modifier = { name = religious_tolerance duration = 1825 } #5 years
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
 	}
 }
 
@@ -5015,10 +5480,14 @@ country_event = {
 		name = DG_Catholics.413.optc #The situation is too delicate
 		ai_chance = {
 			factor = 30
-		}
-		modifier = {
-			factor = 1.5
-			check_key = { lhs = Prov_CLLoy value = 70 }
+			modifier = {
+			    factor = 1.5
+			    check_key = { lhs = Prov_CLLoy value = 70 }
+		    }
+			modifier = {
+				factor = 2
+				full_idea_group = humanist_ideas
+			}
 		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
 		set_country_flag = jesuits_suppressed
@@ -5028,6 +5497,7 @@ country_event = {
  				modifier = bav_jesuits_rejected
 			}
  		}
+		add_country_modifier = { name = religious_tolerance duration = 1825 } #5 years
 	}
 }
 
@@ -5041,6 +5511,7 @@ province_event = {
 	trigger = {
 		owner = { 
 	        religion = catholic
+			NOT = { has_country_modifier = religious_tolerance }
 			NOT = { is_excommunicated = yes }
 		    check_variable = { which = jesuit_support value = 1 } 
 			NOT = { has_country_flag = jesuits_suppressed }
