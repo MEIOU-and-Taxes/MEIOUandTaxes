@@ -1701,7 +1701,12 @@ country_event = {
 			}
 
 			modifier = { 
-				factor = 0.5
+				factor = 1.5
+				has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
+			}
+
+			modifier = { 
+				factor = 0.75
 				NOT = {
 					has_country_flag = AI_Reform_BUOffice
 					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
@@ -1709,7 +1714,7 @@ country_event = {
 			}
 			
 			modifier = { 
-				factor = 0.1
+				factor = 0.2
 				NOT = {
 					has_country_flag = AI_Reform_BUOffice
 					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
@@ -1788,6 +1793,23 @@ country_event = {
 					has_country_flag = AI_Reform_BUFarm
 					has_country_flag = AI_Reform_BUTax #similar effect to the BUTax reform
 					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
+				}
+			}
+
+			modifier = { 
+				factor = 0.5
+				NOT = {
+					has_country_flag = AI_Reform_BUOffice
+					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
+				}
+			}
+			
+			modifier = { 
+				factor = 0.1
+				NOT = {
+					has_country_flag = AI_Reform_BUOffice
+					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
+					has_country_flag = AI_Interaction_DecCrptLaws_MedInterest
 				}
 			}
 
@@ -1876,7 +1898,7 @@ country_event = {
 			}
 
 			modifier = { 
-				factor = 0.2
+				factor = 0.33
 				NOT = {
 					has_country_flag = AI_Reform_BUTenure
 					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
@@ -2236,7 +2258,12 @@ country_event = {
 				}
 			}			
 			modifier = { 
-				factor = 0.5
+				factor = 1.25
+				has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
+			}
+			
+			modifier = { 
+				factor = 0.75
 				NOT = {
 					has_country_flag = AI_Reform_BUExams
 					has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
@@ -2325,6 +2352,10 @@ country_event = {
 					has_country_flag = AI_Interaction_DecCrptLaws_MedInterest
 					current_income_balance = 0
 				}
+			}
+			modifier = { 
+				factor = 1.1
+				has_country_flag = AI_Interaction_DecCrptLaws_HighInterest
 			}
 			modifier = { 
 				factor = 0.1
@@ -9052,23 +9083,75 @@ country_event = {
 		ai_chance = {
 			factor = 1
 
-			# group of stability checks - high loyalty helps restore stability quickly and there is a -50% hit to stability from the interaction
 			modifier = {
-				factor = 0.5
+				factor = 1.5
+				stability = 0 # stability at least 0
+				NOT = { has_country_flag = AI_Interaction_IncLoyNO_HighInterest } # If in need of loyalty dont increase likelyhood
 				OR = {
-					NOT = { stability = 1 }
-					has_country_flag = AI_Interaction_IncLoyNO_MedInterest
+					AND = {
+						### Able to do NOGov2->3 by privileges but power is too high
+						NOT = { Privilege_HasGreater = { Privilege=NOProcessing Lvl=2 } }
+						NOT = { Privilege_HasGreater = { Privilege=NOGame Lvl=2 } }
+						NOT = { Privilege_HasGreater = { Privilege=NOForestry Lvl=2 } }
+						NOT = { Privilege_HasGreater = { Privilege=NOSeigneurial Lvl=3 } }
+						check_key = { lhs = Prov_NOPow value = 85 }
+					}
+					AND = {
+						### Able to do NOGov3->4 by privileges but power is too high
+						check_key = { lhs = Prov_NOPow value = 70 }
+   						NOT = { Privilege_HasGreater = { Privilege=NOSeigneurial Lvl=2 } }
+					}
+					AND = {
+						### Able to do NOSer1->2 by requirements but power is too high
+						check_key = { lhs = Prov_NOPow value = 85 }
+						mil_idea_group_amount = { amount = 1 }
+						Privilege_HasGreater = { Privilege=BUStructure Lvl=1 }
+						check_key = { lhs = Prov_BUPow value = 10 }
+					}
+					AND = {
+						### Able to do NOSer2->3 by requirements but power is too high
+						check_key = { lhs = Prov_NOPow value = 80 }
+						mil_idea_group_amount = { amount = 2 }
+						check_key = { lhs = Prov_BUPow value = 20 }
+					}
 				}
 			}
 
-			modifier = {
-				factor = 0.5
-				NOT = { stability = 0 }
+			modifier = { # High interest in decreasing power, low interest in increasing loyalty
+				factor = 1.25
+				has_country_flag = AI_Interaction_DecPowNO_HighInterest
+				stability = 1
+				has_country_flag = AI_Interaction_IncLoyNO_LowInterest
 			}
 
 			modifier = {
 				factor = 0.5
-				NOT = { stability = -1 }
+				has_country_flag = AI_Interaction_DecPowNO_MedInterest
+			}
+
+			modifier = {
+				factor = 0.1
+				has_country_flag = AI_Interaction_DecPowNO_LowInterest
+			}
+
+			modifier = { 
+				factor = 0.5
+				NOT = { stability = 1 }
+			}
+
+			#do not use interaction if there is no need from AI interaction flags meant to reduce NO Power
+			modifier = { 
+				factor = 0
+				NOT = { 
+					has_country_flag = AI_Interaction_DecPowNO_HighInterest
+					has_country_flag = AI_Interaction_DecPowNO_MedInterest
+					has_country_flag = AI_Interaction_DecPowNO_LowInterest
+				}
+			}
+
+			modifier = { ## Dont use if stability is below 0
+				factor = 0
+				NOT = { stability = 0 }
 			}
 			
 			#group of checks for NO being stripped from privileges supporting their high power
@@ -9076,7 +9159,10 @@ country_event = {
 				factor = 0 #no sense to demote if there is no taxation in place
 				OR = {
 					Rights_BUTax1Has = yes
-					Rights_NOGov1Has = yes
+					AND = { # If Gov1->2 reform cannot be done dont demote
+						Rights_NOGov1Has = yes
+   						Privilege_HasGreater = { Privilege=NOHierarchy Lvl=3 }
+					}
 				}
 			}
 			
@@ -9106,21 +9192,6 @@ country_event = {
 					}
 					Rights_AIReadyToReform = yes
 				}
-			}
-			
-			#do not use interaction if there is no need from AI interaction flags meant to reduce NO Power
-			modifier = { 
-				factor = 0
-				NOT = { 
-					has_country_flag = AI_Interaction_DecPowNO_HighInterest
-					has_country_flag = AI_Interaction_DecPowNO_MedInterest
-					has_country_flag = AI_Interaction_DecPowNO_LowInterest
-				}
-			}
-			
-			modifier = {
-				factor = 0.1
-				has_country_flag = AI_Interaction_DecPowNO_LowInterest
 			}
 		}
 	}
