@@ -5939,6 +5939,9 @@ province_event = {
 		NOT = { has_province_modifier = absentee_bishop }
 		NOT = { has_province_modifier = indulgence_peddler }
 		NOT = { has_province_modifier = religious_scandal_province }
+		NOT = {
+			has_global_flag = pap_disables_indulgences_flag
+		}
 	}
     
 	immediate = {
@@ -6018,7 +6021,7 @@ province_event = {
 	}
 }
 
-### ECCLESTICAL JURISDICTION
+### ECCLESIASTICAL JURISDICTION
 country_event = {
 	id = DG_Papacy.909
 	title = DG_Papacy.909.title
@@ -6104,6 +6107,59 @@ country_event = {
 		else = {
 			add_country_modifier = { name = religious_scandal_country_weak duration = 365 }
 		}
+	}
+}
+
+### POPULAR PIETY
+country_event = {
+	id = DG_Papacy.910
+	title = DG_Papacy.910.title
+	desc = DG_Papacy.910.desc
+	picture = all_pilgrims
+	
+	is_triggered_only = yes #on_actions on_thri_yearly_pulse_2
+	
+	trigger = {
+	    NOT = { is_religion_enabled = protestant }
+		has_global_flag = renaissance
+		catholic_trigger = yes
+		OR = {
+		    any_owned_province = { has_province_modifier = absentee_bishop }
+			any_owned_province = { has_province_modifier = religious_scandal_province }
+			any_owned_province = { has_province_modifier = indulgence_peddler }
+			has_country_modifier = anticlericalism
+			has_country_modifier = religious_scandal_country_strong
+			has_country_modifier = religious_scandal_country
+			has_country_modifier = religious_scandal_country_weak
+		}
+	}
+	
+	option = {
+		name = DG_Papacy.910.opta #Embrace popular piety
+		ai_chance = {
+			factor = 50
+			modifier = {
+				check_key = { lhs = Prov_CLLoy value = 70 }
+				factor = 2
+			}
+		}
+		CL_Leverage = yes
+		custom_tooltip = CL_Leverage_effect
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		add_country_modifier = { name = religious_controversy duration = 1825 } #5 years
+	}
+	option = {
+		name = DG_Papacy.910.optb #Embrace anticlericalism
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+				factor = 2
+			}
+		}
+		CL_PopularReform = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		add_country_modifier = { name = religious_controversy duration = 1825 } #5 years
 	}
 }
 

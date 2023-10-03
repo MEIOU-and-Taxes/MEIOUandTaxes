@@ -45,9 +45,18 @@ namespace = DG_HeresySpread
 #409 - Book Burning (Dominican)
 #410 - Monastic dispute (Cistercian, Fransiscan)
 #411 - Monks preach against heresy (Jesuit, Dominican, Augustinian)
+#412 - Papal Legate summoned to $CAPITAL_CITY$
 #413 - The Jesuit Order
 #414 - Jesuit Misssionaries
 #415 - Jesuit Education
+
+######################
+### MISCALLANEUOUS ###
+######################
+#501 - Candidate for Sainthood
+#502 - Canonization of a Saint (from Curia interaction)
+#503 - Canonization of a Saint (random)
+#504 - The First Estate
 
 ################################
 # BIRTH OF COUNTER-REFORMATION #
@@ -5419,6 +5428,107 @@ country_event = {
 	}
 }
 
+### PAPAL LEGATE SUMMONED TO $CAPITAL_CITY$
+country_event = {
+	id = DG_Catholics.412
+	title = DG_Catholics.412.title
+	desc = DG_Catholics.412.desc
+	picture = catholic_papal_legate
+	
+	is_triggered_only = yes #from Curia interaction
+	
+	option = {
+		name = DG_Catholics.412.opta #A bishop
+		define_advisor = {
+		    religion = ROOT
+			culture = ROOT
+			type = statesman_CL
+			skill = 1
+			discount = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.412.optb #An Augustinian monk (Contemplative Order)
+		trigger = { any_owned_province = { has_province_modifier = augustinian_order } }
+		define_advisor = {
+		    religion = ROOT
+			culture = ROOT
+			type =  theologian_CL
+			skill = 2
+			discount = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.412.optc #A Cistercian monk (Contemplative Order)
+		trigger = { any_owned_province = { has_province_modifier = cistercian_order } }
+		define_advisor = {
+		    religion = ROOT
+			culture = ROOT
+			type =  theologian_CL
+			skill = 2
+			discount = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.412.optd #A Franciscan friar (Active Order)
+		trigger = { any_owned_province = { has_province_modifier = franciscan_order } }
+		define_advisor = {
+		    religion = ROOT
+			culture = ROOT
+			type = theologian_CL
+			skill = 2
+			discount = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.412.opte #A Dominican friar (Active Order)
+		trigger = { any_owned_province = { has_province_modifier = dominican_order } }
+		define_advisor = {
+		    religion = ROOT
+			culture = ROOT
+			type = inquisitor_CL
+			skill = 2
+			discount = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.412.optf #A Jesuit monk
+		trigger = {
+			check_variable = { which = jesuit_support value = 1 }
+			NOT = { has_country_flag = jesuits_suppressed }
+		}
+		random_list = {
+			50 = {
+			    define_advisor = {
+		            religion = ROOT
+					culture = ROOT
+			        type = inquisitor_CL
+			        skill = 2
+			        discount = yes
+		        }
+			}
+			25 = {
+			    define_advisor = {
+		            religion = ROOT
+					culture = ROOT
+			        type = diplomat_CL
+			        skill = 2
+			        discount = yes
+		        }
+			}
+			25 = {
+			    define_advisor = {
+		            religion = ROOT
+					culture = ROOT
+			        type = statesman_CL
+			        skill = 2
+			        discount = yes
+		        }
+			}
+		}
+	}
+}
+
 ### THE JESUITS
 country_event = {
 	id = DG_Catholics.413
@@ -5647,5 +5757,374 @@ country_event = {
 			}
 		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	}
+}
+
+######################
+### MISCALLANEUOUS ###
+######################
+
+### CANDIDATE FOR SAINTHOOD
+country_event = {
+	id = DG_Catholics.501
+	title = DG_Catholics.501.title
+	desc = DG_Catholics.501.desc
+	picture = catholic_canonization
+	
+	is_triggered_only = yes #on_actions on_thri_yearly_pulse_2
+	
+	trigger = {
+		catholic_trigger = yes
+		is_at_war = no
+		NOT = { is_excommunicated = yes }
+		NOT = { has_country_flag = sainthood_candidate }
+		NOT = { papal_trigger = yes }
+	}
+	
+	option = {
+		name = DG_Catholics.501.opta #Celebrate their life
+		ai_chance = { factor = 20 }
+		add_prestige = 5
+		hidden_effect = {
+		    random_list = {
+			    20 = { set_country_flag = sainthood_candidate }
+				80 = { }
+			}
+		}
+	}
+	option = {
+		name = DG_Catholics.501.optb #Send a mission to Rome to plead their case
+		ai_chance = {
+			factor = 80
+			modifier = {
+				has_country_flag = national_saint
+				factor = 0.5
+			}
+		}
+		add_prestige = 5
+		add_papal_influence = -10
+		custom_tooltip = sainthood_candidate_explained
+		hidden_effect = {
+		    random_list = {
+			    80 = { set_country_flag = sainthood_candidate }
+				20 = { }
+			}
+		}
+	}
+}
+
+### CANONIZATION OF A SAINT (CURIA)
+province_event = {
+	id = DG_Catholics.502
+	title = DG_Catholics.502.title
+	desc = DG_Catholics.502.desc
+	picture = catholic_canonization
+	
+	is_triggered_only = yes #from Curia interaction
+	
+	immediate = {
+		hidden_effect = {
+			owner = {
+				set_country_flag = national_saint
+				clr_country_flag = sainthood_candidate
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.502.opta #Celebrate this miracle
+		ai_chance = {
+			factor = 50
+			modifier = {
+				owner = { NOT = { stability = -2 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = -1 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = 0 } }
+				factor = 1.4
+			}
+		}
+		owner = {
+			add_prestige = 10
+			add_opinion = { who = PAP modifier = papacy_great }
+			Stab_Add1 = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.502.optb #Turn $PROVINCENAME$ into a center of pilgrimage
+		ai_chance = {
+			factor = 50
+			modifier = {
+				owner = { stability = 1 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { stability = 2 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { stability = 3 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { treasury = 25 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { num_of_loans = 1 }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { is_bankrupt = yes }
+				factor = 0.1
+			}
+		}
+		owner = { 
+		    add_treasury = -25
+            Stab_Add50Percent = yes			
+		}
+		add_province_modifier = { name = catholic_pilgrimage duration = -1 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=-25 }
+		}
+	}
+}
+
+### CANONIZATION OF A SAINT (RANDOM)
+province_event = {
+	id = DG_Catholics.503
+	title = DG_Catholics.502.title
+	desc = DG_Catholics.502.desc
+	picture = catholic_canonization
+	
+	is_triggered_only = yes #on_actions on_yearly_pulse_2
+	
+	trigger = {
+		OR = {
+		    AND = {
+			    owner = { 
+				    religion = catholic 
+					reverse_has_opinion = { who = PAP value = 50 }
+				}
+			    PAP = {
+				    NOT = { has_ruler_flag = canonization }
+					has_regency = no
+				}
+			}
+			AND = {
+			    owner = { 
+				    religion = avignonist
+					reverse_has_opinion = { who = AVI value = 50 }
+				}
+			    AVI = {
+				    NOT = { has_ruler_flag = canonization }
+					has_regency = no
+				}
+			}
+		}
+		religion = catholic
+		NOT = { has_province_modifier = catholic_pilgrimage }
+		NOT = { any_neighbor_province = { has_province_modifier = catholic_pilgrimage } }
+		NOT = { any_neighbor_province = { any_neighbor_province = { has_province_modifier = catholic_pilgrimage } } }
+	}
+	
+	immediate = {
+		hidden_effect = {
+			owner = {
+				set_country_flag = national_saint
+				clr_country_flag = sainthood_candidate
+			}
+			if = {
+			    limit = {
+				    owner = {
+					    religion = catholic
+					}
+				}
+				PAP = { set_ruler_flag = canonization }
+			}
+			else_if = {
+			    limit = {
+				    owner = {
+					    religion = avignonist
+					}
+				}
+				AVI = { set_ruler_flag = canonization }
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.502.opta #Celebrate this miracle
+		ai_chance = {
+			factor = 50
+			modifier = {
+				owner = { NOT = { stability = -2 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = -1 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = 0 } }
+				factor = 1.4
+			}
+		}
+		owner = {
+			add_prestige = 10
+			add_opinion = { who = PAP modifier = papacy_great }
+			Stab_Add1 = yes
+		}
+	}
+	option = {
+		name = DG_Catholics.502.optb #Turn $PROVINCENAME$ into a center of pilgrimage
+		ai_chance = {
+			factor = 50
+			modifier = {
+				owner = { stability = 1 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { stability = 2 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { stability = 3 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { treasury = 25 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { num_of_loans = 1 }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { is_bankrupt = yes }
+				factor = 0.1
+			}
+		}
+		owner = { 
+		    add_treasury = -25
+            Stab_Add50Percent = yes			
+		}
+		add_province_modifier = { name = catholic_pilgrimage duration = -1 }
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=-25 }
+		}
+	}
+}
+
+### THE FIRST ESTATE
+province_event = {
+	id = DG_Catholics.504
+	title = DG_Catholics.504.title
+	desc = DG_Catholics.504.desc
+	picture = catholic_bishop
+	
+	is_triggered_only = yes #on_actions on_yearly_pulse_2
+	
+	trigger = {
+		OR = {
+		    AND = {
+			    owner = { 
+				    religion = catholic
+					check_key = { lhs = Prov_CLPow value = 30 }
+				}
+			    PAP = {
+				    NOT = { has_ruler_flag = peasant_success }
+					has_regency = no
+				}
+			}
+			AND = {
+			    owner = { 
+				    religion = avignonist
+					check_key = { lhs = Prov_CLPow value = 30 }
+				}
+			    AVI = {
+				    NOT = { has_ruler_flag = peasant_success }
+					has_regency = no
+				}
+			}
+		}
+		OR = {
+		    OR = { #Peasant Bishop
+			    has_province_modifier = catholic_archbishopric
+		        has_province_modifier = preeminent_region_city
+			    check_key = { lhs = Class_Urban value = 10 }
+		    }
+			OR = { #Peasant Abbot
+		        has_province_modifier = augustinian_order
+				has_province_modifier = dominican_order
+				has_province_modifier = cistercian_order
+				has_province_modifier = franciscan_order
+				has_province_modifier = jesuit_order
+		    }
+			has_cardinal = yes #Peasant cardinal
+		}
+		religion = catholic
+		NOT = { has_province_modifier = greedy_bishop }
+		NOT = { has_province_modifier = absentee_bishop }
+		NOT = { has_province_modifier = indulgence_peddler }
+		NOT = { has_province_modifier = religious_scandal_province }
+		NOT = { has_province_modifier = peasant_success_story }
+	}
+
+	immediate = {
+		hidden_effect = {
+			if = {
+			    limit = {
+				    owner = {
+					    religion = catholic
+					}
+				}
+				PAP = { set_ruler_flag = peasant_success }
+			}
+			else_if = {
+			    limit = {
+				    owner = {
+					    religion = avignonist
+					}
+				}
+				AVI = { set_ruler_flag = peasant_success }
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.504.opta #Let the peasants have their hero
+		ai_chance = {
+			factor = 25
+			modifier = {
+				NOT = { num_of_cardinals = 1 }
+				factor = 2
+			}
+		}
+		add_province_modifier = { name = peasant_success_story duration = 1825 }
+		owner = { 
+		    Stab_Add10Percent = yes
+		    add_opinion = { who = PAP modifier = papacy_good }
+		}
+	}
+	option = {
+		name = DG_Catholics.504.optb #Hold him up as a model
+		ai_chance = {
+			factor = 25
+			modifier = {
+				NOT = { stability = 1 }
+				factor = 2
+			}
+		}
+		add_province_modifier = { name = peasant_success_story duration = 3650 }
+		owner = { 
+		    add_papal_influence = -10
+		    Stab_Add25Percent = yes
+		    add_opinion = { who = PAP modifier = papacy_great } 
+		}
 	}
 }
