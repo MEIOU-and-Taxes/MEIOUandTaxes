@@ -43,7 +43,7 @@ Refresh to read game.log again.
 
     # Reading data
 
-    def get_data(_, i: str):
+    def get_data(_, i):
         lst = []
         loc = 0
 
@@ -73,8 +73,14 @@ Refresh to read game.log again.
         for fn in files:
             with open(fn, 'r') as f:
                 text += f.read()
-        with open('game.log', 'r') as f:
-            text += f.read()
+        logs = len(files)
+        try:
+            with open('game.log', 'r') as f:
+                text += f.read()
+                logs += 1
+        except FileNotFoundError:
+            print("WARNING: Could not find game.log")
+        print(f'Read {logs} log file{"" if logs == 1 else "s"}')
         return files, text
 
     logs, data = read_all_logs()
