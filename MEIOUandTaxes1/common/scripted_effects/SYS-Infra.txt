@@ -848,10 +848,13 @@ Infra_SetMaint = {
 		]
 	}
 	
+	### Handle State Investments
 	if = {
 		limit = { # add maintenance costs based on state expansion if state invested. Always applies since state forced the expansion.
 			check_key = { lhs = Building_$type$Wealth value = 0.01 }
 		}
+
+		# Sum costs per unit in price
 		set_key = { lhs = Tmp_0 value = 0 }
 		
 		set_key = { lhs = Tmp_1 which = TN_ProvPrc1 }
@@ -866,20 +869,29 @@ Infra_SetMaint = {
 		multiply_key = { lhs = Tmp_1 value = $indust$ }
 		change_key = { lhs = Tmp_0 which = Tmp_1 }
 		
+		multiply_key = { lhs = Tmp_0 value = $factor$ } # balance factor on how much new property costs per unit
+		multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
+		multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
+		multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
+
 		set_key = { lhs = Tmp_1 which = Building_$type$Wealth } # State investment
-		divide_key = { lhs = Tmp_1 which = Tmp_0 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		multiply_key = { lhs = Tmp_2 value = $food$ }
-		change_key = { lhs = Building_$type$1 which = Tmp_2 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		multiply_key = { lhs = Tmp_2 value = $raw$ }
-		change_key = { lhs = Building_$type$6 which = Tmp_2 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		multiply_key = { lhs = Tmp_2 value = $indust$ }
-		change_key = { lhs = Building_$type$24 which = Tmp_2 }
+		divide_key = { lhs = Tmp_1 which = Tmp_0 } # Wealth / cost per unit = units affordable
+
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 value = 0.01 } # if state investment can afford to expand at least >0 units of property -> expand
+			}
+			change_key = { lhs = Building_$type$Up which = Tmp_1 } ## add affordable units to expansion desire
+						
+			set_key = { lhs = Building_$type$1 which = Tmp_1 }
+			set_key = { lhs = Building_$type$6 which = Tmp_1 }
+			set_key = { lhs = Building_$type$24 which = Tmp_1 }
+			
+			multiply_key = { lhs = Building_$type$1 value = $food$ }
+			multiply_key = { lhs = Building_$type$6 value = $raw$ }
+			multiply_key = { lhs = Building_$type$24 value = $indust$ }
+
+		}
 	}
 }
 
@@ -1026,10 +1038,10 @@ Infra_DoSizeHelper1 = { # expansion or shrinkage
 }
 
 # Calculate Property size change.
-# (1)Building_$type$Gain  = Variable from paying fullfilment goods. This increases size.
-# (2)Building_$type$Decay = There is an annual fixed decay of 2% per year.. This reduces size.
-# (3)Building_$type$Up    = represent how much industries expanded Property.
-# (4)Building_$type$Down  = represent how much industries shrinked within the Property.
+# (1)Building_$type$  	  = Current size of the property type
+# (1)Building_$type$Decay = There is an annual fixed decay of 2% per year.. This reduces size.
+# (2)Building_$type$Up    = represent how much industries expanded Property.
+# (3)Building_$type$Down  = represent how much industries shrinked within the Property.
 # New_Property_Size = (1)-(2)+(3)-(4)
 Infra_DoSize = { 
 	set_key = { lhs = Building_$type$Decay value = 0 }
@@ -1952,7 +1964,19 @@ Infra_SetSpendInfra = {
 			limit = {
 				OR = {
 					has_province_flag = Infra_$type$100
-					[[StateFunded] always = $StateFunded$ ]
+					#[[StateFunded] always = $StateFunded$ ]
+					
+					# BrutusY: Here should be StateBased rather than the old StateFunded
+					# However, since only Capitol is StateBased
+					# This code condition alone would make AI maintain unnecessary Capitol Buildings
+					AND = {
+						always = $StateBased$
+						is_capital = yes
+						# This condition ensures that only the capital's Capitol building will be maintained
+						# Hopefully, AI would not maintain a bunch of idle Capitols
+						# After conquering a bunch of small neighbours
+					}
+
 				}
 			}
 			change_key = { lhs = Infra_StateSpend which = Infra_$type$Spend }
