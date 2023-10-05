@@ -473,6 +473,8 @@ TN_PrepSector = {
                 }
                 clr_province_flag = TN_SectorCent
                 clr_province_flag = HasSeaAccess
+                clr_province_flag = HasRiverSeaAccess
+                clr_province_flag = HasRiverSeaBAccess
                 clr_province_flag = HasSilkAccess
                 
 
@@ -628,6 +630,8 @@ TN_PrepSector = {
 
 	tradenode_centers = {
         clr_global_flag = HasSeaAccess
+        clr_global_flag = HasRiverSeaAccess
+        clr_global_flag = HasRiverSeaBAccess
         clr_global_flag = HasSilkAccess
         every_trade_node_member_country = {
             limit = {
@@ -636,6 +640,8 @@ TN_PrepSector = {
             }
             set_key = { lhs = Tmp_0 value = 0 }
             clr_global_flag = HasSeaAccess
+            clr_global_flag = HasRiverSeaAccess
+            clr_global_flag = HasRiverSeaBAccess
             clr_global_flag = HasSilkAccess
             clr_country_flag = Found_TN
             every_province = {
@@ -645,13 +651,24 @@ TN_PrepSector = {
                     isValidProv = yes
                 }
                 if = {
-                    limit = {
-                        OR = {
-                            has_port = yes                            
-                            check_key = { lhs = TN_River value = 1 }
-                        }
+                    limit = {                       
+                        has_port = yes 
+                        NOT = { has_province_modifier = lack_of_harbour }
                     }
                     set_global_flag = HasSeaAccess                   
+                }
+                if = {
+                    limit = {
+                        check_key = { lhs = TN_River value = 1 }
+                    }
+                    set_global_flag = HasRiverSeaAccess
+                }
+                if = {
+                    limit = {
+                        always = no ### will enable later
+                        has_province_flag = TN_RiverJumpB
+                    }
+                    set_global_flag = HasRiverSeaBAccess                   
                 }
                 if = {
                     limit = {
@@ -691,6 +708,24 @@ TN_PrepSector = {
                     }
                     else = {
                         clr_province_flag = HasSeaAccess
+                    }
+                    if = {
+                        limit = {
+                            has_global_flag = HasRiverSeaAccess
+                        }
+                        set_province_flag = HasRiverSeaAccess
+                    }
+                    else = {
+                        clr_province_flag = HasRiverSeaAccess
+                    }
+                    if = {
+                        limit = {
+                            has_global_flag = HasRiverSeaBAccess
+                        }
+                        set_province_flag = HasRiverSeaBAccess
+                    }
+                    else = {
+                        clr_province_flag = HasRiverSeaBAccess
                     }
                     if = {
                         limit = {
@@ -1447,14 +1482,50 @@ TN_ScoreSector = {
         #POP_GetMerchant = { return = TN_SectorScore }
         set_key = { lhs = TN_SectorScore value = 0 }
         export_to_key = { lhs = TN_SectorScore value = trigger_value:num_of_merchants }
-        multiply_key = { lhs = TN_SectorScore value = 0.3 } # balancing
+        multiply_key = { lhs = TN_SectorScore value = 0.5 } # balancing; Mepper: Made Merchants quite a bit more influential than ships
         export_to_key = { lhs = Tmp_0 value = trigger_value:num_of_heavy_ship }
-        multiply_key = { lhs = Tmp_0 value = 0.25 }
-        export_to_key = { lhs = Tmp_3 value = trigger_value:num_of_galley }
-        multiply_key = { lhs = Tmp_3 value = 0.1 }
+        multiply_key = { lhs = Tmp_0 value = 0.20 }
+        if = {          #Curb China's outdated Heavy Ships giving them insane sector score all game
+            limit = {
+                culture_group = chinese_group
+                NOT = {
+                    full_idea_group = naval_ideas
+                }
+            }
+            if = {
+                limit = {
+                    NOT = {
+                        is_year = 1500
+                    }
+                }
+                multiply_key = {
+                    lhs = Tmp_0 
+                    value = 0.5
+                }
+            }
+            else_if = {
+                limit = { 
+                    NOT = {
+                        is_year = 1650
+                    }
+                }
+                multiply_key = {
+                    lhs = Tmp_0 
+                    value = 0.25
+                }
+            }
+            else = {
+                multiply_key = {
+                    lhs = Tmp_0 
+                    value = 0.1
+                }
+            } 
+        }
         export_to_key = { lhs = Tmp_1 value = trigger_value:num_of_light_ship }
-        multiply_key = { lhs = Tmp_1 value = 0.05 }
-        
+        multiply_key = { lhs = Tmp_1 value = 0.1 }
+        export_to_key = { lhs = Tmp_3 value = trigger_value:num_of_galley }
+        multiply_key = { lhs = Tmp_3 value = 0.05 }
+
         change_key = { lhs = TN_SectorScore which = Tmp_0 }
         change_key = { lhs = TN_SectorScore which = Tmp_1 }
         change_key = { lhs = TN_SectorScore which = Tmp_3 }
@@ -1462,16 +1533,52 @@ TN_ScoreSector = {
 
         export_to_key = { lhs = Tmp_0 value = modifier:trade_efficiency }
         export_to_key = { lhs = Tmp_1 value = modifier:global_trade_power }
-        if = {  limit = { NOT = { check_key = { lhs = Tmp_0 value = 0 } } } set_key = { lhs = Tmp_0 value = 0 } }
-        if = {  limit = { NOT = { check_key = { lhs = Tmp_1 value = 0 } } } set_key = { lhs = Tmp_1 value = 0 } }
+        ###
+        #Maximum of -90% penalty to Sector Score based on Global Trade Power and Trade Efficiency each respectively
+        if = {  limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.9 } } } set_key = { lhs = Tmp_0 value = -0.9 } }
+        if = {  limit = { NOT = { check_key = { lhs = Tmp_1 value = -0.9 } } } set_key = { lhs = Tmp_1 value = -0.9 } }
         change_key = { lhs = Tmp_0 value = 1 }
         change_key = { lhs = Tmp_1 value = 1 }
+        ###
+        #Sector Score gets multiplied by Trade Efficiency ^ 2 AND Global Trade Power ^ 2 to make it's effect bigger
+        multiply_key = { lhs = Tmp_0 which = Tmp_0 }
+        multiply_key = { lhs = Tmp_1 which = Tmp_1 }
         multiply_key = { lhs = TN_SectorScore which = Tmp_0 }
         multiply_key = { lhs = TN_SectorScore which = Tmp_1 }
 
-        if = {
+        if = {      #Differentiate between better commerce levels
             limit = {
-                Rights_BGCom6HasGreater = yes
+                Rights_BGCom10Has = yes
+            }
+            change_key = { lhs = TN_SectorScore value = 10 }
+        }
+        else_if = {
+            limit = {
+                Rights_BGCom9Has = yes
+            }
+            change_key = { lhs = TN_SectorScore value = 8 }
+        }
+        else_if = {
+            limit = { 
+                Rights_BGCom8Has = yes 
+            }
+            change_key = { lhs = TN_SectorScore value = 6 }
+        }
+        else_if = {
+            limit = {
+                Rights_BGCom7Has = yes
+            }
+            change_key = { lhs = TN_SectorScore value = 4 }
+        }
+        else_if = {
+            limit = {
+                Rights_BGCom6Has = yes
+            }
+            change_key = { lhs = TN_SectorScore value = 2 }
+        }
+        else_if = {
+            limit = {
+                Rights_BGCom5Has = yes
             }
             change_key = { lhs = TN_SectorScore value = 1 }
         }
@@ -1480,25 +1587,25 @@ TN_ScoreSector = {
                 has_reform = Pol_Mandate3
                 #is_key_equal = { lhs = Pol_Mandate value = 2 }
             }
-            change_key = { lhs = TN_SectorScore value = 2 }
+            multiply_key = { lhs = TN_SectorScore value = 1.2 }
         }
         if = {
             limit = {
                 has_idea_group = free_trade_ideas
             }
-            change_key = { lhs = TN_SectorScore value = 3 }
+            multiply_key = { lhs = TN_SectorScore value = 1.3 }
         }
         else_if = {
             limit = {
                 has_idea_group = mercantilism_ideas
             }
-            change_key = { lhs = TN_SectorScore value = 2 }
+            multiply_key = { lhs = TN_SectorScore value = 1.2 }
         }
         else_if = {
             limit = {
                 has_idea_group = trade_ideas
             }
-            change_key = { lhs = TN_SectorScore value = 1 }
+            multiply_key = { lhs = TN_SectorScore value = 1.1 }
         }
 
         Compute_Commercial_Risk = yes # Has nothing to do with TN_SectorScore. This is mainly to pass it later and calc it once per owner
@@ -1909,6 +2016,8 @@ TN_DoTrade = {
                     
                 # Resolve bids and offers with sectors that are within reach
                 # Edit for new produce
+                # If you want any good to exit through ChangeAmountsImport or ChangeAmountsExport you need to add the parameter ChangeAmounts = yes 
+                # Example:  TN_DoTradeHelper2 = { type = Import prod = 22 mil = yes ChangeAmounts = yes }
                 TN_DoTradeHelper2 = { type = Import prod = 1 food = yes }
                 TN_DoTradeHelper2 = { type = Import prod = 2 }
                 TN_DoTradeHelper2 = { type = Import prod = 4 }
@@ -2194,6 +2303,8 @@ TN_SetReach = {
             limit = { # Only Major or higher than jump/spread
                 OR = {
                     has_province_flag = HasSeaAccess
+                    has_province_flag = HasRiverSeaAccess
+                    has_province_flag = HasRiverSeaBAccess
                     has_province_flag = HasSilkAccess
                 }
                 OR = {
@@ -2284,7 +2395,7 @@ TN_SetReach = {
                 limit = {
                     has_province_flag = TN_SectorCent
                     NOT = { has_province_flag = TN_SectorCentReachWithin }
-                    has_province_flag = HasSeaAccess          
+                    has_province_flag = HasSeaAccess
                 }
                 TN_effect = { 
                     effect = TN_effect21 # Connect every owned place in the world
@@ -2506,17 +2617,12 @@ TN_SetPrcFill = {
             limit = {
                 check_key = { lhs = Public_Tmp1 value = 0 }
             }
-            #change_key = { lhs = Public_Tmp1 value = 1 }
-            #multiply_key = { lhs = Public_Tmp1 which = Public_Tmp1 } # Exponential                      
-            #change_key = { lhs = Public_Tmp1 value = -1 }
-            
             set_key = { lhs = Public_Tmp0 which = TN_ProvPrc$prod$ }
             multiply_key = { lhs = Public_Tmp0 value = 0.02 }
             change_key = { lhs = Public_Tmp0 value = 1 }
             divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 
-            multiply_key = { lhs = Public_Tmp1 value = 8 } # Fluctuation factor
-            #[[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
+            multiply_key = { lhs = Public_Tmp1 value = 11 } # Fluctuation factor
             [[fluctuationFactor] multiply_key = { lhs = Public_Tmp1 value = $fluctuationFactor$ } ]
 
             change_key = { lhs = Public_Tmp1 value = 100 }            
@@ -2524,18 +2630,12 @@ TN_SetPrcFill = {
 			multiply_key = { lhs = TN_ProvPrc$prod$ value = 0.01 }
         }
         else = {
-            #change_key = { lhs = Public_Tmp1 value = -1 }
-            #multiply_key = { lhs = Public_Tmp1 which = Public_Tmp1 } # Exponential
-            #change_key = { lhs = Public_Tmp1 value = -1 }
-            #multiply_key = { lhs = Public_Tmp1 value = -1 }
-            
             set_key = { lhs = Public_Tmp0 which = TN_ProvPrc$prod$ }
             multiply_key = { lhs = Public_Tmp0 value = -0.02 }
             change_key = { lhs = Public_Tmp0 value = 3 }
             divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 
-            multiply_key = { lhs = Public_Tmp1 value = 8 } # Fluctuation factor
-            #[[delicacies] multiply_key = { lhs = Public_Tmp1 value = 0.5 } ]
+            multiply_key = { lhs = Public_Tmp1 value = 11 } # Fluctuation factor
             [[fluctuationFactor] multiply_key = { lhs = Public_Tmp1 value = $fluctuationFactor$ } ]
 
             multiply_key = { lhs = Public_Tmp1 value = -1 }
@@ -3075,19 +3175,11 @@ TN_DoTradeSetAmountImport = {
                     set_key = { lhs = $return$ which = $offer$ }
                     Set_Import_Max = { offer = $offer$ return = $return$ }
                     [[mil]
-                        Calc_Tech_Difference_$type$ = { return = $return$ }                        
+                    Calc_Tech_Difference_$type$ = { return = $return$ }                        
                     ]
-                    #if = {
-                    #    limit = {                            
-                    #        owner = { 
-                    #            OR = {
-                    #                is_rival = event_target:ProvNew
-                    #                event_target:ProvNew = { is_rival = PREV }
-                    #            }
-                    #        }                                                   
-                    #    }
-                    #    multiply_key = { lhs = $return$ value = 0.5 }
-                    #}
+                    [[ChangeAmounts]
+                        ChangeAmounts$type$ = { return = $return$ }
+                    ]
                 }
                 else = {
                     set_key = { lhs = $return$ value = 0 }
@@ -3169,18 +3261,9 @@ TN_DoTradeSetAmountExport = {
                     [[mil]
                         Calc_Tech_Difference_$type$ = { return = $return$ }
                     ]
-                    #if = {
-                    #    limit = {                            
-                    #        owner = { 
-                    #            OR = {
-                    #                is_rival = event_target:ProvNew
-                    #                event_target:ProvNew = { is_rival = PREV }
-                    #            }
-                    #        }                                                   
-                    #    }
-                    #    multiply_key = { lhs = $return$ value = 0.5 }
-                    #}
-
+                    [[ChangeAmounts]
+                        ChangeAmounts$type$ = { return = $return$ }
+                    ]
                 }
                 else = {
                     set_key = { lhs = $return$ value = 0 }
@@ -3453,7 +3536,7 @@ TN_DoTradeByAmountImport = {
 					if = {
 						limit = {
 							NOT = {
-								is_key_equal = { lhs = Sector_ID which = PREV }
+								is_key_equal = { lhs = Sector_TagID which = PREV }
 							}
 						}                       
                         set_key = { lhs = Public_Tmp7 which = PREV }
@@ -3675,7 +3758,7 @@ TN_DoTradeByAmountExport = {
 }
 
 TN_DoTradeHelper2 = {
-	TN_DoTradeSetAmount$type$ = { bid = TN_SectorStockpileBid$prod$ offer = TN_SectorStockpileOffer$prod$ return = Tmp_1 [[food] distance = Public_Tmp3] [[mil] type = $type$] }
+	TN_DoTradeSetAmount$type$ = { bid = TN_SectorStockpileBid$prod$ offer = TN_SectorStockpileOffer$prod$ return = Tmp_1 [[food] distance = Public_Tmp3] [[mil] type = $type$] [[ChangeAmounts] type = $type$] }
 	
 	if = {
 		limit = {
@@ -3800,7 +3883,7 @@ TN_SumSectorHelper2 = {
         set_key = { lhs = Public_Tmp2 which = TN_SectorSply$prod$ } # if supply > demand
     }
 
-    multiply_key = { lhs = Public_Tmp2 value = 4 }
+    multiply_key = { lhs = Public_Tmp2 value = 3 }
     
     if = {
         limit = {
@@ -4567,8 +4650,10 @@ TN_GetProdClass = {
 }
 
 TN_SetIncomeInnateHelperMain = {
+    [[Proportional]
     if = {
         limit = {
+            always = $Proportional$
             check_key = { lhs = $class$_Total value = 0.01 }
         }
         if = {
@@ -4589,23 +4674,38 @@ TN_SetIncomeInnateHelperMain = {
             set_key = { lhs = $class$_IncomeInnate which = $class$_Total }
             multiply_key = { lhs = $class$_IncomeInnate value = $val2$ }
         }
-    }
+    }]
+    [[Fixed]
+    if = {
+        limit = {
+            always = $Fixed$
+            check_key = { lhs = $class$_Total value = 0.01 }
+        }
+        set_key = { lhs = $class$_IncomeInnate value = $val$ }
+    }]
+    multiply_key = { lhs = $class$_IncomeInnate value = 1.333 } ## balancing
 	if = {
 		limit = {
 			NOT = { has_global_flag = POP_Sim }
 		}
-        multiply_key = { lhs = $class$_IncomeInnate value = 1.333 } ## balancing
+        multiply_key = { lhs = $class$_IncomeInnate value = 1.0 } ## balancing
     }
     else_if = {
         limit = {
-            has_global_flag = POP_Sim10
+            has_global_flag = POP_Sim
         }
-        multiply_key = { lhs = $class$_IncomeInnate value = 0.25 } ## balancing
+        multiply_key = { lhs = $class$_IncomeInnate value = 1.0 } ## balancing
         if = {
             limit = {
-                NOT = { has_global_flag = POP_Sim6 }
+                has_global_flag = POP_Sim10
             }
-            multiply_key = { lhs = $class$_IncomeInnate value = 0.5 } ## balancing
+            multiply_key = { lhs = $class$_IncomeInnate value = 0.25 } ## balancing
+            if = {
+                limit = {
+                    NOT = { has_global_flag = POP_Sim6 }
+                }
+                multiply_key = { lhs = $class$_IncomeInnate value = 0.5 } ## balancing
+            }
         }
     }
 }
@@ -4619,16 +4719,11 @@ TN_SetIncomeInnateHelper = {
 # val2 = innate income per 1k pops before threshhold
 # Threshhold = pops in k below which higher innate income is applied
 TN_SetIncomeInnate = {
-    TN_SetIncomeInnateHelperMain = { class = SF val = 0.006 val2 = 0.08 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NM val = 0.007 val2 = 0.08 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = RE val = 0.008 val2 = 0.5 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NO val = 0.012 val2 = 0.8 Threshold = 0.5 }
-    if = {
-        limit = {
-            check_key = { lhs = BG_Total value = 0.001 }
-        }
-        set_key = { lhs = BG_IncomeInnate value = 0.5 }
-    }
+    TN_SetIncomeInnateHelperMain = { class = SF Proportional=yes val = 0.006 val2 = 0.08 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = NM Proportional=yes val = 0.007 val2 = 0.08 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = RE Proportional=yes val = 0.008 val2 = 0.5 Threshold = 3 }
+    TN_SetIncomeInnateHelperMain = { class = NO Proportional=yes val = 0.012 val2 = 0.8 Threshold = 0.5 }
+    TN_SetIncomeInnateHelperMain = { class = BG Fixed=yes val = 0.5 }
     set_key = { lhs = CL_IncomeInnate value = 0 }
 }
 

@@ -277,6 +277,7 @@ Construct_CalcInfra = {
 }
 
 Construct_CalcInfraHelper = {
+	# Construct_Tmp3: additional units
 	if = {
 		limit = {
 			Infra_CanConstruct = yes
@@ -308,6 +309,7 @@ Construct_CalcInfraHelper = {
 			set_key = { lhs = Construct_Amount value = 0 }
 			set_key = { lhs = Construct_Amount which = Construct_Cost }
 			set_key = { lhs = Construct_Tmp4 which = Construct_Amount } #Save amount of units to export to owner for display purposes
+			subtract_key = { lhs = Construct_Tmp4 which = Construct_Tmp3 }	#Deduct the amount of extra units again for Displaying Base Units
 			multiply_key = { lhs = Construct_Cost which = Infra_$type$SizeCost1 }
 		}
 		else_if = { # Build X rank
@@ -317,26 +319,57 @@ Construct_CalcInfraHelper = {
 					overlord = { is_key_equal = { lhs = Construct_TypeToggle value = 1 } }
 				}
 			}
-			Infra_GetGoal$type$ = { return=Construct_Cost inp=Construct_Amount }
-            change_key = { lhs = Construct_Cost which = Construct_Tmp3 }
+
+			# Infra_GetGoal$type$ = { return=Construct_Cost inp=Construct_Amount }
+            # change_key = { lhs = Construct_Cost which = Construct_Tmp3 }
 			
-			set_key = { lhs = Construct_Tmp1 value = 6 }
-			Infra_GetGoal$type$ = { return=Construct_Tmp0 inp=Construct_Tmp1 }
+			# set_key = { lhs = Construct_Tmp1 value = 6 }
+			# Infra_GetGoal$type$ = { return=Construct_Tmp0 inp=Construct_Tmp1 }
             
-			subtract_key = { lhs = Construct_Tmp0 which = Infra_$type$Size }
-			subtract_key = { lhs = Construct_Tmp0 which = Infra_InConst$type$ }
-			if = {
-				limit = {
-					check_key = { lhs = Construct_Cost which = Construct_Tmp0 }
-				}
-				set_key = { lhs = Construct_Cost which = Construct_Tmp0 }
-			}
+			# subtract_key = { lhs = Construct_Tmp0 which = Infra_$type$Size }
+			# subtract_key = { lhs = Construct_Tmp0 which = Infra_InConst$type$ }
+			# if = {
+			# 	limit = {
+			# 		check_key = { lhs = Construct_Cost which = Construct_Tmp0 }
+			# 	}
+			# 	set_key = { lhs = Construct_Cost which = Construct_Tmp0 }
+			# }
+			# if = {
+			# 	limit = {
+			# 		NOT = { check_key = { lhs = Construct_Cost value = 0 } }
+			# 	}
+			# 	set_key = { lhs = Construct_Cost value = 0 }
+			# }
+
+			# BrutusY: Rewrite the calculation of target level
+			# Set Construct_Tmp0 to be current infrastructure level
+			if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 7 } } set_key = { lhs = Construct_Tmp0 value = 7 } }
+			else_if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 6 } } set_key = { lhs = Construct_Tmp0 value = 6 } }
+			else_if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 5 } } set_key = { lhs = Construct_Tmp0 value = 5 } }
+			else_if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 4 } } set_key = { lhs = Construct_Tmp0 value = 4 } }
+			else_if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 3 } } set_key = { lhs = Construct_Tmp0 value = 3 } }
+			else_if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 2 } } set_key = { lhs = Construct_Tmp0 value = 2 } }
+			else_if = { limit = { is_key_equal = { lhs = Infra_$type$ value = 1 } } set_key = { lhs = Construct_Tmp0 value = 1 } }
+			else = { set_key = { lhs = Construct_Tmp0 value = 0 } }
+			
+			# Calculate the final target level
+			change_key = { lhs = Construct_Tmp0 which = Construct_Amount }
+			
+			# Use the same Build Up to X Rank code, with Construct_Tmp0 as the Target Level
+
+			Infra_GetGoal$type$ = { return=Construct_Cost inp=Construct_Tmp0 }
+            
+            change_key = { lhs = Construct_Cost which = Construct_Tmp3 }
+			subtract_key = { lhs = Construct_Cost which = Infra_$type$Size }
+			subtract_key = { lhs = Construct_Cost which = Infra_InConst$type$ }
 			if = {
 				limit = {
 					NOT = { check_key = { lhs = Construct_Cost value = 0 } }
 				}
 				set_key = { lhs = Construct_Cost value = 0 }
 			}
+
+			# End of Calculation
 			
 			# Save the amount of buildings to be constructed
 			set_key = { lhs = Construct_Amount value = 0 }
@@ -500,7 +533,8 @@ Construct_BuildInfraHelper = {
         limit = { 
             has_province_flag = comes_from_manual
         }
-        change_key = { lhs = Construct_Amount which = Construct_Tmp3 }
+		#Don't do the below, Extra Units are already added in Construct_CalcInfraHelper
+        #change_key = { lhs = Construct_Amount which = Construct_Tmp3 }
         clr_province_flag = comes_from_manual
     }
     

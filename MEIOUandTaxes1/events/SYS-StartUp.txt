@@ -251,17 +251,14 @@ country_event = {
             }
 
             POP_ClassTotalCalc = yes
+    
+            set_key = { lhs = Land_SoilD which = Land_Soil }
+            multiply_key = { lhs = Land_SoilD value = 100 }
         }
 		Init_LAModify = yes # Country based local autonomy adjustments
 
         Concern_DoIterMain = yes # Concern calculation iteration
 
-        # Setup Soil
-        multiply_key = { lhs = Land_Soil value = 0.65 }
-        change_key = { lhs = Land_Soil value = 0.6 }
-
-        set_key = { lhs = Land_SoilD which = Land_Soil }
-        multiply_key = { lhs = Land_SoilD value = 100 }
     }
 
     option = {
@@ -371,14 +368,25 @@ country_event = {
 		}
 		NaturalFeatures = yes # Initializing natural features flags / variables
 
-        if = {
+        every_province = {
             limit = {
-                OR = {
-                    area = yucatan_area
-                    area = mayapan_area
-                }
+				isValidEmpty = yes # Every province not yet calculated and no wasteland
             }
-            multiply_key = { lhs = Land_Rain value = 0.6 }
+            if = {
+                limit = {
+                    OR = {
+                        area = yucatan_area
+                        area = mayapan_area
+                    }
+                }
+                multiply_key = { lhs = Land_Rain value = 0.6 }
+            }
+            if = {
+                limit = {
+                    superregion = west_africa_superregion
+                }
+                multiply_key = { lhs = Land_Rain value = 1.2 }
+            }
         }
             
         every_province = {
@@ -706,10 +714,6 @@ country_event = {
 					if = {
 						limit = {
 							OR = {
-								superregion = north_india_superregion
-								area = central_doab_area
-								area = gwalior_area
-								region = west_bengal_region
 								area = mexico_area
 								#China
 								province_id = 2510
@@ -765,6 +769,10 @@ country_event = {
 								#Iran
 								province_id = 417
 								province_id = 426
+								superregion = north_india_superregion
+								area = central_doab_area
+								area = gwalior_area
+								region = west_bengal_region
 							}
 							NOT = { region = vietnam_region }
 						}
@@ -2097,9 +2105,6 @@ country_event = {
                 country_event = { id = setup_event.11 }
                 
                 country_event = { id = cb_types.1 }
-                country_event = { id = cb_types.2 }
-                country_event = { id = cb_types.3 }
-                country_event = { id = cb_types.4 }
                 
                 country_event = { id = SYS_Pulse.005 }
                 
@@ -3177,6 +3182,16 @@ country_event = {
     is_triggered_only = yes
     
     immediate = {
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidEmpty = yes
+                }
+                Land_CalcCrops = yes
+                set_key = { lhs = Land_SoilD which = Land_Soil }
+                multiply_key = { lhs = Land_SoilD value = 100 }
+            }
+        }
         every_country = {
             limit = {
                 isValidCountry = yes

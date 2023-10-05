@@ -2,10 +2,8 @@
 cb_roman_east = {  #should be replaced with claims
 	war_goal = reclaim_rome_east
 	valid_for_subject = no
-	is_triggered_only = yes # See cb_types.1
-	months = 12000
-	
-	prerequisites = {
+
+	prerequisites_self = {
 		OR = {
 			tag = BYZ
 			#tag = TRE They rescinded this claim when they became the Empire of Trebizond
@@ -14,11 +12,14 @@ cb_roman_east = {  #should be replaced with claims
 		}
 		is_subject = no
 		NOT = { has_country_flag = heir_to_rome }
-		NOT = { overlord_of = FROM }
 		OR = {
 			ai = yes
 			NOT = { has_global_flag = multiplayer }
 		}
+	}
+	
+	prerequisites = {
+		NOT = { overlord_of = FROM }
 		FROM = { has_country_flag = RomeExpansion }
 	}
 	
@@ -31,38 +32,21 @@ cb_roman_east = {  #should be replaced with claims
 	}
 }
 
-cb_korean_expansion = {
-	war_goal = reclaim_korea
-	valid_for_subject = no
-	is_triggered_only = yes # See cb_types.1
-	months = 12000
-	
-	prerequisites = {
-		primary_culture = korean
-		NOT = { overlord_of = FROM }
-	}
-	
-	attacker_disabled_po = {
-		po_form_personal_union
-		po_change_government
-		po_change_religion
-		po_trade_power
-	}
-}
-
 # Russian Expansion East
 cb_russian_expansion_east = { #should be replaced with claims
 	war_goal = horde_payback
-	is_triggered_only = yes # See cb_types.1
-	months = 12000
-	
-	prerequisites = {
+
+	prerequisites_self = {
 		culture_group = east_slavic
 		nomad_trigger = no
 		OR = {
 			is_subject = no
 			overlord = { NOT = { culture_group = east_slavic } }
 		}
+	}
+	
+	prerequisites = {
+		is_neighbor_of = FROM
 		FROM = {
 			has_country_flag = RussiaExpansion
 			OR = {
@@ -92,14 +76,16 @@ cb_russian_expansion_east = { #should be replaced with claims
 cb_hre_tributary = {
 	war_goal = take_capital_vassalize
 	valid_for_subject = no
-	is_triggered_only = yes # See cb_types.1
-	months = 12000
 
-	prerequisites = {
+	prerequisites_self = {
 		has_dlc = "Mandate of Heaven"
 		is_part_of_hre = yes
 		NOT = { government = republic }
 		is_emperor = no
+	}
+
+	prerequisites = {
+		is_neighbor_of = FROM
 		FROM = {
 			is_part_of_hre = yes
 			government = republic
@@ -121,21 +107,24 @@ cb_hre_tributary = {
 cb_kingdom = {
 	war_goal = unite_culture
 	valid_for_subject = no
-	is_triggered_only = yes
-	months = 12000
 
-	prerequisites = {
-		is_nomad = no
-		check_key = { lhs = Ruler_SkillMIL value = 3 }
-		has_country_modifier = title_5
+	prerequisites_self = {
 		legitimacy_equivalent = 80
 		stability = 1
+		has_country_modifier = title_5
+		is_nomad = no
+		check_key = { lhs = Ruler_SkillMIL value = 3 }
 		NOT = { culture_group = japanese_g }
 		OR = {
 			NOT = { culture_group = chinese_group }
 			primary_culture = chinese_colonial
 		}
 		is_colonial_nation = no
+		NOT = { has_country_flag = War_Block }
+	}
+
+	prerequisites = {
+		is_neighbor_of = FROM
 		FROM = {
 			OR = {
 				is_free_or_tributary_trigger = yes
@@ -156,12 +145,10 @@ cb_kingdom = {
 cb_empire = {
 	war_goal = unite_culture_group
 	valid_for_subject = no
-	is_triggered_only = yes
-	months = 12000
 
-	prerequisites = {
-		is_nomad = no
+	prerequisites_self = {
 		legitimacy_equivalent = 65
+		is_nomad = no
 		check_key = { lhs = Ruler_SkillMIL value = 3 }
 		OR = {
 			has_country_modifier = title_6
@@ -182,6 +169,11 @@ cb_empire = {
 			primary_culture = chinese_colonial
 		}
 		is_colonial_nation = no
+		NOT = { has_country_flag = War_Block }
+	}
+
+	prerequisites = {
+		is_neighbor_of = FROM
 		FROM = {
 			OR = {
 				is_free_or_tributary_trigger = yes
@@ -201,14 +193,17 @@ cb_empire = {
 
 cb_free_the_caliph = { #should be removed when we have something to replace it
 	war_goal = take_free_the_caliph
-	
-	is_triggered_only = yes # See cb_types.1
-	valid_for_subject = no
+	is_triggered_only = yes
 	months = 12000
 	
-	prerequisites = {
+	valid_for_subject = no
+
+	prerequisites_self = {
 		total_development = 400
 		religion = sunni
+	}
+	
+	prerequisites = {
 		NOT = { overlord_of = FROM }
 	}
 	attacker_disabled_po = {
@@ -248,26 +243,27 @@ cb_free_the_caliph = { #should be removed when we have something to replace it
 cb_plantagenet_french_throne = {
 	war_goal = take_capital_personal_union
 	ai_peace_desire = -40
-	is_triggered_only = yes
 	valid_for_subject = no
-	months = 12000
-	prerequisites = {
+
+	prerequisites_self = {
 		tag = ENG
 		OR = {
 			dynasty = "Plantagenet"
 			dynasty = "Lancaster"
 			dynasty = "York"
 		}
-		FROM = {
-			tag = FRA
-			dynasty = "de Valois"
-			is_subject = no
-		}
 		OR = {
 			ai = yes
 			NOT = {
 				has_global_flag = multiplayer
 			}
+		}
+	}
+	prerequisites = {
+		FROM = {
+			tag = FRA
+			dynasty = "de Valois"
+			is_subject = no
 		}
 	}
 }
@@ -354,7 +350,17 @@ cb_foreign_interference = {
 
 cb_mesoamerican_vassalization = {
 	war_goal = wg_take_capital_mesoamerican_vassalization
-	is_triggered_only = yes
-	months = 12000
+
+	prerequisites_self = {
+		religion_group = mesoamerican_pagan
+		is_subject = no
+	}
+	prerequisites = {
+		is_neighbor_of = FROM
+		FROM = {
+			religion_group = mesoamerican_pagan
+			NOT = { is_subject_of = ROOT }
+		}
+	}
 	attacker_disabled_po = { po_change_government po_change_religion po_demand_provinces po_return_cores po_form_personal_union }
 }
