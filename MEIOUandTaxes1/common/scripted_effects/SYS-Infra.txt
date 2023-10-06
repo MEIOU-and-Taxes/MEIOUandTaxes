@@ -940,19 +940,32 @@ Infra_SetMaint = {
 			}
 			change_key = { lhs = Building_$type$Up which = Tmp_1 } ## add affordable units to expansion desire
 
+
+			## Calcualte good demands
 			multiply_key = { lhs = Tmp_1 which = Modi_$type$Cost }
 			multiply_key = { lhs = Tmp_1 which = Modi_BuildingCost }
 			multiply_key = { lhs = Tmp_1 which = Modi_BuildingTime }
 
-			set_key = { lhs = Building_$type$1 which = Tmp_1 }
-			set_key = { lhs = Building_$type$6 which = Tmp_1 }
-			set_key = { lhs = Building_$type$24 which = Tmp_1 }
+			set_key = { lhs = Tmp_2	which = Tmp_1 }
+			set_key = { lhs = Tmp_3	which = Tmp_1 }
+			set_key = { lhs = Tmp_4 which = Tmp_1 }
 
-			multiply_key = { lhs = Building_$type$1 value = $food$ }
-			multiply_key = { lhs = Building_$type$6 value = $raw$ }
-			multiply_key = { lhs = Building_$type$24 value = $indust$ }
+			multiply_key = { lhs = Tmp_2 value = $food$ }
+			multiply_key = { lhs = Tmp_3 value = $raw$ }
+			multiply_key = { lhs = Tmp_4 value = $indust$ }
 
-			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Wealth_Invested } # Subtract actual investment from Wealth (corruption will be subtracted in "Infra_DoSpend"
+			## add additional building goods demands
+			change_key = { lhs = Building_$type$1  which = Tmp_2 }
+			change_key = { lhs = Building_$type$6  which = Tmp_3 }
+			change_key = { lhs = Building_$type$24 which = Tmp_4 }
+
+			###
+			# WEATLH DEDUCTION FROM INVESTMENT POOL IS DONE IN Infra_DoSpend!!!
+			###
+		}
+		else = { # No units affordable --> no investment happens
+			set_key = { lhs = Building_$type$Wealth_Invested	  value = 0 }
+			set_key = { lhs = Building_$type$Wealth_Invested_Crpt value = 0 }
 		}
 	}
 }
@@ -1512,26 +1525,44 @@ Infra_DoSpend = {
 	set_key = { lhs = BU_Spend$type$ value = 0 }
 	
 
-	### Handling of state investment -> give corruption money to elites
+	### Handling of state investment
 	if = {
-		check_key = { lhs = Building_$type$Wealth_Invested_Crpt value = 0.001 } # Any state investment corruption occured
-
-		if = { 
-			limit = { 
-				check_key = { lhs = Building_$type$Spend which = Building_$type$Wealth_Invested_Crpt } ## Spend >= Corruption
+		limit = { check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 } } # Any state investment occured
+	
+		# give investment money to elites for property build by the state
+		if = {
+			limit = {
+				check_key = { lhs = Building_$type$Spend which = Building_$type$Wealth_Invested } ## Spend >= Investment
 			} 
 		
-			subtract_key = { lhs = Building_$type$Spend  which = Building_$type$Wealth_Invested_Crpt } # Reduce Elite spending by corruption
-			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Wealth_Invested_Crpt } # reduce state investment by corruption
+			subtract_key = { lhs = Building_$type$Spend  which = Building_$type$Wealth_Invested } # Reduce Elite spending by Investment
+			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Wealth_Invested } # reduce state investment by taken investments
 		}	
-		else = { # Spending >= then corruption --> Can't give more then total spending, no wealth overflow, rest remains in investment pool
-			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Spend } # reduce state investment pool by corruption spending
-			set_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Spend } # amount actually corruption, rest remain in investment pool
+		else = { # Spending < investment --> Can't give more then total spending, no wealth overflow or loss, rest remains in investment pool
+			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Spend } 	# reduce state investment pool by investment spending
+			set_key = { lhs = Building_$type$Wealth_Invested which = Building_$type$Spend } # amount actually invested rest remain in investment pool
 			set_key = { lhs = Building_$type$Spend value = 0 } # No spending since all is paid for by the state
+		}
+		
+		# give corruption money to elites
+		if = {
+			limit = { check_key = { lhs = Building_$type$Wealth_Invested_Crpt value = 0.001 } } # Any state investment corruption occured
+
+			if = {
+				limit = {
+					check_key = { lhs = Building_$type$Spend which = Building_$type$Wealth_Invested_Crpt } ## Spend >= Corruption
+				} 
+			
+				subtract_key = { lhs = Building_$type$Spend  which = Building_$type$Wealth_Invested_Crpt } # Reduce Elite spending by corruption
+				subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Wealth_Invested_Crpt } # reduce state investment by corruption
+			}	
+			else = { # Spending < corruption --> Can't give more then total spending, no wealth overflow or loss, rest remains in investment pool
+				subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Spend } # reduce state investment pool by corruption spending
+				set_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Spend } # amount actually corruption, rest remain in investment pool
+				set_key = { lhs = Building_$type$Spend value = 0 } # No spending since all is paid for by the state
+			}
+		}
 	}
-
-
-	}	
 
 	if = {
 		limit = {
