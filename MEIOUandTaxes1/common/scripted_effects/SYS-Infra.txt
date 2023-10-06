@@ -801,30 +801,40 @@ Infra_SetMaint = {
             limit = {
 				always = $RegularMaint$
 			}
-			set_key = { lhs = Tmp_0 which = Building_$type$ }
-			multiply_key = { lhs = Tmp_0 value = $rate$ } ### basically a x on building count to determine maint costs
+			# Calculate Shrinkage or expansion
+			set_key = { lhs = Tmp_0 which = Building_$type$Up }
+			subtract_key = { lhs = Tmp_0 which = Building_$type$Down }
 
-			set_key = { lhs = Tmp_1 which = Building_$type$Up }
-			subtract_key = { lhs = Tmp_1 which = Building_$type$Down }
-			multiply_key = { lhs = Tmp_1 value = $factor$ } ### how much do new buildings cost
-			change_key = { lhs = Tmp_0 which = Tmp_1 } # add expansion or shrinkage to maintenance costs
+			set_key = { lhs = Tmp_1 which = Building_$type$ }
+			if = {
+				limit = { 
+					NOT = { check_key = { lhs = Tmp_0 value = 0 } }
+				}
+				change_key = { lhs = Tmp_1 which = Tmp_0 } # remove shrinking property from paying maintenance
+			}
+			multiply_key = { lhs = Tmp_1 value = $rate$ } ### basically a x on building count to determine maint costs
 
 			if = {
-				limit = {
-					check_key = { lhs = Tmp_0 value = 0 } # if property wants to expand, add the maintenance of the expansion. Because there is a new size change, the property will now demand more.
+				limit = { 
+					check_key = { lhs = Tmp_0 value = 0 } # expansion?
 				}
-				multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
-				multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
-				multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
-							
-				set_key = { lhs = Building_$type$1 which = Tmp_0 }
-				set_key = { lhs = Building_$type$6 which = Tmp_0 }
-				set_key = { lhs = Building_$type$24 which = Tmp_0 }
-				
-				multiply_key = { lhs = Building_$type$1 value = $food$ }
-				multiply_key = { lhs = Building_$type$6 value = $raw$ }
-				multiply_key = { lhs = Building_$type$24 value = $indust$ }
+
+				multiply_key = { lhs = Tmp_0 value = $factor$ } ### how much do new buildings cost
+				change_key = { lhs = Tmp_1 which = Tmp_0 } # add expansion build costs to maintenance costs
 			}
+
+			# calculate total costs for maintenance + building
+			multiply_key = { lhs = Tmp_1 which = Modi_$type$Cost }
+			multiply_key = { lhs = Tmp_1 which = Modi_BuildingCost }
+			multiply_key = { lhs = Tmp_1 which = Modi_BuildingTime }
+						
+			set_key = { lhs = Building_$type$1  which = Tmp_1 }
+			set_key = { lhs = Building_$type$6  which = Tmp_1 }
+			set_key = { lhs = Building_$type$24 which = Tmp_1 }
+			
+			multiply_key = { lhs = Building_$type$1 value = $food$ }
+			multiply_key = { lhs = Building_$type$6 value = $raw$ }
+			multiply_key = { lhs = Building_$type$24 value = $indust$ }
 		}
 		]
 		[[IncomeMaint]
@@ -924,8 +934,8 @@ Infra_SetMaint = {
 		# Apply State Investment Effectivess to determine how much is just given into spending pool
 		# -> at the end this means elites have to pay less out of own pockets = corruption
 		set_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Wealth_Invested }
-		multiply_key = { lhs = Building_$type$Wealth_Invested which = Tmp_3 } 
-		subtract_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Wealth_Invested }
+		multiply_key = { lhs = Building_$type$Wealth_Invested which = Tmp_3 } # this is real investment now (-corruption)
+		subtract_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Wealth_Invested } # this is corruption value
 
 		# Calculate affordable units when doing an investment
 		set_key = { lhs = Tmp_1 which = Building_$type$Wealth_Invested } # this is real investment (investment - corruption)
