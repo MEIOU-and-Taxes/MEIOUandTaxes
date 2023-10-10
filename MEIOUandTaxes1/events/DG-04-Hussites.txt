@@ -1184,56 +1184,6 @@ country_event = {
 			}
 		}
 	}
-	after = {
-	    if = { #Looking for alternative heirs
-		    limit = {
-				NOT = { has_country_flag = hussite_war_heir }
-		        any_known_country = {
-			        dynasty = ROOT
-				    government = monarchy
-					has_regency = no
-					is_female = no
-				    num_of_cities = 8
-					is_free_or_tributary_trigger = yes
-			    }
-			}
-			random_known_country = {
-			    limit = {
-				    dynasty = ROOT
-				    government = monarchy
-					has_regency = no
-					is_female = no
-				    num_of_cities = 8
-					is_free_or_tributary_trigger = yes
-				}
-				set_country_flag = hussite_war_heir_2
-			}
-		}
-		else_if = {
-		    limit = {
-				NOT = { has_country_flag = hussite_war_heir }
-		        any_known_country = {
-			        marriage_with = ROOT
-				    government = monarchy
-					has_regency = no
-					is_female = no
-				    num_of_cities = 8
-					is_free_or_tributary_trigger = yes
-			    }
-			}
-			random_known_country = {
-			    limit = {
-				    marriage_with = ROOT
-				    government = monarchy
-					has_regency = no
-					is_female = no
-				    num_of_cities = 8
-					is_free_or_tributary_trigger = yes
-				}
-				set_country_flag = hussite_war_heir_3
-			}
-		}
-	}
 }
 
 ### THE FOUR ARTICLES OF $CAPITAL_CITY$ (1420)
@@ -1778,7 +1728,7 @@ country_event = {
 	option = {
 		name = dg_hussite.024.a #Fight with words
 		ai_chance = {
-			factor = 50
+			factor = 75
 			modifier = {
 				any_known_country = {
 					has_country_flag = hussite_crown_candidate
@@ -1801,7 +1751,7 @@ country_event = {
 					has_country_flag = hussite_crown_candidate
 					is_enemy = ROOT
 				}
-				factor = 0.5
+				factor = 0.7
 			}
 		}
 		custom_tooltip = hussite_union
@@ -1813,7 +1763,7 @@ country_event = {
 	}
 	option = {
 		name = dg_hussite.024.b #Fight with guns
-		ai_chance = { factor = 50 }
+		ai_chance = { factor = 25 }
 		random_country = {
 			limit = { has_country_flag = hussite_crown_candidate }
 			add_opinion = { who = ROOT modifier = hussite_crown_refused }
@@ -2051,6 +2001,54 @@ country_event = {
 	}
 }
 
+### CIVIL WAR
+country_event = {
+	id = DG_Hussites.020
+	title = dg_hussite.029.t
+	desc = dg_hussite.029.d
+	picture = all_massacre
+	major = yes
+	
+	trigger = {
+		has_country_flag = hussite_wars_target
+		had_country_flag = { flag = hussite_crown days = 730 }
+		has_regency = no
+		religion = hussite
+		NOT = { religious_unity = 0.90 }
+		NOT = { stability = 3 }
+		any_owned_province = {
+            has_owner_culture = yes 		
+            is_in_capital_area = no			
+            MN_CheckRelSlot = { Type = value Religion = 1 }
+		}
+	}
+	
+	mean_time_to_happen = { months = 6 }
+	
+	option = {
+		name = dg_hussite.029.a #Let us finish this
+		Stab_Subtract50Percent = yes
+		random_owned_province = {
+		    limit = {
+			   has_owner_culture = yes
+			   is_in_capital_area = no
+			   MN_CheckRelSlot = { Type = value Religion = 1 }
+			}
+		    spawn_rebels = {
+				type = catholic_rebels
+				size = 3
+				leader = "Puta z Castolovic"
+				win = yes
+				should_take_capital = yes
+			}
+			add_province_modifier = {
+				name = heretic_bastion
+				duration = 1095 #3 years
+			}
+		}
+	}
+}
+
 ### THE ASSEMBLY OF $CAPITAL_CITY$
 country_event = {
 	id = DG_Hussites.024
@@ -2106,7 +2104,7 @@ country_event = {
 	
 	mean_time_to_happen = { months = 1 }
 	
-	immediate = { 
+	immediate = {
 	    set_country_flag = hussite_compacta 
 		if = {
 		    limit = { religion = hussite }
@@ -2244,13 +2242,7 @@ country_event = {
 		}
 		if = {
 			limit = { 
-<<<<<<< HEAD
 			    has_country_flag = hussite_war_heir
-=======
-			    has_country_flag = hussite_war_heir 
-				has_regency = yes
-				has_heir = no
->>>>>>> Piterdaw-Flavour
 				is_lesser_in_union = no
 			}
 			set_heir = hussite_war_heir
@@ -2329,6 +2321,10 @@ country_event = {
             }
 		}
 		add_country_modifier = { name = religious_intolerance duration = 1825 } #5 years
+	}
+	after = {
+	    clr_country_flag = hussite_wars_target
+		clr_country_flag = hussite_crown
 	}
 }
 
