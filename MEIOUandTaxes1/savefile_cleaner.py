@@ -1,13 +1,14 @@
+
 import re
 import os
 import glob
-import traceback
 import time
 from math import ceil
-
-SAVE_HEADER = "EU4txt".encode("iso-8859-1")  # First 6 chars of uncompressed savefile
+from traceback import print_exc
 
 try:
+    SAVE_HEADER = "EU4txt\n".encode("iso-8859-1")
+    print(SAVE_HEADER)
     class ProgressBar():
         def __init__(self, top, before='', after='', end='\n'):
             self.bef = before
@@ -38,8 +39,17 @@ try:
                 return True
             
             return True
+
+        def add(self, item):
+            self.show(len(item))
+            return item
+
+        def done(self):
+            self.show(self.top)
+
     dir = __file__  # Find save games folder, searching upwards
-    while dir != (dir := os.path.dirname(dir)):
+    while dir != os.path.dirname(dir):
+        dir = os.path.dirname(dir)
         if os.path.isdir(os.path.join(dir, "save games")):
             os.chdir(os.path.join(dir, "save games"))
             break
@@ -47,19 +57,21 @@ try:
     else:
         raise ValueError("Could not find save games folder.")
 
-    def is_uncompressed_file(file):  # Is an uncompressed eu4 savefile
+    def is_valid_file(file):  # Is an uncompressed eu4 savefile
         with open(file, "rb") as f:
-            return f.read(6) == SAVE_HEADER
+            t = f.read(7)
+            if not t[:6] == SAVE_HEADER[:6]:
+                return 0  # compressed file
+            if not t[6] == SAVE_HEADER[6]:
+                return -1  # already cleaned file
+            return 1  # valid file
     
     def is_backup_file(file):
         return file[-11:] == "_backup.eu4"
 
-    def is_clean_file(file):
-        ...
-
     # List of possible savefiles
     files = [
-        file for file in glob.iglob("**/*.eu4", recursive=True) if is_uncompressed_file(file) and not is_backup_file(file)
+        file for file in glob.iglob("**/*.eu4", recursive=True) if not is_backup_file(file) and is_valid_file(file) == 1
     ]
 
     print("Welcome to the eu4 save file cleaner! Select your unclean save file below: ")
@@ -76,9 +88,10 @@ try:
             file = files[0]
             break
         try:  # Get save by index
-            inp = int(inp)
-            file = files[inp]
-            break
+            v = int(inp)
+            if 0 <= v < len(files):
+                file = files[v]
+                break
         except Exception:
             pass
         if inp in files:  # Get save name (in list)
@@ -87,9 +100,17 @@ try:
         try:  # Get save name (not in list)
             if not inp.endswith(".eu4"):
                 inp += ".eu4"
-            if is_uncompressed_file(inp):
+            v = is_valid_file(inp)
+            if v == -1:
+                if not input('File is already cleaned, continue anyways? (y/n): ').lower() in ('y', 'yes'):
+                    continue
                 file = inp
                 break
+            elif v == 1:
+                file = inp
+                break
+            else:
+                print("File is compressed and cannot be read.")
         except FileNotFoundError:
             print("Could not find specified file.")
         except ValueError:
@@ -129,22 +150,20 @@ try:
             return re.sub(reg, '', text.translate(WS))
         text = []
         pos = 0
-        print(f"Reading from '{file}'...", end = '')
-        
         time1 = time.perf_counter()
         txt = f.read()
+        pb = ProgressBar(len(txt), f"Reading from '{file}'... ", end='')
         for match in re.finditer(r'variables\=\{[^\}]*\}', txt):
-            text.append(format_text(txt[pos:match.start()], R_WS))
-            text.append(format_text(match.group(), R_NUM))
+            text.append(format_text(pb.add(txt[pos:match.start()]), R_WS))
+            text.append(format_text(pb.add(match.group()), R_NUM))
             pos = match.end()
-        text.append(format_text(txt[pos:], R_WS))
+        text.append(format_text(pb.add(txt[pos:]), R_WS))
+        pb.done()
         
         time2 = time.perf_counter()
         print(f"  Took {time2 - time1:.4f}s")
-        del time1, time2
         
         sizes = (len(txt)/1024/1024, sum(map(len, text))/1024/1024)
-        del txt
 
     if backup:
         print(f"Backing up '{file}' as '{backup}'")
@@ -159,5 +178,5 @@ try:
         input("Press enter to exit...")
 
 except Exception:
-    traceback.print_exc()
+    print_exc()
     input("Press enter to exit...")

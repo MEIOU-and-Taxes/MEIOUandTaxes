@@ -72,9 +72,9 @@ Refresh to read game.log again.
 
     all_graphs.get_data = get_data
     graphs = {
-        func.__name__[5:].replace("_", " "): (func.__doc__, func)
+        getattr(all_graphs, name).__name__[5:].replace("_", " "): (getattr(all_graphs, name).__doc__, getattr(all_graphs, name))
         for name in dir(all_graphs)
-        if (func := getattr(all_graphs, name)) and name.lower().startswith("graph")
+        if getattr(all_graphs, name) and name.lower().startswith("graph")
     }
 
     # Read file(s)
