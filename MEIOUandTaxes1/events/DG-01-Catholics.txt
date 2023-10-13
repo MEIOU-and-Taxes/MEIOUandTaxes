@@ -57,6 +57,8 @@ namespace = DG_HeresySpread
 #502 - Canonization of a Saint (from Curia interaction)
 #503 - Canonization of a Saint (random)
 #504 - The First Estate
+#505 - Bishop of $PROVINCENAME$
+#506 - $PROVINCECAPITAL$ is elevated to archbishopric
 
 ################################
 # BIRTH OF COUNTER-REFORMATION #
@@ -1011,7 +1013,7 @@ country_event = {
 	option = {
 		name = DG_Catholics.010.opta #Give them free reign to fight heresy
 		add_devotion = 10
-		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
 		hidden_effect = {
 			set_country_flag = jesuits_founded
 			change_variable = { which = jesuit_support value = 2 }
@@ -6125,6 +6127,167 @@ province_event = {
 		    add_papal_influence = -10
 		    Stab_Add25Percent = yes
 		    add_opinion = { who = PAP modifier = papacy_great } 
+		}
+	}
+}
+
+### BISHOP OF $PROVINCENAME$
+province_event = {
+	id = DG_Catholics.505
+	title = DG_Catholics.505.title
+	desc = DG_Catholics.505.desc
+	picture = catholic_bishop
+	
+	is_triggered_only = yes #on_actions on_yearly_pulse_2
+	
+	trigger = {
+		owner = {
+		    catholic_trigger = yes
+		    NOT = { tag = PAP }
+			NOT = { tag = AVI }
+		}
+		OR = {
+		    has_province_modifier = preeminent_region_city
+			check_key = { lhs = Class_Urban value = 10 }
+		}
+		religion = owner
+		NOT = { has_province_modifier = catholic_archbishopric }
+		NOT = { has_province_modifier = greedy_bishop }
+		NOT = { has_province_modifier = effective_bishop }
+		NOT = { has_province_modifier = absentee_bishop }
+		NOT = { has_province_modifier = indulgence_peddler }
+		NOT = { has_province_modifier = religious_scandal_province }
+	}
+	
+	option = {
+		name = DG_Catholics.505.opta #Promote peace and order
+		ai_chance = { factor = 70 }
+		add_province_modifier = { name = effective_bishop duration = 7300 } #20 years
+		owner = { Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 } }
+	}
+	option = {
+		name = DG_Catholics.505.optb #Take an interest in his career
+		ai_chance = {
+			factor = 30
+			modifier = {
+				owner = { NOT = { treasury = 25 } }
+				factor = 0.3
+			}
+			modifier = {
+				owner = { num_of_loans = 1 }
+				factor = 0.3
+			}
+			modifier = {
+				owner = { is_bankrupt = yes }
+				factor = 0.1
+			}
+		}
+		owner = {
+			add_treasury = -25
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		}
+		add_province_modifier = { name = effective_bishop duration = 7300 } #20 years
+		random_list = {
+			50 = { owner = { define_advisor = { religion = catholic culture = ROOT type = theologian_CL discount = yes } } }
+			50 = { owner = { define_advisor = { religion = catholic culture = ROOT type = inquisitor_CL discount = yes } } }
+		}
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=CL type=value inp=25 }
+		}
+	}
+}
+
+#### $PROVINCECAPITAL$ IS ELEVATED TO ARCHBISHOPRIC
+province_event = {
+	id = DG_Catholics.506
+	title = DG_Catholics.506.title
+	desc = DG_Catholics.506.desc
+	picture = catholic_bishop
+	
+	trigger = {
+		OR = {
+			is_capital = yes
+			has_province_modifier = effective_bishop
+		}
+		OR = {
+		    has_province_modifier = preeminent_region_city
+			check_key = { lhs = Class_Urban value = 10 }
+		}
+		owner = {
+		    check_key = { lhs = Prov_CLPow value = 25 }
+		    NOT = { tag = PAP }
+			NOT = { tag = AVI } 
+			NOT = { war_with = PAP }
+			NOT = { is_excommunicated = yes }
+		}
+		OR = {
+			is_capital = yes
+			AND = {
+				superregion = italy_superregion
+				has_owner_culture = yes
+				check_key = { lhs = Class_Urban value = 25 }
+			}
+			NOT = { any_neighbor_province = { any_neighbor_province = { has_province_flag = catholic_archbishopric } } }
+		}
+		any_neighbor_province = { owner = { religion = catholic } } #No one province islands
+		NOT = { has_province_modifier = catholic_archbishopric }
+		NOT = { has_province_modifier = absentee_bishop }
+		is_core = owner
+		controlled_by = owner
+		has_siege = no
+		PAP = {
+		    has_regency = no
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 100
+		modifier = {
+		    OR = {
+			    is_capital = yes
+			    has_province_modifier = effective_bishop
+			}
+			factor = 0.5
+		}
+		modifier = {
+			has_province_modifier = greedy_bishop
+			factor = 2
+		}
+		modifier = {
+			owner = { check_key = { lhs = Prov_CLPow value = 75 } }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { check_key = { lhs = Prov_CLPow value = 50 } }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { num_of_cardinals = 3 }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { num_of_cardinals = 6 }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { num_of_cardinals = 9 }
+			factor = 0.7
+		}
+		modifier = {
+		    AND = {
+			    NOT = { religion = catholic }
+				NOT = { religion = avignonist }
+			}
+			factor = 1.4
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.506.opta #An honor indeed
+		add_province_modifier = { name = catholic_archbishopric duration = -1 }
+		set_province_flag = catholic_archbishopric
+		owner = {
+			add_papal_influence = 5
 		}
 	}
 }
