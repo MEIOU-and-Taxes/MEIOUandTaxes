@@ -59,6 +59,11 @@ namespace = DG_HeresySpread
 #504 - The First Estate
 #505 - Bishop of $PROVINCENAME$
 #506 - $PROVINCECAPITAL$ is elevated to archbishopric
+#507 - Resolving a Grievance
+#508 - A Case Comes before the Papal Court
+#509 - The Pope Rules in Our Favour
+#510 - The Pope Rules against Us
+#511 - The Pope Brokers a Compromise
 
 ################################
 # BIRTH OF COUNTER-REFORMATION #
@@ -6214,7 +6219,7 @@ province_event = {
 			check_key = { lhs = Class_Urban value = 10 }
 		}
 		owner = {
-		    check_key = { lhs = Prov_CLPow value = 25 }
+		    check_key = { lhs = Prov_CLPow value = 30 }
 		    NOT = { tag = PAP }
 			NOT = { tag = AVI } 
 			NOT = { war_with = PAP }
@@ -6288,6 +6293,935 @@ province_event = {
 		set_province_flag = catholic_archbishopric
 		owner = {
 			add_papal_influence = 5
+		}
+	}
+}
+
+### RESOLVING A GRIEVANCE
+country_event = {
+	id = DG_Catholics.507
+	title = DG_Catholics.507.title
+	desc = DG_Catholics.507.desc
+	picture = catholic_papal_legate
+	
+	trigger = {
+		religion = catholic
+		is_papal_controller = no
+		NOT = { any_neighbor_country = { has_country_flag = aggrieved_party } }
+		exists = PAP
+		NOT = { tag = PAP }
+		Rights_CLHie1Has = yes
+		is_excommunicated = no
+		any_neighbor_country = {
+			religion = catholic
+			is_papal_controller = no
+			Rights_CLHie1Has = yes
+			is_excommunicated = no
+			ai = yes
+			NOT = { tag = PAP }
+			NOT = { war_with = ROOT }
+			NOT = { has_opinion = { who = ROOT value = 50 } }
+			OR = {
+			    is_rival = ROOT
+				is_enemy = ROOT
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 200
+		
+		modifier = {
+			exists = AVI
+			AVI = { papal_trigger = yes }
+			factor = 2
+		}
+		modifier = { #Papal mediations between Poland and Teutonic Order
+			OR = {
+			    AND = {
+				    tag = POL
+					is_rival = TEU
+				}
+				AND = {
+				    tag = TEU
+					is_rival = POL
+				}
+			}
+			factor = 0.2
+		}
+	}
+	
+	immediate = {
+		random_neighbor_country = {
+			limit = {
+				religion = catholic
+				is_papal_controller = no
+			    NOT = { is_excommunicated = yes }
+			    Rights_CLHie1Has = yes
+			    ai = yes
+				NOT = { tag = PAP }
+			    NOT = { war_with = ROOT }
+			    NOT = { has_opinion = { who = ROOT value = 50 } }
+				OR = {
+			        is_rival = ROOT
+					is_enemy = ROOT
+				}
+			}
+			set_country_flag = aggrieved_party
+			add_opinion = { who = ROOT modifier = grievance }
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					any_neighbor_country = {
+						has_country_flag = aggrieved_party
+						truce_with = ROOT
+					}
+				}
+				set_country_flag = grievance_military
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					set_country_flag = grievance_military
+				}
+			}
+			else_if = {
+				limit = {
+					any_neighbor_country = {
+						has_country_flag = aggrieved_party
+						trade_embargo_by = ROOT
+					}
+				}
+				set_country_flag = grievance_trade
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					set_country_flag = grievance_trade
+				}
+			}
+			else_if = {
+				limit = {
+					NOT = { has_country_flag = grievance_military }
+					NOT = { has_country_flag = grievance_trade }
+				}
+				set_country_flag = grievance_diplomatic
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					set_country_flag = grievance_diplomatic
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.507.opta #Try to resolve the situation ourselves
+		ai_chance = { factor = 25 }
+		if = {
+			limit = { has_country_flag = grievance_military }
+			add_mil_power = -100
+		}
+		else_if = {
+			limit = { has_country_flag = grievance_trade }
+			add_country_modifier = { name = minor_trade_crisis duration = 2000 }
+		}
+		if = {
+			limit = { has_country_flag = grievance_diplomatic }
+			if = {
+				limit = { monthly_income = 50 }
+				add_treasury = -200
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					add_treasury = 200
+				}
+			}
+			else_if = {
+				limit = { monthly_income = 25 }
+				add_treasury = -150
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					add_treasury = 150
+				}
+			}
+			else_if = {
+				limit = { monthly_income = 10 }
+				add_treasury = -100
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					add_treasury = 100
+				}
+			}
+			else_if = {
+				limit = { monthly_income = 5 }
+				add_treasury = -50
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					add_treasury = 50
+				}
+			}
+			else_if = {
+				limit = { monthly_income = 2 }
+				add_treasury = 25
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					add_treasury = -25
+				}
+			}
+			else = {
+				add_treasury = -10
+				random_neighbor_country = {
+					limit = { has_country_flag = aggrieved_party }
+					add_treasury = -10
+				}
+			}
+		}
+		if = {
+			limit = { DIP = 5 }
+			random_list = {
+				100 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+						ROOT = {
+						    add_truce_with = PREV
+						}
+					}
+				}
+			}
+		}
+		else_if = {
+			limit = { DIP = 4 }
+			random_list = {
+				90 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+						ROOT = {
+						    add_truce_with = PREV
+						}
+					}
+				}
+				10 = { add_prestige = -5 }
+			}
+		}
+		else_if = {
+			limit = { DIP = 3 }
+			random_list = {
+				70 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+						ROOT = {
+						    add_truce_with = PREV
+						}
+					}
+				}
+				30 = { add_prestige = -5 }
+			}
+		}
+		else_if = {
+			limit = { DIP = 2 }
+			random_list = {
+				50 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+						ROOT = {
+						    add_truce_with = PREV
+						}
+					}
+				}
+				50 = { add_prestige = -5 }
+			}
+		}
+		else = {
+			random_list = {
+				30 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+						ROOT = {
+						    add_truce_with = PREV
+						}
+					}
+				}
+				70 = { add_prestige = -5 }
+			}
+		}
+		#Cleanup
+		hidden_effect = {
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				clr_country_flag = aggrieved_party
+				clr_country_flag = grievance_diplomatic
+				clr_country_flag = grievance_military
+				clr_country_flag = grievance_trade
+			}
+			clr_country_flag = grievance_diplomatic
+			clr_country_flag = grievance_military
+			clr_country_flag = grievance_trade
+		}
+	}
+	option = {
+		name = DG_Catholics.507.optb #Rattle our sabres until they back down
+		ai_chance = {
+			factor = 25
+			modifier = {
+				any_neighbor_country = {
+					has_country_flag = aggrieved_party
+					truce_with = ROOT
+				}
+				factor = 1.4
+			}
+			modifier = {
+				any_neighbor_country = {
+					has_country_flag = aggrieved_party
+					NOT = { army_size = ROOT }
+				}
+				factor = 1.4
+			}
+		}
+		if = {
+			limit = {
+				any_neighbor_country = {
+					has_country_flag = aggrieved_party
+					NOT = { army_size = ROOT }
+				}
+			}
+			random_list = {
+				75 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+					}
+				}
+				25 = {
+				    add_prestige = -5
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_casus_belli = { type = cb_insult months = 24 target = ROOT }
+					}
+				}
+			}
+		}
+        else = {
+		    random_list = {
+				25 = {
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						remove_opinion = { who = ROOT modifier = grievance }
+						add_truce_with = ROOT
+					}
+				}
+				75 = {
+				    add_prestige = -5
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_casus_belli = { type = cb_insult months = 24 target = ROOT }
+					}
+				}
+			}
+		}
+		#Cleanup
+		hidden_effect = {
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				clr_country_flag = aggrieved_party
+				clr_country_flag = grievance_diplomatic
+				clr_country_flag = grievance_military
+				clr_country_flag = grievance_trade
+			}
+			clr_country_flag = grievance_diplomatic
+			clr_country_flag = grievance_military
+			clr_country_flag = grievance_trade
+		}
+	}
+	option = {
+		name = DG_Catholics.507.optc #Ask the pope to arbitrate the issue
+		ai_chance = {
+			factor = 25
+			modifier = {
+				is_papal_controller = yes
+				factor = 3
+			}
+		}
+		add_papal_influence = -5
+		random_country = {
+			limit = { is_papal_controller = yes }
+			country_event = { id = DG_Catholics.508 days = 30 }
+		}
+	}
+	option = {
+		name = DG_Catholics.507.optd #Send generous gifts to ensure the pope sees things our way
+		trigger = { NOT = { is_papal_controller = yes } }
+		ai_chance = {
+			factor = 25
+			modifier = {
+				num_of_loans = 1
+				factor = 0
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0
+			}
+		}
+		custom_tooltip = papal_bribes_explained
+		if = {
+			limit = { monthly_income = 50 }
+			add_treasury = -100
+			hidden_effect = { change_variable = { which = arbitration_bribe value = 100 } }
+		}
+		else_if = {
+			limit = { monthly_income = 25 }
+			add_treasury = -50
+			hidden_effect = { change_variable = { which = arbitration_bribe value = 50 } }
+		}
+		else_if = {
+			limit = { monthly_income = 10 }
+			add_treasury = -25
+			hidden_effect = { change_variable = { which = arbitration_bribe value = 25 } }
+		}
+		else_if = {
+			limit = { monthly_income = 5 }
+			add_treasury = -10
+			hidden_effect = { change_variable = { which = arbitration_bribe value = 10 } }
+		}
+		else = {
+			add_treasury = -5
+			hidden_effect = { change_variable = { which = arbitration_bribe value = 5 } }
+		}
+		add_papal_influence = -10
+		random_country = {
+			limit = { is_papal_controller = yes }
+			country_event = { id = DG_Catholics.508 days = 30 }
+		}
+	}
+}
+
+### A CASE COMES BEFORE THE PAPAL COURT
+country_event = {
+	id = DG_Catholics.508
+	title = DG_Catholics.508.title
+	desc = DG_Catholics.508.desc
+	picture = catholic_trial
+	
+	is_triggered_only = yes #from DG_Catholics.507
+	
+	option = {
+		name = DG_Catholics.508.opta #Try to find a compromise acceptable to both sides
+		ai_chance = {
+			factor = 60
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 5 } }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 10 } }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 25 } }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 50 } }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 100 } }
+				factor = 0.7
+			}
+		}
+		#Bribe
+		if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 100 } }
+			}
+			add_treasury = 50
+			PAP = { add_treasury = 50 }
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 50 } }
+			}
+			add_treasury = 25
+			PAP = { add_treasury = 25 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 25 } }
+			}
+			add_treasury = 10
+			PAP = { add_treasury = 10 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 10 } }
+			}
+			add_treasury = 5
+			PAP = { add_treasury = 5 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 5 } }
+			}
+			add_treasury = 2.5
+			PAP = { add_treasury = 2.5 }
+		}
+		FROM = {
+			hidden_effect = { set_variable = { which = arbitration_bribe value = 0 } }
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				hidden_effect = { set_country_flag = grievance_compromise }
+				country_event = { id = DG_Catholics.511 days = 30 }
+				add_opinion = { who = ROOT modifier = papacy_good }
+			}
+			hidden_effect = {
+				set_country_flag = aggrieved_party
+				set_country_flag = grievance_compromise
+			}
+			country_event = { id = DG_Catholics.511 days = 30 }
+			add_opinion = { who = ROOT modifier = papacy_good }
+		}
+	}
+	option = {
+		name = DG_Catholics.508.optb #Rule in favor of the plaintiff
+		ai_chance = {
+			factor = 20
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 5 } }
+				factor = 1.2
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 10 } }
+				factor = 1.2
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 25 } }
+				factor = 1.2
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 50 } }
+				factor = 1.2
+			}
+			modifier = {
+				FROM = { check_variable = { which = arbitration_bribe value = 100 } }
+				factor = 1.2
+			}
+		}
+		#Bribe
+		if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 100 } }
+			}
+			add_treasury = 50
+			PAP = { add_treasury = 50 }
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 50 } }
+			}
+			add_treasury = 25
+			PAP = { add_treasury = 25 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 25 } }
+			}
+			add_treasury = 10
+			PAP = { add_treasury = 10 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 10 } }
+			}
+			add_treasury = 5
+			PAP = { add_treasury = 5 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 5 } }
+			}
+			add_treasury = 2.5
+			PAP = { add_treasury = 2.5 }
+		}
+		FROM = {
+			hidden_effect = { set_variable = { which = arbitration_bribe value = 0 } }
+			country_event = { id = DG_Catholics.509 days = 30 }
+			add_opinion = { who = ROOT modifier = papacy_great }
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				add_opinion = { who = ROOT modifier = papacy_bad }
+			}
+		}
+	}
+	option = {
+		name = DG_Catholics.508.optc #Rule against the plaintiff
+		ai_chance = {
+			factor = 20
+		}
+		#Bribe
+		if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 100 } }
+			}
+			add_treasury = 50
+			PAP = { add_treasury = 50 }
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 50 } }
+			}
+			add_treasury = 25
+			PAP = { add_treasury = 25 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 25 } }
+			}
+			add_treasury = 10
+			PAP = { add_treasury = 10 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 10 } }
+			}
+			add_treasury = 5
+			PAP = { add_treasury = 5 }
+		}
+		else_if = {
+			limit = {
+				FROM = { check_variable = { which = arbitration_bribe value = 5 } }
+			}
+			add_treasury = 2.5
+			PAP = { add_treasury = 2.5 }
+		}
+		FROM = {
+			hidden_effect = { set_variable = { which = arbitration_bribe value = 0 } }
+			country_event = { id = DG_Catholics.510 days = 30 }
+			add_opinion = { who = ROOT modifier = papacy_bad }
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				add_opinion = { who = ROOT modifier = papacy_great }
+			}
+		}
+	}
+}
+
+### THE POPE RULES IN OUR FAVOUR
+country_event = {
+	id = DG_Catholics.509
+	title = DG_Catholics.509.title
+	desc = DG_Catholics.509.desc
+	picture = catholic_trial
+	
+	is_triggered_only = yes #from DG_Catholics.508
+	
+	
+	option = {
+		name = DG_Catholics.509.opta #Be lenient in victory
+		ai_chance = { factor = 50 }
+		add_prestige = 5
+		every_country = {
+			limit = {
+				OR = {
+					papal_trigger = yes
+					is_papal_controller = yes
+				}
+			}
+			reverse_add_opinion = { who = ROOT modifier = papacy_great }
+		}
+		random_neighbor_country = {
+			limit = { has_country_flag = aggrieved_party }
+			set_country_flag = lenient_ruling
+			add_opinion = { who = PAP modifier = papacy_bad }
+			country_event = { id = DG_Catholics.510 days = 30 }
+		}
+	}
+	option = {
+		name = DG_Catholics.509.optb #Demand justice be served
+		ai_chance = { factor = 50 }
+		every_country = {
+			limit = {
+				OR = {
+					papal_trigger = yes
+					is_papal_controller = yes
+				}
+			}
+			reverse_add_opinion = { who = ROOT modifier = papacy_great }
+		}
+		random_neighbor_country = {
+			limit = { has_country_flag = aggrieved_party }
+			add_opinion = { who = PAP modifier = papacy_bad }
+			country_event = { id = DG_Catholics.510 days = 30 }
+		}
+	}
+	after = {
+		hidden_effect = {
+			set_variable = { which = arbitration_bribe value = 0 }
+			clr_country_flag = grievance_diplomatic
+			clr_country_flag = grievance_military
+			clr_country_flag = grievance_trade
+		}
+	}
+}
+
+### THE POPE RULES AGAINST US
+country_event = {
+	id = DG_Catholics.510
+	title = DG_Catholics.510.title
+	desc = DG_Catholics.510.desc
+	picture = catholic_trial
+	
+	is_triggered_only = yes #from DG_Catholics.508 or DG_Catholics.509
+	
+	immediate = {
+		if = {
+			limit = { has_country_flag = aggrieved_party }
+			hidden_effect = { clr_country_flag = aggrieved_party }
+			FROM = { set_country_flag = aggrieved_party }
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.510.opta #Submit gracefully in defeat
+		ai_chance = { factor = 50 }
+		if = {
+			limit = {
+				has_country_flag = grievance_military
+			}
+			if = {
+				limit = {
+					has_country_flag = lenient_ruling
+				}
+				add_mil_power = -100
+			}
+			else = {
+				add_mil_power = -200
+			}
+		}
+		else_if = {
+			limit = {
+				has_country_flag = grievance_trade
+			}
+			if = {
+				limit = {
+					has_country_flag = lenient_ruling
+				}
+				add_country_modifier = { name = minor_trade_crisis duration = 2000 }
+			}
+			else = {
+				add_country_modifier = { name = minor_trade_crisis duration = 4000 }
+			}
+		}
+		else_if = {
+			limit = {
+				has_country_flag = grievance_diplomatic
+			}
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				ROOT = {
+				    add_truce_with = PREV
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = lenient_ruling
+				}
+				if = {
+					limit = { monthly_income = 50 }
+					add_treasury = -100
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 100
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 25 }
+					add_treasury = -75
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 75
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 10 }
+					add_treasury = -50
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 50
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 5 }
+					add_treasury = -25
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 25
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 2 }
+					add_treasury = -10
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 10
+					}
+				}
+				else = {
+					add_treasury = -5
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 5
+					}
+				}
+			}
+			else = {
+				if = {
+					limit = { monthly_income = 50 }
+					add_treasury = -200
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 200
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 25 }
+					add_treasury = -150
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 150
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 10 }
+					add_treasury = -100
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 100
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 5 }
+					add_treasury = -50
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 50
+					}
+				}
+				else_if = {
+					limit = { monthly_income = 2 }
+					add_treasury = -25
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+						add_treasury = 25
+					}
+				}
+				else = {
+					add_treasury = -10
+					random_neighbor_country = {
+						limit = { has_country_flag = aggrieved_party }
+							add_treasury = 10
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_country_flag = lenient_ruling
+			}
+			add_prestige = -5
+		}
+		else = {
+		    add_prestige = -10
+		}
+	}
+	option = {
+		name = DG_Catholics.510.optb #Reject this arbitrary ruling
+		ai_chance = { factor = 50 }
+		add_legitimacy = -10
+		add_devotion  = -10
+		add_republican_tradition = -10
+		random_neighbor_country = {
+			limit = { has_country_flag = aggrieved_party }
+			add_casus_belli = { type = cb_insult months = 24 target = ROOT }
+		}
+	}
+	after = {
+		hidden_effect = {
+			random_neighbor_country = {
+				limit = { has_country_flag = aggrieved_party }
+				clr_country_flag = aggrieved_party
+				clr_country_flag = grievance_diplomatic
+				clr_country_flag = grievance_military
+				clr_country_flag = grievance_trade
+			}
+			set_variable = { which = arbitration_bribe value = 0 }
+			clr_country_flag = grievance_diplomatic
+			clr_country_flag = grievance_military
+			clr_country_flag = grievance_trade
+		}
+	}
+}
+
+### THE POPE BROKERS A COMPROMISE
+country_event = {
+	id = DG_Catholics.511
+	title = DG_Catholics.511.title
+	desc = DG_Catholics.511.desc
+	picture = catholic_papal_legate
+	
+	is_triggered_only = yes #from DG_Catholics.508
+	
+	option = {
+		name = DG_Catholics.511.opta #Make unpopular changes to heal the rift
+		ai_chance = { factor = 50 }
+		if = {
+			limit = { has_country_flag = grievance_military }
+			add_mil_power = -50
+		}
+		else_if = {
+			limit = { has_country_flag = grievance_trade }
+			add_country_modifier = { name = minor_trade_crisis duration = 1000 }
+		}
+		else_if = {
+			limit = {
+				has_country_flag = grievance_diplomatic
+			}
+			random_neighbor_country = {
+				limit = { has_country_flag = grievance_compromise }
+				ROOT = {
+				    add_truce_with = PREV
+				}
+			}
+		}
+		add_opinion = { who = PAP modifier = papacy_good }
+		random_neighbor_country = {
+			limit = { has_country_flag = grievance_compromise }
+			add_opinion = { who = ROOT modifier = grievance_resolved }
+			hidden_effect = { clr_country_flag = grievance_compromise }
+		}
+	}
+	option = {
+		name = DG_Catholics.511.optb #Make a token change to mollify the church
+		ai_chance = { factor = 50 }
+		add_prestige = -5
+		add_papal_influence = -5
+	}
+	after = {
+		hidden_effect = {
+			random_neighbor_country = {
+				limit = { has_country_flag = grievance_compromise }
+				clr_country_flag = grievance_compromise
+			}
+			set_variable = { which = arbitration_bribe value = 0 }
+			clr_country_flag = aggrieved_party
+			clr_country_flag = grievance_diplomatic
+			clr_country_flag = grievance_military
+			clr_country_flag = grievance_trade
 		}
 	}
 }
