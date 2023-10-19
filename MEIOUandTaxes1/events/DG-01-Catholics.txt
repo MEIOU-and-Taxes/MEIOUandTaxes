@@ -64,6 +64,7 @@ namespace = DG_HeresySpread
 #509 - The Pope Rules in Our Favour
 #510 - The Pope Rules against Us
 #511 - The Pope Brokers a Compromise
+#512 - Our Lady of $PROVINCENAME$
 
 ################################
 # BIRTH OF COUNTER-REFORMATION #
@@ -4723,7 +4724,7 @@ province_event = {
 	}
 
 	mean_time_to_happen = {
-		years = 200
+		years = 250
 		modifier = {
 			factor = 1.2
 			owner = { reform_desire = 0.25 }
@@ -6211,12 +6212,15 @@ province_event = {
 	
 	trigger = {
 		OR = {
-			is_capital = yes
+		    AND = {
+			    is_capital = yes
+				owner = { num_of_cities = 10 }
+			}
 			has_province_modifier = effective_bishop
 		}
 		OR = {
 		    has_province_modifier = preeminent_region_city
-			check_key = { lhs = Class_Urban value = 10 }
+			check_key = { lhs = Class_Urban value = 20 }
 		}
 		owner = {
 		    check_key = { lhs = Prov_CLPow value = 30 }
@@ -6329,7 +6333,7 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 200
+		years = 300
 		
 		modifier = {
 			exists = AVI
@@ -6347,7 +6351,7 @@ country_event = {
 					is_rival = POL
 				}
 			}
-			factor = 0.2
+			factor = 0.25
 		}
 	}
 	
@@ -7222,6 +7226,82 @@ country_event = {
 			clr_country_flag = grievance_diplomatic
 			clr_country_flag = grievance_military
 			clr_country_flag = grievance_trade
+		}
+	}
+}
+
+### OUR LADY OF $PROVINCENAME$
+province_event = {
+	id = DG_Catholics.512
+	title = DG_Catholics.512.title
+	desc = DG_Catholics.512.desc
+	picture = orthodox_icon
+	
+	is_triggered_only = yes #on_actions on_yearly_pulse_2
+	
+	trigger = {
+		owner = { catholic_trigger = yes }
+		religion = catholic
+		NOT = { has_province_modifier = catholic_pilgrimage }
+		NOT = { has_province_modifier = religious_scandal_province }
+	}
+	
+	option = {
+		name = DG_Catholics.512.opta #Pay homage to this miracle
+		ai_chance = { factor = 60 }
+		add_province_modifier = { name = catholic_pilgrimage duration = 3650 } #10 years
+	}
+	option = {
+		name = DG_Catholics.512.optb #Condemn it as heresy
+		ai_chance = { 
+		    factor = 20
+			modifier = {
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+				factor = 2
+			}
+		}
+		trigger = {
+			OR = {
+				has_province_modifier = effective_bishop
+				owner = {
+					OR = {
+						advisor = inquisitor_CL
+						advisor = theologian_CL
+					}
+				}
+			}
+		}
+		add_province_modifier = { name = religious_scandal_province duration = 730 } #2 years
+		owner = {
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+	}
+	option = {
+		name = DG_Catholics.512.optc #Charge believers to witness it
+		trigger = {
+		    OR = {
+		        check_key = { lhs = SF_Wealth value = 500 }
+				AND = {
+				    check_key = { lhs = SF_Wealth value = 250 }
+			        has_province_modifier = greedy_bishop
+				}
+			}
+		}
+		ai_chance = { 
+		    factor = 20
+			modifier = {
+				num_of_loans = 1
+				factor = 2
+			}
+		}
+		owner = {
+			add_treasury = 25
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-5 }
+		}
+		add_province_modifier = { name = catholic_pilgrimage duration = 1825 } #5 years
+		add_province_modifier = { name = religious_scandal_province duration = 1825 } #5 years
+		hidden_effect = {
+		    Public_ChangeClassWealthVal = { class=SF type=value inp=-25 }
 		}
 	}
 }
