@@ -150,7 +150,6 @@ country_event = {
 	option = {
 		name = consort_events.2.a
 		goto = consort_home
-		custom_tooltip = consort_events.2.a.tt #The Queens Family will expect special treatment.
 		event_target:consort_home = {
 			add_province_modifier = {
 				name = "NO_ConsortOrigin"
@@ -167,8 +166,6 @@ country_event = {
 	picture = ROYAL_COUPLE_FUTURE_eventPicture
 	desc = consort_events.3.d
 	
-	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
-	
 	trigger = {
 		has_dlc = "Rights of Man"
 		has_consort = yes
@@ -178,6 +175,26 @@ country_event = {
 		has_regency = no
 		any_owned_province = {
 			has_province_modifier = NO_ConsortOrigin
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 800
+		modifier = {
+			factor = 0.9
+			check_key = { lhs = Prov_NOPow value = 75 }
+		}
+		modifier = {
+			factor = 0.9
+			check_key = { lhs = Prov_NOPow value = 50 }
+		}
+		modifier = {
+			factor = 0.6
+			has_ruler_flag = accepted_help_from_spouses_family
+		}
+		modifier = {
+			factor = 1.5
+			has_ruler_flag = helped_spouses_family
 		}
 	}
 	
@@ -203,9 +220,11 @@ country_event = {
 			on_trigger = has_country_flag
 			pay_money = {
 				add_treasury = -50
-				random_owned_province = {
-				    limit = { has_province_modifier = NO_ConsortOrigin }
-					Public_ChangeClassWealthVal = { class=NO type=value inp=50 }
+				hidden_effect = {
+				    random_owned_province = {
+				        limit = { has_province_modifier = NO_ConsortOrigin }
+					    Public_ChangeClassWealthVal = { class=NO type=value inp=50 }
+				    }
 				}
 				custom_tooltip = consort_events.3.a.tt.2
 				custom_tooltip = consort_events.3.a.tt.0
@@ -279,5 +298,416 @@ country_event = {
 		clr_country_flag = give_noble_influence
 		clr_country_flag = kick_advisor
 		clr_country_flag = pay_mil_trad
+	}
+}
+
+### MARITAL BLISS
+country_event = {
+	id = consort_events.4
+	title = consort_events.4.t
+	desc = consort_events.4.d
+	picture = KING_DOING_GREAT_eventPicture
+	goto = consort_home
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		is_lesser_in_union = no
+		has_consort = yes
+		has_foreign_consort = no #Local Dynasty
+		NOT = { has_ruler_flag = has_lowborn_consort }
+		NOT = { has_ruler_flag = refused_to_help_spouses_family }
+		has_regency = no
+		any_owned_province = {
+			has_province_modifier = NO_ConsortOrigin
+			check_key = { lhs = Prov_NOLoy value = 40 }
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = { has_ruler_flag = helped_spouses_family }
+				clr_ruler_flag = helped_spouses_family
+			}
+			random_owned_province = {
+				limit = { has_province_modifier = NO_ConsortOrigin }
+				save_event_target_as = consort_home
+			}
+			random_list = {
+				15 = { set_country_flag = in_laws_fund_development }
+				15 = { set_country_flag = in_laws_provide_money }
+				15 = { set_country_flag = in_laws_provide_mil_advisor }
+				15 = { set_country_flag = in_laws_provide_dip_advisor }
+				15 = { set_country_flag = in_laws_provide_adm_advisor }
+				15 = { set_country_flag = in_laws_provide_help_with_nobility }
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 600
+		modifier = {
+			factor = 1.5
+			has_ruler_flag = accepted_help_from_spouses_family
+		}
+		modifier = {
+			factor = 0.9
+			consort_dip = 4
+		}
+		modifier = {
+			factor = 0.9
+			consort_dip = 5
+		}
+		modifier = {
+			factor = 0.9
+			consort_dip = 6
+		}
+		modifier = {
+			factor = 0.5
+			has_ruler_flag = helped_spouses_family
+		}
+	}
+
+	option = {
+		name = consort_events.4.a #
+		set_ruler_flag = accepted_help_from_spouses_family
+		trigger_switch = {
+			on_trigger = has_country_flag
+			in_laws_fund_development = {
+				random_owned_province = {
+					limit = {
+						is_core = ROOT
+					}
+					add_or_extend_province_modifier_effect = { NAME = rural_development_efforts	DURATION = 3650 }
+			        custom_tooltip = rural_development_efforts_tt
+			        add_or_extend_province_modifier_effect = { NAME = urban_development_efforts	DURATION = 3650 }
+			        custom_tooltip = urban_development_efforts_tt
+				}
+				custom_tooltip = consort_events.4.a.tt.1
+				clr_country_flag = in_laws_fund_development
+			}
+			in_laws_provide_money = {
+				add_treasury = 50
+				hidden_effect = {
+				    random_owned_province = {
+				        limit = { has_province_modifier = NO_ConsortOrigin }
+					    Public_ChangeClassWealthVal = { class=NO type=value inp=-50 }
+				    }
+				}
+				custom_tooltip = consort_events.4.a.tt.2
+				clr_country_flag = in_laws_provide_money
+			}
+			in_laws_provide_mil_advisor = {
+				define_advisor = {
+					type = recruitmaster_NO
+					culture = event_target:domain_of_spouses_family_province
+					religion = event_target:domain_of_spouses_family_province
+					skill = 2
+					discount = yes
+				}
+				add_mil_power = 25
+				custom_tooltip = consort_events.4.a.tt.3
+				clr_country_flag = in_laws_provide_mil_advisor
+			}
+			in_laws_provide_dip_advisor = {
+				define_advisor = {
+					type = diplomat_NO
+					culture = event_target:domain_of_spouses_family_province
+					religion = event_target:domain_of_spouses_family_province
+					skill = 2
+					discount = yes
+				}
+				add_dip_power = 25
+				custom_tooltip = consort_events.4.a.tt.4
+				clr_country_flag = in_laws_provide_dip_advisor
+			}
+			in_laws_provide_adm_advisor = {
+				define_advisor = {
+					type = natural_scientist_NO
+					culture = event_target:domain_of_spouses_family_province
+					religion = event_target:domain_of_spouses_family_province
+					skill = 2
+					discount = yes
+				}
+				add_adm_power = 25
+				custom_tooltip = consort_events.4.a.tt.6
+				clr_country_flag = in_laws_provide_adm_advisor
+			}
+			in_laws_provide_help_with_nobility = {
+				if = {
+					limit = {
+						has_estate = estate_no
+						check_key = { lhs = Prov_NOPow value = 25 }
+					}
+					Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+				}
+				else = {
+					add_legitimacy = 10
+					add_horde_unity = 10
+				}
+				custom_tooltip = consort_events.4.a.tt.5
+				clr_country_flag = in_laws_provide_help_with_nobility
+			}
+		}
+		custom_tooltip = consort_events.4.a.tt.0
+	}
+	option = {
+		name = consort_events.4.b #Refuse
+		add_prestige = 5
+		custom_tooltip = consort_events.4.b.tt
+		clr_country_flag = in_laws_fund_development
+		clr_country_flag = in_laws_provide_money
+		clr_country_flag = in_laws_provide_mil_advisor
+		clr_country_flag = in_laws_provide_dip_advisor
+		clr_country_flag = in_laws_provide_adm_advisor
+		clr_country_flag = in_laws_provide_help_with_nobility
+	}
+}
+
+### FAMILY FIRST?
+country_event = {
+	id = consort_events.5
+	title = consort_events.5.t
+	desc = consort_events.5.d
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_actions
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		is_lesser_in_union = no
+		NOT = { has_ruler_flag = has_lowborn_consort }
+		has_consort_regency = yes
+		any_owned_province = {
+			has_province_modifier = NO_ConsortOrigin
+			check_key = { lhs = Prov_NOLoy value = 40 }
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_list = {
+				25 = { set_country_flag = pay_money }
+				25 = { set_country_flag = give_noble_influence }
+				25 = { set_country_flag = kick_advisor }
+				25 = { set_country_flag = pay_mil_trad }
+			}
+		}
+	}
+
+	option = {
+		name = consort_events.5.a #
+		if = {
+			limit = { has_ruler_flag = accepted_help_from_spouses_family }
+			clr_ruler_flag = accepted_help_from_spouses_family
+		}
+		if = {
+			limit = { has_ruler_flag = refused_to_help_consort_regents_family }
+			clr_ruler_flag = refused_to_help_consort_regents_family
+		}
+		set_ruler_flag = helped_spouses_family
+		trigger_switch = {
+			on_trigger = has_country_flag
+			pay_money = {
+				add_treasury = -50
+				hidden_effect = {
+				    random_owned_province = {
+				        limit = { has_province_modifier = NO_ConsortOrigin }
+					    Public_ChangeClassWealthVal = { class=NO type=value inp=50 }
+				    }
+				}
+				custom_tooltip = consort_events.3.a.tt.2
+				custom_tooltip = consort_events.3.a.tt.0
+				clr_country_flag = pay_money
+			}
+			give_noble_influence = {
+				add_faction_influence = {
+                    faction = FC_NO
+                    influence = 10
+                }
+				custom_tooltip = consort_events.3.a.tt.3
+				custom_tooltip = consort_events.3.a.tt.0
+				clr_country_flag = give_noble_influence
+			}
+			kick_advisor = {
+				remove_advisor = random
+				add_adm_power = -25
+				custom_tooltip = consort_events.3.a.tt.4
+				custom_tooltip = consort_events.3.a.tt.0
+				clr_country_flag = kick_advisor
+			}
+			pay_mil_trad = {
+                NO_Commissions = yes
+		        if = {
+			        limit = {
+				        check_key = { lhs = Prov_NOPow value = 75 }
+			        }
+			        add_army_tradition = -10
+		        }
+				else_if = {
+			        limit = {
+				        check_key = { lhs = Prov_NOPow value = 50 }
+			        }
+			        add_army_tradition = -7.5
+		        }
+				else = {
+			        add_army_tradition = -5
+		        }
+			    custom_tooltip = consort_events.3.a.tt.5
+				custom_tooltip = consort_events.3.a.tt.0
+				clr_country_flag = pay_mil_trad
+			}
+		}
+	}
+	option = {
+		name = consort_events.5.b #Refuse
+		custom_tooltip = consort_events.5.b.tt
+		set_ruler_flag = refused_to_help_consort_regents_family
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		random_owned_province = {
+			limit = {
+				has_province_modifier = NO_ConsortOrigin
+			}
+			add_local_autonomy = 25
+		}
+		clr_country_flag = pay_money
+		clr_country_flag = give_noble_influence
+		clr_country_flag = kick_advisor
+		clr_country_flag = pay_mil_trad
+	}
+}
+
+### TO LOVE AND BE LOVED
+country_event = {
+	id = consort_events.6
+	title = consort_events.6.t
+	desc = consort_events.6.d
+	picture = ROYAL_COUPLE_FUTURE_eventPicture
+    
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_actions
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		is_lesser_in_union = no
+		has_consort = no
+		has_regency = no
+		num_of_cities = 2
+		government = monarchy
+		has_reform = Pol_Family1 #Primary Spouse
+		OR = {
+		    has_reform = Pol_Succession1 #Birthright
+			has_reform = Pol_Succession4 #Elective
+		}
+		NOT = { has_ruler_flag = turned_down_marriage_offer_for_love }
+	}
+
+	immediate = {
+		hidden_effect = { 
+			random_owned_province = {
+				limit = { is_capital = no }
+				save_event_target_as = consort_home
+			}
+		}
+	}
+
+	option = { #Let the monarch have the heart's desire
+		name = consort_events.6.a 
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 0.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 70 } }
+			}
+			modifier = {
+				factor = 0
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+		}
+		goto = consort_home
+		set_ruler_flag = has_lowborn_consort #Before creating the consort!
+		define_consort = { }
+		add_ruler_modifier = { 
+			name = consort_of_the_people
+		}
+		event_target:consort_home = {
+			add_province_modifier = {
+				name = home_of_consort
+				duration = -1
+			}
+		}
+		add_prestige = -20
+		add_legitimacy = -20
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+	}
+
+	option = { #Totally out of question!
+		name = consort_events.6.b
+		ai_chance = {
+			factor = 75
+		}
+		set_ruler_flag = turned_down_marriage_offer_for_love
+	}
+}
+
+### CONSORTS OF FOREIGN DYNASTY ###
+
+### A VISIT FROM THE CONSORTS FAMILY
+country_event = {
+	id = consort_events.51
+	title = consort_events.51.t
+	picture = KING_DOING_GREAT_eventPicture
+	
+	desc = {
+		trigger = { can_heir_be_child_of_consort = yes }
+		desc = consort_events.51.da # The heir is spitting image of consort
+	}
+	desc = {
+		trigger = {
+			OR = {
+				has_heir = no
+				can_heir_be_child_of_consort = no
+			}
+		}
+		desc = consort_events.51.db # They have a great time
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_actions
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		is_lesser_in_union = no
+		has_consort = yes
+		has_foreign_consort = yes
+		any_country = {
+			has_given_consort_to = ROOT
+			exists = yes
+		}
+		NOT = { has_ruler_flag = approached_by_consorts_foreign_family }
+	}
+	
+	immediate = {
+		hidden_effect = {
+			set_ruler_flag = approached_by_consorts_foreign_family
+			
+			random_known_country = {
+				limit = {
+					has_given_consort_to = ROOT
+				}
+				save_event_target_as = origin_country_of_consort
+			}
+		}
+	}
+
+	option = {
+		name = consort_events.51.a # This is what kin means
+		custom_tooltip = consort_events.51.a.tt #The Consort's family will hear of the plesantries
+		add_dip_power = 10
+
+		event_target:origin_country_of_consort = {
+			add_opinion = {
+				who = ROOT
+				modifier = we_are_kin
+			}
+		}
 	}
 }
