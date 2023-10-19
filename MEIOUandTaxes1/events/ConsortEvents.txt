@@ -711,3 +711,489 @@ country_event = {
 		}
 	}
 }
+
+### THE ROYAL HERETIC
+country_event = {
+	id = consort_events.52
+	title = consort_events.52.t
+	desc = consort_events.52.da
+	picture = KINGS_CHOICE_eventPicture
+    
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_actions
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		has_consort = yes
+		is_lesser_in_union = no
+		government = monarchy
+		has_reform = Pol_Family1 #Primary Spouse
+		OR = {
+		    has_reform = Pol_Succession1 #Birthright
+			has_reform = Pol_Succession4 #Elective
+		}
+		any_country = {
+			has_given_consort_to = ROOT
+			NOT = { religion = ROOT }
+			ROOT = {
+				consort_religion = PREV
+			}
+		}
+		NOT = { has_consort_flag = the_people_dislike_infidel_consort }
+		NOT = { has_country_modifier = heretic_royalty }
+		NOT = { religion = confucianism }
+	}
+	
+	immediate = {
+		hidden_effect = {
+			set_consort_flag = the_people_dislike_infidel_consort
+			
+			random_known_country = {
+				limit = {
+					has_given_consort_to = ROOT
+					NOT = { religion = ROOT }
+				}
+				save_event_target_as = origin_country_of_consort
+			}
+		}
+	}
+
+	option = {
+		name = consort_events.52.a # The Consort is beyond reproach
+		custom_tooltip = consort_events.52.a.tt
+        Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		add_country_modifier = {
+			name = "heretic_royalty"
+			duration = 3650 #10 years
+		}
+	}
+	option = {
+		name = consort_events.52.b # Attempt divorce
+		custom_tooltip = consort_events.52.b.tt
+		divorce_consort_effect = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+	}
+}
+
+### MATTERS OF STATE
+country_event = {
+	id = consort_events.53
+	title = consort_events.53.t
+	desc = consort_events.53.d
+	picture = KINGS_CHOICE_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_actions
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		has_regency = no
+		has_consort = yes
+		is_lesser_in_union = no
+		government = monarchy
+		has_reform = Pol_Family1 #Primary Spouse
+		OR = {
+		    has_reform = Pol_Succession1 #Birthright
+			has_reform = Pol_Succession4 #Elective
+		}
+		any_country = {
+			has_given_consort_to = ROOT
+			OR = {
+				war_with = ROOT
+				is_rival = ROOT
+				is_enemy = ROOT
+			}
+		}
+		employed_advisor = { category = MIL }
+		NOT = { has_ruler_modifier = without_spouse_advice }
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_known_country = {
+				limit = {
+					has_given_consort_to = ROOT
+				}
+				save_event_target_as = origin_country_of_consort
+			}
+		}
+	}
+
+	option = {
+		name = consort_events.53.a # The Consort has our trust
+		custom_tooltip = consort_events.53.a.tt
+		add_mil_power = -25
+		remove_advisor_by_category = MIL
+	}
+
+	option = {
+		name = consort_events.53.b # The ruler openly doubt their consort
+		custom_tooltip = consort_events.53.b.tt
+		add_ruler_modifier = {
+			name = "without_spouse_advice"
+			duration = 1825
+		}
+	}
+}
+
+### THE SKILLS OF THE CONSORT
+country_event = {
+	id = consort_events.54
+	title = consort_events.54.t
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_actions
+	
+	trigger = {
+		has_dlc = "Rights of Man"
+		has_consort = yes
+		is_lesser_in_union = no
+		government = monarchy
+		has_reform = Pol_Family1 #Primary Spouse
+		OR = {
+		    has_reform = Pol_Succession1 #Birthright
+			has_reform = Pol_Succession4 #Elective
+		}
+		OR = {
+			consort_dip = 5
+			consort_adm = 5
+			consort_mil = 5
+		}
+		NOT = { has_ruler_modifier = without_spouse_advice }
+		NOT = { has_country_modifier = consort_adm_advice }
+		NOT = { has_country_modifier = consort_dip_advice }
+		NOT = { has_country_modifier = consort_mil_advice }
+	}
+
+	picture = {
+		trigger = { has_female_consort = yes }
+		picture = QUEEN_AT_COUNCIL_TABLE_eventPicture
+	}
+	picture = {
+		trigger = { has_female_consort = no }
+		picture = BABBLING_BAFFOON_eventPicture
+	}
+
+	desc = {
+		trigger = {
+			has_ruler_flag = high_adm
+		}
+		desc = consort_events.54.da # ADM highest
+	}
+	desc = {
+		trigger = {
+			has_ruler_flag = high_dip
+		}
+		desc = consort_events.54.db # DIP highest
+	}
+	desc = {
+		trigger = {
+			has_ruler_flag = high_mil
+		}
+		desc = consort_events.54.dc # MIL highest
+	}
+	desc = {
+		trigger = {
+			NOT = {
+				has_ruler_flag = high_adm
+				has_ruler_flag = high_dip
+				has_ruler_flag = high_mil
+			}
+		}
+		desc = consort_events.54.dd # even stats or N/A
+	}
+	
+	immediate = {
+		hidden_effect = {
+			export_to_variable = {
+				which = consort_admVar
+				value = consort_adm
+			}
+			export_to_variable = {
+				which = consort_dipVar
+				value = consort_dip
+			}
+			export_to_variable = {
+				which = consort_milVar
+				value = consort_mil
+			}
+
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							check_variable = {
+								which = consort_milVar
+								which = consort_admVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_admVar
+									which = consort_milVar
+								}
+							}
+							check_variable = {
+								which = consort_milVar
+								which = consort_dipVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_dipVar
+									which = consort_milVar
+								}
+							}
+						}
+						AND = {
+							check_variable = {
+								which = consort_milVar
+								which = consort_admVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_admVar
+									which = consort_milVar
+								}
+							}
+							check_variable = {
+								which = consort_milVar
+								which = consort_dipVar
+							}
+						}
+						AND = {
+							check_variable = {
+								which = consort_milVar
+								which = consort_dipVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_dipVar
+									which = consort_milVar
+								}
+							}
+							check_variable = {
+								which = consort_milVar
+								which = consort_admVar
+							}
+						}
+					}
+				}
+				set_ruler_flag = high_mil
+			}
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							check_variable = {
+								which = consort_admVar
+								which = consort_dipVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_dipVar
+									which = consort_admVar
+								}
+							}
+							check_variable = {
+								which = consort_admVar
+								which = consort_milVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_milVar
+									which = consort_admVar
+								}
+							}
+						}
+						AND = {
+							check_variable = {
+								which = consort_admVar
+								which = consort_dipVar
+							}
+							check_variable = {
+								which = consort_admVar
+								which = consort_milVar
+							}
+							NOT = {
+								check_variable = {
+									which = consort_milVar
+									which = consort_admVar
+								}
+							}
+						}
+					}
+				}
+				set_ruler_flag = high_adm
+			}
+			if = {
+				limit = {
+					check_variable = {
+						which = consort_dipVar
+						which = consort_admVar
+					}
+					NOT = {
+						check_variable = {
+							which = consort_admVar
+							which = consort_dipVar
+						}
+					}
+					check_variable = {
+						which = consort_dipVar
+						which = consort_milVar
+					}
+					NOT = {
+						check_variable = {
+							which = consort_milVar
+							which = consort_dipVar
+						}
+					}
+				}
+				set_ruler_flag = high_dip
+			}
+		}
+	}
+
+	option = {
+		name = consort_events.54.a # High adm - will be prioritized in case of adm and dip being even
+		trigger = {
+			has_ruler_flag = high_adm
+		}
+		add_country_modifier = {
+			name = "consort_adm_advice"
+			duration = 7300
+		}
+		clr_ruler_flag = high_adm
+	}
+
+	option = {
+		name = consort_events.54.b # High dip
+		trigger = {
+			has_ruler_flag = high_dip
+		}
+		add_country_modifier = {
+			name = "consort_dip_advice"
+			duration = 7300
+		}
+		clr_ruler_flag = high_dip
+	}
+	option = {
+		name = consort_events.54.c # High mil - will be prioritized in case mil and any other stat being even
+		trigger = {
+			has_ruler_flag = high_mil
+		}
+		add_country_modifier = {
+			name = "consort_mil_advice"
+			duration = 7300
+		}
+		clr_ruler_flag = high_mil
+	}
+	option = {
+		name = consort_events.54.d # Fallback/all stats are even
+		trigger = {
+			NOT = {
+				has_ruler_flag = high_adm
+				has_ruler_flag = high_dip
+				has_ruler_flag = high_mil
+			}
+		}
+		random_list = {
+			30 = {
+				add_country_modifier = {
+					name = "consort_adm_advice"
+					duration = 7300
+				}
+			}
+			30 = {
+				add_country_modifier = {
+					name = "consort_dip_advice"
+					duration = 7300
+				}
+			}
+			30 = {
+				add_country_modifier = {
+					name = "consort_mil_advice"
+					duration = 7300
+				}
+			}
+		}		
+	}
+}
+
+### THE GRAVEST OF INSULSTS
+country_event = {
+	id = consort_events.205
+	title = consort_events.205.t
+	desc = consort_events.205.d
+	picture = CONSORT_DOING_BADLY_eventPicture
+
+	is_triggered_only = yes #from divorce_consort_effect
+
+	option = {
+		name = consort_events.205.a
+		custom_tooltip = consort_events.205.a.tt
+
+		hidden_effect = {
+			FROM = { 
+				remove_consort = yes 
+				country_event = { id = consort_events.206 } 
+			}
+		}
+
+		add_opinion = {
+			who = FROM
+			modifier = offended_by_divorce	
+		}
+
+		add_casus_belli = {
+			target = FROM
+			type = cb_insult
+			months = 60
+		}
+	}
+}
+
+### DIVORCE CLEANUP EVENT
+country_event = {
+	id = consort_events.206
+	title = none
+	desc = none
+	picture = none
+
+	is_triggered_only = yes #from consort_events.205
+
+	hidden = yes
+
+	immediate = {
+		if = {
+			limit = { has_ruler_flag = has_lowborn_consort }
+			random_owned_province = {
+				limit = { has_province_modifier = home_of_consort }
+				remove_province_modifier = home_of_consort
+			}
+		}
+		if = {
+			limit = { has_ruler_flag = has_lowborn_consort }
+			clr_ruler_flag = has_lowborn_consort
+		}
+		if = {
+			limit = { has_country_modifier = consort_adm_advice }
+			remove_country_modifier = consort_adm_advice
+		}
+		if = {
+			limit = { has_country_modifier = consort_dip_advice }
+			remove_country_modifier = consort_dip_advice
+		}
+		if = {
+			limit = { has_country_modifier = consort_mil_advice }
+			remove_country_modifier = consort_mil_advice
+		}
+		if = {
+			limit = { has_country_modifier = without_spouse_advice }
+			remove_country_modifier = without_spouse_advice
+		}
+		if = {
+			limit = { has_country_modifier = life_of_the_party }
+			remove_country_modifier = life_of_the_party
+		}
+		clr_ruler_flag = marriage_length
+	}
+	option = {
+
+	}
+}
