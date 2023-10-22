@@ -2327,12 +2327,19 @@ Prov_NOPowerCalc = {
 		multiply_key = { lhs = Tmp_5 value = 0.01 }
 	
 		set_key = { lhs = NO_RuralPowerScalar value = 100 }
-		set_key = { lhs = Tmp_6 which = SF_PrpResources }
-		change_key = { lhs = Tmp_6 which = RE_PrpResources }
-		change_key = { lhs = Tmp_6 which = BG_PrpResources }
-		change_key = { lhs = Tmp_6 which = CL_PrpResources }
+		set_key = { lhs = Tmp_6 which = CL_PrpResources }
+		multiply_key = { lhs = Tmp_6 value = 0.5 } ## clergy protect their own holdings
+
+		change_key = { lhs = Tmp_6 which = SF_PrpResources } ### no protection except the State
+
+		set_key = { lhs = Tmp_7 which = RE_PrpResources }
+		change_key = { lhs = Tmp_7 which = BG_PrpResources }
+		multiply_key = { lhs = Tmp_7 value = 0.2 } ## urban is mostly protected
+		change_key = { lhs = Tmp_6 which = Tmp_7 }
+
 		multiply_key = { lhs = Tmp_6 which = Prov_BUPow }
 		multiply_key = { lhs = Tmp_6 value = 0.01 }
+
 		subtract_key = { lhs = NO_RuralPowerScalar which = BU_PrpResources }
 		subtract_key = { lhs = NO_RuralPowerScalar which = Tmp_6 }
 		multiply_key = { lhs = NO_RuralPowerScalar which = Tmp_5 }
@@ -2436,17 +2443,17 @@ Prov_DoTaxNO = {
 		limit = {
 			owner = { Privilege_Has = { Privilege=NOProcessing Lvl=2 } }
 		}
-		multiply_key = { lhs = Tax_TmpBase value = 0.25 }
+		multiply_key = { lhs = Tax_TmpBase value = 0.35 }
 	}
 	else_if = {
 		limit = {
 			owner = { Privilege_Has = { Privilege=NOProcessing Lvl=1 } }
 		}
-		multiply_key = { lhs = Tax_TmpBase value = 0.225 }
+		multiply_key = { lhs = Tax_TmpBase value = 0.325 }
 	}
 	else = {
 		# Base rate
-		multiply_key = { lhs = Tax_TmpBase value = 0.2 }
+		multiply_key = { lhs = Tax_TmpBase value = 0.3 }
 	}
 
 	# Tribal cap
@@ -2689,7 +2696,7 @@ Prov_DoTaxBG = {
 				Rights_BGGov6HasGreater = yes
 			}
 		}
-		set_key = { lhs = Tax_TmpBase value = 4 }
+		set_key = { lhs = Tax_TmpBase value = 5 }
 	}
 	else_if = {
 		limit = {
@@ -2697,7 +2704,7 @@ Prov_DoTaxBG = {
 				Rights_BGGov5Has = yes
 			}
 		}
-		set_key = { lhs = Tax_TmpBase value = 3 }
+		set_key = { lhs = Tax_TmpBase value = 4 }
 	}
 	else_if = {
 		limit = {
@@ -2705,7 +2712,7 @@ Prov_DoTaxBG = {
 				Rights_BGGov4Has = yes
 			}
 		}
-		set_key = { lhs = Tax_TmpBase value = 2 }
+		set_key = { lhs = Tax_TmpBase value = 3 }
 	}
 	else_if = {
 		limit = {
@@ -2713,10 +2720,10 @@ Prov_DoTaxBG = {
 				Rights_BGGov3Has = yes
 			}
 		}
-		set_key = { lhs = Tax_TmpBase value = 1 }
+		set_key = { lhs = Tax_TmpBase value = 2 }
 	}
 	else = {
-		set_key = { lhs = Tax_TmpBase value = 0.5 }
+		set_key = { lhs = Tax_TmpBase value = 1 }
 	}
 	
 	if = {
@@ -3324,6 +3331,23 @@ Prov_DoTaxBU = {
 		}
 		Tax_ResetTax = yes
 	}
+	# BrutusY: delay applying BU_TaxRelief modifier to here
+	# This allows the timed modifier to be in sync with tax cycle
+	# Using country_flag BU_TaxReliefStarted to set the modifier
+	if = {
+		limit = {
+			owner = {
+				has_country_flag = BU_TaxReliefStarted 
+			}
+		}
+		owner = {
+			clr_country_flag = BU_TaxReliefStarted
+			BU_TaxRelief = yes
+			# Maybe adding a event here indicating that Tax Relief is in effect
+			# Description would be how your subjects are relishing in the new tax relief measure
+		}
+	}
+	# End of delayed applying BU_TaxRelief
 	if = {
 		limit = {
 			owner = { NOT = { has_country_modifier = BU_TaxRelief } }
@@ -3825,7 +3849,7 @@ Prov_DoTaxBU = {
 						Rights_NOGov1Has = yes
 					}
 				}
-				set_key = { lhs = Tax_TmpBase value = 8 }
+				set_key = { lhs = Tax_TmpBase value = 2.5 }
 			}
 			else_if = {
 				limit = {
@@ -3833,7 +3857,7 @@ Prov_DoTaxBU = {
 						Rights_NOGov2Has = yes
 					}
 				}
-				set_key = { lhs = Tax_TmpBase value = 4 }
+				set_key = { lhs = Tax_TmpBase value = 2 }
 			}
 			else_if = {
 				limit = {
@@ -3841,7 +3865,7 @@ Prov_DoTaxBU = {
 						Rights_NOGov3Has = yes
 					}
 				}
-				set_key = { lhs = Tax_TmpBase value = 2 }
+				set_key = { lhs = Tax_TmpBase value = 1.5 }
 			}
 			else_if = {
 				limit = {
@@ -3849,7 +3873,15 @@ Prov_DoTaxBU = {
 						Rights_NOGov4Has = yes
 					}
 				}
-				set_key = { lhs = Tax_TmpBase value = 1 }
+				set_key = { lhs = Tax_TmpBase value = 1.0 }
+			}
+			else_if = {
+				limit = {
+					owner = {
+						Rights_NOGov5Has = yes
+					}
+				}
+				set_key = { lhs = Tax_TmpBase value = 0.5 }
 			}
 			else = {
 				set_key = { lhs = Tax_TmpBase value = 0 }
