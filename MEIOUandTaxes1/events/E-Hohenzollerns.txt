@@ -263,11 +263,200 @@ country_event = {			#Poland version
   
 	trigger = {
 		OR = {
-			tag = PLC
-			AND = {
-				tag = POL
-				NOT = { exists = PLC }
+			tag = POL
+			NOT = { exists = PLC }
+		}
+		has_country_flag = first_peace_of_thorn
+		has_country_flag = supported_prussian_confederation_flag
+		TEU = {
+			NOT = { is_at_war = yes	}
+			NOT = { num_of_cities = 10 }
+		}
+		DNZ = {
+		    NOT = { is_at_war = yes	}
+			is_free_or_tributary_trigger = yes
+		    num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+		        value = 4
+		        region = prussia_region
+		    }
+			truce_with = TEU
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+		    #Return of Polish core provinces
+		    every_province = {
+			    limit = {
+				    is_core = POL
+					OR = {
+					    owned_by = TEU
+						owned_by = LVO
+					}
+				}
+				cede_province = POL
 			}
+			#Return of Chelmno
+			if = {
+			    limit = { 
+			        OR = {
+				        2398 = { owned_by = TEU }
+					    2398 = { owned_by = DNZ }
+				    }
+				}
+                2398 = {
+                    cede_province = POL
+					add_core = POL
+					
+                }				
+			}
+			#Return of Lithuanian core provinces
+			if = {
+			    limit = { 
+				    LIT = {
+					    exists = yes
+					    is_subject_of = POL 
+					} 
+				}
+				every_province = {
+			        limit = {
+				        is_core = LIT
+					    OR = {
+					        owned_by = TEU
+						    owned_by = LVO
+					    }
+				    }
+				   cede_province = LIT
+			    }
+			}
+			#Return of Prussian provinces to Teutonic Order
+		    every_province = {
+			    limit = {
+				    owned_by = POL
+					region = prussia_region
+				}
+				cede_province = TEU
+			}
+			every_province = {
+			    limit = {
+				    owned_by = DNZ
+					region = prussia_region
+					NOT = { province_id = 2355 } #Gdansk
+				}
+				cede_province = TEU
+			}
+			if = {
+			    limit = { 
+				    LIT = {
+					    exists = yes
+					    is_subject_of = POL 
+					} 
+				}
+			    every_province = {
+			        limit = {
+				        owned_by = LIT
+					    region = prussia_region
+				    }
+					cede_province = TEU
+			    }
+			}
+			if = {
+			    limit = { 
+				    WRM = {
+					    exists = yes
+						ai = yes
+					    is_subject_of = TEU
+					} 
+				}
+			    every_province = {
+			        limit = {
+				        owned_by = WRM
+					    region = prussia_region
+				    }
+					cede_province = WRM
+					add_core = WRM
+			    }
+			}
+			else_if = {
+			    limit = { 
+				    WRM = {
+					    exists = yes
+						ai = no
+					    is_subject_of = TEU
+					} 
+				}
+			    create_subject = {
+			        who = WRM
+			        subject_type = decentralized_vassal
+		        }
+			}
+			#Return of Livonian provinces to Livonian Order
+		    if = {
+			    limit = {
+				    LVO = {
+					    exists = yes
+					    is_subject_of = TEU 
+					}
+				}
+				every_province = {
+			        limit = {
+				        owned_by = POL
+					    region = baltic_region
+				    }
+				    cede_province = LVO
+			    }
+				every_province = {
+			        limit = {
+				        owned_by = DNZ
+					    region = baltic_region
+				    }
+				    cede_province = LVO
+			    }
+				if = {
+			        limit = { 
+					    LIT = {
+						    exists = yes
+						    is_subject_of = POL 
+						} 
+					}
+			        every_province = {
+			            limit = {
+				            owned_by = LIT
+					        region = baltic_region
+				        }
+					    cede_province = LVO
+			       }
+			    }
+			}
+		}
+	}
+  
+	mean_time_to_happen = { months = 1 }
+  
+	option = {
+	    name = "secondpeaceofthorn.1.a"
+        add_dip_power = -50
+		TEU = {
+			free_vassal = LVO
+		}
+		country_event = {
+			id = secondpeaceofthorn.2
+		}
+	}
+}
+
+country_event = {			#PLC version
+	id = secondpeaceofthorn.11
+	title = "secondpeaceofthorn.1.t"
+	desc = "secondpeaceofthorn.1.d"
+	picture = SIEGE_eventPicture
+  
+	fire_only_once = yes
+  
+	trigger = {
+		OR = {
+			tag = PLC
+			NOT = { exists = POL }
 		}
 		has_country_flag = first_peace_of_thorn
 		has_country_flag = supported_prussian_confederation_flag
@@ -287,193 +476,96 @@ country_event = {			#Poland version
 	}
   
 	mean_time_to_happen = { months = 1 }
-  
-	option = {
-		name = "secondpeaceofthorn.1.a"
-		every_owned_province = {
-			limit = {
-				region = prussia_region
-				owned_by = ROOT
-				NOT = { province_id = 2398 } #Chelmno
-			}
-			cede_province = TEU
-			add_core = TEU
-		}
-		every_province = {
-			limit = {
-				region = prussia_region
-				owned_by = DNZ
-				NOT = { province_id = 2398 } #Chelmno
-				NOT = { province_id = 2355 } #Danzig
-			}
-			cede_province = TEU
-			add_core = TEU
-		}
-		every_province = {
-			limit = {
-				area = mazovia_area
-				owned_by = TEU
-			}
-			cede_province = ROOT
-		}
-		every_province = {
-			limit = {
-				area = lithuania_area
-				owned_by = TEU
-			}
-			cede_province = LIT
-		}
-		if = {
-			limit = {
-				WRM = {
-					exists = yes
-					is_subject_of = TEU
+	
+	immediate = {
+		hidden_effect = {
+		    #Return of Polish core provinces
+		    every_province = {
+			    limit = {
+				    is_core = PLC
+					OR = {
+					    owned_by = TEU
+						owned_by = LVO
+					}
 				}
+				cede_province = PLC
 			}
-			every_province = {
-				limit = {
-					region = prussia_region
-					owned_by = WRM
-					NOT = { province_id = 2398 } #Chelmno
-					NOT = { province_id = 2355 } #Danzig
-				}
-				cede_province = TEU
-				add_core = TEU
-			}
-		}
-		if = {
-			limit = {
-				2398 = { owned_by = TEU	} #Chelmno
-			}
-			2398 = {
-				cede_province = POL
-				add_core = POL
-			}
-		}
-		
-		TEU = {
-			free_vassal = LVO
-		}
-		
-		LIT = {
+			#Return of Chelmno
 			if = {
-					limit = {
-						is_subject_of = POL
-						OR = {
-							is_subject_of_type = permanent_union
-							is_subject_of_type = permanent_union_limited
-						}
+			    limit = { 
+			        OR = {
+				        2398 = { owned_by = TEU }
+					    2398 = { owned_by = DNZ }
+				    }
+				}
+                2398 = {
+                    cede_province = PLC
+					add_core = PLC
+					
+                }				
+			}
+			#Return of Prussian provinces to Teutonic Order
+		    every_province = {
+			    limit = {
+				    owned_by = PLC
+					region = prussia_region
+				}
+				cede_province = TEU
+			}
+			every_province = {
+			    limit = {
+				    owned_by = DNZ
+					region = prussia_region
+					NOT = { province_id = 2355 } #Gdansk
+				}
+				cede_province = TEU
+			}
+			if = {
+			    limit = { 
+				    WRM = {
+					    exists = yes
+						ai = yes
+					    is_subject_of = TEU
+					} 
+				}
+			    every_province = {
+			        limit = {
+				        owned_by = WRM
+					    region = prussia_region
+				    }
+					cede_province = WRM
+					add_core = WRM
+			    }
+			}
+			#Return of Livonian provinces to Livonian Order
+		    if = {
+			    limit = {
+				    LVO = {
+					    exists = yes
+					    is_subject_of = TEU 
 					}
-					every_owned_province = {
-						limit = {
-							region = prussia_region
-							owned_by = THIS
-							NOT = { province_id = 2398 } #Chelmno
-						}
-						remove_core = THIS
-						cede_province = TEU
-						add_core = TEU
-					}
+				}
+				every_province = {
+			        limit = {
+				        owned_by = PLC
+					    region = baltic_region
+				    }
+				    cede_province = LVO
+			    }
+				every_province = {
+			        limit = {
+				        owned_by = DNZ
+					    region = baltic_region
+				    }
+				    cede_province = LVO
+			    }
 			}
 		}
-		country_event = {
-			id = secondpeaceofthorn.2
-		}
 	}
-}
-
-country_event = {			#PLC version
-	id = secondpeaceofthorn.11
-	title = "secondpeaceofthorn.1.t"
-	desc = "secondpeaceofthorn.1.d"
-	picture = SIEGE_eventPicture
-  
-	fire_only_once = yes
-  
-	trigger = {
-		tag = PLC
-		has_country_flag = first_peace_of_thorn
-		has_country_flag = supported_prussian_confederation_flag
-		NOT = { has_country_flag = refused_peace_of_thorn }
-		TEU = {
-			NOT = { is_at_war = yes	}
-			is_free_or_tributary_trigger = yes
-			any_owned_province = { region = prussia_region }
-			NOT = { num_of_cities = 10 }
-		}
-		OR = { 
-			41 = { owned_by = PLC } #Sambia/Konigsberg
-			41 = { owned_by = DNZ } #Sambia/Konigsberg
-			1844 = { owned_by = PLC } #Marienburg/Malbork
-			1844 = { owned_by = DNZ } #Marienburg/Malbork
-		}
-	}
-  
-	mean_time_to_happen = { months = 3 }
   
 	option = {
 		name = "secondpeaceofthorn.1.a"
-		every_owned_province = {
-			limit = {
-				region = prussia_region
-				owned_by = ROOT
-				NOT = { province_id = 2398 } #Chelmno
-			}
-			cede_province = TEU
-			add_core = TEU
-		}
-		every_province = {
-			limit = {
-				region = prussia_region
-				owned_by = DNZ
-				NOT = { province_id = 2398 } #Chelmno
-				NOT = { province_id = 2355 } #Danzig
-			}
-			cede_province = TEU
-			add_core = TEU
-		}
-		every_province = {
-			limit = {
-				area = mazovia_area
-				owned_by = TEU
-			}
-			cede_province = ROOT
-		}
-		every_province = {
-			limit = {
-				area = lithuania_area
-				owned_by = TEU
-			}
-			cede_province = ROOT
-		}
-		if = {
-			limit = {
-				WRM = {
-					exists = yes
-					is_subject_of = TEU
-				}
-			}
-			every_province = {
-				limit = {
-					region = prussia_region
-					owned_by = WRM
-					NOT = { province_id = 2398 } #Chelmno
-					NOT = { province_id = 2355 } #Danzig
-				}
-				cede_province = TEU
-				add_core = TEU
-			}
-		}
-		if = {
-			limit = {
-				2398 = {owned_by = TEU } #Chelmno
-			}
-			2398 = {
-					cede_province = PLC
-					add_core = PLC
-			}
-		}
-		
+		add_dip_power = -50
 		TEU = {
 			free_vassal = LVO
 		}
@@ -540,105 +632,44 @@ country_event = {
 	is_triggered_only = yes
 	
 	option = {
-		trigger = {
-			tag = POL
-			NOT = { exists = PLC }
-		}
 		name = "secondpeaceofthorn.3.a"
 		ai_chance = { factor = 100 }
-		# hidden_effect = {
-		# 	country_event = {
-		# 		id = miscexpenses.001
-		# 	}
-		# }
 		if = {
-			limit = { owns = 2845 }
+			limit = { owns = 2845 } #Lauenburg-Bytow
 			2845 = {
-				cede_province = POL
-				add_core = POL
+				cede_province = FROM
+				add_core = FROM
 			}
 		}
 		if = {
-			limit = { owns = 43 }
+			limit = { owns = 43 } #Pomerellen
 			43 = {
-				cede_province = POL
-				add_core = POL
+				cede_province = FROM
+				add_core = FROM
 			}
 		}
 		if = {
-			limit = { owns = 1844 }
+			limit = { owns = 1844 } #Elbing
 			1844 = {
-				cede_province = POL
-				add_core = POL
+				cede_province = FROM
+				add_core = FROM
 			}
 		}
 		if = {
-			limit = { owns = 1391 }
+			limit = { owns = 1391 } #Warmia
 			1391 = {
-				cede_province = POL
-				add_core = POL
+				cede_province = FROM
+				add_core = FROM
 			}
 		}
 		if = {
-			limit = { owns = 4025 }
+			limit = { owns = 4025 } #Tuchel
 			4025 = {
-				cede_province = POL
-				add_core = POL
+				cede_province = FROM
+				add_core = FROM
 			}
 		}
-		POL = {
-			country_event = {
-				id = secondpeaceofthorn.4
-			}
-		}
-	}
-	option = {
-		trigger = {
-			tag = PLC
-		}
-		name = "secondpeaceofthorn.3.a"
-		ai_chance = { factor = 100 }
-		# hidden_effect = {
-		# 	country_event = {
-		# 		id = miscexpenses.001
-		# 	}
-		# }
-		if = {
-			limit = { owns = 2845 }
-			2845 = {
-				cede_province = PLC
-				add_core = PLC
-			}
-		}
-		if = {
-			limit = { owns = 43 }
-			43 = {
-				cede_province = PLC
-				add_core = PLC
-			}
-		}
-		if = {
-			limit = { owns = 1844 }
-			1844 = {
-				cede_province = PLC
-				add_core = PLC
-			}
-		}
-		if = {
-			limit = { owns = 1391 }
-			1391 = {
-				cede_province = PLC
-				add_core = PLC
-			}
-		}
-		if = {
-			limit = { owns = 4025 }
-			4025 = {
-				cede_province = PLC
-				add_core = PLC
-			}
-		}
-		PLC = {
+		FROM = {
 			country_event = {
 				id = secondpeaceofthorn.4
 			}
