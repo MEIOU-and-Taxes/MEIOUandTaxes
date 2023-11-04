@@ -5649,7 +5649,7 @@ province_event = {
 	}
 
 	mean_time_to_happen = {
-		years = 25
+		years = 30
 		modifier = {
 			owner = { check_variable = { which = jesuit_support value = 2 } }
 			factor = 0.7
@@ -7303,5 +7303,66 @@ province_event = {
 		hidden_effect = {
 		    Public_ChangeClassWealthVal = { class=SF type=value inp=-25 }
 		}
+	}
+}
+
+### AUTO DA FE
+country_event = {
+	id = DG_Catholics.513
+	title = DG_Catholics.513.title
+	desc = DG_Catholics.513.desc
+	picture = catholic_burning_at_stake
+	goto = auto_da_fe
+	
+	is_triggered_only = yes #on_actions on_thri_yearly_pulse_2
+	
+	trigger = {
+		has_country_modifier = evangel_cm
+		any_owned_province = {
+		    has_owner_religion = yes
+			check_key = { lhs = Prov_CLPow value = 25 }
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					has_owner_religion = yes
+					check_key = { lhs = Prov_CLPow value = 25 }
+				}
+				save_event_target_as = auto_da_fe
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Catholics.513.opta #Carry out the sentences
+		ai_chance = { 
+		    factor = 50
+			modifier = {
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+				factor = 2
+			}
+		}
+		event_target:auto_da_fe = {
+			add_unrest = 10
+			Public_ChangePowCL = { inp = 10 type = value }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+	}
+	option = {
+		name = DG_Catholics.513.optb #Refuse to carry out the sentences
+		ai_chance = { 
+		    factor = 50
+			modifier = {
+				check_key = { lhs = Prov_CLLoy value = 70 }
+				factor = 2
+			}
+		}
+		event_target:auto_da_fe = {
+			add_province_modifier = { name = religious_scandal_province duration = 3650 }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-5 }
 	}
 }
