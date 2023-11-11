@@ -1213,10 +1213,470 @@ country_event = {
 				limit = {
 					culture_group = langue_d_oil
 				}
+				set_country_flag = french_pretender
 			}
-
-			set_country_flag = french_pretender
 		}
 		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Rejected the choice to become French:flavor_hyw.201"
+	}
+}
+
+
+#France gets involved in Castile Civil war, send du Guesclin to Spain
+# Civil War in Castile
+country_event = {
+	id = flavor_hyw.300
+	title = "flavor_hyw.300.t"
+	desc = "flavor_hyw.300.d"
+	picture = CIVIL_WAR_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		# Support the Revolt
+		name = "flavor_hyw.300.a"
+		ai_chance = { factor = 75 }
+		if = {
+			limit = {
+				tag = FRA
+			}
+			add_manpower = -3
+			set_country_flag = civil_war_support_FRA
+			country_event = { id = flavor_hyw.301 days = 20 tooltip = "flavor_hyw.301.d" }
+			GUY = {
+				country_event = { id = flavor_hyw.302 days = 60 tooltip = "flavor_hyw.301.d" }
+			}
+			
+
+			ENR = {
+				add_manpower = 3
+			}
+			
+			kill_leader = {
+				type = "Bertrand du Guesclin"
+			}
+		}
+		if = {
+			limit = {
+				NOT = { tag = FRA }
+			}
+			add_manpower = -3
+
+			ENR = {
+				add_manpower = 3
+			}
+		}
+	}
+	option = {		# We do not support rebels
+		name = "flavor_hyw.300.b"
+		ai_chance = { factor = 25 }
+		add_prestige = 10
+
+		if = {
+			limit = {
+				tag = FRA
+			}
+
+			reverse_add_opinion = {
+				who = ROOT
+				modifier = rejects_enrique
+			}
+		}
+	}
+}
+
+#Henry II gets Bertrand du guesclin for now
+# Civil War in Castile
+country_event = {
+	id = flavor_hyw.301
+	title = "flavor_hyw.301.t"
+	desc = "flavor_hyw.301.d"
+	picture = CIVIL_WAR_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		# Support the Revolt
+		name = "flavor_hyw.301.a"
+
+		ENR = {
+			define_general = {
+				fire = 3
+				shock = 5
+				manuever = 6
+				siege = 5
+				name = "Bertrand du Guesclin"
+				trait = siege_specialist_personality
+			}
+		}
+	}
+}
+
+
+#In turn England too will get involved in Castile Civil war, Peter offers three daughters as payment guarantee. Only Gascons are invloved.
+# Civil War in Castile
+country_event = {
+	id = flavor_hyw.302
+	title = "flavor_hyw.302.t"
+	desc = "flavor_hyw.302.d"
+	picture = CIVIL_WAR_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		# Support Peter because Henry is aligned with the French
+		name = "flavor_hyw.302.a"
+
+		join_all_offensive_wars_of = CAS
+
+		set_country_flag = england_helps_peter
+	}
+
+	option = {		# Not interested in the affairs of Iberia
+		name = "flavor_hyw.302.a"
+		set_country_flag = england_refuses_peter
+
+		reverse_add_opinion = {
+			who = ROOT
+			modifier = rejects_peter
+		}
+	}
+}
+
+
+#Peter goes against his words, even when Black Prince won him a great victory, trigger on battle victory
+country_event = {
+	id = flavor_hyw.303
+	title = "flavor_hyw.303.t"
+	desc = "flavor_hyw.303.d"
+	picture = CIVIL_WAR_eventPicture
+
+	is_triggered_only = yes
+	
+	option = {		# 
+		name = "flavor_hyw.303.a"
+
+		white_peace = ENR
+
+		country_event = { id = flavor_hyw.304 days = 20 tooltip = "flavor_hyw.304.d" }
+	}
+}
+
+#Black Prince returns home empty handed, drowning in debt
+country_event = {
+	id = flavor_hyw.304
+	title = "flavor_hyw.304.t"
+	desc = "flavor_hyw.304.d"
+	picture = CIVIL_WAR_eventPicture
+
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_hyw.304.a"
+
+		add_loan = {
+			interest_modifier = 3
+			duration = 60
+		}
+		add_loan = {
+			interest_modifier = 3
+			duration = 60
+		}
+		add_loan = {
+			interest_modifier = 3
+			duration = 60
+		}
+		add_loan = {
+			interest_modifier = 3
+			duration = 60
+		}
+		add_loan = {
+			interest_modifier = 3
+			duration = 60
+		}
+
+		add_years_of_income = -5
+	}
+}
+
+#In order to fill the coffer, Black princes starts to impose heavy taxes on his Gascon lords, causing them to defect to Charles V
+#If Gascony can't fill the defecit in three years, then Gascony will effectively declare bankkruptcy
+country_event = {
+	id = flavor_hyw.305
+	title = "flavor_hyw.305.t"
+	desc = "flavor_hyw.305.d"
+	picture = CIVIL_WAR_eventPicture
+
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_hyw.305.a"
+
+		set_bankruptcy = GUY
+		set_global_flag = gascon_lords_revolts
+
+		hidden_effect = {
+			FRA = {
+				country_event = { id = flavor_hyw.306 days = 20 tooltip = "flavor_hyw.306.d" }
+			}
+		}
+	}
+}
+
+#French King can now offer some pension money to Gascon lords to attract them back into the fold.
+country_event = {
+	id = flavor_hyw.306
+	title = "flavor_hyw.306.t"
+	desc = "flavor_hyw.306.d"
+	picture = CIVIL_WAR_eventPicture
+
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_hyw.306.a"
+
+		ENG = {
+			every_subject_country = {
+				limit = {
+					capital_scope = { superregion = france_superregion }
+					NOT = { tag = GUY }
+				}
+
+				country_event = { id = flavor_hyw.307 }
+			}
+
+			france_superregion = {
+				limit = {
+					NOT = { province_id = 63 }
+					owned_by = ENG
+				}
+				change_controller = FRA
+			}
+		}
+	}
+}
+
+
+country_event = {
+	id = flavor_hyw.307
+	title = "flavor_hyw.307.t"
+	desc = "flavor_hyw.307.d"
+	picture = CIVIL_WAR_eventPicture
+
+	is_triggered_only = yes
+
+	#It's more beneficial to be french after all
+	option = {
+		name = "flavor_hyw.307.a"
+
+		if = {
+			limit = {
+				is_subject_of_type = daimyo_vassal 
+			}
+			FRA = {
+				create_subject = {
+					subject_type = daimyo_vassal
+					subject = ROOT
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				is_subject_of_type = appanage_subject 
+			}
+			FRA = {
+				create_subject = {
+					subject_type = appanage_subject
+					subject = ROOT
+				}
+			}
+
+			ROOT = { define_ruler = { dynasty = FRA } }
+		}
+	}
+
+	#Remain loyal
+	option = {
+		name = "flavor_hyw.307.b"
+		add_legitimacy = -20
+	}
+}
+
+#John of Gaunt/Edmund of York can claim Castilian throne by having Peter's daughters married to them
+
+#Peter's daughters' marriage to a English prince make Henry II of Castile a staunch ally of the French
+
+
+#Jean IV of Brittany resents English presence in his duchy. Can colludes a secret treaty with the French to retake Brest
+
+#If French was being too aggressive to the English, then he will offer Brest/Saint Malo back to the English to warn off the French.
+
+
+#Oliver Clisson started off as a English helper, but Jean IV of Montfort pissed him off so he offered his service to Charles V
+country_event = {
+	id = flavor_hyw.400
+	title = "flavor_hyw.400.t"
+	desc = "flavor_hyw.400.d"
+	picture = CIVIL_WAR_eventPicture
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_year	= 1359
+		NOT = { is_year = 1407 }
+		OR = {
+			tag = BRI
+			tag = MNF
+		}
+		has_global_flag = hundred_years_war
+	}
+
+	mean_time_to_happen = {
+		months = 200
+	
+		modifier = {
+			factor = 0.6
+			alliance_with = ENG
+		}
+
+		modifier = {
+			factor = 0.8
+			war_with = FRA
+		}
+	}
+	
+	option = {
+		name = "flavor_hyw.302.a"
+		kill_leader = {
+			type = "Oliver Clisson"
+		}
+
+		FRA = {
+			define_general = {
+				shock = 4
+				fire = 4
+				manuever = 4
+				siege = 5
+				name = "Oliver Clisson"
+			}
+		}
+	}
+}
+
+#Louis de Sancerre enters Charles V's service in 1359
+country_event = {
+	id = flavor_hyw.401
+	title = "flavor_hyw.401.t"
+	desc = "flavor_hyw.401.d"
+	picture = CIVIL_WAR_eventPicture
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_year	= 1359
+		NOT = { is_year = 1402 }
+		tag = FRA
+		has_global_flag = hundred_years_war
+	}
+
+	mean_time_to_happen = {
+		months = 200
+	
+		modifier = {
+			factor = 0.8
+			AND = {
+				NOT = { army_tradition = ENG }
+				ai = yes
+			}
+		}
+
+		modifier = {
+			factor = 0.8
+			AND = {
+				army_tradition = ENG
+				ai = no
+			}
+		}
+
+		modifier = {
+			factor = 0.8
+			war_with = ENG
+		}
+	}
+	
+	option = {
+		name = "flavor_hyw.401.a"
+		define_general = {
+			shock = 4
+			fire = 4
+			manuever = 4
+			siege = 5
+			name = "Louis de Sancerre"
+		}
+	}
+}
+
+
+#Flanders revolt in Ghent cauing everyone in Europe being nervous about the power of the newly established bourgeoisie class
+country_event = {
+	id = flavor_hyw.500
+	title = "flavor_hyw.500.t"
+	desc = "flavor_hyw.500.d"
+	picture = CIVIL_WAR_eventPicture
+	
+	fire_only_once = yes
+
+	trigger = {
+		is_year	= 1379
+		NOT = { is_year = 1385 }
+		tag = FLA
+		has_global_flag = hundred_years_war
+		2353 = {			# Ghent
+			owned_by = ROOT
+		}
+	}
+
+	mean_time_to_happen = {
+		months = 200
+	}
+
+	immediate = {
+		#Inspired similar rebellions in Italy, France and England
+		#Avoids non monarchy
+		every_country = { 
+			limit = {
+				OR = {
+					capital_scope = { superregion = france_superregion } 
+					capital_scope = { region = south_england_region } 
+					capital_scope = { superregion = italy_superregion } 
+				}
+				government = monarchy 
+			}
+
+			country_event = { id = flavor_hyw.501 days = 20 tooltip = "flavor_hyw.501.d" }
+		}
+	}
+
+	option = {
+		spawn_rebels = {
+			size = 2
+			unrest = 5
+			win = yes
+			leader = "Philip"
+			leader_dynasty = "van Artevelde"
+			type = pretender_rebels
+		}
+	}
+}
+
+country_event = {
+	id = flavor_hyw.501
+	title = "flavor_hyw.501.t"
+	desc = "flavor_hyw.501.d"
+	picture = BURGUNDIAN_PRESENTATION_eventPicture
+
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_hyw.501.a"
+
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=-15 }
 	}
 }
