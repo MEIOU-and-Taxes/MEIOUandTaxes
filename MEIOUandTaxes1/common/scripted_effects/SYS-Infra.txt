@@ -509,37 +509,17 @@ Infra_SetMaintHelper = {
 				}
 			}
 
-            # Tmp_0 = Current Profit
-            # Tmp_1 = Current Profit Margin
+			### Result Variables
+            # Tmp_0 = (Perceived) Current Profit
+            # Tmp_1 = (Perceived) Current Profit Margin
             # Tmp_2 = Desired Change Rate in Size %
 			set_key = { lhs = Tmp_0 which = Prod_S$slot$Income }
-			if = { # If Tmp_0 is positive, Add a throughput factor and reduce Income by it
-				limit = {
-					check_key = { lhs = Tmp_0 value = 0.001 }
-				}
-				### Add a throughput factor
-				set_key = { lhs = Tmp_4 which = Prod_S$slot$Soph }
-				multiply_key = { lhs = Tmp_4 value = 0.01 }
-				multiply_key = { lhs = Tmp_4 which = Tmp_4 }
-				multiply_key = { lhs = Tmp_4 value = -1 }
-				change_key = { lhs = Tmp_4 value = 1 }
-				### Add a throughput factor
-				set_key = { lhs = Tmp_3 which = Prod_S$slot$SizeCur }
-				divide_key = { lhs = Tmp_3 which = Prod_S$slot$Size }
-				multiply_key = { lhs = Tmp_3 which = Tmp_3 } ### Exponential		
-				if = {
-					limit = {
-						check_key = { lhs = Tmp_4 which = Tmp_3 } ### If Soph isnt 100%, pick Soph if its higher
-					}
-					set_key = { lhs = Tmp_3 which = Tmp_4 }	
-				}
-				multiply_key = { lhs = Tmp_0 which = Tmp_3 }
-				set_key = { lhs = Tmp_3 value = 0 }	
-			}
+			# Subtract Spending from Income to get profits
 			subtract_key = { lhs = Tmp_0 which = Prod_S$slot$Spend }
 			
 			[[IncomeMaint]
-			if = { # Take out 2.5% of building income for Income based Maint (Commercial)
+			# Take out 2.5% of building income for Income based Maint (Commercial)
+			if = {
 				limit = {
 					always = $IncomeMaint$
 					check_key = { lhs = Building_$type$IncomeAverage value = 0.001 }
@@ -553,25 +533,68 @@ Infra_SetMaintHelper = {
 			}
 			]
 
-			if = { limit = { is_key_equal = { lhs = Prod_S$slot$Income value = 0 } }
+			### DBZ handling if income = 0 --> cant get a profit margin if income = 0
+			# Result: Tmp_1 = Profit Margin
+			if = { 
+				limit = { 
+					is_key_equal = { lhs = Prod_S$slot$Income value = 0 } 
+				}
 				set_key = { lhs = Tmp_1 value = 0 }
 			}
-			else = {
+			else = { ## If Income != 0
 				set_key = { lhs = Tmp_1 which = Tmp_0 }
 				divide_key = { lhs = Tmp_1 which = Prod_S$slot$Income }
+
+				# If Profit Margin is positive, add a throughput factor and reduce perceived profits 
+				# This is done to aritificially reduce expansion demand if throughput is low because non existing inputs
+				if = {
+					limit = {
+						check_key = { lhs = Tmp_1 value = 0.001 }
+					}
+					### Add a throughput factor
+					set_key = { lhs = Tmp_3 which = Prod_S$slot$SizeCur }
+					divide_key = { lhs = Tmp_3 which = Prod_S$slot$Size }
+
+					if = {
+						limit = { 
+							NOT = { check_key = { lhs = Tmp_3 value = 1 } } ### Throughputfactor only applied if TP < 100%
+						}
+						multiply_key = { lhs = Tmp_3 which = Tmp_3 } ### Exponential effect
+						multiply_key = { lhs = Tmp_0 which = Tmp_3 }
+						set_key = { lhs = Tmp_3 value = 0 }	
+					}
+
+				}
+				else = { ### If industry is making losses, check if industry already developed full skill. If not make it decrease size slower based on lower skill
+					### Add a sophistication (skill) factor
+					set_key = { lhs = Tmp_4 which = Prod_S$slot$Soph }
+					multiply_key = { lhs = Tmp_4 value = 0.01 }
+
+					if = {
+						limit = { 
+							NOT = { check_key = { lhs = Tmp_4 value = 1 } } ### Skill Factor only applied if Skill < 100%
+						}
+						multiply_key = { lhs = Tmp_4 which = Tmp_4 } # Exponential effect of low skill
+						multiply_key = { lhs = Tmp_0 which = Tmp_4 } # reduce perceived loss
+						set_key = { lhs = Tmp_4 value = 0 }
+					}
+				}
+
 			}
-						
+
+			### Actual heuristic for Industry Expansion
+			# Formula for expansion desire for Perceived Profits != 0:
+			# (   33 							)
+			# ( ------ * Profits + 0.15*Profits ) * 0.2
+			# (  Size							)
 			if = {
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0.04 } # profit margin >= 4 % --> expand
 				}
-				set_key = { lhs = Tmp_2 value = 100 }
+				set_key = { lhs = Tmp_2 value = 33 }
 				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
-				multiply_key = { lhs = Tmp_2 value = 0.33 }
 				multiply_key = { lhs = Tmp_2 which = Tmp_1 }
-
-				multiply_key = { lhs = Tmp_1 value = 0.15 }
-
+				multiply_key = { lhs = Tmp_1 value = 0.2 }
 				change_key = { lhs = Tmp_1 which = Tmp_2 }
 			}
 			else_if = {
@@ -585,32 +608,33 @@ Infra_SetMaintHelper = {
 			}
 			else = {  # Profits < 0
 				#Tmp_1 is a negative value here
-				set_key = { lhs = Tmp_2 value = 100 }
+				set_key = { lhs = Tmp_2 value = 33 }
 				divide_key = { lhs = Tmp_2 which = Prod_S$slot$Size }
-				multiply_key = { lhs = Tmp_2 value = 0.33 }
 				multiply_key = { lhs = Tmp_2 which = Tmp_1 }
-
 				multiply_key = { lhs = Tmp_1 value = 0.2 }
-
 				change_key = { lhs = Tmp_1 which = Tmp_2 }
-				divide_key = { lhs = Tmp_1 value = 2 } ## Balance factor to make shrinkage slower then expansion
+				divide_key = { lhs = Tmp_1 value = 2.0 } # `Industry_NaturalShrinkage_DivisionFactor~value` Balance factor to make shrinkage slower then expansion
 			}
-						
-			if = { # If Tmp_1 is positive, building will want to expand.
+
+			multiply_key = { lhs = Tmp_1 value = 0.15 } ## Balance Factor on desired change
+
+			if = { # If Perceived Profit is positive, building will want to expand.
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0 }
 				}
-			
-				if = { # if desired change rate > 200% limit it to 200%
-					limit = { check_key = { lhs = Tmp_1 value = 2.0 } }
-					set_key = { lhs = Tmp_1 value = 2.0 }
-				}
 
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change
+
+				if = {
+					limit = {
+						check_key = { lhs = Prod_S$slot$Change value = 1.0 } # `Industry_NaturalMax_ChangeUp~value`
+					}
+					set_key = { lhs = Prod_S$slot$Change value = 1.0 } # `Industry_NaturalMax_ChangeUp~value`
+				}
+
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
-				multiply_key = { lhs = Tmp_2 value = 0.15 }
 				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
 					limit = { has_global_flag = POP_Sim }
@@ -625,16 +649,18 @@ Infra_SetMaintHelper = {
                 # On the other hand, Prod_S$slot$Change reflects the specific change desire of absolute units of an specific industry. 
 			}
 			else = { # if Tmp_1 is negative, will want to shrink.
-				if = { # if desired shrink rate lower than -25% limit it
-					limit = { NOT = {  check_key = { lhs = Tmp_1 value = -0.25 } } }
-					set_key = { lhs = Tmp_1 value = -0.25 }
+				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
+
+				if = {
+					limit = {
+						NOT = { check_key = { lhs = Prod_S$slot$Change value = -0.25 } } # `Industry_NaturalMax_ChangeDown~value`
+					}
+					set_key = { lhs = Prod_S$slot$Change value = -0.25 } # `Industry_NaturalMax_ChangeDown~value`
 				}
 
-				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
 				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
 				
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
-				multiply_key = { lhs = Tmp_2 value = 0.15 }
 				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
 					limit = { has_global_flag = POP_Sim }
@@ -775,30 +801,40 @@ Infra_SetMaint = {
             limit = {
 				always = $RegularMaint$
 			}
-			set_key = { lhs = Tmp_0 which = Building_$type$ }
-			multiply_key = { lhs = Tmp_0 value = $rate$ } ### basically a x on building count to determine maint costs
+			# Calculate Shrinkage or expansion
+			set_key = { lhs = Tmp_0 which = Building_$type$Up }
+			subtract_key = { lhs = Tmp_0 which = Building_$type$Down }
 
-			set_key = { lhs = Tmp_1 which = Building_$type$Up }
-			subtract_key = { lhs = Tmp_1 which = Building_$type$Down }
-			multiply_key = { lhs = Tmp_1 value = $factor$ } ### how much do new buildings cost
-			change_key = { lhs = Tmp_0 which = Tmp_1 } # expansion or shrinkage
+			set_key = { lhs = Tmp_1 which = Building_$type$ }
+			if = {
+				limit = { 
+					NOT = { check_key = { lhs = Tmp_0 value = 0 } }
+				}
+				change_key = { lhs = Tmp_1 which = Tmp_0 } # remove shrinking property from paying maintenance
+			}
+			multiply_key = { lhs = Tmp_1 value = $rate$ } ### basically a x on building count to determine maint costs
 
 			if = {
-				limit = {
-					check_key = { lhs = Tmp_0 value = 0 } # if property wants to expand, add the maintenance of the expansion. Because there is a new size change, the property will now demand more.
+				limit = { 
+					check_key = { lhs = Tmp_0 value = 0 } # expansion?
 				}
-				multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
-				multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
-				multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
-							
-				set_key = { lhs = Building_$type$1 which = Tmp_0 }
-				set_key = { lhs = Building_$type$6 which = Tmp_0 }
-				set_key = { lhs = Building_$type$24 which = Tmp_0 }
-				
-				multiply_key = { lhs = Building_$type$1 value = $food$ }
-				multiply_key = { lhs = Building_$type$6 value = $raw$ }
-				multiply_key = { lhs = Building_$type$24 value = $indust$ }
+
+				multiply_key = { lhs = Tmp_0 value = $factor$ } ### how much do new buildings cost
+				change_key = { lhs = Tmp_1 which = Tmp_0 } # add expansion build costs to maintenance costs
 			}
+
+			# calculate total costs for maintenance + building
+			multiply_key = { lhs = Tmp_1 which = Modi_$type$Cost }
+			multiply_key = { lhs = Tmp_1 which = Modi_BuildingCost }
+			multiply_key = { lhs = Tmp_1 which = Modi_BuildingTime }
+						
+			set_key = { lhs = Building_$type$1  which = Tmp_1 }
+			set_key = { lhs = Building_$type$6  which = Tmp_1 }
+			set_key = { lhs = Building_$type$24 which = Tmp_1 }
+			
+			multiply_key = { lhs = Building_$type$1 value = $food$ }
+			multiply_key = { lhs = Building_$type$6 value = $raw$ }
+			multiply_key = { lhs = Building_$type$24 value = $indust$ }
 		}
 		]
 		[[IncomeMaint]
@@ -848,7 +884,7 @@ Infra_SetMaint = {
 		]
 	}
 	
-	### Handle State Investments
+	#### Handle State Investments
 	if = {
 		limit = { # add maintenance costs based on state expansion if state invested. Always applies since state forced the expansion.
 			check_key = { lhs = Building_$type$Wealth value = 0.01 }
@@ -856,45 +892,96 @@ Infra_SetMaint = {
 
 		# Sum costs per unit in price
 		set_key = { lhs = Tmp_0 value = 0 }
-		
+
 		set_key = { lhs = Tmp_1 which = TN_ProvPrc1 }
 		multiply_key = { lhs = Tmp_1 value = $food$ }
 		change_key = { lhs = Tmp_0 which = Tmp_1 }
-		
+
 		set_key = { lhs = Tmp_1 which = TN_ProvPrc6 }
 		multiply_key = { lhs = Tmp_1 value = $raw$ }
 		change_key = { lhs = Tmp_0 which = Tmp_1 }
-		
+
 		set_key = { lhs = Tmp_1 which = TN_ProvPrc24 }
 		multiply_key = { lhs = Tmp_1 value = $indust$ }
 		change_key = { lhs = Tmp_0 which = Tmp_1 }
-		
+
 		multiply_key = { lhs = Tmp_0 value = $factor$ } # balance factor on how much new property costs per unit
-		multiply_key = { lhs = Tmp_0 which = Modi_$type$Cost }
-		multiply_key = { lhs = Tmp_0 which = Modi_BuildingCost }
-		multiply_key = { lhs = Tmp_0 which = Modi_BuildingTime }
 
-		set_key = { lhs = Tmp_1 which = Building_$type$Wealth } # State investment
-		divide_key = { lhs = Tmp_1 which = Tmp_0 } # Wealth / cost per unit = units affordable
+		### Calculate State Investment Ability:
+		#            25
+		# 1 - ------------------
+		#      StateReach + 25
 
+		set_key = { lhs = Tmp_2 value = 25 } #`Industry_StateInvestment_Ability_BUPow_NeutralPoint~value`
+		set_key = { lhs = Tmp_3 which = Prov_BUPow }
+		change_key = { lhs = Tmp_3 value = 25 } #`Industry_StateInvestment_Ability_BUPow_NeutralPoint~value`
+		divide_key = { lhs = Tmp_2 which = Tmp_3 }
+		multiply_key = { lhs = Tmp_2 value = -1 }
+		change_key = { lhs = Tmp_2 value = 1 }
+
+		### Calculate State Investment Effectiveness:
+		#      Corruption  
+		# 1 - -------------
+		#         150      
+		set_key = { lhs = Tmp_3 which = Prov_BULoy }
+		divide_key = { lhs = Tmp_3 value = 150 } #`Industry_StateInvestment_Corruption_BULoy_Divisor~value`
+		multiply_key = { lhs = Tmp_3 value = -1 }
+		change_key = { lhs = Tmp_3 value = 1 }
+
+		set_key = { lhs = Building_$type$Wealth_Invested which = Building_$type$Wealth } # State investment
+		multiply_key = { lhs = Building_$type$Wealth_Invested which = Tmp_2 } # Apply State Investment Ability to get fraction that can be invested at a time
+		
+		# Apply State Investment Effectivess to determine how much is just given into spending pool
+		# -> at the end this means elites have to pay less out of own pockets = corruption
+		set_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Wealth_Invested }
+		multiply_key = { lhs = Building_$type$Wealth_Invested which = Tmp_3 } # this is real investment now (-corruption)
+		subtract_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Wealth_Invested } # this is corruption value
+
+		# Calculate affordable units when doing an investment
+		set_key = { lhs = Tmp_1 which = Building_$type$Wealth_Invested } # this is real investment (investment - corruption)
+		divide_key = { lhs = Tmp_1 which = Tmp_0 } # Real Invested Wealth / cost per unit = units affordable
+
+		# if real investment can afford to expand at least >0 units of property -> invest
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_1 value = 0.01 } # if state investment can afford to expand at least >0 units of property -> expand
+				check_key = { lhs = Tmp_1 value = 0.01 }
 			}
 			change_key = { lhs = Building_$type$Up which = Tmp_1 } ## add affordable units to expansion desire
-						
-			set_key = { lhs = Building_$type$1 which = Tmp_1 }
-			set_key = { lhs = Building_$type$6 which = Tmp_1 }
-			set_key = { lhs = Building_$type$24 which = Tmp_1 }
-			
-			multiply_key = { lhs = Building_$type$1 value = $food$ }
-			multiply_key = { lhs = Building_$type$6 value = $raw$ }
-			multiply_key = { lhs = Building_$type$24 value = $indust$ }
 
+
+			## Calcualte good demands
+			multiply_key = { lhs = Tmp_1 which = Modi_$type$Cost }
+			multiply_key = { lhs = Tmp_1 which = Modi_BuildingCost }
+			multiply_key = { lhs = Tmp_1 which = Modi_BuildingTime }
+
+			set_key = { lhs = Tmp_2	which = Tmp_1 }
+			set_key = { lhs = Tmp_3	which = Tmp_1 }
+			set_key = { lhs = Tmp_4 which = Tmp_1 }
+
+			multiply_key = { lhs = Tmp_2 value = $food$ }
+			multiply_key = { lhs = Tmp_3 value = $raw$ }
+			multiply_key = { lhs = Tmp_4 value = $indust$ }
+
+			## add additional building goods demands
+			change_key = { lhs = Building_$type$1  which = Tmp_2 }
+			change_key = { lhs = Building_$type$6  which = Tmp_3 }
+			change_key = { lhs = Building_$type$24 which = Tmp_4 }
+
+			###
+			# WEATLH DEDUCTION FROM INVESTMENT POOL IS DONE IN Infra_DoSpend!!!
+			###
+		}
+		else = { # No units affordable --> no investment happens
+			set_key = { lhs = Building_$type$Wealth_Invested	  value = 0 }
+			set_key = { lhs = Building_$type$Wealth_Invested_Crpt value = 0 }
 		}
 	}
 }
 
+# Returns:
+# Tmp_0 size of all industries
+# Tmp_1 size of nomad cottage
+# Tmp_2 size of higher learning
 Infra_RefreshIndustryHelper = {
     if = {
         limit = {
@@ -948,6 +1035,7 @@ Infra_RefreshIndustry = {
     set_key = { lhs = Tmp_0 value = 0 }
     set_key = { lhs = Tmp_1 value = 0 }
 
+	# This is used to sum up the size per type of property in all the slots
     Infra_RefreshIndustryHelper = { slot = 0 type = $type$  [[excl] excl = $excl$ ] [[excl_cottage] excl_cottage = $excl_cottage$ ] [[excl_relig] excl_relig = $excl_relig$ ] }
     Infra_RefreshIndustryHelper = { slot = 1 type = $type$  [[excl] excl = $excl$ ] [[excl_cottage] excl_cottage = $excl_cottage$ ] [[excl_relig] excl_relig = $excl_relig$ ] }
     Infra_RefreshIndustryHelper = { slot = 2 type = $type$  [[excl] excl = $excl$ ] [[excl_cottage] excl_cottage = $excl_cottage$ ] [[excl_relig] excl_relig = $excl_relig$ ] }
@@ -1444,20 +1532,46 @@ Infra_DoSpend = {
 	set_key = { lhs = CL_Spend$type$ value = 0 }
 	set_key = { lhs = BU_Spend$type$ value = 0 }
 	
+
+	### Handling of state investment
 	if = {
-		limit = { # remove necessary amount of spending maintenance from the amount state invested.
-			check_key = { lhs = Building_$type$Spend which = Building_$type$Wealth }
-		}
-		subtract_key = { lhs = Building_$type$Spend which = Building_$type$Wealth }
-		
-		set_key = { lhs = Building_$type$Wealth value = 0 }
-	}
-	else = { # if state investment is higher than spending, break code
-		subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Spend }
-		
-		set_key = { lhs = Building_$type$Spend value = 0 }
-	}
+		limit = { check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 } } # Any state investment occured
 	
+		# give investment money to elites for property build by the state
+		if = {
+			limit = {
+				check_key = { lhs = Building_$type$Spend which = Building_$type$Wealth_Invested } ## Spend >= Investment
+			} 
+		
+			subtract_key = { lhs = Building_$type$Spend  which = Building_$type$Wealth_Invested } # Reduce Elite spending by Investment
+			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Wealth_Invested } # reduce state investment by taken investments
+		}	
+		else = { # Spending < investment --> Can't give more then total spending, no wealth overflow or loss, rest remains in investment pool
+			subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Spend } 	# reduce state investment pool by investment spending
+			set_key = { lhs = Building_$type$Wealth_Invested which = Building_$type$Spend } # amount actually invested rest remain in investment pool
+			set_key = { lhs = Building_$type$Spend value = 0 } # No spending since all is paid for by the state
+		}
+		
+		# give corruption money to elites
+		if = {
+			limit = { check_key = { lhs = Building_$type$Wealth_Invested_Crpt value = 0.001 } } # Any state investment corruption occured
+
+			if = {
+				limit = {
+					check_key = { lhs = Building_$type$Spend which = Building_$type$Wealth_Invested_Crpt } ## Spend >= Corruption
+				} 
+			
+				subtract_key = { lhs = Building_$type$Spend  which = Building_$type$Wealth_Invested_Crpt } # Reduce Elite spending by corruption
+				subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Wealth_Invested_Crpt } # reduce state investment by corruption
+			}	
+			else = { # Spending < corruption --> Can't give more then total spending, no wealth overflow or loss, rest remains in investment pool
+				subtract_key = { lhs = Building_$type$Wealth which = Building_$type$Spend } # reduce state investment pool by corruption spending
+				set_key = { lhs = Building_$type$Wealth_Invested_Crpt which = Building_$type$Spend } # amount actually corruption, rest remain in investment pool
+				set_key = { lhs = Building_$type$Spend value = 0 } # No spending since all is paid for by the state
+			}
+		}
+	}
+
 	if = {
 		limit = {
 			check_key = { lhs = Building_$type$Spend value = 0.001 }
