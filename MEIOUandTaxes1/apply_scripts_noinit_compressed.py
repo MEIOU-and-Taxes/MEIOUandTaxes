@@ -1,25 +1,45 @@
-import os
-import re
-import glob
+import os, sys, re, glob, shutil, time
 from queue import *
-from threading import Thread
-import time
+from threading import Thread, Lock
 py_block = re.compile('\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
 py_string2 = re.compile('#.*')
 py_string3 = re.compile('(\[\[[\w&$]*\]|\^\^[\w&$]*\^|[\>\<\!\=]+|[\{\}\]^])')
+
+s_progress_print_lock = Lock()
+progress_done=False
+def clear_line():
+	sys.stdout.write('\x1b[2K')
+
+def logprogress(q):
+	with s_progress_print_lock:
+		if not progress_done:
+			progress=(1-(q.qsize()/len(paths)))*100
+			clear_line()
+			print(f'\r{progress:.1f}% done', end='')
+
+def logprogress_done():
+	with s_progress_print_lock:
+		progress_done=True
+		clear_line()
+		print(f'\r100% done')
+
+decisionpath = os.path.join( 'src', 'decisions' )
 def run(q, files):
-	path1 = pathstart('decisions')
 	while not q.empty():
-		path = q.get()
-		check = [True]
-		while check[0]:
-			check[0] = False
-			if path1 in path:
-				files[path] = apply_script_to_decision(files[path], scripts, check)
-			else:
-				files[path] = apply_script(files[path], scripts, check)
-		q.task_done()
+		try:
+			path = q.get_nowait()
+			check = [True]
+			while check[0]:
+				check[0] = False
+				if path.startswith( decisionpath ):
+					files[path] = apply_script_to_decision(files[path], scripts, check)
+				else:
+					files[path] = apply_script(files[path], scripts, check)
+			q.task_done()
+			logprogress( q )
+		except Empty:
+			pass
 	return True
 
 def parse_block(block):
@@ -209,54 +229,95 @@ def apply_script_to_decision(file, scripts, check):
 
 	return out
 
-def check_dont(path, dont):
-	for item in dont:
-		if item in path:
-			return True
-		
-	return False
-
-def pathcont (text):
-	return os.path.join('', text, '')
-
-def pathstart (text):
-	return os.path.join(text, '')
-
-def pathend (text):
-	return os.path.join('', text)
-
 
 if __name__ == '__main__':
 	start = time.time()
-	dont = ['Tools for Modding', 'graphicalculturetype.txt', pathcont('bookmarks'), pathcont('countries'), pathcont('country_colors'), pathcont('country_tags'),
-		pathcont('cultures'), pathcont('event_modifiers'), pathcont('opinion_modifiers'), pathstart('map'), pathstart('interface'), pathstart('gfx'), pathcont('units'),
-		pathcont('static_modifiers'), pathcont('countries'), pathcont('country_tags'), pathcont('province_names'), pathcont('tradenodes'), 'SYS-CensusDisplay.txt',
-		pathcont('event_modifiers'), '00-POP_Init.txt', '00-POP_Init-0.txt', '00-POP_Init-1.txt', '00-POP_Init-2.txt','DISP-Trade_Bought.txt', 'DISP-Trade_Bought_2.txt', 'DISP-Trade_Bought_3.txt','DISP-Trade_Sold.txt', 'DISP-Trade_Sold_2.txt', 'DISP-Trade_Sold_3.txt']
-	
-	paths = [path for path in glob.glob(os.path.join('*', '**', '*.txt'), recursive=True) if not check_dont(path, dont)]
+
+	# files/paths to run through parsing
+	parse = [
+		'common',
+		'customizable_localization',
+		'decisions',
+		'dlc_metadata',
+		'events',
+		'hints',
+		'history',
+		'localisation',
+		'missions',
+		'music'
+	]
+
+	# files/paths to link instead of parsing
+	link = [
+		[ 'common', 'graphicalculturetype.txt' ],
+		[ 'common', 'bookmarks' ],
+		[ 'common', 'countries' ],
+		[ 'common', 'country_colors' ],
+		[ 'common', 'country_tags' ],
+		[ 'common', 'cultures' ],
+		[ 'common', 'event_modifiers' ],
+		[ 'common', 'opinion_modifiers' ],
+		[ 'common', 'province_names' ],
+		[ 'common', 'static_modifiers' ],
+		[ 'common', 'tradenodes' ],
+		[ 'common', 'units' ],
+		[ 'customizable_localization', 'DISP-Trade_Bought.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Bought_2.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Bought_3.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Sold.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Sold_2.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Sold_3.txt' ],
+		[ 'events', 'SYS-CensusDisplay.txt' ],
+		[ 'events', '00-POP_Init-0.txt' ],
+		[ 'events', '00-POP_Init-1.txt' ],
+		[ 'events', '00-POP_Init-2.txt' ],
+		'gfx',
+		[ 'history', 'countries' ],
+		'interface',
+		'map',
+		'descriptor.mod',
+		'thumbnail.png',
+		'checksum_manifest.txt'
+	]
+
+	parse[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in parse ]
+	link[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in link ]
+
+	def check_path_link ( path ):
+		for p in link:
+			if path.startswith( p ):
+				return True
+		return False
+
+	def check_path_parse ( path ):
+		return path.endswith( '.txt' ) and not check_path_link( path )
+
+	print( 'Reading file tree...' )
+
+	paths = []
+	for p in parse:
+		paths.extend( [ path for path in glob.glob( os.path.join( p, '**' ), recursive=True ) if check_path_parse( path ) ] )
 
 	files = dict()
 	scripts = dict()
 	
 	for path in paths:
-		print(path)
 		files[path] = parse_file(path)
 
-	dont = ['00-triggers.txt']
 	print("Loading effects and triggers...")
-	for path in glob.glob(os.path.join('common', 'scripted_effects', '*.txt')):
+	for path in glob.glob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
 		paths.remove(path)
 		for script in files[path]:
 			scripts[script[0]] = script[2]
 
-	for path in glob.glob(os.path.join('common', 'scripted_triggers', '*.txt')):
+	for path in glob.glob(os.path.join('src', 'common', 'scripted_triggers', '*.txt')):
 		paths.remove(path)
 		for script in files[path]:
-			if len(script[2]) > 1 and type(script[2]) == type(list()) and not check_dont(path, dont):
+			if len(script[2]) > 1 and type(script[2]) == type(list()) and not path.endswith( '00-triggers.txt' ):
 				scripts[script[0]] = [['AND', '=', script[2]]]
 			else:
 				scripts[script[0]] = script[2]
-	
+	link.extend([os.path.join('src','common','scripted_triggers'), os.path.join('src','common','scripted_effects')])
 	
 	
 	print("Applying scripts to files...")
@@ -266,17 +327,39 @@ if __name__ == '__main__':
 	for i in range(len(paths)):
 		q.put(paths[i])
 
+	print(f'0% done', end='')
 	for i in range (num_threads):
 		worker = Thread(target=run,args=(q,files))
 		worker.start()
 
 	q.join()
+	logprogress_done()
 
 	print("Saving files...")
+	if ( os.path.exists( 'build' ) ):
+		shutil.rmtree( 'build' )
 	for path in paths:
-		with open(path, 'w', encoding='ISO-8859-1') as f:
+		buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
+		os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
+		with open(buildpath, 'w', encoding='ISO-8859-1') as f:
 			f.write(reconstruct_compressed(files[path]))
+
+	def link_file ( filepath ):
+		buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
+		os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
+		os.link( filepath, buildpath )
+
+	for path in parse:
+		for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
+			if ( os.path.isfile( filepath ) and not filepath.endswith( '.txt' ) ):
+				link_file( filepath )
+	for path in link:
+		if os.path.isdir( path ):
+			for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
+				if ( os.path.isfile( filepath ) ):
+					link_file( filepath )
+		else:
+			link_file( path )
+
 	end = time.time()
 	print((end - start))
-
-
