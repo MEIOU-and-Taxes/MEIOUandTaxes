@@ -1,6 +1,13 @@
-import os, sys, re, glob, shutil, time
+import os, sys, re, glob, shutil, time, argparse
 from queue import *
 from threading import Thread, Lock
+
+parser = argparse.ArgumentParser(description='Parse M&T source files')
+parser.add_argument('-i', '--parse-init', help='parse init event files (not done by default)', action='store_true')
+parser.add_argument('-u', '--uncompressed', help='do not compress output files', action='store_true')
+
+args = parser.parse_args()
+
 py_block = re.compile('\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
 py_string2 = re.compile('#.*')
@@ -193,6 +200,29 @@ def apply_paras(script, paras):
 				
 	return out
 
+def reconstruct(file, t=''):
+	txt = ''
+
+	for f in file:
+		if f:
+			if len(f) == 3 and type(f[0]) != type(list()) and type(f[1]) != type(list()):
+				if type(f[2]) == type(list()):
+					tail = ''
+						
+					if f[2]:
+						if type(f[2][0]) != type(list()):
+							tail = ' '.join(f[2])
+						else:
+							tail = '\n%s%s' % (reconstruct(f[2], t + '\t'), t)
+
+					txt += '%s%s %s { %s}\n' % (t, f[0], f[1], tail)
+				else:
+					txt += '%s%s %s %s\n' % (t, f[0], f[1], f[2])
+			elif len(f) == 2 and type(f[0]) != type(list()):
+				txt += '%s[%s\n%s%s]\n' % (t, f[0], reconstruct(f[1], t + '\t'), t)
+
+	return txt
+
 def reconstruct_compressed(file):
 	txt = ''
 
@@ -268,9 +298,6 @@ if __name__ == '__main__':
 		[ 'customizable_localization', 'DISP-Trade_Sold_2.txt' ],
 		[ 'customizable_localization', 'DISP-Trade_Sold_3.txt' ],
 		[ 'events', 'SYS-CensusDisplay.txt' ],
-		[ 'events', '00-POP_Init-0.txt' ],
-		[ 'events', '00-POP_Init-1.txt' ],
-		[ 'events', '00-POP_Init-2.txt' ],
 		'gfx',
 		[ 'history', 'countries' ],
 		'interface',
@@ -279,6 +306,13 @@ if __name__ == '__main__':
 		'thumbnail.png',
 		'checksum_manifest.txt'
 	]
+
+	if not args.parse_init:
+		link.extend([
+			[ 'events', '00-POP_Init-0.txt' ],
+			[ 'events', '00-POP_Init-1.txt' ],
+			[ 'events', '00-POP_Init-2.txt' ]
+		])
 
 	parse[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in parse ]
 	link[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in link ]
@@ -342,7 +376,10 @@ if __name__ == '__main__':
 		buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
 		os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
 		with open(buildpath, 'w', encoding='ISO-8859-1') as f:
-			f.write(reconstruct_compressed(files[path]))
+			if args.uncompressed:
+				f.write(reconstruct(files[path]))
+			else:
+				f.write(reconstruct_compressed(files[path]))
 
 	def link_file ( filepath ):
 		buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
