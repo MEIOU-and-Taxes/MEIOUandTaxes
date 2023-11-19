@@ -2,11 +2,7 @@ import os, sys, re, glob, shutil, time, argparse
 from queue import *
 from threading import Thread, Lock
 
-parser = argparse.ArgumentParser(description='Parse M&T source files')
-parser.add_argument('-i', '--parse-init', help='parse init event files (not done by default)', action='store_true')
-parser.add_argument('-u', '--uncompressed', help='do not compress output files', action='store_true')
-
-args = parser.parse_args()
+__all__ = [ 'compile' ]
 
 py_block = re.compile('\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
@@ -18,10 +14,10 @@ progress_done=False
 def clear_line():
 	sys.stdout.write('\x1b[2K')
 
-def logprogress(q):
+def logprogress(q, start_count):
 	with s_progress_print_lock:
 		if not progress_done:
-			progress=(1-(q.qsize()/len(paths)))*100
+			progress=(1-(q.qsize()/start_count))*100
 			clear_line()
 			print(f'\r{progress:.1f}% done', end='')
 
@@ -32,7 +28,7 @@ def logprogress_done():
 		print(f'\r100% done')
 
 decisionpath = os.path.join( 'src', 'decisions' )
-def run(q, files):
+def run(q, files, scripts, start_count):
 	while not q.empty():
 		try:
 			path = q.get_nowait()
@@ -44,7 +40,7 @@ def run(q, files):
 				else:
 					files[path] = apply_script(files[path], scripts, check)
 			q.task_done()
-			logprogress( q )
+			logprogress(q, start_count)
 		except Empty:
 			pass
 	return True
@@ -260,7 +256,7 @@ def apply_script_to_decision(file, scripts, check):
 	return out
 
 
-if __name__ == '__main__':
+def compile(compress=False, parse_init=True):
 	start = time.time()
 
 	# files/paths to run through parsing
@@ -307,7 +303,7 @@ if __name__ == '__main__':
 		'checksum_manifest.txt'
 	]
 
-	if not args.parse_init:
+	if not parse_init:
 		link.extend([
 			[ 'events', '00-POP_Init-0.txt' ],
 			[ 'events', '00-POP_Init-1.txt' ],
@@ -356,14 +352,14 @@ if __name__ == '__main__':
 	
 	print("Applying scripts to files...")
 	q = Queue(maxsize=0)
-	num_threads = min(20, len(paths))
-
-	for i in range(len(paths)):
+	start_count = len(paths)
+	num_threads = min(20, start_count)
+	for i in range(start_count):
 		q.put(paths[i])
 
 	print(f'0% done', end='')
 	for i in range (num_threads):
-		worker = Thread(target=run,args=(q,files))
+		worker = Thread(target=run, args=(q, files, scripts, start_count))
 		worker.start()
 
 	q.join()
@@ -376,10 +372,10 @@ if __name__ == '__main__':
 		buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
 		os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
 		with open(buildpath, 'w', encoding='ISO-8859-1') as f:
-			if args.uncompressed:
-				f.write(reconstruct(files[path]))
-			else:
+			if compress:
 				f.write(reconstruct_compressed(files[path]))
+			else:
+				f.write(reconstruct(files[path]))
 
 	def link_file ( filepath ):
 		buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
@@ -400,3 +396,6 @@ if __name__ == '__main__':
 
 	end = time.time()
 	print((end - start))
+
+if __name__ == '__main__':
+	compile()
