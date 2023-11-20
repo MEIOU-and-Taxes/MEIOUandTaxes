@@ -1,6 +1,4 @@
-import os, sys, re, glob, shutil, time, argparse
-from queue import *
-from threading import Thread, Lock
+import os, sys, re, glob, shutil, time, argparse, multiprocessing
 
 __all__ = [ 'compile' ]
 
@@ -8,42 +6,6 @@ py_block = re.compile('\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
 py_string2 = re.compile('#.*')
 py_string3 = re.compile('(\[\[[\w&$]*\]|\^\^[\w&$]*\^|[\>\<\!\=]+|[\{\}\]^])')
-
-s_progress_print_lock = Lock()
-progress_done=False
-def clear_line():
-	sys.stdout.write('\x1b[2K')
-
-def logprogress(q, start_count):
-	with s_progress_print_lock:
-		if not progress_done:
-			progress=(1-(q.qsize()/start_count))*100
-			clear_line()
-			print(f'\r{progress:.1f}% done', end='')
-
-def logprogress_done():
-	with s_progress_print_lock:
-		progress_done=True
-		clear_line()
-		print(f'\r100% done')
-
-decisionpath = os.path.join( 'src', 'decisions' )
-def run(q, files, scripts, start_count):
-	while not q.empty():
-		try:
-			path = q.get_nowait()
-			check = [True]
-			while check[0]:
-				check[0] = False
-				if path.startswith( decisionpath ):
-					files[path] = apply_script_to_decision(files[path], scripts, check)
-				else:
-					files[path] = apply_script(files[path], scripts, check)
-			q.task_done()
-			logprogress(q, start_count)
-		except Empty:
-			pass
-	return True
 
 def parse_block(block):
 	block = py_block.sub('', block)
@@ -255,9 +217,22 @@ def apply_script_to_decision(file, scripts, check):
 
 	return out
 
+files = dict()
+scripts = dict()
+decisionpath = os.path.join( 'src', 'decisions' )
+def compile_file(path):
+	check = [True]
+	while check[0]:
+		check[0] = False
+		if path.startswith(decisionpath):
+			files[path] = apply_script_to_decision(files[path], scripts, check)
+		else:
+			files[path] = apply_script(files[path], scripts, check)
+	return path, files[path]
 
 def compile(compress=False, parse_init=True):
 	start = time.time()
+	multiprocessing.set_start_method( 'fork' )
 
 	# files/paths to run through parsing
 	parse = [
@@ -327,9 +302,6 @@ def compile(compress=False, parse_init=True):
 	paths = []
 	for p in parse:
 		paths.extend( [ path for path in glob.glob( os.path.join( p, '**' ), recursive=True ) if check_path_parse( path ) ] )
-
-	files = dict()
-	scripts = dict()
 	
 	for path in paths:
 		files[path] = parse_file(path)
@@ -348,24 +320,20 @@ def compile(compress=False, parse_init=True):
 			else:
 				scripts[script[0]] = script[2]
 	link.extend([os.path.join('src','common','scripted_triggers'), os.path.join('src','common','scripted_effects')])
-	
-	
-	print("Applying scripts to files...")
-	q = Queue(maxsize=0)
-	start_count = len(paths)
-	num_threads = min(20, start_count)
-	for i in range(start_count):
-		q.put(paths[i])
 
+	file_count = len(paths)
+	print(f"Applying scripts to {file_count} files...")
 	print(f'0% done', end='')
-	for i in range (num_threads):
-		worker = Thread(target=run, args=(q, files, scripts, start_count))
-		worker.start()
+	with multiprocessing.Pool() as pool:
+		compiled_files_it = pool.imap_unordered(compile_file, paths, max(1, round(file_count/1000)))
+		for i in range(file_count):
+			path, file = next(compiled_files_it)
+			files[path] = file
+			progress = 100*(i+1)/file_count
+			sys.stdout.write('\x1b[2k') # clear line
+			print(f'\r{progress:.1f}% done', end='')
 
-	q.join()
-	logprogress_done()
-
-	print("Saving files...")
+	print("\nSaving files...")
 	if ( os.path.exists( 'build' ) ):
 		shutil.rmtree( 'build' )
 	for path in paths:
