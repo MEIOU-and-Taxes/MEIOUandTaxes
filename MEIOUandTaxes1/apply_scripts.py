@@ -340,6 +340,11 @@ def compile(compress=False, parse_init=True):
 	if ( os.path.exists( 'build' ) ):
 		shutil.rmtree( 'build' )
 
+	if 'fork' in multiprocessing.get_all_start_methods():
+		multiprocessing.set_start_method('fork')
+		print( 'Loading scripts...' )
+		load_scripts()
+
 	file_count = len(paths)
 	print(f"Compiling {file_count} files...")
 	print(f'0% done', end='')
