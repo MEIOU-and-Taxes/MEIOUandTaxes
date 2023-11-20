@@ -120,6 +120,12 @@ def apply_script(file, scripts, check=[False]):
 def apply_paras(script, paras):
 	out = list()
 
+	if len(script) and all(type(part) == str and part != '=' for part in script):
+		script = ' '.join(script)
+		for para in paras:
+			script = script.replace(f'${para[0]}$', para[2])
+		return [script]
+
 	for section in script:
 		if '[' in section[0]:
 			for para in paras:
@@ -140,7 +146,7 @@ def apply_paras(script, paras):
 					outout.append(foo)
 				else:
 					outout.append(part)
-					
+
 			if type(section[2]) != type(list()):
 				if '$' in section[2]:
 					foo = str(section[2])
