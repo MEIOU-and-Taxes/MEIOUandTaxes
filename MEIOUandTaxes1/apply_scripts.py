@@ -217,22 +217,53 @@ def apply_script_to_decision(file, scripts, check):
 
 	return out
 
-files = dict()
 scripts = dict()
+def load_scripts():
+	for path in glob.glob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
+		parsed = parse_file(path)
+		for script in parsed:
+			scripts[script[0]] = script[2]
+	for path in glob.glob(os.path.join('src', 'common', 'scripted_triggers', '*.txt')):
+		parsed = parse_file(path)
+		for script in parsed:
+			if len(script[2]) > 1 and type(script[2]) == type(list()) and not path.endswith( '00-triggers.txt' ):
+				scripts[script[0]] = [['AND', '=', script[2]]]
+			else:
+				scripts[script[0]] = script[2]
+
 decisionpath = os.path.join( 'src', 'decisions' )
-def compile_file(path):
+def compile_file(path, compress):
+	if not scripts:
+		load_scripts()
+	file = parse_file(path)
 	check = [True]
 	while check[0]:
 		check[0] = False
 		if path.startswith(decisionpath):
-			files[path] = apply_script_to_decision(files[path], scripts, check)
+			file = apply_script_to_decision(file, scripts, check)
 		else:
-			files[path] = apply_script(files[path], scripts, check)
-	return path, files[path]
+			file = apply_script(file, scripts, check)
+	buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
+	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
+	with open(buildpath, 'w', encoding='ISO-8859-1') as f:
+		if compress:
+			f.write(reconstruct_compressed(file))
+		else:
+			f.write(reconstruct(file))
+
+# helper functions since we can only pass one argument to multiprocess pool
+def compile_and_save_uncompressed(path):
+	compile_file(path, False)
+def compile_and_save_compressed(path):
+	compile_file(path, True)
+
+def link_file ( filepath ):
+	buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
+	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
+	os.link( filepath, buildpath )
 
 def compile(compress=False, parse_init=True):
 	start = time.time()
-	multiprocessing.set_start_method( 'fork' )
 
 	# files/paths to run through parsing
 	parse = [
@@ -259,6 +290,8 @@ def compile(compress=False, parse_init=True):
 		[ 'common', 'event_modifiers' ],
 		[ 'common', 'opinion_modifiers' ],
 		[ 'common', 'province_names' ],
+		[ 'common', 'scripted_triggers' ],
+		[ 'common', 'scripted_effects' ],
 		[ 'common', 'static_modifiers' ],
 		[ 'common', 'tradenodes' ],
 		[ 'common', 'units' ],
@@ -302,54 +335,26 @@ def compile(compress=False, parse_init=True):
 	paths = []
 	for p in parse:
 		paths.extend( [ path for path in glob.glob( os.path.join( p, '**' ), recursive=True ) if check_path_parse( path ) ] )
-	
-	for path in paths:
-		files[path] = parse_file(path)
 
-	print("Loading effects and triggers...")
-	for path in glob.glob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
-		paths.remove(path)
-		for script in files[path]:
-			scripts[script[0]] = script[2]
-
-	for path in glob.glob(os.path.join('src', 'common', 'scripted_triggers', '*.txt')):
-		paths.remove(path)
-		for script in files[path]:
-			if len(script[2]) > 1 and type(script[2]) == type(list()) and not path.endswith( '00-triggers.txt' ):
-				scripts[script[0]] = [['AND', '=', script[2]]]
-			else:
-				scripts[script[0]] = script[2]
-	link.extend([os.path.join('src','common','scripted_triggers'), os.path.join('src','common','scripted_effects')])
+	print( 'Clearing build directory...' )
+	if ( os.path.exists( 'build' ) ):
+		shutil.rmtree( 'build' )
 
 	file_count = len(paths)
-	print(f"Applying scripts to {file_count} files...")
+	print(f"Compiling {file_count} files...")
 	print(f'0% done', end='')
 	with multiprocessing.Pool() as pool:
-		compiled_files_it = pool.imap_unordered(compile_file, paths, max(1, round(file_count/1000)))
+		if compress:
+			compiled_files_it = pool.imap_unordered(compile_and_save_compressed, paths, max(1, round(file_count/1000)))
+		else:
+			compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, paths, max(1, round(file_count/1000)))
 		for i in range(file_count):
-			path, file = next(compiled_files_it)
-			files[path] = file
+			next(compiled_files_it)
 			progress = 100*(i+1)/file_count
 			sys.stdout.write('\x1b[2k') # clear line
 			print(f'\r{progress:.1f}% done', end='')
 
-	print("\nSaving files...")
-	if ( os.path.exists( 'build' ) ):
-		shutil.rmtree( 'build' )
-	for path in paths:
-		buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
-		os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
-		with open(buildpath, 'w', encoding='ISO-8859-1') as f:
-			if compress:
-				f.write(reconstruct_compressed(files[path]))
-			else:
-				f.write(reconstruct(files[path]))
-
-	def link_file ( filepath ):
-		buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
-		os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
-		os.link( filepath, buildpath )
-
+	print("\nLinking static files...")
 	for path in parse:
 		for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
 			if ( os.path.isfile( filepath ) and not filepath.endswith( '.txt' ) ):
