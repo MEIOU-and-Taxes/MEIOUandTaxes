@@ -4956,6 +4956,7 @@ province_event = {
 			area = east_dniepr_area
 		    area = lower_don_area
             area = crimea_area 
+			area = cherson_area
 		}
 		OR = {
 			culture = crimean 
@@ -5038,6 +5039,7 @@ country_event = {
 			}
 			spawn_rebels = {
 				type = cossack_rebels
+				leader = "Seweryn Nalewajko"
 				size = 3
 			}
 		}
@@ -5047,6 +5049,7 @@ country_event = {
 			}
 			spawn_rebels = {
 				type = cossack_rebels
+				leader = "Hryhory Loboda"
 				size = 2
 			}
 		}
@@ -5197,7 +5200,10 @@ country_event = {
 				modifier = cossack_rebellion
 			}
 		}
-        ZAZ = { country_event = { id = flavor_pol.743 } }
+		hidden_effect = {
+            ZAZ = { country_event = { id = flavor_pol.743 } }
+			country_event = { id = flavor_pol.744 days = 60  random = 20 }
+		}
 	}
 }
 
@@ -5234,11 +5240,12 @@ country_event = {
 			}
 			log = "FE-POL:[GetYear]:[Root.GetName]:rebellious hetman is Bogdam Chmielnicki:flavor_pol.743"
             define_ruler = {
-			    name = "Bohdan Chmielnicki"
+			    name = "Bohdan"
+				dynasty = "Chmielnicki"
 			    claim = 100
-			    adm = 5
-			    dip = 6
-			    mil = 6
+			    adm = 3
+			    dip = 5
+			    mil = 5
 				max_random_adm = 5
 			    min_age = 25
 				max_age = 45
@@ -5255,15 +5262,12 @@ country_event = {
 		   add_ruler_personality = deceitful_personality
 		   add_ruler_personality = drunkard_personality
 		}
-        if = {
-		    limit = {
-			    NOT = { has_country_flag = bohdan_chmielnicki }
-			}
+        else = {
             define_ruler = {
 			    claim = 90
-			    adm = 4
-			    dip = 5
-			    mil = 5
+			    adm = 2
+			    dip = 4
+			    mil = 4
 				max_random_adm = 4
 				max_random_dip = 5
 				max_random_mil = 5
@@ -5287,8 +5291,8 @@ country_event = {
             siege = 2
         }
         add_country_modifier = {
-				name = chmielnicki_uprising
-				duration = 7300 #20 years
+			name = chmielnicki_uprising
+			duration = 7300 #20 years
 		}
 	}
 }
@@ -5316,14 +5320,12 @@ country_event = {
 		every_owned_province = {
 		    limit = {
 			    OR = {
-			        area = east_dniepr_area
-				    area = zaporizhia_area
-				    area = sloboda_ukraine_area
-				    area = azov_area
-				    area = lower_don_area
-				    area = briansk_area
-                    area = crimea_area 
+			        region = ruthenia_region
+					region = crimea_region
+					region = volga_region
+					region = steppes_region
 				}
+				NOT = { area = west_dniepr_area }
 			}
 			spawn_rebels = {
 				type = mob_rebels
@@ -5336,7 +5338,7 @@ country_event = {
 				area = west_dniepr_area
 			}
 			spawn_rebels = {
-				type = cossack_rebels
+				type = mob_rebels
 				size = 2
 			}
         }
@@ -5411,10 +5413,7 @@ country_event = {
 	
     trigger = {
 	    tag = ZAZ
-	    OR = {
-		    POL = { has_country_flag = chmielnicki_uprising_2 }
-		    PLC = { has_country_flag = chmielnicki_uprising_2 }
-		}
+		overlord = { has_country_flag = chmielnicki_uprising_2 }
         OR = {
             AND = { 
 			    exists = MOS
@@ -5439,6 +5438,14 @@ country_event = {
 			}
 		}
 	}	
+	
+	mean_time_to_happen = {
+		years = 4
+		modifier = {
+			factor = 0.5
+			is_at_war = yes
+		}
+	}
 	
 	immediate = {
 	    if = {
@@ -5476,14 +5483,6 @@ country_event = {
 			}
             set_country_flag = strong_russia
 			log = "FE-POL:[GetYear]:[Root.GetName]:Russia recognised as potential overlord:flavor_pol.746"
-		}
-	}
-	
-	mean_time_to_happen = {
-		years = 4
-		modifier = {
-			factor = 0.25
-			is_at_war = yes
 		}
 	}
     
@@ -5578,16 +5577,18 @@ country_event = {
 		every_owned_province = {
 		    limit = {
 			    OR = {
-				    area = west_dniepr_area
-			        area = east_dniepr_area
-				    area = zaporizhia_area
-				    area = sloboda_ukraine_area
+				    region = ruthenia_region
+					region = crimea_region
+					region = volga_region
+					region = steppes_region
 				}
 			}
 			cede_province = ZAZ
+			add_core = ZAZ
         }
 		ZAZ = {
 		    every_owned_province = { add_core = ROOT }
+			Stab_Add1 = yes
         }
         ROOT = {
 		    disband_rebels = mob_rebels
@@ -5608,20 +5609,32 @@ country_event = {
 	trigger = {
 	    has_country_flag = agreement_of_pereyeslavl
 		government = monarchy
-		NOT = { war_with = ZAZ }
-	}
-	
-	mean_time_to_happen = { years = 5 }
-	
-	immediate = {
-		hidden_effect = {
-			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 15 } #TODO: check why, seems out of place
+		OR = {
+		    ZAZ = { war_exhaustion = 3 }
+			ZAZ = { NOT = { stability = 0 } }
 		}
 	}
+	
+	mean_time_to_happen = { 
+	    months = 6 
+		modifier = {
+			factor = 0.7
+			ZAZ = { war_exhaustion = 4 }
+		}
+		modifier = {
+			factor = 0.7
+			ZAZ = { war_exhaustion = 5 }
+		}
+	}
+	
 
 	option = { #Make this union come true!
         name = "flavor_pol.749.a"
 		log = "FE-POL:[GetYear]:[Root.GetName]:signed Union of Hadziacz:flavor_pol.749"
+		if = {
+		    limit = { ZAZ = { war_with = ROOT } }
+			white_peace = ZAZ
+		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
         ZAZ = { ChangeTagEffect = { scope=UKR } }
         create_subject = {
@@ -5643,14 +5656,10 @@ country_event = {
 		every_owned_province = {
 		    limit = {
 			    OR = {
-				    area = west_dniepr_area
-			        #area = east_dniepr_area 
-					province_id = 299 #Pereyaslavl
-					province_id = 4943 #Oster
-					province_id = 289 #Chernihiv
-					province_id = 311 #Starodub
-				    area = lower_don_area
-				    region = crimea_region 
+				    region = ruthenia_region
+					region = crimea_region
+					region = volga_region
+					region = steppes_region
 				}
 			}
 			cede_province = UKR
@@ -5706,15 +5715,18 @@ country_event = {
 	}
 	option = { #No mercy for traitors!
         name = "flavor_pol.749.b"
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 15 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused Union of Hadziacz:flavor_pol.749"
-        add_prestige = 20
-        #add_mil_power = 200
+        add_prestige = 10
 	}
 	option = { #Give up ukrainian lands
         name = "flavor_pol.749.c"
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused Union of Hadziacz and gave up Ukraine:flavor_pol.749"
+		if = {
+		    limit = { ZAZ = { war_with = ROOT } }
+			white_peace = ZAZ
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -20 }
         add_prestige = -20
 		ZAZ = {
 		    every_owned_province = {
@@ -5742,8 +5754,8 @@ country_event = {
 	}
 
 	option = { #Peace at last!
-        name = "flavor_pol.748.a"
-        Stab_Add2 = yes	
+        name = "flavor_pol.750.a"
+        Stab_Add1 = yes	
 	}
 }
 
@@ -5805,7 +5817,7 @@ country_event = {
 			tag = PLC
 		}
 		adm_tech = 23
-		NOT = [ adm_tech = 30 }
+		NOT = { adm_tech = 30 }
 		NOT = { Rights_BUSer2Has = yes } #in case if Poland is able to reform its military
 		NOT = { Rights_BUSer3Has = yes }
 		NOT = { Rights_BUSer4Has = yes }
