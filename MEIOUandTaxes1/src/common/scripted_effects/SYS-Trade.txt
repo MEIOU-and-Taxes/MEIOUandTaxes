@@ -24,7 +24,7 @@ TN_AssignSectorID = {
     set_key = { lhs = Sector_ID value = 1 }
     every_province = {
         limit = {
-            has_province_flag = TN_COT
+            NOT = { has_province_flag = In_TN_COT }
             isValidProv = yes
             NOT = { check_key = { lhs = Sector_ID value = 1 } }
         }
@@ -691,8 +691,15 @@ TN_PrepSector = {
                         set_key = { lhs = Tmp_0 which = PREV }
                         PREV = { save_event_target_as = SectorCentTarget }
                     }
-                    else = {
+                    else_if = {
+                        limit = {
+                            is_key_equal = { lhs = Tmp_0 which = PREV }
+                        }
                         PREV = { save_event_target_as = SectorCentTarget }
+                        log = "Error: Sector Center Target randomly chosen"
+                    }
+                    else = {
+                        log = "Error: Sector Center Target not found"
                     }
                 }
             }
@@ -1655,12 +1662,14 @@ TN_ScoreSector = {
                     NOT = {
                         any_trade_node_member_province = {
 						    is_key_equal = { lhs = Sector_ID which = PREV }
-                            has_province_flag = TN_COT
+                            has_province_flag = TN_COT_M
+                            has_province_flag = TN_COT_D
                             has_province_flag = TN_SectorPart
                         }
                     }
                 }
                 set_key = { lhs = TN_SectorScore value = 0 }
+                log = "Error: Sector has no Center of Trade!"
             }
         }
     }
