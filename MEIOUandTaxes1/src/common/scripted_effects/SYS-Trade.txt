@@ -644,6 +644,7 @@ TN_PrepSector = {
             clr_global_flag = HasRiverSeaBAccess
             clr_global_flag = HasSilkAccess
             clr_country_flag = Found_TN
+            clr_country_flag = TN_fallback
             every_province = {
                 limit = {
                     same_trade_node_as = PREV_PREV
@@ -687,19 +688,21 @@ TN_PrepSector = {
                     set_country_flag = Found_TN
                     if = {      #So if all provinces in a node have no tradepower
                         limit = {
+                            NOT = { has_country_flag = TN_fallback }
                             all_owned_province = {
                                 same_trade_node_as = PREV_PREV
-                                is_key_equal = { lhs = Tmp_0 value = 1 }
+                                NOT = { province_trade_power = 0.001 }
                             }
                         }
                         PREV = {        #Just pick the first province we scope to, make it the center and add 1 extra value to Tmp_0 so that we only assign a sector center once
                             save_event_target_as = SectorCentTarget
-                            change_key = { lhs = Tmp_0 value = 1 }
+                            set_country_flag = TN_fallback
                         }
                         log = "Fallback to first province in trade node for [This.Owner.GetName] in [This.TradeNode.GetName]"
                     }
                     if = {       
                         limit = {
+                            NOT = { has_country_flag = TN_fallback }
                             NOT = { check_key = { lhs = Tmp_0 which = PREV } }
                         }
                         set_key = { lhs = Tmp_0 which = PREV }
@@ -752,7 +755,7 @@ TN_PrepSector = {
                     }
                 }
             }
-        }        
+        }       
     }
 }
 
