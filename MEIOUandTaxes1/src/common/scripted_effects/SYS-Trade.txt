@@ -682,8 +682,21 @@ TN_PrepSector = {
                 change_key = { lhs = Tmp_0 value = 1 }
                 multiply_key = { lhs = Tmp_0 which = Tmp_1 }
                 change_key = { lhs = Tmp_0 value = 1 }
+                #The Above returns exactly 1 if no province in the tradenode has any trade power
                 PREV = {
                     set_country_flag = Found_TN
+                    if = {      #So if all provinces in a node have no tradepower
+                        limit = {
+                            all_owned_province = {
+                                same_trade_node_as = PREV_PREV
+                                is_key_equal = { lhs = Tmp_0 value = 1 }
+                            }
+                        }
+                        PREV = {        #Just pick the first province we scope to, make it the center and add 1 extra value to Tmp_0 so that we only assign a sector center once
+                            save_event_target_as = SectorCentTarget
+                            change_key = { lhs = Tmp_0 value = 1 }
+                        }
+                    }
                     if = {
                         limit = {
                             NOT = { check_key = { lhs = Tmp_0 which = PREV } }
