@@ -12,9 +12,8 @@ province_event = {
 	id = DG_Protestant.001
 	title = "DG_Protestant.001.title"
 	desc = "DG_Protestant.001.desc"
-	picture = all_church_state
+	picture = protestant_reformation
 
-	major = yes
 	fire_only_once = yes
 	
 	trigger = {
@@ -224,6 +223,65 @@ province_event = {
 				MN_HeresySpread = { typefrom = value from = 1 to = 2 incr = 0.05 typeIncr = value }
 				MN_Attribute_Effect = { reltype = value religion = 2 typeEffect = Preach typeStrength = value strength = 3 }
 				MN_Attribute_Reset = { reltype = value religion = 2 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+		hidden_effect = {
+		    if = {
+			    limit = {
+				    any_province = {
+					    culture = ROOT
+						continent = europe
+						has_province_flag = catholic_archbishopric
+					}
+				}
+				random_province = {
+				    limit = {
+					    culture = ROOT
+						continent = europe
+						has_province_flag = catholic_archbishopric
+				    }
+					set_province_flag = reformation_origins_archbishop
+				    save_event_target_as = reformation_origins_archbishop
+			    }
+			}
+			else_if = {
+			    limit = {
+				    any_province = {
+					    culture_group = ROOT
+						continent = europe
+						has_province_flag = catholic_archbishopric
+					}
+				}
+				random_province = {
+				    limit = {
+					    culture_group = ROOT
+						continent = europe
+						has_province_flag = catholic_archbishopric
+				    }
+					set_province_flag = reformation_origins_archbishop
+				    save_event_target_as = reformation_origins_archbishop
+			    }
+			}
+			else = {
+				random_province = {
+				    limit = {
+					    continent = europe
+						has_province_flag = catholic_archbishopric
+				    }
+					set_province_flag = reformation_origins_archbishop
+				    save_event_target_as = reformation_origins_archbishop
+			    }
+			}
+		}
+		hidden_effect = {
+		    every_country = {
+				limit = {
+				    OR = {
+					    western_christian = yes
+						capital_scope = { continent = europe }
+					}
+				}
+				country_event = { id = DG_Protestant.099 days = 1 }
 			}
 		}
 	}
@@ -685,9 +743,9 @@ country_event = {
 #Spread of the Heresy
 country_event = {
 	id = DG_Protestant.003
-	title = "DG_Protestant.001.title"
-	desc = "DG_Protestant.001.desc"
-	picture = all_church_state
+	title = "DG_Protestant.003.title"
+	desc = "DG_Protestant.003.desc"
+	picture = protestant_reformation
 
 	is_triggered_only	= yes
 
@@ -698,6 +756,10 @@ country_event = {
 	immediate = {
 		hidden_effect = {
 			set_country_flag = DG_Lutheran_Spread
+			set_saved_name = {
+				type = advisor
+				key = heretic_preacher
+			}
 		}
 	}
 	
@@ -725,6 +787,20 @@ country_event = {
 				}
 				NOT = { any_known_country = { is_elector = yes religion = protestant } }
 				factor = 0.2
+			}
+			modifier = {
+			    AND = {
+				    is_elector = yes
+					government = theocracy
+				}
+				factor = 0.5
+			}
+			modifier = {
+			    AND = {
+				    is_elector = yes
+					government = monarchy
+				}
+				factor = 2
 			}
 			modifier = {
 				is_papal_controller = yes
@@ -1016,10 +1092,21 @@ country_event = {
 				factor = 0.0
 			}
 			modifier = {
-				OR = {
-					is_elector = yes
-					is_emperor = yes
+			    AND = {
+				    is_elector = yes
+					government = monarchy
 				}
+				factor = 0.5
+			}
+			modifier = {
+			    AND = {
+				    is_elector = yes
+					government = theocracy
+				}
+				factor = 2
+			}
+			modifier = {
+				is_emperor = yes
 				factor = 2
 			}
 			modifier = {
@@ -1130,6 +1217,7 @@ country_event = {
 	after = {
 		hidden_effect = {
 			country_event = { id = DG_Protestant.002 }
+			clear_saved_name = heretic_preacher
 #			random_neighbor_country = {
 #				limit = { western_christian = yes NOT = { has_country_flag = DG_Lutheran_Spread } }
 #				country_event = { id = DG_Protestant.003 days = 60 random = 15 }
@@ -1988,22 +2076,98 @@ country_event = {
 		hidden_effect = {
 			set_variable = { which = heretic_electors value = 0 }
 			set_global_flag = DG_Test
-			random_country = {
-				limit = {
-					capital_scope = { is_part_of_hre = yes }
-					is_free_or_tributary_trigger = yes
-					#hre_heretic_religion = ROOT
-					OR = {
-						AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
-						AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
-						AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
-						AND = { religion = hussite emperor = { NOT = { religion = reformed } } }
-					}
-					hre_religion_treaty = no
-					is_emperor = no
-					NOT = { is_in_league_war = yes }
+			if = {
+			    limit = {
+				    any_country = {
+					    is_elector = yes
+						government = monarchy
+					    capital_scope = { is_part_of_hre = yes }
+					    is_free_or_tributary_trigger = yes
+			    		OR = {
+				    		AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
+				    		AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
+				    		AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
+				    		AND = { religion = hussite emperor = { NOT = { religion = reformed } } }
+					     }
+			    		hre_religion_treaty = no
+			    		is_emperor = no
+			    		NOT = { is_in_league_war = yes }
+			     	}
 				}
-				country_event = { id = DG_Protestant.010 days = 3 random = 1 }
+			    random_country = {
+				    limit = {
+					    is_elector = yes
+						government = monarchy
+			     		capital_scope = { is_part_of_hre = yes }
+		     			is_free_or_tributary_trigger = yes
+		    			OR = {
+		     				AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
+		    				AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
+		     				AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
+		    				AND = { religion = hussite emperor = { NOT = { religion = reformed } } }
+		 			    }
+			     		hre_religion_treaty = no
+				    	is_emperor = no
+				    	NOT = { is_in_league_war = yes }
+				    }
+				    country_event = { id = DG_Protestant.010 days = 10 random = 2 }
+			    }
+			}
+			else_if = {
+			    limit = {
+				    any_country = {
+					    num_of_cities = 5
+						government = monarchy
+					    capital_scope = { is_part_of_hre = yes }
+					    is_free_or_tributary_trigger = yes
+			    		OR = {
+				    		AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
+				    		AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
+				    		AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
+				    		AND = { religion = hussite emperor = { NOT = { religion = reformed } } }
+					     }
+			    		hre_religion_treaty = no
+			    		is_emperor = no
+			    		NOT = { is_in_league_war = yes }
+			     	}
+				}
+			    random_country = {
+				    limit = {
+					    num_of_cities = 5
+						government = monarchy
+			     		capital_scope = { is_part_of_hre = yes }
+		     			is_free_or_tributary_trigger = yes
+		    			OR = {
+		     				AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
+		    				AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
+		     				AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
+		    				AND = { religion = hussite emperor = { NOT = { religion = reformed } } }
+		 			    }
+			     		hre_religion_treaty = no
+				    	is_emperor = no
+				    	NOT = { is_in_league_war = yes }
+				    }
+				    country_event = { id = DG_Protestant.010 days = 10 random = 2 }
+			    }
+			}
+			else = {
+			    random_country = {
+				    limit = {
+						government = monarchy
+			     		capital_scope = { is_part_of_hre = yes }
+		     			is_free_or_tributary_trigger = yes
+		    			OR = {
+		     				AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
+		    				AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
+		     				AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
+		    				AND = { religion = hussite emperor = { NOT = { religion = reformed } } }
+		 			    }
+			     		hre_religion_treaty = no
+				    	is_emperor = no
+				    	NOT = { is_in_league_war = yes }
+				    }
+				    country_event = { id = DG_Protestant.010 days = 10 random = 2 }
+			    }
 			}
 		}
 	}
@@ -2020,6 +2184,7 @@ country_event = {
 	is_triggered_only = yes
 
 	trigger = {
+	    government = monarchy
 		capital_scope = { is_part_of_hre = yes }
 		is_free_or_tributary_trigger = yes
 		#hre_heretic_religion = ROOT
@@ -2193,29 +2358,29 @@ country_event = {
 			add_imperial_influence = -10
 		}
 	}
-	option = {
-		name = "DG_Protestant.010.optb" #Don't join
-		ai_chance = { factor = 10 }
-		add_prestige = -5
-		hidden_effect = {
-			random_country = {
-				limit = {
-					capital_scope = { is_part_of_hre = yes }
-					is_free_or_tributary_trigger = yes
-					#hre_heretic_religion = ROOT
-					OR = {
-						AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
-						AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
-						AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
-						AND = { religion = hussite emperor = { NOT = { religion = hussite } } }
-					}
-					hre_religion_treaty = no
-					is_emperor = no
-				}
-				country_event = { id = DG_Protestant.010 days = 30 random = 15 }
-			}
-		}
-	}
+	#option = {
+	#	name = "DG_Protestant.010.optb" #Don't join
+	#	ai_chance = { factor = 10 }
+	#	add_prestige = -5
+	#	hidden_effect = {
+	#		random_country = {
+	#			limit = {
+	#				capital_scope = { is_part_of_hre = yes }
+	#				is_free_or_tributary_trigger = yes
+	#				#hre_heretic_religion = ROOT
+	#				OR = {
+	#					AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
+	#					AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
+	#					AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
+	#					AND = { religion = hussite emperor = { NOT = { religion = hussite } } }
+	#				}
+	#				hre_religion_treaty = no
+	#				is_emperor = no
+	#			}
+	#			country_event = { id = DG_Protestant.010 days = 30 random = 15 }
+	#		}
+	#	}
+	#}
 	
 	after = {
 		if = {
@@ -2236,12 +2401,38 @@ country_event = {
 		if = {
 			limit = {
 				hre_leagues_enabled = yes
+				any_province = {
+				    is_part_of_hre = yes
+				    check_key = { lhs = Class_Urban value = 10 }
+					owner = {
+					    government = monarchy
+						religion = protestant
+					}
+				}
 			}
 			random_province = {
-				limit = { is_part_of_hre = yes }
-				province_event = { id = DG_Protestant.021 days = 3650 }
+				limit = {
+				    is_part_of_hre = yes
+				    check_key = { lhs = Class_Urban value = 10 }
+					owner = {
+					    government = monarchy
+						religion = protestant
+					}
+				}
+				province_event = { id = DG_Protestant.021 days = 365 random = 30 }
 			}
-		}	
+		}
+		else_if = {
+			limit = {
+				hre_leagues_enabled = yes
+			}
+			random_province = {
+				limit = {
+				    is_part_of_hre = yes
+				}
+				province_event = { id = DG_Protestant.021 days = 365 random = 30 }
+			}
+		}
 	}
 }
 
@@ -2257,7 +2448,7 @@ country_event = {
 	option = {
 		name = "DG_Protestant.011.opta" #Submit to the Emperor
 		ai_chance = {
-			factor = 50
+			factor = 75
 			modifier = {
 				ADM = 5
 				factor = 0.7
@@ -2371,7 +2562,7 @@ country_event = {
 	}
 	option = {
 		name = "DG_Protestant.011.optb" #Nope
-		ai_chance = { factor = 50 }
+		ai_chance = { factor = 25 }
 		capital_scope = { remove_core = ROOT }
 		set_country_flag = reservatum_rejected
 	}
@@ -2697,31 +2888,8 @@ province_event = {
 		hidden_effect = {
 			every_country = {
 				limit = {
-					OR = {
-						is_emperor = yes
-						is_elector = yes
-						capital_scope = { is_part_of_hre = yes }
-						AND = {
-							OR = {
-								is_papal_controller = yes
-								AND = {
-									government = theocracy
-									religion_group = christian
-								}
-								emperor = { is_rival = PREV }
-								emperor = { is_enemy = PREV }
-								emperor = { overlord_of = PREV }
-								emperor = { war_with = PREV }
-							}
-							OR = {
-								religion = catholic
-								religion = reformed
-								religion = protestant
-								religion = hussite
-							}
-						}
-					}
-					is_colonial_nation = no
+					capital_scope = { continent = europe }
+					western_christian = yes
 				}
 				country_event = { id = DG_Protestant.022 days = 60 }
 			}
@@ -2737,6 +2905,11 @@ country_event = {
 	picture = protestant_league
 	
 	is_triggered_only = yes
+	
+	trigger = {
+	    emperor = { is_in_league_war = no }
+	}
+	
 	immediate = {
 		if = {
 			limit = {
@@ -2771,7 +2944,7 @@ country_event = {
 	option = {
 		name = "DG_Protestant.022.opta" #Look on with interest
 		ai_chance = {
-			factor = 70
+			factor = 75
 			modifier = {
 				OR = {
 					religion = catholic
@@ -2800,7 +2973,6 @@ country_event = {
 			NOT = { in_league = hussite }
 			NOT = { is_emperor = yes }
 		}
-		add_prestige = -5
 	}
 	option = {
 		name = "DG_Protestant.022.optb" #Onwards to victory!
@@ -2819,7 +2991,7 @@ country_event = {
 	option = {
 		name = "DG_Protestant.022.optc" #Join the rebels	
 		ai_chance = {
-			factor = 12
+			factor = 10
 			modifier = {
 				emperor = { alliance_with = ROOT }
 				factor = 0
@@ -2850,7 +3022,7 @@ country_event = {
 					is_emperor = no
 					religion = ROOT
 				}
-				factor = 3
+				factor = 2
 			}
 		}
 		trigger = {
@@ -2859,9 +3031,7 @@ country_event = {
 			NOT = { in_league = catholic }
 			NOT = { in_league = hussite }
 			NOT = { is_emperor = yes }
-			capital_scope = {
-				continent = europe
-			}
+			capital_scope = { is_part_of_hre = yes }
 		}
 		if = {
 			limit = {
@@ -2908,7 +3078,7 @@ country_event = {
 	option = {
 		name = "DG_Protestant.022.optd" #Join the Emperor
 		ai_chance = {
-			factor = 8
+			factor = 5
 			modifier = {
 				emperor = { alliance_with = ROOT }
 				factor = 3
@@ -2948,9 +3118,7 @@ country_event = {
 			NOT = { in_league = catholic }
 			NOT = { in_league = hussite }
 			NOT = { is_emperor = yes }
-			capital_scope = {
-				continent = europe
-			}
+			capital_scope = { is_part_of_hre = yes }
 		}
 		if = {
 			limit = { hre_religion = protestant }
@@ -3003,7 +3171,11 @@ country_event = {
 		hre_leagues_enabled = yes
 		OR = {
 			capital_scope = { is_part_of_hre = yes }
-			emperor = { is_in_league_war = yes }
+			AND = {
+			    has_global_flag = DG_Second_League_War
+				western_christian = yes
+				num_of_cities = 30
+			}
 		}
 		any_known_country = {
 			religion = protestant
@@ -3027,6 +3199,10 @@ country_event = {
 		}
 		modifier = {
 			any_owned_province = { is_part_of_hre = yes }
+			factor = 0.7
+		}
+		modifier = {
+			is_great_power = yes
 			factor = 0.7
 		}
 		modifier = {
@@ -4859,7 +5035,10 @@ country_event = {			#Peace event
 			if = {
 				limit = {
 					any_known_country = {
-						capital_scope = { is_part_of_hre = yes }
+						capital_scope = { 
+						    is_part_of_hre = yes 
+							check_key = { lhs = Class_Urban value = 20 }
+						}
 						NOT = { num_of_cities = 2 }
 						is_emperor = no
 						is_elector = no
@@ -4867,7 +5046,10 @@ country_event = {			#Peace event
 				}
 				random_country = {
 					limit = {
-						capital_scope = { is_part_of_hre = yes }
+						capital_scope = { 
+						    is_part_of_hre = yes 
+							check_key = { lhs = Class_Urban value = 20 }
+						}
 						NOT = { num_of_cities = 2 }
 						is_emperor = no
 						is_elector = no
@@ -4875,17 +5057,7 @@ country_event = {			#Peace event
 					capital_scope = { save_global_event_target_as = DG_Augsburg_Diet }
 				}
 			}
-			if = {
-				limit = {
-					NOT = {
-						any_known_country = {
-							capital_scope = { is_part_of_hre = yes }
-							NOT = { num_of_cities = 2 }
-							is_emperor = no
-							is_elector = no
-						}
-					}
-				}
+			else = {
 				emperor = { capital_scope = { save_global_event_target_as = DG_Augsburg_Diet } }
 			}
 		}
@@ -4924,7 +5096,7 @@ country_event = {
 		NOT = { has_global_flag = DG_Leage_Peace_Talks_Ongoing }
 	}
 	
-	mean_time_to_happen = { months = 60 } 	#Force League war after 5 years of Leagues
+	mean_time_to_happen = { months = 120 } 	#Force League war after 10 years of Leagues
 	
 	option = {
 		name = "DG_Protestant.029.opta" #Start a league war
@@ -5702,32 +5874,6 @@ province_event = { #26 - Treaty of [Westphalia]
 		}
 		owner = {
 			emperor = { set_hre_religion = catholic }
-			if = {
-				limit = {
-					NOT = {
-						has_global_flag = DG_Third_League_War
-					}
-				}
-				hidden_effect = {
-					random_country = {
-						limit = {
-							capital_scope = { is_part_of_hre = yes }
-							is_free_or_tributary_trigger = yes
-							#hre_heretic_religion = ROOT
-							OR = {
-								AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
-								AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
-								AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
-								AND = { religion = hussite emperor = { NOT = { religion = hussite } } }
-							}
-							hre_religion_treaty = no
-							is_emperor = no
-							NOT = { is_in_league_war = yes }
-						}
-						country_event = { id = DG_Protestant.010 days = 30 random = 15 }
-					}
-				}
-			}
 		}
 		if = {
 			limit = {
@@ -5735,6 +5881,9 @@ province_event = { #26 - Treaty of [Westphalia]
 			}
 			owner = { set_hre_religion_locked = yes }
 			set_global_flag = DG_Peace_of_Westphalia
+		}
+		else = {
+		    set_global_flag = DG_Augsburg_Interim
 		}
 	}
 	option = {
@@ -5750,32 +5899,6 @@ province_event = { #26 - Treaty of [Westphalia]
 		}
 		owner = {
 			emperor = { set_hre_religion = protestant }
-			if = {
-				limit = {
-					NOT = {
-						has_global_flag = DG_Third_League_War
-					}
-				}
-				hidden_effect = {
-					random_country = {
-						limit = {
-							capital_scope = { is_part_of_hre = yes }
-							is_free_or_tributary_trigger = yes
-							#hre_heretic_religion = ROOT
-							OR = {
-								AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
-								AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
-								AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
-								AND = { religion = hussite emperor = { NOT = { religion = hussite } } }
-							}
-							hre_religion_treaty = no
-							is_emperor = no
-							NOT = { is_in_league_war = yes }
-						}
-						country_event = { id = DG_Protestant.010 days = 30 random = 15 }
-					}
-				}
-			}
 		}
 		if = {
 			limit = {
@@ -5783,6 +5906,9 @@ province_event = { #26 - Treaty of [Westphalia]
 			}
 			owner = { set_hre_religion_locked = yes }
 			set_global_flag = DG_Peace_of_Westphalia
+		}
+		else = {
+		    set_global_flag = DG_Augsburg_Interim
 		}
 	}
 	option = {
@@ -5796,32 +5922,6 @@ province_event = { #26 - Treaty of [Westphalia]
 		}
 		owner = {
 			emperor = { set_hre_religion = reformed }
-			if = {
-				limit = {
-					NOT = {
-						has_global_flag = DG_Third_League_War
-					}
-				}
-				hidden_effect = {
-					random_country = {
-						limit = {
-							capital_scope = { is_part_of_hre = yes }
-							is_free_or_tributary_trigger = yes
-							#hre_heretic_religion = ROOT
-							OR = {
-								AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
-								AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
-								AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
-								AND = { religion = hussite emperor = { NOT = { religion = hussite } } }
-							}
-							hre_religion_treaty = no
-							is_emperor = no
-							NOT = { is_in_league_war = yes }
-						}
-						country_event = { id = DG_Protestant.010 days = 30 random = 15 }
-					}
-				}
-			}
 		}
 		if = {
 			limit = {
@@ -5829,6 +5929,9 @@ province_event = { #26 - Treaty of [Westphalia]
 			}
 			owner = { set_hre_religion_locked = yes }
 			set_global_flag = DG_Peace_of_Westphalia
+		}
+		else = {
+		    set_global_flag = DG_Augsburg_Interim
 		}
 	}
 	option = {
@@ -5842,32 +5945,6 @@ province_event = { #26 - Treaty of [Westphalia]
 		}	
 		owner = {
 			emperor = { set_hre_religion = hussite }
-			if = {
-				limit = {
-					NOT = {
-						has_global_flag = DG_Third_League_War
-					}
-				}
-				hidden_effect = {
-					random_country = {
-						limit = {
-							capital_scope = { is_part_of_hre = yes }
-							is_free_or_tributary_trigger = yes
-							#hre_heretic_religion = ROOT
-							OR = {
-								AND = { religion = catholic emperor = { NOT = { religion = catholic } } }
-								AND = { religion = protestant emperor = { NOT = { religion = protestant } } }
-								AND = { religion = reformed emperor = { NOT = { religion = reformed } } }
-								AND = { religion = hussite emperor = { NOT = { religion = hussite } } }
-							}
-							hre_religion_treaty = no
-							is_emperor = no
-							NOT = { is_in_league_war = yes }
-						}
-						country_event = { id = DG_Protestant.010 days = 30 random = 15 }
-					}
-				}
-			}
 		}
 		if = {
 			limit = {
@@ -5877,6 +5954,9 @@ province_event = { #26 - Treaty of [Westphalia]
 				set_hre_religion_locked = yes
 				set_global_flag = DG_Peace_of_Westphalia
 			}
+		}
+		else = {
+		    set_global_flag = DG_Augsburg_Interim
 		}
 	}
 	option = {
@@ -5895,10 +5975,21 @@ province_event = { #26 - Treaty of [Westphalia]
 				}
 			}
 		}
-		emperor = { 
-			set_hre_religion_treaty = yes 
+		owner = {
+		    emperor = { set_hre_religion_treaty = yes }
 		}
-		set_global_flag = DG_Peace_of_Westphalia
+		if = {
+			limit = {
+				has_global_flag = DG_Third_League_War
+			}
+			owner = { 
+				set_hre_religion_locked = yes
+				set_global_flag = DG_Peace_of_Westphalia
+			}
+		}
+		else = {
+		    set_global_flag = DG_Augsburg_Interim
+		}
 	}
 	option = {
 		name = "DG_Prestestant.035.optf"
@@ -6730,16 +6821,28 @@ country_event = { #45 - Cleanup (hidden)
 }
 
 
-
-
-
-
-
-
-
-
-
-
+country_event = { #99 - Ninety-Five Theses (news)
+	id = DG_Protestant.099
+	title = DG_Protestant.099.title
+	desc = DG_Protestant.099.desc
+	picture = protestant_reformation
+	
+	is_triggered_only = yes #By DG_Protestant.001
+	
+	immediate = {
+	    hidden_effect = {
+	        random_province = {
+		        limit = {
+		    		has_province_flag = reformation_origins_archbishop
+		        }
+	     	    save_event_target_as = reformation_origins_archbishop
+	        }
+		}
+	}
+	option = {
+		name = DG_Protestant.099.opta
+	}
+}
 
 #Spread of the Heresy
 country_event = {
