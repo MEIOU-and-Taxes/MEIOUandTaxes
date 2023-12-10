@@ -1,0 +1,165 @@
+# Should be a meta script executed in a province scope. With a input variable of the type of investment and another with the value of the investment.
+# add_infrastructure_investment_province = { type = Amenities value = 100 }
+# add_infrastructure_investment_province = { type = Amenities value = -100 }
+# add_infrastructure_investment_province = { type = Amenities variable = variable_xyz }
+add_infrastructure_investment_province = {
+[[value]
+	change_key = { lhs = Infra_$type$ value = $value$ }
+]
+[[variable]
+	change_key = { lhs = Infra_$type$ which = $variable$ }
+]
+
+	if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = Infra_$type$ value = 0 }
+			}
+		}
+		set_key = { lhs = Infra_$type$ value = 0 }
+	}
+}
+
+# Should be a meta script executed in a area scope investing in all owned provinces. With a input variable of the type of investment and another with the value of the investment.
+# Assumes that it's called in a province
+# add_infrastructure_investment_area = { type = Amenities value = 100 }
+# add_infrastructure_investment_area = { type = Amenities value = -100 }
+# add_infrastructure_investment_area = { type = Amenities variable = variable_xyz }
+add_infrastructure_investment_area = {
+	set_key = { lhs = Public_Tmp1 value = 0 }
+
+[[value]
+	set_key = { lhs = Public_Tmp1 value = $value$ }
+]
+[[variable]
+	set_key = { lhs = Public_Tmp1 which = $variable$ }
+]
+
+	area = {
+		limit = {
+			owned_by = PREV
+		}
+		set_key = { lhs = Public_Tmp1 which = PREV }
+
+		add_infrastructure_investment_province = { type = $type$ variable = Public_Tmp1 }
+	}
+
+	area = {
+		set_key = { lhs = Public_Tmp1 value = 0 }
+	}
+}
+
+# Should be a meta script executed in a country scope investing in all owned provinces. With a input variable of the type of investment and another with the value of the investment.
+# add_infrastructure_investment_country = { type = Amenities value = 100 }
+# add_infrastructure_investment_country = { type = Amenities value = -100 }
+# add_infrastructure_investment_country = { type = Amenities variable = variable_xyz }
+add_infrastructure_investment_country = {
+	set_key = { lhs = Public_Tmp1 value = 0 }
+
+[[value]
+	set_key = { lhs = Public_Tmp1 value = $value$ }
+]
+[[variable]
+	set_key = { lhs = Public_Tmp1 which = $variable$ }
+]
+
+	every_owned_province = {
+		set_key = { lhs = Public_Tmp1 which = PREV }
+
+		add_infrastructure_investment_province = { type = $type$ variable = Public_Tmp1 }
+
+		set_key = { lhs = Public_Tmp1 value = 0 }
+	}
+
+	set_key = { lhs = Public_Tmp1 value = 0 }
+}
+
+# Modifer (until the end of the game) that influences the effectiveness of infrastructure - the speed with which infrastructure grows so basically the amount of size needed to reach a new rank
+# infrastructure_efficiency = { value = 100 }
+# infrastructure_efficiency = { variable = variable_xyz }
+infrastructure_efficiency = {
+[[value]
+	change_key = { lhs = infrastructure_efficiency value = $value$ }
+]
+[[variable]
+	change_key = { lhs = infrastructure_efficiency which = $variable$ }
+]
+}
+
+# Modifer (until the end of the game) that influences the effectiveness of drafting effectively influencing the draft rate of a country
+# draft_rate_efficiency = { value = 100 }
+# draft_rate_efficiency = { variable = variable_xyz }
+draft_rate_efficiency = {
+[[value]
+	change_key = { lhs = draft_rate_efficiency value = $value$ }
+]
+[[variable]
+	change_key = { lhs = draft_rate_efficiency which = $variable$ }
+]
+}
+
+# scaled_GameCurrency_change
+# Changes countries currency of specified type by specified amount or variable.  
+# Examples:
+# scaled_currency_change = { type = treasury  amount = 100 }
+# scaled_currency_change = { type = mil_power amount = -100 }
+# scaled_currency_change = { type = prestige  variable = prestige_gain }
+# $type$ - Possible Inputs: treasury, years_of_income, mil_power, dip_power, adm_power, prestige, absolutism, legitimacy, horde_unity, republican_tradition, scaled_republican_tradition, devotion, 
+# imperial_influence (emperor scope), church_power, fervor, patriarch_authority, karma, authority, papal_influence, war_exhaustion, mercantilism, liberty_desire(subject scope), inflation
+# not yet implemented inputs: sailors, manpower, stability
+# Conditional Inputs:
+# $invert$ -> yes | no -> inverts the value input so 100 will result in a -100 change
+scaled_GameCurrency_change = {
+	hidden_effect = {
+		[[amount]
+			set_key = { lhs = Public_Tmp1 value = $value$ }
+		]
+		[[variable]
+			set_key = { lhs = Public_Tmp1 which = $variable$ }
+		]
+	
+		[[invert]
+		if = {
+			limit = { always = $invert$ }
+			multiply_key = { lhs = Public_Tmp1 value = -1 }
+		}
+		]
+	}
+	custom_tooltip = scaled_GameCurrency_change_$type$
+	
+	hidden_effect = {
+		if = { limit = { check_key = { lhs = Public_Tmp1 value = 0 } }	
+			while =  { limit = { check_key = { lhs = Public_Tmp1 value = 4096 } }	 add_$type$ = 4096  	subtract_key = { lhs = Public_Tmp1 value = 4096 } }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 2048 } } 		 add_$type$ = 2048  	subtract_key = { lhs = Public_Tmp1 value = 2048 } }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 1024 } } 		 add_$type$ = 1024  	subtract_key = { lhs = Public_Tmp1 value = 1024 } }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 512 } } 		 add_$type$ = 512		subtract_key = { lhs = Public_Tmp1 value = 512 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 256 } } 		 add_$type$ = 256		subtract_key = { lhs = Public_Tmp1 value = 256 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 128 } } 		 add_$type$ = 128		subtract_key = { lhs = Public_Tmp1 value = 128 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 64 } } 		 add_$type$ = 64 		subtract_key = { lhs = Public_Tmp1 value = 64 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 32 } } 		 add_$type$ = 32 		subtract_key = { lhs = Public_Tmp1 value = 32 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 16 } } 		 add_$type$ = 16 		subtract_key = { lhs = Public_Tmp1 value = 16 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 8 } } 			 add_$type$ = 8 		subtract_key = { lhs = Public_Tmp1 value = 8 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 4 } } 			 add_$type$ = 4 		subtract_key = { lhs = Public_Tmp1 value = 4 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 2 } } 			 add_$type$ = 2 		subtract_key = { lhs = Public_Tmp1 value = 2 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 1 } } 			 add_$type$ = 1 		subtract_key = { lhs = Public_Tmp1 value = 1 	} }
+		}
+		else_if = { limit = { NOT = { check_key = { lhs = Public_Tmp1 value = 0 } } }
+			multiply_key = { lhs = Public_Tmp1 value = -1 }
+			
+			while =  { limit = { check_key = { lhs = Public_Tmp1 value = 4096 } } 	 add_$type$ = -4096  	subtract_key = { lhs = Public_Tmp1 value = 4096 } }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 2048 } } 		 add_$type$ = -2048  	subtract_key = { lhs = Public_Tmp1 value = 2048 } }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 1024 } } 		 add_$type$ = -1024  	subtract_key = { lhs = Public_Tmp1 value = 1024 } }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 512 } } 		 add_$type$ = -512		subtract_key = { lhs = Public_Tmp1 value = 512 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 256 } } 		 add_$type$ = -256		subtract_key = { lhs = Public_Tmp1 value = 256 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 128 } } 		 add_$type$ = -128		subtract_key = { lhs = Public_Tmp1 value = 128 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 64 } } 		 add_$type$ = -64 		subtract_key = { lhs = Public_Tmp1 value = 64 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 32 } } 		 add_$type$ = -32 		subtract_key = { lhs = Public_Tmp1 value = 32 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 16 } } 		 add_$type$ = -16 		subtract_key = { lhs = Public_Tmp1 value = 16 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 8 } } 			 add_$type$ = -8 		subtract_key = { lhs = Public_Tmp1 value = 8 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 4 } } 			 add_$type$ = -4 		subtract_key = { lhs = Public_Tmp1 value = 4 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 2 } } 			 add_$type$ = -2 		subtract_key = { lhs = Public_Tmp1 value = 2 	} }
+			if = { limit = { check_key = { lhs = Public_Tmp1 value = 1 } } 			 add_$type$ = -1 		subtract_key = { lhs = Public_Tmp1 value = 1 	} }
+		}
+		set_key = { lhs = Public_Tmp1	value = 0 }
+	}
+}

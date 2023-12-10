@@ -1,0 +1,1019 @@
+namespace = DG_Orthodox
+
+# 001        - Orthodox Maintenance System
+# 002 -  100 - Monasticism
+# 101 -  200 - Patriarchs
+# 201 -  300 - Autocephaly
+# 301 -  400 - 
+# 401 -  500 - 
+# 501 -  600 - 
+# 601 -  700 -
+# 701 -  800 - 
+# 801 -  900 - Uniates
+# 901 - 1000 - Random Events
+
+# Orthodox Maintenance System
+country_event = {
+	id = DG_Orthodox.001
+	title = "AI_Event"
+	desc = "AI_Event"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		religion = orthodox
+	}
+
+	immediate = {
+		every_owned_province = {
+			limit = {
+				has_province_modifier = orthodox_patriarchate
+			}
+			#province_event = { id = DG_Orthodox.201 }
+		}
+	}
+	
+	option = {
+		name = "AI_Event"
+		if = {
+			limit = {
+				has_country_flag = great_schism
+			}
+		}
+		else_if = {
+			limit = {
+				at_war_with_religious_enemy = yes
+				NOT = { any_owned_province = { has_province_modifier = religious_icon } }
+				NOT = { is_key_equal = { lhs = aspect_08 value = 3 } } #Not for iconoclast nation
+			}
+			random = {
+				chance = 25
+				random_province = {
+					limit = {
+						has_orthodox_institution = yes
+						has_orthodox_monastery = yes
+						has_owner_religion = yes
+						controlled_by = owner
+						has_siege = yes
+					}
+					province_event = { id = DG_Orthodox.901 }
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				always = no
+				NOT = { has_ruler_flag = synod_convened }
+			}
+		}
+		else_if = {
+			limit = {
+				any_owned_province = {
+					OR = {
+						is_capital = yes
+						has_province_modifier = orthodox_patriarchate
+						has_province_modifier = orthodox_archbishopric
+					}
+					NOT = { has_orthodox_monastery = yes }
+				}
+			}
+			random = {
+				chance = 25
+				random_owned_province = {
+					limit = {
+						OR = {
+							is_capital = yes
+							has_province_modifier = orthodox_patriarchate
+							has_province_modifier = orthodox_archbishopric
+						}
+						NOT = { has_orthodox_monastery = yes }
+					}
+					province_event = { id = DG_Orthodox.002 }
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { has_country_flag = holy_fool }
+			}
+			random = {
+				chance = 10
+				random_owned_province = {
+					province_event = { id = DG_Orthodox.003 }
+				}
+			}
+		}
+		else = {
+			random_list = {
+				20 = { #Monastic Town
+					random_owned_province = {
+						limit = {
+							NOT = { has_orthodox_monastery = yes }
+							NOT = { base_production = 3 }
+							any_neighbor_province = { base_production = 3 }
+							NOT = { has_province_modifier = monastic_town }
+							religion = orthodox
+						}
+						province_event = { id = DG_Orthodox.004 }
+					}
+				}
+				20 = { #Metropolitan
+					if = {
+						limit = {
+							check_key = { lhs = Prov_CLLoy value = 60 }
+							NOT = { any_owned_province = { has_province_modifier = effective_bishop } }
+						}
+						random_owned_province = {
+							limit = {
+								OR = {
+									owner = { NOT = { any_owned_province = { has_province_modifier = orthodox_metropolitan } } }
+									has_province_modifier = orthodox_metropolitan
+								}
+								has_owner_religion = yes
+								OR = {
+									base_production = 10
+									is_capital = yes
+								}
+								OR = {
+									culture_group = owner
+									has_owner_accepted_culture = yes
+								}
+								NOT = { any_neighbor_province = { has_province_modifier = orthodox_patriarchate } }
+								NOT = { any_neighbor_province = { has_province_modifier = orthodox_archbishopric } }
+								NOT = { any_neighbor_province = { has_province_modifier = orthodox_metropolitan } }
+								NOT = { has_province_modifier = orthodox_patriarchate }
+								NOT = { has_province_modifier = orthodox_archbishopric }
+								NOT = { has_province_modifier = orthodox_metropolitan }
+							}
+							province_event = { id = DG_Orthodox.005 }
+						}
+					}
+				}
+				20 = { #Cenobitic Monastery
+					random_owned_province = {
+						limit = {
+							owner = { check_key = { lhs = aspect_24 value = 2 } }
+							has_owner_religion = yes
+							OR = {
+								is_capital = yes
+								check_key = { lhs = TN_ProvSply41 value = 2 } #Knowledge - university_province_trigger = yes
+								has_province_modifier = orthodox_patriarchate
+								base_production = 10
+							}
+						}
+						province_event = { id = DG_Orthodox.002 }
+					}
+				}
+				20 = { #Anchorite Hermitage
+					random_owned_province = {
+						limit = {
+							owner = { check_key = { lhs = aspect_24 value = 3 } }
+							OR = {
+								has_owner_religion = no
+								is_colony = yes
+								has_empty_adjacent_province = yes
+							}
+							NOT = { base_production = 3 }
+						}
+						province_event = { id = DG_Orthodox.002 }
+					}
+				}
+				20 = { #Lavra
+					random_owned_province = {
+						limit = {
+							owner = { check_key = { lhs = aspect_24 value = 4 } }
+							OR = {
+								has_owner_religion = yes
+								is_colony = yes
+							}
+						}
+						province_event = { id = DG_Orthodox.002 }
+					}
+				}
+			}
+		}
+	}
+	
+	after = {
+	}
+}
+
+#####################
+# Monks and Priests #
+#####################
+
+#002 - Monasticism
+province_event = {
+	
+	id = DG_Orthodox.002
+	title = "DG_Orthodox.002.title"
+	desc = "DG_Orthodox.002.desc"
+	picture = orthodox_monks
+	
+	is_triggered_only = yes #By maintenance event
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Orthodox.002.opta" #Stavropegic
+		trigger = {
+			owner = { check_key = { lhs = aspect_24 value = 2 } }
+			NOT = { has_province_modifier = stavropegic_monastery }
+			has_owner_religion = yes
+			OR = {
+				is_capital = yes
+				check_key = { lhs = TN_ProvSply41 value = 2 } #Knowledge - university_province_trigger = yes
+				has_province_modifier = orthodox_patriarchate
+				base_production = 10
+			}
+			owner = {
+				any_owned_province = { has_province_modifier = orthodox_patriarchate }
+			}
+		}
+		ai_chance = { factor = 5 }
+		set_province_flag = stavropegic_monastery
+		add_permanent_province_modifier = { name = stavropegic_monastery duration = -1 hidden = yes }
+		owner = { add_patriarch_authority = 0.05 }
+		hidden_effect = {
+			MN_Attribute_Effect = { reltype = value religion = 9 typeEffect = INF typeStrength = value strength = 2 }
+		}
+	}
+	
+	option = {
+		name = "DG_Orthodox.002.optb" #Cenobites
+		trigger = {
+			owner = { check_key = { lhs = aspect_24 value = 2 } }
+			has_owner_religion = yes
+			OR = {
+				is_capital = yes
+				#high enough education - university_province_trigger = yes
+				has_province_modifier = orthodox_patriarchate
+				base_production = 10
+			}
+		}
+		ai_chance = {
+			factor = 40
+		}
+		set_province_flag = cenobitic_monastery
+		add_province_modifier = { name = cenobitic_monastery duration = -1 hidden = yes }
+		every_neighbor_province = {
+			limit = { owned_by = ROOT }
+			every_neighbor_province = {
+				limit = { owned_by = ROOT NOT = { has_province_modifier = cenobitic_monastery } }
+				every_neighbor_province = {
+					limit = {
+						owned_by = ROOT
+						base_production = 2
+						NOT = { has_province_modifier = cenobitic_monastery }
+						NOT = { has_province_modifier = stavropegic_monastery }
+						OR = {
+							religion = orthodox
+							is_colony = yes #Active in Africa and Brazil
+							has_empty_adjacent_province = yes
+						}
+					}
+					set_province_flag = cenobitic_monastery
+					add_permanent_province_modifier = { name = cenobitic_monastery duration = -1 hidden = yes }
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Orthodox.002.optc" #lavra
+		trigger = {
+			owner = { check_key = { lhs = aspect_24 value = 3 } }
+			OR = {
+				has_owner_religion = yes
+				is_colony = yes
+			}
+		}
+		ai_chance = { factor = 25 }
+		set_province_flag = lavra_monastery
+		add_permanent_province_modifier = { name = lavra_monastery duration = -1 hidden = yes }
+	}
+	
+	option = {
+		name = "DG_Orthodox.002.optd" #Anchorites
+		trigger = {
+			owner = { check_key = { lhs = aspect_24 value = 4 } }
+			OR = {
+				has_owner_religion = no
+				is_colony = yes
+				has_empty_adjacent_province = yes
+			}
+			NOT = { base_production = 3 }
+		}
+		ai_chance = {
+			factor = 25
+		}
+		set_province_flag = anchorite_hermitage
+		add_permanent_province_modifier = { name = anchorite_hermitage duration = -1 hidden = yes }
+	}
+	
+	option = {
+		name = "DG_Orthodox.002.opte" #No thanks
+		ai_chance = {
+			factor = 5
+			modifier = {
+				owner = { manpower_percentage = 0.80 }
+				factor = 0.7
+			}
+			modifier = {
+				owner = { manpower_percentage = 1.00 }
+				factor = 0.7
+			}
+			modifier = {
+				owner = { NOT = { manpower_percentage = 0.50 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { manpower_percentage = 0.25 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { manpower_percentage = 0.10 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { manpower_percentage = 0.05 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { piety = 0.60 }
+				factor = 0
+			}
+			modifier = {
+				owner = { piety = 0.20 }
+				factor = 0.7
+			}
+			modifier = {
+				owner = { NOT = { piety = -0.20 } }
+				factor = 1.4
+			}
+		}
+		owner = {
+			if = {
+				limit = { piety = 0.60 }
+				add_prestige = -8
+			}
+			else_if = {
+				limit = { piety = 0.20 }
+				add_prestige = -6
+			}
+			else_if = {
+				limit = { piety = -0.20 }
+				add_prestige = -4
+			}
+			else_if = {
+				limit = { piety = -0.60 }
+				add_prestige = -2
+			}
+		}
+	}
+}
+
+#003 - Holy Fool
+province_event = { 	
+	id = DG_Orthodox.003
+	title = "DG_Orthodox.003.title"
+	desc = "DG_Orthodox.003.desc"
+	picture = all_mischief
+	
+	is_triggered_only = yes
+	
+	immediate = { owner = { set_country_flag = holy_fool } }
+	
+	option = {
+		name = "DG_Orthodox.003.opta" #Honor him as a holy fool
+		ai_chance = { factor = 40 }
+		set_province_flag = anchorite_hermitage
+		add_permanent_province_modifier = { name = anchorite_hermitage duration = -1 hidden = yes }
+	}
+	option = {
+		name = "DG_Orthodox.003.optb" #Build a cathedral in his honor
+		ai_chance = {
+			factor = 40
+			modifier = {
+				owner = { NOT = { treasury = 50 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { is_bankrupt = yes }
+				factor = 0
+			}
+			modifier = {
+				owner = { num_of_loans = 1 }
+				factor = 0.7
+			}
+			modifier = {
+				owner = { num_of_loans = 2 }
+				factor = 0.7
+			}
+			modifier = {
+				owner = { treasury = 100 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { treasury = 250 }
+				factor = 1.4
+			}
+		}
+		owner = { add_treasury = -50 }
+		MN_Attribute_Effect = { reltype = value religion = 9 typeEffect = INF typeStrength = value strength = 5 } #add_building = temple
+	}
+	option = {
+		name = "DG_Orthodox.003.optc" #Condemn him as a heretic
+		ai_chance = {
+			factor = 20
+			modifier = {
+				unrest = 1
+				factor = 1.4
+			}
+			modifier = {
+				unrest = 5
+				factor = 1.4
+			}
+			modifier = {
+				owner = { patriarch_authority = 0.80 }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { patriarch_authority = 0.60 }
+				factor = 1.4
+			}
+		}
+		add_province_modifier = { name = religious_scandal_province duration = 730 }
+	}
+}
+
+#004 - Monastic Town
+	province_event = {
+	id = DG_Orthodox.004
+	title = "DG_Orthodox.004.title"
+	desc = "DG_Orthodox.004.desc"
+	picture = catholic_monastic_town
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "DG_Orthodox.004.opta"
+		goto = ROOT
+		set_province_flag = monastic_town
+		add_permanent_province_modifier = { name = monastic_town duration = -1 hidden = yes }
+	}
+}
+
+#005 - Metropolitan of $PROVINCENAME$
+province_event = {
+	id = DG_Orthodox.005
+	title = "DG_Orthodox.005.title"
+	desc = "DG_Orthodox.005.desc"
+	picture = orthodox_metropolitan
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "DG_Orthodox.005.opta" #Preach Christian values
+		trigger = {
+			owner = { NOT = { any_owned_province = { has_province_modifier = orthodox_metropolitan } } }
+		}
+		set_province_flag = orthodox_metropolitan
+		add_permanent_province_modifier = { name = orthodox_metropolitan duration = -1 hidden = yes }
+	}
+	
+	option = {
+		name = "DG_Orthodox.005.opta" #Preach Christian values
+		trigger = {
+			has_province_modifier = orthodox_metropolitan
+		}
+		ai_chance = { factor = 40 }
+		add_province_modifier = { name = effective_bishop duration = 5000 hidden = yes }
+	}
+	
+	option = {
+		name = "DG_Orthodox.005.optb" #Preach duty to the $MONARCHTITLE$
+		trigger = {
+			has_province_modifier = orthodox_metropolitan
+		}
+		ai_chance = {
+			factor = 30
+			modifier = {
+				owner = { NOT = { legitimacy = 100 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { legitimacy = 80 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { legitimacy = 60 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { legitimacy = 40 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { legitimacy = 20 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = 0 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = -1 } }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { stability = -2 } }
+				factor = 1.4
+			}
+		}
+		add_province_modifier = { name = effective_bishop duration = 1000 hidden = yes }
+		owner = {
+			if = {
+				limit = { piety = 0.60 }
+				add_legitimacy = 4
+			}
+			else_if = {
+				limit = { piety = 0.20 }
+				add_legitimacy = 3
+			}
+			else_if = {
+				limit = { piety = -0.20 }
+				add_legitimacy = 2
+			}
+			else_if = {
+				limit = { piety = -0.60 }
+				add_legitimacy = 1
+			}
+			if = {
+				limit = { NOT = { stability = 0 } }
+				if = {
+					limit = { piety = 0.60 }
+					random = { chance = 20 Stab_Add50Percent = yes }
+				}
+				else_if = {
+					limit = { piety = 0.20 }
+					random = { chance = 15 Stab_Add50Percent = yes }
+				}
+				else_if = {
+					limit = { piety = -0.20 }
+					random = { chance = 10 Stab_Add50Percent = yes }
+				}
+				else_if = {
+					limit = { piety = -0.60 }
+					random = { chance =  5 Stab_Add50Percent = yes }
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Orthodox.005.optc" #Preach against heresy
+		trigger = {
+			has_province_modifier = orthodox_metropolitan
+		}
+		ai_chance = {
+			factor = 30
+			modifier = {
+				owner = { any_owned_province = { culture = ROOT NOT = { religion = orthodox } } }
+				factor = 2
+			}
+		}
+		add_province_modifier = { name = effective_bishop duration = 1000 hidden = yes }
+		owner = {
+			add_piety = 0.20
+			if = {
+				limit = { piety = 0.60 }
+				add_country_modifier = { name = religious_intolerance duration = 4000 }
+			}
+			else_if = {
+				limit = { piety = 0.20 }
+				add_country_modifier = { name = religious_intolerance duration = 2000 }
+			}
+			else_if = {
+				limit = { piety = -0.20 }
+				add_country_modifier = { name = religious_intolerance duration = 1000 }
+			}
+			else_if = {
+				limit = { piety = -0.60 }
+				add_country_modifier = { name = religious_intolerance duration =  500 }
+			}
+		}
+		owner = {
+			random_owned_province = {
+				limit = { culture = ROOT NOT = { religion = orthodox } }
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 9 incr = 0.10 typeIncr = value }
+			}
+		}
+	}
+}
+
+
+
+
+
+##############
+# Patriarchs #
+##############
+
+#101 - A Visit by the Patriarch
+#102 - Fate of the Patriarchate
+#103 - Recovery of $PROVINCENAME$
+#104 - The Patriarch of $COUNTRY$
+#105 - Confirmation of a Metropolitan
+#106 - The Patriarch of $PROVINCECAPITAL$ and All $COUNTRY$ (new religious head)
+#107 - The Patriarch appoints a metropolitan
+#108 - Recovery of a patriarchate
+#109 - The Ruler of $FROMCOUNTRY$ sends congratulations
+#110 - An affront to the Patriarch
+#121 - First Among Equals (should be adjusted by having bad patriarchs; should change patriarch)
+#122 - Rival Patriarchs (needs to have patriarchs change modifiers)
+#123 - Heretic Patriarch
+#124 - Resistance of the Patriarch
+#131 - Patriarch protests the treatment of his people
+#132 - Flight of the Patriarch
+#133 - Patriarch seeks Refuge
+#134 - Flight of the Patriarch (notifier)
+#135 - The Patriarch returns to [Antioch]
+
+
+
+
+
+############################
+# Autonomy and Autocephaly #
+############################
+
+#201 - Autocephaly System
+province_event = {
+	id = DG_Orthodox.201
+	title = "AI_Event"
+	desc = "AI_Event"
+	picture = all_church_state
+
+	is_triggered_only = yes
+
+	hidden = yes
+	
+	trigger = {
+		religion = orthodox
+	}
+
+	immediate = {
+		
+	}
+
+	option = {
+		name = "AI_Event"
+	}
+}
+
+#231 - $FROM$ requests Religious Autonomy
+#232 - The Autonomous $PRIMARY_CULTURE$ Church
+#233 - Religious autonomy denied
+#234 - $FROM$ requests autocephaly
+#235 - The Autocephalous $PRIMARY_CULTURE$ Church
+#236 - Religious Autocephaly denied
+#237 - $FROM$ declares religious independence
+#238 - $FROM$ recognizes our independence
+#239 - $FROM$ severs their ties to our Patriarch
+
+
+
+
+
+###########
+# Uniates # 40s
+###########
+
+#801 - Union of the Churches (Union of Florence decision)
+
+#802 - A Visit from the Patriarch (Catholic countries)
+country_event = {
+	id = DG_Orthodox.802
+	title = DG_Orthodox.042.title
+	desc = DG_Orthodox.042.desc
+	picture = orthodox_patriarch_visit
+	goto = patriarch_visit
+	
+	trigger = {
+	    check_variable = { which = jesuit_support value = 1 }
+	    religion = catholic
+		num_of_owned_provinces_with = {
+		    value = 10
+			religion = orthodox
+		}
+		orthodox = 0
+		is_free_or_tributary_trigger = yes
+		any_owned_province = { #Seat of local metropolitan
+		    religion = orthodox
+			check_key = { lhs = Class_Urban value = 10 }
+		}
+		NOT = { has_country_flag = uniate_church_proposed }
+		NOT = { has_country_flag = uniate_church }
+		NOT = { has_country_flag = uniate_church_rejected }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	mean_time_to_happen = {
+		years = 25
+		modifier = {
+			factor = 0.7
+			check_variable = { which = jesuit_support value = 2 }
+		}
+		modifier = {
+			factor = 0.7
+			check_variable = { which = jesuit_support value = 3 }
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					religion = orthodox
+			        check_key = { lhs = Class_Urban value = 10 }
+				}
+				save_event_target_as = patriarch_visit
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Orthodox.042.opta #Appoint pro-$COUNTRY_RELIGION$ bishops
+		ai_chance = { factor = 75 }
+		if = {
+			limit = { advisor = theologian_CL }
+			add_adm_power = -50
+		}
+		else = {
+			add_adm_power = -100
+		}
+		every_owned_province = {
+		    limit = {
+			    religion = orthodox
+			    check_key = { lhs = Class_Urban value = 10 }
+			}
+			add_unrest = 10 #Appointing new bishops causes an outrage among orthodox population
+		}
+		set_country_flag = uniate_church_proposed
+	}
+	option = {
+		name = DG_Orthodox.042.optb #Refuse to compromise with schismatics
+		ai_chance = {
+			factor = 25
+			modifier = {
+				check_key = { lhs = Prov_CLPow value = 80 }
+				factor = 1.4
+			}
+			modifier = {
+				check_key = { lhs = Prov_CLPow value = 60 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { check_key = { lhs = Prov_CLPow value = 40 } }
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { check_key = { lhs = Prov_CLPow value = 20 } }
+				factor = 0.7
+			}
+		}
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 80 } }
+			add_country_modifier = { name = religious_intolerance duration = 2000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 60 } }
+			add_country_modifier = { name = religious_intolerance duration = 1600 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 40 } }
+			add_country_modifier = { name = religious_intolerance duration = 1200 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 20 } }
+			add_country_modifier = { name = religious_intolerance duration = 800 }
+		}
+		else = {
+			add_country_modifier = { name = religious_intolerance duration = 400 }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		set_country_flag = uniate_church_rejected
+	}
+}
+
+#803 - Union of the Churches
+country_event = {
+	id = DG_Orthodox.803
+	title = DG_Orthodox.043.title
+	desc = DG_Orthodox.043.desc
+	picture = orthodox_controversial_patriarch
+	
+	trigger = {
+		has_country_flag = uniate_church_proposed
+		religion = catholic
+		NOT = { has_country_flag = uniate_church_rejected }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	mean_time_to_happen = {
+		years = 8
+		modifier = {
+			ADM = 5
+			factor = 0.7
+		}
+		modifier = {
+			NOT = { ADM = 3 }
+			factor = 1.4
+		}
+		modifier = {
+			advisor = theologian_CL
+			factor = 0.7
+		}
+	}
+	
+	option = {
+		name = DG_Orthodox.043.opta #Sign the agreement
+		ai_chance = {
+			factor = 70
+			modifier = {
+				orthodox = 3 #There's no point
+				factor = 0
+			}
+			modifier = {
+				religious_unity = 1.00
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { religious_unity = 0.80 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { religious_unity = 0.60 }
+				factor = 1.4
+			}
+			modifier = {
+				num_of_owned_provinces_with = {
+		            value = 15
+			        religion = orthodox
+		        }
+				factor = 1.4
+			}
+			modifier = {
+				num_of_owned_provinces_with = {
+		            value = 20
+			        religion = orthodox
+		        }
+				factor = 1.4
+			}
+			modifier = {
+				num_of_owned_provinces_with = {
+		            value = 25
+			        religion = orthodox
+		        }
+				factor = 1.4
+			}
+			modifier = {
+				num_of_owned_provinces_with = {
+		            value = 30
+			        religion = orthodox
+		        }
+				factor = 1.4
+			}
+		}
+		add_country_modifier = { name = uniate_church duration = -1 }
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 80 } }
+			add_country_modifier = { name = religious_controversy duration = 4000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 60 } }
+			add_country_modifier = { name = religious_controversy duration = 2000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 40 } }
+			add_country_modifier = { name = religious_controversy duration = 1000 }
+		}
+		else = {
+			add_country_modifier = { name = religious_controversy duration = 500 }
+		}
+		clr_country_flag = uniate_church_proposed
+		set_country_flag = uniate_church
+		custom_tooltip = uniate_church_explained
+	}
+	option = {
+		name = DG_Orthodox.043.optb #Tear it up
+		ai_chance = {
+			factor = 30
+		}
+		set_country_flag = uniate_church_rejected
+	}
+}
+
+#804 - Resistance to Union
+country_event = {
+	id = DG_Orthodox.804
+	title = DG_Orthodox.044.title
+	desc = DG_Orthodox.044.desc
+	picture = orthodox_uprising
+	
+	trigger = {
+		has_country_modifier = uniate_church
+		NOT = { check_variable = { which = uniate_resistance value = 3 } }
+	}
+	
+	mean_time_to_happen = {
+		years = 8
+		modifier = {
+			religious_unity = 1.00
+			factor = 1.4
+		}
+		modifier = {
+			check_variable = { which = uniate_resistance value = 1 }
+			factor = 1.4
+		}
+		modifier = {
+			check_variable = { which = uniate_resistance value = 2 }
+			factor = 1.4
+		}
+	}
+	
+	option = {
+		name = DG_Orthodox.044.opta #Continue to support the union
+		ai_chance = { factor = 50 }
+		custom_tooltip = uniate_riots_explained
+		add_papal_influence = 5
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 } 
+		hidden_effect = {
+			every_owned_province = {
+				limit = { religion = orthodox }
+				random = { chance = 33 add_province_modifier = { name = religious_riots duration = 730 } }
+			}
+			change_variable = { which = uniate_resistance value = 1 }
+		}
+	}
+	option = {
+		name = DG_Orthodox.044.optb #Sign the Articles of Pacification
+		ai_chance = { factor = 40 }
+		custom_tooltip = uniate_church_concessions_explained
+		remove_country_modifier = uniate_church
+		add_country_modifier = { name = uniate_church_with_concessions duration = -1 }
+		add_papal_influence = -20
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 } 
+		hidden_effect = {
+			set_variable = { which = uniate_resistance value = 0 }
+		}
+		set_country_flag = uniate_church_concessions
+	}
+	option = {
+		name = DG_Orthodox.044.optc #Drop support for the union
+		ai_chance = {
+			factor = 10
+		}
+		remove_country_modifier = uniate_church
+		add_papal_influence = -10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 } 
+		hidden_effect = {
+			set_variable = { which = uniate_resistance value = 0 }
+		}
+		clr_country_flag = uniate_church
+	}
+}
+
+#805 - Papal envoys arrive in $CAPITAL_CITY$
+#806 - The Patriarch of Rome
+#807 - Obstinate [From.GetAdjective] Schismatics
+#808 - Healing the Schism
+
+#################
+# Random Events #
+#################
+
+#901 - Miraculous Icon
+province_event = {
+	id = DG_Orthodox.901
+	title = "DG_Orthodox.901.title"
+	desc = "DG_Orthodox.901.desc"
+	picture = orthodox_icon
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "DG_Orthodox.901.opta" #Parade the icon around the walls
+		ai_chance = { factor = 90 }
+		add_permanent_province_modifier = { name = religious_icon duration = -1 hidden = yes }
+	}
+	option = {
+		name = "DG_Orthodox.901.optb" #We do not need miracles to defend $PROVINCE_CAPITAL$
+		ai_chance = { factor = 10 }
+		owner = { add_prestige = 1 }
+	}
+}

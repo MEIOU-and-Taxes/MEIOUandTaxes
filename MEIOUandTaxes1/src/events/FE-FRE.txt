@@ -1,0 +1,75 @@
+namespace = flavor_fre
+
+# Scripted by Ellesthyan
+
+#The people of Freiburg want to buy their freedom
+country_event = {
+	id = flavor_fre.1
+	title = flavor_fre.1.name
+	desc = flavor_fre.1.desc
+	picture = COURT_eventPicture
+	
+	trigger = {
+		tag = FRE
+		NOT = { num_of_cities = 2 }
+		exists = HAB
+		HAB = { dynasty = "von Habsburg" }
+	}
+	
+	fire_only_once = yes
+	
+	mean_time_to_happen = { years = 12 }
+	
+	option = {		#Accept
+		name = "flavor_fre.1.opta"
+		ai_chance = { factor = 90 }
+		#TODO: Transfer of wealth from BG to NO on province level?
+		log = "FE-FRE:[GetYear]:[Root.GetName]:accepted petition from people of Freiburg to buy their freedom:flavor_fre.1"
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=20 }
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-20 }
+		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=20 }
+		HAB = {
+			country_event = { id = flavor_fre.2 }
+		}
+	}
+	option = {		#Deny
+		name = "flavor_fre.1.optb"
+		ai_chance = { factor = 10 }
+		add_prestige = 10
+		Stab_Subtract2 = yes
+		log = "FE-FRE:[GetYear]:[Root.GetName]:refused petition from people of Freiburg to buy their freedom:flavor_fre.1"
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=20 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-20 }
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=20 }
+		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-20 }
+		69 = {
+			add_province_modifier = {
+				name = "burghers_organizing"
+				duration = 3650
+			}
+			custom_tooltip = burghers_organizing_tt
+			add_unrest = 15
+		}
+	}
+}
+
+#Habsburg is asked for protection
+country_event = {
+	id = flavor_fre.2
+	title = flavor_fre.2.name
+	desc = flavor_fre.2.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_fre.2.opta"
+		add_prestige = 5
+		69 = {
+			cede_province = HAB
+			add_core = HAB
+		}
+	}
+	#TODO: option to refuse, turning city into republic/free city?
+}

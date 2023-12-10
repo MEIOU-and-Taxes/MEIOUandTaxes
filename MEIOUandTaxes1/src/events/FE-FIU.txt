@@ -1,0 +1,111 @@
+namespace = flavor_fiu
+
+# Scripted by Ellesthyan
+
+#Sale of Istrian possessions
+country_event = {
+	id = flavor_fiu.1
+	title = flavor_fiu.1.name
+	desc = flavor_fiu.1.desc
+	picture = COURT_eventPicture
+	
+	trigger = {
+		tag = GOR
+		GOR = { overlord_of = FIU }
+		exists = HAB
+		HAB = { dynasty = "von Habsburg" }
+	}
+	
+	fire_only_once = yes
+	mean_time_to_happen = { years = 50 } #real date was 1466, increased from 9 years
+	
+	option = {		#Sell
+		name = "flavor_fiu.1.opta"
+		log = "FE-FIU:[GetYear]:[Root.Owner.GetName]:decided to sell Fiume to [HAB.GetName]:flavor_fiu.1"
+		ai_chance = { factor = 90 }
+		add_prestige = -5
+		HAB = {
+			country_event = { id = flavor_fiu.2 }
+		}
+	}
+	option = {		#Pay
+		name = "flavor_fiu.1.optb"
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 0
+				NOT = { treasury = 300 }
+			} 
+		}
+		log = "FE-FIU:[GetYear]:[Root.Owner.GetName]:decided to keep Fiume and repay loan to [HAB.GetName]:flavor_fiu.1"
+		add_prestige = 5
+		add_treasury = -200
+		HAB = {
+			country_event = { id = flavor_fiu.4 }
+		}
+	}
+}
+
+#Habsburg receives the sale
+country_event = {
+	id = flavor_fiu.2
+	title = flavor_fiu.2.name
+	desc = flavor_fiu.2.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_fiu.2.opta"
+		add_prestige = 5
+		hidden_effect = {
+			GOR = { free_vassal = FIU }
+		}
+		create_subject = {
+			subject_type = decentralized_vassal #division
+			subject = FIU
+		}
+		FIU = {
+			country_event = { id = flavor_fiu.3 }
+		}
+	}
+}
+
+#Fiume receives the news
+country_event = {
+	id = flavor_fiu.3
+	title = flavor_fiu.3.name
+	desc = flavor_fiu.3.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_fiu.3.opta"
+		if = {
+			limit = {
+				NOT = { dynasty = "von Walsee" }
+			}
+			define_ruler = {
+				dynasty = "von Walsee"
+				culture = schwabisch
+			}
+			kill_heir ={}
+		}
+	}
+}
+
+#Habsburg receives the money
+country_event = {
+	id = flavor_fiu.4
+	title = flavor_fiu.4.name
+	desc = flavor_fiu.4.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_fiu.4.opta"
+		add_treasury = 200
+	}
+}

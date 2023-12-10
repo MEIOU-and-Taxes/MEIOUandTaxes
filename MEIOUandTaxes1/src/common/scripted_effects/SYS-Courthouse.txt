@@ -1,0 +1,335 @@
+Courthouse_Calc = {
+	set_key = { lhs = Courthouse_Cost value = 0 }
+    set_key = { lhs = Courthouse_Tmp4 value = 0 }
+	every_owned_province = {
+		set_key = { lhs = Courthouse_Cost value = 0 }
+		set_key = { lhs = Courthouse_Amount which = PREV }
+        
+		if = {
+			limit = {
+				OR = {
+					has_province_flag = UI_Select
+					PREV = { ai = yes }
+				}
+			}
+			Courthouse_CalcInfraHelper = { type = Courthouse }
+			PREV = { change_key = { lhs = Courthouse_Cost which = PREV } change_key = { lhs = Courthouse_Tmp4 which = PREV } } #Courthouse_Tmp4 total amount of units, display purposes.
+			
+		}
+		else = { # if its fallen out of the selection, clear it. Be safe, be secure, stop breaking shit
+			set_key = { lhs = Courthouse_Amount value = 0 }
+		}
+		# Courthouse_Amount is hijacked if a valid prov to tell us how many will be built
+	}
+}
+
+Courthouse_CalcADM = {
+	set_key = { lhs = Courthouse_Tmp6 value = 0 }
+	every_province = {
+		limit = {
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+			isValidProv = yes
+			OR = {
+				owned_by = ROOT
+				owner = { 
+					is_non_sovereign_subject_trigger = yes
+					is_subject_of = ROOT
+				}
+			}
+		}
+		#((1 - (dev / 100 max 100)) * 0.5 + 0.5 * dev * 0.3) )
+		set_key = { lhs = Courthouse_Tmp5 which = Dev_Total }
+		if = { # Simple raw numbers
+			limit = {
+				check_key = { lhs = Courthouse_Tmp5 value = 100 }
+			}
+			set_key = { lhs = Courthouse_Tmp5 value = 100 }
+		}
+		if = { # Simple raw numbers
+			limit = {
+				NOT = { check_key = { lhs = Courthouse_Tmp5 value = 1 } }
+			}
+			set_key = { lhs = Courthouse_Tmp5 value = 1 }
+		}
+		divide_key = { lhs = Courthouse_Tmp5 value = 100 }
+		set_key = { lhs = Courthouse_Tmp6 value = 1 }
+		subtract_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp5 }
+		multiply_key = { lhs = Courthouse_Tmp6 value = 0.5 }
+		change_key = { lhs = Courthouse_Tmp6 value = 0.5 }
+		multiply_key = { lhs = Courthouse_Tmp6 which = Dev_Total }
+		multiply_key = { lhs = Courthouse_Tmp6 value = 5 } # balancing
+
+		set_key = { lhs = Courthouse_Tmp5 which = Infra_Courthouse }
+		change_key = { lhs = Courthouse_Tmp5 which = Courthouse_Amount }
+		set_key = { lhs = Courthouse_Tmp3 which = Courthouse_Amount }
+		set_key = { lhs = Courthouse_Tmp2 value = 0 }
+		while = {
+			limit = {
+				check_key = { lhs = Courthouse_Tmp3 value = 1 }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 7 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 4 }
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 6 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 3.5 }
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 5 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 3 }
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 4 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 2.5 }
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 3 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 2 }
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 2 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 1.5 }
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Courthouse_Tmp5 value = 1 }
+				}
+				change_key = { lhs = Courthouse_Tmp2 value = 1 }
+			}
+			subtract_key = { lhs = Courthouse_Tmp5 value = 1 }
+			subtract_key = { lhs = Courthouse_Tmp3 value = 1 }
+		}
+		multiply_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp2 }
+
+		PREV = { change_key = { lhs = Courthouse_Tmp6 which = PREV }  }
+	}
+}
+
+Courthouse_CalcBuildingHelper = {
+	if = {
+		limit = {
+			Infra_CanCourthouse = yes
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+		}
+		if = { # Simple raw numbers
+			limit = {
+				check_key = { lhs = Courthouse_Amount value = 1 }
+				OR = {
+					owner = { is_key_equal = { lhs = Courthouse_TypeToggle value = 0 } }
+					overlord = { is_key_equal = { lhs = Courthouse_TypeToggle value = 0 } }
+				}
+			}
+			multiply_key = { lhs = Courthouse_Amount value = 0.001 } # an absolute number of buildings, no decimals
+			multiply_key = { lhs = Courthouse_Amount value = 1000 }
+			[[cap]
+			set_key = { lhs = Courthouse_Tmp0 which = $cap$ }
+			subtract_key = { lhs = Courthouse_Tmp0 which = Building_$type$ }
+			subtract_key = { lhs = Courthouse_Tmp0 which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Courthouse_Amount which = Courthouse_Tmp0 }
+				}
+				set_key = { lhs = Courthouse_Amount which = Courthouse_Tmp0 }
+			}
+			]
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Courthouse_Amount value = 0 } }
+				}
+				set_key = { lhs = Courthouse_Amount value = 0 }
+			}
+			set_key = { lhs = Courthouse_Cost which = Building_$type$Cost1 }
+			multiply_key = { lhs = Courthouse_Cost which = Courthouse_Amount }
+			
+			# Courthouse_Amount stays the same, already raw
+			set_key = { lhs = Courthouse_Tmp0 value = 0 }
+		}
+		else_if = { # % of current (25% more, 50% more)
+			limit = {
+				OR = {
+					owner = { is_key_equal = { lhs = Courthouse_TypeToggle value = 1 } }
+					overlord = { is_key_equal = { lhs = Courthouse_TypeToggle value = 1 } }
+				}
+			}
+			set_key = { lhs = Courthouse_Cost which = Building_$type$ }
+			multiply_key = { lhs = Courthouse_Cost which = Courthouse_Amount }
+			multiply_key = { lhs = Courthouse_Cost value = 0.01 } # 0-100 scale
+			multiply_key = { lhs = Courthouse_Cost value = 0.001 } # an absolute number of buildings, no decimals
+			multiply_key = { lhs = Courthouse_Cost value = 1000 }
+			
+			[[cap]
+			set_key = { lhs = Courthouse_Tmp1 which = $cap$ }
+			subtract_key = { lhs = Courthouse_Tmp1 which = Building_$type$ }
+			subtract_key = { lhs = Courthouse_Tmp1 which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Courthouse_Cost which = Courthouse_Tmp1 }
+				}
+				set_key = { lhs = Courthouse_Cost which = Courthouse_Tmp1 }
+			}
+			]
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Courthouse_Cost value = 0 } }
+				}
+				set_key = { lhs = Courthouse_Cost value = 0 }
+			}
+			
+			# Save the amount of buildings to be constructed
+			set_key = { lhs = Courthouse_Amount value = 0 }
+			set_key = { lhs = Courthouse_Amount which = Courthouse_Cost }
+			
+			multiply_key = { lhs = Courthouse_Cost which = Building_$type$Cost1 }
+			set_key = { lhs = Courthouse_Tmp0 value = 0 }
+			set_key = { lhs = Courthouse_Tmp1 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Courthouse_Amount value = 0 }
+		}
+	}
+	else = {
+		set_key = { lhs = Courthouse_Amount value = 0 }
+	}
+}
+
+Courthouse_CalcInfraHelper = {
+	if = {
+		limit = {
+			Infra_CanCourthouse = yes
+			Infra_Can$type$ = yes
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+		}
+		subtract_key = { lhs = Courthouse_Amount value = 1 }
+		if = { # Build up to X rank
+			limit = {
+				OR = {
+					owner = { is_key_equal = { lhs = Courthouse_TypeToggle value = 0 } }
+					overlord = { is_key_equal = { lhs = Courthouse_TypeToggle value = 0 } }
+				}
+			}
+			
+			Infra_GetGoal$type$ = { return=Courthouse_Cost inp=Courthouse_Amount }
+            
+            change_key = { lhs = Courthouse_Cost which = Courthouse_Tmp3 }
+			subtract_key = { lhs = Courthouse_Cost which = Infra_$type$Size }
+			subtract_key = { lhs = Courthouse_Cost which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Courthouse_Cost value = 0 } }
+				}
+				set_key = { lhs = Courthouse_Cost value = 0 }
+			}
+			
+			# Save the amount of buildings to be constructed
+			set_key = { lhs = Courthouse_Amount value = 0 }
+			set_key = { lhs = Courthouse_Amount which = Courthouse_Cost }
+			set_key = { lhs = Courthouse_Tmp4 which = Courthouse_Amount } #Save amount of units to export to owner for display purposes
+			multiply_key = { lhs = Courthouse_Cost which = Infra_$type$SizeCost1 }
+		}
+		else_if = { # Build X rank
+			limit = {
+				OR = {
+					owner = { is_key_equal = { lhs = Courthouse_TypeToggle value = 1 } }
+					overlord = { is_key_equal = { lhs = Courthouse_TypeToggle value = 1 } }
+				}
+			}
+			Infra_GetGoal$type$ = { return=Courthouse_Cost inp=Courthouse_Amount }
+            change_key = { lhs = Courthouse_Cost which = Courthouse_Tmp3 }
+			
+			set_key = { lhs = Courthouse_Tmp1 value = 5 }
+			Infra_GetGoal$type$ = { return=Courthouse_Tmp0 inp=Courthouse_Tmp1 }
+            
+			subtract_key = { lhs = Courthouse_Tmp0 which = Infra_$type$Size }
+			subtract_key = { lhs = Courthouse_Tmp0 which = Infra_InConst$type$ }
+			if = {
+				limit = {
+					check_key = { lhs = Courthouse_Cost which = Courthouse_Tmp0 }
+				}
+				set_key = { lhs = Courthouse_Cost which = Courthouse_Tmp0 }
+			}
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Courthouse_Cost value = 0 } }
+				}
+				set_key = { lhs = Courthouse_Cost value = 0 }
+			}
+			
+			# Save the amount of buildings to be constructed
+			set_key = { lhs = Courthouse_Amount value = 0 }
+			set_key = { lhs = Courthouse_Amount which = Courthouse_Cost }
+            set_key = { lhs = Courthouse_Tmp4 which = Courthouse_Amount } #Save amount of units to export to owner for display purposes
+			
+			multiply_key = { lhs = Courthouse_Cost which = Infra_$type$SizeCost1 }
+			
+			
+			set_key = { lhs = Courthouse_Tmp0 value = 0 }
+			set_key = { lhs = Courthouse_Tmp1 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Courthouse_Amount value = 0 }
+		}
+	}
+	else = {
+		set_key = { lhs = Courthouse_Amount value = 0 }
+	}
+}
+
+Courthouse_Build = {
+	hidden_effect = {		
+		POP_RemoveDucat = { type=which inp=Courthouse_Tmp0 }
+		set_key = { lhs = Courthouse_Tmp5 which = Courthouse_Tmp6 }
+		scaled_admin_cost_country = { input=Courthouse_Tmp6 }
+		set_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp5 }
+		scaled_diplo_cost_country = { input=Courthouse_Tmp6 }
+		set_key = { lhs = Courthouse_Tmp6 which = Courthouse_Tmp5 }
+		scaled_milit_cost_country = { input=Courthouse_Tmp6 }
+	}
+	every_owned_province = {
+		limit = {
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+		}
+        set_province_flag = comes_from_manual
+		set_key = { lhs = Courthouse_Parallel which = PREV } #Amount of Parallelism
+        set_key = { lhs = Courthouse_Tmp3 which = PREV } #Amount of extra units
+		change_key = { lhs = Courthouse_Parallel value = 1 } # fallback, default width is 0, so 1
+            
+		Courthouse_BuildInfraHelper = { id = 13 }
+		
+		# Clear it all
+		set_key = { lhs = Courthouse_Cost value = 0 }
+		set_key = { lhs = Courthouse_Amount value = 0 }
+		set_key = { lhs = Courthouse_Parallel value = 0 }
+	}
+}
+Courthouse_Clear = {
+	#every_owned_province = {
+	#	limit = {
+	#		isValidProv = yes
+	#	}
+	#}
+}
+Courthouse_BuildInfraHelper = {
+    if = { #If comes from manual investment (player construct even) add extra units to the final count
+        limit = { 
+            has_province_flag = comes_from_manual
+        }
+        change_key = { lhs = Courthouse_Amount which = Courthouse_Tmp3 }
+        clr_province_flag = comes_from_manual
+    }
+    
+	Infra_StartProject = { id = $id$ height = Courthouse_Amount width = Courthouse_Parallel }
+	change_key = { lhs = Infra_Wealth which = Courthouse_Cost }
+}

@@ -1,0 +1,154 @@
+#
+#######################################################################
+## Cossack rebels.
+#######################################################################
+cossack_rebels = {
+	
+	color = { 190 55 55 }
+	area = nation					# Stays within the nation
+	government = republic			# Don't care about gov type
+	defection = none				# Will not defect
+	independence = culture				# Does not strive for independence
+	gfx_type = culture_province
+    will_relocate = yes
+	
+	resilient = yes					# Can retreat
+	reinforcing = yes				# Can reinforce
+	general = yes					# Does use generals
+	smart = yes						# Do assault forts, tactically withdraw from battle, etc.
+	unit_transfer = no				# Units do not remain after enforcing demands.
+	
+	artillery = 0.1
+	infantry = 0.6
+	cavalry = 0.3
+	
+	morale = 1.05
+	
+	# Possible handle actions
+	handle_action_negotiate = no
+	handle_action_stability = yes
+	
+	# The rebel type with the highest modifier for this province gets picked
+	spawn_chance = {
+		factor = 1
+		modifier = {
+			factor = 0.2
+			is_core = FROM
+		}
+		modifier = {
+			factor = 0.2
+			is_overseas = yes # Prefer other types overseas
+		}
+		modifier = {
+			factor = 0.0
+			owner = {
+				culture_group = ROOT
+			}
+		}
+		modifier = {
+			factor = 0.8
+			religion = FROM
+		}
+		# modifier = {
+		# 	factor = 0
+		# 	NOT = { owner = { has_estate = estate_cossacks } }
+		# }
+		modifier = {
+			factor = 0
+			NOT = { has_terrain = grass_flats }
+		}
+		modifier = {
+			factor = 0
+			owner = { culture_group = east_slavic }
+		}
+		modifier = {
+			factor = 0
+			NOT = { culture = ukrainian }
+		}
+		modifier = {
+			factor = 150.0
+			culture = ukrainian
+		}
+		modifier = {
+			has_province_modifier = nobles_organizing
+			factor = 2
+		}
+	}
+	
+	# This is checked for EACH province in the Area of Operations
+	movement_evaluation = {
+		factor = 1
+		modifier = {
+			factor = 0.1
+			units_in_province = 1
+		}
+		modifier = {
+			factor = 0.001
+			controlled_by = REB
+		}
+		modifier = {
+			factor = 2.0
+			is_capital = yes
+		}
+		modifier = {
+			factor = 5.0
+			has_terrain = grass_flats
+		}
+		modifier = {
+			factor = 1.5
+			unrest = 2
+		}
+		modifier = {
+			factor = 1.5
+			unrest = 4
+		}
+		modifier = {
+			factor = 1.5
+			unrest = 6
+		}
+	}
+	
+	# Province Scope
+	siege_won_trigger = {
+	}
+	siege_won_effect = {
+		add_local_autonomy = 10
+	}
+	
+	# Country scope
+	can_negotiate_trigger = {
+		always = no
+	}
+	
+	# Country scope
+	can_enforce_trigger = {
+		always = no
+	}
+	
+	# Localisation for their demands
+	demands_description = "cossack_rebels_demand"
+	
+	# Country scope
+	demands_enforced_effect = {
+		every_owned_province = {
+			limit = {
+				has_rebel_faction = REB
+			}
+			add_local_autonomy = 50
+		}
+		
+		remove_country_modifier = Reform_CD
+		
+		add_country_modifier = {
+			name = Reform_CD
+			duration = 3625
+		}
+		#re-calculate rights priorities calculation
+		if = {
+			limit = {
+				ai = yes
+			}
+			set_country_flag = AITax_Yearly # Refire Tax Calculation
+		}
+	}
+}

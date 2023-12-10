@@ -1,0 +1,560 @@
+
+anj_unification_missions = {
+	slot = 1
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_anj
+	}
+	has_country_shield = yes
+	
+	anj_centralise_state = {
+		icon = mission_conquer_50_development
+		required_missions = { }
+		trigger = {
+			absolutism = 30
+		}
+		effect = {
+			add_legitimacy = 10
+			add_horde_unity = 10
+			add_republican_tradition = 10
+			val_de_loire_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					owned_by = ORL
+				}
+				add_permanent_claim = ROOT
+			}
+		}
+	}
+	
+	anj_annex_loire_vallee = {
+		icon = mission_have_two_subjects
+		required_missions = { anj_centralise_state }
+		provinces_to_highlight = {
+			area = val_de_loire_area
+			owned_by = ORL
+		}
+		trigger = {
+			NOT = { exists = ORL }
+			owns = 184
+		}
+		effect = {
+			normandy_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					owned_by = NRM
+				}
+				add_permanent_claim = ROOT
+			}
+		}
+	}
+	
+	anj_annex_alencon = {
+		icon = mission_have_two_subjects
+		required_missions = { anj_annex_loire_vallee }
+		provinces_to_highlight = {
+			area = normandy_area
+			owned_by = NRM
+		}
+		trigger = {
+			NOT = { exists = NRM }
+			owns = 3374
+		}
+		effect = {
+			add_absolutism = 10
+		}
+	}
+}
+
+anj_expansion_missions = {
+	slot = 2
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_anj
+	}
+	has_country_shield = yes
+	
+	anj_fortify_anjou = {
+		icon = mission_european_fort
+		required_missions = { anj_centralise_state }
+		position = 2
+		provinces_to_highlight = {
+			province_id = 178
+		}
+		trigger = {
+			178 = {
+				HasBuildingOrBetter = { b1=fort_15th b2=fort_16th b3=fort_17th b4=fort_18th }
+				owned_by = ROOT
+			}
+		}
+		effect = {
+			add_mil_power = 100
+		}
+	}
+	
+	anj_subjugate_bretagne = {
+		icon = mission_have_two_subjects
+		required_missions = { anj_fortify_anjou }
+		position = 2
+		provinces_to_highlight = {
+			area = brittany_area
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			brittany_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			capital_scope = {
+				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			}
+		}
+	}
+}
+
+anj_kingdom_missions = {
+	slot = 1
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_anj
+	}
+	has_country_shield = yes
+	
+	anj_win_independence = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { anj_subjugate_bretagne anj_annex_alencon }
+		position = 4
+		trigger = {
+			is_subject = no
+			is_at_war = no
+		}
+		effect = {
+			ile_de_france_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					NOT = { owned_by = ROOT }
+				}
+				add_core = ROOT
+			}
+		}
+	}
+	
+	anj_conquer_paris = {
+		icon = mission_unite_home_region
+		required_missions = { anj_win_independence }
+		provinces_to_highlight = {
+			superregion = france_superregion
+			owned_by = FRA
+		}
+		trigger = {
+			east_france_region = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			NOT = { exists = FRA }
+		}
+		effect = {
+			country_event = { id = mission_event.001 }
+			hidden_effect = { complete_mission = anj_conquer_paris }
+		}
+	}
+	
+	anj_conquer_lorraine = {
+		icon = mission_conquer_50_development
+		required_missions = { anj_conquer_paris }
+		provinces_to_highlight = {
+			area = lorraine_area
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			lorraine_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			capital_scope = {
+				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			}
+		}
+	}
+	
+	anj_conquer_alsace = {
+		icon = mission_conquer_50_development
+		required_missions = { anj_conquer_lorraine }
+		provinces_to_highlight = {
+			area = alsace_area
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			alsace_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_mil_power = 50
+		}
+	}
+	
+	anj_fortify_alsace = {
+		icon = mission_european_fort
+		required_missions = { anj_conquer_alsace }
+		provinces_to_highlight = {
+			province_id = 75	# Nordgau
+		}
+		trigger = {
+			75 = {
+				HasBuildingOrBetter = { b1=fort_15th b2=fort_16th b3=fort_17th b4=fort_18th }
+				owned_by = ROOT
+			}
+		}
+		effect = {
+			add_mil_power = 100
+		}
+	}
+}
+
+anj_university_missions = {
+	slot = 2
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_anj
+	}
+	has_country_shield = yes
+	
+	anj_medium_university = {
+		icon = mission_early_game_buildings
+		required_missions = { }
+		position = 5
+		provinces_to_highlight = {
+			province_id = 178
+		}
+		trigger = {
+			178 = {
+				owned_by = ROOT
+				HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b4=urban_infrastructure_5 b5=urban_infrastructure_6 }
+				custom_trigger_tooltip = { tooltip = miss_output_41_10 check_key = { lhs = TN_ProvSply41 value = 10 } }
+			}
+		}
+		effect = {
+			178 = {
+				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			}
+		}
+	}
+}
+
+anj_paris_university = {
+	slot = 2
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_anj
+	}
+	has_country_shield = yes
+	
+	anj_big_university = {
+		icon = mission_early_game_buildings
+		required_missions = { }
+		position = 7
+		provinces_to_highlight = {
+			province_id = 183
+		}
+		trigger = {
+			183 = {
+				owned_by = ROOT
+				HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b4=urban_infrastructure_5 b5=urban_infrastructure_6 }
+				custom_trigger_tooltip = { tooltip = miss_output_41_25 check_key = { lhs = TN_ProvSply41 value = 25 } }
+			}
+		}
+		effect = {
+			183 = {
+				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			}
+		}
+	}
+}
+
+anj_italian_ambitions = {
+	slot = 3
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_anj
+	}
+	has_country_shield = yes
+	
+	anj_build_army = {
+		icon = mission_build_up_to_force_limit
+		trigger = {
+			army_size_percentage = 1
+		}
+		effect = {
+			201 = {
+				if = {
+					limit = {
+						NOT = {
+							owned_by = ROOT
+							is_core = ROOT
+						}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			1512 = {
+				if = {
+					limit = {
+						NOT = {
+							owned_by = ROOT
+							is_core = ROOT
+						}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			3377 = {
+				if = {
+					limit = {
+						NOT = {
+							owned_by = ROOT
+							is_core = ROOT
+						}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			3860 = {
+				if = {
+					limit = {
+						NOT = {
+							owned_by = ROOT
+							is_core = ROOT
+						}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+
+	anj_subjugate_provence = {
+		icon = mission_have_two_subjects
+		required_missions = { anj_build_army }
+		provinces_to_highlight = {
+			OR = {
+				province_id = 201
+				province_id = 1512
+				province_id = 3377
+				province_id = 3860
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			201 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			1512 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			3377 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			3860 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					exists = SAV
+				}
+				add_casus_belli = {
+					type = cb_vassalize_mission
+					months = 1200
+					target = SAV
+				}
+			}
+			else = {
+				2385 = {
+					if = {
+						limit = {
+							NOT = {
+								owned_by = ROOT
+								is_core = ROOT
+							}
+						}
+						add_core = ROOT
+					}
+				}
+				savoy_dauphine_area = {
+					if = {
+						limit = {
+							NOT = {
+								owned_by = ROOT
+								is_core = ROOT
+							}
+						}
+						add_core = ROOT
+					}
+				}
+			}
+		}
+	}
+
+	anj_subjugate_savoie = {
+		icon = mission_have_two_subjects
+		required_missions = { anj_subjugate_provence }
+		provinces_to_highlight = {
+			OR = {
+				area = savoy_dauphine_area
+				area = piedmont_area
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			savoy_dauphine_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			piedmont_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_army_tradition = 20
+		}
+	}
+	
+	anj_conquer_milan = {
+		icon = mission_cannons_firing
+		required_missions = { anj_subjugate_savoie }
+		provinces_to_highlight = {
+			OR = {
+				area = lombardy_area
+				area = padan_area
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			lombardy_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			padan_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					exists = KNP
+					is_subject = no
+					KNP = {
+						is_subject = no
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 600
+					target = KNP
+				}
+			}
+			if = {
+				limit = {
+					exists = NAP
+					is_subject = no
+					NAP = {
+						is_subject = no
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 600
+					target = NAP
+				}
+			}
+			else = {
+				add_army_tradition = 10
+			}
+		}
+	}
+	
+	anj_claim_to_naples = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { anj_conquer_milan }
+		provinces_to_highlight = {
+			region = naples_region
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			OR = {
+				KNP = {
+					junior_union_with = ROOT
+				}
+				NAP = {
+					junior_union_with = ROOT
+				}
+				naples_region = {
+					type = all
+					country_or_non_sovereign_subject_holds = ROOT
+				}
+			}
+		}
+		effect = {
+			add_prestige = 20
+			hidden_effect = {
+				remove_casus_belli = {
+					type = cb_restore_personal_union
+					target = KNP
+				}
+				remove_casus_belli = {
+					type = cb_restore_personal_union
+					target = NAP
+				}
+			}
+		}
+	}
+	
+	anj_claim_to_sicily = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { anj_claim_to_naples }
+		provinces_to_highlight = {
+			region = sicily_region
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			sicily_region = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_army_tradition = 20
+		}
+	}
+}

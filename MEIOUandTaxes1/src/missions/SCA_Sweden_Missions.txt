@@ -1,0 +1,230 @@
+
+swedish_missions_scandinavia = {
+	slot = 1
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = k_of_swe
+	}
+	has_country_shield = yes
+
+	swe_civil_war = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { }
+		position = 1
+		provinces_to_highlight = {
+			OR = {
+				AND = {
+					ROOT = {
+						tag = SWE
+					}
+					country_or_non_sovereign_subject_holds = RSW
+				}
+				AND = {
+					ROOT = {
+						NOT = { tag = SWE }
+					}
+					country_or_non_sovereign_subject_holds = SWE
+				}
+				AND = {
+					region = scandinavia_region
+					NOT = { country_or_non_sovereign_subject_holds = ROOT }
+				}
+			}
+		}
+		trigger = {
+			scandinavia_region = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			if = {
+				limit = { tag = SWE }
+				NOT = { exists = RSW }
+			}
+			else = {
+				NOT = { exists = SWE }
+			}
+		}
+		effect = {
+			if = {
+				limit = { NOT = { has_country_flag = SWE_done_CW_mission } }
+				set_country_flag = SWE_done_CW_mission
+				form_SWE_effect = yes
+				finland_coastal_area = {
+					limit = {
+						NOT = { country_or_non_sovereign_subject_holds = ROOT }
+						is_empty = no
+					}
+					add_claim = ROOT
+				}
+				finland_inland_area = {
+					limit = {
+						NOT = { country_or_non_sovereign_subject_holds = ROOT }
+						is_empty = no
+					}
+					add_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	swe_control_scania = {
+		icon = mission_assemble_an_army
+		required_missions = { swe_civil_war }
+		position = 2
+		provinces_to_highlight = {
+			OR = {
+				province_id = 6
+				province_id = 10
+				province_id = 18
+				province_id = 26
+				province_id = 1256
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			6 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			10 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			18 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			26 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			1256 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_country_modifier = {
+				name = "consolidated_sweden"
+				duration = 9125 #25 years
+			}
+		}
+	}
+	
+	swe_subjugate_norway = {
+		icon = mission_have_two_subjects
+		required_missions = { swe_control_scania }
+		position = 3
+		provinces_to_highlight = {
+			OR = {
+				area = northern_norway_area
+				area = eastern_norway_area
+				area = western_norway_area
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			eastern_norway_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			western_norway_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			northern_norway_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_army_tradition = 15
+		}
+	}
+	
+	swe_subjugate_denmark = {
+		icon = mission_have_two_subjects
+		required_missions = { swe_subjugate_norway }
+		position = 4
+		provinces_to_highlight = {
+			OR = {
+				area = denmark_area
+				province_id = 15
+				province_id = 67
+				province_id = 3720
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		trigger = {
+			denmark_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			15 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			67 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			3720 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_navy_tradition = 15
+		}
+	}
+	
+	swe_unify_scandinavia = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { swe_subjugate_denmark }
+		position = 5
+		trigger = {
+			finland_coastal_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			scandinavia_region = {
+				type = all
+				OR = {
+					country_or_non_sovereign_subject_holds = ROOT
+					is_empty = yes
+				}
+			}
+			eastern_norway_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			western_norway_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			northern_norway_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			denmark_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			15 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			67 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			3720 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_country_modifier = {
+				name = "united_scandinavia"
+				duration = 9125 #25 years
+			}
+			country_event = { id = mission_event.035 }
+			hidden_effect = { complete_mission = swe_unify_scandinavia }
+		}
+	}
+}

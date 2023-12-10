@@ -1,0 +1,938 @@
+namespace = PTM_Politics
+
+country_event = {
+    id = PTM_Politics.001
+    title = PTM_Politics.001.t
+    desc = PTM_Politics.001.d
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+    hidden = yes
+
+    option = {
+        name = no_localisation
+		FC_Census = yes
+	}
+}
+
+# Political Census
+country_event = {
+	id = PTM_Politics.002
+	title = PTM_Politics.002.t
+	desc = PTM_Politics.002.d
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+		hidden_effect = {
+			every_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				# Relations
+				Pol_TickRelations = { FAC1=NO FAC2=BG }
+				Pol_TickRelations = { FAC1=NO FAC2=CL }
+				Pol_TickRelations = { FAC1=NO FAC2=TR }
+				Pol_TickRelations = { FAC1=NO FAC2=BU }
+				Pol_TickRelations = { FAC1=NO FAC2=State DispRest = yes }
+				Pol_TickRelations = { FAC1=BG FAC2=CL }
+				Pol_TickRelations = { FAC1=BG FAC2=TR }
+				Pol_TickRelations = { FAC1=BG FAC2=BU }
+				Pol_TickRelations = { FAC1=BG FAC2=State DispRest = yes }
+				Pol_TickRelations = { FAC1=CL FAC2=TR }
+				Pol_TickRelations = { FAC1=CL FAC2=BU }
+				Pol_TickRelations = { FAC1=CL FAC2=State DispRest = yes }
+				Pol_TickRelations = { FAC1=TR FAC2=BU }
+				Pol_TickRelations = { FAC1=TR FAC2=State DispRest = yes }
+				Pol_TickRelations = { FAC1=BU FAC2=State DispRest = yes }
+			}
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+# Scandal
+# Faction messes up in a noticable way, due to a randomised list of reasons
+# Player can sit by, or act and use the event for their purposes.
+# For AI, check if they can pass reforms follows, as there is an instability in the faction influence.
+country_event = {
+	id = PTM_Politics.003
+	title = PTM_Politics.003.t
+	desc = PTM_Politics.003.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_modifier = Pol_ScandalCD }
+		OR = {
+			Fac_HasNO = yes
+			Fac_HasBG = yes
+			Fac_HasCL = yes
+			Fac_HasTR = yes
+			Fac_HasBU = yes
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			add_country_modifier = {
+				name = Pol_ScandalCD
+				duration = 1825
+				hidden = yes
+			}
+			Pol_Weights = { PowerFactor = 2 }
+		}
+	}
+
+	# Passive response (standard influence loss), everyones but the scandalous slightly upset
+	option = {
+		name = PTM_Politics.003.a
+		Pol_ScandalAccept = yes
+	}
+	# Downplay (less influence loss), cost relations to all except target
+	option = {
+		name = PTM_Politics.003.b
+		Pol_ScandalDownplay = yes
+	}
+	# Use (more influence loss), turns factions against the scandalous, but turns the scandalous against you
+	option = {
+		name = PTM_Politics.003.c
+		Pol_ScandalUse = yes
+	}
+
+	after = {
+		Pol_Clean = yes
+		hidden_country_event = { id = PTM_Politics.001 }
+		if = {
+			limit = {
+				ai = yes
+			}
+			country_event = { id = AI_Budget.1 }
+		}
+	}
+}
+# Major Death
+# Faction looses a major key player, diminishing their influence
+# Player can sit by, or act and use the event for their purposes.
+# For AI, check if they can pass reforms follows, as there is an instability in the faction influence.
+
+country_event = {
+	id = PTM_Politics.004
+	title = PTM_Politics.004.t
+	desc = PTM_Politics.004.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_modifier = Pol_DeathCD }
+		OR = {
+			Fac_HasNO = yes
+			Fac_HasBG = yes
+			Fac_HasCL = yes
+			Fac_HasTR = yes
+			Fac_HasBU = yes
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			add_country_modifier = {
+				name = Pol_DeathCD
+				duration = 1825
+				hidden = yes
+			}
+			Pol_Weights = { PowerFactor = 1 }
+		}
+	}
+
+	# Passive response (standard influence loss)
+	option = {
+		name = PTM_Politics.004.a
+		Pol_DeathAccept = yes
+	}
+	# Use (more influence loss), hurts the faction for relation hit
+	option = {
+		name = PTM_Politics.004.b
+		Pol_DeathUse = yes
+	}
+
+	after = {
+		Pol_Clean = yes
+		hidden_country_event = { id = PTM_Politics.001 }
+		if = {
+			limit = {
+				ai = yes
+			}
+			country_event = { id = AI_Budget.1 }
+		}
+	}
+}
+
+### Ruler alignment events
+country_event = {
+    id = PTM_Politics.005
+    title = PTM_Politics.005.t
+    desc = PTM_Politics.005.d
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+	trigger = {
+		NOT = {
+			has_country_flag = Horde_Collapse_Ongoing
+		}
+		NOT = { 
+			has_country_flag = Conclave_Underway
+		}
+		OR = {
+			NOT = { tag = TIM }
+			has_country_flag = Timur_Dead
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			Pol_CalcAdvisorShare = yes
+		}
+	}
+
+	#Begin a new alignment
+    option = {
+		ai_chance = {
+			factor = 80
+			#TODO: higher chance if advisors are old?
+		}
+        name = PTM_Politics.005.a
+		Advisor_RemoveAdvisor = { category=ADM }
+		Advisor_RemoveAdvisor = { category=DIP }
+		Advisor_RemoveAdvisor = { category=MIL }
+
+		if = {
+			limit = {
+				ai = no
+			}
+			Stab_Subtract50Percent = yes
+		}
+		hidden_effect = {
+			remove_country_modifier = Pol_Alignment_NO
+			remove_country_modifier = Pol_Alignment_BG
+			remove_country_modifier = Pol_Alignment_CL
+			remove_country_modifier = Pol_Alignment_TR
+			remove_country_modifier = Pol_Alignment_BU
+		}
+		country_event = { id = PTM_Politics.006 }
+	}
+	
+	#Continue with the current leadership
+    option = {
+		ai_chance = {
+			factor = 20
+		}
+        name = PTM_Politics.005.b
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:previous cabinet:+:[This.GovernmentName]"
+
+		if = {
+			limit = {
+				ai = no
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Pol_Tmp1 value = 3 }
+				}
+				custom_tooltip = PTM_MissingAdvisors
+				Stab_Subtract50Percent = yes
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Pol_Tmp1 value = 2 }
+				}
+				custom_tooltip = PTM_MissingAdvisors
+				Stab_Subtract25Percent = yes
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Pol_Tmp1 value = 1 }
+				}
+				custom_tooltip = PTM_MissingAdvisors
+				Stab_Subtract10Percent = yes
+			}
+		}
+		if = {
+			limit = {
+				government = republic
+			}
+			Pol_AdvisorOpinionContinue = { OpinionHigh=-8 OpinionMed=-4 OpinionLow = -2 }
+		}
+		else = {
+			Pol_AdvisorOpinionContinue = { OpinionHigh=-15 OpinionMed=-10 OpinionLow = -5 }
+		}
+		hidden_country_event = { id = PTM_Politics.001 }
+	}
+}
+
+country_event = {
+    id = PTM_Politics.006
+    title = PTM_Politics.006.t
+    desc = PTM_Politics.006.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			set_key = { lhs = State_Alignment value = 0 }
+			set_key = { lhs = State_AlignmentDuration value = 0 }
+			Pol_AdvisorGenerateCabinet = { Faction = NO Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 }
+			Pol_AdvisorGenerateCabinet = { Faction = BG Var1=Pol_Tmp3 Var2=Pol_Tmp4 Var3=Pol_Tmp5 }
+			Pol_AdvisorGenerateCabinet = { Faction = CL Var1=Pol_Tmp6 Var2=Pol_Tmp7 Var3=Pol_Tmp8 }
+			if = {
+				limit = {
+					check_key = { lhs = Prov_TRPow value = 1 }
+				}
+				Pol_AdvisorGenerateCabinet = { Faction = TR Var1=Pol_Tmp9 Var2=Pol_Tmp10 Var3=Pol_Tmp11 }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Prov_BUPow value = 1 }
+				}
+				Pol_AdvisorGenerateCabinet = { Faction = BU Var1=Pol_Tmp12 Var2=Pol_Tmp13 Var3=Pol_Tmp14 }
+			}
+			Pol_GetFactionRelations = yes
+			Pol_AdvisorGenerateBalancedCabinet = yes
+		}
+	}
+
+    option = {
+        name = PTM_Politics.006.a
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:Nobles:+:[This.GovernmentName]"
+		custom_tooltip = Pol_NewAlignment_NO
+		add_country_modifier = {
+			name = Pol_Alignment_NO
+			duration = -1
+			hidden = yes
+		}
+		Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+		Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+		Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		Pol_FacInfReactPos = { Fac=NO }
+		custom_tooltip = Rights_LB
+		Pol_SpawnCabinet = { Faction=NO Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 Skill=1 Random=no}
+		hidden_effect = {
+			set_key = { lhs = State_Alignment value = 1 }
+			set_key = { lhs = State_AlignmentDuration value = 12 }
+		}
+		ai_chance = {
+			factor = 1
+			
+			modifier = {
+				factor = 2 #Crucial
+				NOT = { check_key = { lhs = NO_RelationState value = -90 } }
+			}
+
+			modifier = {
+				factor = 2 #high interest
+				NOT = { check_key = { lhs = NO_RelationState value = -75 } }
+			}
+
+			modifier = {
+				factor = 2 #medium interest
+				NOT = { check_key = { lhs = NO_RelationState value = -50 } }
+			}
+			
+			modifier = {
+				factor = 2 #low interest
+				NOT = { check_key = { lhs = NO_RelationState value = -25 } }
+			}
+		}
+	}
+    option = {
+        name = PTM_Politics.006.b
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:Burghers:+:[This.GovernmentName]"
+		custom_tooltip = Pol_NewAlignment_BG
+		add_country_modifier = {
+			name = Pol_Alignment_BG
+			duration = -1
+			hidden = yes
+		}
+		Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+		Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+		Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		Pol_FacInfReactPos = { Fac=BG }
+		custom_tooltip = Rights_LB
+		Pol_SpawnCabinet = { Faction=BG Var1=Pol_Tmp3 Var2=Pol_Tmp4 Var3=Pol_Tmp5 }
+		hidden_effect = {
+			set_key = { lhs = State_Alignment value = 2 }
+			set_key = { lhs = State_AlignmentDuration value = 12 }
+		}
+		ai_chance = {
+			factor = 0.8
+			
+			modifier = {
+				factor = 2 #Crucial
+				NOT = { check_key = { lhs = BG_RelationState value = -90 } }
+			}
+
+			modifier = {
+				factor = 2 #high interest
+				NOT = { check_key = { lhs = BG_RelationState value = -75 } }
+			}
+
+			modifier = {
+				factor = 2 #medium interest
+				NOT = { check_key = { lhs = BG_RelationState value = -50 } }
+			}
+			
+			modifier = {
+				factor = 2 #low interest
+				NOT = { check_key = { lhs = BG_RelationState value = -25 } }
+			}
+		}
+	}
+    option = {
+        name = PTM_Politics.006.c
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:Clergy:+:[This.GovernmentName]"
+		custom_tooltip = Pol_NewAlignment_CL
+		add_country_modifier = {
+			name = Pol_Alignment_CL
+			duration = -1
+			hidden = yes
+		}
+		Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+		Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		Pol_FacInfReactPos = { Fac=CL }
+		custom_tooltip = Rights_LB
+		Pol_SpawnCabinet = { Faction=CL Var1=Pol_Tmp6 Var2=Pol_Tmp7 Var3=Pol_Tmp8 Skill=1 Random=no}
+		hidden_effect = {
+			set_key = { lhs = State_Alignment value = 3 }
+			set_key = { lhs = State_AlignmentDuration value = 12 }
+		}
+		ai_chance = {
+			factor = 0.5
+			
+			modifier = {
+				factor = 2 #Crucial
+				NOT = { check_key = { lhs = CL_RelationState value = -90 } }
+			}
+
+			modifier = {
+				factor = 2 #high interest
+				NOT = { check_key = { lhs = CL_RelationState value = -75 } }
+			}
+
+			modifier = {
+				factor = 2 #medium interest
+				NOT = { check_key = { lhs = CL_RelationState value = -50 } }
+			}
+			
+			modifier = {
+				factor = 2 #low interest
+				NOT = { check_key = { lhs = CL_RelationState value = -25 } }
+			}
+		}
+	}
+    option = {
+        name = PTM_Politics.006.d
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:Tribes:+:[This.GovernmentName]"
+		custom_tooltip = Pol_NewAlignment_TR
+		trigger = {
+			check_key = { lhs = Prov_TRPow value = 1 }
+		}
+		add_country_modifier = {
+			name = Pol_Alignment_TR
+			duration = -1
+			hidden = yes
+		}
+		Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+		Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		Pol_FacInfReactPos = { Fac=TR }
+		custom_tooltip = Rights_LB
+		Pol_SpawnCabinet = { Faction=TR Var1=Pol_Tmp9 Var2=Pol_Tmp10 Var3=Pol_Tmp11 Skill=1 Random=no}
+		hidden_effect = {
+			set_key = { lhs = State_Alignment value = 4 }
+			set_key = { lhs = State_AlignmentDuration value = 12 }
+		}
+		ai_chance = {
+			factor = 1
+			
+			modifier = {
+				factor = 2 #Crucial
+				NOT = { check_key = { lhs = TR_RelationState value = -90 } }
+			}
+
+			modifier = {
+				factor = 2 #high interest
+				NOT = { check_key = { lhs = TR_RelationState value = -75 } }
+			}
+
+			modifier = {
+				factor = 2 #medium interest
+				NOT = { check_key = { lhs = TR_RelationState value = -50 } }
+			}
+			
+			modifier = {
+				factor = 2 #low interest
+				NOT = { check_key = { lhs = TR_RelationState value = -25 } }
+			}
+
+			modifier = {
+				factor = 0.2
+				NOT = { check_key = { lhs = Prov_TRPow value = 25 } }
+			}	
+			
+			modifier = {
+				factor = 0
+				NOT = { check_key = { lhs = Prov_TRPow value = 10 } }
+			}			
+
+		}
+	}
+    option = {
+        name = PTM_Politics.006.e
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:Bureaucrats:+:[This.GovernmentName]"
+		custom_tooltip = Pol_NewAlignment_BU
+		trigger = {
+			check_key = { lhs = Prov_BUPow value = 1 }
+		}
+		add_country_modifier = {
+			name = Pol_Alignment_BU
+			duration = -1
+			hidden = yes
+		}
+		Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+		Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+		Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+		Pol_FacInfReactPos = { Fac=BU }
+		custom_tooltip = Rights_LB
+		Pol_SpawnCabinet = { Faction=BU Var1=Pol_Tmp12 Var2=Pol_Tmp13 Var3=Pol_Tmp14 Skill=1 Random=no}
+		hidden_effect = {
+			set_key = { lhs = State_Alignment value = 5 }
+			set_key = { lhs = State_AlignmentDuration value = 12 }
+		}
+		ai_chance = {
+			factor = 2
+
+			modifier = {
+				factor = 0.25
+				NOT = {
+					#rights
+					has_country_flag = AI_Reform_BUTax
+					has_country_flag = AI_Reform_BUDir
+					has_country_flag = AI_Reform_BUInd
+					has_country_flag = AI_Reform_BUSer
+					#privileges
+					has_country_flag = AI_Reform_BUOffice
+					has_country_flag = AI_Reform_BUFarm
+					has_country_flag = AI_Reform_BUTenure
+					has_country_flag = AI_Reform_BUWages
+					has_country_flag = AI_Reform_BUHierarchy
+					has_country_flag = AI_Reform_BUHire
+					has_country_flag = AI_Reform_BUExams
+					has_country_flag = AI_Reform_BUOversight
+					has_country_flag = AI_Reform_BUEnlist
+					has_country_flag = AI_Reform_BUStructure
+					has_country_flag = AI_Reform_BUCourts
+					has_country_flag = AI_Reform_BUPolitics
+					has_country_flag = AI_Reform_BURotate
+					has_country_flag = AI_Reform_NOProcessing
+					has_country_flag = AI_Reform_NOGame
+					has_country_flag = AI_Reform_NOForestry
+					has_country_flag = AI_Reform_NOSeigneurial
+					has_country_flag = AI_Reform_NOTitles
+					has_country_flag = AI_Reform_NOAutonomy
+					has_country_flag = AI_Reform_NODiplomacy
+					has_country_flag = AI_Reform_NODynastic
+					has_country_flag = AI_Reform_NOHierarchy
+					has_country_flag = AI_Reform_NOTaxE
+					has_country_flag = AI_Reform_NOServiceE
+				}
+			}
+
+			modifier = {
+				factor = 2
+				ADM=4 #Factor of 2 for ruler Admin skill of 4
+			}
+			modifier = {
+				factor = 2
+				ADM=5 #Factor of 4 for ruler Admin skill of 5 or 6
+			}
+						
+			#TODO: administrator stance
+			#TODO: personality?
+		}
+	}
+    option = {
+        name = PTM_Politics.006.f
+		##UNCOMMENTFORLOG log = "SYS-Politics:[GetYear]:[This.GetName]:allied with:balanced cabinet:+:[This.GovernmentName]"
+		Pol_AdvisorSpawnBalancedCabinet = yes
+		Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+		Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+		Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+		Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		ai_chance = {
+			factor = 2
+		}
+	}
+	after = {
+		hidden_country_event = { id = PTM_Politics.001 }
+	}
+}
+
+country_event = {
+    id = PTM_Politics.007
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+	hidden = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				has_country_flag = POP_Init
+			}
+			if = {
+				limit = {
+					is_lesser_in_union = yes
+				}
+				overlord = {
+					PREV = {
+						set_key = { lhs = Ruler_SkillADM which = PREV }
+						set_key = { lhs = Ruler_SkillDIP which = PREV }
+						set_key = { lhs = Ruler_SkillMIL which = PREV }
+						set_key = { lhs = Ruler_Skill which = PREV }
+						set_key = { lhs = Ruler_AuthRuler which = PREV }
+						set_key = { lhs = Ruler_AuthInstitution which = PREV }
+						set_key = { lhs = Ruler_ADM which = PREV }
+						set_key = { lhs = Ruler_DIP which = PREV }
+						set_key = { lhs = Ruler_MIL which = PREV }
+						set_key = { lhs = Ruler_Impact which = PREV }
+						set_key = { lhs = Ruler_SkillScaled which = PREV }
+						set_key = { lhs = Ruler_CrptImpact which = PREV }
+					}
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						NOT = { has_country_flag = Ruler_ExileRestore }
+					}
+					Ruler_Calc = yes
+				}
+				
+				every_subject_country = {
+					limit = {
+						is_lesser_in_union = yes
+					}
+					set_key = { lhs = Ruler_SkillADM which = PREV }
+					set_key = { lhs = Ruler_SkillDIP which = PREV }
+					set_key = { lhs = Ruler_SkillMIL which = PREV }
+					set_key = { lhs = Ruler_Skill which = PREV }
+					set_key = { lhs = Ruler_AuthRuler which = PREV }
+					set_key = { lhs = Ruler_AuthInstitution which = PREV }
+					set_key = { lhs = Ruler_ADM which = PREV }
+					set_key = { lhs = Ruler_DIP which = PREV }
+					set_key = { lhs = Ruler_MIL which = PREV }
+					set_key = { lhs = Ruler_Impact which = PREV }
+					set_key = { lhs = Ruler_SkillScaled which = PREV }
+					set_key = { lhs = Ruler_CrptImpact which = PREV }
+				}
+			}
+		}
+	}
+    option = {
+        name = no_localisation
+	}
+}
+
+# Diminished influence of the faction
+# For AI, check if they can pass reforms follows, as there is an instability in the faction influence.
+
+country_event = {
+    id = PTM_Politics.008
+    title = PTM_Politics.008.t
+    desc = PTM_Politics.008.d
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+	
+	trigger = {
+		check_key = { lhs = State_Alignment value = 1 }
+		OR = {
+			AND = {
+				is_key_equal = { lhs = State_Alignment value = 1 }
+				NOT = { faction_influence = { faction = FC_NO influence = 30 } }
+			}
+			AND = {
+				is_key_equal = { lhs = State_Alignment value = 2 }
+				NOT = { faction_influence = { faction = FC_BG influence = 30 } }
+			}
+			AND = {
+				is_key_equal = { lhs = State_Alignment value = 3 }
+				NOT = { faction_influence = { faction = FC_CL influence = 30 } }
+			}
+			AND = {
+				is_key_equal = { lhs = State_Alignment value = 4 }
+				NOT = { faction_influence = { faction = FC_TR influence = 30 } }
+			}
+			AND = {
+				is_key_equal = { lhs = State_Alignment value = 5 }
+				NOT = { faction_influence = { faction = FC_BU influence = 30 } }
+			}
+		}
+	}
+
+    option = {
+        name = PTM_Politics.008.a
+		if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 1 }
+			}
+			FC_Boost = { Faction = NO Value = 20 }
+			add_country_modifier = {
+				name = Pol_Alignment_NO
+				duration = -1
+				hidden = yes
+			}
+			Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+			Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+			Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 2 }
+			}
+			FC_Boost = { Faction = BG Value = 20 }
+			add_country_modifier = {
+				name = Pol_Alignment_BG
+				duration = -1
+				hidden = yes
+			}
+			Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+			Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 3 }
+			}
+			FC_Boost = { Faction = CL Value = 20 }
+			add_country_modifier = {
+				name = Pol_Alignment_CL
+				duration = -1
+				hidden = yes
+			}
+			Pol_ChangeRelationsStateTooltip = { CL=yes type=value val=15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+			Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 4 }
+			}
+			FC_Boost = { Faction = TR Value = 20 }
+			add_country_modifier = {
+				name = Pol_Alignment_TR
+				duration = -1
+				hidden = yes
+			}
+			Pol_ChangeRelationsStateTooltip = { TR=yes type=value val=15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+			Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BU FacID=5 Fac_InfVar=Pol_Tmp19 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 5 }
+			}
+			FC_Boost = { Faction = BU Value = 20 }
+			add_country_modifier = {
+				name = Pol_Alignment_BU
+				duration = -1
+				hidden = yes
+			}
+			Pol_ChangeRelationsStateTooltip = { BU=yes type=value val=15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=NO FacID=1 Fac_InfVar=Pol_Tmp15 }
+			Pol_StateAlignmentReactionsHelper = { Fac=BG FacID=2 Fac_InfVar=Pol_Tmp16 }
+			Pol_StateAlignmentReactionsHelper = { Fac=CL FacID=3 Fac_InfVar=Pol_Tmp17 }
+			Pol_StateAlignmentReactionsHelper = { Fac=TR FacID=4 Fac_InfVar=Pol_Tmp18 }
+		}
+		hidden_country_event = { id = PTM_Politics.001 }
+	}
+    option = {
+        name = PTM_Politics.008.b
+		if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 1 }
+			}
+			FC_Boost = { Faction = NO Value = -10 }
+			Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-20 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 2 }
+			}
+			FC_Boost = { Faction = BG Value = -10 }
+			Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-20 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 3 }
+			}
+			FC_Boost = { Faction = CL Value = -10 }
+			Pol_ChangeRelationsStateTooltip = { CL=yes type=value val=-20 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 4 }
+			}
+			FC_Boost = { Faction = TR Value = -10 }
+			Pol_ChangeRelationsStateTooltip = { TR=yes type=value val=-20 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 5 }
+			}
+			FC_Boost = { Faction = BU Value = -10 }
+			Pol_ChangeRelationsStateTooltip = { BU=yes type=value val=-20 }
+		}
+	}
+    option = {
+        name = PTM_Politics.008.c
+		hidden_effect = {
+			remove_country_modifier = Pol_Alignment_NO
+			remove_country_modifier = Pol_Alignment_BG
+			remove_country_modifier = Pol_Alignment_CL
+			remove_country_modifier = Pol_Alignment_TR
+			remove_country_modifier = Pol_Alignment_BU
+			set_key = { lhs = State_Alignment value = 0 }
+		}
+		if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 1 }
+			}
+			custom_tooltip = Pol_EndAlignment_NO
+			Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-40 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 2 }
+			}
+			custom_tooltip = Pol_EndAlignment_NO
+			Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-40 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 3 }
+			}
+			custom_tooltip = Pol_EndAlignment_CL
+			Pol_ChangeRelationsStateTooltip = { CL=yes type=value val=-40 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 4 }
+			}
+			custom_tooltip = Pol_EndAlignment_TR
+			Pol_ChangeRelationsStateTooltip = { TR=yes type=value val=-40 }
+		}
+		else_if = {
+			limit = {
+				is_key_equal = { lhs = State_Alignment value = 5 }
+			}
+			custom_tooltip = Pol_EndAlignment_BU
+			Pol_ChangeRelationsStateTooltip = { BU=yes type=value val=-40 }
+		}
+	}
+	after = {
+		if = {
+			limit = {
+				ai = yes
+			}
+			country_event = { id = AI_Budget.1 }
+		}
+	}
+}
+
+### Rivalry events
+country_event = {
+    id = PTM_Politics.100
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+	hidden = yes
+	
+	trigger = {
+		always = no
+		# Some faction needs to be ready to gouge the eyes from another
+		OR = {
+			NOT = { check_key = { lhs = NO_RelationBG value = -90 } }
+			NOT = { check_key = { lhs = NO_RelationCL value = -90 } }
+			NOT = { check_key = { lhs = NO_RelationTR value = -90 } }
+			NOT = { check_key = { lhs = NO_RelationBU value = -90 } }
+			NOT = { check_key = { lhs = BG_RelationCL value = -90 } }
+			NOT = { check_key = { lhs = BG_RelationTR value = -90 } }
+			NOT = { check_key = { lhs = BG_RelationBU value = -90 } }
+			NOT = { check_key = { lhs = CL_RelationTR value = -90 } }
+			NOT = { check_key = { lhs = CL_RelationBU value = -90 } }
+			NOT = { check_key = { lhs = TR_RelationBU value = -90 } }
+		}
+		NOT = { has_country_modifier = NO_RivalBG }
+		NOT = { has_country_modifier = NO_RivalCL }
+		NOT = { has_country_modifier = NO_RivalTR }
+		NOT = { has_country_modifier = NO_RivalBU }
+		NOT = { has_country_modifier = BG_RivalCL }
+		NOT = { has_country_modifier = BG_RivalTR }
+		NOT = { has_country_modifier = BG_RivalBU }
+		NOT = { has_country_modifier = CL_RivalTR }
+		NOT = { has_country_modifier = CL_RivalBU }
+		NOT = { has_country_modifier = TR_RivalBU }
+	}
+	
+	immediate = {
+		Pol_RivalryConsider = yes
+	}
+
+    option = {
+        name = no_localisation
+	}
+}
+country_event = {
+    id = PTM_Politics.101
+    title = PTM_Politics.101.t
+    desc = PTM_Politics.101.d
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			Pol_RivalryBegin = yes
+		}
+	}
+
+    option = {
+        name = PTM_Politics.101.a
+	}
+}

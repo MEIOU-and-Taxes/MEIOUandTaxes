@@ -1,0 +1,214 @@
+namespace = flavor_wls
+
+country_event = {
+	id = flavor_wls.1 #General Owain Glyndwr
+	title = flavor_wls.1.t
+	desc = flavor_wls.1.d
+	picture = BATTLE_eventPicture
+	fire_only_once = yes
+	trigger = {
+		tag = WLS
+		NOT = { is_year = 1395 }
+		is_year = 1384 #year he entered English service, born in 1359
+	}
+	mean_time_to_happen = {
+		years = 5
+	}
+	option = {
+		name = "OPT.EXCELLENT"
+		log = "FE-WLS:[GetYear]:[Root.GetName]:Owain Glyndwr became a general:flavor_wls.1"
+		define_general = {
+			name = "Owain Glyndwr"
+			fire = 6
+			shock = 6
+			manuever = 6
+			siege = 3
+		}
+	}
+}
+country_event = {
+	id = flavor_wls.2 #Owain Glyndwr rebellion
+	title = flavor_wls.2.t
+	desc = flavor_wls.2.d
+	picture = BORDER_TENSION_eventPicture
+	fire_only_once = yes
+	trigger = {
+		tag = WLS
+		has_leader = "Owain Glyndwr"
+		is_subject = yes
+	}
+	mean_time_to_happen = {
+		years = 10
+	}
+	option = {
+		name = "OPT.REFUSE"
+		ai_chance = {
+			factor = 15
+		}
+		log = "FE-WLS:[GetYear]:[Root.GetName]:Owain Glyndwr stayed a general and and not started independence war:flavor_wls.2"
+	}
+	option = {
+		name = flavor_wls.2.a
+		ai_chance = {
+			factor = 85
+		}
+
+		add_country_modifier = {
+			name = ruler_deposed
+			duration = -1
+			hidden = yes
+		}
+		define_leader_to_ruler = {
+			name = "Owain Glyndwr"
+			adm = 3
+			dip = 4
+			mil = 6
+			claim = 100
+		}
+		if = {
+			limit = {
+				has_dlc = "Rights of Man"
+			}
+			add_ruler_personality = brilliant_strategist_personality
+			add_ruler_personality = aggressive_personality
+		}
+		log = "FE-WLS:[GetYear]:[Root.GetName]:Owain Glyndyr became a ruler and started independence war:flavor_wls.2"
+		hidden_effect = { #to avoid having both general and ruler at the same time
+			kill_leader = {
+				type = "Owain Glyndwr"
+			}
+			define_ruler_to_general = {
+				fire = 6
+				shock = 6
+				manuever = 6
+				siege = 3
+			}
+		}
+		if = {
+			limit = { has_heir = yes }
+			hidden_effect = {
+				kill_heir = { allow_new_heir = no }	
+			}
+		}
+		Stab_Subtract1 = yes
+
+		ENG = {
+			create_subject = {
+				subject_type = rebellious_decentralized_vassal
+				subject = WLS
+			}
+		}
+		declare_war_with_cb = { who = ENG casus_belli = cb_independence_war }
+	}
+	after = {
+		ENG = {
+			country_event = { id = flavor_wls.4 } #notification event
+		}
+	}
+}
+country_event = {
+	id = flavor_wls.3 # Failure of Owain Glyndwr rebellion
+	title = flavor_wls.3.t
+	desc = flavor_wls.3.d
+	picture = CIVIL_WAR_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes #from end of war check
+	major = yes
+	trigger = {
+		WLS = {
+			has_country_modifier = ruler_deposed
+		}
+	}
+	immediate = {
+		log = "FE-WLS:[GetYear]:[Root.GetName]:Owain Glyndwr lost the rebellion:flavor_wls.3"
+		WLS = {
+			hidden_effect = {
+				remove_country_modifier = ruler_deposed
+			}
+			if = {
+				limit = { has_heir = yes }
+				hidden_effect = {
+					kill_heir = { allow_new_heir = no }
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_wls.3.a
+		trigger = {
+			NOT = { 
+				dynasty = "Tudor"
+				heir_dynasty = "Tudor"
+			 }
+		}
+		ai_chance = {
+			factor = 95
+		}
+		log = "FE-WLS:[GetYear]:[WLS.GetName]:Owen Tudor became a ruler:flavor_wls.3"
+		WLS = {
+			define_ruler = {
+				name = "Owen"
+				dynasty = "Tudor"
+				culture = ROOT
+				claim = 75
+			}
+		}
+		add_prestige = 5
+	}
+	option = {
+		name = flavor_wls.3.b
+		ai_chance = {
+			factor = 5
+		}
+		WLS = {
+			define_ruler = {
+				culture = THIS
+				claim = 65
+			}
+			add_liberty_desire = -10
+		}
+		log = "FE-WLS:[GetYear]:[Root.GetName]:Welsh noble became a ruler (instead of Owen Tudor):flavor_wls.3"
+	}
+	option = {
+		name = flavor_wls.3.c
+		trigger = {
+			OR = { 
+				dynasty = "Tudor"
+				heir_dynasty = "Tudor"
+			 }
+		}
+		ai_chance = {
+			factor = 95
+		}
+		WLS = {
+			define_ruler = {
+				culture = ROOT
+				claim = 65
+			}
+		}
+		log = "FE-WLS:[GetYear]:[Root.GetName]:English noble became a ruler (instead of Owen Tudor):flavor_wls.3"
+	}
+}
+
+country_event = {
+	id = flavor_wls.4 #Owain Glyndwr rebellion, notification event
+	title = flavor_wls.1.t
+	desc = {
+		trigger = {
+			war_with = WLS	
+		}
+		desc = flavor_wls.4.d_war
+	}
+	desc = {
+		trigger = {
+			war_with = WLS
+		}
+		desc = flavor_wls.4.d_peace
+	}	
+	picture = BORDER_TENSION_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "OPT.DULYNOTED2"
+	}
+}

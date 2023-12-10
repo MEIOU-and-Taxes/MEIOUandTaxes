@@ -1,0 +1,75 @@
+CV_is_special_case = {
+	OR = {
+		has_province_flag = CV_SC_german_ostsiedlung
+		has_province_flag = CV_SC_frankish_settlers
+	}
+}
+
+CV_Can_Convert = {
+	is_state_core = owner # core required for culture spread
+	OR = {
+		has_owner_culture = no	# Target province needs to not be owner culture
+		#Special Cases scripted trigger
+		CV_is_special_case = yes
+	}
+	NOT = { nationalism = 1 } # no culture spread while there is nationalism around
+	OR = {
+		AND = {
+			any_friendly_coast_border_province = {# Culture Conversion needs neighboring province with state (accepted) culture	
+				owned_by = PREV
+				OR = {
+					has_owner_culture = yes
+					AND = { # Cultural Unions can convert accepted provinces to state culture
+						culture_group = owner
+						PREV = { NOT = { culture_group = owner } }
+					}
+					has_owner_accepted_culture = yes
+				}
+			}
+			OR = {
+				NOT = { has_owner_culture = yes }
+				AND = { # Cultural Unions can convert accepted provinces to state culture
+					culture_group = owner
+					OR = {
+						culture_group = greek_group
+						# fluid mobility
+						culture_group = oghuz
+						culture_group = tartar_group
+						culture_group = old_turkic
+						culture_group = altaic
+						owner = { total_development = 1200 }
+					}
+				}
+				AND = {
+					owner = { has_institution = Academia }
+					owner = { has_institution = Nationalism }
+				}
+				AND = {
+					culture_group = oghuz
+					owner = { culture_group = greek_group }
+					has_owner_religion = yes
+				}
+				AND = {
+					culture_group = greek_group
+					owner = { culture_group = oghuz }
+					has_owner_religion = yes
+				}
+				AND = {
+					culture_group = tartar_group
+					owner = { culture_group = east_slavic }
+					has_owner_religion = yes
+				}
+			}
+		}
+		#AND = { # Capital can always be converted, if tag holds at least 1 province of own_culture
+			is_capital = yes
+		#	owner = { any_owned_province = { has_owner_culture = yes } }
+		#}
+		AND = { # Capital can always be converted, if tag holds at least 1 province of own_culture
+			province_id = 3876
+			owner = { has_country_flag = capital_to_thraki }
+		}
+		#Special Cases scripted trigger
+		CV_is_special_case = yes
+	}
+}

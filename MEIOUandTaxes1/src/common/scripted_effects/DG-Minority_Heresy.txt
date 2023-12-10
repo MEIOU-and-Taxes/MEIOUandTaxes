@@ -1,0 +1,475 @@
+
+#Makes sure minorities are aligned on population changes
+MN_CleaningHelperRur = {
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$ value = 1 } }
+		if = {
+			limit = { NOT = { check_key = { lhs = MN_S$slot$Rural value = 0 } } }
+			set_key = { lhs = MN_S$slot$Rural value = 0 }
+		}
+		else = {
+			divide_key   = { lhs = MN_S$slot$RurN  which = DG_Tmp11 }
+			set_key      = { lhs = MN_S$slot$Rural which = MN_S$slot$RurN }
+			divide_key   = { lhs = MN_S$slot$Rural which = Class_Rural }
+			set_key      = { lhs = MN_S$slot$RurP  which = MN_S$slot$Rural }
+			multiply_key = { lhs = MN_S$slot$RurP  value = 100 }
+		}
+	}
+}
+
+MN_CleaningHelperUrb = {
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$ value = 1 } }
+		if = {
+			limit = { NOT = { check_key = { lhs = MN_S$slot$Urban value = 0 } } }
+			set_key = { lhs = MN_S$slot$Urban value = 0 }
+		}
+		else = {
+			divide_key   = { lhs = MN_S$slot$UrbN  which = DG_Tmp12 }
+			set_key      = { lhs = MN_S$slot$Urban which = MN_S$slot$UrbN }
+			divide_key   = { lhs = MN_S$slot$Urban which = Class_Urban }
+			set_key      = { lhs = MN_S$slot$UrbP  which = MN_S$slot$Urban }
+			multiply_key = { lhs = MN_S$slot$UrbP  value = 100 }
+		}
+	}
+}
+
+MN_CleaningHelperNot = {
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$ value = 1 } }
+		if = {
+			limit = { NOT = { check_key = { lhs = MN_S$slot$Notables value = 0 } } }
+			set_key = { lhs = MN_S$slot$Notables value = 0 }
+		}
+		else = {
+			divide_key   = { lhs = MN_S$slot$NotN     which = DG_Tmp13 }
+			set_key      = { lhs = MN_S$slot$Notables which = MN_S$slot$NotN }
+			divide_key   = { lhs = MN_S$slot$Notables which = Class_Notables }
+			set_key      = { lhs = MN_S$slot$NotP     which = MN_S$slot$Notables }
+			multiply_key = { lhs = MN_S$slot$NotP     value = 100 }
+		}
+	}
+}
+
+MN_CleaningHelperTot = {
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$ value = 1 } }
+		set_key      = { lhs = MN_S$slot$TotN     which = MN_S$slot$RurN }
+		change_key   = { lhs = MN_S$slot$TotN     which = MN_S$slot$UrbN }
+		change_key   = { lhs = MN_S$slot$TotN     which = MN_S$slot$NotN }
+		set_key      = { lhs = MN_S$slot$TotP     which = MN_S$slot$TotN }
+		if = {
+			limit = {
+				check_key = { lhs = MN_S$slot$TotP value = 0.001 }
+			}
+			divide_key   = { lhs = MN_S$slot$TotP which = Class_Total }
+			multiply_key = { lhs = MN_S$slot$TotP value = 100 }
+		}
+	}
+}
+
+MN_CleaningUp = {
+	if = {
+		limit = { is_key_equal = { lhs = Class_Rural value = 0 } }
+		set_key = { lhs = MN_S0RurN value = 0 }
+		set_key = { lhs = MN_S1RurN value = 0 }
+		set_key = { lhs = MN_S2RurN value = 0 }
+		set_key = { lhs = MN_S3RurN value = 0 }
+		set_key = { lhs = MN_S4RurN value = 0 }
+		set_key = { lhs = MN_S5RurN value = 0 }
+	}
+	if = {
+		limit = { is_key_equal = { lhs = Class_Urban value = 0 } }
+		set_key = { lhs = MN_S0UrbN value = 0 }
+		set_key = { lhs = MN_S1UrbN value = 0 }
+		set_key = { lhs = MN_S2UrbN value = 0 }
+		set_key = { lhs = MN_S3UrbN value = 0 }
+		set_key = { lhs = MN_S4UrbN value = 0 }
+		set_key = { lhs = MN_S5UrbN value = 0 }
+	}
+	if = {
+		limit = { is_key_equal = { lhs = Class_Notables value = 0 } }
+		set_key = { lhs = MN_S0NotN value = 0 }
+		set_key = { lhs = MN_S1NotN value = 0 }
+		set_key = { lhs = MN_S2NotN value = 0 }
+		set_key = { lhs = MN_S3NotN value = 0 }
+		set_key = { lhs = MN_S4NotN value = 0 }
+		set_key = { lhs = MN_S5NotN value = 0 }
+	}
+	#Cleanup Rural Population
+	set_key    = { lhs = DG_Tmp11 which = MN_S0RurN }
+	change_key = { lhs = DG_Tmp11 which = MN_S1RurN }
+	change_key = { lhs = DG_Tmp11 which = MN_S2RurN }
+	change_key = { lhs = DG_Tmp11 which = MN_S3RurN }
+	change_key = { lhs = DG_Tmp11 which = MN_S4RurN }
+	change_key = { lhs = DG_Tmp11 which = MN_S5RurN }
+	if = {
+		limit = { NOT = { is_key_equal = { lhs = DG_Tmp11 which = Class_Rural } } }
+		if = {
+			limit = { check_key = { lhs = DG_Tmp11 value = 0.001 } }
+			divide_key = { lhs = DG_Tmp11 which = Class_Rural }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S0RurN value = 0.001 } }
+			divide_key = { lhs = MN_S0RurN which = DG_Tmp11 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S1RurN value = 0.001 } }
+			divide_key = { lhs = MN_S1RurN which = DG_Tmp11 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S2RurN value = 0.001 } }
+			divide_key = { lhs = MN_S2RurN which = DG_Tmp11 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S3RurN value = 0.001 } }
+			divide_key = { lhs = MN_S3RurN which = DG_Tmp11 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S4RurN value = 0.001 } }
+			divide_key = { lhs = MN_S4RurN which = DG_Tmp11 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S5RurN value = 0.001 } }
+			divide_key = { lhs = MN_S5RurN which = DG_Tmp11 }
+		}
+	}
+	#Cleanup Urban Population
+	set_key    = { lhs = DG_Tmp12 which = MN_S0UrbN }
+	change_key = { lhs = DG_Tmp12 which = MN_S1UrbN }
+	change_key = { lhs = DG_Tmp12 which = MN_S2UrbN }
+	change_key = { lhs = DG_Tmp12 which = MN_S3UrbN }
+	change_key = { lhs = DG_Tmp12 which = MN_S4UrbN }
+	change_key = { lhs = DG_Tmp12 which = MN_S5UrbN }
+	if = {
+		limit = { NOT = { is_key_equal = { lhs = DG_Tmp12 which = Class_Urban } } }
+		if = {
+			limit = { check_key = { lhs = DG_Tmp12 value = 0.001 } }
+			divide_key = { lhs = DG_Tmp12 which = Class_Urban }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S0UrbN value = 0.001 } }
+			divide_key = { lhs = MN_S0UrbN which = DG_Tmp12 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S1UrbN value = 0.001 } }
+			divide_key = { lhs = MN_S1UrbN which = DG_Tmp12 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S2UrbN value = 0.001 } }
+			divide_key = { lhs = MN_S2UrbN which = DG_Tmp12 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S3UrbN value = 0.001 } }
+			divide_key = { lhs = MN_S3UrbN which = DG_Tmp12 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S4UrbN value = 0.001 } }
+			divide_key = { lhs = MN_S4UrbN which = DG_Tmp12 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S5UrbN value = 0.001 } }
+			divide_key = { lhs = MN_S5UrbN which = DG_Tmp12 }
+		}
+	}
+	#Cleanup Notables Population
+	set_key    = { lhs = DG_Tmp13 which = MN_S0NotN }
+	change_key = { lhs = DG_Tmp13 which = MN_S1NotN }
+	change_key = { lhs = DG_Tmp13 which = MN_S2NotN }
+	change_key = { lhs = DG_Tmp13 which = MN_S3NotN }
+	change_key = { lhs = DG_Tmp13 which = MN_S4NotN }
+	change_key = { lhs = DG_Tmp13 which = MN_S5NotN }
+	if = {
+		limit = { NOT = { is_key_equal = { lhs = DG_Tmp13 which = Class_Notables } } }
+		if = {
+			limit = { check_key = { lhs = DG_Tmp13 value = 0.001 } }
+			divide_key = { lhs = DG_Tmp13 which = Class_Notables }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S0NotN value = 0.001 } }
+			divide_key = { lhs = MN_S0NotN which = DG_Tmp13 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S1NotN value = 0.001 } }
+			divide_key = { lhs = MN_S1NotN which = DG_Tmp13 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S2NotN value = 0.001 } }
+			divide_key = { lhs = MN_S2NotN which = DG_Tmp13 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S3NotN value = 0.001 } }
+			divide_key = { lhs = MN_S3NotN which = DG_Tmp13 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S4NotN value = 0.001 } }
+			divide_key = { lhs = MN_S4NotN which = DG_Tmp13 }
+		}
+		if = {
+			limit = { check_key = { lhs = MN_S5NotN value = 0.001 } }
+			divide_key = { lhs = MN_S5NotN which = DG_Tmp13 }
+		}
+	}
+	#Cleanup Total Population
+	MN_CleaningHelperTot = { slot = 0 }
+	MN_CleaningHelperTot = { slot = 1 }
+	MN_CleaningHelperTot = { slot = 2 }
+	MN_CleaningHelperTot = { slot = 3 }
+	MN_CleaningHelperTot = { slot = 4 }
+	MN_CleaningHelperTot = { slot = 5 }
+}
+
+MN_HeresyHelperFrom = {
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$RurN which = DG_Tmp2 } }
+		subtract_key = { lhs = MN_S$slot$RurN which = DG_Tmp2 }
+	}
+	else = {
+		set_key = { lhs = DG_Tmp2 which = MN_S$slot$RurN }
+		set_key = { lhs = MN_S$slot$RurN value = 0 }
+	}
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$UrbN which = DG_Tmp3 } }
+		subtract_key = { lhs = MN_S$slot$UrbN which = DG_Tmp3 }
+	}
+	else = {
+		set_key = { lhs = DG_Tmp3 which = MN_S$slot$UrbN }
+		set_key = { lhs = MN_S$slot$UrbN value = 0 }
+	}
+	if = {
+		limit = { check_key = { lhs = MN_S$slot$NotN which = DG_Tmp4 } }
+		subtract_key = { lhs = MN_S$slot$NotN which = DG_Tmp4 }
+	}
+	else = {
+		set_key = { lhs = DG_Tmp4 which = MN_S$slot$NotN }
+		set_key = { lhs = MN_S$slot$NotN value = 0 }
+	}
+	set_key      = { lhs = MN_S$slot$Rural which = MN_S$slot$RurN }
+	set_key      = { lhs = MN_S$slot$Urban which = MN_S$slot$UrbN }
+	set_key      = { lhs = MN_S$slot$Notables which = MN_S$slot$NotN }
+	if = {
+		limit = { OR = { is_key_equal = { lhs = Class_Rural value = 0 } NOT = { check_key = { lhs = MN_S$slot$Rural value = 0.001 } } } }
+		set_key   = { lhs = MN_S$slot$Rural value = 0 }
+	}
+	else = {
+		divide_key   = { lhs = MN_S$slot$Rural which = Class_Rural }
+	}
+	if = {
+		limit = { OR = { is_key_equal = { lhs = Class_Urban value = 0 } NOT = { check_key = { lhs = MN_S$slot$Urban value = 0.001 } } } }
+		set_key   = { lhs = MN_S$slot$Urban value = 0 }
+	}
+	else = {
+		divide_key   = { lhs = MN_S$slot$Urban which = Class_Urban }
+	}
+	if = {
+		limit = { OR = { is_key_equal = { lhs = Class_Notables value = 0 } NOT = { check_key = { lhs = MN_S$slot$Notables value = 0.001 } } } }
+		set_key   = { lhs = MN_S$slot$Notables value = 0 }
+	}
+	else = {
+		divide_key   = { lhs = MN_S$slot$Notables which = Class_Notables }
+	}
+	set_key      = { lhs = MN_S$slot$RurP which = MN_S$slot$Rural }
+	set_key      = { lhs = MN_S$slot$UrbP which = MN_S$slot$Urban }
+	set_key      = { lhs = MN_S$slot$NotP which = MN_S$slot$Notables }
+	multiply_key = { lhs = MN_S$slot$RurP value = 100 }
+	multiply_key = { lhs = MN_S$slot$UrbP value = 100 }
+	multiply_key = { lhs = MN_S$slot$NotP value = 100 }
+	set_key      = { lhs = MN_S$slot$TotN which = MN_S$slot$RurN }
+	change_key   = { lhs = MN_S$slot$TotN which = MN_S$slot$UrbN }
+	change_key   = { lhs = MN_S$slot$TotN which = MN_S$slot$NotN }
+	set_key      = { lhs = MN_S$slot$TotP which = MN_S$slot$TotN }
+	if = {
+		limit = {
+			check_key = { lhs = MN_S$slot$TotP value = 0.001 }
+		}
+		divide_key   = { lhs = MN_S$slot$TotP which = Class_Total }
+		multiply_key = { lhs = MN_S$slot$TotP value = 100 }
+	}
+}
+
+MN_HeresyHelperTo = {
+	change_key   = { lhs = MN_S$slot$RurN which = DG_Tmp2 }
+	change_key   = { lhs = MN_S$slot$UrbN which = DG_Tmp3 }
+	change_key   = { lhs = MN_S$slot$NotN which = DG_Tmp4 }
+	set_key      = { lhs = MN_S$slot$Rural which = MN_S$slot$RurN }
+	set_key      = { lhs = MN_S$slot$Urban which = MN_S$slot$UrbN }
+	set_key      = { lhs = MN_S$slot$Notables which = MN_S$slot$NotN }
+	if = {
+		limit = { OR = { is_key_equal = { lhs = Class_Rural value = 0 } is_key_equal = { lhs = MN_S$slot$Rural value = 0.001 } } }
+		set_key   = { lhs = MN_S$slot$Rural value = 0 }
+	}
+	else = {
+		divide_key   = { lhs = MN_S$slot$Rural which = Class_Rural }
+	}
+	if = {
+		limit = { OR = { is_key_equal = { lhs = Class_Urban value = 0 } is_key_equal = { lhs = MN_S$slot$Urban value = 0.001 } } }
+		set_key   = { lhs = MN_S$slot$Urban value = 0 }
+	}
+	else = {
+		divide_key   = { lhs = MN_S$slot$Urban which = Class_Urban }
+	}
+	if = {
+		limit = { OR = { is_key_equal = { lhs = Class_Notables value = 0 } is_key_equal = { lhs = MN_S$slot$Notables value = 0.001 } } }
+		set_key   = { lhs = MN_S$slot$Notables value = 0 }
+	}
+	else = {
+		divide_key   = { lhs = MN_S$slot$Notables which = Class_Notables }
+	}
+	set_key      = { lhs = MN_S$slot$RurP which = MN_S$slot$Rural }
+	set_key      = { lhs = MN_S$slot$UrbP which = MN_S$slot$Urban }
+	set_key      = { lhs = MN_S$slot$NotP which = MN_S$slot$Notables }
+	multiply_key = { lhs = MN_S$slot$RurP value = 100 }
+	multiply_key = { lhs = MN_S$slot$UrbP value = 100 }
+	multiply_key = { lhs = MN_S$slot$NotP value = 100 }
+	set_key      = { lhs = MN_S$slot$TotN which = MN_S$slot$RurN }
+	change_key   = { lhs = MN_S$slot$TotN which = MN_S$slot$UrbN }
+	change_key   = { lhs = MN_S$slot$TotN which = MN_S$slot$NotN }
+	set_key      = { lhs = MN_S$slot$TotP which = MN_S$slot$TotN }
+	if = {
+		limit = {
+			check_key = { lhs = MN_S$slot$TotP value = 0.001 }
+		}
+		divide_key   = { lhs = MN_S$slot$TotP which = Class_Total }
+		multiply_key = { lhs = MN_S$slot$TotP value = 100 }
+	}
+}
+
+#Conversion Helper used in other scripted effects
+MN_HeresyHelper = {
+	if = {
+		limit = { is_key_equal = { lhs = MN_S0 $typefrom$ = $from$ } }
+		MN_HeresyHelperFrom = { slot = 0 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 $typefrom$ = $from$ } }
+		MN_HeresyHelperFrom = { slot = 1 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S2 $typefrom$ = $from$ } }
+		MN_HeresyHelperFrom = { slot = 2 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S3 $typefrom$ = $from$ } }
+		MN_HeresyHelperFrom = { slot = 3 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S4 $typefrom$ = $from$ } }
+		MN_HeresyHelperFrom = { slot = 4 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S5 $typefrom$ = $from$ } }
+		MN_HeresyHelperFrom = { slot = 5 }
+	}
+	
+	if = {
+		limit = { is_key_equal = { lhs = MN_S0 $typeto$ = $to$ } }
+		MN_HeresyHelperTo = { slot = 0 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S1 $typeto$ = $to$ } }
+		MN_HeresyHelperTo = { slot = 1 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S2 $typeto$ = $to$ } }
+		MN_HeresyHelperTo = { slot = 2 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S3 $typeto$ = $to$ } }
+		MN_HeresyHelperTo = { slot = 3 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S4 $typeto$ = $to$ } }
+		MN_HeresyHelperTo = { slot = 4 }
+	}
+	else_if = {
+		limit = { is_key_equal = { lhs = MN_S5 $typeto$ = $to$ } }
+		MN_HeresyHelperTo = { slot = 5 }
+	}
+
+	set_province_flag = DG_Update # Do once at the end of the month
+}
+
+#Heresy Spread
+MN_HeresySpread = {
+	MN_AddReligion = { type = value religion = $to$ }
+	
+	MN_CleaningUp = yes
+	
+	if = {
+		limit = {
+			is_key_equal = { lhs = MN_S0 $typefrom$ = $from$ }
+		}
+		set_key = { lhs = DG_Tmp2 which = MN_S0RurN }
+		set_key = { lhs = DG_Tmp3 which = MN_S0UrbN }
+		set_key = { lhs = DG_Tmp4 which = MN_S0NotN }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = MN_S1 $typefrom$ = $from$ }
+		}
+		set_key = { lhs = DG_Tmp2 which = MN_S1RurN }
+		set_key = { lhs = DG_Tmp3 which = MN_S1UrbN }
+		set_key = { lhs = DG_Tmp4 which = MN_S1NotN }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = MN_S2 $typefrom$ = $from$ }
+		}
+		set_key = { lhs = DG_Tmp2 which = MN_S2RurN }
+		set_key = { lhs = DG_Tmp3 which = MN_S2UrbN }
+		set_key = { lhs = DG_Tmp4 which = MN_S2NotN }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = MN_S3 $typefrom$ = $from$ }
+		}
+		set_key = { lhs = DG_Tmp2 which = MN_S3RurN }
+		set_key = { lhs = DG_Tmp3 which = MN_S3UrbN }
+		set_key = { lhs = DG_Tmp4 which = MN_S3NotN }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = MN_S4 $typefrom$ = $from$ }
+		}
+		set_key = { lhs = DG_Tmp2 which = MN_S4RurN }
+		set_key = { lhs = DG_Tmp3 which = MN_S4UrbN }
+		set_key = { lhs = DG_Tmp4 which = MN_S4NotN }
+	}
+	else_if = {
+		limit = {
+			is_key_equal = { lhs = MN_S5 $typefrom$ = $from$ }
+		}
+		set_key = { lhs = DG_Tmp2 which = MN_S5RurN }
+		set_key = { lhs = DG_Tmp3 which = MN_S5UrbN }
+		set_key = { lhs = DG_Tmp4 which = MN_S5NotN }
+	}
+	multiply_key = { lhs = DG_Tmp2 $typeIncr$ = $incr$ }
+	multiply_key = { lhs = DG_Tmp3 $typeIncr$ = $incr$ }
+	multiply_key = { lhs = DG_Tmp4 $typeIncr$ = $incr$ }
+	
+	MN_HeresyHelper = { to = $to$ typeto = value from = $from$ typefrom = $typefrom$ }
+	
+	set_key = { lhs = DG_Tmp2 value = 0 }
+	set_key = { lhs = DG_Tmp3 value = 0 }
+	set_key = { lhs = DG_Tmp4 value = 0 }
+}
+
+#Heresy Grosth
+MN_HeresyGrowth = {
+	MN_AddReligion = { type = value religion = $to$ }
+	
+	MN_CleaningUp = yes
+	
+	set_key = { lhs = DG_Tmp2 value = $RuralShift$ }
+	multiply_key = { lhs = DG_Tmp2 value = 0.001 }
+	set_key = { lhs = DG_Tmp3 value = $UrbanShift$ }
+	multiply_key = { lhs = DG_Tmp3 value = 0.001 }
+	set_key = { lhs = DG_Tmp4 value = $NotableShift$ }
+	multiply_key = { lhs = DG_Tmp4 value = 0.001 }
+	
+	MN_HeresyHelper = { to = $to$ typeto = value from = $from$ typefrom = value }
+	
+	set_key = { lhs = DG_Tmp2 value = 0 }
+	set_key = { lhs = DG_Tmp3 value = 0 }
+	set_key = { lhs = DG_Tmp4 value = 0 }
+}

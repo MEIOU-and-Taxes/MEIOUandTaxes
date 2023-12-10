@@ -1,0 +1,266 @@
+# Scripted by Ellesthyan - Ported to 3.0 by Beorsferth
+
+namespace = flavor_boh
+
+#Treaty of Trnava event chain
+country_event = {
+	id = flavor_boh.9 #Treaty of Trnava
+	title = flavor_boh.9.name
+	desc = flavor_boh.9.desc
+	picture = COURT_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = BOH
+		owns = 1858 # Belluno
+		exists = HUN
+		exists = HAB
+		HUN = {
+			has_ruler = "Louis the Great"
+		#	alliance_with = HAB
+		}
+		ROOT = {
+			NOT = { war_with = HAB }
+			NOT = { war_with = HUN }
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5 
+		modifier = {
+			factor = 0.2
+			HUN = {
+				alliance_with = HAB
+			}
+		}
+	}
+	
+	option = {		
+		name = "flavor_boh.9.opta" #Agree to concession
+		ai_chance = { factor = 90 }
+		log = "FE-BOH:[GetYear]:[Root.GetName]:agreed on concession of Belluno in treaty of Trnava:flavor_boh.9"
+
+		BOH = {
+			add_prestige = 10
+		}
+		1858 = {
+			cede_province = HUN
+			add_core = HUN
+			remove_core = BOH
+		}
+		HUN = {
+			break_alliance = HAB
+		}
+		HAB = {
+			country_event = { id = flavor_boh.11 } #explanantion event
+		}
+		HUN = {
+			country_event = { id = flavor_boh.10 } #decision what to do with the province
+		}
+	}
+	
+	option = {		
+		name = "flavor_boh.9.optb" #Deny concession
+		ai_chance = { factor = 10 }
+		log = "FE-BOH:[GetYear]:[Root.GetName]:denied concession of Belluno in treaty of Trnava:flavor_boh.9"
+		HUN = {
+			add_opinion = {
+				who = BOH
+				modifier = conflict_heats_up
+			}
+			country_event = { id = flavor_boh.13 } #explanantion event
+		}
+		HAB = {
+			add_opinion = {
+				who = BOH
+				modifier = conflict_heats_up
+			}
+			country_event = { id = flavor_boh.12 } #explanantion event
+		}
+	}
+}
+
+country_event = {
+	id = flavor_boh.10 #Outcome of the treaty of Trnava
+	title = flavor_boh.10.name
+	desc = flavor_boh.10.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		
+		name = "flavor_boh.10.opta" #Give Belluno to an ally
+		ai_chance = { factor = 90 }
+		add_prestige = 10
+		if = {
+			limit = {
+				exists = PAD
+				PAD = { alliance_with = HUN }
+			}
+			1858 = {
+				cede_province = PAD
+				add_core = PAD
+				remove_core = HUN
+			}
+			break_alliance = AQU
+			break_alliance = GOR
+			PAD = { #Padua
+				country_event = { id = flavor_boh.14 }
+			}
+			AQU = { #Friuli
+				country_event = { id = flavor_boh.15 }
+			}
+			GOR = { #Gorizia
+				country_event = { id = flavor_boh.15 }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					AND = {
+						exists = PAD
+						PAD = { alliance_with = HUN }
+					}
+				}
+				exists = AQU
+				AQU = { alliance_with = HUN }
+			}
+			1858 = {
+				cede_province = AQU
+				add_core = AQU
+				remove_core = HUN
+			}
+			break_alliance = GOR
+			AQU = {
+				country_event = { id = flavor_boh.14 }
+			}
+			GOR = {
+				country_event = { id = flavor_boh.15 }
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					AND = {
+						exists = PAD
+						PAD = { alliance_with = HUN }
+					}
+					AND = {
+						exists = AQU
+						AQU = { alliance_with = HUN }
+					}
+				}
+				exists = GOR
+				GOR = { alliance_with = HUN }
+			}
+			1858 = {
+				cede_province = GOR
+				add_core = GOR
+				remove_core = HUN
+			}
+			GOR = {
+				country_event = { id = flavor_boh.13 }
+			}
+		}
+		FROM = { country_event = { id = flavor_boh.16 } }
+	}
+	
+	option = {		
+		name = "flavor_boh.10.optb" #Keep Belluno for yourself
+		ai_chance = { factor = 10 }
+		add_prestige = -10
+		break_alliance = PAD
+		break_alliance = AQU
+		break_alliance = GOR
+		PAD = {
+			country_event = { id = flavor_boh.15 }
+		}
+		AQU = {
+			country_event = { id = flavor_boh.15 }
+		}
+		GOR = {
+			country_event = { id = flavor_boh.15 }
+		}
+		log = "FE-BOH:[GetYear]:[Root.GetName]:kept Belluno for themselves:flavor_boh.10"
+	}
+}
+
+country_event = {
+	id = flavor_boh.11
+	title = flavor_boh.11.name
+	desc = flavor_boh.11.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		
+		name = "flavor_boh.11.opta" #Explains agreement
+	}
+}
+
+country_event = {
+	id = flavor_boh.12
+	title = flavor_boh.12.name
+	desc = flavor_boh.12.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		
+		name = "flavor_boh.12.opta" #Explains denial to Austria
+	}
+}
+
+country_event = {
+	id = flavor_boh.13
+	title = flavor_boh.13.name
+	desc = flavor_boh.13.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_boh.13.opta" #Explains denial to Hungary
+	}
+}
+
+country_event = {
+	id = flavor_boh.14
+	title = flavor_boh.14.name
+	desc = flavor_boh.14.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_boh.14.opta" #Explains transfer of Belluno
+		log = "FE-BOH:[GetYear]:[Root.GetName]:received Belluno from Hungary (as allies):flavor_boh.14"
+	}
+}
+
+country_event = {
+	id = flavor_boh.15
+	title = flavor_boh.15.name
+	desc = flavor_boh.15.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		
+		name = "flavor_boh.15.opta" #Explains breaking of alliance with Italian allies
+	}
+}
+
+country_event = {
+	id = flavor_boh.16
+	title = flavor_boh.16.name
+	desc = flavor_boh.16.desc
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {		
+		name = "flavor_boh.16.opta" #Explains to Bohemia why Hungary doesn't keep ownership of Belluno
+	}
+}

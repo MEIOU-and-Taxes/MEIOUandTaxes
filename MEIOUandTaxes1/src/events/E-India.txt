@@ -1,0 +1,327 @@
+namespace = India
+
+country_event = {
+	id = India.01
+	title = India.01.t
+	desc = India.01.desc
+	picture = KING_SICK_IN_BED_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = DLH
+		exists = yes
+		is_year = 1359
+		BNG = {
+			exists = yes
+			is_subject = yes
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	option = {
+		name = "India.01.a"
+		ai_chance = {
+			factor = 100
+		}
+		add_prestige = 25
+		BNG = { 
+			grant_independence = yes
+		}
+		ORI = {
+			grant_independence = yes
+		}
+		declare_war_with_cb = {
+			who = BNG
+			casus_belli = cb_core
+			war_goal_province = 2693
+		}
+		BNG = {
+			country_event = {
+				id = India.02
+				days = 1
+			}
+		}
+	}
+	option = {
+		name = "India.01.b"
+		ai_chance = {
+			factor = 0
+		}
+		add_prestige = -25
+		Stab_Subtract1 = yes
+		BNG = {
+			every_owned_province = {
+				limit = {
+					is_core = DLH
+				}
+				remove_core = DLH
+			}
+		}
+	}
+}
+country_event = {
+	id = India.02
+	title = India.02.t
+	desc = India.02.desc
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "India.02.a"
+		add_country_modifier = { name = defence_of_bengal  duration = 1000 }
+	}
+}
+country_event = {
+	id = India.03
+	title = India.03.t
+	desc = India.03.desc
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		tag = DLH
+		has_disaster = TwilightOfHindustan
+		NOT = { has_global_flag = DLH_Collapse }
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				NOT = { exists = AHM }
+			}
+			AHM = { clr_country_flag = POP_Init }
+		}
+	}
+	
+	option = {
+		name = "India.03.a"
+		Delhi_Collapse = yes
+		hidden_effect = {
+			AHM = {
+				add_country_modifier = { name = blessing_of_god duration = 1825 }
+			}
+		}
+	}
+	option = {
+		name = "India.03.b"
+		Delhi_Collapse = yes
+		switch_tag = AHM
+	}
+	after = {
+		set_country_flag = TwilightEclipse
+		AHM = {
+			if = {
+				limit = {
+					owns = 2210 #Juanapur
+				}
+				Effect_set_capital = { target=2210 } #Juanapur
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						ai = no
+					}
+					add_country_modifier = { name = blessing_of_god duration = 1825 }
+				}
+				if = {
+					limit = {
+						NOT = { has_country_flag = POP_Init }
+					}
+					delhi_government_change = yes
+					country_event = { id = Init.1 }
+				}
+			}
+		}
+	}
+}
+country_event = {
+	id = India.04
+	title = India.04.t
+	desc = India.04.desc
+	picture = BATTLE_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = TIM
+		exists = yes
+		war_with = DLH
+		controls = 2112 #Multan
+		MUL = {
+			OR = {
+				NOT = { exists = yes }
+				is_subject_of = DLH
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				NOT = { exists = MUL }
+			}
+			MUL = { clr_country_flag = POP_Init }
+		}
+	}
+	
+	option = {
+		name = "India.04.a"
+		ai_chance = {
+			factor = 100
+		}
+		DLH = {
+			add_legitimacy = -15
+			if = {
+				limit = {
+					NOT = { exists = MUL }
+				}
+				every_owned_province = {
+					limit = {
+						is_core = MUL
+						NOT = { area = upper_doab_area }
+					}
+					cede_province = MUL
+				}
+			}
+			else = {
+				MUL = { grant_independence = yes }
+			}
+		}
+		hidden_effect = { MUL = { set_key = { lhs = Vassal_Type value = 10 } } }
+		create_subject = {
+			subject_type = daimyo_vassal
+			who = MUL
+		}
+		hidden_effect = {
+			MUL = {
+				define_ruler = {
+					name = "Khizr Khan"
+					dynasty = "Sayyid"
+					ADM = 5
+					DIP = 4
+					MIL = 3
+					age = 28
+				}
+				if = {
+					limit = {
+						NOT = { 
+							OR = {
+								has_country_modifier = title_4 
+								has_country_modifier = title_5 
+								has_country_modifier = title_6 
+							}
+						}
+					}
+					change_title_4 = yes
+				}
+			}
+		}
+		hidden_effect = {
+			DLH = {
+				add_casus_belli = {
+					target = MUL
+					type = cb_annex
+					months = 120
+				}
+				country_event = {
+					id = India.05
+				}
+			}
+			MUL = {
+				set_country_flag = DLH_Successor
+				add_casus_belli = {
+					target = DLH
+					type = cb_annex
+					months = 240
+				}
+			}
+		}
+	}
+	option = {
+		name = "India.04.b"
+		ai_chance = {
+			factor = 0
+		}
+	}
+	after = {
+		MUL = {
+			if = {
+				limit = {
+					owns = 2112 #Multan
+				}
+				Effect_set_capital = { target=2112 }
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = { has_country_flag = POP_Init }
+					}
+					delhi_government_change = yes
+					country_event = { id = Init.1 }
+				}
+			}
+		}
+	}
+}
+country_event = {
+	id = India.05
+	title = India.05.t
+	desc = India.05.desc
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	
+	option = {
+		name = "India.05.a"
+		hidden_effect = {
+			MUL = {
+				add_country_modifier = { name = blessing_of_god duration = 1825 }
+			}
+		}
+	}
+	option = {
+		name = "India.05.b"
+		switch_tag = MUL
+	}
+}
+country_event = {
+	id = India.06
+	title = India.06.t
+	desc = India.06.desc
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "India.06.a"
+	}
+}
+country_event = {
+	id = India.07
+	title = India.07.t
+	desc = India.07.desc
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "India.07.a"
+		add_prestige = 25
+		Stab_Add1 = yes
+		hidden_effect = {
+			clr_country_flag = Twilight
+			set_country_flag = TwilightOver
+		}
+	}
+}

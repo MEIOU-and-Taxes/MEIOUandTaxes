@@ -1,0 +1,585 @@
+Admin_Init = {
+	set_key = { lhs = Admin_Wage value = 100 } # 100% of wages
+	set_key = { lhs = Admin_Hire value = 100 } # 100% of bureaucrats
+}
+Admin_Main = {
+	# Display
+	every_owned_province = {
+		## calculate tax efficiency, mana cost multiplier
+		Admin_SetBase = yes # rights base %, base tax efficiency
+		Admin_SetDemand = yes # demand % of population to become bureaucrats
+		Admin_SetSupply = yes # supply = demand * multiplier
+		Admin_SetWage = yes # wage = supply * fixed price * multiplier
+		Admin_SetEffic = yes # use factors, work out tax efficiency
+		multiply_key = { lhs = Admin_BaseUni value = 100 } # inflate to 100 scale for display
+		multiply_key = { lhs = Admin_BaseDir value = 100 }
+		multiply_key = { lhs = Admin_BaseInd value = 100 }
+	}
+}
+Admin_SetBase = {
+	if = {
+		limit = {
+			owner = {
+				OR = { ## is tax system unified or not
+					AND = {
+						NOT = { Rights_BUInd2HasGreater = yes }
+						NOT = { Rights_BUDir2HasGreater = yes }
+					}
+					Rights_BUTax3HasGreater = yes
+				}
+			}
+		}
+		set_key = { lhs = Admin_BaseUni value = 0.05 } # 10% with reach
+		set_key = { lhs = Admin_BaseDir value = 0 }
+		set_key = { lhs = Admin_BaseInd value = 0 }
+		if = {
+			limit = {
+				owner = { Rights_BUTax2Has = yes }
+			}
+			set_key = { lhs = Admin_BaseUni value = 0.10 } #20% with reach
+		}
+		if = {
+			limit = {
+				owner = { Rights_BUTax3Has = yes }
+			}
+			set_key = { lhs = Admin_BaseUni value = 0.80 } #80%
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_BUTax4Has = yes }
+			}
+			set_key = { lhs = Admin_BaseUni value = 1.00 } #100%
+		}
+	}
+	else = {
+		set_key = { lhs = Admin_BaseUni value = 0.10 }
+		set_key = { lhs = Admin_BaseDir value = 0.10 }
+		set_key = { lhs = Admin_BaseInd value = 0.10 }
+		if = {
+			limit = {
+				owner = { Rights_BUDir2Has = yes }
+			}
+			set_key = { lhs = Admin_BaseDir value = 0.40 } #40%
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_BUDir3Has = yes }
+			}
+			set_key = { lhs = Admin_BaseDir value = 0.60 } #60%
+		}
+		if = {
+			limit = {
+				owner = { Rights_BUInd2Has = yes }
+			}
+			set_key = { lhs = Admin_BaseInd value = 0.40 } #40%
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_BUInd3Has = yes }
+			}
+			set_key = { lhs = Admin_BaseInd value = 0.60 } #60%
+		}
+		set_key = { lhs = Admin_BaseUni which = Admin_BaseDir }
+		change_key = { lhs = Admin_BaseUni which = Admin_BaseInd }
+		multiply_key = { lhs = Admin_BaseUni value = 0.5 }
+	}
+}
+Admin_SetDemand = { # demand % of population to become bureaucrats
+	# 100 scale
+	set_key = { lhs = Admin_DemandDir value = 0 }
+	set_key = { lhs = Admin_DemandInd value = 0 }
+	
+	if = {
+		limit = {
+			owner = { Rights_BUTax4HasGreater = yes }
+		}
+		change_key = { lhs = Admin_DemandDir value = 0.6 }
+		change_key = { lhs = Admin_DemandInd value = 0.45 }
+	}
+	else_if = {
+		limit = {
+			owner = { Rights_BUTax3HasGreater = yes }
+		}
+		change_key = { lhs = Admin_DemandDir value = 0.5 }
+		change_key = { lhs = Admin_DemandInd value = 0.35 }
+	}
+	else = {
+		if = {
+			limit = {
+				owner = { Rights_BUDir3Has = yes }
+			}
+			change_key = { lhs = Admin_DemandDir value = 0.35 }
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_BUDir2Has = yes }
+			}
+			change_key = { lhs = Admin_DemandDir value = 0.2 }
+		}
+		else_if = {
+			limit = {
+				owner = { 
+					Rights_BUDir1Has = yes
+					Rights_BUTax2Has = yes
+				}
+			}
+			change_key = { lhs = Admin_DemandDir value = 0.1 }
+		}
+		
+		if = {
+			limit = {
+				owner = { Rights_BUInd3Has = yes }
+			}
+			change_key = { lhs = Admin_DemandInd value = 0.2 }
+		}
+		else_if = {
+			limit = {
+				owner = { Rights_BUInd2Has = yes }
+			}
+			change_key = { lhs = Admin_DemandInd value = 0.1 }
+		}
+		else_if = {
+			limit = {
+				owner = { 
+					Rights_BUInd1Has = yes 
+					Rights_BUTax2Has = yes
+				}
+			}
+			change_key = { lhs = Admin_DemandInd value = 0.05 }
+		}
+	}
+	multiply_key = { lhs = Admin_DemandDir value = 0.5 }
+	multiply_key = { lhs = Admin_DemandInd value = 0.5 }
+	
+	multiply_key = { lhs = Admin_DemandDir which = Prov_BUPow }
+	multiply_key = { lhs = Admin_DemandInd which = Prov_BUPow }
+	
+	multiply_key = { lhs = Admin_DemandDir value = 0.01 }
+	multiply_key = { lhs = Admin_DemandInd value = 0.01 }
+	
+	change_key = { lhs = Admin_DemandDir value = 0.05 } # base
+	change_key = { lhs = Admin_DemandInd value = 0.01 } # base
+	if = {
+		limit = {
+			is_capital = yes
+		}
+		multiply_key = { lhs = Admin_DemandDir value = 1.5 }
+		multiply_key = { lhs = Admin_DemandInd value = 1.5 }
+		change_key = { lhs = Admin_DemandDir value = 0.2 }
+		change_key = { lhs = Admin_DemandInd value = 0.2 }
+	}
+	else = {
+		export_to_key = { lhs = Tmp_1 value = local_autonomy }
+		multiply_key = { lhs = Tmp_1 value = -0.01 }
+		change_key = { lhs = Tmp_1 value = 1 }
+		multiply_key = { lhs = Tmp_1 value = 0.33 }
+		change_key = { lhs = Tmp_1 value = 0.67 }
+		multiply_key = { lhs = Admin_DemandDir which = Tmp_1 }
+		multiply_key = { lhs = Admin_DemandInd which = Tmp_1 }
+	}
+	if = {
+		limit = {
+			OR = {
+				owner = { is_colonial_nation = yes }
+				owner = { is_former_colonial_nation = yes }
+				is_owned_by_trade_company = yes
+			}
+		}
+		multiply_key = { lhs = Admin_DemandDir value = 0.4 }
+		multiply_key = { lhs = Admin_DemandInd value = 0.7 }
+	}
+	
+	if = {
+		limit = {
+			check_key = { lhs = Prov_TRPow value = 0.001 } 
+		}
+		set_key = { lhs = Tmp_1 value = 100 }
+		subtract_key = { lhs = Tmp_1 which = Prov_TRPow }
+		multiply_key = { lhs = Tmp_1 value = 0.01 }
+		multiply_key = { lhs = Admin_DemandDir which = Tmp_1 }
+		multiply_key = { lhs = Admin_DemandInd which = Tmp_1 }
+		set_key = { lhs = Tmp_1 value = 0 }
+	}
+	
+	multiply_key = { lhs = Admin_DemandInd which = Modi_AdminHireMulti } # % of wages paid
+	multiply_key = { lhs = Admin_DemandDir which = Modi_AdminHireMulti } # % of wages paid
+	
+	set_key = { lhs = Tmp_1 which = Class_Rural }
+	subtract_key = { lhs = Tmp_1 which = NM_Total } # nomads need no admin
+	multiply_key = { lhs = Tmp_1 which = Modi_AdminRuralDmnd }
+	set_key = { lhs = Tmp_2 which = Class_Urban }
+	multiply_key = { lhs = Tmp_2 value = 2 } # way more administration
+	multiply_key = { lhs = Tmp_2 which = Modi_AdminUrbanDmnd }
+	set_key = { lhs = Tmp_3 which = Class_Notables }
+	multiply_key = { lhs = Tmp_3 which = Modi_AdminNotablesDmnd }
+	change_key = { lhs = Tmp_1 which = Tmp_2 }
+	change_key = { lhs = Tmp_1 which = Tmp_3 }
+	
+	multiply_key = { lhs = Admin_DemandInd which = Tmp_1 }
+	multiply_key = { lhs = Admin_DemandInd value = 10 } # 100 scale to 1000 scale
+	multiply_key = { lhs = Admin_DemandInd value = 0.001 }
+	multiply_key = { lhs = Admin_DemandInd value = 1000 }
+	
+	multiply_key = { lhs = Admin_DemandDir which = Tmp_1 }
+	multiply_key = { lhs = Admin_DemandDir value = 10 } # 100 scale to 1000 scale
+	multiply_key = { lhs = Admin_DemandDir value = 0.001 }
+	multiply_key = { lhs = Admin_DemandDir value = 1000 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	
+	set_key = { lhs = Admin_DemandUni value = 0 }
+	change_key = { lhs = Admin_DemandUni which = Admin_DemandDir }
+	change_key = { lhs = Admin_DemandUni which = Admin_DemandInd }
+	set_key = { lhs = Tmp_2 value = 0 }
+	set_key = { lhs = Tmp_3 value = 0 }
+}
+Admin_SetWage = {
+	if = {
+		limit = {
+			owner = {
+				OR = {
+					AND = {
+						NOT = { Rights_BUInd2HasGreater = yes }
+						NOT = { Rights_BUDir2HasGreater = yes }
+					}
+					Rights_BUTax3HasGreater = yes
+				}
+			}
+		}
+		set_key = { lhs = Admin_CostDir value = 0 }
+		set_key = { lhs = Admin_CostInd value = 0 }
+		Admin_SetWageType = { type=Uni }
+	}
+	else = {
+		Admin_SetWageType = { type=Ind }
+		Admin_SetWageType = { type=Dir }
+		set_key = { lhs = Admin_CostUni value = 0 }
+		change_key = { lhs = Admin_CostUni which = Admin_CostDir }
+		change_key = { lhs = Admin_CostUni which = Admin_CostInd }
+	}
+}
+Admin_SetWageType = {
+	set_key = { lhs = Admin_Cost$type$ which = Admin_Supply$type$ }
+	
+	set_key = { lhs = Admin_Wage which = PREV }
+	multiply_key = { lhs = Admin_Wage which = Modi_CorruptionWages } # % of wages paid
+
+	if = {
+        limit = {
+            check_key = { lhs = Admin_Wage value = 100 }
+        }
+        set_key = { lhs = Admin_Wage value = 100 }
+    }
+
+	multiply_key = { lhs = Admin_Cost$type$ value = 0.1 } # 100 scale to 10 scale
+	multiply_key = { lhs = Admin_Cost$type$ which = Admin_Wage } # % of wages paid
+	multiply_key = { lhs = Admin_Cost$type$ value = 0.1 } # 100 scale to 10 scale
+	
+	multiply_key = { lhs = Admin_Cost$type$ value = 4.5 } # 4.5 ducats per 1k bureaucrats
+	multiply_key = { lhs = Admin_Cost$type$ which = Modi_AdminCostMulti } # % of wages paid
+	multiply_key = { lhs = Admin_Cost$type$ value = 0.001 } # 1000 scale to 1 scale
+	
+	#TN_GetInfl = { return = Tmp_1 }
+	#divide_key = { lhs = Admin_Cost which = Tmp_1 } # Inflation, should scale it to local price/costs
+	
+	# China should be paying like 50 ducats a year for a fully paid, full bureaucracy for 50 million citizens
+}
+
+Admin_SetSupply = {
+	if = {
+		limit = {
+			owner = {
+				OR = {
+					AND = {
+						NOT = { Rights_BUInd2HasGreater = yes }
+						NOT = { Rights_BUDir2HasGreater = yes }
+					}
+					Rights_BUTax3HasGreater = yes
+				}
+			}
+		}
+		set_key = { lhs = Admin_SupplyDir value = 0 }
+		set_key = { lhs = Admin_SupplyInd value = 0 }
+		set_key = { lhs = Admin_SupplyRestDir value = 0 }
+		set_key = { lhs = Admin_SupplyRestInd value = 0 }
+		set_key = { lhs = Admin_SupplyChangeDir value = 0 }
+		set_key = { lhs = Admin_SupplyChangeInd value = 0 }
+		Admin_SetSupplyType = { type=Uni }
+	}
+	else = {
+		Admin_SetSupplyType = { type=Ind }
+		Admin_SetSupplyType = { type=Dir }
+		set_key = { lhs = Admin_SupplyUni value = 0 }
+		change_key = { lhs = Admin_SupplyUni which = Admin_SupplyDir }
+		change_key = { lhs = Admin_SupplyUni which = Admin_SupplyInd }
+		set_key = { lhs = Admin_SupplyRestUni value = 0 }
+		change_key = { lhs = Admin_SupplyRestUni which = Admin_SupplyRestDir }
+		change_key = { lhs = Admin_SupplyRestUni which = Admin_SupplyRestInd }
+		set_key = { lhs = Admin_SupplyChangeUni value = 0 }
+		change_key = { lhs = Admin_SupplyChangeUni which = Admin_SupplyChangeDir }
+		change_key = { lhs = Admin_SupplyChangeUni which = Admin_SupplyChangeInd }
+	}
+}
+Admin_SetSupplyType = {
+	set_key = { lhs = Admin_SupplyRest$type$ which = Admin_Demand$type$ }
+	set_key = { lhs = Admin_Hire which = PREV }
+	multiply_key = { lhs = Admin_SupplyRest$type$ value = 0.1 } # 100 scale to 10 scale
+	multiply_key = { lhs = Admin_SupplyRest$type$ which = Admin_Hire } # % of staff hired
+	multiply_key = { lhs = Admin_SupplyRest$type$ value = 0.1 } # 10 scale to 1 scale
+	if = {
+		limit = {
+			has_global_flag = POP_Sim
+		}
+		set_key = { lhs = Admin_Supply$type$ which = Admin_SupplyRest$type$ }
+	}
+	else = {
+		set_key = { lhs = Admin_SupplyChange$type$ which = Admin_SupplyRest$type$ }
+		
+		subtract_key = { lhs = Admin_SupplyChange$type$ which = Admin_Supply$type$ }
+		
+		multiply_key = { lhs = Admin_SupplyChange$type$ value = 0.1 } # Takes 10 years to adjust
+#		if = { # Allows 1:1 matching
+#			limit = {
+#				OR = {
+#					check_key = { lhs = Admin_SupplyChange$type$ value = -0.099 }
+#					NOT = { check_key = { lhs = Admin_SupplyChange$type$ value = 0.1 } }
+#				}
+#			}
+#			set_key = { lhs = Admin_SupplyChange$type$ which = Admin_SupplyRest$type$ }
+#			subtract_key = { lhs = Admin_SupplyChange$type$ which = Admin_Supply$type$ }
+#		}
+		change_key = { lhs = Admin_Supply$type$ which = Admin_SupplyChange$type$ }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = Admin_Supply$type$ which = Admin_Demand$type$ }
+		}
+		set_key = { lhs = Admin_Supply$type$ which = Admin_Demand$type$ }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Admin_Supply$type$ value = 0 } }
+		}
+		set_key = { lhs = Admin_Supply$type$ value = 0 }
+	}
+	multiply_key = { lhs = Admin_Supply$type$ value = 0.001 }
+	multiply_key = { lhs = Admin_Supply$type$ value = 1000 }
+}
+
+Admin_SetEffic = {
+	if = {
+		limit = {
+			owner = {
+				OR = {
+					AND = {
+						NOT = { Rights_BUInd2HasGreater = yes }
+						NOT = { Rights_BUDir2HasGreater = yes }
+					}
+					Rights_BUTax3HasGreater = yes
+				}
+			}
+		}
+		set_key = { lhs = Admin_EfficDir value = 0 }
+		set_key = { lhs = Admin_EfficInd value = 0 }
+		set_key = { lhs = Admin_EfficRestDir value = 0 }
+		set_key = { lhs = Admin_EfficRestInd value = 0 }
+		set_key = { lhs = Admin_EfficChangeDir value = 0 }
+		set_key = { lhs = Admin_EfficChangeInd value = 0 }
+		Admin_SetEfficType = { type=Uni reform=Tax3 }
+	}
+	else = {
+		Admin_SetEfficType = { type=Ind reform=Ind2 }
+		Admin_SetEfficType = { type=Dir reform=Dir2 }
+		set_key = { lhs = Admin_EfficUni value = 0 }
+		change_key = { lhs = Admin_EfficUni which = Admin_EfficDir }
+		change_key = { lhs = Admin_EfficUni which = Admin_EfficInd }
+		multiply_key = { lhs = Admin_EfficUni value = 0.5 }
+	}
+}
+Admin_SetEfficType = {
+	set_key = { lhs = Admin_EfficRest$type$ value = 0 }
+	set_key = { lhs = Admin_EfficChange$type$ value = 0 }
+	if = {
+		limit = {
+			check_key = { lhs = Admin_Supply$type$ value = 0.001 }
+			check_key = { lhs = Admin_Demand$type$ value = 0.001 }
+		}
+		change_key = { lhs = Admin_EfficRest$type$ which = Admin_Supply$type$ }
+		divide_key = { lhs = Admin_EfficRest$type$ which = Admin_Demand$type$ }
+		
+		# Exponential effect
+		set_key = { lhs = Tmp_0 value = 1 }
+		subtract_key = { lhs = Tmp_0 which = Admin_EfficRest$type$ }
+		multiply_key = { lhs = Tmp_0 which = Tmp_0 }
+		
+		set_key = { lhs = Admin_EfficRest$type$ value = 1 }
+		subtract_key = { lhs = Admin_EfficRest$type$ which = Tmp_0 }
+		
+		# Wages
+		# Exponential effect
+		set_key = { lhs = Tmp_0 value = 100 }
+		subtract_key = { lhs = Tmp_0 which = Admin_Wage }
+		multiply_key = { lhs = Tmp_0 value = 0.01 } # 100 scale to 1 scale
+		multiply_key = { lhs = Tmp_0 which = Tmp_0 }
+		
+		set_key = { lhs = Tmp_1 value = 1 }
+		subtract_key = { lhs = Tmp_1 which = Tmp_0 }
+		
+		multiply_key = { lhs = Admin_EfficRest$type$ which = Tmp_1 } # % of wages paid
+		
+		# Base
+		multiply_key = { lhs = Admin_EfficRest$type$ which = Admin_Base$type$ } # Effect of Tax Burden
+			
+		# If the State has become involved, then State Reach is important
+		if = {
+			limit = {
+				owner = {
+					Rights_BUTax2HasGreater = yes
+				}
+			}
+			set_key = { lhs = Admin_EfficReach which = Prov_BUPow }
+			multiply_key = { lhs = Admin_EfficReach value = 0.01 }
+			if = {
+				limit = {
+					owner = {
+						Rights_BU$reform$HasGreater = no
+					}
+				}
+				multiply_key = { lhs = Admin_EfficReach value = 0.5 }
+				change_key = { lhs = Admin_EfficReach value = 0.5 }
+			}
+			multiply_key = { lhs = Admin_EfficRest$type$ which = Admin_EfficReach }
+			multiply_key = { lhs = Admin_EfficReach value = 100 }
+		}
+		else = {
+			set_key = { lhs = Admin_EfficReach value = 100 }
+		}
+		
+		multiply_key = { lhs = Admin_EfficRest$type$ value = 100 } # 1 scale to 100 scale
+		# Leave at 100 scale
+		set_key = { lhs = Tmp_0 value = 0 }
+		set_key = { lhs = Tmp_1 value = 0 }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Admin_Demand$type$ value = 0.001 }
+		}
+		set_key = { lhs = Admin_EfficRest$type$ value = 0 }
+	}
+	else = {
+		set_key = { lhs = Admin_EfficRest$type$ value = 100 }
+	}
+	if = {
+		limit = {
+			has_global_flag = POP_Sim
+		}
+		set_key = { lhs = Admin_Effic$type$ which = Admin_EfficRest$type$ }
+	}
+	else = {
+		set_key = { lhs = Admin_EfficChange$type$ which = Admin_EfficRest$type$ }
+		
+		subtract_key = { lhs = Admin_EfficChange$type$ which = Admin_Effic$type$ }
+		
+		multiply_key = { lhs = Admin_EfficChange$type$ value = 0.1 } # Takes 10 years to adjust
+#		if = { # Allows 1:1 matching
+#			limit = {
+#				OR = {
+#					check_key = { lhs = Admin_EfficChange$type$ value = -0.099 }
+#					NOT = { check_key = { lhs = Admin_EfficChange$type$ value = 0.1 } }
+#				}
+#			}
+#			set_key = { lhs = Admin_EfficChange$type$ which = Admin_EfficRest$type$ }
+#			subtract_key = { lhs = Admin_EfficChange$type$ which = Admin_Effic$type$ }
+#		}
+		change_key = { lhs = Admin_Effic$type$ which = Admin_EfficChange$type$ }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = Admin_Effic$type$ value = 100 }
+		}
+		set_key = { lhs = Admin_Effic$type$ value = 100 }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Admin_Effic$type$ value = 0 } }
+		}
+		set_key = { lhs = Admin_Effic$type$ value = 0 }
+	}
+}
+Admin_SetReach = {
+	if = {
+		limit = {
+			NOT = { has_global_flag = POP_Sim }
+		}
+		## Calc the resting point
+		## Wealth, autonomy, rights-based power and current power are the key factors (inertia)
+		set_key = { lhs = Admin_ReachRest value = 0 }
+
+		change_key = { lhs = Admin_ReachRest which = Modi_AdminReachRights }
+		change_key = { lhs = Admin_ReachRest which = Modi_AdminReachStructure }
+		change_key = { lhs = Admin_ReachRest which = Modi_AdminReach }
+		set_key = { lhs = Tmp_0 value = 100 }
+		subtract_key = { lhs = Tmp_0 which = Prov_BUPow }
+		multiply_key = { lhs = Tmp_0 value = 0.01 }
+		multiply_key = { lhs = Tmp_0 value = 0.75 } # removes up to 75% of all decay
+		change_key = { lhs = Tmp_0 value = 0.25 }
+		multiply_key = { lhs = Tmp_0 which = Modi_AdminReachRestMult }
+		multiply_key = { lhs = Admin_ReachRest which = Tmp_0 }
+
+		## National pre-calced class institutional power
+		# Comes from rights and privileges, and pre-calced at the national level for performance reasons
+		#owner = {
+		#	set_key = { lhs = Tmp_0 which = CL_PowCalc }
+		#	PREV = { set_key = { lhs = Tmp_0 which = PREV } }
+		#	set_key = { lhs = Tmp_0 value = 0 }
+		#}
+		#change_key = { lhs = Admin_ReachRest which = Tmp_0 }
+		#set_key = { lhs = Tmp_0 value = 0 }
+
+		# Drop the last digit, 2 decimal places for display and removal of micro changes
+		multiply_key = { lhs = Admin_ReachRest value = 0.1 }
+		multiply_key = { lhs = Admin_ReachRest value = 10 }
+		
+		## Calc annual power change
+		# Power has inertia, so add Pow * -1 to the monthly change. 100 power is -1.00 effect
+		# Result is upward pressure and downward pressure leading to a resting point
+		set_key = { lhs = Admin_ReachChange which = Admin_Reach }
+		multiply_key = { lhs = Admin_ReachChange value = -1 }
+		change_key = { lhs = Admin_ReachChange which = Admin_ReachRest }
+		# Above is considered monthly change, so x12 the effect. Mimics autonomy
+		#multiply_key = { lhs = Admin_ReachChange value = 12 } # For the year, 12 monthly changes
+		multiply_key = { lhs = Admin_ReachChange value = 0.01 } # 1% speed of change per month, so 12% a year. Applied last to preserve precision
+			
+		# Rate of change
+		multiply_key = { lhs = Admin_ReachChange value = 2 } # Raise this for faster change
+		multiply_key = { lhs = Admin_ReachChange which = Modi_AdminReachSpeed }
+	}
+	else = {
+		set_key = { lhs = Admin_ReachChange value = 0 }
+	}
+	change_key = { lhs = Admin_ReachChange which = Modi_AdminReachChange }
+
+	### Apply the change
+	change_key = { lhs = Admin_Reach which = Admin_ReachChange }
+
+	# Drop the last digit, 2 decimal places for display and removal of micro changes
+	multiply_key = { lhs = Admin_Reach value = 0.1 }
+	multiply_key = { lhs = Admin_Reach value = 10 }
+	multiply_key = { lhs = Admin_ReachChange value = 0.1 }
+	multiply_key = { lhs = Admin_ReachChange value = 10 }
+	
+	# Clamp range to 0-100
+	if = {
+		limit = {
+			check_key = { lhs = Admin_Reach value = 100 }
+		}
+		set_key = { lhs = Admin_Reach value = 100 }
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				check_key = { lhs = Admin_Reach value = 0 }
+			}
+		}
+		set_key = { lhs = Admin_Reach value = 0 }
+	}
+}

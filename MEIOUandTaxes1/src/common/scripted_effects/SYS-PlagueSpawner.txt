@@ -1,0 +1,959 @@
+#By shiro
+Main_Plague_Spawner = {
+    every_owned_province = {
+        limit = {
+            NOT = { has_province_flag = Plague }
+            NOT = {
+                continent = north_america
+                continent = south_america
+            }
+            check_key = { lhs = Plague_SpawnChance$Type$ value = 1 }
+            NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 55 } }
+        }
+       
+        
+        if = {
+            limit = {
+                NOT = {
+                    contgroup = {
+                        AND = {
+                            is_key_equal = { lhs = ID_Cont which = PREV }
+                            OR = {
+                                has_province_flag = ActivePlague$Type$
+                                has_province_modifier = RecentPlague$Type$
+                            }
+                        }
+                    }
+                }
+            }
+            
+            set_key = { lhs = Tmp_0 which = Plague_SpawnChance$Type$ } # Don't change Plague_SpawnChance$Type$, hardcoded from   start.
+            multiply_key = { lhs = Tmp_0 value = 10 }
+                #factors
+                        
+                #avg life fullfilment
+            set_key = { lhs = Public_Tmp2 value = 1 }
+            divide_key = { lhs = Public_Tmp2 which = Class_FillLifeC } 
+            multiply_key = { lhs = Tmp_0 which = Public_Tmp2 }
+            
+                #density
+            set_key = { lhs = Tmp_1 which = SF_Total }
+            divide_key = { lhs = Tmp_1 which = Land_PSize }
+            #divide_key = { lhs = Tmp_1 value = 1.75 }
+            multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+            
+                # urban density
+            if = {
+                limit = {
+                    check_key = { lhs = RE_Total value = 3 }
+                }
+                if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 3.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 1 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.333 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 10.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 2 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.1 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 30.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 3 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.033 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 80.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 4 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.012 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 200.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 5 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.005 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 500.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 6 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.002 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 1000.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.001 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+            }
+                
+                # Divide by resistance x1.3
+            set_key = { lhs = Tmp_2 which = Plague_Resistance$Type$ }
+            multiply_key = { lhs = Tmp_2 value = 1.3 }
+            divide_key = { lhs = Tmp_0 which = Plague_Resistance$Type$ } 
+               
+            if = {
+                limit = {
+                    has_siege = yes 
+                }
+                multiply_key = { lhs = Tmp_0 value = 15 }
+            }
+            
+            if = {
+                limit = {
+                    owner = { is_at_war = yes }
+                }
+                multiply_key = { lhs = Tmp_0 value = 3 }
+            }
+            
+            if = {
+                limit = {
+                    any_neighbor_province = {
+                        has_siege = yes
+                    }
+                }
+                multiply_key = { lhs = Tmp_0 value = 10 }
+            }
+           
+            #if = {
+            #    limit = {
+            #        is_looted = yes 
+            #    }
+            #    multiply_key = { lhs = Tmp_0 value = 3 } 
+            #}
+            
+            trigger_switch = {
+                on_trigger = devastation
+                
+                20 = { multiply_key = { lhs = Tmp_0 value = 2 } }
+                30 = { multiply_key = { lhs = Tmp_0 value = 3 } }
+                40 = { multiply_key = { lhs = Tmp_0 value = 4 } }
+                50 = { multiply_key = { lhs = Tmp_0 value = 5 } }
+                60 = { multiply_key = { lhs = Tmp_0 value = 6 } }
+                70 = { multiply_key = { lhs = Tmp_0 value = 7 } }
+                80 = { multiply_key = { lhs = Tmp_0 value = 8 } }
+                90 = { multiply_key = { lhs = Tmp_0 value = 9 } }
+            }
+            
+            contgroup = {
+                limit = {
+                    is_key_equal = { lhs = ID_Cont which = PREV }
+                }
+                trigger_switch = {
+                    on_trigger = has_province_flag
+                    
+                    ActivePlague0 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague1 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague2 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague3 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague4 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                }
+                PREV = {
+                    if = {
+                        limit = {
+                            check_key = { lhs = Tmp_0 value = 5 }
+                        }
+                        if = {
+                            limit = {
+                                check_key = { lhs = Tmp_0 value = 8 }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_0 value = 11 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_0 value = 14 }
+                                    }
+                                    random_list = {
+                                        10 = {
+                                            Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 7300
+                                                   hidden = yes
+                                                }
+                                                set_province_flag = ActivePlague$Type$
+                                            }
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                                else = {
+                                    random_list = {
+                                        7 = {
+                                            Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 5475
+                                                   hidden = yes
+                                                }   
+                                                set_province_flag = ActivePlague$Type$
+                                            }   
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                            }
+                            else = {
+                                random_list = {
+                                    4 = {
+                                        Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                        #province_event = { id = new_world.2 }
+                                        
+                                        PREV = {
+                                            add_province_modifier = {
+                                               name = RecentPlague$Type$
+                                               duration = 3650
+                                               hidden = yes
+                                            }
+                                            set_province_flag = ActivePlague$Type$
+                                        }   
+                                    }
+                                    10 = {
+                                    }
+                                }
+                            }  
+                        }
+                        else = {
+                            random_list = {
+                                1 = {
+                                    Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                    #province_event = { id = new_world.2 }
+                                    
+                                    PREV = {
+                                        add_province_modifier = {
+                                            name = RecentPlague$Type$
+                                            duration = 1825
+                                            hidden = yes
+                                        }
+                                        set_province_flag = ActivePlague$Type$
+                                    }   
+                                }
+                                10 = {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    clr_country_flag = bubonic
+    clr_country_flag = smallpox
+    clr_country_flag = influenza
+    clr_country_flag = typhus
+}
+Main_Plague_Spawner_BEurope = {
+    every_owned_province = {
+        limit = {
+            NOT = { has_province_flag = Plague }
+            NOT = {
+                continent = north_america
+                continent = south_america
+            }
+            check_key = { lhs = Plague_SpawnChance$Type$ value = 1 }
+            OR = {
+                NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 50 } }
+                NOT = { is_year = 1380 }
+            }
+        }
+       
+        if = {
+            limit = {
+                NOT = {
+                    contgroup = {
+                        AND = {
+                            is_key_equal = { lhs = ID_Cont which = PREV }
+                            OR = {
+                                has_province_flag = ActivePlague$Type$
+                                has_province_modifier = RecentPlague$Type$
+                            }
+                        }
+                    }
+                }
+            }
+            
+            set_key = { lhs = Tmp_0 which = Plague_SpawnChance$Type$ } # Don't change Plague_SpawnChance$Type$, hardcoded from start.
+            multiply_key = { lhs = Tmp_0 value = 15 }
+                #factors
+            ##province_event = { id = new_world.3 }   
+            
+                #avg life fullfilment
+            set_key = { lhs = Public_Tmp2 value = 1 }
+            divide_key = { lhs = Public_Tmp2 which = Class_FillLifeC } 
+            multiply_key = { lhs = Tmp_0 which = Public_Tmp2 }
+            
+                #density
+            set_key = { lhs = Tmp_1 which = SF_Total }
+            divide_key = { lhs = Tmp_1 which = Land_PSize }
+            #divide_key = { lhs = Tmp_1 value = 1.75 }
+            multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                
+            divide_key = { lhs = Tmp_0 which = Plague_Resistance$Type$ }
+            
+                # urban density
+            if = {
+                limit = {
+                    check_key = { lhs = RE_Total value = 3 }
+                }
+                if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 3.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 1 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.333 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 10.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 2 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.1 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 30.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 3 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.033 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 80.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 4 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.012 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 200.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 5 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.005 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 500.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 6 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.002 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+                else_if = {
+                    limit = {
+                        check_key = { lhs = RE_Total value = 1000.1 }
+                        NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+                    }
+                    set_key = { lhs = Tmp_1 which = RE_Total }
+					multiply_key = { lhs = Tmp_1 value = 0.001 } # Overcrowd factors
+                    multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                }
+            }
+            
+            if = {
+                limit = {
+                    has_siege = yes 
+                }
+                multiply_key = { lhs = Tmp_0 value = 15 }
+            }
+            
+            if = {
+                limit = {
+                    owner = { is_at_war = yes }
+                }
+                multiply_key = { lhs = Tmp_0 value = 3 }
+            }
+            
+            if = {
+                limit = {
+                    any_neighbor_province = {
+                        has_siege = yes
+                    }
+                }
+                multiply_key = { lhs = Tmp_0 value = 10 }
+            }
+           
+            #if = {
+            #    limit = {
+            #        is_looted = yes 
+            #    }
+            #    multiply_key = { lhs = Tmp_0 value = 3 } 
+            #}
+            
+            trigger_switch = {
+                on_trigger = devastation
+                
+                20 = { multiply_key = { lhs = Tmp_0 value = 2 } }
+                30 = { multiply_key = { lhs = Tmp_0 value = 3 } }
+                40 = { multiply_key = { lhs = Tmp_0 value = 4 } }
+                50 = { multiply_key = { lhs = Tmp_0 value = 5 } }
+                60 = { multiply_key = { lhs = Tmp_0 value = 6 } }
+                70 = { multiply_key = { lhs = Tmp_0 value = 7 } }
+                80 = { multiply_key = { lhs = Tmp_0 value = 8 } }
+                90 = { multiply_key = { lhs = Tmp_0 value = 9 } }
+            }
+            
+            contgroup = {
+                limit = {
+                    is_key_equal = { lhs = ID_Cont which = PREV }
+                }
+                trigger_switch = {
+                    on_trigger = has_province_flag
+                    
+                    ActivePlague0 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague1 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague2 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague3 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague4 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                }
+                PREV = {
+                    if = {
+                        limit = {
+                            check_key = { lhs = Tmp_0 value = 5 }
+                        }
+                        if = {
+                            limit = {
+                                check_key = { lhs = Tmp_0 value = 8 }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_0 value = 11 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_0 value = 14 }
+                                    }
+                                    random_list = {
+                                        10 = {
+                                            Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 6300
+                                                   hidden = yes
+                                                }
+                                                set_province_flag = ActivePlague$Type$
+                                            }
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                                else = {
+                                    random_list = {
+                                        7 = {
+                                            Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 4475
+                                                   hidden = yes
+                                                }   
+                                                set_province_flag = ActivePlague$Type$
+                                            }   
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                            }
+                            else = {
+                                random_list = {
+                                    4 = {
+                                        Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                        #province_event = { id = new_world.2 }
+                                        
+                                        PREV = {
+                                            add_province_modifier = {
+                                               name = RecentPlague$Type$
+                                               duration = 2650
+                                               hidden = yes
+                                            }
+                                            set_province_flag = ActivePlague$Type$
+                                        }   
+                                    }
+                                    10 = {
+                                    }
+                                }
+                            }  
+                        }
+                        else = {
+                            random_list = {
+                                1 = {
+                                    Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                    #province_event = { id = new_world.2 }
+                                    
+                                    PREV = {
+                                        add_province_modifier = {
+                                            name = RecentPlague$Type$
+                                            duration = 1825
+                                            hidden = yes
+                                        }
+                                        set_province_flag = ActivePlague$Type$
+                                    }   
+                                }
+                                10 = {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    clr_country_flag = bubonic_europe
+}
+Main_Malaria_Plague_Spawner = {
+    every_owned_province = {
+        limit = {
+            NOT = { has_province_flag = Plague }
+            NOT = {
+                continent = north_america
+                continent = south_america
+            }
+            check_key = { lhs = Plague_SpawnChance$Type$ value = 1 }
+            NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 70 } }
+        }
+       
+        
+        if = {
+            limit = {
+                NOT = {
+                    contgroup = {
+                        AND = {
+                            is_key_equal = { lhs = ID_Cont which = PREV }
+                            OR = {
+                                has_province_flag = ActivePlague$Type$
+                                has_province_modifier = RecentPlague$Type$
+                            }
+                        }
+                    }
+                }
+            }
+            
+            set_key = { lhs = Tmp_0 which = Plague_SpawnChance$Type$ } # Don't change Plague_SpawnChance$Type$, hardcoded from start.
+            multiply_key = { lhs = Tmp_0 value = 10 }
+                #factors
+            ##province_event = { id = new_world.3 }   
+            
+                #avg life fullfilment
+            set_key = { lhs = Public_Tmp2 value = 1.5 }
+            divide_key = { lhs = Public_Tmp2 which = Class_FillLifeC } 
+            multiply_key = { lhs = Tmp_0 which = Public_Tmp2 }
+            
+                
+                # Divide by resistance x1.3
+            set_key = { lhs = Tmp_2 which = Plague_Resistance$Type$ }
+            multiply_key = { lhs = Tmp_2 value = 1.3 }
+            divide_key = { lhs = Tmp_0 which = Plague_Resistance$Type$ } 
+            #divide_key = { lhs = Tmp_0 which = Plague_Resistance$Type$ }
+            
+            if = {
+                limit = {
+                    has_siege = yes 
+                }
+                multiply_key = { lhs = Tmp_0 value = 10 }
+            }
+            
+            if = {
+                limit = {
+                    owner = { is_at_war = yes }
+                }
+                multiply_key = { lhs = Tmp_0 value = 3 }
+            }
+            
+            if = {
+                limit = {
+                    any_neighbor_province = {
+                        has_siege = yes
+                    }
+                }
+                multiply_key = { lhs = Tmp_0 value = 5 }
+            }
+           
+            trigger_switch = {
+                on_trigger = devastation
+                
+                20 = { multiply_key = { lhs = Tmp_0 value = 2 } }
+                30 = { multiply_key = { lhs = Tmp_0 value = 3 } }
+                40 = { multiply_key = { lhs = Tmp_0 value = 4 } }
+                50 = { multiply_key = { lhs = Tmp_0 value = 5 } }
+                60 = { multiply_key = { lhs = Tmp_0 value = 6 } }
+                70 = { multiply_key = { lhs = Tmp_0 value = 7 } }
+                80 = { multiply_key = { lhs = Tmp_0 value = 8 } }
+                90 = { multiply_key = { lhs = Tmp_0 value = 9 } }
+            }
+            
+            contgroup = {
+                limit = {
+                    is_key_equal = { lhs = ID_Cont which = PREV }
+                }
+                trigger_switch = {
+                    on_trigger = has_province_flag
+                    
+                    ActivePlague0 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague1 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague2 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague3 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague4 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                }
+                PREV = {
+                    if = {
+                        limit = {
+                            check_key = { lhs = Tmp_0 value = 5 }
+                        }
+                        if = {
+                            limit = {
+                                check_key = { lhs = Tmp_0 value = 8 }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_0 value = 11 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_0 value = 14 }
+                                    }
+                                    random_list = {
+                                        10 = {
+                                            Plague_Spawn_Malaria = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 6300
+                                                   hidden = yes
+                                                }
+                                                set_province_flag = ActivePlague$Type$
+                                            }
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                                else = {
+                                    random_list = {
+                                        7 = {
+                                            Plague_Spawn_Malaria = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 4475
+                                                   hidden = yes
+                                                }   
+                                                set_province_flag = ActivePlague$Type$
+                                            }   
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                            }
+                            else = {
+                                random_list = {
+                                    4 = {
+                                        Plague_Spawn_Malaria = { Type=$Type$ InitInfection=0.01 }  
+                                        #province_event = { id = new_world.2 }
+                                        
+                                        PREV = {
+                                            add_province_modifier = {
+                                               name = RecentPlague$Type$
+                                               duration = 2650
+                                               hidden = yes
+                                            }
+                                            set_province_flag = ActivePlague$Type$
+                                        }   
+                                    }
+                                    10 = {
+                                    }
+                                }
+                            }  
+                        }
+                        else = {
+                            random_list = {
+                                1 = {
+                                    Plague_Spawn_Malaria = { Type=$Type$ InitInfection=0.01 }  
+                                    #province_event = { id = new_world.2 }
+                                    
+                                    PREV = {
+                                        add_province_modifier = {
+                                            name = RecentPlague$Type$
+                                            duration = 1825
+                                            hidden = yes
+                                        }
+                                        set_province_flag = ActivePlague$Type$
+                                    }   
+                                }
+                                10 = {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    clr_country_flag = malaria
+}
+America_Plague_Spawner = {
+    $cont$_america = {
+        limit = {
+            isValidEmpty = yes
+            NOT = { has_province_flag = Plague }
+            check_key = { lhs = Plague_SpawnChance$Type$ value = 1 }
+            NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 70 } }
+        }
+       
+        
+        if = {
+            limit = {
+                NOT = {
+                    contgroup = {
+                        AND = {
+                            is_key_equal = { lhs = ID_Cont which = PREV }
+                            OR = {
+                                has_province_flag = ActivePlague$Type$
+                                has_province_modifier = RecentPlague$Type$
+                            }
+                        }
+                    }
+                }
+            }
+            
+            set_key = { lhs = Tmp_0 which = Plague_SpawnChance$Type$ } # Don't change Plague_SpawnChance$Type$, hardcoded from start.
+            multiply_key = { lhs = Tmp_0 value = 10 }
+                #factors
+            #province_event = { id = new_world.3 }   
+            
+                #avg life fullfilment
+            set_key = { lhs = Public_Tmp2 value = 1 }
+            divide_key = { lhs = Public_Tmp2 which = Class_FillLifeC } 
+            multiply_key = { lhs = Tmp_0 which = Public_Tmp2 }
+            
+                #density
+            set_key = { lhs = Tmp_1 which = SF_Total }
+            divide_key = { lhs = Tmp_1 which = Land_PSize }
+            divide_key = { lhs = Tmp_1 value = 1.75 }
+            multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+                
+                # Divide by resistance x1.5
+            set_key = { lhs = Tmp_2 which = Plague_Resistance$Type$ }
+            multiply_key = { lhs = Tmp_2 value = 1.5 }
+            divide_key = { lhs = Tmp_0 which = Plague_Resistance$Type$ } 
+            #divide_key = { lhs = Tmp_0 which = Plague_Resistance$Type$ }
+            
+            if = {
+                limit = {
+                    has_siege = yes 
+                }
+                multiply_key = { lhs = Tmp_0 value = 10 }
+            }
+            
+            if = {
+                limit = {
+                    owner = { is_at_war = yes }
+                }
+                multiply_key = { lhs = Tmp_0 value = 3 }
+            }
+            
+            if = {
+                limit = {
+                    any_neighbor_province = {
+                        has_siege = yes
+                    }
+                }
+                multiply_key = { lhs = Tmp_0 value = 5 }
+            }
+           
+            #if = {
+            #    limit = {
+            #        is_looted = yes 
+            #    }
+            #    multiply_key = { lhs = Tmp_0 value = 3 } 
+            #}
+            
+            trigger_switch = {
+                on_trigger = devastation
+                
+                20 = { multiply_key = { lhs = Tmp_0 value = 2 } }
+                30 = { multiply_key = { lhs = Tmp_0 value = 3 } }
+                40 = { multiply_key = { lhs = Tmp_0 value = 4 } }
+                50 = { multiply_key = { lhs = Tmp_0 value = 5 } }
+                60 = { multiply_key = { lhs = Tmp_0 value = 6 } }
+                70 = { multiply_key = { lhs = Tmp_0 value = 7 } }
+                80 = { multiply_key = { lhs = Tmp_0 value = 8 } }
+                90 = { multiply_key = { lhs = Tmp_0 value = 9 } }
+            }
+            
+            contgroup = {
+                limit = {
+                    is_key_equal = { lhs = ID_Cont which = PREV }
+                }
+                trigger_switch = {
+                    on_trigger = has_province_flag
+                    
+                    ActivePlague0 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague1 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague2 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague3 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                    ActivePlague4 = { PREV = { multiply_key = { lhs = Tmp_0 value = 0.3 } } }
+                }
+                PREV = {
+                    if = {
+                        limit = {
+                            check_key = { lhs = Tmp_0 value = 5 }
+                        }
+                        if = {
+                            limit = {
+                                check_key = { lhs = Tmp_0 value = 8 }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_0 value = 11 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_0 value = 14 }
+                                    }
+                                    random_list = {
+                                        10 = {
+                                            Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 7300
+                                                   hidden = yes
+                                                }
+                                                set_province_flag = ActivePlague$Type$
+                                            }
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                                else = {
+                                    random_list = {
+                                        7 = {
+                                            Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                            #province_event = { id = new_world.2 }
+                                            
+                                            PREV = {
+                                                add_province_modifier = {
+                                                   name = RecentPlague$Type$
+                                                   duration = 5475
+                                                   hidden = yes
+                                                }   
+                                                set_province_flag = ActivePlague$Type$
+                                            }   
+                                        }
+                                        10 = {
+                                        }
+                                    }
+                                }
+                            }
+                            else = {
+                                random_list = {
+                                    4 = {
+                                        Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                        #province_event = { id = new_world.2 }
+                                        
+                                        PREV = {
+                                            add_province_modifier = {
+                                               name = RecentPlague$Type$
+                                               duration = 3650
+                                               hidden = yes
+                                            }
+                                            set_province_flag = ActivePlague$Type$
+                                        }   
+                                    }
+                                    10 = {
+                                    }
+                                }
+                            }  
+                        }
+                        else = {
+                            random_list = {
+                                1 = {
+                                    Plague_Spawn = { Type=$Type$ InitInfection=0.01 }  
+                                    #province_event = { id = new_world.2 }
+                                    
+                                    PREV = {
+                                        add_province_modifier = {
+                                            name = RecentPlague$Type$
+                                            duration = 1825
+                                            hidden = yes
+                                        }
+                                        set_province_flag = ActivePlague$Type$
+                                    }   
+                                }
+                                10 = {
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    clr_country_flag = salmonella_north
+    clr_country_flag = salmonella_south
+    clr_country_flag = smallpox_north
+    clr_country_flag = smallpox_south
+    clr_country_flag = malaria_north
+    clr_country_flag = malaria_south
+}
+#

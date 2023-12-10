@@ -1,0 +1,189 @@
+
+sar_missions_one = {
+	slot = 1
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_sar
+	}
+	has_country_shield = yes
+
+	sar_unify_sardina = {
+		icon = mission_unite_home_region
+		required_missions = {  }
+		position = 1
+		provinces_to_highlight = {
+			area = corsica_sardinia_area
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			OR = {
+				custom_trigger_tooltip = {tooltip ="is_free_or_tributary_trigger_tooltip" is_free_or_tributary_trigger = yes }
+				overlord = {
+					NOT = { culture_group = iberian }
+				}
+			}
+			is_at_war = no
+			government = monarchy
+			owns = 2242 # Casteddu
+			OR = {
+				check_variable = { which = "Demesne_in_Sardinia" value = 4 }
+				check_variable = { which = "Cores_on_Sardinia" value = 3 }
+			}
+		}
+		effect = {
+			log = "FE-FormingNewNations:[GetYear]:[Root.GetName]:formed [SAR.GetName] via mission:sar_unify_sardina"
+			if = {
+				limit = { NOT = { exists = SAR } }
+				country_event = { id = mission_event.037 }
+				hidden_effect = { complete_mission = sar_unify_sardina }
+			}
+			else = {
+				capital_scope = {
+					add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+				}
+			}
+		}
+	}
+}
+
+sar_missions_two = {
+	slot = 2
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_sar
+	}
+	has_country_shield = yes
+
+	sar_conquer_corsica = {
+		icon = mission_cannons_firing
+		required_missions = {  }
+		position = 1
+		provinces_to_highlight = {
+			OR = {
+				province_id = 1247
+				province_id = 2851
+			}
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			1247 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			2851 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_navy_tradition = 20
+		}
+	}
+}
+
+sar_missions_three = {
+	slot = 2
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_sar
+	}
+	has_country_shield = yes
+	
+	sar_integrate_sicily = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { sar_unify_sardina sar_conquer_corsica }
+		position = 2
+		provinces_to_highlight = {
+			region = sicily_region
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			sicily_region = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_country_modifier = {
+				name = "hegemonic_ambition"
+				duration = 9125 #25 years
+			}
+		}
+	}
+}
+
+sar_missions_four = {
+	slot = 3
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_sar
+	}
+	has_country_shield = yes
+	
+	sar_christian_fleet = {
+		icon = mission_sea_battles
+		required_missions = {  }
+		position = 1
+		trigger = {
+			if = {
+				limit = { exists = TUR }
+				navy_size = 7
+				OR = {
+					num_of_galley = TUR
+					naval_strength = {
+						who = TUR
+						value = 3
+					}
+				}
+			}
+			else_if = {
+				limit = { exists = OTT }
+				navy_size = 7
+				OR = {
+					num_of_galley = OTT
+					naval_strength = {
+						who = OTT
+						value = 3
+					}
+				}			
+			}
+			else_if = {
+				limit = { exists = MAM }
+				navy_size = 7
+				OR = {
+					num_of_galley = MAM
+					naval_strength = {
+						who = MAM
+						value = 3
+					}
+				}			
+			}
+			else_if = {
+				limit = { exists = HAF }
+				navy_size = 7
+				OR = {
+					num_of_galley = HAF
+					naval_strength = {
+						who = MAM
+						value = 3
+					}
+				}			
+			}
+			else = {
+				navy_size = 7
+				OR = {
+					num_of_galley = FEZ
+					naval_strength = {
+						who = FEZ
+						value = 3
+					}
+				}
+			}
+		}
+		effect = {
+			add_navy_tradition = 10
+		}
+	}
+}

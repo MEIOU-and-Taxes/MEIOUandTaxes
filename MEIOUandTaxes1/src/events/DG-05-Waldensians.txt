@@ -1,0 +1,1975 @@
+namespace = DG_Waldensians
+
+# 001     - Starting the heresy
+# 002-100 - 
+# 101-200 - Spreading heresy
+# 201-300 - Inquisition results
+# 301-400 - Unrest events
+# 999     - Waldensians become Reformed
+
+province_event = {
+	id = DG_Waldensians.001
+	title = "DG_Waldensians.001.title"
+	desc = "DG_Waldensians.001.desc"
+	picture = all_church_state
+
+	major = yes
+	fire_only_once = yes
+	
+	trigger = {
+		NOT = { is_religion_enabled = waldensian }
+		province_id = 1389
+		NOT = { is_religion_enabled = reformed }
+	}
+	
+	mean_time_to_happen = {
+		months = 30
+	}
+	
+	immediate = {
+		enable_religion = waldensian
+		hidden_effect = { set_global_flag = DG_Waldensian_Spawn }
+		set_province_flag = wal_craddle
+		save_global_event_target_as = wal_origins
+		log = "DG:[GetYear]:[This.aab.GetValue]:Waldensian:Birth:[This.GetName]:[This.Owner.GetName]"
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Waldensian:Spread:[This.GetName]:[This.Owner.GetName]"
+		hidden_effect = {
+			MN_HeresySpread = { typefrom = which from = MN_S0 to = 5 incr = 0.02 typeIncr = value }
+			MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = Preach typeStrength = value strength = 3 }
+			MN_Attribute_Reset = { reltype = value religion = 5 typeEffect = ENT typeStrength = value strength = 100 }
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				add_ruler_modifier = {
+					name = "heretic_tolerance"
+				}
+				reverse_add_opinion = { who = PAP modifier = opinion_pope_religious_tolerance }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				add_ruler_modifier = {
+					name = "tolerant_society"
+				}
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				add_ruler_modifier = {
+					name = "religious_intolerance"
+				}
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	after = {
+		hidden_effect = {
+			owner = {
+				country_event = { id = DG_Waldensians.002 }
+			}
+		}
+	}
+}
+
+country_event = {
+	id = DG_Waldensians.002
+	title = "DG_Waldensians.002.title"
+	desc = "DG_Waldensians.002.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+
+	option = {
+		name = "DG_Waldensians.002.opta"
+		trigger = { ai = no }
+		hidden_effect = {
+			set_country_flag = wal_spread_info
+			set_country_flag = wal_inquis_info
+			set_country_flag = wal_convert_info
+			set_country_flag = wal_unrest_info
+			set_country_flag = wal_end_info
+		}
+	}
+
+	option = {
+		name = "DG_Waldensians.002.optb"
+		trigger = { ai = no }
+		hidden_effect = {
+			clr_country_flag = wal_spread_info
+			clr_country_flag = wal_inquis_info
+			clr_country_flag = wal_convert_info
+			clr_country_flag = wal_unrest_info
+			clr_country_flag = wal_end_info
+		}
+	}
+
+	option = {
+		name = "DG_Waldensians.002.optc"
+		trigger = { ai = no }
+		country_event = { id = DG_Notification.051 }
+	}
+
+	option = {
+		name = "EVT_AI"
+		trigger = { ai = yes }
+	}
+	
+	after = {
+		if = {
+			limit = { NOT = { has_country_flag = waldensian_presence } }
+			hidden_effect = {
+				set_country_flag = waldensian_presence
+			}
+		}
+	}
+}
+
+country_event = {
+	id = DG_Waldensians.011
+	title = "DG_Waldensians.011.title"
+	desc = {
+		trigger = {
+			has_country_flag = support_05
+		}
+		desc = "DG_Waldensians.011.des1"
+	}
+	desc = {
+		trigger = {
+			has_country_flag = accept_05
+		}
+		desc = "DG_Waldensians.011.des2"
+	}
+	desc = {
+		trigger = {
+			has_country_flag = silence_05
+		}
+		desc = "DG_Waldensians.011.des3"
+	}
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		NOT = { religion = waldensian }
+		OR = {
+			has_country_flag = support_05
+			has_country_flag = accept_05
+			has_country_flag = silence_05
+		}
+		NOT = { has_ruler_modifier = tolerant_society }
+		NOT = { has_ruler_modifier = religious_intolerance }
+		NOT = { has_ruler_modifier = heretic_tolerance }
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = { has_ruler_modifier = tolerant_society }
+			NOT = { has_ruler_modifier = religious_intolerance }
+		}
+		hidden_effect = {
+			set_country_flag = support_05
+			clr_country_flag = accept_05
+			clr_country_flag = silence_05
+			add_ruler_modifier = { name = "heretic_tolerance" }
+			MN_conv_resist_c = { strength = -10 }
+			reverse_add_opinion = { who = PAP modifier = opinion_pope_religious_tolerance }
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = { has_ruler_modifier = heretic_tolerance }
+			NOT = { has_ruler_modifier = religious_intolerance }
+		}
+		hidden_effect = {
+			clr_country_flag = support_05
+			set_country_flag = accept_05
+			clr_country_flag = silence_05
+			add_ruler_modifier = { name = "tolerant_society" }
+			MN_conv_resist_c = { strength = -5 }
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = { has_ruler_modifier = heretic_tolerance }
+			NOT = { has_ruler_modifier = tolerant_society }
+		}
+		hidden_effect = {
+			clr_country_flag = support_05
+			clr_country_flag = accept_05
+			set_country_flag = silence_05
+			add_ruler_modifier = { name = "religious_intolerance" }
+			MN_conv_resist_c = { strength = 10 }
+		}
+	}
+}
+
+#Spread of the Heresy
+country_event = {
+	id = DG_Waldensians.100
+	title = "DG_Waldensians.100.title"
+	desc = "DG_Waldensians.100.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes #triggered by four_year_pulse_4
+	
+	option = {
+		if = {
+			limit = { NOT = { has_country_flag = waldensian_presence } }
+			country_event = { id = DG_Waldensians.101 }
+			set_country_flag = waldensian_presence
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = waldensian_presence days = 36500 } }
+			random_list = {
+				1 = { country_event = { id = DG_Waldensians.101 } }
+				99 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = waldensian_presence days = 27375 } }
+			random_list = {
+				5 = { country_event = { id = DG_Waldensians.101 } }
+				95 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = waldensian_presence days = 18250 } }
+			random_list = {
+				10 = { country_event = { id = DG_Waldensians.101 } }
+				90 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = waldensian_presence days = 10950 } }
+			random_list = {
+				15 = { country_event = { id = DG_Waldensians.101 } }
+				85 = {}
+			}
+		}
+		else = {
+			random_list = {
+				20 = { country_event = { id = DG_Waldensians.101 } }
+				80 = {}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = DG_Waldensians.101
+	title = "DG_Waldensians.001.title"
+	desc = "DG_Waldensians.101.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes #triggered by four_year_pulse_4
+
+	option = {
+		name = "EVT_AI"
+		random_province = {
+			limit = {
+				NOT = { is_religion_enabled = reformed }
+				NOT = { MN_CheckRelSlot = { Type = value Religion = 5 } }
+				OR = {
+					any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 5 } }
+					any_neighbor_province = { any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 5 } } }
+				}
+				religion = catholic
+			}
+			province_event = { id = DG_Waldensians.102 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.102
+	title = "DG_Waldensians.001.title"
+	desc = "DG_Waldensians.102.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes #triggered by DG_Waldensians.101
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Waldensian:Spread:[This.GetName]:[This.Owner.GetName]"
+	}
+
+	option = {
+		name = "EVT_AI"
+		hidden_effect = {
+			random_list = {
+				10 = {
+					MN_HeresyGrowth = { from = 1 to = 5 RuralShift = 50 UrbanShift = 100 NotableShift = 50 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = waldensian_presence }
+									AND = {
+										has_country_flag = waldensian_presence
+										has_country_flag = wal_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Waldensians.103 }
+					}
+				}
+				 5 = {
+					MN_HeresyGrowth = { from = 1 to = 5 RuralShift = 100 UrbanShift = 250 NotableShift = 100 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = waldensian_presence }
+									AND = {
+										has_country_flag = waldensian_presence
+										has_country_flag = wal_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Waldensians.104 }
+					}
+				}
+				 1 = {
+					MN_HeresyGrowth = { from = 1 to = 5 RuralShift = 250 UrbanShift = 500 NotableShift = 250 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = waldensian_presence }
+									AND = {
+										has_country_flag = waldensian_presence
+										has_country_flag = wal_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Waldensians.105 }
+					}
+				}
+				10 = {
+					MN_HeresyGrowth = { from = 1 to = 5 RuralShift = 50 UrbanShift = 100 NotableShift = 50 }
+					MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = Preach typeStrength = value strength = 1 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = waldensian_presence }
+									AND = {
+										has_country_flag = waldensian_presence
+										has_country_flag = wal_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Waldensians.106 }
+					}
+				}
+				 5 = {
+					MN_HeresyGrowth = { from = 1 to = 5 RuralShift = 100 UrbanShift = 250 NotableShift = 100 }
+					MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = Preach typeStrength = value strength = 1 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = waldensian_presence }
+									AND = {
+										has_country_flag = waldensian_presence
+										has_country_flag = wal_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Waldensians.107 }
+					}
+				}
+				 1 = {
+					MN_HeresyGrowth = { from = 1 to = 5 RuralShift = 250 UrbanShift = 500 NotableShift = 250 }
+					MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = Preach typeStrength = value strength = 3 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = waldensian_presence }
+									AND = {
+										has_country_flag = waldensian_presence
+										has_country_flag = wal_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Waldensians.108 }
+					}
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.103
+	title = "DG_Waldensians.001.title"
+	desc = {
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		desc = "DG_Waldensians.103.des1"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+		desc = "DG_Waldensians.103.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.102
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = waldensian_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Waldensians.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.104
+	title = "DG_Waldensians.001.title"
+	desc = {
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		desc = "DG_Waldensians.104.des1"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+		desc = "DG_Waldensians.104.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.102
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = waldensian_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Waldensians.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.105
+	title = "DG_Waldensians.001.title"
+	desc = {
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		desc = "DG_Waldensians.105.des1"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+		desc = "DG_Waldensians.105.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.102
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = waldensian_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Waldensians.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.106
+	title = "DG_Waldensians.101.title"
+	desc = {
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		desc = "DG_Waldensians.106.des1"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+		desc = "DG_Waldensians.106.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.102
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = waldensian_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Waldensians.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.107
+	title = "DG_Waldensians.101.title"
+	desc = {
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		desc = "DG_Waldensians.107.des1"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+		desc = "DG_Waldensians.107.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.102
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = waldensian_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Waldensians.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.108
+	title = "DG_Waldensians.101.title"
+	desc = {
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		desc = "DG_Waldensians.108.des1"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+		desc = "DG_Waldensians.108.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.102
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_05
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_05
+				MN_conv_resist_c = { strength = -5 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Waldensians.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = waldensian_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_05
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = waldensian_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = waldensian_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Waldensians.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.111
+	title = "DG_Waldensians.111.title"
+	desc = "DG_Waldensians.111.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		always = no
+		is_religion_enabled = waldensian
+		owner = { NOT = { religion = waldensian } }
+		MN_CheckRelSlot = { Type = value Religion = 5 }
+		NOT = { is_religion_enabled = reformed }
+	}
+	
+	mean_time_to_happen = {
+		years = 25
+		
+		modifier = {
+			factor = 0.9
+			region = west_italy_region
+		}		
+		modifier = {
+			factor = 0.7
+			OR = {
+				region = provence_region
+				region = languedoc_region
+				region = low_countries_region
+				region = magyar_plains_region
+			}
+		}
+		modifier = {
+			factor = 10
+			is_religion_enabled = reformed
+		}
+	}
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Waldensian:Spread:[This.GetName]:[This.Owner.GetName]"
+	}
+
+	option = {
+		name = "DG_Waldensians.002.opta"
+		hidden_effect = {
+			set_key = { lhs = Heresy_Scalar value = 0 }
+			random_list = {
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.01 }
+					
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_spread_info }
+						}
+						set_province_flag = ConversionNotification05perc
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.03 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_spread_info }
+						}
+						set_province_flag = ConversionNotification10perc
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.05 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_spread_info }
+						}
+						set_province_flag = ConversionNotification15perc
+
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.07 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_spread_info }
+						}
+						set_province_flag = ConversionNotification20perc
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.09 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_spread_info }
+						}
+						set_province_flag = ConversionNotification25perc
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.11 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_spread_info }
+						}
+						set_province_flag = ConversionNotification30perc
+					}
+				}
+				#30 = { }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Heresy_Scalar value = 0.05 }
+				}
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 5 incr = Heresy_Scalar typeIncr = which }
+			}
+			MN_Attribute_Reset = { reltype = value religion = 5 typeEffect = ENT typeStrength = value strength = 100 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.112
+	title = "DG_Waldensians.101.title"
+	desc = {
+		trigger = {
+			has_province_flag = ConversionNotification01perc
+		}
+		desc = DG_Waldensians.112.desc01
+	}
+	desc = {
+		trigger = {
+			has_province_flag = ConversionNotification03perc
+		}
+		desc = DG_Waldensians.112.desc03
+	}
+	desc = {
+		trigger = {
+			has_province_flag = ConversionNotification05perc
+		}
+		desc = DG_Waldensians.112.desc05
+	}
+	desc = {
+		trigger = {
+			has_province_flag = ConversionNotification07perc
+		}
+		desc = DG_Waldensians.112.desc07
+	}
+	desc = {
+		trigger = {
+			has_province_flag = ConversionNotification09perc
+		}
+		desc = DG_Waldensians.112.desc09
+	}
+	desc = {
+		trigger = {
+			has_province_flag = ConversionNotification11perc
+		}
+		desc = DG_Waldensians.112.desc11
+	}	
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Waldensians.111
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+		goto = ROOT
+	}
+
+	after = {
+		ConversionNotificationCleanup = yes
+	}
+}
+
+#Spawn a center of reformation
+province_event = {
+	id = DG_Waldensians.118
+	title = "DG_Waldensians.118.title"
+	desc = "DG_Waldensians.118.desc"
+	picture = ANGLICAN_SERMON_eventPicture
+	
+	#major = yes
+	
+	trigger = {
+		#always = no
+		#has_province_flag = wal_craddle
+		has_province_flag = printing_press_p
+		NOT = { religion_years = {	waldensian = 50 } } #to be replaced by our Peace of Westphalia
+		can_have_center_of_reformation_trigger = {
+			CenterReligion = waldensian
+		}
+		owner = { religion = waldensian }
+	}
+	mean_time_to_happen = {
+		years = 5
+		modifier = {
+			factor = 0.5
+			has_province_flag = wal_craddle
+		}
+		modifier = {
+			factor = 0.5
+			province_id = 1389 #Vaud
+		}
+		modifier = {
+			factor = 5.0
+			owner = { has_country_flag = accept_05 }
+		}
+		modifier = {
+			factor = 10.0
+			owner = { has_country_flag = silence_05 }
+		}
+	}
+	
+	option = {
+		name = "OPT.GOOD"
+		trigger = { owner = { religion = waldensian } }
+		add_reform_center = waldensian
+		add_or_extend_province_modifier_hidden_effect = { NAME = religious_enthusiasm DURATION = 3650 }
+	}
+	
+	option = {
+		name = "OPT.DAMN"
+		trigger = { owner = { NOT = { religion = waldensian } } }
+		add_reform_center = waldensian
+		add_or_extend_province_modifier_hidden_effect = { NAME = heretic_centre DURATION = 3650 }
+	}
+}
+
+#Removes center of reformation
+province_event = {
+	id = DG_Waldensians.119
+	title = "DG_Waldensians.119.title"
+	desc = "DG_Waldensians.119.desc"
+	picture = ANGLICAN_SERMON_eventPicture
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+
+	trigger = {
+		religion = waldensian
+		is_reformation_center = yes
+		Academia = 100
+	}
+	
+	option = {
+		name = "OPT.NOTED"
+		remove_reform_center = waldensian
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.201
+	title = "DG_Waldensians.201.title"
+	desc = "DG_Waldensians.20.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = waldensian
+		owner = { NOT = { religion = waldensian } }
+		MN_CheckProp = { religion = 5 type = Preach prop = 1 }
+	}
+	
+	mean_time_to_happen = {
+		years = 20
+		
+		modifier = {
+			factor = 0.20
+			MN_CheckProp = { religion = 5 type = Inquis prop = 0.1 }
+		}
+	}
+		
+	option = {
+		name = "OPT.EXCELLENT"
+		MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = Preach typeStrength = value strength = -1 }
+		if = {
+			limit = {
+				owner = { has_country_flag = wal_inquis_info }
+			}
+			province_event = { id = DG_Waldensians.202 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.202
+	title = "DG_Waldensians.201.title"
+	desc = "DG_Waldensians.201.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+		
+	option = {
+		name = "OPT.EXCELLENT"
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.203
+	title = "DG_Waldensians.203.title"
+	desc = "DG_Waldensians.203.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = waldensian
+		owner = { NOT = { religion = waldensian } }
+		MN_CheckProp = { religion = 5 type = ENT prop = 0.1 }
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			factor = 0.20
+			MN_CheckProp = { religion = 5 type = Inquis prop = 0.1 }
+		}
+	}
+		
+	option = {
+		name = "OPT.EXCELLENT"
+		MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = ENT typeStrength = value strength = 5 }
+		if = {
+			limit = {
+				owner = { has_country_flag = wal_inquis_info }
+			}
+			province_event = { id = DG_Waldensians.204 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.204
+	title = "DG_Waldensians.203.title"
+	desc = "DG_Waldensians.203.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+		
+	option = {
+		name = "OPT.EXCELLENT"
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.205
+	title = "DG_Waldensians.205.title"
+	desc = "DG_Waldensians.205.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = waldensian
+		owner = { NOT = { religion = waldensian } }
+		MN_CheckProp = { religion = 5 type = INF prop = 2 }
+	}
+	
+	mean_time_to_happen = {
+		years = 25
+		
+		modifier = {
+			factor = 0.20
+			MN_CheckProp = { religion = 5 type = Inquis prop = 0.1 }
+		}
+	}
+		
+	option = {
+		name = "DG_Waldensians.205.opta"
+		MN_Attribute_Effect = { reltype = value religion = 5 typeEffect = INF typeStrength = value strength = -2 }
+		if = {
+			limit = {
+				owner = { has_country_flag = wal_inquis_info }
+			}
+			province_event = { id = DG_Waldensians.206 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.206
+	title = "DG_Waldensians.205.title"
+	desc = "DG_Waldensians.205.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+		
+	option = {
+		name = "OPT.EXCELLENT"
+	}
+}
+
+#Unrest Events
+province_event = {
+	id = DG_Waldensians.301
+	title = "DG_Waldensians.301.title"
+	desc = "DG_Waldensians.301.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = waldensian
+		owner = { NOT = { religion = waldensian } }
+		MN_CheckProp = { religion = 5 type = TotP prop = 10 }
+	}
+	
+	mean_time_to_happen = {
+		months = 300
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 20 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 30 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 40 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 50 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 60 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 70 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 80 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 90 }
+		}
+		modifier = {
+			factor = 2.0
+			owner = { has_country_flag = support_05 }
+		}
+		modifier = {
+			factor = 0.75
+			owner = { has_country_flag = silence_05 }
+		}
+	}
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Waldensian:Uprising:[This.GetName]:[This.Owner.GetName]"
+	}
+	
+	option = {
+		random_list = {
+			10 = {
+				MinorityTrauma = { religion = 5 strength = 0.10 }
+				if = {
+					limit = {
+						owner = { has_country_flag = wal_unrest_info }
+					}
+					set_province_flag = mn_trauma_10 
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 15 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.20 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_20 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 30 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.30 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_30 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 40 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.40 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_40 
+					}
+				}
+			}
+			20 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 50 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.50 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_50 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 60 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.60 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_60 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 70 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.70 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_70 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 80 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.80 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_80 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 90 }
+					}
+					MinorityTrauma = { religion = 5 strength = 0.90 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_trauma_90 
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = { has_country_flag = wal_unrest_info }
+			}
+			province_event = { id = DG_Waldensians.302 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.302
+	title = "DG_Waldensians.301.title"
+	desc = "DG_Waldensians.301.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.OHNO"
+		trigger_switch = {
+			on_trigger = has_province_flag
+
+			mn_trauma_10 =	{ custom_tooltip = mn_trauma_10_tt }
+			mn_trauma_20 =	{ custom_tooltip = mn_trauma_20_tt }
+			mn_trauma_30 =	{ custom_tooltip = mn_trauma_30_tt }
+			mn_trauma_40 =	{ custom_tooltip = mn_trauma_40_tt }
+			mn_trauma_50 =	{ custom_tooltip = mn_trauma_50_tt }
+			mn_trauma_60 =	{ custom_tooltip = mn_trauma_60_tt } 
+			mn_trauma_70 =	{ custom_tooltip = mn_trauma_70_tt }
+			mn_trauma_80 =	{ custom_tooltip = mn_trauma_80_tt }
+			mn_trauma_90 =	{ custom_tooltip = mn_trauma_90_tt }
+		}
+	}
+	after = {
+		hidden_effect = {
+			TraumaNotificationCleanup = yes
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.311
+	title = "DG_Waldensians.311.title"
+	desc = "DG_Waldensians.311.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = waldensian
+		owner = { NOT = { religion = waldensian } }
+		MN_CheckProp = { religion = 5 type = TotP prop = 10 }
+	}
+	
+	mean_time_to_happen = {
+		months = 300
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 20 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 30 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 40 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 50 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 60 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 70 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 80 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 5 type = TotP prop = 90 }
+		}
+		modifier = {
+			factor = 2.00
+			owner = { has_country_flag = support_05 }
+		}
+		modifier = {
+			factor = 0.75
+			owner = { has_country_flag = silence_05 }
+		}
+	}
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Waldensian:Unrest:[This.GetName]:[This.Owner.GetName]"
+	}
+	
+	option = {
+		random_list = {
+			5 = {
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_min_U.16 DURATION = 365 }
+				if = {
+					limit = {
+						owner = { has_country_flag = wal_unrest_info }
+					}
+					set_province_flag = mn_unrest_min_1
+				}
+			}
+			10 = {
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_min_U.16 DURATION = 1825 }
+				if = {
+					limit = {
+						owner = { has_country_flag = wal_unrest_info }
+					}
+					set_province_flag = mn_unrest_min_5
+				}
+			}
+			5 = {
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_min_U.16 DURATION = 3650 }
+				if = {
+					limit = {
+						owner = { has_country_flag = wal_unrest_info }
+					}
+					set_province_flag = mn_unrest_min_10
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 20 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_low_U.16 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_low_1
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 20 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_low_U.16 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_low_5
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 20 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_low_U.16 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_low_10
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 40 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_mid_U.16 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_mid_1
+					}
+				}
+			}
+			20 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 40 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_mid_U.16 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_mid_5
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 40 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_mid_U.16 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_mid_10
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 60 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.05 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_imp_1
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 60 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.05 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_imp_5
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 60 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.05 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_imp_10
+					}
+				}
+			}
+			5 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 80 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_max_1
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 80 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_max_5
+					}
+				}
+			}
+			5 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 5 type = TotP prop = 80 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = wal_unrest_info }
+						}
+						set_province_flag = mn_unrest_max_10
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = { has_country_flag = wal_unrest_info }
+			}
+			province_event = { id = DG_Waldensians.312 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.312
+	title = "DG_Waldensians.311.title"
+	desc = "DG_Waldensians.311.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.OHNO"
+		trigger_switch = {
+			on_trigger = has_province_flag
+
+			mn_unrest_min_1 =	{ custom_tooltip = mn_unrest_min_1_tt }
+			mn_unrest_min_5 =	{ custom_tooltip = mn_unrest_min_2_tt }
+			mn_unrest_min_10 =	{ custom_tooltip = mn_unrest_min_3_tt }
+			mn_unrest_low_1 =	{ custom_tooltip = mn_unrest_low_1_tt }
+			mn_unrest_low_5 =	{ custom_tooltip = mn_unrest_low_2_tt }
+			mn_unrest_low_10 =	{ custom_tooltip = mn_unrest_low_3_tt } 
+			mn_unrest_mid_1 =	{ custom_tooltip = mn_unrest_mid_1_tt }
+			mn_unrest_mid_5 =	{ custom_tooltip = mn_unrest_mid_2_tt }
+			mn_unrest_mid_10 =	{ custom_tooltip = mn_unrest_mid_3_tt }
+			mn_unrest_imp_1 =	{ custom_tooltip = mn_unrest_imp_1_tt }
+			mn_unrest_imp_5 =	{ custom_tooltip = mn_unrest_imp_2_tt }
+			mn_unrest_imp_10 =	{ custom_tooltip = mn_unrest_imp_3_tt } 
+			mn_unrest_max_1 =	{ custom_tooltip = mn_unrest_max_1_tt }
+			mn_unrest_max_5 =	{ custom_tooltip = mn_unrest_max_2_tt }
+			mn_unrest_max_10 =	{ custom_tooltip = mn_unrest_max_3_tt } 
+		}
+	}
+	after = {
+		hidden_effect = {
+			UnrestNofificationCleanup = yes
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.901
+	title = "DG_Waldensians.901.title"
+	desc = "DG_Waldensians.901.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = reformed
+		MN_CheckRelSlot = { Type = value Religion = 5 }
+		OR = {
+			owner = { religion = reformed }
+			AND = { MN_CheckRelSlot = { Type = value Religion = 3 } OR = { NOT = { owner = { religion = waldensian } } NOT = { religion_years = { reformed = 75 } } } } #NOT = { religion_years = { reformed = 75 } } } }
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 30
+		modifier = {
+			factor = 1.25
+			owner = {
+				religion = waldensian
+				stability = 3
+			}
+		}
+		modifier = {
+			factor = 0.75
+			owner = {
+				religion = waldensian
+				NOT = { stability = -1 }
+			}
+		}
+		modifier = {
+			factor = 0.75
+			owner = {
+				religion = reformed
+				stability = 3
+			}
+		}
+		modifier = {
+			factor = 1.25
+			owner = {
+				religion = reformed
+				NOT = { stability = -1 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		MN_Preacher = { from = 5 to = 3 ruralChange = 2.5 urbanChange = 2.5 notablesChange = 2.5 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		if = {
+			limit = {
+				owner = { has_country_flag = wal_end_info }
+			}
+			province_event = { id = DG_Waldensians.902 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Waldensians.902
+	title = "DG_Waldensians.901.title"
+	desc = "DG_Waldensians.901.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.ISEE"
+	}
+}

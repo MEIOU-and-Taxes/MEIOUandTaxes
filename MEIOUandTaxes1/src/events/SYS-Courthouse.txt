@@ -1,0 +1,451 @@
+namespace = SYS_Courthouse
+country_event = {
+	id = SYS_Courthouse.100
+	title = no_localisation
+	desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+		hidden_country_event = { id = SYS_Courthouse.001 }
+	}
+}
+
+# Build UI
+country_event = {
+	id = SYS_Courthouse.001
+	title = SYS_Courthouse.001.t
+	desc = SYS_Courthouse.001.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+            set_key = { lhs = Courthouse_Tmp4 value = 0 }
+			Courthouse_Calc = yes
+			set_country_flag = UI_Freeze
+			export_to_key = { lhs = Courthouse_Tmp1 value = treasury }
+			
+			# Amount post contribution
+			set_key = { lhs = Courthouse_Tmp0 which = Courthouse_Cost }
+			
+			set_key = { lhs = Courthouse_Tmp2 which = Courthouse_Parallel }
+			change_key = { lhs = Courthouse_Tmp2 value = 1 }
+            if = {
+                limit = {
+                    NOT = {
+                        OR = {
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 1 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 2 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 3 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 4 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 5 }
+                        }
+                    }                    
+                }
+                set_key = { lhs = Courthouse_Tmp3 value = 0 }
+            }
+			Courthouse_CalcADM = yes
+        }
+	}
+	
+	option = { # Build
+		name = SYS_Courthouse.001.a
+		trigger = {
+			any_owned_province = {
+				has_province_flag = UI_Select
+				OR = {
+					owned_by = ROOT
+					owner = { 
+						is_subject_other_than_tributary_trigger = yes
+						is_subject_of = ROOT
+					}
+				}
+			}
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+		}
+		hidden_effect = {
+			Courthouse_Calc = yes # Exploit-proof, come and try, please, just test it. See what you can do. Doubt you can break it, 100%, 1000% exploit-proof
+			export_to_key = { lhs = Courthouse_Tmp1 value = treasury } # incase of player shenanigans, we're watching you. Dont even try. Please. Stop breaking shit
+			
+			# Amount post contribution, recalced.
+			set_key = { lhs = Courthouse_Tmp0 which = Courthouse_Cost }
+			Courthouse_CalcADM = yes
+		}
+		if = {
+			limit = {
+				all_owned_province = {
+					NOT = { check_key = { lhs = Courthouse_Amount value = 0.001 } }
+				}
+				all_subject_country = {
+					is_subject_other_than_tributary_trigger = yes
+					all_owned_province = {
+						NOT = { check_key = { lhs = Construct_Amount value = 0.001 } }
+					}
+				}
+			}
+			custom_tooltip = SYS_Courthouse.001.aNOPEAMOUNT
+			hidden_country_event = { id = SYS_Courthouse.100 }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Courthouse_Tmp1 which = Courthouse_Tmp0 }
+			}
+			custom_tooltip = SYS_Courthouse.001.aYEPCOST
+			hidden_effect = {
+				Courthouse_Build = yes # Dont look into this one
+			}
+		}
+		else = {
+			custom_tooltip = SYS_Courthouse.001.aNOPEWHY
+			hidden_country_event = { id = SYS_Courthouse.100 }
+		}
+	}
+	
+	option = { # Change Parallelism
+		name = SYS_Courthouse.001.e
+		trigger = {
+			any_owned_province = {
+				has_province_flag = UI_Select
+			}
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+		}
+		custom_tooltip = SYS_Courthouse.001.etooltip
+		hidden_country_event = { id = SYS_Courthouse.014 }
+	}
+	
+	option = { # Change Configuration
+		name = SYS_Courthouse.001.d
+		custom_tooltip = SYS_Courthouse.001.dtooltip
+		hidden_country_event = { id = SYS_Courthouse.013 }
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+	}
+	after = {
+		set_key = { lhs = Courthouse_Tmp0 value = 0 }
+		set_key = { lhs = Courthouse_Tmp1 value = 0 }
+		set_key = { lhs = Courthouse_Tmp2 value = 0 }
+		clr_country_flag = UI_Freeze
+	}
+}
+
+country_event = {
+	id = SYS_Courthouse.130
+	title = no_localisation
+	desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+		hidden_country_event = { id = SYS_Courthouse.013 }
+	}
+}
+
+country_event = { # Infra Amount
+	id = SYS_Courthouse.013
+	title = SYS_Courthouse.013.t
+	desc = SYS_Courthouse.013.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			if = {
+				limit = {
+					check_key = { lhs = Courthouse_Amount value = 7 }
+				}
+				set_key = { lhs = Courthouse_Amount value = 7 }
+			}
+            if = {
+                limit = {
+                    NOT = {
+                        OR = {
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 1 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 2 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 3 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 4 }
+                            is_key_equal = { lhs = Courthouse_Tmp3 value = 5 }
+                        }
+                    }                    
+                }
+                set_key = { lhs = Courthouse_Tmp3 value = 0 }
+            }
+		}
+	}
+	
+	option = { # Done
+		name = SYS_Courthouse.013.a
+		trigger = {
+			check_key = { lhs = Courthouse_Amount value = 0.001 }
+		}
+		hidden_country_event = { id = SYS_Courthouse.001 }
+	}
+	
+	option = { # Improve to Rank X (Toggle)
+		name = SYS_Courthouse.013.b
+		trigger = {
+			is_key_equal = { lhs = Courthouse_TypeToggle value = 1 }
+		}
+		custom_tooltip = SYS_Courthouse.013.btooltip
+		hidden_effect = {
+			set_key = { lhs = Courthouse_TypeToggle value = 0 }
+			set_key = { lhs = Courthouse_Amount value = 0 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Improve by X Ranks (Toggle)
+		name = SYS_Courthouse.013.i
+		trigger = {
+			is_key_equal = { lhs = Courthouse_TypeToggle value = 0 }
+		}
+		custom_tooltip = SYS_Courthouse.013.itooltip
+		hidden_effect = {
+			set_key = { lhs = Courthouse_TypeToggle value = 1 }
+			set_key = { lhs = Courthouse_Amount value = 0 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 1
+		name = SYS_Courthouse.013.c
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 1 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 2
+		name = SYS_Courthouse.013.d
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 2 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 3
+		name = SYS_Courthouse.013.e
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 3 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 4
+		name = SYS_Courthouse.013.f
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 4 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 5
+		name = SYS_Courthouse.013.g
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 5 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 6
+		name = SYS_Courthouse.013.h
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 6 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+	
+	option = { # Rank 7
+		name = SYS_Courthouse.013.j
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Amount value = 7 }
+			hidden_country_event = { id = SYS_Courthouse.130 }
+		}
+	}
+    
+    option = {
+        name = Extra_Units_More
+        custom_tooltip = custom.Extra_Units_More
+        trigger = {
+            NOT = { 
+                is_key_equal = { lhs = Courthouse_Tmp3 value = 5 }
+            }
+        }
+        hidden_effect = { 
+            change_key = { lhs = Courthouse_Tmp3 value = 1 }
+            hidden_country_event = { id = SYS_Courthouse.130 }
+        }
+    }
+    
+    option = {
+        name = Extra_Units_Less
+        trigger = { 
+            check_key = { lhs = Courthouse_Tmp3 value = 1 }
+        }
+        custom_tooltip = custom.Extra_Units_More
+        hidden_effect = { 
+            change_key = { lhs = Courthouse_Tmp3 value = -1 }
+            hidden_country_event = { id = SYS_Courthouse.130 }
+        }
+    }
+    
+    option = {
+        name = Extra_Units_Reset
+        trigger = { 
+            NOT = { is_key_equal = { lhs = Courthouse_Tmp3 value = 0 } }
+        }
+        custom_tooltip = custom.Extra_Units_Reset
+        hidden_effect = { 
+            set_key = { lhs = Courthouse_Tmp3 value = 0 }
+            hidden_country_event = { id = SYS_Courthouse.130 }
+        }
+    }
+	
+	option = {
+		name = PTM_BACK
+		highlight = yes
+		hidden_country_event = { id = SYS_Courthouse.001 }
+	}
+}
+
+country_event = {
+	id = SYS_Courthouse.140
+	title = no_localisation
+	desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	immediate = {
+	}
+	
+	option = {
+		name = PTM_EXIT
+		highlight = yes
+		hidden_country_event = { id = SYS_Courthouse.014 }
+	}
+}
+
+country_event = { # Courthouse Parallelism
+	id = SYS_Courthouse.014
+	title = SYS_Courthouse.014.t
+	desc = SYS_Courthouse.014.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Tmp2 which = Courthouse_Parallel }
+			change_key = { lhs = Courthouse_Tmp2 value = 1 }
+		}
+	}
+	option = { # 1 at a time
+		name = SYS_Courthouse.014.a
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 0 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 2 at a time
+		name = SYS_Courthouse.014.b
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 1 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 3 at a time
+		name = SYS_Courthouse.014.c
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 2 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 4 at a time
+		name = SYS_Courthouse.014.d
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 3 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 5 at a time
+		name = SYS_Courthouse.014.e
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 4 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 6 at a time
+		name = SYS_Courthouse.014.f
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 5 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 7 at a time
+		name = SYS_Courthouse.014.g
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 6 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 8 at a time
+		name = SYS_Courthouse.014.h
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 7 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 9 at a time
+		name = SYS_Courthouse.014.i
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 9 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = { # 10 at a time
+		name = SYS_Courthouse.014.j
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Parallel value = 9 }
+			hidden_country_event = { id = SYS_Courthouse.140 }
+		}
+	}
+	
+	option = {
+		name = PTM_BACK
+		highlight = yes
+		hidden_country_event = { id = SYS_Courthouse.001 }
+		hidden_effect = {
+			set_key = { lhs = Courthouse_Tmp2 value = 0 }
+		}
+	}
+}
