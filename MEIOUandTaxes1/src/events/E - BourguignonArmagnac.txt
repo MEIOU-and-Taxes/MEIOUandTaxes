@@ -1,0 +1,668 @@
+#####################################################
+#          Bourguignon - Armagnac Conflict          #
+#####################################################
+
+
+# $MONARCHNAME$ the Mad
+country_event = {
+	id = bourguignon_armagnac.1
+	title = "bourguignon_armagnac.1.n"
+	desc = "bourguignon_armagnac.1.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = FRA
+		has_global_flag = hundred_years_war
+		OR = { has_regency = no has_consort_regency = yes }
+		NOT = { has_global_flag = bourguignon_armagnac_conflict }
+		NOT = { has_ruler = "Jean II" }
+		NOT = { has_ruler = "Charles V le Sage" }
+		OR = {
+			AND = {
+				exists = BUR
+				overlord_of = BUR
+			}
+			AND = {
+				NOT = { exists = BUR }
+				owns = 192 # Digenois
+			}
+		}
+		OR = {
+			AND = {
+				exists = ORL
+				overlord_of = ORL
+			}
+			AND = {
+				NOT = { exists = ORL }
+				owns = 184 # Orliens
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			is_year = 1375
+			factor = 0.85
+		}
+		modifier = {
+			is_year = 1400
+			factor = 0.85
+		}
+		modifier = {
+			is_year = 1425
+			factor = 0.85
+		}
+		modifier = {
+			exists = BUR
+			factor = 0.90
+		}
+		modifier = {
+			exists = ORL
+			factor = 0.90
+		}
+		modifier = {
+			NOT = { stability = 0 }
+			factor = 0.90
+		}
+		modifier = {
+			NOT = { stability = -1 }
+			factor = 0.90
+		}
+		modifier = {
+			NOT = { stability = -2 }
+			factor = 0.90
+		}
+		modifier = {
+			adm = 2 
+			factor = 0.9
+		}
+		modifier = {
+			adm = 1 
+			factor = 0.9
+		}
+		modifier = {
+			adm = 0 
+			factor = 0.9
+		}
+	}
+	
+	immediate = {
+		add_ruler_modifier = { name = "mental_illness" }
+		add_country_modifier = { name = "bout_of_insanity" duration = 90 }
+		set_variable = { which = "number_of_episodes" value = 1 }
+		set_global_flag = bourguignon_armagnac_conflict
+		hidden_effect = {
+			if = {
+				limit = {
+					adm = 5
+				}
+				change_adm = -3
+			}
+			if = {
+				limit = {
+					adm = 4
+				}
+				change_adm = -2
+			}
+			if = {
+				limit = {
+					adm = 3
+				}
+				change_adm = -1
+			}
+			if = {
+				limit = {
+					dip = 5
+				}
+				change_dip = -3
+			}
+			if = {
+				limit = {
+					dip = 4
+				}
+				change_dip = -2
+			}
+			if = {
+				limit = {
+					dip = 3
+				}
+				change_dip = -1
+			}
+			if = {
+				limit = {
+					mil = 5
+				}
+				change_mil = -3
+			}
+			if = {
+				limit = {
+					mil = 4
+				}
+				change_mil = -2
+			}
+			if = {
+				limit = {
+					mil = 3
+				}
+				change_mil = -1
+			}
+		}
+	}
+	
+	option = {
+		name = "bourguignon_armagnac.1.a"
+		ai_chance = { 
+			factor = 95
+			#Philippe II of Burgundy was a heavy influence on Charles VI
+			modifier = {
+				factor = 0
+				BUR = {
+					has_ruler = "Philippe II"
+					dynasty = "de Valois"
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = BUR }
+			}
+			every_owned_province = {
+				limit = {
+					is_core = BUR
+				}
+				cede_province = BUR
+			}
+			define_ruler = {
+				dynasty = "de Valois"
+				ADM = 4
+				DIP = 4
+				MIL = 4
+			}
+			create_subject = {
+				subject_type = appanage_subject
+				subject = BUR
+			}
+		}
+		BUR = {
+			add_ruler_modifier = { name = "regent_of_france" }
+			add_opinion = { who = ROOT modifier = "regency_granted" }
+		}
+		ORL = {
+			add_opinion = { who = ROOT modifier = "regency_denied" }
+		}
+	}
+	
+	option = {
+		name = "bourguignon_armagnac.1.b"
+		ai_chance = { factor = 5 }
+		if = {
+			limit = {
+				NOT = { exists = ORL }
+			}
+			every_owned_province = {
+				limit = {
+					is_core = ORL
+				}
+				cede_province = ORL
+			}
+			define_ruler = {
+				dynasty = "de Valois"
+				ADM = 4
+				DIP = 4
+				MIL = 4
+			}
+			create_subject = {
+				subject_type = appanage_subject
+				subject = ORL
+			}
+		}
+		ORL = {
+			add_ruler_modifier = { name = "regent_of_france" }
+			add_opinion = { who = ROOT modifier = "regency_granted" }
+		}
+		BUR = {
+			add_opinion = { who = ROOT modifier = "regency_denied" }
+		}
+	}
+}
+
+# New Psychotic Episode
+country_event = {
+	
+	id = bourguignon_armagnac.2
+	title = "bourguignon_armagnac.2.n"
+	desc = "bourguignon_armagnac.2.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	trigger = {
+		#NOT = { has_global_flag = 1530_start_date }
+		has_ruler_modifier = "mental_illness"
+		NOT = { has_country_modifier = "bout_of_insanity" }
+	}
+	
+	mean_time_to_happen = {
+		months = 24
+		
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 2 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 3 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 4 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 5 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 6 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 7 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 8 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 9 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 10 }
+			factor = 0.90
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			change_variable = { which = "number_of_episodes" value = 1 }
+		}
+	}
+	
+	option = {
+		name = "bourguignon_armagnac.2.a"
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 2 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 3 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 120 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 3 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 4 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 150 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 4 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 5 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 180 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 5 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 6 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 210 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 6 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 7 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 240 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 7 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 8 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 270 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 8 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 9 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 300 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 9 }
+				NOT = { check_variable = { which = "number_of_episodes" value = 10 } }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 330 }
+		}
+		if = {
+			limit = {
+				check_variable = { which = "number_of_episodes" value = 10 }
+			}
+			add_country_modifier = { name = "bout_of_insanity" duration = 360 }
+		}
+	}
+}
+
+### Pending new events regarding the madness of the king
+
+#Once the regent died, another regent must be chosen
+country_event = {
+	id = bourguignon_armagnac.3
+	title = "bourguignon_armagnac.3.n"
+	desc = "bourguignon_armagnac.3.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "bourguignon_armagnac.3.a"
+		ai_chance = { factor = 95 }
+		if = {
+			limit = {
+				NOT = { exists = BUR }
+			}
+			every_owned_province = {
+				limit = {
+					is_core = BUR
+				}
+				cede_province = BUR
+			}
+			define_ruler = {
+				dynasty = "de Valois"
+				ADM = 4
+				DIP = 4
+				MIL = 4
+			}
+			create_subject = {
+				subject_type = appanage_subject
+				subject = BUR
+			}
+		}
+		BUR = {
+			add_ruler_modifier = { name = "regent_of_france" }
+			add_opinion = { who = ROOT modifier = "regency_granted" }
+		}
+		ORL = {
+			add_opinion = { who = ROOT modifier = "regency_denied" }
+		}
+	}
+	
+	#Pissing off Burgundy to start their murder shceme
+	option = {
+		name = "bourguignon_armagnac.3.b"
+		ai_chance = { factor = 5 }
+		if = {
+			limit = {
+				NOT = { exists = ORL }
+			}
+			every_owned_province = {
+				limit = {
+					is_core = ORL
+				}
+				cede_province = ORL
+			}
+			define_ruler = {
+				dynasty = "de Valois"
+				ADM = 4
+				DIP = 4
+				MIL = 4
+			}
+			create_subject = {
+				subject_type = appanage_subject
+				subject = BUR
+			}
+		}
+		ORL = {
+			add_ruler_modifier = { name = "regent_of_france" }
+			add_opinion = { who = ROOT modifier = "regency_granted" }
+		}
+		BUR = {
+			add_opinion = { who = ROOT modifier = "regency_denied" }
+		}
+	}
+}
+
+#Duke of Burgundy despite his wealth and prestige, increasingly sidelined by king's brother because he is only cousin to the king.
+country_event = {
+	id = bourguignon_armagnac.4
+	title = "bourguignon_armagnac.4.n"
+	desc = "bourguignon_armagnac.4.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	is_triggered_only = yes
+
+	#Plans Duke of Orlean's death
+	option = {
+		name = "bourguignon_armagnac.4.a"
+		ai_chance = { factor = 95 }
+		ORL = {
+			country_event = { id = bourguignon_armagnac.5 days = 10 }
+		}
+	}
+	
+	#We are loyal subject of our cousin.
+	option = {
+		name = "bourguignon_armagnac.4.b"
+		ai_chance = { factor = 5 }
+		
+	}
+}
+
+#Annuls Orlean's Luxumburg adventures if it happened
+country_event = {
+	id = bourguignon_armagnac.5
+	title = "bourguignon_armagnac.5.n"
+	desc = "bourguignon_armagnac.5.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "bourguignon_armagnac.5.a"
+		ORL = {
+			release = LUX
+		}
+		if = {
+			limit = {
+				NOT = { is_year = 1411 }
+			}
+			LUX = {
+				define_ruler = {
+					name = "Jobst"
+					dynasty = "Luxembourg"
+					claim = 95
+				}
+			}
+		}
+		if = {
+			limit = {
+				is_year = 1411
+			}
+			LUX = {
+				define_ruler = {
+					name = "Elisabeth"
+					dynasty = "Luxembourg"
+					claim = 95
+				}
+			}
+		}
+	}
+}
+
+#Kills Duke of Orleans and steals regency
+country_event = {
+	id = bourguignon_armagnac.6
+	title = "bourguignon_armagnac.6.n"
+	desc = "bourguignon_armagnac.6.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = "bourguignon_armagnac.6.a"
+		ai_chance = { factor = 95 }
+		ORL = {
+			kill_ruler = yes
+		}
+
+		add_ruler_modifier = { name = "regent_of_france" }
+	}
+}
+
+### Pending flavour events regarding the conflict
+
+# Duke of Burgundy seizes the opportunity of regency to take independence
+country_event = {
+	id = bourguignon_armagnac.2001
+	title = "bourguignon_armagnac.2001.n"
+	desc = "bourguignon_armagnac.2001.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	trigger = {
+		has_ruler_modifier = "regent_of_france"
+		has_ruler_modifier = "murdered_rival"
+		FRA = { has_ruler_modifier = "mental_illness" }
+		tag = BUR
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+		
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 2 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 3 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 4 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 5 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 6 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 7 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 8 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 9 }
+			factor = 0.90
+		}
+		modifier = {
+			check_variable = { which = "number_of_episodes" value = 10 }
+			factor = 0.90
+		}
+	}
+	
+	option = {
+		name = "bourguignon_armagnac.2001.a"
+		FRA = {
+			create_subject = {
+				subject_type = nominal_subject
+				subject = BUR
+			}
+			country_event = { id = bourguignon_armagnac.2002 days = 5 }
+		}
+	}
+}
+
+country_event = {
+	id = bourguignon_armagnac.2002
+	title = "bourguignon_armagnac.2002.n"
+	desc = "bourguignon_armagnac.2002.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "bourguignon_armagnac.2002.a"
+		france_superregion = {
+			limit = {
+				is_city = yes
+				owned_by = BUR
+				is_part_of_hre = no
+				NOT = { is_core = ROOT }
+			}
+			add_core = ROOT
+		}
+		france_superregion = {
+			limit = {
+				is_city = yes
+				owned_by = BUR
+				is_part_of_hre = yes
+				NOT = { is_core = ROOT }
+			}
+			add_claim = ROOT
+		}
+	}
+}
+
+
+#Charles V abolished fouage upon his death due to his remorse. Regency was caught unparepared, causing serveral revolt
+#In a few days, revolts broke out everywhere in the Oïl region, starting with Normandy. The Harelle revolt in Rouen began on February 27 , the same day Caen rose up, then Falaise, Orléans, Reims, Amiens, Laon... The Maillotins revolt broke out in Paris on  March 1
+country_event = {
+	id = bourguignon_armagnac.20021
+	title = "bourguignon_armagnac.2002.n"
+	desc = "bourguignon_armagnac.2002.t"
+	picture = CHARLES_LE_FOL_eventPicture
+	
+	is_triggered_only = yes
+	
+	#Follows dead king's will
+	option = {
+		name = "bourguignon_armagnac.2002.a"
+		every_core_province = {
+			hidden_effect = {
+				remove_province_modifier = emergency_tax_relief
+			}
+			add_province_modifier = { name = "emergency_tax_relief" duration = 5475 }
+		}
+	}
+
+	#Rejects it, because state can't function without money
+	option = {
+		name = "bourguignon_armagnac.2002.a"
+		add_country_modifier = {
+			name = incensed_peasantry
+			duration = 5475
+		}
+	}
+}
+
+
+#Marriage policy with Wittelsbachs
+
+#Bal des ardents
+
+
+
+#Cabochians revolts, great ordinance of 1357
+
+#Crush Parisian revolt and bring Burgundy closer to English
