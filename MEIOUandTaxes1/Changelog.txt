@@ -3260,7 +3260,18 @@
 	- Use normal EU4 method of evaluating CBs (so no more few times per year checks for all CBs but instant gain/loss of them
 	- Remove manual tax buildings from macro builder
 	- Limit autoinvestor to provinces with at least 2.5 State Reach, for both AI and player
-
+	- Industry Expansion heuristic changes:
+		- We completely revamped the industry expansion (/shrinkage) heuristic used by industries intrinsic expansion, because the old heuristic created unrealistic and usually wrong and slow expansions due to a mixture of bugs and bad design. The goal of a new heuristic was to simplify the players (and industries) understanding of when it will expand down to a very simple metric (profit).
+		- The new heuristic is more aligned with the intuitive market understanding. Industries expand based on marginal cost aka profit or rather the margins of profit. As a rule of thumb that means that industries above 4% profit margin expand, between 4 and 0 % stay the same, and below 0% profit margin (loss) shrink.
+		- Additionally there are some other factors influencing the desire to expand or shrink. First one being the industries throughput. Throughput is a metric of production in an optimal scenario and the actual production. If throughput gets low (usually this means missing input goods or labor) industries will want to expand less even if operating at a profit with the effect getting exponentially stronger the lower throughput gets.
+		- Secondly industries will expand slower if the usage of their respective ressource size is drawing to be maxed out.
+		- Besides those main determining factors the heuristic is influenced by certain API effects like important harbors etc.
+	- Changes to State / Player Investements:
+		- In order to make state investment more realistic and less overpowered compared to naturally occurring growth, we wanted to change the way on where, when and why to invest somewhere. This is done to make state investment less of a no brainer just dumping money in every single province and making it more integrated with other systems. It works now in the following way:
+		- State investment takes money out of the states treasury. Then something new happens. Depending on the provinces corruption a certain amount of money is not actually getting invested, but siphoned away by the elites/bureaucrats into corruption so their own pockets. Therefore you really need to check where to invest based on provincial corruption and most likely keep money into the treasury at high corruption periods.
+		- After the corruption step the remaining money is put into an investment pool which is per property type (visible in the property modifier).
+		- Lastly the money is actually getting invested by demanding goods from the market to build up the property (before investment just nullified maintenance costs, which lead to buildup due to higher profits). The speed of investment is different though. It depends on the state reach in the province. The higher the state reach the faster money is actually getting invested. If state reach is zero, the state has no way to invest and the money is NOT getting invested.
+		
 ### Optimisation
 	- Neutral to positive performance impact from the trade rework
 	- Optimisations to Trade to reduce the code size and impact of the script to accomodate the trade rework
