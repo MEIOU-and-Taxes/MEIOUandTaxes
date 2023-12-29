@@ -2,10 +2,10 @@ import os
 
 def generate_sprite_types(folder_name):
     # Template for the spriteTypes structure
-    template = '''    spriteType = {{
-        name = "GFX_{name}"
-        texturefile = "gfx/texticons/decisions/{folder_name}/{name}.dds"
-    }}\n'''
+    template = '''spriteTypes = {{
+    name = "GFX_{name}"
+    texturefile = "gfx//texticons//decisions//{folder_name}//{name}{ext}"
+}}\n'''
     # Directory where the script is located
     directory = os.path.dirname(os.path.realpath(__file__))
 
@@ -15,9 +15,9 @@ def generate_sprite_types(folder_name):
     with open(output_file, "w") as file:
         # Iterate over files in the directory
         for filename in os.listdir(directory):
-            if filename.endswith(".dds"):  # Assuming we're only interested in .dds files
-                name = filename.rsplit('.', 1)[0]  # Remove file extension
-                sprite_type = template.format(name=name, folder_name=folder_name)
+            if filename.endswith(".dds") or filename.endswith(".png"):
+                name, ext = os.path.splitext(filename)  # Separate file name and extension
+                sprite_type = template.format(name=name, ext=ext, folder_name=folder_name)
                 file.write(sprite_type)
 
 def get_folder_name():
