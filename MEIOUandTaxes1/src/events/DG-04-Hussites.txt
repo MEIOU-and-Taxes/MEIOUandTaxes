@@ -1,0 +1,4789 @@
+namespace = DG_Hussites
+
+# 001     - Starting the heresy
+# 002-099 - Hussite Wars
+# 100-200 - Spreading heresy
+# 201-300 - Inquisition results
+# 301-400 - Unrest events
+# 901     - Hussites become Protestant
+
+#Birth of the Heresy
+province_event = {
+	id = DG_Hussites.001
+	title = "DG_Hussites.001.title"
+	desc = "DG_Hussites.001.desc"
+	picture = all_church_state
+
+	major = yes
+	fire_only_once = yes
+	
+	trigger = {
+		NOT = { is_religion_enabled = hussite }
+		had_global_flag = { flag = DG_Western_Schism_Timer days = 7300 } #Takes advantage of the Schism
+		Prod_HasProd = { Prod = 30 }
+		check_key = { lhs = TN_ProvSply41 value = 2 } #Knowledge
+		province_id = 268
+#		owner = {
+#			num_of_cities = 5
+#			OR = { religion = catholic religion = avignonist }
+#			capital_scope = {
+#				OR = {
+#					#superregion = france_superregion
+#					#superregion = iberia_superregion
+#					superregion = germany_superregion
+#					superregion = greater_austrian_circle_superregion
+#					#superregion = balkan_superregion
+#					#superregion = commonwealth_superregion
+#					#superregion = scandinavian_superregion
+#				}
+#			}
+#		}
+		OR = { religion = catholic religion = avignonist }
+		NOT = { is_religion_enabled = protestant }
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+		
+		modifier = {
+			factor = 1.50
+			owner = { is_emperor = no }
+		}
+		modifier = {
+			factor = 0.95
+			owner = { religion = catholic }
+		}
+		modifier = {
+			factor = 0.95
+			check_key = { lhs = TN_ProvSply41 value = 5 }
+		}
+		modifier = {
+			factor = 0.95
+			check_key = { lhs = TN_ProvSply41 value = 10 }
+		}
+		modifier = {
+			factor = 0.75
+			NOT = { owner = { ruler_culture = ROOT } }
+		}
+		modifier = {
+			factor = 0.75
+			is_religion_enabled = lollard
+		}
+		modifier = {
+			factor = 0.95
+			owner = { reform_desire = 10 }
+		}
+		modifier = {
+			factor = 0.90
+			owner = { reform_desire = 20 }
+		}
+		modifier = {
+			factor = 0.85
+			owner = { reform_desire = 30 }
+		}
+		modifier = {
+			factor = 0.80
+			owner = { reform_desire = 40 }
+		}
+		modifier = {
+			factor = 0.75
+			owner = { reform_desire = 50 }
+		}
+		modifier = {
+			factor = 0.70
+			owner = { reform_desire = 60 }
+		}
+		modifier = {
+			factor = 0.65
+			owner = { reform_desire = 70 }
+		}
+		modifier = {
+			factor = 0.60
+			owner = { reform_desire = 80 }
+		}
+		modifier = {
+			factor = 0.55
+			owner = { reform_desire = 90 }
+		}
+		modifier = {
+			factor = 0.50
+			owner = { reform_desire = 100 }
+		}
+	}
+	
+	immediate = {
+		enable_religion = hussite
+		hidden_effect = { 
+			set_global_flag = DG_Hussite_Spawn 
+			clr_global_flag = DG_Western_Schism_Timer
+		}
+		log = "DG:[GetYear]:[This.aab.GetValue]:Hussite:Birth:[This.GetName]:[This.Owner.GetName]"
+		owner = {
+			add_reform_desire = 0.00025
+		}
+		
+		hidden_effect = {
+			set_province_flag = hus_craddle
+			save_global_event_target_as = hus_origins
+			if = {
+				limit = { owner = { is_part_of_hre = yes } }
+				owner = { set_country_flag = imperial_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = france_superregion } } }
+				owner = { set_country_flag = french_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = iberia_superregion } } }
+				owner = { set_country_flag = iberian_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = germany_superregion } } }
+				owner = { set_country_flag = german_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = greater_austrian_circle_superregion } } }
+				owner = { set_country_flag = german_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = balkan_superregion } } }
+				owner = { set_country_flag = balkan_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = commonwealth_superregion } } }
+				owner = { set_country_flag = eastern_hussitism }
+			}
+			else_if = {
+				limit = { owner = { is_part_of_hre = no capital_scope = { superregion = scandinavian_superregion } } }
+				owner = { set_country_flag = scandinavian_hussitism }
+			}
+			MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.20 typeIncr = value }
+			MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 5 }
+			MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			#MN_RlgConv = yes
+			every_neighbor_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		ai_chance = {
+			factor = 20
+			modifier = {
+				owner = { tag = BOH }
+				factor = 5
+			}
+			modifier = {
+				owner = { tag = HAB }
+				factor = 0
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_ruler_modifier = { name = "heretic_tolerance" }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+				reverse_add_opinion = { who = PAP modifier = opinion_pope_religious_tolerance }
+				every_owned_province = {
+					MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.10 typeIncr = value }
+					MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		ai_chance = {
+			factor = 30
+			modifier = {
+				owner = { tag = BOH }
+				factor = 0
+			}
+			modifier = {
+				owner = { tag = HAB }
+				factor = 0
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				add_ruler_modifier = { name = "tolerant_society" }
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+				every_owned_province = {
+					MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+					MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		ai_chance = {
+			factor = 50
+			modifier = {
+				owner = { tag = BOH }
+				factor = 0
+			}
+			modifier = {
+				owner = { tag = HAB }
+				factor = 20
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_ruler_modifier = {
+					name = "religious_intolerance"
+				}
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			}
+		}
+	}
+	
+	after = {
+		owner = {
+			country_event = { id = DG_Hussites.002 }
+		}
+		hidden_effect = {
+			owner = {
+				every_owned_province = {
+					MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+					MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				}
+			}
+		#	random_province = {
+		#		limit = { religion = catholic }
+		#		province_event = { id = DG_Hussites.003 days = 3650 }
+		#	}
+		}
+	}
+}
+
+#Choice of Notifications
+country_event = {
+	id = DG_Hussites.002
+	title = "DG_Hussites.002.title"
+	desc = "DG_Hussites.002.desc"
+	picture = all_church_state
+	
+	trigger = {
+		NOT = { has_country_flag = hussite_presence }
+	}
+
+	is_triggered_only = yes
+
+	option = {
+		name = "DG_Hussites.002.opta"
+		trigger = { ai = no }
+		hidden_effect = {
+			set_country_flag = hus_spread_info
+			set_country_flag = hus_inquis_info
+			set_country_flag = hus_convert_info
+			set_country_flag = hus_unrest_info
+			set_country_flag = hus_end_info
+		}
+	}
+
+	option = {
+		name = "DG_Hussites.002.optb"
+		trigger = { ai = no }
+		hidden_effect = {
+			clr_country_flag = hus_spread_info
+			clr_country_flag = hus_inquis_info
+			clr_country_flag = hus_convert_info
+			clr_country_flag = hus_unrest_info
+			clr_country_flag = hus_end_info
+		}
+	}
+
+	option = {
+		name = "DG_Hussites.002.optc"
+		trigger = { ai = no }
+		country_event = { id = DG_Notification.041 }
+	}
+
+	option = {
+		name = "EVT_AI"
+		trigger = { ai = yes }
+	}
+	
+	after = {
+		if = {
+			limit = { NOT = { has_country_flag = hussite_presence } }
+			hidden_effect = {
+				set_country_flag = hussite_presence
+			}
+		}
+	}
+}
+
+#Site of the Synod regarding the Heresy
+province_event = {
+	id = DG_Hussites.003
+	title = "DG_Hussites.003.title"
+	desc = "DG_Hussites.003.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes
+
+	option = {
+		name = "DG_Hussites.003.opta"
+		save_global_event_target_as = hus_synod_site
+		PAP = {
+			export_to_variable = { which = hus_synode_year value = trigger_value:is_year }
+			country_event = { id = DG_Synod.401 }
+		}
+	}
+}
+
+#Papal Decision during Synod
+country_event = {
+	id = DG_Hussites.004
+	title = "DG_Hussites.004.title"
+	desc = "DG_Hussites.004.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+	hidden = yes
+
+	option = {
+		name = "DG_Hussites.004.opta"
+		set_country_flag = PAP_condemn_04
+		every_known_country = {
+			limit = { has_country_flag = hussite_presence }
+			country_event = { id = DG_Hussites.006 }
+		}
+	}
+}
+
+#Condemnation of the Heresy
+country_event = {
+	id = DG_Hussites.005
+	title = "DG_Hussites.005.title"
+	desc = {
+		trigger = {
+			has_country_flag = silence_04
+		}
+		desc = "DG_Hussites.005.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { has_country_flag = silence_04 }
+		}
+		desc = "DG_Hussites.005.des2"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes
+	
+	immediate = {
+		hidden_effect = {
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+	}
+
+	option = {
+		name = "DG_Hussites.005.opta" #Support him
+		trigger = {
+			NOT = { has_ruler_modifier = tolerant_society }
+			NOT = { has_ruler_modifier = religious_intolerance }
+		}
+		hidden_effect = {
+			set_country_flag = support_04
+			clr_country_flag = accept_04
+			clr_country_flag = silence_04
+			add_ruler_modifier = { name = "heretic_tolerance" }
+			MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+			remove_country_modifier = "tolerant_society"
+			remove_country_modifier = "religious_intolerance"
+			add_opinion = { who = PAP modifier = papacy_bad }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.005.optb" #Let him speak
+		trigger = {
+			NOT = { has_ruler_modifier = heretic_tolerance }
+			NOT = { has_ruler_modifier = religious_intolerance }
+		}
+		hidden_effect = {
+			clr_country_flag = support_04
+			set_country_flag = accept_04
+			clr_country_flag = silence_04
+			remove_country_modifier = "heretic_tolerance"
+			add_ruler_modifier = { name = "tolerant_society" }
+			MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+			remove_country_modifier = "religious_intolerance"
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.005.optc" #Silence him
+		trigger = {
+			NOT = { has_ruler_modifier = heretic_tolerance }
+			NOT = { has_ruler_modifier = tolerant_society }
+		}
+		hidden_effect = {
+			clr_country_flag = support_04
+			clr_country_flag = accept_04
+			set_country_flag = silence_04
+			remove_country_modifier = "heretic_tolerance"
+			remove_country_modifier = "tolerant_society"
+			add_ruler_modifier = { name = "religious_intolerance" }
+			MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			add_opinion = { who = PAP modifier = papacy_good }
+		}
+	}
+}
+
+### MARTYRDOM AND HERESY (1415)
+country_event = {
+	id = DG_Hussites.006
+	title = "DG_Hussites.006.title"
+	desc = "DG_Hussites.006.desc"
+	picture = all_church_state
+	is_triggered_only = yes #from DG_Papacy.268 or DG_Papacy.270
+	
+	option = {
+		name = "DG_Hussites.006.opta" #Send a '$PRIMARY_CULTURE$ protestation' to the emperor
+		trigger = { is_emperor = no } #The Emperor was responsible for burning of Jan Hus
+		ai_chance = {
+			factor = 25
+		}
+		custom_tooltip = hussite_25
+		random_country = {
+			limit = { is_emperor = yes }
+			reverse_add_opinion = { who = ROOT modifier = dg_broken_promises }
+		}
+		add_opinion = { who = PAP modifier = papacy_bad }
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 }
+		
+		hidden_effect = {
+			set_country_flag = support_04
+			clr_country_flag = accept_04
+			clr_country_flag = silence_04
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.25 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+			MN_conv_resist_c = { strength = -10 }
+		}
+		log = "DG:[GetYear]:[This.GetName]:Hussite:Spearhead"
+	}
+	
+	option = {
+		name = "DG_Hussites.006.optb" #Express our outrage at this result
+		trigger = { is_emperor = no } #The Emperor was responsible for burning of Jan Hus
+		ai_chance = {
+			factor = 25
+		}
+		custom_tooltip = hussite_10
+		Stab_Subtract25Percent = yes
+		add_opinion = { who = PAP modifier = papacy_bad }
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		
+		hidden_effect = {
+			clr_country_flag = support_04
+			set_country_flag = accept_04
+			clr_country_flag = silence_04
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.10 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+			MN_conv_resist_c = { strength = -5 }
+		}
+		log = "DG - Sthg went wrong"
+	}
+	
+	option = {
+		name = "DG_Hussites.006.optc" #Let the mob roam freely
+		trigger = { NOT = { religion = hussite } }
+		ai_chance = {
+			factor = 50
+		}
+		custom_tooltip = hussite_5
+		Stab_Subtract50Percent = yes
+		add_country_modifier = { name = religious_intolerance duration = 1095 } #3 years
+		
+		random_owned_province = {
+			limit = { has_province_flag = hus_craddle }
+			add_province_modifier = { name = religious_scandal_province duration = 1000 }
+			add_unrest = 5
+			spawn_rebels = { type = hussite_rebels size = 1 }
+		}
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		
+		hidden_effect = {
+			clr_country_flag = support_04
+			clr_country_flag = accept_04
+			set_country_flag = silence_04
+			MN_conv_resist_c = { strength = 10 }
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 3650 }
+			}
+		}
+		log = "DG - Sthg went wrong"
+	}
+	
+	after = {
+	    country_event = { 
+            id = DG_Hussites.007
+            days = 90
+            random = 30
+        }
+	}
+}
+
+### THE HUSSITE LEAGUE (1415)
+country_event = {
+	id = DG_Hussites.007
+	title = "DG_Hussites.007.title"
+	desc = "DG_Hussites.007.desc"
+	picture = all_church_state
+    major = yes
+	is_triggered_only = yes #from DG_Hussites.006
+	
+	immediate = {
+		hidden_effect = {
+		    set_country_flag = hussite_league_formed
+			every_owned_province = {
+				BastionAssessment = { heresy = 4 }
+			}
+		}
+	}
+
+	option = {
+		name = "DG_Hussites.007.opta" #Try to suppress the Hussites
+		trigger = { NOT = { religion = hussite } }
+		ai_chance = {
+			factor = 70
+		}
+		custom_tooltip = hussite_10
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		
+		hidden_effect = {
+			clr_country_flag = support_04
+			set_country_flag = accept_04
+			clr_country_flag = silence_04
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.10 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 3650 }
+			}
+			add_ruler_modifier = { name = "leaning_catholic" hidden = yes }
+			country_event = { id = DG_Hussites.008 days = 730 random = 90 }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.007.optb" #Support the Hussite League
+		trigger = { is_emperor = no }
+		ai_chance = {
+			factor = 10
+		}
+		custom_tooltip = hussite_25
+		Stab_Subtract50Percent = yes
+		add_country_modifier = { name = religious_tolerance duration = 730 } #2 years
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 }
+		
+		hidden_effect = {
+			set_country_flag = support_04
+			clr_country_flag = accept_04
+			clr_country_flag = silence_04
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.25 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 3650 }
+			}
+			country_event = { id = DG_Hussites.008 days = 365 random = 90 }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.007.optc" #Support the Romanist League
+		trigger = { NOT = { religion = hussite } }
+		ai_chance = {
+			factor = 20
+		}
+		custom_tooltip = convert_10
+		Stab_Subtract50Percent = yes
+		add_country_modifier = { name = religious_intolerance duration = 730 } #2 years
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		
+		hidden_effect = {
+			clr_country_flag = support_04
+			clr_country_flag = accept_04
+			set_country_flag = silence_04
+			add_opinion = { who = PAP modifier = papacy_good }
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = -0.05 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 3650 }
+			}
+			every_owned_province = {
+			    limit = { MN_CheckRelSlot = { Type = value Religion = 4 } }
+				add_unrest = 5
+			}
+			add_ruler_modifier = { name = "leaning_catholic" hidden = yes }
+		}
+	}
+}
+
+### PAPAL LEGATE ARRIVES
+country_event = {
+	id = DG_Hussites.008
+	title = "DG_Hussites.008.title"
+	desc = "DG_Hussites.008.desc"
+	picture = all_church_state
+	is_triggered_only = yes #from DG_Hussites.007
+	
+	trigger = {
+	    NOT = { has_country_flag = hussite_wars_target }
+		NOT = { religion = hussite }
+	}
+	immediate = {
+		hidden_effect = {
+			every_owned_province = {
+				BastionAssessment = { heresy = 4 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.008.opta" #Agree to persecute the Hussites
+		trigger = { 
+		    OR = { ai = no has_country_flag = silence_04 }
+			NOT = { religion = hussite }
+		}
+		custom_tooltip = convert_10
+		if = {
+			limit = { dominant_religion = hussite }
+			Stab_Subtract1 = yes
+		}
+		else = {
+		    Stab_Subtract50Percent = yes
+		}
+		add_country_modifier = { name = religious_intolerance duration = 730 } #2 years
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		
+		hidden_effect = {
+			set_country_flag = hus_lean_01
+			every_owned_province = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = Preach prop = 10 }
+					}
+					MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -10 }
+				}
+				else_if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = Preach prop = 5 }
+					}
+					MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -5 }
+				}
+				else_if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = Preach prop = 2 }
+					}
+					MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -2 }
+				}
+			}
+
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = -0.10 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.008.optb" #Find ways to delay
+		trigger = { 
+		    OR =  { ai = no has_country_flag = accept_04 }
+			NOT = { religion = hussite }
+		}
+		custom_tooltip = hussite_5
+		Stab_Subtract25Percent = yes
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		
+		hidden_effect = {
+			set_country_flag = hus_hesi_16
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 1 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.008.optc"
+		trigger = { 
+		    OR =  { ai = no has_country_flag = support_04 }
+			is_emperor = no
+		}
+		custom_tooltip = hussite_10
+		if = {
+			limit = { dominant_religion = catholic }
+			Stab_Subtract1 = yes
+		}
+		else = {
+		    Stab_Subtract50Percent = yes
+		}
+		add_opinion = { who = PAP modifier = papacy_bad }
+		add_papal_influence = -20
+		
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 }
+		
+		hidden_effect = {
+			set_country_flag = hus_lean_16
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.10 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+	}
+}
+
+### MONARCH AND THE HUSSITES
+country_event = {
+	id = DG_Hussites.009
+	title = "DG_Hussites.009.title"
+	desc = {
+		trigger = {
+			has_country_flag = support_04
+		}
+		desc = "DG_Hussites.009.des1"
+	}
+	desc = {
+		trigger = {
+			has_country_flag = accept_04
+		}
+		desc = "DG_Hussites.009.des2"
+	}
+	desc = {
+		trigger = {
+			has_country_flag = silence_04
+		}
+		desc = "DG_Hussites.009.des3"
+	}
+	picture = all_church_state
+	
+	is_triggered_only = yes #on_actions on_new_monarch
+	
+	trigger = {
+	    NOT = { has_country_flag = hussite_league_formed }
+		NOT = { religion = hussite }
+		OR = {
+			has_country_flag = support_04
+			has_country_flag = accept_04
+			has_country_flag = silence_04
+		}
+		NOT = { has_ruler_modifier = tolerant_society }
+		NOT = { has_ruler_modifier = religious_intolerance }
+		NOT = { has_ruler_modifier = heretic_tolerance }
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = { has_ruler_modifier = tolerant_society }
+			NOT = { has_ruler_modifier = religious_intolerance }
+		}
+		hidden_effect = {
+			set_country_flag = support_04
+			clr_country_flag = accept_04
+			clr_country_flag = silence_04
+			add_ruler_modifier = { name = "heretic_tolerance" }
+			MN_conv_resist_c = { strength = -10 }
+			reverse_add_opinion = { who = PAP modifier = opinion_pope_religious_tolerance }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = { has_ruler_modifier = heretic_tolerance }
+			NOT = { has_ruler_modifier = religious_intolerance }
+		}
+		hidden_effect = {
+			clr_country_flag = support_04
+			set_country_flag = accept_04
+			clr_country_flag = silence_04
+			add_ruler_modifier = { name = "tolerant_society" }
+			MN_conv_resist_c = { strength = -5 }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = { has_ruler_modifier = heretic_tolerance }
+			NOT = { has_ruler_modifier = tolerant_society }
+		}
+		hidden_effect = {
+			clr_country_flag = support_04
+			clr_country_flag = accept_04
+			set_country_flag = silence_04
+			add_ruler_modifier = { name = "religious_intolerance" }
+			MN_conv_resist_c = { strength = 10 }
+		}
+	}
+}
+
+### THE DEFENESTRATION  OF $CAPITAL_CITY$ (HISTORICAL VERSION)
+country_event = {
+	id = DG_Hussites.010
+	title = "DG_Hussites.010.title"
+	desc = "DG_Hussites.010.desc"
+	picture = protestant_defenestration
+	fire_only_once = yes
+	is_triggered_only = yes #on_actions on_monarch death
+	major = yes
+	
+	trigger = {
+		has_country_flag = hussite_league_formed
+		OR = {
+			has_country_flag = accept_04
+			has_country_flag = silence_04
+		}
+		capital_scope = {
+			has_owner_culture = yes
+			MN_CheckRelSlot = { Type = value Religion = 4 } 
+		}
+		NOT = { has_global_flag = hussite_wars }
+		NOT = { religion = hussite }
+		NOT = { is_religion_enabled = protestant }
+	}
+	
+	immediate = {
+		hidden_effect = {
+		    set_global_flag = hussite_wars
+			set_country_flag = hussite_wars_target
+		    if = {
+			    limit = { has_country_flag = accept_04 }
+		        clr_country_flag = accept_04
+			}
+			else_if = {
+			    limit = { has_country_flag = silence_04 }
+		        clr_country_flag = silence_04
+			}
+			every_known_country = {
+			    limit = {
+				    religion = catholic
+				    OR = {
+					    is_elector = yes
+					    is_emperor = yes
+					    is_papal_controller = yes
+					    is_neighbor_of = ROOT
+					    is_subject_of = ROOT
+				    }
+			    }
+			    add_opinion = { who = ROOT modifier = throneless_king }
+		    }
+		}
+		hidden_effect = {
+		    if = {
+			    limit = { 
+			        has_heir = yes
+				    is_lesser_in_union = no
+			    }
+			    exile_heir_as = hussite_war_heir
+			    set_country_flag = hussite_war_heir
+		    }
+		}
+		if = { #Looking for alternative heirs
+		    limit = {
+				NOT = { has_country_flag = hussite_war_heir }
+		        any_known_country = {
+			        dynasty = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+			    }
+			}
+			random_known_country = {
+			    limit = {
+				    dynasty = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+				}
+				set_country_flag = hussite_war_heir_2
+			}
+		}
+		else_if = {
+		    limit = {
+				NOT = { has_country_flag = hussite_war_heir }
+		        any_known_country = {
+			        marriage_with = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+			    }
+			}
+			random_known_country = {
+			    limit = {
+				    marriage_with = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+				}
+				set_country_flag = hussite_war_heir_3
+			}
+		}
+		define_ruler = {
+			name = "Interregnum"
+			regency = yes
+			claim = 50
+		}
+		if = {
+		    limit = { primary_culture = czech }
+		    define_heir = {
+		        name = "Jiri"
+                dynasty = "Podebrad"
+                age = 0
+                adm = 5
+                dip = 4
+                mil = 3
+                claim = 25
+            }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.010.opta" #Put down the insurrection
+		Stab_Subtract2 = yes
+		capital_scope = {
+		    spawn_rebels = {
+				type = hussite_rebels
+				size = 4
+				win = yes
+				leader = "Jan Zelivsky"
+			}
+			add_province_modifier = {
+				name = heretic_bastion
+				duration = 1095 #3 years
+			}
+			set_province_flag = hussite_bastion
+		}
+		random_owned_province = {
+		    limit = {
+			   has_owner_culture = yes
+			   is_capital = no
+			   MN_CheckRelSlot = { Type = value Religion = 4 }
+			   check_key = { lhs = Class_Urban value = 5 }
+			}
+		    spawn_rebels = {
+				type = hussite_rebels
+				size = 3
+				win = yes
+			}
+			add_province_modifier = {
+				name = heretic_bastion
+				duration = 1095 #3 years
+			}
+		}
+	}
+}
+
+### THE DEFENESTRATION  OF $CAPITAL_CITY$ (AHISTORICAL VERSION)
+country_event = {
+	id = DG_Hussites.011
+	title = "DG_Hussites.011.title"
+	desc = "DG_Hussites.011.desc"
+	picture = protestant_defenestration
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		has_country_flag = hussite_league_formed
+		OR = {
+			has_country_flag = accept_04
+			has_country_flag = silence_04
+		}
+		capital_scope = {
+			has_owner_culture = yes
+			MN_CheckRelSlot = { Type = value Religion = 4 } 
+		}
+		OR = {
+			has_regency = yes
+			NOT = { DIP = 4 }
+			NOT = { ADM = 4 }
+			ruler_has_personality = zealot_personality
+			ruler_has_personality = fanatical_priest_personality
+			ruler_has_personality = weak_personality
+			ruler_has_personality = mad_personality
+		}
+		NOT = { has_global_flag = hussite_wars }
+		NOT = { religion = hussite }
+		NOT = { is_religion_enabled = protestant }
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+		modifier = {
+			has_regency = yes
+			factor = 0.1
+		}
+		modifier = {
+			any_owned_province = {
+			    MN_CheckRelSlot = { Type = value Religion = 4 }
+				has_missionary = yes
+			}
+			factor = 0.5
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+		    set_global_flag = hussite_wars
+			set_country_flag = hussite_wars_target
+		    if = {
+			    limit = { has_country_flag = accept_04 }
+		        clr_country_flag = accept_04
+			}
+			else_if = {
+			    limit = { has_country_flag = silence_04 }
+		        clr_country_flag = silence_04
+			}
+			every_known_country = {
+			    limit = {
+				    religion = catholic
+				    OR = {
+					    is_elector = yes
+					    is_emperor = yes
+					    is_papal_controller = yes
+					    is_neighbor_of = ROOT
+					    is_subject_of = ROOT
+				    }
+			    }
+			    add_opinion = { who = ROOT modifier = throneless_king }
+		    }
+		}
+		hidden_effect = {
+		    if = {
+			    limit = { 
+			        has_heir = yes
+				    is_lesser_in_union = no
+			    }
+			    exile_heir_as = hussite_war_heir
+			    set_country_flag = hussite_war_heir
+		    }
+		}
+		if = { #Looking for alternative heirs
+		    limit = {
+				NOT = { has_country_flag = hussite_war_heir }
+		        any_known_country = {
+			        dynasty = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+			    }
+			}
+			random_known_country = {
+			    limit = {
+				    dynasty = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+				}
+				set_country_flag = hussite_war_heir_2
+			}
+		}
+		else_if = {
+		    limit = {
+				NOT = { has_country_flag = hussite_war_heir }
+		        any_known_country = {
+			        marriage_with = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+			    }
+			}
+			random_known_country = {
+			    limit = {
+				    marriage_with = ROOT
+				    government = monarchy
+					has_regency = no
+					is_female = no
+				    num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+				}
+				set_country_flag = hussite_war_heir_3
+			}
+		}
+		define_ruler = {
+			name = "Interregnum"
+			regency = yes
+			claim = 50
+		}
+		if = {
+		    limit = { primary_culture = czech }
+		    define_heir = {
+		        name = "Jiri"
+                dynasty = "Podebrad"
+                age = 0
+                adm = 5
+                dip = 4
+                mil = 3
+                claim = 25
+            }
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.011.opta" #Put down the insurrection
+		Stab_Subtract2 = yes
+		add_prestige = -20
+		capital_scope = {
+		    spawn_rebels = {
+				type = hussite_rebels
+				size = 4
+				win = yes
+				leader = "Jan Zelivsky"
+			}
+			add_province_modifier = {
+				name = heretic_bastion
+				duration = 1095 #3 years
+			}
+			set_province_flag = hussite_bastion
+		}
+		random_owned_province = {
+		    limit = {
+			   has_owner_culture = yes
+			   is_capital = no
+			   MN_CheckRelSlot = { Type = value Religion = 4 }
+			   check_key = { lhs = Class_Urban value = 5 }
+			}
+		    spawn_rebels = {
+				type = hussite_rebels
+				size = 3
+				win = yes
+			}
+			add_province_modifier = {
+				name = heretic_bastion
+				duration = 1095 #3 years
+			}
+		}
+	}
+}
+
+### THE FOUR ARTICLES OF $CAPITAL_CITY$ (1420)
+country_event = {
+	id = DG_Hussites.012
+	title = DG_Hussites.012.title
+	desc = DG_Hussites.012.desc
+	picture = hussite_barons
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+	    has_country_flag = hussite_league_formed
+		OR = {
+		    AND = { #Fighting the Hussites, but was unable to defeat them
+			    has_country_flag = hussite_wars_target
+				has_spawned_rebels = hussite_rebels
+				NOT = { religion = hussite }
+			    any_owned_province = {
+			        has_province_flag = hussite_bastion
+				    MN_CheckRelSlot = { Type = value Religion = 4 }
+				    controlled_by = REB
+			    }
+			}
+			AND = { #Supported the Hussites from the very beginning
+			    has_country_flag = hussite_league_formed
+				has_country_flag = support_04
+			}
+			religion = hussite #Turned husssite for whatever reason
+		}
+		NOT = { is_religion_enabled = protestant }
+	}
+	
+	mean_time_to_happen = {
+		months = 24
+		modifier = {
+			religion = hussite
+			factor = 0.5
+		}
+	}
+	
+	immediate = {
+	    if = {
+		    limit = { NOT = { religion = hussite } }
+		    change_religion = hussite
+		    force_converted = yes
+			Stab_Subtract1 = yes
+		}
+		if = {
+		    limit = { has_spawned_rebels = hussite_rebels }
+			disband_rebels = hussite_rebels
+		}
+		if = {
+		    limit = { NOT = { has_global_flag = hussite_wars } }
+			set_global_flag = hussite_wars
+		}
+		every_known_country = {
+		    limit = {
+			    is_subject_of = ROOT
+				is_subject_of_type = appanage_subject
+				religion = catholic
+			}
+			grant_independence = yes
+			set_country_flag = hussite_appanage
+			ROOT = {
+			    add_casus_belli = {
+				    target = PREV
+				    type = cb_disloyal_vassal
+				    months = 240
+			    }
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.012.opta #Reject the demands (Interregnum continues)
+		ai_chance = {
+			factor = 80
+		}
+		trigger = {
+		    has_country_flag = hussite_wars_target
+		}
+		if = {
+		    limit = { 
+			    has_global_flag = community_of_tabor 
+				NOT = { has_country_modifier = utraquist }
+				NOT = { has_country_modifier = taborite }
+			}
+			random_list = { #With no obvious heir chaos reigns in the country
+			    75 = {
+				    add_country_modifier = { name = utraquist duration = -1 }
+		            set_country_flag = utraquist_faction
+				}
+				25 = {
+				    add_country_modifier = { name = taborite duration = -1 }
+		            set_country_flag = taborite_faction
+				}
+			}
+		}
+		if = {
+		    limit = { primary_culture = czech }
+		    define_general = {
+			    name = "Jan Zizka"
+			    fire = 5
+			    shock = 3
+			    manuever = 5
+			    siege = 3
+			    trait = inspirational_leader_general_personality
+		    }
+		}
+		if = {
+		    limit = {
+			    any_known_country = { has_country_flag = hussite_war_heir_2 }
+			}
+			random_known_country = {
+			    limit = { has_country_flag = hussite_war_heir_2 }
+				add_casus_belli = {
+				    target = ROOT
+				    type = cb_restore_personal_union
+				    months = 360
+			    }
+			}
+		}
+		else_if = {
+		    limit = {
+			    any_known_country = { has_country_flag = hussite_war_heir_3 }
+			}
+			random_known_country = {
+			    limit = { has_country_flag = hussite_war_heir_3 }
+				add_casus_belli = {
+				    target = ROOT
+				    type = cb_restore_personal_union
+				    months = 360
+			    }
+			}
+		}
+	}
+	option = {
+		name = DG_Hussites.012.optb #Accept the demands in return for my throne (End the Interregnum)
+		ai_chance = {
+			factor = 20
+		}
+		custom_tooltip = hussite_crown_tooltip
+		trigger = {
+            has_country_flag = hussite_wars_target
+		    has_country_flag = hussite_war_heir
+			NOT = { has_global_flag = community_of_tabor }
+		}
+		if = {
+			limit = { has_country_flag = hussite_war_heir }
+			set_heir = hussite_war_heir
+			clr_country_flag = hussite_war_heir
+			set_country_flag = hussite_crown
+		}
+		if = {
+		    limit = { primary_culture = czech }
+		    define_general = {
+			    name = "Jan Zizka"
+			    fire = 5
+			    shock = 3
+			    manuever = 5
+			    siege = 3
+			    trait = inspirational_leader_general_personality
+		    }
+		}
+	}
+	option = {
+		name = DG_Hussites.012.optc #Join the ranks of the Utraquists (End the Interregnum)
+		ai_chance = { factor = 15 }
+		trigger = {
+			has_country_flag = hussite_wars_target
+			has_global_flag = community_of_tabor
+			has_country_flag = hussite_war_heir
+		}
+		custom_tooltip = hussite_crown_tooltip
+		if = {
+			limit = { has_country_flag = hussite_war_heir }
+			set_heir = hussite_war_heir
+			clr_country_flag = hussite_war_heir
+			set_country_flag = hussite_crown
+		}
+		Stab_Add50Percent = yes
+		add_country_modifier = { name = religious_tolerance duration = 1825 } #5 years
+		define_advisor = { religion = hussite type = theologian_CL discount = yes }
+		add_country_modifier = { name = utraquist duration = -1 }
+		set_country_flag = utraquist_faction
+		if = {
+		    limit = { primary_culture = czech }
+		    define_general = {
+			    name = "Jan Zizka"
+			    fire = 5
+			    shock = 3
+			    manuever = 5
+			    siege = 3
+			    trait = inspirational_leader_general_personality
+		    }
+		}
+	}
+	option = {
+		name = DG_Hussites.012.optd #Reject this apologist doctrine (End the Interregnum)
+		ai_chance = {
+			factor = 5
+			modifier = {
+				NOT = { religious_unity = 0.80 }
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { religious_unity = 0.60 }
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { religious_unity = 0.40 }
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { religious_unity = 0.20 }
+				factor = 0
+			}
+		}
+		trigger = {
+			has_country_flag = hussite_wars_target
+			has_global_flag = community_of_tabor
+			has_country_flag = hussite_war_heir
+		}
+		custom_tooltip = hussite_crown_tooltip
+		if = {
+			limit = { has_country_flag = hussite_war_heir }
+			set_heir = hussite_war_heir
+			clr_country_flag = hussite_war_heir
+			set_country_flag = hussite_crown
+		}
+		Stab_Add50Percent = yes
+		add_country_modifier = { name = religious_intolerance duration = 1825 } #5 years
+		define_advisor = { religion = hussite type = inquisitor_CL discount = yes }
+		add_country_modifier = { name = taborite duration = -1 }
+		set_country_flag = taborite_faction
+		if = {
+		    limit = { primary_culture = czech }
+		    define_general = {
+			    name = "Jan Zizka"
+			    fire = 5
+			    shock = 3
+			    manuever = 5
+			    siege = 3
+			    trait = inspirational_leader_general_personality
+		    }
+		}
+	}
+	option = {
+		name = DG_Hussites.012.opte #Publish this document far and wide
+		ai_chance = { factor = 100 }
+		trigger = {
+		    NOT = { has_country_flag = hussite_wars_target }
+		}
+		custom_tooltip = hussite_crown_tooltip
+		set_country_flag = hussite_crown
+		if = {
+		    limit = { primary_culture = czech }
+		    define_general = {
+			    name = "Jan Zizka"
+			    fire = 5
+			    shock = 3
+			    manuever = 5
+			    siege = 3
+			    trait = inspirational_leader_general_personality
+		    }
+		}
+	}
+	after = {
+	    if = {
+		    limit = { NOT = { has_country_flag = hussite_wars_target } }
+			set_country_flag = hussite_wars_target
+		}
+		set_ruler_religion = hussite
+		set_heir_religion = hussite
+		set_consort_religion = hussite
+		every_known_country = {
+		    limit = { 
+			    religion = catholic 
+				OR = {
+				   is_neighbor_of = ROOT
+				   is_emperor = yes
+				   is_elector = yes
+				}
+			}
+			add_casus_belli = {
+				target = ROOT
+				type = cb_crusade
+				months = 480
+			}
+		}
+	}
+}
+
+### THE COMMUNITY OF TABOR
+province_event = {
+	id = DG_Hussites.013
+	title = DG_Hussites.013.title
+	desc = DG_Hussites.013.desc
+	picture = hussite_wars
+	fire_only_once = yes
+	
+	trigger = {
+		owner = { has_country_flag = hussite_wars_target }
+		NOT = { has_global_flag = community_of_tabor }
+		NOT = { has_province_modifier = heretic_bastion }
+		NOT = { controlled_by = REB }
+		has_owner_culture = yes
+		is_capital = no
+	}
+	
+	mean_time_to_happen = {
+		years = 10
+		modifier = {
+			owner = {
+				NOT = { religion = hussite }
+				num_of_owned_provinces_with = {
+					has_province_modifier = heretic_bastion
+					value = 2
+				}
+			}
+			factor = 2
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			set_global_flag = community_of_tabor
+			set_province_flag = tabor
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.013.opta #They must be put down like rabid dogs
+		trigger = { 
+		    owner = { NOT = { religion = hussite } } 
+		}
+		ai_chance = {
+		    factor = 100 
+		}
+		spawn_rebels = {
+		    type = hussite_rebels
+			size = 2
+			win = yes
+		}
+		add_province_modifier = { name = heretic_bastion duration = 1095 }
+	}
+	option = {
+		name = DG_Hussites.013.optb #Accept their aid but reject their doctrines
+		trigger = {
+			owner = { religion = hussite }
+		}
+		ai_chance = { factor = 75 }
+		owner = {
+			Stab_Add50Percent = yes
+			define_advisor = { religion = hussite type = theologian_CL discount = yes }
+			add_country_modifier = { name = utraquist duration = -1 }
+			set_country_flag = utraquist_faction
+			add_country_modifier = { name = religious_tolerance duration = 1825 } #5 years
+		}
+	}
+	option = {
+		name = DG_Hussites.013.optc #Embrace the Taborite cause as our own
+		trigger = {
+			owner = { religion = hussite }
+		}
+		ai_chance = {
+			factor = 25
+		}
+		owner = {
+		    Stab_Add50Percent = yes
+			define_advisor = { religion = hussite type = inquisitor_CL discount = yes }
+			add_country_modifier = { name = taborite duration = -1 }
+			set_country_flag = taborite_faction
+			add_country_modifier = { name = religious_intolerance duration = 1825 } #5 years
+		}
+	}
+}
+
+### HUSSITE CONFEDERATION
+province_event = {
+	id = DG_Hussites.014
+	title = DG_Hussites.014.title
+	desc = DG_Hussites.014.desc
+	picture = hussite_barons
+	
+	trigger = {
+		religion = catholic
+		owner = { 
+		    any_neighbor_country = {
+			    religion = hussite
+				has_country_flag = hussite_wars_target
+			}
+			religion = catholic
+			num_of_cities = 5
+		    hussite = 0
+			NOT = { has_country_flag = hussite_persecution }
+			NOT = { has_country_flag = hussite_confederation }
+			
+		}
+		any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } }
+	}
+	
+	mean_time_to_happen = { months = 48 }
+	
+	option = {
+		name = DG_Hussites.014.opta #Persecute them
+		ai_chance = {
+			factor = 60
+			modifier = {
+				is_part_of_hre = yes
+				factor = 1.4
+			}
+		}
+		custom_tooltip = hussite_5
+		hidden_effect = {
+			MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+			MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+			MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			every_neighbor_province = {
+			    limit = { culture = ROOT }
+			    MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.05 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+		owner = {
+			set_country_flag = hussite_persecution
+			every_neighbor_country = {
+				limit = {
+					has_country_flag = hussite_confederation
+				}
+				add_opinion = { who = ROOT modifier = mistreated_coreligionists_observant }
+			}
+			every_neighbor_country = {
+				limit = { religion = hussite }
+				add_opinion = { who = ROOT modifier = mistreated_coreligionists_pious }
+			}
+			add_country_modifier = { name = religious_intolerance duration = 1825 } #5 years
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-5 }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+	}
+	option = {
+		name = DG_Hussites.014.optb #Tolerate them
+		ai_chance = { 
+		    factor = 40 
+			modifier = {
+				has_country_flag = hussite_war_heir_2
+				factor = 0
+			}
+		    modifier = {
+				has_country_flag = hussite_war_heir_3
+				factor = 0
+			}
+		}
+		custom_tooltip = hussite_10
+		hidden_effect = {
+			MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.10 typeIncr = value }
+			MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+			MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			every_neighbor_province = {
+			    limit = { culture = ROOT }
+			    MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = 0.10 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+		}
+		owner = {
+			set_country_flag = hussite_confederation
+			every_neighbor_country = {
+				limit = { religion = hussite }
+				add_opinion = { who = ROOT modifier = aided_coreligionists_pious }
+			}
+			add_country_modifier = { name = religious_tolerance duration = 1825 } #5 years
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-5 }
+		}
+	}
+}
+
+### THE CROWN OF $COUNTRY$
+country_event = {
+	id = DG_Hussites.015
+	title = DG_Hussites.015.title
+	desc = DG_Hussites.015.desc
+	picture = catholic_court
+	fire_only_once = yes
+	
+	trigger = {
+	    has_global_flag = hussite_wars
+		has_country_flag = hussite_wars_target
+		has_regency = yes
+		religion = hussite
+		NOT = { has_country_flag = hussite_crown }
+		any_known_country = {
+			has_country_flag = hussite_confederation
+			government = monarchy
+			has_regency = no
+			is_female = no
+			is_lesser_in_union = no
+			religion = catholic
+		}
+	}
+	
+	mean_time_to_happen = { months = 18 }
+	
+	immediate = {
+		hidden_effect = {
+			#Choosing an appropriate target
+			random_country = {
+				limit = {
+					has_country_flag = hussite_confederation
+					government = monarchy
+					has_regency = no
+			        is_female = no
+					is_lesser_in_union = no
+					religion = catholic
+					OR = {
+						num_of_cities = ROOT
+						army_size = ROOT
+					}
+				}
+				set_country_flag = hussite_crown_candidate
+			}
+			if = {
+				limit = { NOT = { any_known_country = { has_country_flag = hussite_crown_candidate } } }
+				random_country = {
+					limit = {
+						has_country_flag = hussite_confederation
+						government = monarchy
+						has_regency = no
+			            is_female = no
+						is_lesser_in_union = no
+						religion = catholic
+						culture_group = ROOT
+					}
+					set_country_flag = hussite_crown_candidate
+				}
+			}
+			if = {
+				limit = { NOT = { any_known_country = { has_country_flag = hussite_crown_candidate } } }
+				random_country = {
+					limit = {
+						has_country_flag = hussite_confederation
+						government = monarchy
+						has_regency = no
+			            is_female = no
+						is_lesser_in_union = no
+						religion = catholic
+					}
+					set_country_flag = hussite_crown_candidate
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.015.opta #Fight with words
+		ai_chance = {
+			factor = 75
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_crown_candidate
+					OR = {
+						num_of_cities = ROOT
+						army_size = ROOT
+					}
+				}
+				factor = 2
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_crown_candidate
+					is_rival = ROOT
+				}
+				factor = 0.7
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_crown_candidate
+					is_enemy = ROOT
+				}
+				factor = 0.7
+			}
+		}
+		custom_tooltip = hussite_union
+		random_country = {
+			limit = { has_country_flag = hussite_crown_candidate }
+			add_opinion = { who = ROOT modifier = hussite_crown_offered }
+			country_event = { id = DG_Hussites.016 days = 7 }
+		}
+	}
+	option = {
+		name = DG_Hussites.015.optb #Fight with swords
+		ai_chance = { factor = 25 }
+		random_country = {
+			limit = { has_country_flag = hussite_crown_candidate }
+			add_opinion = { who = ROOT modifier = hussite_crown_refused }
+			country_event = { id = DG_Hussites.017 days = 7 }
+		}
+	}
+}
+
+### THE HUSSITE CROWN (AN OFFER)
+country_event = {
+	id = DG_Hussites.016
+	title =DG_Hussites.016.title
+	desc = DG_Hussites.016.desc
+	picture = catholic_court
+	
+	is_triggered_only = yes #from DG_Hussites.015
+	
+	option = {
+		name = DG_Hussites.016.opta #Allow the coronation
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+			modifier = {
+				factor = 0.2
+				FROM = { is_rival = ROOT }
+			}
+			modifier = {
+				factor = 0.2
+				FROM = { is_enemy = ROOT }
+			}
+			modifier = {
+			    factor = 0.2
+				NOT = { has_opinion = { who = FROM value = -50 } }
+			}
+			modifier = {
+			    factor = 0.2
+				NOT = { reverse_has_opinion = { who = FROM value = -50 } }	
+			}
+			modifier = {
+			    factor = 0
+				is_emperor = yes
+			}
+		}
+		if = {
+		    limit = { war_with = FROM }
+		    white_peace = FROM
+		}
+		if = {
+		    limit = { FROM = { is_rival = ROOT } }
+		    remove_rival = FROM
+		}
+		if = {
+		    limit = { FROM = { is_enemy = ROOT } }
+		    FROM = { remove_rival = ROOT }
+		}
+		create_alliance = FROM
+		create_marriage = FROM
+		add_prestige = -10
+		add_papal_influence = -25
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -25 }
+		FROM = {
+			define_ruler = { 
+			    religion = hussite 
+			    culture = ROOT 
+			    dynasty = ROOT 
+			}
+			set_country_flag = hussite_crown
+		}
+		hidden_effect = {
+		    add_trust = {
+                who = FROM
+                value = 100
+                mutual = yes
+            }
+		    set_ai_attitude = {
+                attitude = attitude_friendly
+                who = FROM
+                locked = yes
+            }
+			FROM = {
+			    set_ai_attitude = {
+                    attitude = attitude_friendly
+                    who = ROOT
+                    locked = yes
+                }
+			}
+		    country_event = { id = DG_Hussites.019 days = 365 random = 90 }
+		}
+	}
+	option = {
+		name = DG_Hussites.016.optb #Forbid the coronation
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+		}
+		add_papal_influence = 10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 10 }
+		FROM = {
+			define_ruler = { 
+			    religion = hussite 
+			    culture = ROOT 
+			    dynasty = ROOT 
+			}
+			add_casus_belli = { target = ROOT months = 36 type = cb_insult }
+			set_country_flag = hussite_crown
+		}
+		every_owned_province = {
+		    limit = {
+			    MN_CheckRelSlot = { Type = value Religion = 4 }
+			}
+			add_unrest = 10
+		}
+	}
+}
+
+### THE HUSSITE CROWN (LACK OF OFFER)
+country_event = {
+	id = DG_Hussites.017
+	title = DG_Hussites.017.title
+	desc = DG_Hussites.017.desc
+	picture = catholic_court
+	
+	is_triggered_only = yes #from DG_Hussites.015
+	
+	option = {
+		name = DG_Hussites.017.opta #This is a slap in the face
+		add_legitimacy = -5
+		add_casus_belli = { target = FROM months = 36 type = cb_insult }
+	}
+}
+
+### END OF INTERREGNUM
+country_event = {
+	id = DG_Hussites.018
+	title = DG_Hussites.018.title
+	desc = DG_Hussites.018.desc
+	picture = catholic_court
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+	   has_country_flag = hussite_wars_target
+	   religion = hussite
+	   has_regency = no
+	}
+	
+	mean_time_to_happen = {
+	    months = 6
+	}
+	
+	immediate = {
+	    if = {
+		    limit = { NOT = { has_country_flag = hussite_crown } }
+			set_country_flag = hussite_crown
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.018.opta #Peace at last!
+		if = {
+		    limit = { has_spawned_rebels = hussite_rebels }
+			disband_rebels = hussite_rebels
+		}
+		if = {
+		    limit = { has_spawned_rebels = catholic_rebels }
+			disband_rebels = catholic_rebels
+		}
+		Stab_Add50Percent = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = BG Amount = 10 }
+	}
+}
+
+### INTERNATIONAL PRESSURE
+country_event = {
+	id = DG_Hussites.019
+	title = DG_Hussites.019.title
+	desc = DG_Hussites.019.desc
+	picture = catholic_trial
+	is_triggered_only = yes #from DG_Hussites.016
+	
+	trigger = {
+	    religion = catholic
+		any_known_country = {
+		    has_country_flag = hussite_crown
+			religion = hussite
+			dynasty = ROOT
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.019.opta #Withdraw our candidate from their throne
+		ai_chance = {
+			factor = 60
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+		}
+		add_papal_influence = 10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 10 }
+		random_known_country = {
+		    limit = {
+			    has_country_flag = hussite_crown
+			    religion = hussite
+			    dynasty = ROOT
+			}
+			define_ruler = {
+			    name = "Interregnum"
+			    regency = yes
+			    claim = 25
+		    }
+			break_alliance = ROOT
+			break_marriage = ROOT
+			clr_country_flag = hussite_crown
+		}
+	}
+	option = {
+		name = DG_Hussites.019.optb #Refuse to bend to their demands
+		ai_chance = {
+			factor = 40
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+		}
+		add_papal_influence = -25
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -25 }
+		every_country = {
+			limit = {
+				religion = catholic
+				OR = {
+					is_papal_controller = yes
+					is_emperor = yes
+					is_neighbor_of = ROOT
+				}
+			}
+			add_casus_belli = { target = ROOT type = cb_insult months = 60 }
+		}
+	}
+}
+
+### CIVIL WAR
+country_event = {
+	id = DG_Hussites.020
+	title = DG_Hussites.020.title
+	desc = DG_Hussites.020.desc
+	picture = all_massacre
+	fire_only_once = yes
+	
+	trigger = {
+		has_country_flag = hussite_wars_target
+		had_country_flag = { flag = hussite_crown days = 730 }
+		has_regency = no
+		religion = hussite
+		NOT = { num_of_rebel_armies = 1 }
+		NOT = { religious_unity = 0.90 }
+		NOT = { stability = 3 }
+		any_owned_province = {
+			is_capital = no
+			religion = catholic
+		}
+	}
+	
+	mean_time_to_happen = { months = 3 }
+	
+	immediate = {
+	    set_country_flag = hussite_wars_second_phase
+	}
+	
+	option = {
+		name = DG_Hussites.020.opta #Let us finish this
+		Stab_Subtract50Percent = yes
+		random_owned_province = {
+		    limit = {
+			   is_capital = no
+			   religion = catholic
+			}
+		    spawn_rebels = {
+				type = catholic_rebels
+				size = 3
+				leader = "Puta z Castolovic"
+				win = yes
+				should_take_capital = yes
+			}
+			add_province_modifier = {
+				name = heretic_bastion
+				duration = 1095 #3 years
+			}
+		}
+	}
+}
+
+### HUSSITE OFFENSIVE
+country_event = {
+	id = DG_Hussites.021
+	title = DG_Hussites.021.title
+	desc = DG_Hussites.021.desc
+	picture = hussite_wagons
+	fire_only_once = yes
+	
+	trigger = {
+		has_country_flag = hussite_wars_target
+		has_global_flag = community_of_tabor
+		OR = {
+		    has_country_flag = hussite_wars_second_phase
+			had_country_flag = { flag = hussite_wars_target days = 1825 } #5 years
+		}
+		NOT = { has_country_flag = hussite_offensive }
+		religion = hussite
+	}
+	
+	mean_time_to_happen = {
+		months = 9
+	}
+	
+	immediate = {
+	    if = {
+		    limit = { NOT = { has_country_flag = hussite_wars_second_phase } }
+			set_country_flag = hussite_wars_second_phase
+		}
+		if = {
+		    limit = { primary_culture = czech }
+		    define_general = {
+			    name = "Prokop Veliky"
+			    fire = 4
+			    shock = 3
+			    manuever = 4
+			    siege = 3
+			    trait = master_of_arms_personality
+		    }
+			define_general = {
+			    name = "Jan Capek z San"
+			    fire = 3
+			    shock = 2
+			    manuever = 5
+			    siege = 2
+			    trait = goal_oriented_personality #Famous for his raid against Teutonic Order
+		    }
+		}
+		hidden_effect = {
+			set_variable = {
+				which = hussite_raids
+				value = 0
+			}
+		}
+		set_country_flag = hussite_offensive
+	}
+	
+	option = {
+		name = DG_Hussites.021.opta #Give them free rein
+		ai_chance = {
+			factor = 30
+			modifier = {
+				has_country_modifier = utraquist
+				factor = 0.5
+			}
+			modifier = {
+				has_country_modifier = taborite
+				factor = 2
+			}
+			modifier = {
+				num_of_loans = 1
+				factor = 1.4
+			}
+			modifier = {
+				num_of_loans = 2
+				factor = 1.4
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 2
+			}
+		}
+		hidden_effect = {
+		    every_neighbor_country = {
+		        limit = {
+				    religion = catholic
+				    NOT = { is_subject_of = ROOT }
+			    }
+			    ROOT = {
+			        add_casus_belli = {
+				        target = PREV
+				        type = cb_hussite_raid
+				        months = 480
+			        }
+			    }
+		    }
+		}
+	}
+	option = {
+		name = DG_Hussites.021.optb #Keep them under control
+		ai_chance = { factor = 30 }
+        set_country_flag = limited_hussite_raids
+		hidden_effect = {
+		    every_neighbor_country = {
+		        limit = {
+				    religion = catholic
+				    NOT = { is_subject_of = ROOT }
+			    }
+			    ROOT = {
+			        add_casus_belli = {
+				        target = PREV
+				        type = cb_hussite_raid
+				        months = 480
+			        }
+			    }
+		    }
+		}
+	}
+}
+
+### HUSSITE RAIDS
+country_event = {
+	id = DG_Hussites.022
+	title = DG_Hussites.022.title
+	desc = DG_Hussites.022.desc
+	picture = hussite_wagons
+	is_triggered_only = yes #on_actions on_yearly_pulse_2
+	
+	trigger = {
+		has_country_flag = hussite_offensive
+		religion = hussite
+		is_at_war = no
+		NOT = { num_of_rebel_armies = 1 }
+		NOT = { war_exhaustion = 6 }
+		NOT = { is_religion_enabled = protestant }
+		NOT = { check_variable = { which = hussite_raids value = 20 } } #Maximum number of 20 raids is allowed for balance purposes
+		any_neighbor_country = {
+		    religion = catholic
+			NOT = { alliance_with = ROOT }
+			NOT = { marriage_with = ROOT }
+			NOT = { truce_with = ROOT }
+			NOT = { guaranteed_by = ROOT }
+			NOT = {
+			    army_strength = {
+	                who = ROOT
+	                value = 0.5
+                }
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.022.opta #Give our blessing to the 'Beautiful Riders'
+		ai_chance = {
+			factor = 90
+			modifier = {
+				has_country_flag = limited_hussite_raids 
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 4
+				factor = 0.5
+			}
+			modifier = {
+				war_exhaustion = 2
+				factor = 0.5
+			}
+		}
+		random_neighbor_country = {
+		    limit = {
+		        religion = catholic
+			    NOT = { alliance_with = ROOT }
+			    NOT = { marriage_with = ROOT }
+			    NOT = { truce_with = ROOT }
+				NOT = { guaranteed_by = ROOT }
+			    NOT = {
+			        army_strength = {
+	                    who = ROOT
+	                    value = 0.5
+                    }
+			    }
+			}
+			ROOT = {
+			    declare_war_with_cb = {
+                    who = PREV
+                    casus_belli = cb_hussite_raid
+                }
+			}
+		}
+		hidden_effect = {
+			change_variable = {
+				which = hussite_raids
+				value = 1
+			}
+		}
+	}
+	option = {
+		name = DG_Hussites.022.optb #It's not the right moment
+		ai_chance = { factor = 10 }
+	}
+}
+
+### THE ASSEMBLY OF $CAPITAL_CITY$
+country_event = {
+	id = DG_Hussites.024
+	title = DG_Hussites.024.title
+	desc = DG_Hussites.024.desc
+	picture = hussite_barons
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		has_country_flag = hussite_wars_target
+		OR = {
+		    AND = { #Defeated hussite rebels
+			    religion = catholic
+				NOT = { has_spawned_rebels = hussite_rebels }
+				capital_scope = { controlled_by = ROOT }
+			}
+			AND = { #Anti-hussite crusade was successful
+			    religion = hussite
+				any_known_country = {
+				    religion = catholic
+					is_in_war = {
+                        defender_leader = ROOT
+						casus_belli = cb_crusade
+                    }
+					#NOT = { war_score = -50 }
+				    any_province = {
+					    is_capital_of = ROOT
+						controlled_by = PREV
+					}
+				}
+			}
+			AND = { #Someone took the crown by force
+			    religion = hussite
+				is_lesser_in_union = yes
+				overlord = { religion = catholic }
+			}
+			AND = { #Country's population became tired of constant warfare
+			    religion = hussite
+			    had_country_flag = {
+			        flag = hussite_wars_target
+			        days = 7300 #20 years
+		        }
+				OR = {
+				    NOT = { stability = -2 }
+					war_exhaustion = 8
+				}
+			}
+		}
+		NOT = { has_country_flag = hussite_compacta }
+		NOT = { is_religion_enabled = protestant }
+	}
+	
+	mean_time_to_happen = { months = 1 }
+	
+	immediate = {
+	    set_country_flag = hussite_compacta 
+		if = {
+		    limit = { religion = hussite }
+		    change_religion = catholic
+		    force_converted = yes
+		}
+		every_known_country  = {
+		    limit = {
+			    is_in_war = {
+                    defender_leader = ROOT
+					casus_belli = cb_crusade
+                }
+			}
+			white_peace = ROOT
+			add_prestige = 20
+		}
+		every_known_country = {
+		    limit = { has_country_flag = hussite_appanage }
+			ROOT = {
+			    create_subject = {
+			        subject_type = appanage_subject
+			        subject = PREV
+		        }
+			}
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.024.opta #Sign the Compact of $CAPITAL_CITY$
+		ai_chance = { factor = 90 }
+		if = {
+			limit = { 
+			    has_country_flag = hussite_war_heir
+				is_lesser_in_union = no
+			}
+			set_heir = hussite_war_heir
+			clr_country_flag = hussite_war_heir
+			hidden_effect = {
+			    if = {
+			        limit = { has_regency = no }
+				    kill_ruler = yes 
+			    }
+			}
+		}
+		else_if = {
+		    limit = {
+			    has_country_flag = hussite_crown			
+			    any_known_country = { 
+				    has_country_flag = hussite_war_heir_2
+					is_free_or_tributary_trigger = yes
+				}
+				is_lesser_in_union = no
+			}
+			random_known_country = { 
+			    limit = { 
+				    has_country_flag = hussite_war_heir_2
+					is_free_or_tributary_trigger = yes
+				}
+				create_subject = {
+			        subject_type = temporary_union
+			        subject = ROOT
+		        }
+			}
+		}
+		else_if = {
+		    limit = {
+			    has_country_flag = hussite_crown			
+			    any_known_country = { 
+				    has_country_flag = hussite_war_heir_3
+					is_free_or_tributary_trigger = yes
+				}
+				is_lesser_in_union = no
+			}
+			random_known_country = { 
+			    limit = { 
+				    has_country_flag = hussite_war_heir_3 
+					is_free_or_tributary_trigger = yes
+				}
+				create_subject = {
+			        subject_type = temporary_union
+			        subject = ROOT
+		        }
+			}
+		}
+		else_if = {
+		    limit = {
+                has_country_flag = hussite_crown
+		        any_neighbor_country = {
+				    religion = catholic
+					num_of_cities = 8
+					is_free_or_tributary_trigger = yes
+			    }
+				is_lesser_in_union = no
+			}
+			random_neighbor_country = { 
+			    limit = { 
+				    religion = catholic
+					num_of_cities = 8 
+					is_free_or_tributary_trigger = yes
+				}
+				create_subject = {
+			        subject_type = temporary_union
+			        subject = ROOT
+		        }
+			}
+		}
+		else_if = { #Very unlikely, added just in case
+		    limit = {
+                has_country_flag = hussite_crown
+				is_lesser_in_union = no
+			}
+		    define_ruler = {
+                culture = ROOT
+				claim = 50
+            }
+		}
+		Stab_Add1 = yes
+		add_war_exhaustion = -5
+		PAP = {
+			add_opinion = { who = ROOT modifier = disobeyed_religious_leader }
+		}
+		add_country_modifier = { name = edict_of_tolerance duration = -1 }
+	}
+	after = {
+	    clr_country_flag = hussite_wars_target
+		clr_country_flag = hussite_crown
+		clr_country_flag = hussite_offensive 
+		clr_country_flag = limited_hussite_raids
+		hidden_effect = {
+			every_owned_province = {
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = -0.2 typeIncr = value }
+				MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -3 }
+				MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 3650 }
+			}
+		}
+	}
+}
+
+### COMPACT WITH HERESY
+country_event = {
+	id = DG_Hussites.025
+	title = DG_Hussites.025.title
+	desc = DG_Hussites.025.desc
+	picture = catholic_heresy
+	
+	trigger = {
+		is_papal_controller = yes
+		PAP = { has_regency = no }
+		any_known_country = {
+			has_country_flag = hussite_compacta
+			has_country_modifier = edict_of_tolerance
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 10
+		modifier = {
+			any_known_country = {
+				has_country_flag = hussite_compacta
+				NOT = { religion = catholic }
+			}
+			factor = 0.1
+		}
+	}
+	
+	option = {
+		name = DG_Hussites.025.opta #Uphold the compacta
+		ai_chance = {
+			factor = 25
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					NOT = { religion = catholic }
+				}
+				factor = 0
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					alliance_with = ROOT
+				}
+				factor = 1.4
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					marriage_with = ROOT
+				}
+				factor = 1.4
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					is_subject_of = ROOT
+				}
+				factor = 1.4
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					alliance_with = PAP
+				}
+				factor = 2
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					truce_with = ROOT
+				}
+				factor = 0.7
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					is_rival = ROOT
+				}
+				factor = 0.7
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					is_enemy = ROOT
+				}
+				factor = 0.5
+			}
+			modifier = {
+				any_known_country = {
+					has_country_flag = hussite_compacta
+					war_with = ROOT
+				}
+				factor = 0.5
+			}
+		}
+		random_country = {
+			limit = { has_country_flag = hussite_compacta }
+			add_opinion = { who = ROOT modifier = papacy_great }
+			add_opinion = { who = PAP modifier = papacy_great }
+		}
+		add_papal_influence = -5
+	}
+	option = {
+		name = DG_Hussites.025.optb #Tear up the compacta
+		ai_chance = {
+			factor = 75
+			modifier = {
+				has_country_flag = hussite_compacta
+				factor = 0
+			}
+		}
+		random_country = {
+			limit = { has_country_flag = hussite_compacta }
+			add_opinion = { who = ROOT modifier = papacy_bad }
+			add_opinion = { who = PAP modifier = papacy_bad }
+			country_event = { id = DG_Hussites.026 days = 30 }
+			clr_country_flag = hussite_compacta
+		}
+		add_reform_desire = 0.001
+	}
+}
+
+### PRESSURE FROM VATICAN
+country_event = {
+	id = DG_Hussites.026
+	title = DG_Hussites.026.title
+	desc = DG_Hussites.026.desc
+	picture = catholic_heresy
+	is_triggered_only = yes #from DG_Hussites.025
+	
+	option = {
+		name = DG_Hussites.026.opta #Uphold the compacta
+		ai_chance = { factor = 40 }
+		reverse_add_opinion = { who = PAP modifier = disobeyed_religious_leader }
+		if = {
+			limit = { religion = catholic }
+			add_legitimacy = -10
+			add_papal_influence = -20
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 }
+		}
+	}
+	option = {
+		name = DG_Hussites.026.optb #Tear up the compacta
+		ai_chance = {
+			factor = 60
+			modifier = {
+				NOT = { religion = catholic }
+				factor = 0
+			}
+			modifier = {
+				dominant_religion = hussite
+				factor = 0.1
+			}
+			modifier = {
+				NOT = { stability = 0 }
+				factor = 0.7
+			}
+		}
+		if = {
+			limit = { religion = catholic }
+			add_legitimacy = 5
+			add_papal_influence = 10
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		}
+		if = {
+			limit = { has_country_modifier = edict_of_tolerance }
+			remove_country_modifier = edict_of_tolerance
+			Stab_Subtract1 = yes
+		}
+		if = {
+			limit = { any_owned_province = { religion = hussite } }
+			every_owned_province = {
+				limit = { religion = hussite }
+				add_unrest = 10
+			}
+		}
+	}
+}
+
+country_event = {
+	id = DG_Hussites.027
+	title = "DG_Hussites.027.title"
+	desc = "DG_Hussites.027.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.HELLNO"
+		trigger = { always = no }
+		change_religion = holyleague
+	}
+	
+	option = {
+		name = "OPT.VERYWELL"
+		custom_tooltip = SetHussiteCompromiseAspects_tt
+		hidden_effect = { SetHussiteCompromiseAspects = yes }
+	}
+}
+
+country_event = {
+	id = DG_Hussites.031
+	title = "DG_Hussites.031.title"
+	desc = "DG_Hussites.031.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "DG_Hussites.031.opta"
+	}
+	
+	option = {
+		name = "OPT.VERYWELL"
+		change_religion = catholic
+	}
+}
+
+country_event = {
+	id = DG_Hussites.041
+	title = "DG_Hussites.041.title"
+	desc = "DG_Hussites.041.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.HELLNO"
+		trigger = { always = no }
+		change_religion = holyleague
+	}
+	
+	option = {
+		name = "OPT.VERYWELL"
+		custom_tooltip = SetHussiteAspects_tt
+		hidden_effect = { SetHussiteAspects = yes }
+	}
+}
+
+country_event = {
+	id = DG_Hussites.051
+	title = "DG_Hussites.051.title"
+	desc = "DG_Hussites.051.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.GOOD2"
+		change_religion = catholic
+	}
+}
+
+#Spread of the Heresy
+country_event = {
+	id = DG_Hussites.100
+	title = "DG_Hussites.100.title"
+	desc = "DG_Hussites.100.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes #triggered by four_year_pulse_4
+	
+	option = {
+		if = {
+			limit = { NOT = { has_country_flag = hussite_presence } }
+			country_event = { id = DG_Hussites.101 }
+			set_country_flag = hussite_presence
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = hussite_presence days = 36500 } }
+			random_list = {
+				1 = { country_event = { id = DG_Hussites.101 } }
+				99 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = hussite_presence days = 27375 } }
+			random_list = {
+				5 = { country_event = { id = DG_Hussites.101 } }
+				95 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = hussite_presence days = 21900 } }
+			random_list = {
+				15 = { country_event = { id = DG_Hussites.101 } }
+				85 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = hussite_presence days = 18250 } }
+			random_list = {
+				30 = { country_event = { id = DG_Hussites.101 } }
+				70 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = hussite_presence days = 14600 } }
+			random_list = {
+				40 = { country_event = { id = DG_Hussites.101 } }
+				60 = {}
+			}
+		}
+		else_if = {
+			limit = { had_country_flag = { flag = hussite_presence days = 7300 } }
+			random_list = {
+				55 = { country_event = { id = DG_Hussites.101 } }
+				45 = {}
+			}
+		}
+		else = {
+			random_list = {
+				70 = { country_event = { id = DG_Hussites.101 } }
+				30 = {}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = DG_Hussites.101
+	title = "DG_Hussites.101.title"
+	desc = "DG_Hussites.101.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes #triggered by four_year_pulse_4
+
+	option = {
+		name = "EVT_AI"
+		random_list = {
+			75 = {
+				random_province = {
+					limit = {
+						NOT = { is_religion_enabled = protestant }
+						OR = { area = royal_bohemia_area area = north_bohemia_area area = moravia_area }
+						owner = {
+							OR = {
+								any_owned_province = { has_province_flag = hus_craddle }
+								overlord = { any_owned_province = { has_province_flag = hus_craddle } }
+							}
+						}
+						OR = {
+							MN_CheckRelSlot = { Type = value Religion = 4 }
+							any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } }
+							any_neighbor_province = { any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } } }
+						}
+						religion = catholic
+					}
+					province_event = { id = DG_Hussites.102 }
+					random_neighbor_province = {
+						limit = {
+							religion = catholic
+						} 
+						random_list = {
+							90 = { province_event = { id = DG_Hussites.102 } }
+							10 = {}
+						}
+					}
+				}
+			}
+			5 = {
+				random_province = {
+					limit = {
+						NOT = { is_religion_enabled = protestant }
+						OR = { area = royal_bohemia_area area = north_bohemia_area area = moravia_area }
+						owner = {
+							NOT = { any_owned_province = { has_province_flag = hus_craddle } }
+							NOT = { overlord = { any_owned_province = { has_province_flag = hus_craddle } } }
+						}
+						OR = {
+							MN_CheckRelSlot = { Type = value Religion = 4 }
+							any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } }
+							any_neighbor_province = { any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } } }
+						}
+						religion = catholic
+					}
+					province_event = { id = DG_Hussites.102 }
+				}
+			}
+			1 = {
+				random_province = {
+					limit = {
+						NOT = { is_religion_enabled = protestant }
+						NOT = { area = royal_bohemia_area area = north_bohemia_area area = moravia_area }
+						OR = {
+							MN_CheckRelSlot = { Type = value Religion = 4 }
+							any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } }
+							any_neighbor_province = { any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } } }
+						}
+						religion = catholic
+					}
+					province_event = { id = DG_Hussites.102 }
+				}
+			}
+			19 = {
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.102
+	title = "DG_Hussites.101.title"
+	desc = "DG_Hussites.101.desc"
+	picture = all_church_state
+
+	hidden = yes
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Hussite:Spread:[This.GetName]:[This.Owner.GetName]"
+	}
+
+	option = {
+		name = "EVT_AI"
+		hidden_effect = {
+			random_list = {
+				10 = {
+					MN_HeresyGrowth = { from = 1 to = 4 RuralShift = 100 UrbanShift = 250 NotableShift = 100 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = hussite_presence }
+									AND = {
+										has_country_flag = hussite_presence
+										has_country_flag = hus_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Hussites.103 }
+					}
+				}
+				 5 = {
+					MN_HeresyGrowth = { from = 1 to = 4 RuralShift = 250 UrbanShift = 500 NotableShift = 250 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = hussite_presence }
+									AND = {
+										has_country_flag = hussite_presence
+										has_country_flag = hus_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Hussites.104 }
+					}
+				}
+				 1 = {
+					trigger = { owner = { check_key = { lhs = DG_conv_resist value = 10 } } }
+					MN_HeresyGrowth = { from = 1 to = 4 RuralShift = 500 UrbanShift = 1000 NotableShift = 500 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = hussite_presence }
+									AND = {
+										has_country_flag = hussite_presence
+										has_country_flag = hus_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Hussites.105 }
+					}
+				}
+				10 = {
+					trigger = { owner = { check_key = { lhs = DG_conv_resist value = 10 } } }
+					MN_HeresyGrowth = { from = 1 to = 4 RuralShift = 100 UrbanShift = 250 NotableShift = 100 }
+					MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 5 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = hussite_presence }
+									AND = {
+										has_country_flag = hussite_presence
+										has_country_flag = hus_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Hussites.106 }
+					}
+				}
+				 5 = {
+					trigger = { owner = { check_key = { lhs = DG_conv_resist value = 10 } } }
+					MN_HeresyGrowth = { from = 1 to = 4 RuralShift = 250 UrbanShift = 500 NotableShift = 250 }
+					MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 5 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = hussite_presence }
+									AND = {
+										has_country_flag = hussite_presence
+										has_country_flag = hus_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Hussites.107 }
+					}
+				}
+				 1 = {
+					trigger = { owner = { check_key = { lhs = DG_conv_resist value = 25 } } }
+					MN_HeresyGrowth = { from = 1 to = 4 RuralShift = 500 UrbanShift = 1000 NotableShift = 500 }
+					MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = 5 }
+					if = {
+						limit = {
+							owner = {
+								OR = {
+									NOT = { has_country_flag = hussite_presence }
+									AND = {
+										has_country_flag = hussite_presence
+										has_country_flag = hus_spread_info
+									}
+								}
+							}
+						}
+						province_event = { id = DG_Hussites.108 }
+					}
+				}
+				50 = { }
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.103
+	title = "DG_Hussites.101.title"
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			NOT = { PAP = { has_country_flag = PAP_condemn_04 } }
+		}
+		desc = "DG_Hussites.103.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			PAP = { has_country_flag = PAP_condemn_04 }
+		}
+		desc = "DG_Hussites.103.des2"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+		desc = "DG_Hussites.103.des3"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = hussite_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Hussites.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.104
+	title = "DG_Hussites.101.title"
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			NOT = { owner = { has_country_flag = PAP_condemn_04 } }
+		}
+		desc = "DG_Hussites.104.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			owner = { has_country_flag = PAP_condemn_04 }
+		}
+		desc = "DG_Hussites.104.des2"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+		desc = "DG_Hussites.104.des3"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = hussite_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Hussites.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.105
+	title = "DG_Hussites.101.title"
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			NOT = { owner = { has_country_flag = PAP_condemn_04 } }
+		}
+		desc = "DG_Hussites.105.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			owner = { has_country_flag = PAP_condemn_04 }
+		}
+		desc = "DG_Hussites.105.des2"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+		desc = "DG_Hussites.105.des3"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = hussite_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Hussites.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.106
+	title = "DG_Hussites.101.title"
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			NOT = { owner = { has_country_flag = PAP_condemn_04 } }
+		}
+		desc = "DG_Hussites.106.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			owner = { has_country_flag = PAP_condemn_04 }
+		}
+		desc = "DG_Hussites.106.des2"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+		desc = "DG_Hussites.106.des3"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = hussite_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Hussites.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.107
+	title = "DG_Hussites.101.title"
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			NOT = { owner = { has_country_flag = PAP_condemn_04 } }
+		}
+		desc = "DG_Hussites.107.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			owner = { has_country_flag = PAP_condemn_04 }
+		}
+		desc = "DG_Hussites.107.des2"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+		desc = "DG_Hussites.107.des3"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.05
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.01
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.05
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = hussite_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Hussites.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.108
+	title = "DG_Hussites.101.title"
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			NOT = { owner = { has_country_flag = PAP_condemn_04 } }
+		}
+		desc = "DG_Hussites.108.des1"
+	}
+	desc = {
+		trigger = {
+			NOT = { owner = { has_country_flag = hussite_presence } }
+			owner = { has_country_flag = PAP_condemn_04 }
+		}
+		desc = "DG_Hussites.108.des2"
+	}
+	desc = {
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+		desc = "DG_Hussites.108.des3"
+	}
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+	
+	option = {
+		name = "DG_Hussites.001.opta" #Support him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = support_04
+				add_opinion = { who = PAP modifier = papacy_bad }
+				MN_conv_resist_c = { strength = -10 }
+				#add_reform_desire = 0.0005
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optb" #Let him speak
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = accept_04
+				MN_conv_resist_c = { strength = -5 }
+				#add_reform_desire = 0.0001
+			}
+		}
+	}
+	
+	option = {
+		name = "DG_Hussites.001.optc" #Silence him
+		trigger = {
+			NOT = {
+				owner = { has_country_flag = hussite_presence }
+			}
+		}
+		hidden_effect = {
+			owner = {
+				set_country_flag = silence_04
+				add_opinion = { who = PAP modifier = papacy_good }
+				MN_conv_resist_c = { strength = 10 }
+				#add_reform_desire = -0.0003
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		trigger = {
+			owner = { has_country_flag = hussite_presence }
+		}
+	}
+	
+	after = {
+		owner = {
+			if = {
+				limit = { NOT = { has_country_flag = hussite_presence } }
+				hidden_effect = {
+					country_event = { id = DG_Hussites.002 }
+				}
+			}
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.111
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.111.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		always = no
+		is_religion_enabled = hussite
+		owner = { NOT = { religion = hussite } }
+		MN_CheckRelSlot = { Type = value Religion = 4 }
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = Bastion prop = 1 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = Bastion prop = 2 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = Bastion prop = 3 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = Bastion prop = 4 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = Bastion prop = 5 }
+		}
+		modifier = {
+			factor = 0.75
+			owner = { has_country_flag = support_04 }
+		}
+		modifier = {
+			factor = 1.25
+			owner = { has_country_flag = silence_04 }
+		}
+		modifier = {
+			factor = 10
+			is_religion_enabled = protestant
+		}
+	}
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Hussite:Spread:[This.GetName]:[This.Owner.GetName]"
+	}
+
+	option = {
+		name = "EVT_AI"
+		hidden_effect = {
+			set_key = { lhs = Heresy_Scalar value = 0 }
+			random_list = {
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.05 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_spread_info }
+						}
+						province_event = { id = DG_Hussites.112 }
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.10 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_spread_info }
+						}
+						province_event = { id = DG_Hussites.113 }
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.15 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_spread_info }
+						}
+						province_event = { id = DG_Hussites.114 }
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.20 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_spread_info }
+						}
+						province_event = { id = DG_Hussites.115 }
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.25 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_spread_info }
+						}
+						province_event = { id = DG_Hussites.116 }
+					}
+				}
+				10 = {
+					set_key = { lhs = Heresy_Scalar value = 0.30 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_spread_info }
+						}
+						province_event = { id = DG_Hussites.117 }
+					}
+				}
+				#30 = { }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Heresy_Scalar value = 0.05 }
+				}
+				MN_HeresySpread = { typefrom = which from = MN_S0 to = 4 incr = Heresy_Scalar typeIncr = which }
+			}
+			MN_Attribute_Reset = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 100 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.112
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.112.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.113
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.113.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.114
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.114.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.115
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.115.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.116
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.116.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.117
+	title = "DG_Hussites.111.title"
+	desc = "DG_Hussites.117.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes #triggered by DG_Hussites.101
+	
+	immediate = {
+	}
+
+	option = {
+		name = "OPT.HERETICSCUM"
+	}
+}
+
+#Spawn a center of reformation
+province_event = {
+	id = DG_Hussites.118
+	title = "DG_Hussites.118.title"
+	desc = "DG_Hussites.118.desc"
+	picture = ANGLICAN_SERMON_eventPicture
+	
+	#major = yes
+	
+	trigger = {
+		#always = no
+		#has_province_flag = hus_craddle
+		has_province_flag = printing_press_p
+		NOT = { religion_years = { hussite = 50 } } #to be replaced by our Peace of Westphalia
+		can_have_center_of_reformation_trigger = {
+			CenterReligion = hussite
+		}
+		owner = { religion = hussite }
+	}
+	mean_time_to_happen = {
+		years = 5
+		modifier = {
+			factor = 0.8
+			owner = { tag = BOH }
+		}
+		modifier = {
+			factor = 0.5
+			has_province_flag = hus_craddle
+		}
+		modifier = {
+			factor = 0.5
+			province_id = 268 #Prague
+		}
+		modifier = {
+			factor = 5.0
+			owner = { has_country_flag = accept_04 }
+		}
+		modifier = {
+			factor = 10.0
+			owner = { has_country_flag = silence_04 }
+		}
+	}
+	
+	option = {
+		name = "OPT.GOOD"
+		trigger = { owner = { religion = hussite } }
+		add_reform_center = hussite
+		add_or_extend_province_modifier_hidden_effect = { NAME = religious_enthusiasm DURATION = 3650 }
+	}
+	
+	option = {
+		name = "OPT.DAMN"
+		trigger = { owner = { NOT = { religion = hussite } } }
+		add_reform_center = hussite
+		add_or_extend_province_modifier_hidden_effect = { NAME = heretic_centre DURATION = 3650 }
+	}
+}
+
+#Removes center of reformation
+province_event = {
+	id = DG_Hussites.119
+	title = "DG_Hussites.119.title"
+	desc = "DG_Hussites.119.desc"
+	picture = ANGLICAN_SERMON_eventPicture
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+
+	trigger = {
+		religion = hussite
+		is_reformation_center = yes
+		Academia = 100
+	}
+	
+	option = {
+		name = "OPT.NOTED"
+		remove_reform_center = hussite
+	}
+}
+
+province_event = {
+	id = DG_Hussites.201
+	title = "DG_Hussites.201.title"
+	desc = "DG_Hussites.201.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = hussite
+		owner = { NOT = { religion = hussite } }
+		MN_CheckProp = { religion = 4 type = Preach prop = 1 }
+	}
+	
+	mean_time_to_happen = {
+		years = 20
+		
+		modifier = {
+			factor = 0.20
+			MN_CheckProp = { religion = 4 type = Inquis prop = 0.1 }
+		}
+	}
+		
+	option = {
+		name = "OPT.EXCELLENT"
+		custom_tooltip = hussite_inquisition_tt
+		MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = Preach typeStrength = value strength = -1 }
+		if = {
+			limit = {
+				owner = { has_country_flag = hus_inquis_info }
+			}
+			province_event = { id = DG_Hussites.202 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.202
+	title = "DG_Hussites.201.title"
+	desc = "DG_Hussites.201.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+		
+	option = {
+		name = "OPT.EXCELLENT"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.203
+	title = "DG_Hussites.203.title"
+	desc = "DG_Hussites.203.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = hussite
+		owner = { NOT = { religion = hussite } }
+		MN_CheckProp = { religion = 4 type = ENT prop = 0.1 }
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		
+		modifier = {
+			factor = 0.20
+			MN_CheckProp = { religion = 4 type = Inquis prop = 0.1 }
+		}
+	}
+		
+	option = {
+		name = "OPT.EXCELLENT"
+		MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = ENT typeStrength = value strength = 5 }
+		if = {
+			limit = {
+				owner = { has_country_flag = hus_inquis_info }
+			}
+			province_event = { id = DG_Hussites.204 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.204
+	title = "DG_Hussites.203.title"
+	desc = "DG_Hussites.203.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+		
+	option = {
+		name = "OPT.EXCELLENT"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.205
+	title = "DG_Hussites.205.title"
+	desc = "DG_Hussites.205.desc"
+	picture = all_church_state
+
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = hussite
+		owner = { NOT = { religion = hussite } }
+		MN_CheckProp = { religion = 4 type = INF prop = 2 }
+	}
+	
+	mean_time_to_happen = {
+		years = 25
+		
+		modifier = {
+			factor = 0.20
+			MN_CheckProp = { religion = 4 type = Inquis prop = 0.1 }
+		}
+	}
+		
+	option = {
+		name = "DG_Hussites.205.opta"
+		MN_Attribute_Effect = { reltype = value religion = 4 typeEffect = INF typeStrength = value strength = -2 }
+		if = {
+			limit = {
+				owner = { has_country_flag = hus_inquis_info }
+			}
+			province_event = { id = DG_Hussites.206 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.206
+	title = "DG_Hussites.205.title"
+	desc = "DG_Hussites.205.desc"
+	picture = all_church_state
+
+	is_triggered_only = yes
+		
+	option = {
+		name = "OPT.EXCELLENT"
+	}
+}
+
+#Unrest Events
+province_event = {
+	id = DG_Hussites.301
+	title = "DG_Hussites.301.title"
+	desc = "DG_Hussites.301.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = hussite
+		owner = { NOT = { religion = hussite } }
+		MN_CheckProp = { religion = 4 type = TotP prop = 10 }
+	}
+	
+	mean_time_to_happen = {
+		months = 300
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 20 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 30 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 40 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 50 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 60 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 70 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 80 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 90 }
+		}
+		modifier = {
+			factor = 2.00
+			owner = { has_country_flag = support_04 }
+		}
+		modifier = {
+			factor = 0.75
+			owner = { has_country_flag = silence_04 }
+		}
+	}
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Hussite:Uprising:[This.GetName]:[This.Owner.GetName]"
+	}
+	
+	option = {
+		random_list = {
+			10 = {
+				MinorityTrauma = { religion = 4 strength = 0.10 }
+				if = {
+					limit = {
+						owner = { has_country_flag = hus_unrest_info }
+					}
+					set_province_flag = mn_trauma_10 
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 15 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.20 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_20 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 30 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.30 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_30 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 40 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.40 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_40 
+					}
+				}
+			}
+			20 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 50 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.50 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_50 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 60 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.60 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_60 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 70 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.70 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_70 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 80 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.80 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_80 
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 90 }
+					}
+					MinorityTrauma = { religion = 4 strength = 0.90 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_trauma_90 
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = { has_country_flag = hus_unrest_info }
+			}
+			province_event = { id = DG_Hussites.302 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.302
+	title = "DG_Hussites.301.title"
+	desc = "DG_Hussites.301.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.OHNO"
+		trigger_switch = {
+			on_trigger = has_province_flag
+
+			mn_trauma_10 =	{ custom_tooltip = mn_trauma_10_tt }
+			mn_trauma_20 =	{ custom_tooltip = mn_trauma_20_tt }
+			mn_trauma_30 =	{ custom_tooltip = mn_trauma_30_tt }
+			mn_trauma_40 =	{ custom_tooltip = mn_trauma_40_tt }
+			mn_trauma_50 =	{ custom_tooltip = mn_trauma_50_tt }
+			mn_trauma_60 =	{ custom_tooltip = mn_trauma_60_tt } 
+			mn_trauma_70 =	{ custom_tooltip = mn_trauma_70_tt }
+			mn_trauma_80 =	{ custom_tooltip = mn_trauma_80_tt }
+			mn_trauma_90 =	{ custom_tooltip = mn_trauma_90_tt }
+		}
+	}
+	after = {
+		hidden_effect = {
+			TraumaNotificationCleanup = yes
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.311
+	title = "DG_Hussites.311.title"
+	desc = "DG_Hussites.311.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = hussite
+		owner = { NOT = { religion = hussite } }
+		MN_CheckProp = { religion = 4 type = TotP prop = 10 }
+	}
+	
+	mean_time_to_happen = {
+		months = 300
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 20 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 30 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 40 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 50 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 60 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 70 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 80 }
+		}
+		modifier = {
+			factor = 0.90
+			MN_CheckProp = { religion = 4 type = TotP prop = 90 }
+		}
+		modifier = {
+			factor = 2.00
+			owner = { has_country_flag = support_04 }
+		}
+		modifier = {
+			factor = 0.75
+			owner = { has_country_flag = silence_04 }
+		}
+	}
+	
+	immediate = {
+		#log = "DG:[GetYear]:[This.aab.GetValue]:Hussite:Unrest:[This.GetName]:[This.Owner.GetName]"
+	}
+	
+	option = {
+		random_list = {
+			5 = {
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_min_U.16 DURATION = 365 }
+				if = {
+					limit = {
+						owner = { has_country_flag = hus_unrest_info }
+					}
+					set_province_flag = mn_unrest_min_1
+				}
+			}
+			10 = {
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_min_U.16 DURATION = 1825 }
+				if = {
+					limit = {
+						owner = { has_country_flag = hus_unrest_info }
+					}
+					set_province_flag = mn_unrest_min_5
+				}
+			}
+			5 = {
+				add_or_extend_province_modifier_hidden_effect = { NAME = MN_min_U.16 DURATION = 3650 }
+				if = {
+					limit = {
+						owner = { has_country_flag = hus_unrest_info }
+					}
+					set_province_flag = mn_unrest_min_10
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 20 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_low_U.16 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_low_1
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 20 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_low_U.16 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_low_5
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 20 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_low_U.16 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_low_10
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 40 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_mid_U.16 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_mid_1
+					}
+				}
+			}
+			20 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 40 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_mid_U.16 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_mid_5
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 40 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_mid_U.16 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_mid_10
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 60 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_imp_1
+					}
+				}
+			}
+			15 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 60 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_imp_5
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 60 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_imp_U.04 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_imp_10
+					}
+				}
+			}
+			5 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 80 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 365 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_max_1
+					}
+				}
+			}
+			10 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 80 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 1825 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_max_5
+					}
+				}
+			}
+			5 = {
+				if = {
+					limit = {
+						MN_CheckProp = { religion = 4 type = TotP prop = 80 }
+					}
+					add_or_extend_province_modifier_hidden_effect = { NAME = MN_max_U.16 DURATION = 3650 }
+					if = {
+						limit = {
+							owner = { has_country_flag = hus_unrest_info }
+						}
+						set_province_flag = mn_unrest_max_10
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = { has_country_flag = hus_unrest_info }
+			}
+			province_event = { id = DG_Hussites.312 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.312
+	title = "DG_Hussites.311.title"
+	desc = "DG_Hussites.311.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.OHNO"
+		trigger_switch = {
+			on_trigger = has_province_flag
+
+			mn_unrest_min_1 =	{ custom_tooltip = mn_unrest_min_1_tt }
+			mn_unrest_min_5 =	{ custom_tooltip = mn_unrest_min_2_tt }
+			mn_unrest_min_10 =	{ custom_tooltip = mn_unrest_min_3_tt }
+			mn_unrest_low_1 =	{ custom_tooltip = mn_unrest_low_1_tt }
+			mn_unrest_low_5 =	{ custom_tooltip = mn_unrest_low_2_tt }
+			mn_unrest_low_10 =	{ custom_tooltip = mn_unrest_low_3_tt } 
+			mn_unrest_mid_1 =	{ custom_tooltip = mn_unrest_mid_1_tt }
+			mn_unrest_mid_5 =	{ custom_tooltip = mn_unrest_mid_2_tt }
+			mn_unrest_mid_10 =	{ custom_tooltip = mn_unrest_mid_3_tt }
+			mn_unrest_imp_1 =	{ custom_tooltip = mn_unrest_imp_1_tt }
+			mn_unrest_imp_5 =	{ custom_tooltip = mn_unrest_imp_2_tt }
+			mn_unrest_imp_10 =	{ custom_tooltip = mn_unrest_imp_3_tt } 
+			mn_unrest_max_1 =	{ custom_tooltip = mn_unrest_max_1_tt }
+			mn_unrest_max_5 =	{ custom_tooltip = mn_unrest_max_2_tt }
+			mn_unrest_max_10 =	{ custom_tooltip = mn_unrest_max_3_tt } 
+		}
+	}
+	after = {
+		hidden_effect = {
+			UnrestNofificationCleanup = yes
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.901
+	title = "DG_Hussites.901.title"
+	desc = "DG_Hussites.901.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		is_religion_enabled = protestant
+		MN_CheckRelSlot = { Type = value Religion = 4 }
+		NOT = { owner = { religion = hussite } }
+		OR = {
+			owner = { religion = protestant }
+			owner = { has_country_flag = support_02 }
+			owner = { has_country_flag = accept_02 }
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 300
+		modifier = {
+			factor = 10
+			owner = {
+				religion = hussite
+				stability = 3
+			}
+		}
+		modifier = {
+			factor = 2
+			owner = {
+				religion = hussite
+				stability = -1
+			}
+		}
+		modifier = {
+			factor = 0.75
+			owner = {
+				religion = protestant
+				stability = 3
+			}
+		}
+		modifier = {
+			factor = 1.25
+			owner = {
+				religion = protestant
+				NOT = { stability = -1 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		if = {
+			limit = { owner = { religion = hussite stability = -1 } }
+			MN_Preacher = { from = 4 to = 2 ruralChange = 0.5 urbanChange = 0.5 notablesChange = 0.5 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		}
+		else_if = {
+			limit = { owner = { religion = hussite } }
+			MN_Preacher = { from = 4 to = 2 ruralChange = 1.0 urbanChange = 1.0 notablesChange = 1.0 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		}
+		else = {
+			MN_Preacher = { from = 4 to = 2 ruralChange = 2.5 urbanChange = 2.5 notablesChange = 2.5 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		}
+		if = {
+			limit = {
+				owner = { has_country_flag = hus_end_info }
+			}
+			province_event = { id = DG_Hussites.902 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.902
+	title = "DG_Hussites.901.title"
+	desc = "DG_Hussites.901.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.ISEE"
+	}
+}
+
+province_event = {
+	id = DG_Hussites.903
+	title = "DG_Hussites.903.title"
+	desc = "DG_Hussites.903.desc"
+	picture = all_church_state
+	
+	hidden = yes
+	
+	trigger = {
+		has_global_flag = DG_Counter_Reformation
+		MN_CheckRelSlot = { Type = value Religion = 4 }
+		NOT = { owner = { religion = hussite } }
+		OR = {
+			owner = { religion = catholic }
+			owner = { has_country_flag = accept_02 }
+			owner = { has_country_flag = silence_02 }
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 300
+		modifier = {
+			factor = 10
+			owner = {
+				religion = hussite
+				stability = 3
+			}
+		}
+		modifier = {
+			factor = 2
+			owner = {
+				religion = hussite
+				stability = -1
+			}
+		}
+		modifier = {
+			factor = 0.75
+			owner = {
+				religion = catholic
+				stability = 3
+			}
+		}
+		modifier = {
+			factor = 1.25
+			owner = {
+				religion = catholic
+				NOT = { stability = -1 }
+			}
+		}
+	}
+	
+	option = {
+		name = "OPT.ISEE"
+		if = {
+			limit = { owner = { religion = hussite stability = -1 } }
+			MN_Preacher = { from = 4 to = 1 ruralChange = 0.5 urbanChange = 0.5 notablesChange = 0.5 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		}
+		else_if = {
+			limit = { owner = { religion = hussite } }
+			MN_Preacher = { from = 4 to = 1 ruralChange = 1.0 urbanChange = 1.0 notablesChange = 1.0 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		}
+		else = {
+			MN_Preacher = { from = 4 to = 1 ruralChange = 2.5 urbanChange = 2.5 notablesChange = 2.5 typeFrom = value typeTo = value typeChange = value typeStrength = value strength = 0 }
+		}
+		if = {
+			limit = {
+				owner = { has_country_flag = lol_end_info }
+			}
+			province_event = { id = DG_Hussites.904 }
+		}
+	}
+}
+
+province_event = {
+	id = DG_Hussites.904
+	title = "DG_Hussites.903.title"
+	desc = "DG_Hussites.903.desc"
+	picture = all_church_state
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.ISEE"
+	}
+}

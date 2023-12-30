@@ -1,0 +1,568 @@
+namespace = hee_NAV
+
+### THE WEDDING OF NAVARRA ###
+
+country_event = {
+	id = hee_NAV.1
+	title = hee_NAV.1.t
+	desc = hee_NAV.1.d
+	#TODO: this should be checking balance of power between ARA and NAV, not assuming NAV is weak
+	picture = GOOD_WITH_MONARCH_eventPicture
+	fire_only_once = yes
+	major = yes
+	trigger = {
+		NOT = { dip_tech = 31 }
+		tag = NAV
+
+		is_lesser_in_union = no
+		OR = {
+			is_subject = no
+			is_subject_of_type = tributary_state
+			is_subject_of_type = close_tributary_state
+		}
+
+		ARA = {
+			is_lesser_in_union = no
+			OR = {
+				is_subject = no
+				is_subject_of_type = tributary_state
+				is_subject_of_type = close_tributary_state
+			}
+		}
+
+		has_opinion = {
+			who = ARA
+			value = -10
+		}
+
+		OR = {
+			AND = {
+				is_female = yes
+				ARA = {	is_female = no }
+			}
+			AND = {
+				OR = {
+					has_female_heir = yes
+					has_heir = no
+				}
+				ARA = {
+					has_heir = yes
+					has_female_heir = no
+				}
+			}
+			AND = {
+				is_female = yes
+				ARA = {
+					has_female_heir = no
+					heir_age = 15
+				}
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 7
+	}
+	option = {
+		name = hee_NAV.1.a
+		log = "FE-NAV:[GetYear]:[Root.GetName]:offered to become junior partner of [ARA.GetName]:hee_NAV.1"
+		ai_chance = {
+			factor = 90
+		}
+		ARA = {
+			country_event = {
+				id = hee_NAV.2
+			}
+		}
+	}
+	option = {
+		name = hee_NAV.1.b
+		log = "FE-NAV:[GetYear]:[Root.GetName]:have not offered to become junior partner of [ARA.GetName]:hee_NAV.1"
+		ai_chance = {
+			factor = 10
+		}
+		add_legitimacy = -5
+		add_prestige = 5
+	}
+}
+
+# THE WEDDING OF NAVARRA (ARAGON) #
+
+country_event = {
+	id = hee_NAV.2
+	title = hee_NAV.2.t
+	desc = hee_NAV.2.d
+	picture = GOOD_WITH_MONARCH_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = hee_NAV.2.a
+		ai_chance = {
+			factor = 100
+		}
+		log = "FE-NAV:[GetYear]:[Root.GetName]:created union with [NAV.GetName]:hee_NAV.2"
+		create_union = NAV
+		NAV = {
+			every_owned_province = {
+				limit = {
+					OR = {
+						region = east_france_region
+						region = provence_region
+						region = languedoc_region
+						region = aquitaine_region
+						region = ouest_france_region
+						region = high_countries_region
+						culture_group = langue_d_oil
+					}
+					is_part_of_hre = no
+					NOT = { region = belgii_region }
+					NOT = { region = low_countries_region }
+				}
+				cede_province = FRA
+				add_local_autonomy = 10
+			}
+		}
+	}
+
+	option = {
+		name = hee_NAV.2.b
+		ai_chance = {
+			factor = 0
+		}
+		add_legitimacy = -5
+		log = "FE-NAV:[GetYear]:[Root.GetName]:rejected union with [NAV.GetName]:hee_NAV.2"
+		NAV = {
+			country_event = {
+				id = hee_NAV.3
+			}
+		}
+	}
+}
+
+# ARAGON REJECTS OUR OFFER OF MARRIAGE #
+
+country_event = {
+	id = hee_NAV.3
+	title = hee_NAV.3.t
+	desc = hee_NAV.3.d
+	picture = COURT_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = hee_NAV.3.a
+		add_opinion = {
+			who = ARA
+			modifier = hee_rejected_marriage
+		}
+	}
+}
+
+### THE NAVARRAN CIVIL WAR ###
+
+country_event = {
+	id = hee_NAV.4 #The Navarran Civil War!
+	title = hee_NAV.4.t
+	desc = hee_NAV.4.d
+	picture = CIVIL_WAR_eventPicture
+	fire_only_once = yes
+	major = yes
+	trigger = {
+		NOT = {	adm_tech = 30 }
+		tag = NAV
+		is_lesser_in_union = yes
+		NOT = {	junior_union_with = ARA }
+		NOT = {	has_country_modifier = hee_navarran_civil_war }
+	}
+	mean_time_to_happen = {
+		years = 4
+		modifier = {
+			factor = 0.5
+			NOT = {	legitimacy = 75	}
+		}
+		modifier = {
+			factor = 0.8
+			NOT = {	stability = 1 }
+		}
+	}
+	immediate = {
+		hidden_effect = {
+			add_country_modifier = {
+				name = hee_navarran_civil_war
+				duration = -1
+				hidden = yes
+			}
+		}
+	}
+	option = {
+		name = hee_NAV.4.a
+		random_owned_province = {
+			spawn_rebels = {
+					type = pretender_rebels
+					size = 3
+			}
+		}
+		random_owned_province = {
+			spawn_rebels = {
+					type = pretender_rebels
+					size = 2
+			}
+		}
+		overlord = {
+			country_event = {
+				id = hee_NAV.5
+			}
+		}
+	}
+}
+
+# THE NAVARRAN CIVIL WAR (NOTIFICATION) #
+
+country_event = {
+	id = hee_NAV.5
+	title = hee_NAV.5.t
+	desc = hee_NAV.5.d
+	picture = BATTLE_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = hee_NAV.5.a
+		log = "FE-NAV:[GetYear]:[NAV.GetName]:pretender organises against senior partner rule ([Root.GetName]):hee_NAV.5"
+	}
+}
+
+### CIVIL WAR BREWS IN NAVARRA ###
+
+country_event = {
+	id = hee_NAV.6
+	title = hee_NAV.6.t
+	desc = hee_NAV.6.d
+	picture = CIVIL_WAR_eventPicture
+	fire_only_once = yes
+	trigger = {
+		NOT = {	adm_tech = 30 }
+		tag = NAV
+		NOT = {	has_country_modifier = hee_navarran_civil_war }	
+		years_in_union_under = {
+			who = ARA
+			years = 40
+		}
+	
+		ARA = {
+			OR = {
+				has_regency = no
+				has_consort_regency = yes
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 25
+		modifier = {
+			factor = 0.5
+			NOT = {	legitimacy = 75	}
+		}
+		modifier = {
+			factor = 0.8
+			NOT = {	stability = 1 }
+		}
+	}
+	immediate = {
+		hidden_effect = {
+			add_country_modifier = {
+				name = hee_navarran_civil_war
+				duration = -1
+				hidden = yes
+			}
+		}
+	}
+	option = {
+		name = hee_NAV.6.a
+		ARA = {
+			country_event = {
+				id = hee_NAV.7
+			}
+		}
+	}
+}
+
+### NAVARRA BRIMS WITH DISSENT ###
+
+country_event = {
+	id = hee_NAV.7
+	title = hee_NAV.7.t
+	desc = hee_NAV.7.d
+	picture = LIBERUM_VETO_eventPicture
+	is_triggered_only = yes
+	major = yes
+	option = {
+		name = hee_NAV.7.a
+		log = "FE-NAV:[GetYear]:[NAV.GetName]:pretender organises against senior partner rule ([Root.GetName]):hee_NAV.7"
+		log = "FE-NAV:[GetYear]:[Root.GetName]:decided to treat [NAV.GetName] harshly:hee_NAV.7"
+		ai_chance = {
+			factor = 85
+		}
+		NAV = {
+			random_owned_province = {
+				spawn_rebels = {
+					type = pretender_rebels
+					size = 3
+					leader = "Carlos"
+					leader_dynasty = "de Trastamara"
+			    }
+			}
+			random_owned_province = {
+				spawn_rebels = {
+					type = pretender_rebels
+					size = 2
+			    }
+			}
+			add_liberty_desire = 25
+		}
+	}
+	option = {
+		name = hee_NAV.7.b
+		trigger = {
+			has_heir = yes
+		}
+		ai_chance = {
+			factor = 15
+		}
+		log = "FE-NAV:[GetYear]:[NAV.GetName]:pretender organises against senior partner rule ([Root.GetName]):hee_NAV.7"
+		log = "FE-NAV:[GetYear]:[Root.GetName]:abdicated in favour of heir ([Root.Heir.GetName]) to secure both thrones:hee_NAV.7"
+		kill_ruler = yes
+		NAV = {
+			country_event = {
+				id = hee_NAV.8
+				days = 3
+			}
+		}
+	}
+	option = {
+		name = hee_NAV.7.c
+		ai_chance = {
+			factor = 15
+		}
+		log = "FE-NAV:[GetYear]:[NAV.GetName]:pretender organises against senior partner rule ([Root.GetName]):hee_NAV.7"
+		log = "FE-NAV:[GetYear]:[Root.GetName]:gave [NAV.GetName] to Carlos de Trastamara:hee_NAV.7"
+		log = "FE-NAV:[GetYear]:[Root.GetName]:union with [NAV.GetName] ended:hee_NAV.7"
+		break_union = NAV
+		NAV = {
+			define_ruler = {
+				name = "Carlos"
+				dynasty = "de Trastamara"
+				adm = 3
+				dip = 4
+				mil = 5
+				age = 16
+			}
+			country_event = {
+				id = hee_NAV.9
+			}
+		}
+	}
+}
+
+### THE MONARCH ABDICATES ###
+
+country_event = {
+	id = hee_NAV.8
+	title = hee_NAV.8.t
+	desc = hee_NAV.8.d
+	picture = COURT_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = hee_NAV.8.a
+		add_legitimacy = -15
+		add_liberty_desire = 15
+	}
+}
+
+# CARLOS IS NAMED RULER OF NAVARRA #
+
+country_event = {
+	id = hee_NAV.9
+	title = hee_NAV.9.t
+	desc = hee_NAV.9.d
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = hee_NAV.9.a
+		add_legitimacy = 5
+	}
+}
+
+### SAINT FRANCIS XAVIER ###
+
+country_event = {
+	id = hee_NAV.10
+	title = hee_NAV.10.t
+	desc = hee_NAV.10.d
+	picture = RELIGIOUS_CONVERSION_eventPicture
+	fire_only_once = yes
+	trigger = {
+		is_year = 1521
+		NOT = { is_year = 1551 }
+		check_variable = { which = jesuit_support value = 1 }
+		owns_core_province = 210 #Navarre
+		210 = {
+		    religion = catholic
+			culture = basque
+		}
+		religion = catholic
+	}
+	mean_time_to_happen = {
+		years = 13
+	}
+	option = {
+		name = hee_NAV.10.a
+		ai_chance = {
+			factor = 15
+		}
+		define_advisor = {
+			type = inquisitor_CL
+			name = "Francis of Xavier"
+			skill = 3
+			discount = yes
+			culture = basque
+			location = 210
+		}
+	}
+	option = {
+		name = hee_NAV.10.b
+		ai_chance = {
+			factor = 85
+		}
+		add_papal_influence = 10
+		hidden_effect = {
+			random_province = {
+				limit = {
+					is_capital = no
+					OR = {
+						superregion = japan_superregion
+						superregion = southeast_asia_superregion
+						region = east_deccan_region
+						region = west_deccan_region
+					}
+				}
+				province_event = {
+					id = hee_NAV.12
+					days = 365
+				}
+			}
+			random_province = {
+				limit = {
+					is_capital = no
+					OR = {
+						superregion = japan_superregion
+						superregion = southeast_asia_superregion
+						region = east_deccan_region
+						region = west_deccan_region
+					}
+				}
+				province_event = {
+					id = hee_NAV.12
+					days = 365
+					random = 90
+				}
+			}
+		}
+		custom_tooltip = hee_NAV.10.tt
+	}
+}
+
+### THE CIUDADELA DE PAMPLONA ###
+
+country_event = {
+	id = hee_NAV.11 #The Ciudadela de Pamplona
+	title = hee_NAV.11.t
+	desc = hee_NAV.11.d
+	picture = FORT_eventPicture
+	fire_only_once = yes
+
+	trigger = {
+		owns = 210 #Navarre
+		mil_tech = 37
+		NOT = { is_year = 1630 }
+		OR = {
+			tag = NAV
+			AND = {
+				tag = SPA
+				NOT = {	exists = NAV }
+			}
+			AND = {
+				tag = CAS
+				NOT = {	exists = NAV }
+			}
+			AND = {
+				tag = ARA
+				NOT = {	exists = NAV }
+			}
+		}
+		exists = FRA
+		NOT = {
+			army_strength = {
+				who = FRA
+				value = 0.66
+			}
+		}
+		NOT = {	alliance_with = FRA }
+		NOT = {
+			has_opinion = {
+				who = FRA
+				value = 50
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 25
+	}
+	option = {
+		name = hee_NAV.11.a
+		ai_chance = {
+			factor = 90
+			modifier = {
+				factor = 0
+				OR = {
+					num_of_loans = 2
+					NOT = { treasury = 125 }
+				}
+			}
+		}
+		add_treasury = -100
+		210 = {
+			add_province_modifier = {
+				name = hee_ciudadela_pamplona
+				duration = -1
+			}
+		}
+		if = {
+			limit = { NOT = { 210 = { fort_level = 2 } } }
+			210 = {
+				add_building = fort_15th
+			}
+		}
+	}
+	option = {
+		name = hee_NAV.11.b
+		ai_chance = {
+			factor = 10
+		}
+		add_mil_power = 20
+	}
+}
+
+# X VISITED BY FRANCIS XAVIER #
+
+province_event = {
+	id = hee_NAV.12 #Province visited by Francis Xavier
+	title = hee_NAV.12.t
+	desc = hee_NAV.12.d
+	picture = RELIGIOUS_CONVERSION_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = hee_NAV.12.a
+		custom_tooltip = convert_50
+		MN_ConvertReligion = {
+			typeFrom = which from = MN_S0 # From, as in the religion who is losing its believers
+			typeTo = value to = 1 # To, as in the religion who is gaining new believers
+			typeChange = value   # Change, as in how many people in absolute numbers are changing
+			ruralChange = 50 urbanChange = 50 notablesChange = 50
+		}
+		change_religion = catholic
+	}
+}

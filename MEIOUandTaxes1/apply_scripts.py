@@ -1,26 +1,11 @@
-import os
-import re
-import glob
-from queue import *
-from threading import Thread
-import time
+import os, sys, re, glob, shutil, time, argparse, multiprocessing
+
+__all__ = [ 'compile' ]
+
 py_block = re.compile('\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
 py_string2 = re.compile('#.*')
 py_string3 = re.compile('(\[\[[\w&$]*\]|\^\^[\w&$]*\^|[\>\<\!\=]+|[\{\}\]^])')
-def run(q, files):
-	path1 = pathstart('decisions')
-	while not q.empty():
-		path = q.get()
-		check = [True]
-		while check[0]:
-			check[0] = False
-			if path1 in path:
-				files[path] = apply_script_to_decision(files[path], scripts, check)
-			else:
-				files[path] = apply_script(files[path], scripts, check)
-		q.task_done()
-	return True
 
 def parse_block(block):
 	block = py_block.sub('', block)
@@ -135,6 +120,12 @@ def apply_script(file, scripts, check=[False]):
 def apply_paras(script, paras):
 	out = list()
 
+	if len(script) and all(type(part) == str and part != '=' for part in script):
+		script = ' '.join(script)
+		for para in paras:
+			script = script.replace(f'${para[0]}$', para[2])
+		return [script]
+
 	for section in script:
 		if '[' in section[0]:
 			for para in paras:
@@ -155,7 +146,7 @@ def apply_paras(script, paras):
 					outout.append(foo)
 				else:
 					outout.append(part)
-					
+
 			if type(section[2]) != type(list()):
 				if '$' in section[2]:
 					foo = str(section[2])
@@ -196,6 +187,29 @@ def reconstruct(file, t=''):
 
 	return txt
 
+def reconstruct_compressed(file):
+	txt = ''
+
+	for f in file:
+		if f:
+			if len(f) == 3 and type(f[0]) != type(list()) and type(f[1]) != type(list()):
+				if type(f[2]) == type(list()):
+					tail = ''
+						
+					if f[2]:
+						if type(f[2][0]) != type(list()):
+							tail = ' '.join(f[2])
+						else:
+							tail = '%s' % (reconstruct_compressed(f[2]))
+
+					txt += '%s%s{%s}' % (f[0], f[1], tail)
+				else:
+					txt += '%s%s%s ' % (f[0], f[1], f[2])
+			elif len(f) == 2 and type(f[0]) != type(list()):
+				txt += '[%s%s]' % (f[0], reconstruct_compressed(f[1]))
+
+	return txt
+
 def apply_script_to_decision(file, scripts, check):
 	out = list()
 
@@ -209,72 +223,164 @@ def apply_script_to_decision(file, scripts, check):
 
 	return out
 
-def check_dont(path, dont):
-	for item in dont:
-		if item in path:
-			return True
-		
-	return False
-
-def pathcont (text):
-	return os.path.join('', text, '')
-
-def pathstart (text):
-	return os.path.join(text, '')
-
-def pathend (text):
-	return os.path.join('', text)
-
-
-if __name__ == '__main__':
-	start = time.time()
-	dont = ['Tools for Modding', 'graphicalculturetype.txt', pathcont('bookmarks'), pathcont('countries'), pathcont('country_colors'), pathcont('country_tags'),
-		pathcont('cultures'), pathcont('event_modifiers'), pathcont('opinion_modifiers'), pathstart('map'), pathstart('interface'), pathstart('gfx'), pathcont('units'),
-		pathcont('static_modifiers'), pathcont('countries'), pathcont('country_tags'), pathcont('province_names'), pathcont('tradenodes'), 'SYS-CensusDisplay.txt',
-		pathcont('event_modifiers'),'DISP-Trade_Bought.txt', 'DISP-Trade_Bought_2.txt', 'DISP-Trade_Bought_3.txt','DISP-Trade_Sold.txt', 'DISP-Trade_Sold_2.txt', 'DISP-Trade_Sold_3.txt']
-	paths = [path for path in glob.glob(os.path.join('*', '**', '*.txt'), recursive=True) if not check_dont(path, dont)]
-
-	files = dict()
-	scripts = dict()
-	
-	for path in paths:
-		print(path)
-		files[path] = parse_file(path)
-
-	dont = ['00-triggers.txt']
-	print("Loading effects and triggers...")
-	for path in glob.glob(os.path.join('common', 'scripted_effects', '*.txt')):
-		paths.remove(path)
-		for script in files[path]:
+scripts = dict()
+def load_scripts():
+	for path in glob.glob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
+		parsed = parse_file(path)
+		for script in parsed:
 			scripts[script[0]] = script[2]
-
-	for path in glob.glob(os.path.join('common', 'scripted_triggers', '*.txt')):
-		paths.remove(path)
-		for script in files[path]:
-			if len(script[2]) > 1 and type(script[2]) == type(list()) and not check_dont(path, dont):
+	for path in glob.glob(os.path.join('src', 'common', 'scripted_triggers', '*.txt')):
+		parsed = parse_file(path)
+		for script in parsed:
+			if len(script[2]) > 1 and type(script[2]) == type(list()) and not path.endswith( '00-triggers.txt' ):
 				scripts[script[0]] = [['AND', '=', script[2]]]
 			else:
 				scripts[script[0]] = script[2]
-	
-	
-	print("Applying scripts to files...")
-	q = Queue(maxsize=0)
-	num_threads = min(20, len(paths))
 
-	for i in range(len(paths)):
-		q.put(paths[i])
+decisionpath = os.path.join( 'src', 'decisions' )
+def compile_file(path, compress):
+	if not scripts:
+		load_scripts()
+	file = parse_file(path)
+	check = [True]
+	while check[0]:
+		check[0] = False
+		if path.startswith(decisionpath):
+			file = apply_script_to_decision(file, scripts, check)
+		else:
+			file = apply_script(file, scripts, check)
+	buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
+	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
+	with open(buildpath, 'w', encoding='ISO-8859-1') as f:
+		if compress:
+			f.write(reconstruct_compressed(file))
+		else:
+			f.write(reconstruct(file))
 
-	for i in range (num_threads):
-		worker = Thread(target=run,args=(q,files))
-		worker.start()
+# helper functions since we can only pass one argument to multiprocess pool
+def compile_and_save_uncompressed(path):
+	compile_file(path, False)
+def compile_and_save_compressed(path):
+	compile_file(path, True)
 
-	q.join()
+def link_file ( filepath ):
+	buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
+	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
+	os.link( filepath, buildpath )
 
-	print("Saving files...")
-	for path in paths:
-		with open(path, 'w', encoding='ISO-8859-1') as f:
-			f.write(reconstruct(files[path]))
+def compile(compress=False, parse_init=True):
+	start = time.time()
+
+	# files/paths to run through parsing
+	parse = [
+		'common',
+		'customizable_localization',
+		'decisions',
+		'dlc_metadata',
+		'events',
+		'hints',
+		'history',
+		'localisation',
+		'missions',
+		'music'
+	]
+
+	# files/paths to link instead of parsing
+	link = [
+		[ 'common', 'graphicalculturetype.txt' ],
+		[ 'common', 'bookmarks' ],
+		[ 'common', 'countries' ],
+		[ 'common', 'country_colors' ],
+		[ 'common', 'country_tags' ],
+		[ 'common', 'cultures' ],
+		[ 'common', 'event_modifiers' ],
+		[ 'common', 'opinion_modifiers' ],
+		[ 'common', 'province_names' ],
+		[ 'common', 'scripted_triggers' ],
+		[ 'common', 'scripted_effects' ],
+		[ 'common', 'static_modifiers' ],
+		[ 'common', 'tradenodes' ],
+		[ 'common', 'units' ],
+		[ 'customizable_localization', 'DISP-Trade_Bought.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Bought_2.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Bought_3.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Sold.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Sold_2.txt' ],
+		[ 'customizable_localization', 'DISP-Trade_Sold_3.txt' ],
+		[ 'events', 'SYS-CensusDisplay.txt' ],
+		'gfx',
+		[ 'history', 'countries' ],
+		'interface',
+		'map',
+		'descriptor.mod',
+		'thumbnail.png',
+		'meiou.txt',
+		'checksum_manifest.txt'
+	]
+
+	if not parse_init:
+		link.extend([
+			[ 'events', '00-POP_Init-0.txt' ],
+			[ 'events', '00-POP_Init-1.txt' ],
+			[ 'events', '00-POP_Init-2.txt' ]
+		])
+
+	parse[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in parse ]
+	link[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in link ]
+
+	def check_path_link ( path ):
+		for p in link:
+			if path.startswith( p ):
+				return True
+		return False
+
+	def check_path_parse ( path ):
+		return path.endswith( '.txt' ) and not check_path_link( path )
+
+	print( 'Reading file tree...' )
+
+	paths = []
+	for p in parse:
+		paths.extend( [ path for path in glob.glob( os.path.join( p, '**' ), recursive=True ) if check_path_parse( path ) ] )
+
+	print( 'Clearing build directory...' )
+	if ( os.path.exists( 'build' ) ):
+		shutil.rmtree( 'build' )
+
+	if 'fork' in multiprocessing.get_all_start_methods():
+		multiprocessing.set_start_method('fork')
+		print( 'Loading scripts...' )
+		load_scripts()
+
+	file_count = len(paths)
+	print(f"Compiling {file_count} files...")
+	print(f'0% done', end='')
+	with multiprocessing.Pool() as pool:
+		if compress:
+			compiled_files_it = pool.imap_unordered(compile_and_save_compressed, paths, max(1, round(file_count/1000)))
+		else:
+			compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, paths, max(1, round(file_count/1000)))
+		for i in range(file_count):
+			next(compiled_files_it)
+			progress = 100*(i+1)/file_count
+			sys.stdout.write('\x1b[2k') # clear line
+			print(f'\r{progress:.1f}% done', end='')
+
+	print("\nLinking static files...")
+	for path in parse:
+		for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
+			if ( os.path.isfile( filepath ) and not filepath.endswith( '.txt' ) ):
+				link_file( filepath )
+	for path in link:
+		if os.path.isdir( path ):
+			for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
+				if ( os.path.isfile( filepath ) ):
+					link_file( filepath )
+		else:
+			link_file( path )
+
 	end = time.time()
 	print((end - start))
 
-
+if __name__ == '__main__':
+	compile()

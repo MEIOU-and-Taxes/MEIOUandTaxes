@@ -1,0 +1,832 @@
+AI_StateBuilding_CE = {
+	#########################
+	## CE Building Process ##
+	#########################
+	### Calculate CE for deciding where to build pathing and harbourage
+	# Initialization
+
+	ce_cleanup = yes
+
+	set_key = { lhs = tv_owned_provinces_in_state_in_progress value = 0 }
+	set_key = { lhs = tv_port value = 0 }
+
+	# Get Highest Overlord in tt_highest event_target (max 2 levels of subject relationships)
+	if = {
+		limit = {
+			is_subject = yes
+		}
+		overlord = {
+			if = {
+				limit = {
+					is_subject = yes
+				}
+				overlord = {
+					save_event_target_as = tt_highest
+				}
+			}
+			else = {
+				save_event_target_as = tt_highest
+			}
+		}
+	}
+	else = {
+		save_event_target_as = tt_highest
+	}
+
+	export_ship_speed_multiplier_effect = { which = tv_ship } # Get Hardcoded Ship Speed modifier based on techs
+
+	# Add modifier as key to all port provinces
+	sea_starts = {
+		set_key = { lhs = tv_ship which = ROOT }
+	}
+
+	## Loop through every non empty province hold by overlord and all his subjects - Treat HRE and Japan as an area
+	every_province = {
+		limit = {
+			isValidProv = yes
+			OR = {
+				country_or_vassal_holds = event_target:tt_highest
+				owner = { overlord = { is_subject_of = event_target:tt_highest } }
+				AND = {
+					owner = { is_part_of_hre = yes }
+					event_target:tt_highest = { is_part_of_hre = yes }
+				}
+				AND = {
+					owner = { daimyo_trigger = yes }
+					event_target:tt_highest = { daimyo_trigger = yes }
+				}
+			}
+		}
+		
+		set_key = { lhs = tv_ship which = ROOT } # Get ship speed
+		# Count total amount of port provinces
+		if = {
+			limit = {
+				has_port = yes
+			}
+			ROOT = {
+				change_key = { lhs = tv_port value = 1 }
+			}
+		}
+		# Count total amount of owned provinces
+		if = {
+			limit = {
+				owned_by = ROOT
+			}
+			ROOT = {
+				change_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 }
+			}
+		}
+		ce_get_cost_land_best = { return = tv_cost_land } # Get pathing CE reduction
+		ce_get_cost_port_embark_best = { return = tv_cost_port_embark } # Get Harbourage CE Embark Reduction
+		ce_get_cost_port_to_best = { return = tv_cost_port_to } # Get Pathing landing CE reduction
+		
+		set_key = { lhs = Tmp_7 value = 0 }
+
+		set_province_flag = CE_Cand
+	}
+
+	# Set runner_dispatching_province
+	capital_scope = {
+		set_key = { lhs = tv_tt value = 0 }
+		
+		if = {
+			limit = {
+				ROOT = {
+					check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 }
+				}
+			}
+			save_event_target_as = runner_dispatching_province
+		}
+	}
+
+	# Main CE loop
+	while = {
+		limit = {
+			event_target:runner_dispatching_province = { # this is the capital
+				NOT = { has_province_flag = tf_communication_efficiency_final } # while CE unifinished
+			}
+		}
+		event_target:runner_dispatching_province = { # this is the capital
+			set_province_flag = tf_communication_efficiency_final # set ending condition
+			
+			# subtract total amount of provinces to calculate by 1
+			if = {
+				limit = { owned_by = ROOT }
+
+				ROOT = { subtract_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 } } # reduce amount of provinces by 1
+			}
+			if = {
+				limit = { has_port = yes }
+
+				ROOT = { subtract_key = { lhs = tv_port value = 1 } } # reduc eamount of port provinces by 1
+			}
+			# 
+			if = {
+				limit = {
+					ROOT = { check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 } } # If there are still provinces left to do the calculation
+				}
+				ce_do_river = { # do river CE
+					prev = Tmp_7 # store province id of upstream province in this key
+				}
+				ce_do_land = { # do land CE
+					prev = Tmp_7 # store province id of upstream province
+				}
+				if = {
+					limit = {
+						ROOT = { check_key = { lhs = tv_port value = 1 } } # if there are still port provinces to do the calculation
+					}
+					ce_do_sea = { # do sea CE
+						prev = Tmp_7 # store province id of upstream province
+					}
+				}
+			}
+		}
+		if = {
+			limit = { check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 } } # while there are still provinces left to do the calculation
+
+			ce_set_runner_dispatching_province_land = { # send land runners
+				scope = every_province
+				max = 1440
+			}
+
+			if = {
+				limit = { check_key = { lhs = tv_port value = 1 } } # if there are still port provinces left
+
+				ce_set_runner_disptaching_province_sea = { # run sea runners
+					max = 1440
+				}
+			}
+		}
+	}
+	
+	# Get DEV of provinces (Tmp_0) with travel-time, clear Tmp_1 and Tmp_2 variables from CE calculation
+	every_province = {
+		limit = {
+			has_province_flag = CE_Cand
+		}
+		if = {
+			limit = {
+				owned_by = ROOT
+				
+				check_key = { lhs = tv_tt value = 0.001 }
+			}
+			set_key = { lhs = Tmp_0 which = Dev_Total }
+		}
+		else = {
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
+		
+		set_key = { lhs = Tmp_1 value = 0 }
+		set_key = { lhs = Tmp_2 value = 0 }
+	}
+	
+	set_global_flag = tf_run
+	
+    ### I think this loop travels through the network and sums provinces development values / the development values of the routes
+    # Tmp_9 = Tmp_7 = CE upstream province ID
+    # Tmp_7 = Province ID
+    #
+    # Outputs: 
+    # Tmp_2 = Connected Provinces DEV Sum via river or sea,
+    # Tmp_1 = Connected Provinces DEV Sum via land,
+	while = {
+		limit = { has_global_flag = tf_run }
+
+		clr_global_flag = tf_run # clr run condition
+		
+		every_province = { # everyprovince that has land costs and DEV > 0
+			limit = {
+				has_province_flag = CE_Cand
+				check_key = { lhs = Tmp_0 value = 0.001 }
+				
+				NOT = { has_province_flag = tf_run } # hasnt already been considered
+			}
+
+			set_key = { lhs = Tmp_9 which = Tmp_7 }
+			set_key = { lhs = Tmp_7 which = ID_Prov }
+			
+			if = {
+				limit = {
+					NOT = {
+						any_province = { # No province exists which is the previous province and has not been run yet
+							NOT = { province_id = PREV }
+							
+							has_province_flag = CE_Cand
+							check_key = { lhs = Tmp_0 value = 0.001 }
+							
+							is_key_equal = { lhs = Tmp_7 which = PREV }
+							
+							NOT = {
+								has_province_flag = tf_run
+							}
+						}
+					}
+				}
+				set_global_flag = tf_run # set condition to continue calculation
+				set_province_flag = tf_run # set flag that this province has been calculated
+				
+				POP_GetProv = { var = Tmp_9 return = Prov } # Get upstream province via ID
+				
+                # Upstream CE province
+				event_target:Prov = {
+					set_key = { lhs = Tmp_8 which = Tmp_0 } # get DEV
+					set_key = { lhs = Tmp_0 which = PREV } # get DEV of previous province
+					
+					if = {
+						limit = {
+							PREV = { # if previous is either a river province or not a neighbor of the current province
+								OR = {
+									has_province_flag = tf_river
+									
+									NOT = {
+										any_neighbor_province = {
+											province_id = event_target:Prov
+										}
+									} 
+								}
+							}
+						}
+						change_key = { lhs = Tmp_2 which = Tmp_0 } # add this provinces DEV to Tmp_2
+						
+						PREV = {
+							change_key = { lhs = Tmp_2 which = Tmp_0 } # add the upstream province dev to previous
+						}
+					}
+					else = { # is connected via land -> save dev in Tmp_2
+						change_key = { lhs = Tmp_1 which = Tmp_0 }
+						
+						PREV = {
+							change_key = { lhs = Tmp_1 which = Tmp_0 }
+						}
+					}
+					
+					set_key = { lhs = Tmp_0 which = Tmp_8 } # restore Tmp_0 to this provinces dev
+					change_key = { lhs = Tmp_0 which = PREV } # add on top the upstream dev values
+					
+					set_key = { lhs = Tmp_8 value = 0 }
+				}
+			}
+			
+			set_key = { lhs = Tmp_7 which = Tmp_9 } # set Tmp_7 to the upstream province ID
+			
+			set_key = { lhs = Tmp_9 value = 0 }
+		}
+	}
+	
+    # Clear flags and Tmp_0 key for all calculated provinces
+	every_province = {
+		limit = {
+			has_province_flag = CE_Cand
+		}
+		if = {
+			limit = {
+				has_province_flag = tf_run
+			}
+			clr_province_flag = tf_run
+		}
+		if = {
+			limit = {
+				has_province_flag = tf_river
+			}
+			clr_province_flag = tf_river
+		}
+		
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+	
+    # Go through all owned province with CE costs and which are either connected via Sea or Land
+    # Outputs:
+    # Tmp_1 = Relevance to upgrade pathing in province
+    # Tmp_6 = amount of units pathing to built
+    # Tmp_7 = costs to built pathing units
+	every_owned_province = {
+		limit = {
+			has_province_flag = CE_Cand
+			
+			OR = {
+				check_key = { lhs = Tmp_1 value = 0.001 }
+				check_key = { lhs = Tmp_2 value = 0.001 }
+			}
+		}
+
+        ####
+        # PATHING RELEVANCE CALCULATION
+		if = {
+			limit = { check_key = { lhs = Infra_Pathing value = 7 } } # if province has max pathing don't calculate anything
+
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_6 value = 0 }
+			set_key = { lhs = Tmp_7 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Tmp_6 which = Infra_PathingGoal } # get pathing unit goal			
+			subtract_key = { lhs = Tmp_6 which = Infra_PathingSize } # subtract current units
+			subtract_key = { lhs = Tmp_6 which = Infra_InConstPathing } # subtract units in construction
+			
+			if = {
+				limit = {
+					NOT = {	check_key = { lhs = Tmp_6 value = 1 } } # If there are no units to build for a level up dont do anything
+				}
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_6 value = 0 }
+				set_key = { lhs = Tmp_7 value = 0 }
+			}
+			else = {
+				set_key = { lhs = Tmp_7 which = Tmp_6 } # store units to be built
+				multiply_key = { lhs = Tmp_7 which = Infra_PathingSizeCost1 } # multiply amount of units with cost
+				
+				divide_key = { lhs = Tmp_1 which = Tmp_7 } # Divide amount of dev connected with costs to upgrade one rank
+				divide_key = { lhs = Tmp_1 which = Tmp_0 } # divide result with pathing level +1
+				divide_key = { lhs = Tmp_1 which = Tmp_0 } # divide result again with pathing level +1 
+			}
+		}
+		
+        ####
+        # HARBOURAGE RELEVANCE CALCULATION
+		if = {
+			limit = { # Province can built haverage or is at max level -> dont do anything
+                OR = {
+                    Infra_CanHarbourage = no
+                    check_key = { lhs = Infra_Harbourage value = 7 }
+                }
+			}
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_8 value = 0 }
+			set_key = { lhs = Tmp_9 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Tmp_8 which = Infra_HarbourageGoal } # get harbourage unit goal
+			subtract_key = { lhs = Tmp_8 which = Infra_HarbourageSize } # subtract current units
+			subtract_key = { lhs = Tmp_8 which = Infra_InConstHarbourage } # subtract units in construction
+			
+			if = {
+				limit = {
+					NOT = {	check_key = { lhs = Tmp_8 value = 1 } } # if no units to built dont calculate anything
+				}
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_8 value = 0 }
+				set_key = { lhs = Tmp_9 value = 0 }
+			}
+			else = {
+				set_key = { lhs = Tmp_9 which = Tmp_8 } # get required units to ugprade rank
+				multiply_key = { lhs = Tmp_9 which = Infra_HarbourageSizeCost1 } # multiply units with cost per unit to get total upgrade cost
+				
+				divide_key = { lhs = Tmp_2 which = Tmp_9 } # divide amount of dev with costs
+				divide_key = { lhs = Tmp_2 which = Tmp_0 } # divide result with unit rank
+				divide_key = { lhs = Tmp_2 which = Tmp_0 } # divide result again with unit rank
+			}
+		}
+		
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 which = Tmp_2 }
+			}
+			set_key = { lhs = Tmp_0 which = Tmp_1 }  #if pathing is more important than harbourage store relevance
+		}
+		else = {
+			set_key = { lhs = Tmp_0 which = Tmp_2 } #if harbourage is more important than pathing store relevance
+		}
+	}
+	
+    ######
+    ## This sets the budget
+	set_key = { lhs = Tmp_1 which = $budget$ } # set Tmp_1 = Budget
+	multiply_key = { lhs = Tmp_1 $type$ = $percentage$ } # modify budget with % allocated to CE buildings
+	set_key = { lhs = Public_Tmp2 which = Tmp_1 } # set Tmp_1 = Budget
+
+	# Do something for capitols
+	capital_scope = {
+		if = {
+			limit = {
+				owner = {
+					total_development = 100
+					OR = { 
+						# try to built capitol when autonomy is high or bureacracy is already huge
+						OR = {
+							check_key = { lhs = Prov_BUPow value = 50 }
+							has_country_flag = AI_Interaction_average_home_autonomy_HighInterest
+							has_country_flag = AI_Interaction_average_home_autonomy_MedInterest
+						}
+						OR = {
+							capital_scope = { NOT = { check_key = { lhs = Infra_Capitol value = 1 } } }
+							total_development = 500
+						}
+						OR = {
+							capital_scope = { NOT = { check_key = { lhs = Infra_Capitol value = 1 } } }
+							check_key = { lhs = Prov_BUPow value = 80 }
+						}
+						# try to built capitol lvl up to level 3, to get BUExam2 reform
+						AND = { 
+							Privilege_Has = { Privilege=BUExams Lvl=1 }
+							has_country_flag = AI_Reform_BUExams
+						}
+					}
+				}
+				check_key = { lhs = RE_Total value = 60 } #only try to built capitol when the city is large enough to maintain it
+				Infra_CanCapitol = yes
+				NOT = { check_key = { lhs = Infra_Capitol value = 3 } } # never make the AI build past lvl 3
+			}
+
+			set_key = { lhs = Public_Tmp1 which = Infra_CapitolGoal } # get capitol unit goal
+			subtract_key = { lhs = Public_Tmp1 which = Infra_CapitolSize } # subtract current units
+			subtract_key = { lhs = Public_Tmp1 which = Infra_InConstCapitol } # subtract units in construction
+
+			set_key = { lhs = Public_Tmp3 which = Public_Tmp1 }
+			multiply_key = { lhs = Public_Tmp3 which = Infra_CapitolSizeCost1 } # multiply amount of units with cost
+			
+			# Get Fraction of the budget potentially assigned for building capitols
+			set_key = { lhs = Public_Tmp2 which = ROOT }
+			multiply_key = { lhs = Public_Tmp2 value = 0.33 } # `DEFINE_AI_STATE_BUILDING_BUDGET_CAPITOL~value`
+
+			if = {
+				limit = { check_key = { lhs = Public_Tmp1 value = 1 } } #at least 1 unit to build
+			
+				if = {
+					limit = { check_key = { lhs = Public_Tmp2 which = Public_Tmp3 } } # defined fraction of the budget enough to build capitol ?
+
+					ROOT = { # remove money from budgets
+						set_key = { lhs = Public_Tmp3 which = PREV }
+						subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
+						subtract_key = { lhs = Tmp_1 which = Public_Tmp3 }
+						POP_RemoveDucat = { type = which inp = Public_Tmp3 } # take money out of actual treasury
+					}
+
+					change_key = { lhs = Infra_Wealth which = Public_Tmp3 } # change Infrastructure wealth with building costs
+
+					set_key = { lhs = Construct_Parallel value = 4 } # build with parallelism = 4
+
+					Infra_StartProject = { id = 12 height = Public_Tmp1 width = Construct_Parallel } # build capitol (id=12)
+				}
+				else = { # try to built only 2 units at a time
+					set_key = { lhs = Public_Tmp3 value = 2 }
+					set_key = { lhs = Public_Tmp1 which = Public_Tmp3 }
+					multiply_key = { lhs = Public_Tmp3 which = Infra_CapitolSizeCost1 } # multiply amount of units with cost
+
+					if = {
+						limit = { check_key = { lhs = Public_Tmp2 which = Public_Tmp3 } } # defined fraction of the budget enough to build 2 units of capitol ?
+
+						ROOT = { # remove money from budgets
+							set_key = { lhs = Public_Tmp3 which = PREV }
+							subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
+							subtract_key = { lhs = Tmp_1 which = Public_Tmp3 }
+							POP_RemoveDucat = { type = which inp = Public_Tmp3 } # take money out of actual treasury
+						}
+
+						change_key = { lhs = Infra_Wealth which = Public_Tmp3 } # change Infrastructure wealth with building costs
+
+						set_key = { lhs = Construct_Parallel value = 2 } # build with parallelism = 2
+
+						Infra_StartProject = { id = 12 height = Public_Tmp1 width = Construct_Parallel } # build capitol (id=12)
+					}
+				}
+			}
+		}
+	}
+
+	# Actually try to build stuff
+	while = {
+		limit = {
+			check_key = { lhs = Public_Tmp2 value = 0.001 } # while tag has money left
+		}
+		save_event_target_as = Prov # save tag as event target
+		
+		set_key = { lhs = Tmp_0 value = -1 } # baseline = -1
+		
+        # This loops always gets the province with the highest relevance
+		every_owned_province = { # everyowned province where CE cost > 0, Relevance > 0 and Relevance > previous highest stored in event_target:Prov
+			limit = {
+				has_province_flag = CE_Cand
+				check_key = { lhs = Tmp_0 value = 0.001 }
+				check_key = { lhs = Tmp_0 which = event_target:Prov }
+			}
+			save_event_target_as = Prov # save new highest relevance province
+		}
+		
+		event_target:Prov = { # current highest relevance province
+			if = {
+				limit = { is_key_equal = { lhs = Tmp_0 value = -1 } } # if relevance is not set break loop (--> province with relevance left)
+
+				PREV = { set_key = { lhs = Public_Tmp2 value = 0 } } # set available money to 0 (PREV = Tag)
+			}
+			else = {
+				if = {
+					limit = { is_key_equal = { lhs = Tmp_0 which = Tmp_1 } } # PATHING CASE: highest relevance = pathing relevance
+					PREV = { # PREV = Tag
+ 						set_key = { lhs = Tmp_7 which = PREV } # get cost to upgrade pathing in the current highest relevance province
+						
+						if = {
+							limit = { check_key = { lhs = Public_Tmp2 which = Tmp_7 }	} # if available money > cost
+
+							subtract_key = { lhs = Tmp_1 which = Tmp_7 } # subtract cost from backgrouns budget
+							subtract_key = { lhs = Public_Tmp2 which = Tmp_7 } # subtract cost from available money
+							POP_RemoveDucat = { type = which inp = Tmp_7 } # take money out of actual treasury
+							
+							PREV = { # go back to the province
+								change_key = { lhs = Infra_Wealth which = Tmp_7 } # change Infrastructure wealth with building costs
+					
+								set_key = { lhs = Construct_Parallel value = 4 } # build with parallelism = 4
+								
+                                # Start new project to upgrade pathing (id = 8) infrastructure (Tmp_6 = necessary units, Tmp_7 = parallelism
+								Infra_StartProject = { id = 8 height = Tmp_6 width = Construct_Parallel } # height = amount of units, width = amount of paralelism
+								
+								set_key = { lhs = Tmp_1 value = 0 } # set pathing relevance to 0
+								set_key = { lhs = Tmp_0 which = Tmp_2 } # set highest relevance in province to harbourage relevance
+							}
+						}
+						else = {
+							set_key = { lhs = Public_Tmp2 value = 0 } # set pathing relevance to 0, if cost is higher then available money (unaffordable project)
+						}
+					}
+				}
+				else = { # HARBOURAGE CASE: highest relevance = harbourage relevance
+					PREV = { # PREV = Tag
+						set_key = { lhs = Tmp_9 which = PREV } # get cost to upgrade hrabourage in the current highest relevance province
+						
+						if = {
+							limit = {
+								check_key = { lhs = Public_Tmp2 which = Tmp_9 } # if available money > cost
+							}
+							subtract_key = { lhs = Tmp_1 which = Tmp_9 } # subtract cost from backgrouns budget
+							subtract_key = { lhs = Public_Tmp2 which = Tmp_9 } # subtract cost from available money
+							POP_RemoveDucat = { type = which inp = Tmp_9 } # take money out of actual treasury
+							
+							PREV = { # This is the province
+								change_key = { lhs = Infra_Wealth which = Tmp_9 } # change Infrastructure wealth with building costs
+					
+								set_key = { lhs = Construct_Parallel value = 4 }  # build with parallelism = 4
+								
+                                # Start new project to upgrade harbourage (id = 9) infrastructure (Tmp_6 = necessary units, Tmp_7 = parallelism
+								Infra_StartProject = { id = 9 height = Tmp_8 width = Construct_Parallel } # height = amount of units, width = amount of paralelism
+								
+								set_key = { lhs = Tmp_2 value = 0 } # set harbourage relevance to 0
+								set_key = { lhs = Tmp_0 which = Tmp_1 } # set highest relevance in province to pathing relevance
+							}
+						}
+						else = {
+							set_key = { lhs = Public_Tmp2 value = 0 } # set harbourage relevance to 0, if cost is higher then available money (unaffordable project)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	# Clear all temporary variables
+	ce_cleanup = yes
+	
+	every_province = {
+		set_key = { lhs = Tmp_0 value = 0 }
+		set_key = { lhs = Public_Tmp2 value = 0 }
+		set_key = { lhs = Tmp_2 value = 0 }
+		set_key = { lhs = Tmp_3 value = 0 }
+		set_key = { lhs = Tmp_4 value = 0 }
+		set_key = { lhs = Tmp_5 value = 0 }
+		set_key = { lhs = Tmp_6 value = 0 }
+		set_key = { lhs = Tmp_7 value = 0 }
+		set_key = { lhs = Tmp_8 value = 0 }
+		set_key = { lhs = Tmp_9 value = 0 }
+	}
+	
+	set_key = { lhs = Tmp_2 value = 0 }
+	set_key = { lhs = Tmp_3 value = 0 }
+	set_key = { lhs = Tmp_4 value = 0 }
+	set_key = { lhs = Tmp_5 value = 0 }
+	set_key = { lhs = Tmp_6 value = 0 }
+	set_key = { lhs = Tmp_7 value = 0 }
+	set_key = { lhs = Tmp_8 value = 0 }
+	set_key = { lhs = Tmp_9 value = 0 }
+}
+
+AI_StateBuilding_FindBiggestCities = {
+	# Get highest 3 population cities
+	save_event_target_as = Prov_BiggestCity_1 # save tag as event target
+	save_event_target_as = Prov_BiggestCity_2 # save tag as event target
+	save_event_target_as = Prov_BiggestCity_3 # save tag as event target
+
+    # Go through all provinces and find the top 3 biggestcities
+    AI_StateBuilding_FindBigCity = { id = 1 id_alt_1 = 2 id_alt_2 = 3 }
+    AI_StateBuilding_FindBigCity = { id = 2 id_alt_1 = 1 id_alt_2 = 3 }
+    AI_StateBuilding_FindBigCity = { id = 3 id_alt_1 = 1 id_alt_2 = 2 }
+}
+
+AI_StateBuilding_FindBigCity = {
+	every_owned_province = {
+		limit = {
+			check_key = { lhs = RE_Total value = 0.001 }
+		    Infra_CanAmenities = yes
+		    NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+
+            check_key = { lhs = RE_Total which = event_target:Prov_BiggestCity_$id$ }
+
+            NOT = {
+                province_id = event_target:Prov_BiggestCity_$id$
+                province_id = event_target:Prov_BiggestCity_$id_alt_1$
+                province_id = event_target:Prov_BiggestCity_$id_alt_2$
+            }
+		}
+
+		save_event_target_as = Prov_BiggestCity_$id$ # save new highest relevance province
+	}
+}
+
+AI_StateBuilding_Amenities = {
+   	#############################
+	### Building of Amenities ###
+	#############################
+    # Get budget:
+    set_key = { lhs = Tmp_1 which = $budget$ }
+    multiply_key = { lhs = Tmp_1 $type$ = $percentage$ }
+
+	every_owned_province = {
+		limit = {
+			Infra_CanAmenities = yes
+			NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+            NOT = {
+                province_id = event_target:Prov_BiggestCity_1
+                province_id = event_target:Prov_BiggestCity_2
+                province_id = event_target:Prov_BiggestCity_3
+            }
+		}
+
+		AI_StateBuilding_TryAmenities = { large = no }
+
+	}
+}
+
+AI_StateBuilding_Amenities_BiggestCities = {
+   	#############################
+	### Building of Amenities ###
+	#############################
+    # Get budget:
+    set_key = { lhs = Tmp_1 which = $budget$ }
+    multiply_key = { lhs = Tmp_1 $type$ = $percentage$ }
+
+	if = {
+		limit = {
+			check_key = { lhs = Tmp_1 value = 0.001 } #budget left
+		}
+		capital_scope = {
+			if = {
+				limit = {
+					Infra_CanAmenities = yes
+					NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+				}
+				AI_StateBuilding_TryAmenities = { large = yes }
+			}
+		}
+	}
+	if = {
+		limit = {
+			has_saved_event_target = Prov_BiggestCity_1
+			check_key = { lhs = Tmp_1 value = 0.001 } #budget left
+		}
+		event_target:Prov_BiggestCity_1 = {
+			if = {
+				limit = {
+					Infra_CanAmenities = yes
+					NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+				}
+				AI_StateBuilding_TryAmenities = { large = yes }
+			}
+		}
+	}
+	if = {
+		limit = {
+			has_saved_event_target = Prov_BiggestCity_2
+			check_key = { lhs = Tmp_1 value = 0.001 } #budget left
+		}
+		event_target:Prov_BiggestCity_2 = {
+			if = {
+				limit = {
+					Infra_CanAmenities = yes
+					NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+				}
+				AI_StateBuilding_TryAmenities = { large = yes }
+			}
+		}
+	}
+	if = {
+		limit = {
+			has_saved_event_target = Prov_BiggestCity_3
+			check_key = { lhs = Tmp_1 value = 0.001 } #budget left
+		}
+		event_target:Prov_BiggestCity_3 = {
+			if = {
+				limit = {
+					Infra_CanAmenities = yes
+					NOT = { check_key = { lhs = Infra_Amenities value = 7 } }
+				}
+				AI_StateBuilding_TryAmenities = { large = yes }
+			}
+		}
+	}
+}
+
+AI_StateBuilding_TryAmenities = {
+	set_key = { lhs = Tmp_1 which = ROOT } # get country budget
+
+	Infra_GetAmenities_Cap = { return = Tmp_3 } # Get Amenities Population Cap 
+
+	if = {
+		limit = { always = $large$ }
+
+		multiply_key = { lhs = Tmp_3 value = 0.8 } # `DEFINE_AI_BUILDS_AMENITIES_POP_RATIO_BELOW_CAP_BIG~value`
+	}
+	else = {
+		multiply_key = { lhs = Tmp_3 value = 1.10 } # `DEFINE_AI_BUILDS_AMENITIES_POP_RATIO_BELOW_CAP~value`
+	}
+
+	if = {
+		limit = {
+			check_key = { lhs = RE_Total which = Tmp_3 } # If residents are above the cap*API Setting
+		}
+
+		set_key = { lhs = Tmp_8 which = Infra_AmenitiesGoal } # get amenities rank			
+		subtract_key = { lhs = Tmp_8 which = Infra_AmenitiesSize } # subtract current unit size
+		subtract_key = { lhs = Tmp_8 which = Infra_InConstAmenities } # units in construction
+
+		if = {
+			limit = {
+				NOT = {	check_key = { lhs = Tmp_8 value = 1 } } # if there are no units to built dont do anything
+			}
+			set_key = { lhs = Tmp_8 value = 0 }
+		}
+		else = {
+			set_key = { lhs = Tmp_9 which = Tmp_8 }
+			multiply_key = { lhs = Tmp_9 which = Infra_AmenitiesSizeCost1 } # cost per unit --> this is the total costs for construction
+		}
+		    # Check budget vs. cost and then built stuff
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 which = Tmp_9 } # if budget greater costs
+				check_key = { lhs = Tmp_8 value = 1 } # more than 1 unit to build
+			}
+
+			ROOT = {
+				set_key = { lhs = Tmp_9 which = PREV }
+				subtract_key = { lhs = Tmp_1 which = Tmp_9 }
+				POP_RemoveDucat = { type = which inp = Tmp_9 }
+			}
+
+			change_key = { lhs = Infra_Wealth which = Tmp_9 } # add construction money to infra wealth pool
+
+			set_key = { lhs = Construct_Parallel value = 4 }
+			Infra_StartProject = { id = 10 height = Tmp_8 width = Construct_Parallel } # height = amount of units, width = amount of paralelism
+			set_key = { lhs = Tmp_2 value = 0 }
+		}
+		else_if = { # try to built only 2 units at a time
+			limit = { always = $large$ }
+			set_key = { lhs = Tmp_8 value = 2 }
+			set_key = { lhs = Tmp_9 which = Tmp_8 }
+			multiply_key = { lhs = Tmp_9 which = Infra_CapitolSizeCost1 } # multiply amount of units with cost
+
+			if = {
+				limit = { check_key = { lhs = Tmp_1 which = Tmp_9 } } # defined fraction of the budget enough to build 2 units of capitol ?
+
+				ROOT = { # remove money from budgets
+					set_key = { lhs = Tmp_9 which = PREV }
+					subtract_key = { lhs = Tmp_1 which = Tmp_9 }
+					POP_RemoveDucat = { type = which inp = Tmp_9 } # take money out of actual treasury
+				}
+
+				change_key = { lhs = Infra_Wealth which = Tmp_9 } # change Infrastructure wealth with building costs
+
+				set_key = { lhs = Construct_Parallel value = 2 } # build with parallelism = 2
+
+				Infra_StartProject = { id = 12 height = Tmp_8 width = Construct_Parallel } # build capitol (id=12)
+			}
+		}
+	}
+}
+
+AI_StateBuilding_Cleanup = {
+	set_key = { lhs = Tmp_0 value = 0 }	
+	set_key = { lhs = Tmp_1 value = 0 }
+	set_key = { lhs = Tmp_2 value = 0 }
+	set_key = { lhs = Tmp_3 value = 0 }
+	set_key = { lhs = Tmp_4 value = 0 }
+	set_key = { lhs = Tmp_5 value = 0 }
+	set_key = { lhs = Tmp_6 value = 0 }
+	set_key = { lhs = Tmp_7 value = 0 }
+	set_key = { lhs = Tmp_8 value = 0 }
+	set_key = { lhs = Tmp_9 value = 0 }
+	set_key = { lhs = Public_Tmp1 value = 0 }
+	set_key = { lhs = Public_Tmp2 value = 0 }
+	set_key = { lhs = Public_Tmp3 value = 0 }
+
+	every_province = {
+		set_key = { lhs = Tmp_0 value = 0 }	
+		set_key = { lhs = Tmp_1 value = 0 }
+		set_key = { lhs = Tmp_2 value = 0 }
+		set_key = { lhs = Tmp_3 value = 0 }
+		set_key = { lhs = Tmp_4 value = 0 }
+		set_key = { lhs = Tmp_5 value = 0 }
+		set_key = { lhs = Tmp_6 value = 0 }
+		set_key = { lhs = Tmp_7 value = 0 }
+		set_key = { lhs = Tmp_8 value = 0 }
+		set_key = { lhs = Tmp_9 value = 0 }
+		set_key = { lhs = Public_Tmp1 value = 0 }
+		set_key = { lhs = Public_Tmp2 value = 0 }
+	}
+}

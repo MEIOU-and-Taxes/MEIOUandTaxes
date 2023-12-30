@@ -3234,3 +3234,166 @@
 ### Fixes that will be in the next release (require a new sim)
 	- Add a fix to prevent Bermuda getting no-culture and the Azores and Madeira always turning 
 	- Fix every province with Marble also opening Metal
+
+###################
+##### Open Alpha 24
+###################
+
+### System Changes
+	- Update M&T to latest EU4 version (1.36.2 as of writing this changelog)
+	- Added 39 new nodes in a massive node expansion, equalizing node counts, distances and improving scoping
+		- New links between India, Aden and Malacca, creating a more direct path for trade
+		- Reduction in direct links around the Atlantic, with links in North America merged into Eastern Seaboard
+		- A new focus on Coastal/Sea and Inland/Land division of trade nodes to utilise the new trade system more efficiently, and reduce foreign access to inland interiors
+	- Rebalanced trade center assignments to be more dependent on the node shares and as such keep a more consistent number of centers
+	- Major rebalancing of commerce power along key trade routes, boosting capacity along major links and areas struggling with transport
+	- More balancing of natural features, notably in Japan and India.
+	- Added limited Trade Hopping along the Silk Road for Major TNs, to improve flow of goods
+	- Added Trade Posts for Ragusa in the Balkans
+	- Food and Life demand have seen a radical rebalance, with notably higher food demand, new food pricing and overall a lower fulfilment economy
+		- Food demand has been raised 20%, and other life goods raised as well, with peasant spending on demand slightly down overall
+		- Base Price for food is partially back, now set at 50% of the difference between 'base' food price and the sector price, to allow more stable production and more famines/fulfilment issues
+		- Salt has been notably rebalanced, with more salt production in critical and struggling areas but less production overall
+		- The Initial sim has new logic to better apply balancing throughout the process to stabilise class wealth around the world and reduce edge cases
+		- Allow more Elite demand for comfort/luxury to reduce 500% fulfil scenarios
+	- Added support and display of 'CE from Regional Centers', allowing easy visualisation in CE modifiers of the benefit of Regional Centers
+	- Use normal EU4 method of evaluating CBs (so no more few times per year checks for all CBs but instant gain/loss of them
+	- Remove manual tax buildings from macro builder
+	- Limit autoinvestor to provinces with at least 2.5 State Reach, for both AI and player
+	- Industry Expansion heuristic changes:
+		- We completely revamped the industry expansion (/shrinkage) heuristic used by industries intrinsic expansion, because the old heuristic created unrealistic and usually wrong and slow expansions due to a mixture of bugs and bad design. The goal of a new heuristic was to simplify the players (and industries) understanding of when it will expand down to a very simple metric (profit).
+		- The new heuristic is more aligned with the intuitive market understanding. Industries expand based on marginal cost aka profit or rather the margins of profit. As a rule of thumb that means that industries above 4% profit margin expand, between 4 and 0 % stay the same, and below 0% profit margin (loss) shrink.
+		- Additionally there are some other factors influencing the desire to expand or shrink. First one being the industries throughput. Throughput is a metric of production in an optimal scenario and the actual production. If throughput gets low (usually this means missing input goods or labor) industries will want to expand less even if operating at a profit with the effect getting exponentially stronger the lower throughput gets.
+		- Secondly industries will expand slower if the usage of their respective ressource size is drawing to be maxed out.
+		- Besides those main determining factors the heuristic is influenced by certain API effects like important harbors etc.
+	- Changes to State / Player Investements:
+		- In order to make state investment more realistic and less overpowered compared to naturally occurring growth, we wanted to change the way on where, when and why to invest somewhere. This is done to make state investment less of a no brainer just dumping money in every single province and making it more integrated with other systems. It works now in the following way:
+		- State investment takes money out of the states treasury. Then something new happens. Depending on the provinces corruption a certain amount of money is not actually getting invested, but siphoned away by the elites/bureaucrats into corruption so their own pockets. Therefore you really need to check where to invest based on provincial corruption and most likely keep money into the treasury at high corruption periods.
+		- After the corruption step the remaining money is put into an investment pool which is per property type (visible in the property modifier).
+		- Lastly the money is actually getting invested by demanding goods from the market to build up the property (before investment just nullified maintenance costs, which lead to buildup due to higher profits). The speed of investment is different though. It depends on the state reach in the province. The higher the state reach the faster money is actually getting invested. If state reach is zero, the state has no way to invest and the money is NOT getting invested.
+		
+### Optimisation
+	- Neutral to positive performance impact from the trade rework
+	- Optimisations to Trade to reduce the code size and impact of the script to accomodate the trade rework
+	- CE optimisations to reuse more data and use less expensive triggers
+	- Better balance out scripts across years using a new heuristic of on-map/in-use provinces and tags, for more consistent performance
+	- Reduce the code size of the Census script, and move critical yearly code into its own smaller file to optimise perf
+	- Fire province looting events and code instantly vs over random events within 3 days, to remove event calls from the stack and for fast trigger checks
+	- Optimised the advisor system using new on-actions
+	- Add daily tick optimisations
+	- Optimize Theodosian Walls Canon checks
+	- Remove property Maintenance buildings for the AI to save performance
+
+### AI
+	- Changed cutoffs for AI desires in interactions for loyalty and made them customizable per Elite. The following values were the cutoffs before: high loy desire <40 loy, med <55, low <70, none >=70
+		- New Noble/Tribal desire cutoffs: High <55, Med <65, low <70, none >=70
+		- New Burgher/Clergy desire cutoffs: High <45, Med <55, low <65, none >=65
+		--> Higher desire to increase loyalty hard or softblocks reforming for the AI and loyalty costing interactions
+	- Changed cutoffs for AI desires to decrease power of elites to make them invest less resources decreasing clergy or burgher power and focus on nobles.
+	- Changed cutoffs for AI desires to make AI prioritize decreasing corruption of laws way earlier --> should prevent state reach spam without state privilege reforms
+	- Differentiated the cutoffs for not making law reforms:
+		- for nobility reforms:  
+			- Rural Governance and Tenacy Reforms only to be changed not having med or high desire to increase noble loyalty
+			- Noble Service and Noble Obligation can be changed already at medium desire for loyalty (>= 55 loyalty)
+		- for BU Reforms: made it so that AI doesnt attempt BU reforms if desire for noble loyalty increase is high
+		- for BG reforms: make BGCommerce only require reform desire not loyalty as it does give loyalty not cost
+	- Taught AI which privileges it needs for which exact rights reform so that it doesnt waste resources reducing privileges to 0 before doing rights reforms
+	- Tried to teach AI to use demote greater nobility when it only needs to reduce power to do a reform and all other requirements are fulfilled (not perfect yet, but should help them reform)
+	- Adjusted lots of AI chances to use various privileges to encourage AI to do BU privilege when they need to decrease corruption and have high state reach
+
+### Balance
+	- Removed the random stab hits from advisor deaths
+	- Apply CE bonuses from Capitols before Regional Capitols
+	- Reduced centralization requirements for castillian missions to allow for earlier formation of spain
+	- Rebalance army professionalism, now purely gained from Reforming Ideas, increasing drilling effectiveness which has been made much better. 
+	- Don't allow England to form Great Britain if they already formed the Anglo-French Union
+	- Raise Anatolia power threshold for the Mamluks
+	- Nerf Republican re-elections a lot, also disable one-year term
+	- Countries that have embraced Commercialization will now spread it in Tradenodes where they either have a Merchant or 10% of Trade Power
+	- Reduced centralization requirements and rebalanced timing of Spains formation
+	- Add requirement to embrace Commercialisation to getting heavies from Naval idea group
+	- Make harbourage infra reduce Commerce cost
+	- Limit the effect of China's early-game heavy ships on Sector score
+	- Rebalance sector score 
+		-Buff Merchant number effect to 0.5
+		-Make negative Global Trade Power and Trade efficiency hurt sector score
+		-Make the effects of Trade Efficiency and Global Trade Power quadratic
+		-Make better commerce levels way better for Sector Score, only give nothing below Commerce Rights 5 
+	- Change Required/New Capital province for forming Armenia to Hayastan
+	- Fixes and updates to AI capital city move events
+	- Make inventing Casual Literacy both easier and faster
+	- Stop boosting industrial output in colonies by 10x
+	- Make inventing Commercialisation a bit easier; Trade value minimum 3 now, divider 4
+
+### Flavour
+    - Ported around 100 various flavour events from the vanilla EU4, adjusting them to M&T 3.0
+	- Partial rework of early game Polish and Hungarian succesion events
+	- Added an event chain related to civil strifes in Lithuania
+	- Added new mission trees for Poland and Lithuania
+	
+### DG
+    - Ported humanist events from Dei Gratia, adjusting them to M&T 3.0
+	- Partially ported Catholic events from Dei Gratia, adjusting them to M&T 3.0
+	- Ported Hussite Wars event chain, adjusting it to M&T 3.0
+	- Give the Roman and Avignon Papacies cores on eachothers capitals to make sure they always have a CB on the other
+	- Also give them a truce between when the Schism happens
+	- Fix East Africa religions summing to more than 100%
+
+## History
+	- Made Pate Ibadi
+	- Make Transsylvania start as a Division of Hungary
+	- Remove Centralism from Madagascar
+	- Add TradePosts for Ragusa
+	- Add beer to Plzensko province
+	- Changes to Somalia setup
+	- Fix Champa not having cores on a few provs
+	- Remove starting Catholic Archbishopric modifiers from Gharnata province
+
+### National Ideas
+	- Khmer Ideas
+	- Generic Italian City State Ideas
+	- Lao Ideas
+	- Shan Ideas
+	- Lan Na Ideas
+
+### Fixes
+	- Fix a source of error spam
+	- Nerfs the size of Eastern Orthodox minorities in East Africa superregion
+	- Splits Athabascan group in two (North and South)
+	- Tweaks the paths around Chalchuchuecan
+	- Fixed improper port location in West Africa
+	- Renames two Sumatran island provinces for accuracy
+	- Fixed East African minorities summing to more than 100%
+	- Fix Somalia area issues
+	- Fix Byzantine mission checking for Traveler provinces
+	- Fix inpossibility of forming the Jagiellon Empire due to it checking for some wrong regions 
+	- Remove check for non-existing province from Mongol Empire decision
+	- Fix Prov 533 being in 2 Expedition Groups
+	- Fix flagships being bricked and unbuildable
+	- Fix 3 provinces in West-Africa being uncolonizable
+	- Fix Extra Units being build double; fix to display of units built amount
+	- Fix issue where reducing burgher gov reform level from 7 or 6 would cause it to jump straight to 4
+	- Don't send ask for HRE Defence aid to Princes at war with the Emperor
+
+### Submodding
+	- Fixed public function to change infrastructure levels
+	- Adds a check on "jesuit_activity" modifier for Jesuits to convert Western Christian heretics
+	- Ported "Flavour Events Revisited" submod into the main mod, including rework of many russian, French, Austrian, Hungarian, Polish, Teutonic, Scandinavian, Iberian, English, Italian and other flavour events.
+
+### Localization
+	- Add quite some localization for cultures that were missing their localization
+	- Fix Starobdub and Arabia names not overwriting Vanilla
+	- Karelian culture local name tweak on suggestion of Cuarah from community
+	- Correct the maximum amount of Industry slots per province in the localization (16)
+	- Implement suggestions for Persian Culture changes by Zaleesh
+	- Correct names of Sumatran islands
+	- Localize BUG tag (Buganda), also a lot of other nations there
+	- Comment back in tooltip explaining Clan Marriage gives Clans some power
+	- Fix backtick instead of apostrophe for Sa'ud dynasty
+
+### Map
+	- Modify adjacencies for 4040 to represent San Juan de Ulua (Venice-like)
+
+### UI
+	- Fix bug where French Revolution would cover the Warscore overview (Sam)
+	- Restoration of fancy HRE User Interface (+ League War Interface)
