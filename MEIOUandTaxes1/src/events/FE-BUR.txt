@@ -60,10 +60,14 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 41
+		years = 11
 		modifier = {
 			factor = 0.75
 			has_heir = no
+		}
+		modifier = {
+			factor = 0.75
+			has_female_heir = yes
 		}
 		modifier = {
 			factor = 0.75
@@ -313,7 +317,7 @@ country_event = {
 			limit = {
 				has_heir = yes
 			}
-			kill_heir = {}
+			kill_heir = { allow_new_heir = no }
 		}
 		tooltip = {
 			kill_ruler = yes
@@ -690,7 +694,7 @@ country_event = {
 			limit = {
 				has_heir = yes
 			}
-			kill_heir = {}
+			kill_heir = { allow_new_heir = no }
 		}
 		tooltip = {
 			kill_ruler = yes
@@ -1508,7 +1512,7 @@ country_event = {
 				male = yes
 				claim = 90
 			}
-			kill_heir = {}
+			kill_heir = { allow_new_heir = no }
 		}
 		hidden_effect = {
 			every_subject_country = {
@@ -1885,7 +1889,7 @@ country_event = {		#Promised husband to Margarethe has died, who is next?
 				dynasty = "de Valois"
 			}	
 		}
-		ai_chance = { factor = 80 }
+		ai_chance = { factor = 90 }
 		hidden_effect = {
 			FRA = { set_country_flag = margarethe_marriage_promised_to_us }
 		} 
@@ -1911,18 +1915,24 @@ country_event = {		#Promised husband to Margarethe has died, who is next?
 				}
 			}
 		}
-		ai_chance = { factor = 20 }
+		ai_chance = { factor = 10 }
 		if = {
 			limit = {
 				exists = UEF
 			}
-			UEF = { create_union = FLA }
+			define_heir = {
+				name = "Edmund"
+				dynasty = "Plantagenet"
+			}
 		}
 		else_if = {
 			limit = {
 				exists = ENG
 			}
-			ENG = { create_union = FLA }
+			define_heir = {
+				name = "Edmund"
+				dynasty = "Plantagenet"
+			}
 		}
 		if = {
 			limit = {
@@ -2013,8 +2023,7 @@ country_event = {
 		}
 		BUR = {
 			hidden_effect = { add_country_modifier = { name = bur_succession_cooldown duration = 100 hidden = yes } }
-			kill_heir = {}
-			kill_ruler = yes
+			kill_heir = { allow_new_heir = no }
 			define_ruler = {
 				name = "Philippe II"
 				dynasty = "de Valois"
@@ -2047,31 +2056,10 @@ country_event = {
 		}
 		if = {
 			limit = {
-				HAI = { is_subject_of = FRA }
-			}
-			FRA = { free_vassal = HAI }
-			BUR = { vassalize = HAI }
-		}
-		if = {
-			limit = {
-				HOL = { is_subject_of = FRA }
-			}
-			FRA = { free_vassal = HOL }
-			BUR = { vassalize = HOL }
-		}
-		if = {
-			limit = {
 				BRB = { is_subject_of = FRA }
 			}
 			FRA = { free_vassal = BRB }
 			BUR = { vassalize = BRB }
-		}
-		if = {
-			limit = {
-				AUV = { is_subject_of = FRA }
-			}
-			FRA = { free_vassal = AUV }
-			BUR = { vassalize = AUV }
 		}
 	}
 	
@@ -2098,7 +2086,13 @@ country_event = {
 				}
 				has_country_flag = margarethe_marriage_promised_to_us
 			}
-			create_union = FLA
+			define_heir = {
+				name = "Philippe"
+				dynasty = "de Valois"
+				ADM = 6
+				DIP = 5
+				MIL = 4
+			}
 		}
 	}
 }
@@ -2390,12 +2384,14 @@ country_event = {
 	}
 }
 
-#New Phase of the Cod and Hook Conflict in Holland
+### PETITION FROM THE COD FACTION ###
+
 country_event = {
 	id = flavor_bur.1010
 	title = "flavor_bur.1010.n"
 	desc = "flavor_bur.1010.t"
 	picture = CODS_HOOKS_eventPicture
+	major = yes
 	
 	trigger = {
 		has_country_flag = burgundian_support
@@ -2408,27 +2404,41 @@ country_event = {
 		}
 		NOT = { has_global_flag = 1530_start_date }
 		HOL = {
-			num_of_cities = 1
-			is_free_or_tributary_trigger = yes
+			has_country_modifier = cod_and_hooks
 		}
 	}
 	
 	mean_time_to_happen = { months = 12 }
+	
+	immediate = { 
+	    random_province = {
+		    limit = { owned_by = HOL }
+			set_province_flag = burgundian_intervention
+		}
+	}
 	
 	option = {
 		name = "flavor_bur.1010.a"
 		ai_chance = { factor = 90 }
 		log = "FE-BUR:[GetYear]:[Root.GetName]:actively supported the Cods:flavor_bur.1010"
 		add_treasury = -50
-		add_ruler_modifier = {
-			name = involved_for_annexation
+		hidden_effect = {
+		    add_ruler_modifier = {
+			    name = involved_for_annexation
+		    }
 		}
-		97 = {
+		random_province = {
+		    limit = { has_province_flag = burgundian_intervention }
 			add_province_modifier = {
-				name = "peasants_organizing"
-				duration = 1825
+				name = "pretender_organizing"
+				duration = -1
 			}
-			custom_tooltip = peasants_organizing_tt
+			custom_tooltip = pretender_organizing_tt
+			add_unrest = 20
+			clr_province_flag = burgundian_intervention
+			hidden_effect = {
+			    Public_ChangeClassWealthVal = { class= BG type = value inp=50 }
+			}
 		}
 		HOL = {
 			add_opinion = { who = ROOT modifier = outside_intervention }
@@ -2441,8 +2451,22 @@ country_event = {
 		ai_chance = { factor = 10 }
 		log = "FE-BUR:[GetYear]:[Root.GetName]:financially supported the Cods:flavor_bur.1010"
 		add_treasury = -25
-		add_ruler_modifier = {
-			name = involved_for_vasselage
+		hidden_effect = {
+		    add_ruler_modifier = {
+			    name = involved_for_vasselage
+		    }  
+		}
+		random_province = {
+		    limit = { has_province_flag = burgundian_intervention }
+			add_province_modifier = {
+				name = "pretender_organizing"
+				duration = -1
+			}
+			custom_tooltip = pretender_organizing_tt
+			clr_province_flag = burgundian_intervention
+			hidden_effect = {
+			    Public_ChangeClassWealthVal = { class= BG type = value inp=25 }
+			}
 		}
 		HOL = {
 			add_opinion = { who = ROOT modifier = outside_intervention }
@@ -2454,14 +2478,23 @@ country_event = {
 		name = "flavor_bur.1010.c"
 		ai_chance = { factor = 0 }
 		log = "FE-BUR:[GetYear]:[Root.GetName]:have not supported the Cods:flavor_bur.1010"
-		add_ruler_modifier = {
-			name = non_involvement
+		hidden_effect = {
+		    add_ruler_modifier = {
+			    name = non_involvement
+		    }
+		}
+		random_province = {
+		    limit = { has_province_flag = burgundian_intervention }
+			clr_province_flag = burgundian_intervention
 		}
 		HOL = {
 			add_opinion = { who = ROOT modifier = non_interference }
 		}
 	}
 }
+
+## VICTORY OF THE CODS IN HOLLAND (1ST VERSION) ##
+
 country_event = {
 	id = flavor_bur.1011
 	title = "flavor_bur.1011.n"
@@ -2469,6 +2502,7 @@ country_event = {
 	picture = CODS_HOOKS_eventPicture
 	
 	fire_only_once = yes
+	major = yes
 	
 	is_triggered_only = yes
 	
@@ -2486,7 +2520,18 @@ country_event = {
 			log = "FE-BUR:[GetYear]:[Root.GetName]:inherited Hainau:flavor_bur.1011"
 		}
 	}
+	after = {
+	    hidden_effect = {
+		    every_owned_province = {
+			    limit = { is_core = HOL }
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=50 }
+			}
+		}
+	}
 }
+
+## VICTORY OF THE CODS IN HOLLAND (2ND VERSION) ##
+
 country_event = {
 	id = flavor_bur.1012
 	title = "flavor_bur.1012.n"
@@ -2494,6 +2539,7 @@ country_event = {
 	picture = CODS_HOOKS_eventPicture
 	
 	fire_only_once = yes
+	major = yes
 	
 	is_triggered_only = yes
 	
@@ -2508,6 +2554,13 @@ country_event = {
 			}
 			vassalize = HAI
 			log = "FE-BUR:[GetYear]:[Root.GetName]:vassalized Hainau:flavor_bur.1012"
+		}
+	}
+	after = {
+	    hidden_effect = {
+		    HOL = {
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=35 }
+			}
 		}
 	}
 }
@@ -2637,6 +2690,8 @@ country_event = {
 	}
 }
 
+## THE BURGUNDIAN WEDDING ##
+
 country_event = {
 	id = flavor_bur.1051
 	title = "flavor_bur.1051.n"
@@ -2644,6 +2699,7 @@ country_event = {
 	picture = BURGUNDIAN_PRESENTATION_eventPicture
 
 	is_triggered_only = yes	 #Triggered by Burgundy decisions
+	major = yes
 
 	option = {
 		name = "flavor_bur.1051.a"
@@ -2785,6 +2841,31 @@ country_event = {
 		name = "flavor_bur.1151.a"
 		ai_chance = { factor = 1 }
 		add_prestige = -10
+	}
+}
+
+#Burgundy Setup Event
+country_event = {
+	id = flavor_bur.1500
+	title = flavor_bur.1500.t
+	desc = flavor_bur.1500.d
+	picture = DIPLOMACY_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = BUR
+		has_ruler = "Philippe de Rouvres"
+	}
+	
+	mean_time_to_happen = { days = 1 }
+	
+	option = {
+		name = flavor_bur.1500.a
+		add_ruler_modifier = {
+			name = margarethe_marriage
+		}
+		add_prestige = 5
 	}
 }
 

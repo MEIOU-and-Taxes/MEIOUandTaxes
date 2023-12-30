@@ -1,9 +1,10 @@
 namespace = flavor_pol
 namespace = flavor_hun
 
+### SUCCESSION OF KAZIMIERZ THE GREAT AND LOUIS THE GREAT ###
 
-#Make Louis The Great Heir
-country_event = { 
+#SUCCESSION OF KAZIMIERZ THE III
+country_event = {
 	id = flavor_pol.499
 	title = "flavor_pol.3021b.title"
 	desc = "flavor_pol.3021b.desc"
@@ -51,7 +52,7 @@ country_event = {
 		PWO = {
 			define_heir = {
 				dynasty = "Gryf"
-				name = "Elizabeth"
+				name = "Elzbieta"
 				male = no
 				age = 9
 				adm = 3
@@ -79,9 +80,17 @@ country_event = {
 		add_legitimacy = -25
 		break_marriage = HUN
 	}
+	after = {
+	    hidden_effect = { #After 1356 Kazimierz separated from Adelheid
+		    set_consort_flag = marriage_length_timer
+		    country_event = { id = consort_events.201 days = 365 random = 90 }
+			add_papal_influence = 25
+		} 
+	}
 }
 
-country_event = { 
+#SUCCESSION OF KAZIMIERZ THE GREAT
+country_event = {
 	id = flavor_pol.500
 	title = "flavor_pol.3023.title"
 	desc = "flavor_pol.3023.desc"
@@ -100,7 +109,7 @@ country_event = {
 		else_if = {										
 			limit = {
 				OR = {
-					HUN = { is_lesser_in_union = yes } 
+					#HUN = { is_lesser_in_union = yes } 
 					POL = { is_lesser_in_union = yes } 
 					POL = { senior_union_with = LIT }
 				}
@@ -262,26 +271,23 @@ country_event = {
 	}
 }
 
+#DEATH OF KAZIMIERZ III (with male heir, no union)
 country_event = {
-	id = flavor_pol.502 #Death of Kazimierz III (with male heir, no union)
+	id = flavor_pol.502
 	title = "flavor_pol.502.title"
 	desc = "flavor_pol.502.desc"
 	picture = DEATH_OF_HEIR_eventPicture
 	is_triggered_only = yes
-	
 		
 	option = {
 		name = "option.flavor_pol.502.a"
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Poland had male heir - no union:flavor_pol.502"		
 		add_prestige = 35
 		add_legitimacy = 30
-		#add_adm_power = 100
-		#add_dip_power = 100
-		#add_mil_power =  100
 	}
 }
 	
-#Death of Kazimierz. Checks if Louis is still alive, has a son or heir. PUs Poland. Won't fire if Poland got a male heir.
+#DEATH OF KAZIMIERZ III (Checks if Louis is still alive, has a son or heir. PUs Poland. Won't fire if Poland got a male heir)
 country_event = {
 	id = flavor_pol.501
 	title = "flavor_pol.3022b.title"
@@ -356,16 +362,16 @@ country_event = {
 			}
 		}
 	}
-	immediate = {  }
-	
 	
 	option = { #normal PU when louis alive
-		trigger = { HUN = { has_ruler = "Louis the Great" } }
+		trigger = { 
+		    HUN = { has_ruler = "Louis the Great" } 
+		}
 		name = "flavor_pol.3022.a"
 		HUN = { create_union = POL }
 		set_country_flag = pol_louis_great_king
 		add_liberty_desire = 50
-		country_event = {  id = flavor_pol.504 days = 3 }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (with Louis):flavor_pol.501"	
 	}
 	
@@ -383,13 +389,14 @@ country_event = {
 			}	
 		}
 		trigger = { 
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+			NOT = { HUN = { has_ruler = "Louis the Great" } }
 			NOT = { HUN = { has_regency = yes } }
 			NOT = { HUN = { has_consort_regency = yes } }
+			HUN = { is_lesser_in_union = no }
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.501"	
 		HUN = { create_union = POL }
-		country_event = {  id = flavor_pol.504 days = 3 }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		add_liberty_desire = 100
 		set_country_flag = pol_louis_son_great_king
 	}
@@ -415,48 +422,103 @@ country_event = {
 				OR = { 
 					has_regency = yes 
 					has_consort_regency = yes 
-				} 
+				}
+                is_lesser_in_union = no				
 			}
 		}
 		HUN = { create_union = POL }
-		country_event = {  id = flavor_pol.504 days = 3 }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.501"	
 		add_liberty_desire = 100
 		set_country_flag = pol_louis_son_great_king
 	}
 	
-	
-	option = { #politely decline
+	option = { #We shall choose a Piast!
 		name = "flavor_pol.3022c.c"
 		ai_chance = { factor = 90 }
 		trigger = {
 			NOT = { HUN =  { has_ruler = "Louis the Great" } }
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.501"
-		add_legitimacy = -20
-		add_prestige = 15
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+					NOT = { num_of_cities = 3 }
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+						NOT = { num_of_cities = 3 }
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
 	}
-	
-	
 }
 
-country_event = { #hungary has no male and poland has no piast monarch either female or male.
+#DEATH OF KAZIMIERZ III (Hungary has no male and Poland has no Piast monarch either female or male)
+country_event = {
 	id = flavor_pol.503
 	title = "flavor_pol.title.30236"
 	desc = "flavor_pol.desc.30236"
 	picture = DEATH_OF_HEIR_eventPicture
 	is_triggered_only = yes
 	
-	immediate = {  
-	}
-	
 	option = { #female woman
 		name = "flavor_pol.30236.a"
 		ai_chance = { factor = 10 }
-		HUN = {
-			create_union = POL
+		trigger = {
+			NOT = { HUN =  { has_country_flag = looking_for_heir } }
+			HUN = { is_lesser_in_union = no }
 		}
-		country_event = {  id = flavor_pol.504 days = 3 }
+		HUN = { create_union = POL }
+		#country_event = {  id = flavor_pol.504 days = 3 }
 		add_liberty_desire = 100
 		set_country_flag = woman_great_king
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, union with Hungary (ruled by woman):flavor_pol.503"
@@ -473,8 +535,16 @@ country_event = { #hungary has no male and poland has no piast monarch either fe
 	option = { #go with bohemia
 		name = flavor_pol.30234.a
 		ai_chance = { factor = 15 }
-		BOH = { create_union = POL }
-		country_event = {  id = flavor_pol.504 days = 3 }
+		trigger = {
+			BOH = { is_lesser_in_union = no }
+		}
+		BOH = {
+			create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}
+		#country_event = { id = flavor_pol.504 days = 3 }
 		add_liberty_desire = 75
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, no union with Hungary (as it was ruled by woman):flavor_pol.503"
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, union with Bohemia:flavor_pol.503"
@@ -482,208 +552,259 @@ country_event = { #hungary has no male and poland has no piast monarch either fe
 }
 
 
-#Fired from insta PU. Almost the same as previous event (501) with the difference that it adds possibility for Bohemian PU.
-country_event = { 
-	id = flavor_pol.504
-	title = "flavor_pol.30234.title"
-	desc = {
-		trigger = {
-			HUN = { has_ruler = "Louis the Great" } 
-		}
-		desc = "flavor_pol.3022b.desca"
-	}
-	desc = {
-		trigger = {
-			NOT = { HUN = { has_ruler = "Louis the Great" } }
-			NOT = { HUN = { has_regency = yes } }
-			NOT = { HUN = { has_consort_regency = yes } }
-			NOT = { HUN = { is_female = yes } }
-		}
-		desc = "flavor_pol.30222b.descb"
-	}
-	desc = {
-		trigger = {
-			NOT = { HUN = { has_ruler = "Louis the Great" } }
-			HUN = { 
-				has_heir = yes 
-				has_female_heir = no 
-				OR = { 
-					has_regency = yes 
-					has_consort_regency = yes 
-				} 
-			}
-		}
-		desc = "flavor_pol.302222b.desc"
-	}
-	
-	desc = {
-		trigger = {
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			OR = {
-				HUN = { 
-					has_heir = yes 
-					has_female_heir = yes 
-					OR = { 
-						has_regency = yes 
-						has_consort_regency = yes 
-					} 
-				}
-				AND = {
-					is_female = yes
-					has_regency = no
-					has_consort_regency = no
-				}
-			}
-		}
-		desc = "flavor_pol.3022222b.desc"
-	}
-	picture = POLICY_eventPicture
-	is_triggered_only = yes 
-	fire_only_once = yes
-	major = yes
-	trigger = { 
-		tag = POL
-		junior_union_with = HUN 
-		NOT = { is_year = 1390 }
-		AND = {
-			NOT = { has_country_flag = pol_louis_great_king }
-			NOT = { has_country_flag = pol_louis_son_great_king }
-			NOT = { has_country_flag = woman_great_king }
-		}
-	}
-	
-	immediate = {
-		clr_country_flag = pol_louis_great_heir
-		
-	}
-	
-	option = { #normal PU when louis alive
-		trigger = { HUN = { has_ruler = "Louis the Great" } }
-		name = "flavor_pol.30234.a"
-		#HUN = { create_union = POL }
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (with Louis):flavor_pol.504"	
-		set_country_flag = pol_louis_great_king
-		add_liberty_desire = 40
-	}
-	
-	option = { #make new male ruler PU
-		name = "flavor_pol.3022c.a"
-		ai_chance = { 
-			factor = 10
-			modifier = { 
-				factor = 1.5
-				HUN = { legitimacy = 60 }
-			}
-			modifier = { 
-				factor = 2
-				HUN = { legitimacy = 85 }
-			}	
-		}
-		trigger = { 
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			NOT = { HUN = { has_regency = yes } }
-			NOT = { HUN = { has_consort_regency = yes } }
-			NOT = { is_female = yes }
-		}
-			
-		HUN = { create_union = POL }
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
-		add_liberty_desire = 75
-		set_country_flag = pol_louis_son_great_king
-	}
-	
-	option = { #make male heir PU
-		name = "flavor_pol.3022c.b"
-		ai_chance = { 
-			factor = 10
-			modifier = { 
-				factor = 1.5
-				HUN = { heir_claim = 60 }
-			}
-			modifier = { 
-				factor = 2
-				HUN = { heir_claim = 85 }
-			}
-		}
-		trigger = {	
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			HUN = { 
-				has_heir = yes 
-				has_female_heir = no 
-				OR = { 
-					has_regency = yes 
-					has_consort_regency = yes 
-				} 
-			}
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
-		HUN = { create_union = POL }
-		add_liberty_desire = 75
-		set_country_flag = pol_louis_son_great_king
-	}
-	
-	
-	option = { #politely decline
-		name = "flavor_pol.30234.c"
-		ai_chance = { factor = 90 }
-		trigger = {
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.504"
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, local noble became ruler:flavor_pol.504"
-		break_union = HUN
-		define_ruler = {
-			claim = 20
-			female = no
-			culture = polish
-		}
-	}
-	
-	option = { #Go with woman
-		name = "flavor_pol.30236.a"
-		ai_chance = { factor = 10 }
-		trigger = {
-			NOT = { HUN =  { has_ruler = "Louis the Great" } }
-			OR = {
-				HUN = { 
-					has_heir = yes 
-					has_female_heir = yes 
-					OR = { 
-						has_regency = yes 
-						has_consort_regency = yes 
-					} 
-				}
-				AND = {
-					is_female = yes
-					has_regency = no
-					has_consort_regency = no
-				}
-			}
-		}
-		HUN = {
-			create_union = POL
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (ruler is a woman):flavor_pol.504"
-		add_liberty_desire = 100
-		set_country_flag = woman_great_king
-	}
-	
-	option = { #bohemia
-		name = "flavor_pol.30236.c"
-		trigger = {
-		}
-		ai_chance = { factor = 10 }
-		BOH = {
-			create_union = POL
-		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Bohemia:flavor_pol.504"
-		add_liberty_desire = 75
-	}
-}
+#DEATH OF KAZIMIERZ (Fired from insta PU. Almost the same as previous event (501) with the difference that it adds possibility for Bohemian PU)
+#country_event = { #this event don't seem to work, it isn't needed to complete the event chain anyway
+#	id = flavor_pol.504
+#	title = "flavor_pol.30234.title"
+#	desc = {
+#		trigger = {
+#			HUN = { has_ruler = "Louis the Great" } 
+#		}
+#		desc = "flavor_pol.3022b.desca"
+#	}
+#	desc = {
+#		trigger = {
+#			NOT = { HUN = { has_ruler = "Louis the Great" } }
+#			NOT = { HUN = { has_regency = yes } }
+#			NOT = { HUN = { has_consort_regency = yes } }
+#			NOT = { HUN = { is_female = yes } }
+#		}
+#		desc = "flavor_pol.30222b.descb"
+#	}
+#	desc = {
+#		trigger = {
+#			NOT = { HUN = { has_ruler = "Louis the Great" } }
+#			HUN = { 
+#				has_heir = yes 
+#				has_female_heir = no 
+#				OR = { 
+#					has_regency = yes 
+#					has_consort_regency = yes 
+#				} 
+#			}
+#		}
+#		desc = "flavor_pol.302222b.desc"
+#	}
+#	
+#	desc = {
+#		trigger = {
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			OR = {
+#				HUN = { 
+#					has_heir = yes 
+#					has_female_heir = yes 
+#					OR = { 
+#						has_regency = yes 
+#						has_consort_regency = yes 
+#					} 
+#				}
+#				AND = {
+#					is_female = yes
+#					has_regency = no
+#					has_consort_regency = no
+#				}
+#			}
+#		}
+#		desc = "flavor_pol.3022222b.desc"
+#	}
+#	picture = POLICY_eventPicture
+#	is_triggered_only = yes 
+#	fire_only_once = yes
+#	major = yes
+#	trigger = { 
+#		tag = POL
+#		junior_union_with = HUN 
+#		NOT = { is_year = 1390 }
+#		AND = {
+#			NOT = { has_country_flag = pol_louis_great_king }
+#			NOT = { has_country_flag = pol_louis_son_great_king }
+#			NOT = { has_country_flag = woman_great_king }
+#		}
+#	}
+#	
+#	immediate = {
+#		clr_country_flag = pol_louis_great_heir
+#		
+#	}
+#	
+#	option = { #normal PU when louis alive
+#		trigger = { HUN = { has_ruler = "Louis the Great" } }
+#		name = "flavor_pol.30234.a"
+#		#HUN = { create_union = POL }
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (with Louis):flavor_pol.504"	
+#		set_country_flag = pol_louis_great_king
+#		add_liberty_desire = 40
+#	}
+#	
+#	option = { #make new male ruler PU
+#		name = "flavor_pol.3022c.a"
+#		ai_chance = { 
+#			factor = 10
+#			modifier = { 
+#				factor = 1.5
+#				HUN = { legitimacy = 60 }
+#			}
+#			modifier = { 
+#				factor = 2
+#				HUN = { legitimacy = 85 }
+#			}	
+#		}
+#		trigger = { 
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			NOT = { HUN = { has_regency = yes } }
+#			NOT = { HUN = { has_consort_regency = yes } }
+#			NOT = { is_female = yes }
+#		}
+#			
+#		HUN = { create_union = POL }
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
+#		add_liberty_desire = 75
+#		set_country_flag = pol_louis_son_great_king
+#	}
+#	
+#	option = { #make male heir PU
+#		name = "flavor_pol.3022c.b"
+#		ai_chance = { 
+#			factor = 10
+#			modifier = { 
+#				factor = 1.5
+#				HUN = { heir_claim = 60 }
+#			}
+#			modifier = { 
+#				factor = 2
+#				HUN = { heir_claim = 85 }
+#			}
+#		}
+#		trigger = {	
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			HUN = { 
+#				has_heir = yes 
+#				has_female_heir = no 
+#				OR = { 
+#					has_regency = yes 
+#					has_consort_regency = yes 
+#				} 
+#			}
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (without Louis):flavor_pol.504"	
+#		HUN = { create_union = POL }
+#		add_liberty_desire = 75
+#		set_country_flag = pol_louis_son_great_king
+#	}
+#	
+#	option = { #We shall choose a Piast!
+#		name = "flavor_pol.30234.c"
+#		ai_chance = { factor = 90 }
+#		trigger = {
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.504"
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Piast became ruler:flavor_pol.504"
+#		break_union = HUN
+#		hidden_effect = {
+#		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+#        }
+#		if = {
+#		    limit = { 
+#			    MAZ = {
+#				    exists = yes
+#                   dynasty = "Piast"
+#					is_female = no
+#					ai = yes
+#                }				
+#			}
+#			hidden_effect = {
+#			    MAZ = {
+#				    exile_heir_as = heir_move_to_poland
+#				    exile_ruler_as = { name = ruler_move_to_poland }
+#				}
+#				set_ruler = ruler_move_to_poland
+#			    set_heir = heir_move_to_poland
+#			    set_ruler_flag = elected_ruler
+#			}
+#			inherit = MAZ
+#		}
+#		else_if = {
+#		    limit = { 
+#			    any_known_country = {
+#                    dynasty = "Piast"
+#					is_female = no
+#					ai = yes
+#					NOT = { num_of_cities = 3 }
+#                }				
+#			}
+#			hidden_effect = {
+#			    random_known_country = {
+#				    limit = {
+#					    dynasty = "Piast"
+#						is_female = no
+#						ai = yes
+#						NOT = { num_of_cities = 3 }
+#					}
+#				    exile_heir_as = heir_move_to_poland
+#				    exile_ruler_as = { name = ruler_move_to_poland }
+#					set_country_flag = heir_to_polish_crown
+#				}
+#				set_ruler = ruler_move_to_poland
+#			    set_heir = heir_move_to_poland
+#			    set_ruler_flag = elected_ruler
+#			}
+#			every_country = {
+#			    limit = { has_country_flag = heir_to_polish_crown }
+#				ROOT = { inherit = PREV }
+#			}
+#		}
+#		else = {
+#		    define_ruler = {
+#				dynasty = "Piast"
+#				claim = 25
+#            }
+#		}
+#	}
+#	
+#	option = { #Go with woman
+#		name = "flavor_pol.30236.a"
+#		ai_chance = { factor = 10 }
+#		trigger = {
+#			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+#			OR = {
+#				HUN = { 
+#					has_heir = yes 
+#					has_female_heir = yes 
+#					OR = { 
+#						has_regency = yes 
+#						has_consort_regency = yes 
+#					} 
+#				}
+#				AND = {
+#					is_female = yes
+#					has_regency = no
+#					has_consort_regency = no
+#				}
+#			}
+#		}
+#		HUN = {
+#			create_union = POL
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Hungary (ruler is a woman):flavor_pol.504"
+#		add_liberty_desire = 100
+#		set_country_flag = woman_great_king
+#	}
+#	
+#	option = { #bohemia
+#		name = "flavor_pol.30236.c"
+#		trigger = {
+#		}
+#		ai_chance = { factor = 10 }
+#		BOH = {
+#			create_union = POL
+#		}
+#		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, PU under Bohemia:flavor_pol.504"
+#		add_liberty_desire = 75
+#	}
+#}
 
-
-
-#Mazovia Independence
+#MAZOVIA INDEPENDENCE (hidden event)
 country_event = { 
 	id = flavor_pol.505
 	title = "flavor_pol.title.505"
@@ -694,6 +815,7 @@ country_event = {
 	hidden = yes
 	trigger = {
 		tag = POL
+		MAZ = { exists = yes }
 	}
 	immediate = {  
 		if = {
@@ -712,6 +834,7 @@ country_event = {
 	}
 }
 
+#THE QUESTION OF MAZOVIA
 country_event = { 
 	id = flavor_pol.506
 	title = "flavor_pol.title.506"
@@ -720,6 +843,7 @@ country_event = {
 	is_triggered_only = yes
 	trigger = {
 		tag = POL
+		MAZ = { exists = yes }
 	}
 	
 	
@@ -801,6 +925,7 @@ country_event = {
 	}
 }
 
+#THE QUESTION OF MAZOVIA
 country_event = { 
 	id = flavor_pol.507
 	title = "flavor_pol.title.507"
@@ -809,6 +934,7 @@ country_event = {
 	is_triggered_only = yes
 	trigger = {
 		tag = POL
+		MAZ = { exists = yes }
 	}
 	immediate = {  
 	}
@@ -872,8 +998,7 @@ country_event = {
 	}
 }
 
-
-# Louis or whoever got a woman
+#HUNGARIAN CAPET-ANJOU SUCCESSION (Louis or whoever got a woman heir)
 country_event = {
 	id = flavor_pol.302
 	title = "flavor_pol.302.title"
@@ -916,16 +1041,13 @@ country_event = {
 			}
 		}
 	}
-
-	immediate = {
-		
-	}
 	
 	option = { # Jadwiga
-		name = "flavor_pol.302.d"
-		ai_chance = { factor = 90 }
+		name = "flavor_pol.302.a"
+		ai_chance = { factor = 85 }
 		trigger = {
 			has_country_flag = pol_louis_great_king
+			is_year = 1374
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Jadwiga became a ruler of Poland:flavor_pol.302"
 		if = {
@@ -937,15 +1059,20 @@ country_event = {
 			}
 		}
 		define_ruler = {
+			name = "Interregnum"
+			regency = yes
+		}
+		define_heir = {
 			name = "Jadwiga"
 			dynasty = "d'Anjou"
 			claim = 20
+			birth_date = 1373.10.3
 			adm = 5
 			dip = 5
 			mil = 4
 			female = yes
 		}
-		add_ruler_personality = generous_personality
+		set_heir_flag = jadwiga
 		#in exchange for nobles support for woman taking a throne, they were granted tax privilege
 		if = {
 			limit = { #if they are already at level 4 of tax exemption, increase tax exemption only once and service exemption instead
@@ -972,6 +1099,7 @@ country_event = {
 			}
 		}
 	}
+	
 	option = { # Random woman
 		name = "flavor_pol.302.c"
 		ai_chance = { factor = 5 }
@@ -1024,6 +1152,10 @@ country_event = {
 	
 	option = { # stay in the pu
 		name = "flavor_pol.302.f"
+		trigger = {
+			NOT = { HUN = { has_country_flag = looking_for_heir } }
+			HUN = { is_lesser_in_union = no }
+		}
 		ai_chance = { 
 			factor = 5
 			modifier = {
@@ -1035,8 +1167,82 @@ country_event = {
 				}
 			}	
 		}
+		HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}
 		add_liberty_desire = -20
 		log = "FE-POL:[GetYear]:[Root.GetName]:stayed in PU (d'Anjou woman had not became a ruler of Poland):flavor_pol.302"
+	}
+	
+	option = { #We shall choose a Piast!
+		name = "flavor_pol.3023.e"
+		ai_chance = { factor = 5 }
+		trigger = {
+			NOT = { HUN =  { has_ruler = "Louis the Great" } }
+		}
+		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, declined PU under Hungary (without Louis):flavor_pol.501"
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+					NOT = { num_of_cities = 3 }
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+						NOT = { num_of_cities = 3 }
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
 	}
 	
 	after = {
@@ -1046,7 +1252,7 @@ country_event = {
 	}
 }
 
-# Louis I Anjou or whoever got a son
+#SUCCESSION OF LOUIS THE GREAT (Louis I Anjou or whoever got a son)
 country_event = {
 	id = flavor_pol.303
 	title = "flavor_pol.3023.title"
@@ -1092,14 +1298,6 @@ country_event = {
 	
 	immediate = {
 		hidden_effect = {
-			random_list = {
-				80 = {
-					set_country_flag = pol_jadwiga
-				}
-				20 = {
-					set_country_flag = we_are_polish
-				}
-			}
 			if = {
 				limit = {
 					has_country_flag = pol_louis_great_king
@@ -1144,7 +1342,13 @@ country_event = {
 		trigger = {
 			has_country_flag = pol_louis_great_king
 		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"		
+		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"
+        HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}		
 		add_liberty_desire = -50
 	}
 	option = { # stay in the pu
@@ -1155,7 +1359,13 @@ country_event = {
 		trigger = {
 			has_country_flag = pol_louis_son_great_king
 		}
-		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"		
+		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"
+        HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}		
 		add_liberty_desire = -20
 	}
 	
@@ -1167,15 +1377,18 @@ country_event = {
 		trigger = {
 			has_country_flag = woman_great_king
 		}
+		HUN = {
+		    create_subject = {
+			    subject_type = temporary_union
+			    subject = POL
+		    }
+		}
 		add_liberty_desire = -10
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Louis, PU continues:flavor_pol.303"	
 	}
 		
 	option = { # polands nobility doesnt accept heir
 		name = "flavor_pol.3023.e"
-		trigger = {
-			has_country_flag = we_are_polish
-		}
 		ai_chance = { 
 			factor = 25
 			modifier = {
@@ -1192,13 +1405,71 @@ country_event = {
 				country_event = { id = flavor_hun.90 days = 5 }
 			}
 		}
-		add_prestige = 20
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+					NOT = { num_of_cities = 3 }
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+						NOT = { num_of_cities = 3 }
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
 	}
 	
 	option = { # jadwiga
-		name = "flavor_pol.302.d"
+		name = "flavor_pol.302.a"
 		trigger = {
-			has_country_flag = pol_jadwiga
+			is_year = 1374
 		}
 		ai_chance = { 
 			factor = 60
@@ -1207,15 +1478,20 @@ country_event = {
 		custom_tooltip = custom.flavor_pol.3023.f
 		break_union = HUN
 		define_ruler = {
+			name = "Interregnum"
+			regency = yes
+		}
+		define_heir = {
 			name = "Jadwiga"
 			dynasty = "d'Anjou"
 			claim = 20
+			birth_date = 1373.10.3
 			adm = 5
 			dip = 5
 			mil = 4
 			female = yes
 		}
-		add_ruler_personality = generous_personality
+		set_heir_flag = jadwiga
 		#in exchange for nobles support for woman taking a throne, they were granted tax privilege
 		if = {
 			limit = { #if they are already at level 4 of tax exemption, increase tax exemption only once and service exemption instead
@@ -1289,12 +1565,10 @@ country_event = {
 		clr_country_flag = pol_louis_great_king
 		clr_country_flag = pol_louis_son_great_king
 		clr_country_flag = woman_great_king
-		clr_country_flag = pol_jadwiga
-		clr_country_flag = we_are_polish
 	}
 }
 
-### Hungary male decides if he gets the cb or not
+#THE POLAND SUCCESSION (Hungary male decides if he gets the cb or not)
 country_event = {
 	id = flavor_pol.801
 	title = "flavor_pol.801.t"
@@ -1381,7 +1655,7 @@ country_event = {
 	}
 }
 
-###Poland informed
+#HUNGARY CLAIMS POLAND (Poland informed)
 country_event = {
 	id = flavor_pol.802
 	title = "flavor_pol.802.t"
@@ -1411,7 +1685,7 @@ country_event = {
 	}
 }
 
-### Hungary fights por PU
+#THE QUESTION OF POLAND (Hungary fights por PU)
 country_event = {
 	id = flavor_hun.90
 	title = "flavor_hun.90.t"
@@ -1467,7 +1741,9 @@ country_event = {
 	}
 }
 
-# Polish-Lithuanian Union (Pol female)
+### POLISH-LITHUANIAN UNION ###
+
+### POLISH-LITHUANIAN UNION (Poland has female ruler)
 country_event = {
 	id = flavor_pol.100
 	title = "flavor_pol.100.title"
@@ -1500,16 +1776,8 @@ country_event = {
 					is_neighbor_of = ROOT
 				}
 			}
-			OR = {
-				AND = {
-					has_regency = no
-					is_female = no
-				}
-				AND = {
-					has_regency = yes
-					has_female_heir = no
-				}
-			}
+			has_regency = no
+			is_female = no
 		}
 		NOT = { war_with = LIT }
 		is_lesser_in_union = no
@@ -1517,13 +1785,13 @@ country_event = {
 	}
 	
 	mean_time_to_happen = {
-		months = 24
+		months = 36
 		modifier = {
 			factor = 0.5
 			marriage_with = LIT
 		}
 		modifier = {
-			factor = 0.25
+			factor = 0.5
 			LIT = { religion_group = european_pagan }
 		}
 		modifier = {
@@ -1555,11 +1823,29 @@ country_event = {
 				}
 			}
 		}
+		if = {
+		    limit = {
+			    OR = {
+				    AND = {
+			            has_ruler = "Jadwiga"
+				        dynasty = "d'Anjou"
+				    }
+					has_heir_flag = jadwiga
+				}
+			}
+			set_country_flag = jadwiga_marriage
+		}
 	}
 	
-	option = {		# Accept their Duke on the throne of Poland, but demand his christianisation
+	option = { #Accept their Duke on the throne of Poland, but demand his christianisation
 		name = "flavor_pol.100.a"
-		ai_chance = { factor = 100 }
+		ai_chance = { 
+		    factor = 90 
+		    modifier = {
+				factor = 0
+				LIT = { ai = no }
+			}
+		}
 		trigger = {
 			LIT = {
 				religion_group = european_pagan
@@ -1567,40 +1853,42 @@ country_event = {
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Accepted Lithuanian Duke on the throne, but demanded his christianisation:flavor_pol.100"
 		hidden_effect = {
-			LIT = {
-				if = {
-					limit = { 
-						TRK = {
-							OR = {
-								is_subject_of = POL
-								is_subject_of = LIT
-							}
-							ai = yes 
-							exists = yes
-						} 
-					}
-					inherit = TRK
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }		
+		hidden_effect = {
+			MAZ = { country_event = { id = flavor_pol.509 days = 2 } }
+			if = {
+				limit = {
+					has_country_flag = jadwiga_marriage
 				}
+				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
+			}
+		}
+		hidden_effect = {
+			LIT = {
 				exile_heir_as = heir_move_to_poland
-				#kill_heir = {}
 				exile_ruler_as = { name = ruler_move_to_poland }
 				grant_independence = yes
 			}
 			set_ruler = ruler_move_to_poland
-			#set_heir = heir_move_to_poland
-			define_consort = {
-				name = "Jadwiga"
-				dynasty = "d'Anjou"
-				culture = hungarian
-				country_of_origin = HUN
-				adm = 5
-				dip = 5
-				mil = 4
-				female = yes
+			set_ruler_flag = elected_ruler
+			if = {
+			    limit = { has_country_flag = jadwiga_marriage }
+			    define_consort = {
+				    name = "Jadwiga"
+				    dynasty = "d'Anjou"
+					birth_date = 1373.10.3
+				    culture = hungarian
+				    country_of_origin = HUN
+				    adm = 5
+				    dip = 5
+				    mil = 4
+				    female = yes
+			    }
+				add_queen_personality = generous_personality
+				clr_country_flag = jadwiga_marriage
 			}
 			log = "FE-POL:[GetYear]:[Root.GetName]:Jadwiga d'Anjou set as Queen:flavor_pol.100"
-			add_queen_personality = generous_personality
-
 			if = {
 				limit = {
 					religion = catholic
@@ -1613,8 +1901,6 @@ country_event = {
 				}
 				set_ruler_religion = avignonist
 			}
-
-			#set_heir_religion = catholic
 			create_subject = {
 				subject_type = permanent_union
 				subject = LIT
@@ -1624,14 +1910,16 @@ country_event = {
 		tooltip = {
 			create_union = LIT
 		}
-
 		if = {
 			limit = {
 				religion = catholic
 				LIT = { NOT = { religion = catholic } }
 			}
-			#LIT = { set_country_flag = lit_become_catholic }
 			LIT = { change_religion = catholic force_converted = yes }
+			if = {
+			    limit = { TRK = { is_subject_of = LIT } }
+				TRK = { change_religion = catholic force_converted = yes }
+			}
 		}
 		else_if = {
 			limit = {
@@ -1639,16 +1927,22 @@ country_event = {
 				LIT = { NOT = { religion = avignonist } }
 			}
 			LIT = { change_religion = avignonist force_converted = yes }
+			if = {
+			    limit = { TRK = { is_subject_of = LIT } }
+				TRK = { change_religion = avignonist force_converted = yes }
+			}
 		}
 		else_if = {
 			limit = {
 				religion = orthodox
 				LIT = { NOT = { religion = orthodox } }
 			}
-			#LIT = { set_country_flag = lit_become_orthodox }
 			LIT = { change_religion = orthodox force_converted = yes }
+			if = {
+			    limit = { TRK = { is_subject_of = LIT } }
+				TRK = { change_religion = orthodox force_converted = yes }
+			}
 		}
-
 		POL = {
 			set_country_flag = female_pol_lit_union_female
 			add_historical_friend = LIT
@@ -1669,7 +1963,7 @@ country_event = {
 				is_capital = no
 			}
 			spawn_rebels = {
-				type = noble_rebels
+				type = warlord_rebels
 				size = 2
 			}
 		}
@@ -1678,7 +1972,7 @@ country_event = {
 				is_capital = no
 			}
 			spawn_rebels = {
-				type = noble_rebels
+				type = warlord_rebels
 				size = 2
 			}
 		}
@@ -1691,20 +1985,16 @@ country_event = {
 				modifier = pol_lit_union_negative
 			}
 		}
-		hidden_effect = {
-			MAZ = { country_event = { id = flavor_pol.509 days = 2 } }
-			if = {
-				limit = {
-					dynasty = "d'Anjou'"
-				}
-				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
+	}
+	option = { # Accept their King on the throne of Poland
+		name = "flavor_pol.100.b"
+		ai_chance = { 
+		    factor = 90 
+		    modifier = {
+				factor = 0
+				LIT = { ai = no }
 			}
 		}
-	}
-	
-	option = {		# Accept their King on the throne of Poland
-		name = "flavor_pol.100.b" #TODO: what with Jadwiga? in option A she was set as Queen
-		ai_chance = { factor = 100 }
 		trigger = {
 			LIT = {
 				religion_group = christian
@@ -1712,18 +2002,42 @@ country_event = {
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Accepted Lithuanian Duke on the throne, he was already Christian:flavor_pol.100"
 		hidden_effect = {
-			LIT = {
-				if = {
-					limit = { TRK = { ai = yes } }
-					inherit = TRK
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		hidden_effect = {
+			MAZ = { country_event = { id = flavor_pol.509 days = 2 } } #Mazovia vassalization
+			if = {
+				limit = {
+					has_country_flag = jadwiga_marriage
 				}
+				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
+			}
+		}
+		hidden_effect = {
+			LIT = {
 				exile_heir_as = heir_move_to_poland
 				exile_ruler_as = { name = ruler_move_to_poland }
 				grant_independence = yes
 			}
 			set_ruler = ruler_move_to_poland
 			set_heir = heir_move_to_poland
-
+			set_ruler_flag = elected_ruler
+			if = {
+			    limit = { has_country_flag = jadwiga_marriage }
+			    define_consort = {
+				    name = "Jadwiga"
+				    dynasty = "d'Anjou"
+					birth_date = 1373.10.3
+				    culture = hungarian
+				    country_of_origin = HUN
+				    adm = 5
+				    dip = 5
+				    mil = 4
+				    female = yes
+			    }
+				add_queen_personality = generous_personality
+				clr_country_flag = jadwiga_marriage
+			}
 			if = {
 				limit = {
 					religion = catholic
@@ -1768,7 +2082,7 @@ country_event = {
 				is_capital = no
 			}
 			spawn_rebels = {
-				type = noble_rebels
+				type = warlord_rebels
 				size = 2
 			}
 		}
@@ -1777,7 +2091,7 @@ country_event = {
 				is_capital = no
 			}
 			spawn_rebels = {
-				type = noble_rebels
+				type = warlord_rebels
 				size = 2
 			}
 		}
@@ -1790,32 +2104,112 @@ country_event = {
 				modifier = pol_lit_union_negative
 			}
 		}
+	}
+	option = { #No, let us marry the Piast
+		name = "flavor_pol.100.c"
+		ai_chance = { factor = 10 }
+		log = "FE-POL:[GetYear]:[Root.GetName]:Rejected Lithuanian Duke on the throne, married Piast duke:flavor_pol.100"
 		hidden_effect = {
-			MAZ = { country_event = { id = flavor_pol.509 days = 2 } } #Mazovia vassalization
+		    Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 }
+        }
+		hidden_effect = {
 			if = {
 				limit = {
-					dynasty = "d'Anjou'"
+					has_country_flag = jadwiga_marriage
 				}
 				POL = { country_event = { id = flavor_pol.512 days = 30 } } #Habsurg marriage
 			}
 		}
-	}
-	
-	option = {		# No, let us marry a local noble instead
-		name = "flavor_pol.100.c"
-		ai_chance = { factor = 0 }
-		Stab_Add1 = yes
-		log = "FE-POL:[GetYear]:[Root.GetName]:Rejected Lithuanian Duke on the throne, married local noble:flavor_pol.100"
+		if = {
+		    limit = { 
+			    MAZ = {
+				    exists = yes
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    MAZ = {
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			inherit = MAZ
+		}
+		else_if = {
+		    limit = { 
+			    any_known_country = {
+                    dynasty = "Piast"
+					is_female = no
+					ai = yes
+                }				
+			}
+			hidden_effect = {
+			    random_known_country = {
+				    limit = {
+					    dynasty = "Piast"
+						is_female = no
+						ai = yes
+					}
+				    exile_heir_as = heir_move_to_poland
+				    exile_ruler_as = { name = ruler_move_to_poland }
+					set_country_flag = heir_to_polish_crown
+				}
+				set_ruler = ruler_move_to_poland
+			    set_heir = heir_move_to_poland
+			    set_ruler_flag = elected_ruler
+			}
+			every_country = {
+			    limit = { has_country_flag = heir_to_polish_crown }
+				ROOT = { inherit = PREV }
+			}
+		}
+		else = {
+		    define_ruler = {
+				dynasty = "Piast"
+				claim = 25
+            }
+		}
+		
+		if = {
+			limit = { has_country_flag = jadwiga_marriage }
+			define_consort = {
+		        name = "Jadwiga"
+		        dynasty = "d'Anjou"
+			    birth_date = 1373.10.3
+		        culture = hungarian
+				country_of_origin = HUN
+				adm = 5
+				dip = 5
+				mil = 4
+				female = yes
+			}
+		    add_queen_personality = generous_personality
+			clr_country_flag = jadwiga_marriage
+		}
+		
 		LIT = {
 			add_opinion = {
 				who = ROOT
 				modifier = pol_lit_union_declined
 			}
+			add_casus_belli = {
+					target = POL 
+					type = cb_restore_personal_union
+					months = 120
+			}
 		}
+	}
+	after = {
+	    set_global_flag = plc_union_outcome_flag
 	}
 }
 
-# Polish-Lithuanian Union (Lit female)
+#POLISH-LITHUANIAN UNION (Lithuania has female ruler) 
 country_event = {
 	id = flavor_pol.101
 	title = "flavor_pol.101.title"
@@ -1887,12 +2281,6 @@ country_event = {
 		trigger = {
 			LIT = {
 				religion_group = european_pagan
-			}
-		}
-		LIT = {
-			if = {
-				limit = { TRK = { ai = yes } }
-				inherit = TRK
 			}
 		}
 		create_subject = { 
@@ -1979,12 +2367,6 @@ country_event = {
 			}
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:Accepted the crown of Lithuanian Grand Duchy, have not demanded its christianisation:flavor_pol.101"
-		LIT = {
-			if = {
-				limit = { TRK = { ai = yes } }
-				inherit = TRK
-			}
-		}
 		create_subject = { 
 			subject_type = permanent_union
 			subject = LIT
@@ -2046,9 +2428,12 @@ country_event = {
 			}
 		}
 	}
+	after = {
+	    set_global_flag = plc_union_outcome_flag
+	}
 }
 
-#Mazovian vassalization
+#THE POLISH-LITHUANIAN UNION (Mazovian vassalization)
 country_event = {
 	id = flavor_pol.509
 	title = "flavor_pol.509.t"
@@ -2120,21 +2505,20 @@ country_event = {
 	}
 }
 
-#poland notification mazovia becomes a vassal
+###THE MAZOVIAN ALLEGIANCE (Poland notification Mazovia becomes a vassal)
 country_event = {
 	id = flavor_pol.510
 	title = "flavor_pol.510.t"
 	desc = "flavor_pol.510.d"
 	picture = COURT_eventPicture
-	is_triggered_only = yes 
-	
-    #immediate = { #Commented out as it was granting independence to Poland
-    #    hidden_effect = { grant_independence = yes }
-    #}	
+	is_triggered_only = yes	
 	
 	option = { ### Mazovia becomes loyal again
 		name = "flavor_pol10.a"
-		POL = { vassalize = MAZ }
+		create_subject = {
+			subject_type = appanage_subject #it's more historical outcome than simple vassalization
+			subject = MAZ
+		}
 		add_prestige = 20
 		MAZ = { 
 			add_trust = {
@@ -2146,7 +2530,7 @@ country_event = {
 	}
 }
 
-#poland notification mazovia won't become a vassal
+#THE MAZOVIAN DISRESPECT (Poland notification Mazovia won't become a vassal)
 country_event = {
 	id = flavor_pol.511
 	title = "flavor_pol.511.t"
@@ -2165,7 +2549,7 @@ country_event = {
 	}
 }
 
-#Habsburg marriage for POL
+###ROYAL TIES WITH AUSTRIA
 country_event = {
 	id = flavor_pol.512
 	title = "flavor_pol.512.t"
@@ -2234,13 +2618,13 @@ country_event = {
 		}
 	}
 }
-#HAB notification poland paid
+
+###POLISH MARRIAGE CONTROVERSY (Poland paid)
 country_event = {
 	id = flavor_pol.513
 	title = "flavor_pol.513.t"
 	desc = "flavor_pol.513.d"
 	picture = COURT_eventPicture
-	
 	
 	is_triggered_only = yes 
 	
@@ -2253,7 +2637,8 @@ country_event = {
 		}	
 	}
 }
-#HAB notification poland didn't pay
+
+###POLISH MARRIAGE CONTROVERSY (Poland didn't pay)
 country_event = {
 	id = flavor_pol.514
 	title = "flavor_pol.514.t"
@@ -2280,7 +2665,7 @@ country_event = {
 	}
 }
 
-#Create Dynasty after death of first Gediminai ruler
+#DYNASTY FOR NEW KING! (Create dynasty after Polish-Lithuanian union)
 country_event = {
 	id = flavor_pol.305
 	title = "flavor_pol.305.title"
@@ -2315,7 +2700,7 @@ country_event = {
 	}
 }
 
-#Polish-Lithuanian claims for Podlasia
+###POLISH LITHUANIAN-CLAIMS FOR PODLASIA
 country_event = {
 	id = flavor_pol.313
 	title = "flavor_pol.313.title"
@@ -2330,9 +2715,10 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}
 		}
-		#is_year = 1440
+		dip_tech = 24
 		LIT = {
 			OR = {
 				owns_or_vassal_of = 271  #Bialystok
@@ -2431,7 +2817,7 @@ country_event = {
 						}
 					}
 				}
-				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
+				Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
 			}
 		}
 		custom_tooltip = mazovia_NO_loy_plus_10_tt
@@ -2515,7 +2901,7 @@ country_event = {
 						}
 					}
 				}
-				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
+				Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
 			}
 		}
 		custom_tooltip = mazovia_NO_loy_plus_10_tt
@@ -2536,13 +2922,14 @@ country_event = {
 						}
 					}
 				}
-				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-10 }
+				Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
 			}
 		}
 		custom_tooltip = mazovia_NO_loy_minus_10_tt
 	}
 }
-#Territorial disputes between Poland and Lithuania
+
+#TERRITORIAL DISPUTES BETWEEN POLAND AND LITHUANIA
 country_event = {
 	id = flavor_pol.306
 	title = "flavor_pol.306.title"
@@ -2556,7 +2943,13 @@ country_event = {
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
-			}		}
+				is_subject_of_type = decentralized_vassal
+			}		
+		}
+		OR = {
+		    has_global_flag = ostrow_agreement
+			dip_tech = 22
+		}
 		OR = {
 			claim = LIT
 			core_claim = LIT
@@ -2576,13 +2969,9 @@ country_event = {
 	mean_time_to_happen = {
 		months = 12
 	}
-	option = {
-		name = "flavor_pol.306.a"
-		ai_chance = {
-			factor = 100
-		}
-
-		if = {
+	
+	immediate = {
+	    if = {
 			limit = {
 				GVO = {
 					is_subject_of = LIT
@@ -2590,12 +2979,55 @@ country_event = {
 					ai = yes
 				}
 			}
-			log = "FE-POL:[GetYear]:[Root.GetName]:removed cores and claims from Lithuania provinces:flavor_pol.306"
-			log = "FE-POL:[GetYear]:[Root.GetName]:Lithuania removed cores and claims from  Polish provinces:flavor_pol.306"
-			log = "FE-POL:[GetYear]:[Root.GetName]:inherited Halych-Volhyna while settling border dispute with Lithunia:flavor_pol.306"
-			POL = {
+			LIT = {
 				inherit = GVO
 			}
+		}
+	}
+	
+	option = { #Demand Galicia and Podolia
+		name = "flavor_pol.306.a"
+		ai_chance = {
+			factor = 75
+		}
+		trigger = {
+		    any_province = {
+			    area = red_ruthenia_area
+				owned_by = LIT
+		    }
+		}
+		LIT = { add_liberty_desire = 10 }
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				is_core = POL
+				NOT = { area = red_ruthenia_area }
+				NOT = { area = podolia_volhynia_area }
+			}
+			cede_province = POL
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				OR = {
+				    area = red_ruthenia_area
+					province_id = 1433 #Podolia
+				}
+				NOT = { province_id = 2507 } #Belz
+			}
+			cede_province = POL
+		}
+		if = {
+		    limit = {
+			    MAZ = {
+				    exists = yes
+					is_subject_of = ROOT
+				}
+			}
+			2507 = { cede_province = MAZ }
+		}
+		else = {
+			2507 = { cede_province = POL }
 		}
 		LIT = {
 			custom_tooltip = flavor_pol.306.tooltip.a
@@ -2621,87 +3053,100 @@ country_event = {
 				}
 			}
 		}
-		2535 = { #Cholm
-			if = {
-				limit = {
-					OR = {
-						owned_by = LIT
-						owner = {
-							is_subject_of = LIT
-						}
-					}
-					any_neighbor_province = {
-						owned_by = POL
-					}
-				}
-				log = "FE-POL:[GetYear]:[Root.GetName]:inherited Cholm while settling border dispute with Lithunia:flavor_pol.306"
-				cede_province = POL
-				add_core = POL
-				remove_core = LIT
-			}
-		}
-		1281 = { #Ratne
-			if = {
-				limit = {
-					OR = {
-						owned_by = LIT
-						owner = {
-							is_subject_of = LIT
-						}
-					}
-					any_neighbor_province = {
-						owned_by = POL
-					}
-				}
-				log = "FE-POL:[GetYear]:[Root.GetName]:inherited Ratne while settling border dispute with Lithunia:flavor_pol.306"
-				cede_province = POL
-				add_core = POL
-				remove_core = LIT
-			}
-		}
-		2507 = { #Belz
-			if = {
-				limit = {
-					OR = {
-						owned_by = LIT
-						owner = {
-							is_subject_of = LIT
-						}
-					}
-					any_neighbor_province = {
-						owned_by = POL
-					}
-				}
-				if = {
-					limit = {
-						MAZ = {
-							vassal_of = POL
-						}
-					}
-					log = "FE-POL:[GetYear]:[MAZ.GetName]:inherited Belz while settling border dispute with Lithunia:flavor_pol.306"
-					cede_province = MAZ
-					add_core = MAZ
-					remove_core = LIT
-				}
-				else = {
-					log = "FE-POL:[GetYear]:[Root.GetName]:inherited Belz while settling border dispute with Lithunia:flavor_pol.306"
-					cede_province = POL
-					add_core = POL
-					remove_core = LIT
-				}
-			}
-		}
+		log = "FE-POL:[GetYear]:[Root.GetName]:removed cores and claims from Lithuania provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:Lithuania removed cores and claims from  Polish provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:acquired Galician and Podolian provinces while settling border dispute with Lithuania:flavor_pol.306"
 	}
-	option = {
+	
+	option = { #Demand Galicia, Volhynia and Podolia
 		name = "flavor_pol.306.b"
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 2
+				LIT = { NOT = { liberty_desire = 25 } }
+			}
+		}
+		trigger = {
+		    any_province = {
+			    area = podolia_volhynia_area
+				owned_by = LIT
+		    }
+		}
+		LIT = { add_liberty_desire = 25 }
+		if = {
+		    limit = {
+			    MAZ = {
+				    exists = yes
+					is_subject_of = ROOT
+				}
+			}
+			MAZ = { add_liberty_desire = 25 }
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				is_core = POL
+				NOT = { area = red_ruthenia_area }
+				NOT = { area = podolia_volhynia_area }
+			}
+			cede_province = POL
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				area = red_ruthenia_area
+			}
+			cede_province = POL
+		}
+		every_province = {
+		    limit = {
+			    owned_by = LIT
+				area = podolia_volhynia_area
+			}
+			cede_province = POL
+		}
+		LIT = {
+			custom_tooltip = flavor_pol.306.tooltip.a
+			hidden_effect = {
+				every_owned_province = {
+					limit = {
+						OR = {
+							is_claim = POL
+							is_core = POL
+						}
+					}
+					remove_claim = POL
+					remove_core = POL
+				}
+			}
+		}
+		POL = {
+			custom_tooltip = flavor_pol.306.tooltip.b
+			hidden_effect = {
+				every_owned_province = {
+					remove_claim = LIT
+					remove_core = LIT
+				}
+			}
+		}
+		log = "FE-POL:[GetYear]:[Root.GetName]:removed cores and claims from Lithuania provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:Lithuania removed cores and claims from  Polish provinces:flavor_pol.306"
+		log = "FE-POL:[GetYear]:[Root.GetName]:acquired Galician, Volhynian and Podolian provinces while settling border dispute with Lithuania:flavor_pol.306"
+	}
+	
+	option = {
+		name = "flavor_pol.306.c"
 		ai_chance = {
 			factor = 0
 		}		
 		log = "FE-POL:[GetYear]:[Root.GetName]:decided not to settle border disputes with Lithuania, maintained status quo:flavor_pol.306"
 	}
 }
+
+###UNION OF KREWO
 country_event = {
-	id = flavor_pol.600 #Union of Krewo
+	id = flavor_pol.600
 	title = "flavor_pol.600.title"
 	desc = "flavor_pol.600.desc"
 	picture = DIPLOMACY_eventPicture
@@ -2709,13 +3154,14 @@ country_event = {
 	fire_only_once = yes
 	trigger = {
 		tag = POL
-		is_year = 1380
+		#is_year = 1380
 		LIT = { 
 			is_subject_of = POL 
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
-			}		}
+			}		
+		}
 		NOT = {	exists = PLC }
 		NOT = {	has_country_flag = 1_union_krewo }
 	}
@@ -2732,43 +3178,39 @@ country_event = {
 		tooltip = {
 			custom_tooltip = flavor_pol.union_sign.1
 		}
+		add_dip_power = -100
+		add_legitimacy = 10
 		add_prestige = 10
-		add_adm_power = 50
-		add_dip_power = 50
-		add_legitimacy = 15
-		add_absolutism = -10
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		hidden_effect = {
-			set_variable = {
-				which = bow_to_nobles
-				value = 1
-			}
 			if = {
 				limit = {
 					government = monarchy
 					NOT = {	absolutism = 70 }
 				}
-				Pol_ChangeGovMonarchy = { Succession=1 Assembly=2 } 
-				add_government_reform = Pol_Nobility3
 			}
 		}
 	}
 }
+
+###UNION OF HORODLO
 country_event = {
-	id = flavor_pol.601 #Union of Horodlo
+	id = flavor_pol.601
 	title = "flavor_pol.601.title"
 	desc = "flavor_pol.601.desc"
 	picture = DIPLOMACY_eventPicture
 	major = yes
 	fire_only_once = yes
-	is_triggered_only = yes		#On_new_monarch on_action
+	is_triggered_only = yes		#on_five_year_pulse on_action
 	trigger = {
 		tag = POL
+		has_regency = no
 		LIT = { 
 			is_subject_of = POL 
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}
 		}
 		has_country_flag = 1_union_krewo
@@ -2776,8 +3218,9 @@ country_event = {
 		NOT = {	exists = PLC }
 		had_country_flag = {
 			flag = pol_lit_union_timer
-			days = 9125		#25 years
+			days = 7300 #20 years
 		}
+		dip_tech = 21
 	}
 
 	option = {
@@ -2786,30 +3229,10 @@ country_event = {
 			factor = 90
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:signed union of Horodlo:flavor_pol.601"
-		add_legitimacy = -10
 		add_dip_power = -100
-		add_absolutism = 10
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
-		random_owned_province = {
-			limit = {
-				is_capital = no
-				culture = polish
-			}
-			spawn_rebels = {
-				type = warlord_rebels
-				size = 1
-			}
-		}
-		random_owned_province = {
-			limit = {
-				is_capital = no
-				culture = polish
-				NOT = { has_siege = yes }
-			}
-			spawn_rebels = {
-				type = warlord_rebels
-				size = 1
-			}
+		add_prestige = 10
+		LIT = {
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		}
 		set_country_flag = 2_union_horodlo
 		tooltip = {
@@ -2822,32 +3245,29 @@ country_event = {
 			factor = 10
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused union of Horodlo:flavor_pol.601"
-		add_absolutism = -10
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 15 }
-		hidden_effect = {
-			change_variable = {
-				which = bow_to_nobles
-				value = 2
-			}
-		}
-		add_legitimacy = 15
+		add_prestige = -10
+		Stab_Add50Percent = yes
 	}
 }
+
+###UNION OF GRODNO
 country_event = {
-	id = flavor_pol.602 #Union of Grodno
+	id = flavor_pol.602
 	title = "flavor_pol.602.title"
 	desc = "flavor_pol.602.desc"
 	picture = DIPLOMACY_eventPicture
 	major = yes
 	fire_only_once = yes
-	is_triggered_only = yes #On_new_monarch on_action
+	is_triggered_only = yes #on_five_year_pulse on_action
 	trigger = {
 		tag = POL
+		has_regency = no
 		LIT = { 
 			is_subject_of = POL 
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}		
 		}
 		has_country_flag = 2_union_horodlo
@@ -2855,10 +3275,10 @@ country_event = {
 		NOT = {	exists = PLC }
 		had_country_flag = {
 			flag = pol_lit_union_timer
-			days = 21900	#60 years
+			days = 14600 #40 years
 		}
+		dip_tech = 23
 	}
-
 	option = {
 		name = "flavor_pol.602.a"
 		ai_chance = {
@@ -2870,44 +3290,19 @@ country_event = {
 			custom_tooltip = flavor_pol.union_sign.3
 		}
 		add_dip_power = -100
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
+		add_prestige = 10
 		LIT = {
-			#every_owned_province = {
-			#	add_unrest = 2
-			#}
-			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
+			add_country_modifier = {
+			    name = "pol_union_of_grodno"
+			    duration = -1
+		    }
 		}
-		LIT = {
-			random_owned_province = {
-				limit = {
-					is_capital = no
-					religion = orthodox
-				}
-				spawn_rebels = {
-					type = warlord_rebels 	#TODO: were Orthodox rebels, but they don't exist yet
-					size = 1
-				}
-			}
-			random_owned_province = {
-				limit = {
-					is_capital = no
-					religion = orthodox
-				}
-				spawn_rebels = {
-					type = warlord_rebels
-					size = 1
-				}
-			}
-			random_owned_province = {
-				limit = {
-					is_capital = no
-					religion = orthodox
-				}
-				spawn_rebels = {
-					type = warlord_rebels
-					size = 1
-				}
-			}
+		every_known_country = {
+		    limit = { is_subject_of = LIT }
+			add_country_modifier = {
+			    name = "pol_union_of_grodno"
+			    duration = -1
+		    }
 		}
 	}
 	option = {
@@ -2916,26 +3311,23 @@ country_event = {
 			factor = 10
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused union of Grodno:flavor_pol.602"
-		hidden_effect = {
-			change_variable = {
-				which = bow_to_nobles
-				value = 1
-			}
-		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 15 }
-		add_legitimacy = 10
+		add_prestige = -10
+		Stab_Add50Percent = yes
 	}
 }
+
+###UNION OF KRAKÓW AND VILNA
 country_event = {
-	id = flavor_pol.603 #Union of Krakow and Vilna
+	id = flavor_pol.603
 	title = "flavor_pol.603.title"
 	desc = "flavor_pol.603.desc"
 	picture = DIPLOMACY_eventPicture
 	major = yes
 	fire_only_once = yes
-	is_triggered_only = yes	#On_new_monarch on_action
+	is_triggered_only = yes	#on_five_year_pulse on_action
 	trigger = {
 		tag = POL
+		has_regency = no
 		LIT = { 
 			is_subject_of = POL 
 			OR = {
@@ -2952,58 +3344,52 @@ country_event = {
 		}
 		had_country_flag = {
 			flag = pol_lit_union_timer
-			days = 36500	#100 years
+			days = 36500 #100 years
 		}
+		dip_tech = 30
 	}
 
 	option = {
 		name = "flavor_pol.603.a"
 		ai_chance = {
-			factor = 80
+			factor = 90
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:signed union of Krakow and Vilna:flavor_pol.603"
 		set_country_flag = 4_union_krakow
 		tooltip = {
 			custom_tooltip = flavor_pol.union_sign.4
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
-		add_legitimacy = 10
-		add_adm_power = -100
+		add_dip_power = -100
+		add_prestige = 10
 	}
 	option = {
 		name = "flavor_pol.603.b"
 		ai_chance = {
-			factor = 20
+			factor = 10
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused union of Krakow and Vilna:flavor_pol.603"
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		add_prestige = -10
-		hidden_effect = {
-			change_variable = {
-				which = bow_to_nobles
-				value = 1
-			}
-		}
+		Stab_Add50Percent = yes
 	}
 }
+
+###UNION OF LUBLIN
 country_event = {
-	id = flavor_pol.604 #Union of Lublin
+	id = flavor_pol.604
 	title = "flavor_pol.604.title"
 	desc = "flavor_pol.604.desc"
 	picture = UNION_LUBLIN_eventPicture
 	major = yes
 	fire_only_once = yes
-	is_triggered_only = yes		#On_new_monarch on_action
+	is_triggered_only = yes		#on_five_year_pulse on_action
 	trigger = {
 		tag = POL
-		is_at_war = no
-		AND = {
-			OR = {
-				is_subject = no
-				is_subject_of_type = tributary_state
-				is_subject_of_type = close_tributary_state
-			}
+		dip_tech = 32
+		OR = {
+		    has_heir = no
+			dip_tech = 38
 		}
+		is_free_or_tributary_trigger = yes
 		has_country_flag = 4_union_krakow
 		LIT = { 
 			is_subject_of = POL 
@@ -3012,13 +3398,14 @@ country_event = {
 				is_subject_of_type = permanent_union_limited
 			}
 		}
+		is_at_war = no
+		has_regency = no
 		NOT = {	exists = PLC }
 		had_country_flag = {
 			flag = pol_lit_union_timer
-			days = 38325  #105 years
+			days = 43800  #120 years
 		}
 	}
-
 	immediate = {
 		hidden_effect = {
 			clr_country_flag = pol_lit_union_timer
@@ -3032,7 +3419,12 @@ country_event = {
 		log = "FE-POL:[GetYear]:[Root.GetName]:signed union of Lublin:flavor_pol.604"
 		custom_tooltip = flavor_pol.union_sign.5
 		set_country_flag = 5_union_lublin
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
+		add_dip_power = -100
+		add_prestige = 10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
+		LIT = {
+		    add_liberty_desire = 25
+		}
 	}
 	option = {
 		name = "flavor_pol.604.b"
@@ -3044,94 +3436,137 @@ country_event = {
 			}
 		}
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused union of Lublin:flavor_pol.604"
-		add_legitimacy = -50
-		add_absolutism = -10
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
-		hidden_effect = {
-			set_variable = {
-				which = bow_to_nobles
-				value = 2
-			}
-			if = {
-				limit = {
-					government = monarchy
-					NOT = {
-						absolutism = 70
-					}
-				}
-				Pol_ChangeGovMonarchy = { Succession=1 Assembly=3 } 
-				add_government_reform = Pol_Nobility3
-			}
+		add_prestige = -10
+		Stab_Add50Percent = yes
+		LIT = {
+		    add_liberty_desire = -25
 		}
 	}
 }
+
+### ELECTION OF X (Hereditary elective monarchy mechanics for Poland)
 country_event = {
-	id = flavor_pol.610 #Elective Monarchy!
+	id = flavor_pol.610
 	title = "flavor_pol.610.title"
 	desc = "flavor_pol.610.desc"
-	picture = DIPLOMACY_eventPicture
-	major = yes
-	fire_only_once = yes
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes #on_new_monarch on_actions
 	trigger = {
 		OR = {
 			tag = POL
 			tag = PLC
 		}
 		government = monarchy
-		check_variable = {
-			which = bow_to_nobles
-			value = 1
-		}
-		OR = {
-			has_heir = no
-			check_variable = {
-				which = bow_to_nobles
-				value = 3
-			}
-		}
+		NOT = {
+ 			has_ruler_flag = elected_ruler
+ 		}
+		has_reform = Pol_Succession4
+		has_regency = no
 	}
-	mean_time_to_happen = {
-		years = 30
-		modifier = {
-			factor = 0.8
-			check_variable = {
-				which = bow_to_nobles
-				value = 2
-			}
-		}
-		modifier = {
-			factor = 0.8
-			check_variable = {
-				which = bow_to_nobles
-				value = 3
-			}
-		}
-		modifier = {
-			factor = 0.8
-			check_variable = {
-				which = bow_to_nobles
-				value = 4
-			}
-		}
-		modifier = {
-			factor = 0.8
-			check_variable = {
-				which = bow_to_nobles
-				value = 5
-			}
-		}
-	}
-	option = {
+	
+	immediate = {
+ 	    set_ruler_flag = elected_ruler
+ 	}
+	option = { #Regular election
 		name = "flavor_pol.610.a"
-		log = "FE-POL:[GetYear]:[Root.GetName]:moved to elective monarchy:flavor_pol.610"
-		Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 } 
-		add_government_reform = Pol_Nobility1
-		set_variable = {
-			which = bow_to_nobles
-			value = 2
+		add_legitimacy = 10
+ 		NO_FactionBoost = yes
+		hidden_effect = {
+			set_variable = {
+				which = vivente_rege
+				value = 0
+			}
 		}
+	}
+	option = { #Vivente rege election
+		name = "flavor_pol.610.b"
+		trigger = {
+		    has_heir = yes
+			has_female_heir = no
+			OR = {
+			    has_reform = Pol_Structure4
+				has_reform = Pol_Structure5
+			}
+		}
+		
+		add_legitimacy = 10
+		add_heir_claim = 20
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
+		
+		hidden_effect = {
+			change_variable = {
+				which = vivente_rege
+				value = 1
+			}
+		}
+		
+		custom_tooltip = flavor_pol.610.tooltip.b
+	}
+	option = { #End of Elective Monarchy
+		name = "flavor_pol.610.c"
+		trigger = {
+		    has_heir = yes
+			has_female_heir = no
+			has_reform = Pol_Structure5
+			check_variable = {
+			    which = vivente_rege
+			    value = 2
+		    }
+		}
+		
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-25 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -25 }
+		
+		random_owned_province = {
+		    limit = {
+			    is_capital = no
+				continent = europe
+				is_in_capital_area = yes
+			}
+			spawn_rebels = {
+					type = warlord_rebels
+					size = 3
+			}
+		}
+		random_owned_province = {
+		    limit = {
+			    is_capital = no
+				continent = europe
+			}
+			spawn_rebels = {
+					type = warlord_rebels
+					size = 2
+			}
+		}
+		random_owned_province = {
+		    limit = {
+			    is_capital = no
+				continent = europe
+			}
+			spawn_rebels = {
+					type = warlord_rebels
+					size = 2
+			}
+		}
+		
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=1 }
+        }
+        hidden_effect = {
+			set_variable = {
+				which = vivente_rege
+				value = 0
+			}
+		}
+        custom_tooltip = flavor_pol.610.tooltip.c        	
 	}
 }
+
+### POLISH-TEUTONIC RIVALRY ###
+
+#THE TEUTONIC ORDER (End of historical rivalry)
 country_event = {
 	id = flavor_pol.17
 	title = flavor_pol.17.t
@@ -3163,256 +3598,8 @@ country_event = {
 	}
 }
 
-##########################
-#### TEUTONIC EVENTS #####
-##########################
-#Ported from DeI Ludicrum submod by Piterdaw
-## SUPPORT FOR TEUTONS ##
-
-# country_event = {
-# 	id = flavor_pol.719
-# 	title = "flavor_pol.719.title"
-# 	desc = "flavor_pol.719.desc"
-# 	picture = SIEGE_eventPicture
-   
-#     trigger = { 
-# 		OR = {
-# 		culture_group = low_germanic
-# 		culture_group = high_germanic
-# 		is_emperor = yes
-# 		}
-# 		NOT = { tag = TEU }
-# 		NOT = { tag = LVO }
-# 		NOT = { is_year = 1500 }
-# 		NOT = { government = republic }
-# 		NOT = { has_ruler_flag = support_for_teutons }
-# 		exists = TEU
-# 		TEU = {
-# 		    is_subject = no
-# 			NOT = { has_country_flag = broken_by_polish }
-# 		}	
-# 	}
-
-#     mean_time_to_happen = { years = 5 }
-
-#     immediate = {
-#         set_ruler_flag = support_for_teutons
-# 	}	
-
-# 	option = {
-# 	    ai_chance = {
-# 			factor = 50
-# 			modifier = {
-# 				factor = 1.2
-# 				has_opinion = { who = TEU value = 50 }
-# 			}
-# 			modifier = {
-# 				factor = 1.5
-# 				has_opinion = { who = TEU value = 100 }
-# 			}
-# 			modifier = {
-# 				factor = 1.5
-# 				has_opinion = { who = TEU value = 200 }
-# 			}
-# 			modifier = {
-# 				factor = 1.2
-# 				government = theocracy
-# 			}
-# 		}
-# 		name = "flavor_pol.719.a"
-# 		add_piety = 0.05
-# 		add_prestige = 5
-# 		add_treasury = -50
-# 		TEU = {
-# 		    add_treasury = 50
-# 		}
-#         TEU = {
-#             add_opinion = {
-# 				who = ROOT
-# 				modifier = supported_baltic_crusaders
-# 			}
-# 		}	
-# 	}
-# 	option = {
-# 	    ai_chance = { factor = 50 }
-# 		name = "flavor_pol.719.b"
-# 		add_piety = -0.05
-# 		add_prestige = -5
-# 		TEU = {
-#             add_opinion = {
-# 				who = ROOT
-# 				modifier = refused_to_support_baltic_crusaders
-# 			}
-# 		}
-# 	}
-# }
-
-# ## SUPPORT FOR TEUTONS - WAR ##
-
-# country_event = {
-# 	id = flavor_pol.720
-# 	title = "flavor_pol.720.title"
-# 	desc = "flavor_pol.720.desc"
-# 	picture = SIEGE_eventPicture
-   
-#     trigger = { 
-# 		OR = {
-# 		culture_group = low_germanic
-# 		culture_group = high_germanic
-# 		is_emperor = yes
-# 		}
-# 		NOT = { is_year = 1500 }
-# 		NOT = { government = republic }
-# 		NOT = { tag = TEU }
-# 		NOT = { tag = LVO }
-# 		NOT = { has_ruler_flag = support_for_teutons_war }
-# 		exists = TEU
-# 		TEU = {
-# 		    is_subject = no
-# 			is_at_war = yes
-# 			NOT = { war_with = ROOT }
-# 			NOT = { has_country_flag = broken_by_polish }
-# 		}	
-# 	}
-
-#     mean_time_to_happen = { days = 30 }
-
-#     immediate = {
-#         set_ruler_flag = support_for_teutons_war
-# 	}	
-
-# 	option = {
-# 	    ai_chance = {
-# 			factor = 40
-# 			modifier = {
-# 				factor = 1.2
-# 				has_opinion = { who = TEU value = 50 }
-# 			}
-# 			modifier = {
-# 				factor = 1.5
-# 				has_opinion = { who = TEU value = 100 }
-# 			}
-# 			modifier = {
-# 				factor = 1.5
-# 				has_opinion = { who = TEU value = 200 }
-# 			}
-# 			modifier = {
-# 				factor = 1.2
-# 				government = theocracy
-# 			}
-# 		}
-# 		name = "flavor_pol.720.a"
-# 		add_piety = 0.05
-# 		add_prestige = 5
-# 		add_treasury = -20
-# 		add_manpower = -1
-# 		TEU = {
-# 		    add_treasury = 20
-# 			add_manpower = 1
-# 			change_variable = { which = support_from_europe value = 1 }
-# 		}
-#         TEU = {
-#             add_opinion = {
-# 				who = ROOT
-# 				modifier = supported_baltic_crusaders
-# 			}
-# 		}	
-# 	}
-# 	option = {
-# 	    ai_chance = { factor = 60 }
-# 		name = "flavor_pol.720.b"
-# 		add_piety = -0.05
-# 		add_prestige = -5
-# 		TEU = {
-#             add_opinion = {
-# 				who = ROOT
-# 				modifier = refused_to_support_baltic_crusaders
-# 			}
-# 		}
-# 	}
-# }
-
-# ## TEUTONIC ORDER RECEIVES SUPPORT ##
-
-# country_event = {
-# 	id = flavor_pol.721
-# 	title = "flavor_pol.721.title"
-# 	desc = "flavor_pol.721.desc"
-# 	picture = SIEGE_eventPicture
-   
-#     trigger = { 
-#         tag = TEU
-# 		NOT = { is_year = 1500 }
-# 		is_subject = no
-# 		is_at_war = yes
-# 		NOT = { has_country_flag = broken_by_polish }
-# 		NOT = { has_country_modifier = received_support_1 }
-# 		NOT = { has_country_modifier = received_support_2 }
-# 		NOT = { has_country_modifier = received_support_3 }
-# 		NOT = { has_country_modifier = received_support_4 }
-# 		NOT = { has_country_modifier = received_support_5 }
-# 	}
-
-#     mean_time_to_happen = { days = 90 }
-
-# 	option = {
-# 		name = "flavor_pol.719.a"
-# 	    if = {
-# 		    limit = {
-# 			    check_variable = { which = support_from_europe value = 10 }
-# 				NOT = {  check_variable = { which = support_from_europe value = 20 } }
-# 			}	
-# 			add_country_modifier = {
-# 			    name = received_support_1
-# 			    duration = 3650
-# 			}
-# 		}
-#         if = {
-# 		    limit = {
-# 			    check_variable = { which = support_from_europe value = 20 }
-# 				NOT = {  check_variable = { which = support_from_europe value = 30 } }
-# 			}	
-# 			add_country_modifier = {
-# 			    name = received_support_2
-# 			    duration = 3650
-# 			}
-# 		}
-#         if = {
-# 		    limit = {
-# 			    check_variable = { which = support_from_europe value = 30 }
-# 				NOT = {  check_variable = { which = support_from_europe value = 40 } }
-# 			}	
-# 			add_country_modifier = {
-# 			    name = received_support_3
-# 			    duration = 3650
-# 			}
-# 		}
-#         if = {
-# 		    limit = {
-# 			    check_variable = { which = support_from_europe value = 40 }
-# 				NOT = {  check_variable = { which = support_from_europe value = 50 } }
-# 			}	
-# 			add_country_modifier = {
-# 			    name = received_support_4
-# 			    duration = 3650
-# 			}
-# 		}
-#         if = {
-# 		    limit = {
-# 			    check_variable = { which = support_from_europe value = 50 }
-# 			}	
-# 			add_country_modifier = {
-# 			    name = received_support_5
-# 			    duration = 3650
-# 			}
-# 		}
-#         set_variable = { which = support_from_europe value = 0 }	
-# 	}
-# }	
-		
-## FIRST PEACE OF THORN ##
-		
-country_event = {			#POL  no PLC
+###FIRST PEACE OF THORN (Polish version)
+country_event = {
 	id = flavor_pol.722
 	title = "flavor_pol.722.title"
 	desc = "flavor_pol.722.desc"
@@ -3425,6 +3612,7 @@ country_event = {			#POL  no PLC
 			OR = {
 				is_subject_of_type = permanent_union 
 				is_subject_of_type = permanent_union_limited
+				is_subject_of_type = decentralized_vassal
 			}	
 		}
 		NOT = { exists = PLC }
@@ -3433,7 +3621,7 @@ country_event = {			#POL  no PLC
 		NOT = { has_global_flag = lithuanian_civil_war	}
 		war_score_against = {
 			who = TEU
-			value = 40
+			value = 30
 		}
 
 	}
@@ -3443,6 +3631,27 @@ country_event = {			#POL  no PLC
 
 	immediate = {
 		set_country_flag = first_peace_of_thorn
+		if = {
+		    limit = {
+			    any_country = {
+                    is_emperor = yes
+					ai = yes
+					has_opinion = {
+	                    who = TEU
+	                    value = 10
+                    }
+                }				
+			}
+			random_country = {
+			    limit = { is_emperor = yes }
+				create_guarantee = TEU
+				set_ai_attitude = {
+                    attitude = attitude_friendly
+                    who = TEU
+                    locked = yes
+                }
+			}
+		}
 	}
 
 	option = {
@@ -3465,33 +3674,13 @@ country_event = {			#POL  no PLC
 				modifier = peaced_with_teutons
 				}
 			}
-		if = {
-				limit = { 
-					 TEU = { owns = 1265 } #Semigalia
-				} 
-				1265 = {
-					cede_province = LIT
-					add_core = LIT
-				}
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1280 } #Suvalkija
-				} 
-				1280 = {
-					cede_province = LIT
-					add_core = LIT
-				}
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 3397 } #Upper Lithuania/Kaunas
-				} 
-				3397 = { 
-					cede_province = LIT
-					add_core = LIT
-				}
-		}
+		every_province = {
+            limit = {
+                owned_by = TEU
+                is_core = LIT				
+            }
+            cede_province = LIT			
+        }
 		TEU = { 
 			add_treasury = -500
 			set_country_flag = broken_by_polish
@@ -3511,6 +3700,7 @@ country_event = {			#POL  no PLC
 					OR = {
 						is_subject_of_type = permanent_union 
 						is_subject_of_type = permanent_union_limited
+						is_subject_of_type = decentralized_vassal
 					}
 				}
 			}
@@ -3525,6 +3715,7 @@ country_event = {			#POL  no PLC
 	}
 
 	option = {
+	    trigger = { 2398 = { owned_by = TEU } }
 		ai_chance = { factor = 30 }
 		name = "flavor_pol.722.b" #Peace with Teutons, but demand Chełmno
 		white_peace = TEU
@@ -3554,33 +3745,13 @@ country_event = {			#POL  no PLC
 				remove_core = TEU
 			}
 		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1265 } #Semigalia
-				} 
-				1265 = {
-					cede_province = LIT
-					add_core = LIT
-				}
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1280 } #Suvalkija
-			    }	 
-			    1280 = {
-					cede_province = LIT
-		            add_core = LIT
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 3397 } #Upper Lithuania/Kaunas
-			    }	 
-			    3397 = {
-					cede_province = LIT
-		            add_core = LIT
-			    }
-		}
+		every_province = {
+            limit = {
+                owned_by = TEU
+                is_core = LIT				
+            }
+            cede_province = LIT			
+        }
 		add_country_modifier = { 
 		     name = diplo_faux_pas
 			 duration = 3650
@@ -3589,12 +3760,12 @@ country_event = {			#POL  no PLC
 			set_country_flag = broken_by_polish
 		}
 		hidden_effect = {
-		POL = {
-			every_owned_province = {
-				remove_claim = TEU
-				remove_core = TEU
-			}
-		}
+		    POL = {
+			    every_owned_province = {
+				    remove_claim = TEU
+				    remove_core = TEU
+			    }
+		    }
 		}
 	}
      
@@ -3608,6 +3779,7 @@ country_event = {			#POL  no PLC
 					OR = {
 						is_subject_of_type = permanent_union 
 						is_subject_of_type = permanent_union_limited
+						is_subject_of_type = decentralized_vassal
 					}
 				}
 			 }
@@ -3654,7 +3826,8 @@ country_event = {			#POL  no PLC
 	}
 }
 
-country_event = {		#PLC version
+###FIRST PEACE OF THORN (Commonwealth version)
+country_event = {
 	id = flavor_pol.7221
 	title = "flavor_pol.7221.title"
 	desc = "flavor_pol.7221.desc"
@@ -3676,6 +3849,27 @@ country_event = {		#PLC version
 
     immediate = {
     	set_country_flag = first_peace_of_thorn
+		if = {
+		    limit = {
+			    any_country = {
+                    is_emperor = yes
+					ai = yes
+					has_opinion = {
+	                    who = TEU
+	                    value = 10
+                    }
+                }				
+			}
+			random_country = {
+			    limit = { is_emperor = yes }
+				create_guarantee = TEU
+				set_ai_attitude = {
+                    attitude = attitude_friendly
+                    who = TEU
+                    locked = yes
+                }
+			}
+		}
 	}
     
 	option = {
@@ -3692,33 +3886,13 @@ country_event = {		#PLC version
 			}
 			add_liberty_desire = -50
 		}  
-		if = {
-				limit = { 
-					 TEU = { owns = 1265 } #Semigalia
-			    }	 
-			    1265 = {
-					cede_province = PLC
-		            add_core = PLC
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1280 } #Suvalkija
-			    }	 
-			    1280 = {
-					cede_province = PLC
-		            add_core = PLC
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 3397 } #Upper Lithuania/Kaunas
-			    }	 
-			    3397 = {
-					cede_province = PLC
-		            add_core = PLC
-			    }
-		}
+		every_province = {
+            limit = {
+                owned_by = TEU
+                is_core = LIT				
+            }
+            cede_province = LIT			
+        }
 		TEU = { 
 		    add_treasury = -500
 			set_country_flag = broken_by_polish
@@ -3744,6 +3918,7 @@ country_event = {		#PLC version
 	}
 
     option = {
+	    trigger = { 2398 = { owned_by = TEU } }
 	    ai_chance = { factor = 30 }
 		name = "flavor_pol.7221.b" #Peace with Teutons, but demand Chełmno
 		white_peace = TEU
@@ -3767,33 +3942,13 @@ country_event = {		#PLC version
 			}
 			add_liberty_desire = -50
 		}  
-		if = {
-				limit = { 
-					 TEU = { owns = 1265 } #Semigalia
-			    } 
-			    1265 = {
-					cede_province = PLC
-		            add_core = PLC
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1280 } #Suvalkija
-			    }	 
-			    1280 = {
-					cede_province = PLC
-		            add_core = PLC
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 3397 } #Upper Lithuania/Kaunas
-			    }	 
-			    3397 = {
-					cede_province = PLC
-		            add_core = PLC
-			    }
-		}
+		every_province = {
+            limit = {
+                owned_by = TEU
+                is_core = LIT				
+            }
+            cede_province = LIT			
+        }
 		add_country_modifier = { 
 		     name = diplo_faux_pas
 			 duration = 3650
@@ -3855,7 +4010,8 @@ country_event = {		#PLC version
 	}
 }
 
-country_event = {		#POL no LIT version
+###FIRST PEACE OF THORN (Poland without Lithuania version)
+country_event = {
 	id = flavor_pol.7222
 	title = "flavor_pol.7221.title"
 	desc = "flavor_pol.7221.desc"
@@ -3869,6 +4025,7 @@ country_event = {		#POL no LIT version
 				OR = {
 					is_subject_of_type = permanent_union 
 					is_subject_of_type = permanent_union_limited
+					is_subject_of_type = decentralized_vassal
 				}
 			}
 		 }
@@ -3886,6 +4043,27 @@ country_event = {		#POL no LIT version
 
     immediate = {
     	set_country_flag = first_peace_of_thorn
+		if = {
+		    limit = {
+			    any_country = {
+                    is_emperor = yes
+					ai = yes
+					has_opinion = {
+	                    who = TEU
+	                    value = 10
+                    }
+                }				
+			}
+			random_country = {
+			    limit = { is_emperor = yes }
+				create_guarantee = TEU
+				set_ai_attitude = {
+                    attitude = attitude_friendly
+                    who = TEU
+                    locked = yes
+                }
+			}
+		}
 	}	
     
 	option = {
@@ -3902,34 +4080,15 @@ country_event = {		#POL no LIT version
 				modifier = peaced_with_teutons
 			}		
 			add_liberty_desire = -50
-		}  
-		if = {
-				limit = { 
-					 TEU = { owns = 1265 } #Semigalia
-			    }	 
-			    1265 = {
-					cede_province = POL
-		            add_core = POL
-			    }
 		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1280 } #Suvalkija
-			    }	 
-			    1280 = {
-					cede_province = POL
-		            add_core = POL
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 3397 } #Upper Lithuania/Kaunas
-			    }	 
-			    3397 = {
-					cede_province = POL
-		            add_core = POL
-			    }
-		}
+		every_province = {
+            limit = {
+                owned_by = TEU
+                is_core = POL
+                NOT = { province_id = 2398 } #Chelmno				
+            }
+            cede_province = POL		
+        }
 		TEU = { 
 		    add_treasury = -500
 			set_country_flag = broken_by_polish
@@ -3955,6 +4114,7 @@ country_event = {		#POL no LIT version
 	}
 
     option = {
+	    trigger = { 2398 = { owned_by = TEU } }
 	    ai_chance = { factor = 30 }
 		name = "flavor_pol.7222.b" #Peace with Teutons, but demand Chełmno
 		white_peace = TEU
@@ -3969,6 +4129,14 @@ country_event = {		#POL no LIT version
 				remove_core = TEU
 			}
 		}
+		every_province = {
+            limit = {
+                owned_by = TEU
+                is_core = POL
+                NOT = { province_id = 2398 } #Chelmno				
+            }
+            cede_province = POL		
+        }
 		every_known_country = {
 		limit = {
 		    is_subject_of = POL
@@ -3978,33 +4146,6 @@ country_event = {		#POL no LIT version
 				modifier = peaced_with_teutons
 			}		
 			add_liberty_desire = -50
-		}  
-		if = {
-				limit = { 
-					 TEU = { owns = 1265 } #Semigalia
-			    }	 
-			    1265 = {
-					cede_province = POL
-		            add_core = POL
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 1280 } #Suvalkija
-			    }	 
-			    1280 = {
-					cede_province = POL
-		            add_core = POL
-			    }
-		}
-		if = {
-				limit = { 
-					 TEU = { owns = 3397 } #Upper Lithuania/Kaunas
-			    }	 
-			    3397 = {
-					cede_province = POL
-		            add_core = POL
-			    }
 		}
 		add_country_modifier = { 
 		     name = diplo_faux_pas
@@ -4068,9 +4209,8 @@ country_event = {		#POL no LIT version
 	}
 }
 
-## RISE OF PRUSSIAN CONFEDERATION ##
-
-country_event = {			#POL version
+#THE PRUSSIAN CONFEDERATION REVOLTS (Polish version)
+country_event = {
 	id = flavor_pol.751
 	title = "flavor_teu.EVTNAME1"
 	desc = "flavor_teu.EVTDESC1"
@@ -4083,25 +4223,9 @@ country_event = {			#POL version
 		has_country_flag = pru_confederation_prepare
 		NOT = { truce_with = POL }
 		is_subject = no
-		OR = {
-			43 = { #Puck
-				country_or_non_sovereign_subject_holds = ROOT 
-			}     
-			1391 = { #Ermland
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			1844 = { #Marienburg
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			2355 = { #Danzig
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			2845 = { #Lauenburg-Butow
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			4025 = { #Techolo
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
+		num_of_owned_provinces_with = {
+		    value = 2
+			area = west_prussia_area
 		}
 		exists = POL
 		NOT = { exists = PLC }
@@ -4201,6 +4325,7 @@ country_event = {			#POL version
 	}
 }
 
+#THE PRUSSIAN CONFEDERATION REVOLTS (Commonwealth version)
 country_event = {
 	id = flavor_pol.7511
 	title = "flavor_teu.EVTNAME1"
@@ -4214,25 +4339,9 @@ country_event = {
 		has_country_flag = pru_confederation_prepare
 		NOT = { truce_with = PLC }
 		is_subject = no
-		OR = {
-			43 = { #Puck
-				country_or_non_sovereign_subject_holds = ROOT 
-			}     
-			1391 = { #Ermland
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			1844 = { #Marienburg
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			2355 = { #Danzig
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			2845 = { #Lauenburg-Butow
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
-			4025 = { #Techolo
-				country_or_non_sovereign_subject_holds = ROOT 
-			}
+		num_of_owned_provinces_with = {
+		    value = 2
+			area = west_prussia_area
 		}
 		exists = PLC
 		is_neighbor_of = PLC
@@ -4331,8 +4440,7 @@ country_event = {
 	}
 }
 
-## PRUSSIAN CONFEDERATION SEEKS POLISH SUPPORT ##
-
+#PRUSSIAN CONFEDERATION SEEKS POLISH SUPPORT
 country_event = {
 	id = flavor_pol.752
 	title = "flavor_teu.EVTNAME2"
@@ -4369,16 +4477,6 @@ country_event = {
 			}
 		}
 		create_alliance = DNZ
-		
-		# if = {
-	    #     limit = {
-		# 	    WRM = {
-		# 		    exists = yes
-		# 			is_subject_of = TEU
-		# 		}
-		# 	}
-		# 	WRM = { set_country_flag = subject_of_teu }
-	    # }
 		TEU = {
 				country_event = { id = flavor_pol.754 }
 		}
@@ -4402,8 +4500,7 @@ country_event = {
 	}
 }
 
-## PRUSSIAN CONFEDERATION - BEGINNING ##
-
+###THE PRUSSIAN CONFEDERATION (beginning of the event chain)
 country_event = {
 	id = flavor_pol.753
 	title = "flavor_teu.EVTNAME4"
@@ -4416,10 +4513,18 @@ country_event = {
 	trigger = {
 		tag = TEU
 		has_country_flag = broken_by_polish
+		OR = {
+		    NOT = { check_key = { lhs = Prov_BGLoy value = 50 } }
+			NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+		}
+		num_of_owned_provinces_with = {
+		    value = 2
+			area = west_prussia_area
+		}
 	}
 	
 	mean_time_to_happen = {
-		years = 5
+		years = 20
 	}
 	
 	option = {
@@ -4428,8 +4533,7 @@ country_event = {
 	}
 }
 
-## WAR WITH PRUSSIAN CONFEDERATION ##
-
+#PRUSSIAN-TEUTONIC WAR
 country_event = {
 	id = flavor_pol.754
 	title = "flavor_pol.754.title"
@@ -4450,7 +4554,7 @@ country_event = {
 
 #Vanilla flavor_teu files ported by Mepper to complete the event chain:
 
-# Prussian Confederation accepts Polish rule
+#THE PEACE OF THORN
 country_event = {
 	id = flavor_teu.3
 	title = "flavor_teu.EVTNAME3"
@@ -4488,47 +4592,8 @@ country_event = {
 		}
 	}
 }
-
-# # The Prussian Confederation
-# country_event = {
-# 	id = flavor_teu.4
-# 	title = "flavor_teu.EVTNAME4"
-# 	desc = "flavor_teu.EVTDESC4"
-# 	picture = SEJM_eventPicture
 	
-# 	fire_only_once = yes
-	
-# 	trigger = {
-# 		tag = TEU
-# 		NOT = {
-# 			is_year = 1450
-# 		}
-# 		NOT = { has_country_flag = pru_confederation_flag }
-# 	}
-	
-# 	mean_time_to_happen = {
-# 		days = 1
-# 	}
-	
-# 	option = {
-# 		name = "flavor_teu.4.a"
-# 		set_country_flag = pru_confederation_flag
-# 		custom_tooltip = dnz_decision_available_tooltip
-# 		add_estate_loyalty = {
-# 			estate = estate_burghers
-# 			loyalty = -20
-# 		}
-# 		add_estate_influence_modifier = {
-# 			estate = estate_burghers
-# 			desc = EST_VAL_PRUSSIAN_CONFEDERATION
-# 			influence = 10
-# 			duration = 7300
-# 		}
-# 		give_estate_land_share_gigantic = { estate = estate_burghers }
-# 	}
-# }
-	
-# The End of the Teutonic State
+#THE END OF THE TEUTONIC STATE
 country_event = {
 	id = flavor_teu.5
 	title = flavor_teu.5.t
@@ -4572,12 +4637,309 @@ country_event = {
 	}
 }
 
-############################
-##### COSSACK UPRISING #####
-############################	
+### SUCCESSION IN THE DUCHY OF PRUSSIA ###
+
+###LAST GRANDMASTER OF TEUTONIC ORDER?
+country_event = {
+	id = flavor_teu.6
+	title = "flavor_teu.6.title"
+	desc = "flavor_teu.6.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		tag = TEU
+		num_of_cities = 4
+		is_subject_other_than_tributary_trigger = yes
+		religion = catholic
+		is_religion_enabled = protestant
+		overlord = {
+		    NOT = {
+			    culture_group = low_germanic
+				culture_group = high_germanic
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 6
+	}
+	
+	option = {
+		name = "EXCELLENT"
+		if = {
+		    limit = {
+			    BRA = {
+				    exists = yes
+					num_of_cities = 5
+					is_free_or_tributary_trigger = yes
+					dynasty = "von Hohenzollern"
+				}
+			}
+			define_ruler = {
+                name = "Albrecht"
+                dynasty = "von Hohenzollern"
+                adm = 3
+                dip = 6
+                mil = 1
+                age = 21
+            }
+			else = {
+			    define_ruler = {
+                    name = "Albrecht"
+                    adm = 3
+                    dip = 6
+                    mil = 1
+                    age = 21
+                }
+			}
+		}
+		set_country_flag = teuton_secularization
+	}
+	after = {
+	    add_ruler_personality = silver_tongue_personality #he was able to preserve prussian independence
+		set_ruler_flag = potential_duke_of_prussia
+	}
+}
+
+###INSANITY OF THE DUKE
+country_event = {
+	id = flavor_teu.7
+	title = "flavor_teu.7.title"
+	desc = "flavor_teu.7.desc"
+	picture = COURT_eventPicture
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		tag = PRU
+		is_subject_other_than_tributary_trigger = yes
+		has_country_flag = teuton_secularization
+		NOT = { has_ruler_flag = potential_duke_of_prussia }
+		NOT = { ruler_age = 35 }
+		overlord = {
+		    NOT = {
+			    culture_group = low_germanic
+				culture_group = high_germanic
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "flavor_teu.7.a"
+		add_ruler_personality = mad_personality
+	}
+}
+
+###SUCCESSION IN THE DUCHY OF PRUSSIA (Main event)
+country_event = {
+	id = flavor_teu.8
+	title = "flavor_teu.8.title"
+	desc = "flavor_teu.8.desc"
+	picture = CONQUEST_eventPicture
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		tag = PRU
+		ai = yes
+		is_subject_other_than_tributary_trigger = yes
+		OR = {
+		    ruler_has_personality = mad_personality
+			is_female = yes
+			AND = {
+			    ruler_age = 50
+				OR = { 
+				    has_heir = no
+					has_female_heir = yes
+				}
+			}
+			AND = {
+			    has_regency = yes
+				has_female_heir = yes
+			}
+			AND = {
+			    has_regency = yes
+				NOT = { heir_claim = 50 }
+			}
+		}
+		overlord = {
+		    NOT = {
+			    culture_group = low_germanic
+				culture_group = high_germanic
+			}
+			OR = {
+			    NOT = { stability = -1 }
+				is_bankrupt = yes
+				AND = {
+				   is_at_war = yes
+				   war_exhaustion = 8
+				}
+			}	
+		}
+		any_known_country = {
+		    culture_group = low_germanic
+			is_emperor = no
+			government = monarchy
+			is_part_of_hre = yes
+			num_of_cities = 5
+			is_free_or_tributary_trigger = yes
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	immediate = {
+	    if = {
+		    limit = {
+			    BRA = {
+				    exists = yes
+					government = monarchy
+					is_emperor = no
+					is_part_of_hre = yes
+					num_of_cities = 5
+					culture_group = low_germanic
+					is_free_or_tributary_trigger = yes
+				}
+			}
+			BRA = {
+			    set_country_flag = heir_to_prussia
+			}
+			else = {
+			    random_known_country = {
+				    limit = {
+					    culture_group = low_germanic
+						is_emperor = no
+						government = monarchy
+						is_part_of_hre = yes
+						num_of_cities = 5
+						is_free_or_tributary_trigger = yes
+					}
+				    set_country_flag = heir_to_prussia	
+				}
+			}
+		}
+		overlord = {
+		    set_country_flag = overlord_of_prussia
+		}
+	}
+	
+	option = {
+		name = "flavor_teu.8.a"
+        random_known_country = {
+		    limit = {
+			    has_country_flag = heir_to_prussia
+			}
+			country_event = { 
+			    id = flavor_teu.9 
+				days = 7
+			}
+		}
+	}
+}
+
+###SUCCESSION IN THE DUCHY OF PRUSSIA (inheritor)
+country_event = {
+	id = flavor_teu.9
+	title = "flavor_teu.9.title"
+	desc = "flavor_teu.9.desc"
+	picture = CONQUEST_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		num_of_cities = 5
+		is_free_or_tributary_trigger = yes
+		culture_group = low_germanic
+	}
+	
+	option = {
+		name = "flavor_teu.9.a"
+		ai_chance = { factor = 99 }
+		create_union = FROM
+        random_known_country = {
+		    limit = {
+			    has_country_flag = overlord_of_prussia
+			}
+			country_event = { 
+			    id = flavor_teu.11
+				days = 7
+			}
+		}
+		if = {
+		    limit = {
+			    any_country = {
+                    is_emperor = yes
+					ai = yes
+					has_opinion = {
+	                    who = ROOT
+	                    value = 10
+                    }
+                }				
+			}
+			random_country = {
+			    limit = { is_emperor = yes }
+				create_guarantee = ROOT
+				set_ai_attitude = {
+                    attitude = attitude_friendly
+                    who = ROOT
+                    locked = yes
+                }
+			}
+		}
+	}
+	option = {
+		name = "flavor_teu.9.b"
+		ai_chance = { factor = 1 }
+        add_prestige = -5
+	}
+}
+
+###SUCCESSION IN THE DUCHY OF PRUSSIA (overlord)
+country_event = {
+	id = flavor_teu.11
+	title = "flavor_teu.11.title"
+	desc = "flavor_teu.11.desc"
+	picture = HUSSARS_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_teu.11.opt.a"
+		ai_chance = { factor = 10 }
+		declare_war_with_cb = {
+            who = FROM
+            casus_belli = cb_disloyal_vassal
+        }
+		add_country_modifier = { 
+		     name = diplo_faux_pas
+			 duration = 7300
+		}	
+	}
+	option = {
+		name = "flavor_teu.11.opt.b"
+		ai_chance = { factor = 90 }
+        add_prestige = -5
+		create_subject = {
+			subject_type = nominal_subject
+			subject = FROM
+		}
+	}
+}
+
+#Treaty of Welawa-Bydgoszcz to be added
+
+### COSSACK UPRISING ###	
 #Ported from DeI Ludicrum submod by Piterdaw
 
-## COSSACK CONVERSION ##
+###COSSACK CONVERSION
 province_event = {
     id = flavor_pol.735
 	title = "flavor_pol.735.title"
@@ -4585,12 +4947,17 @@ province_event = {
 	picture = COSSACK_ESTATE_UPSET_eventPicture
 	hidden = yes
 	trigger = {
-		#is_year = 1492
-		AND = {
-			region = crimea_region
-			NOT = { area = crimea_area }
+		is_year = 1500
+		OR = {
+			area = zaporizhia_area
+			area = sloboda_ukraine_area
+			area = lower_don_area
+			area = azov_area
+			area = east_dniepr_area
+		    area = lower_don_area
+            area = crimea_area 
+			area = cherson_area
 		}
-		check_key = { lhs = Prov_TRPow value = 50 }
 		OR = {
 			culture = crimean 
 			culture = tartar
@@ -4599,6 +4966,7 @@ province_event = {
 			OR = {
 				tag = POL
 				tag = PLC
+				tag = LIT
 				religion = orthodox
 			}
 		}
@@ -4610,29 +4978,34 @@ province_event = {
 			}
 		}
 	}
-	
 	mean_time_to_happen = { years = 30 }
-	
 	option = {
 		name = "flavor_pol.735.a"
 		if = {
 			limit = { area = zaporizhia_area }
 			add_core = ZAZ
 		}
-		change_religion = orthodox
 		change_culture = ukrainian
+		if = {
+		    limit = { religion = sunni }
+		    MN_RlgChange = { from = 19 to = 9 }
+		}
+		if = {
+		    limit = { religion = catholic }
+		    MN_RlgChange = { from = 1 to = 9 }
+		}
 		log = "FE-POL:[GetYear]:[Root.Owner.GetName]:[This.GetName] converted to Cossack culture:flavor_pol.735"
 	}
 }
 
-## NALEWAJKO UPRISING ##
-	
+##NALEWAJKO UPRISING
 country_event = {
 	id = flavor_pol.740
 	title = "flavor_pol.740.title"
 	desc = "flavor_pol.740.desc"
 	picture = COSSACK_ESTATE_UPSET_eventPicture
     fire_only_once = yes
+	major = yes
 	
 	trigger = {
 	    OR = {
@@ -4666,6 +5039,7 @@ country_event = {
 			}
 			spawn_rebels = {
 				type = cossack_rebels
+				leader = "Seweryn Nalewajko"
 				size = 3
 			}
 		}
@@ -4675,19 +5049,20 @@ country_event = {
 			}
 			spawn_rebels = {
 				type = cossack_rebels
+				leader = "Hryhory Loboda"
 				size = 2
 			}
 		}
 	}
 }
 
-## END OF THE UPRISING ##
-
+#END OF THE UPRISING
 country_event = {
 	id = flavor_pol.741
 	title = "flavor_pol.741.title"
 	desc = "flavor_pol.741.desc"
 	picture = COSSACK_ESTATE_UPSET_eventPicture
+	goto = peace_negotiations
     fire_only_once = yes
 	
 	trigger = {
@@ -4702,10 +5077,19 @@ country_event = {
 	
 	immediate = {
 	    clr_country_flag = nalewajko_uprising
-	}	
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					culture = ruthenian
+				}
+				save_event_target_as = peace_negotiations
+			}
+		}
+	}
     
 	option = { #Reach an agreement with Cossacks
         name = "flavor_pol.741.a"
+		ai_chance = { factor = 90 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Nalevajko uprising ended by reaching an agreement with Cossacks:flavor_pol.741"
 		log = "FE-POL:[GetYear]:[Root.GetName]:Cossacks were added to regular army and Sich became a vassal:flavor_pol.741"
 		
@@ -4716,7 +5100,12 @@ country_event = {
 		}
 		every_owned_province = {
 			limit = {
-				area = zaporizhia_area
+			    OR = {
+				    area = zaporizhia_area
+				    area = cherson_area
+				    area = crimea_area
+				    area = azov_area
+				}
 			}
 			cede_province = ZAZ
 			add_core = ZAZ
@@ -4725,10 +5114,16 @@ country_event = {
 			subject_type = decentralized_vassal
 			subject = ZAZ
 		}
+		hidden_effect = {
+			ZAZ = {
+				Pol_ChangeGovRepublic = { Mandate=3 Stylings=2 ExtraPowers=1 Assembly=2 TermOfOffice=1 } 
+			}
+		}
 	}
 	
 	option = { #Crush them once and for all
         name = "flavor_pol.741.b"
+		ai_chance = { factor = 10 }
 		set_country_flag = angered_cossacks
 		Stab_Subtract1 = yes
 		log = "FE-POL:[GetYear]:[Root.GetName]:Nalevajko uprising ended by crushing the Cossacks:flavor_pol.741"
@@ -4750,10 +5145,14 @@ country_event = {
 				size = 2
 			}
 		}
-		every_province = {
+		every_owned_province = {
 			limit = {
-				area = zaporizhia_area
-				owned_by = ROOT
+				OR = {
+				    area = zaporizhia_area
+				    area = cherson_area
+				    area = crimea_area
+				    area = azov_area
+				}
 			}
 			add_province_modifier = {
 				name = cossack_unrest 
@@ -4763,7 +5162,7 @@ country_event = {
 	}
 }
 	
-## UNREST ON SICH ##
+#UNREST ON SICH
 country_event = {
 	id = flavor_pol.742
 	title = "flavor_pol.742.title"
@@ -4801,11 +5200,14 @@ country_event = {
 				modifier = cossack_rebellion
 			}
 		}
-        ZAZ = { country_event = { id = flavor_pol.743 } }
+		hidden_effect = {
+            ZAZ = { country_event = { id = flavor_pol.743 } }
+			country_event = { id = flavor_pol.744 days = 60  random = 20 }
+		}
 	}
 }
 
-## RISE OF THE NEW COSSACK HETMAN ##
+#RISE OF THE NEW COSSACK HETMAN
 country_event = {
 	id = flavor_pol.743
 	title = "flavor_pol.743.title"
@@ -4817,6 +5219,9 @@ country_event = {
 	
 	immediate = {
 	    set_country_flag = rebellious_hetman
+		hidden_effect = {
+		    Pol_ChangeGovRepublic = { ExtraPowers=2 }
+		}
 		if = {
 		    limit = { 
 			    is_year = 1620
@@ -4835,11 +5240,12 @@ country_event = {
 			}
 			log = "FE-POL:[GetYear]:[Root.GetName]:rebellious hetman is Bogdam Chmielnicki:flavor_pol.743"
             define_ruler = {
-			    name = "Bohdan Chmielnicki"
+			    name = "Bohdan"
+				dynasty = "Chmielnicki"
 			    claim = 100
-			    adm = 5
-			    dip = 6
-			    mil = 6
+			    adm = 3
+			    dip = 5
+			    mil = 5
 				max_random_adm = 5
 			    min_age = 25
 				max_age = 45
@@ -4856,15 +5262,12 @@ country_event = {
 		   add_ruler_personality = deceitful_personality
 		   add_ruler_personality = drunkard_personality
 		}
-        if = {
-		    limit = {
-			    NOT = { has_country_flag = bohdan_chmielnicki }
-			}
+        else = {
             define_ruler = {
 			    claim = 90
-			    adm = 4
-			    dip = 5
-			    mil = 5
+			    adm = 2
+			    dip = 4
+			    mil = 4
 				max_random_adm = 4
 				max_random_dip = 5
 				max_random_mil = 5
@@ -4888,13 +5291,13 @@ country_event = {
             siege = 2
         }
         add_country_modifier = {
-				name = chmielnicki_uprising
-				duration = 7300 #20 years
+			name = chmielnicki_uprising
+			duration = 7300 #20 years
 		}
 	}
 }
 
-## CHMIELNICKI UPRISING ##
+#CHMIELNICKI UPRISING
 country_event = {
 	id = flavor_pol.744
 	title = "flavor_pol.744.title"
@@ -4917,13 +5320,12 @@ country_event = {
 		every_owned_province = {
 		    limit = {
 			    OR = {
-			        area = east_dniepr_area
-					AND = {
-						region = crimea_region
-						NOT = { area = crimea_area }
-					}
-				    area = briansk_area
+			        region = ruthenia_region
+					region = crimea_region
+					region = volga_region
+					region = steppes_region
 				}
+				NOT = { area = west_dniepr_area }
 			}
 			spawn_rebels = {
 				type = mob_rebels
@@ -4936,7 +5338,7 @@ country_event = {
 				area = west_dniepr_area
 			}
 			spawn_rebels = {
-				type = cossack_rebels
+				type = mob_rebels
 				size = 2
 			}
         }
@@ -4958,7 +5360,7 @@ country_event = {
 	}
 }
 
-## PROVINCE DEFECTS TO COSSACKS ##
+#PROVINCE DEFECTS TO COSSACKS
 province_event = {
 	id = flavor_pol.745
 	title = "flavor_pol.745.title"
@@ -5001,7 +5403,7 @@ province_event = {
 	}
 }
 
-## NEGOTIATIONS OF AGREEMENT ##
+#NEGOTIATIONS OF AGREEMENT
 country_event = {
 	id = flavor_pol.746
 	title = "flavor_pol.746.title"
@@ -5011,10 +5413,7 @@ country_event = {
 	
     trigger = {
 	    tag = ZAZ
-	    OR = {
-		    POL = { has_country_flag = chmielnicki_uprising_2 }
-		    PLC = { has_country_flag = chmielnicki_uprising_2 }
-		}
+		overlord = { has_country_flag = chmielnicki_uprising_2 }
         OR = {
             AND = { 
 			    exists = MOS
@@ -5039,6 +5438,14 @@ country_event = {
 			}
 		}
 	}	
+	
+	mean_time_to_happen = {
+		years = 4
+		modifier = {
+			factor = 0.5
+			is_at_war = yes
+		}
+	}
 	
 	immediate = {
 	    if = {
@@ -5076,14 +5483,6 @@ country_event = {
 			}
             set_country_flag = strong_russia
 			log = "FE-POL:[GetYear]:[Root.GetName]:Russia recognised as potential overlord:flavor_pol.746"
-		}
-	}
-	
-	mean_time_to_happen = {
-		years = 4
-		modifier = {
-			factor = 0.25
-			is_at_war = yes
 		}
 	}
     
@@ -5128,7 +5527,7 @@ country_event = {
 	}
 }
 
-## NEGOTIATIONS WITH COSSACKS ##
+#NEGOTIATIONS WITH COSSACKS
 country_event = {
 	id = flavor_pol.747
 	title = "flavor_pol.747.title"
@@ -5158,7 +5557,7 @@ country_event = {
 	}
 }
 
-## COUNCIL OF PEREYESLAVL ##
+#COUNCIL OF PEREYESLAVL
 country_event = {
 	id = flavor_pol.748
 	title = "flavor_pol.748.title"
@@ -5178,18 +5577,18 @@ country_event = {
 		every_owned_province = {
 		    limit = {
 			    OR = {
-				    area = west_dniepr_area
-			        area = east_dniepr_area
-					AND = {
-						region = crimea_region
-						NOT = { area = crimea_area }
-					}
+				    region = ruthenia_region
+					region = crimea_region
+					region = volga_region
+					region = steppes_region
 				}
 			}
 			cede_province = ZAZ
+			add_core = ZAZ
         }
 		ZAZ = {
 		    every_owned_province = { add_core = ROOT }
+			Stab_Add1 = yes
         }
         ROOT = {
 		    disband_rebels = mob_rebels
@@ -5198,7 +5597,7 @@ country_event = {
 	}
 }
 
-## UNION OF HADZIACZ ##
+#UNION OF HADZIACZ
 country_event = {
 	id = flavor_pol.749
 	title = "flavor_pol.749.title"
@@ -5210,20 +5609,32 @@ country_event = {
 	trigger = {
 	    has_country_flag = agreement_of_pereyeslavl
 		government = monarchy
-		NOT = { war_with = ZAZ }
-	}
-	
-	mean_time_to_happen = { years = 5 }
-	
-	immediate = {
-		hidden_effect = {
-			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 15 } #TODO: check why, seems out of place
+		OR = {
+		    ZAZ = { war_exhaustion = 3 }
+			ZAZ = { NOT = { stability = 0 } }
 		}
 	}
+	
+	mean_time_to_happen = { 
+	    months = 6 
+		modifier = {
+			factor = 0.7
+			ZAZ = { war_exhaustion = 4 }
+		}
+		modifier = {
+			factor = 0.7
+			ZAZ = { war_exhaustion = 5 }
+		}
+	}
+	
 
 	option = { #Make this union come true!
         name = "flavor_pol.749.a"
 		log = "FE-POL:[GetYear]:[Root.GetName]:signed Union of Hadziacz:flavor_pol.749"
+		if = {
+		    limit = { ZAZ = { war_with = ROOT } }
+			white_peace = ZAZ
+		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
         ZAZ = { ChangeTagEffect = { scope=UKR } }
         create_subject = {
@@ -5245,14 +5656,10 @@ country_event = {
 		every_owned_province = {
 		    limit = {
 			    OR = {
-				    area = west_dniepr_area
-			        #area = east_dniepr_area 
-					province_id = 299 #Pereyaslavl
-					province_id = 4943 #Oster
-					province_id = 289 #Chernihiv
-					province_id = 311 #Starodub
-				    area = lower_don_area
-				    region = crimea_region 
+				    region = ruthenia_region
+					region = crimea_region
+					region = volga_region
+					region = steppes_region
 				}
 			}
 			cede_province = UKR
@@ -5308,15 +5715,18 @@ country_event = {
 	}
 	option = { #No mercy for traitors!
         name = "flavor_pol.749.b"
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 15 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused Union of Hadziacz:flavor_pol.749"
-        add_prestige = 20
-        #add_mil_power = 200
+        add_prestige = 10
 	}
 	option = { #Give up ukrainian lands
         name = "flavor_pol.749.c"
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:refused Union of Hadziacz and gave up Ukraine:flavor_pol.749"
+		if = {
+		    limit = { ZAZ = { war_with = ROOT } }
+			white_peace = ZAZ
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -20 }
         add_prestige = -20
 		ZAZ = {
 		    every_owned_province = {
@@ -5327,7 +5737,7 @@ country_event = {
 	}
 }
 
-## END OF THE CHMIELNICKI UPRISING ##
+#END OF THE CHMIELNICKI UPRISING
 country_event = {
 	id = flavor_pol.750
 	title = "flavor_pol.750.title"
@@ -5344,18 +5754,22 @@ country_event = {
 	}
 
 	option = { #Peace at last!
-        name = "flavor_pol.748.a"
-        Stab_Add2 = yes	
+        name = "flavor_pol.750.a"
+        Stab_Add1 = yes	
 	}
 }
 
+### VANILLA EVENTS ###
+
+###NICOLAUS COPERNICUS
 country_event = {
-	id = flavor_pol.5100 #Nicolaus Copernicus
+	id = flavor_pol.5100
 	title = "flavor_pol.EVTNAME5100"
 	desc = "flavor_pol.EVTDESC5100"
 	picture = ADVISOR_eventPicture
 	fire_only_once = yes
-
+    major = yes
+	
 	trigger = {
 		owns = 2398 	#Kulm/Torun province
 		is_year = 1500
@@ -5365,18 +5779,1241 @@ country_event = {
 		years = 5
 	}
 	option = {
-		name = "EXCELLENTCMNISTER"
+		name = "EXCELLENT"
 		add_prestige = 10
+		add_country_modifier = { 
+		     name = astronomist_boost
+			 duration = 3650
+		}
+	}
+	option = {
+		name = "EXCELLENTCMNISTER"
 		define_advisor = {
-			type = astronomist_BG
-			name = "Nicolaus Copernicus"
+			type = astronomist_BU
+			name = "Mikolaj Kopernik"
 			skill = 3
 			discount = yes
+			location = 2398
+		}
+		set_country_flag = copernicus
+	}
+}
+
+###THE NIESZAWA PRIVILEGES - 'CONVENTIONES PARTICULARES'
+country_event = {
+	id = flavor_pol.3467
+	title = "flavor_pol.EVTNAME3467"
+	desc = "flavor_pol.EVTDESC3467"
+	picture = LIBERUM_VETO_eventPicture
+	major = yes
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		adm_tech = 23
+		NOT = { adm_tech = 30 }
+		NOT = { Rights_BUSer2Has = yes } #in case if Poland is able to reform its military
+		NOT = { Rights_BUSer3Has = yes }
+		NOT = { Rights_BUSer4Has = yes }
+		NOT = { Privilege_HasGreater = { Privilege=NOServiceE Lvl=5 } } #in case if nobles are already privileged
+		has_reform = Pol_Succession4
+		faction_influence = {
+            faction = FC_NO
+            influence = 50
+        }
+		is_at_war = yes
+		OR = {
+		    NOT = { war_score = -10 }
+			war_exhaustion = 5
+			num_of_loans = 2
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	immediate = { 
+		hidden_effect = { 
+			set_country_flag = pol_had_nieszawa_privileges_country_flag
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+		} 
+	}
+	option = {
+		name = "flavor_pol.EVTOPTA3467" # Accept the Conventions
+		ai_chance = {
+			factor = 75
+		}
+		add_treasury = 100
+		Privilege_NOServiceERaise = yes
+		hidden_effect = {
+		    every_owned_province = {
+			    limit = { has_province_flag = war_taxes }
+				Public_ChangeClassWealthVal = { class= NO type = value inp=-20 }
+			    clr_province_flag = war_taxes
+			}
+		}	
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3467" # Refuse to sign it and defy the Magnates
+		ai_chance = {
+			factor = 25
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+		add_war_exhaustion = 10
+		random_owned_province = {
+			limit = {
+				is_capital = no
+				culture = polish
+			}
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 3
+			}
 		}
 	}
 }
 
-#Triggered by missions:
+###THE STATUTE OF PIOTRKOW
+country_event = {
+	id = flavor_pol.3468
+	title = "flavor_pol.EVTNAME3468"
+	desc = "flavor_pol.EVTDESC3468"
+	picture = COURT_eventPicture
+	major = yes
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		NOT = { Rights_NOTen3Has = yes }
+		has_reform = Pol_Succession4
+		faction_influence = {
+            faction = FC_NO
+            influence = 40
+        }
+		is_at_war = yes
+		OR = {
+		    NOT = { war_score = -10 }
+			war_exhaustion = 8
+			num_of_loans = 3
+		}
+		had_country_flag = {
+	        flag = pol_had_nieszawa_privileges_country_flag
+	        days = 14600 #40 years
+        }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	immediate = { 
+		hidden_effect = { 
+			set_country_flag = pol_had_statute_of_piotrkow_country_flag
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+			random_core_province = {
+			    limit = { NOT = { has_province_flag = war_taxes } }
+				set_province_flag = war_taxes
+			}
+		} 
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3468" # Enact
+		ai_chance = {
+			factor = 75
+		}
+		add_treasury = 100
+		NO_Serfs = yes
+	    custom_tooltip = NO_Serfs_effect
+		hidden_effect = {
+		    every_owned_province = {
+			    limit = { has_province_flag = war_taxes }
+				Public_ChangeClassWealthVal = { class= NO type = value inp=-20 }
+			    clr_province_flag = war_taxes
+			}
+		}	
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3468" # Refuse to enact
+		ai_chance = {
+			factor = 25
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		add_war_exhaustion = 5
+		random_owned_province = {
+			limit = {
+				is_capital = no
+				culture = polish
+			}
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 2
+			}
+		}
+	}
+}
+
+###THE POLISH INHERITANCE OF MAZOVIA
+country_event = {
+	id = flavor_pol.3473
+	title = "flavor_pol.EVTNAME3473"
+	desc = "flavor_pol.EVTDESC3473"
+	picture = COURT_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		NOT = {
+		   exists = MAZ
+		}
+        owns_core_province = 256		
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3473" # Make it a personal royal fiefdom
+		256 = { # Czersk
+			add_or_extend_province_modifier_effect = { NAME = rural_development_efforts	DURATION = 3650 }
+			custom_tooltip = rural_development_efforts_tt
+			add_or_extend_province_modifier_effect = { NAME = urban_development_efforts	DURATION = 3650 }
+			custom_tooltip = urban_development_efforts_tt
+		}
+	}
+}
+
+###THE JESUIT KING
+country_event = {
+	id = flavor_pol.3477
+	title = "flavor_pol.EVTNAME3477"
+	desc = "flavor_pol.EVTDESC3477"
+	picture = COURT_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		check_variable = { which = jesuit_support value = 1 }
+ 		is_religion_enabled = protestant
+		religion = catholic
+		has_regency = no
+		adm_tech = 40
+	}
+	
+	mean_time_to_happen = {
+		months = 200
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3477" # Religious Freedom won the day
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -10 }
+		CL_FactionCrackdown = yes
+		add_ruler_modifier = { 
+			name = pol_religious_freedom
+		}
+		hidden_effect = {
+			change_variable = { which = jesuit_support value = -1 }
+		}
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3477" # The Catholic Faith are the First among Equals
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -5 }
+        Stab_Add50Percent = yes		
+	}
+	option = {
+		name = "flavor_pol.EVTOPTC3477" # Hail the Jesuit King!
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 10 }
+		CL_FactionBoost = yes
+		add_ruler_modifier = { 
+			name = pol_jesuit_king 
+		}
+		hidden_effect = {
+			change_variable = { which = jesuit_support value = 1 }
+		}
+	}
+}
+
+###THE PACTA CONVENTA AND THE HENRYKIAN ARTICLES
+country_event = {
+	id = flavor_pol.3480
+	title = "flavor_pol.EVTNAME3480"
+	desc = "flavor_pol.EVTDESC3480"
+	picture = REFORM_eventPicture
+	major = yes
+	fire_only_once = yes
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		has_reform = Pol_Succession4
+		faction_influence = {
+            faction = FC_NO
+            influence = 30
+        }
+		NOT = { Privilege_HasGreater = { Privilege=NOHierarchy Lvl=3 } } #in case if nobles are already privileged
+		NOT = { dynasty = "Jagiellon" }
+	    NOT = { dynasty = "Piast" }
+	    NOT = { dynasty = "Gediminai"}
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3480" # There is nothing we can do my King
+		ai_chance = {
+			factor = 75
+		}
+		Stab_Add50Percent = yes
+        Privilege_NOHierarchyRaise = yes
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3467" # Refuse to enact
+		ai_chance = {
+			factor = 25
+		}
+		trigger = {
+		    NOT = {
+			    faction_influence = {
+                    faction = FC_NO
+                    influence = 50
+                }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-25 }
+		Stab_Subtract2 = yes
+		random_owned_province = {
+			limit = {
+				is_capital = no
+				culture = polish
+			}
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 3
+			}
+		}
+		random_owned_province = {
+			limit = {
+				is_capital = no
+				culture = polish
+			}
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 2
+			}
+		}
+	}
+}
+
+###THE SOBIESKIAN ARMY REFORMS
+country_event = {
+	id = flavor_pol.3485
+	title = "flavor_pol.EVTNAME3485"
+	desc = "flavor_pol.EVTDESC3485"
+	picture = REFORM_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		mil_tech = 47
+		num_of_cities = 35
+		MIL = 4
+		government = monarchy
+		NOT = { ruler_age = 40 }
+	}
+	
+	mean_time_to_happen = {
+		years = 2
+	}
+	
+	immediate = {
+	    set_country_flag = sobieskian_reforms
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3485" # Make a strict Army Reform only
+		if = {
+		    limit = {
+		        MIL = 4
+			    NOT = { MIL = 5 }
+		    }
+		    add_army_tradition = 10
+		    add_mil_power = 100
+		}
+		if = {
+		    limit = {
+		        MIL = 5
+			    NOT = { MIL = 6 }
+		    }
+		    add_army_tradition = 20
+		    add_mil_power = 200
+		}
+		if = {
+		    limit = {
+		        MIL = 6
+		    }
+		    add_army_tradition = 30
+		    add_mil_power = 300
+		}
+		if = {
+		    limit = { NOT = { ruler_has_personality = tactical_genius_personality } }
+		    add_ruler_personality = tactical_genius_personality
+        }
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3485" # Reform Army and undermine the power of the Sejm
+		trigger = {
+			faction_influence = {
+                faction = FC_NO
+                influence = 40
+            }
+			ADM = 4
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		NO_FactionCrackdown = yes
+		
+		if = {
+		    limit = {
+		        MIL = 4
+			    NOT = { MIL = 5 }
+		    }
+		    add_army_tradition = 10
+		    add_mil_power = 100
+		}
+		if = {
+		    limit = {
+		        MIL = 5
+			    NOT = { MIL = 6 }
+		    }
+		    add_army_tradition = 20
+		    add_mil_power = 200
+		}
+		if = {
+		    limit = {
+		        MIL = 6
+		    }
+		    add_army_tradition = 30
+		    add_mil_power = 300
+		}
+		if = {
+		    limit = { NOT = { ruler_has_personality = tactical_genius_personality } }
+		    add_ruler_personality = tactical_genius_personality
+        }
+	}
+}
+
+###ENDING THE STAGNATION
+country_event = {
+	id = flavor_pol.3497
+	title = "flavor_pol.EVTNAME3497"
+	desc = "flavor_pol.EVTDESC3497"
+	picture = REFORM_eventPicture
+	
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		has_reform = Pol_Succession4
+		has_country_flag = sobieskian_reforms
+		any_country = {
+		    OR = {
+			    is_rival = ROOT
+				is_enemy = ROOT
+			}
+			is_great_power = yes
+			ROOT = {
+			    has_won_war_against = {
+	                who = PREV
+	                max_years_since = 5
+                }
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 12
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3497" # No, it's too problematic to change the situation
+		Stab_Add1 = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=25 }
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3497" # Let us change this depressive situation
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-25 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -25 }
+		
+		random_owned_province = {
+		    limit = {
+			    is_capital = no
+				continent = europe
+				is_in_capital_area = yes
+			}
+			spawn_rebels = {
+					type = warlord_rebels
+					size = 3
+			}
+		}
+		random_owned_province = {
+		    limit = {
+			    is_capital = no
+				continent = europe
+			}
+			spawn_rebels = {
+					type = warlord_rebels
+					size = 2
+			}
+		}
+		random_owned_province = {
+		    limit = {
+			    is_capital = no
+				continent = europe
+			}
+			spawn_rebels = {
+					type = warlord_rebels
+					size = 2
+			}
+		}
+		
+		hidden_effect = {
+		    Pol_ChangeGovMonarchy = { Succession=1 }
+        }
+        hidden_effect = {
+			set_variable = {
+				which = vivente_rege
+				value = 0
+			}
+		}
+		custom_tooltip = flavor_pol.610.tooltip.c
+	}
+}
+
+###MERKURIUSZ POLSKI ORDYNARYJNY
+country_event = {
+	id = flavor_pol.5101
+	title = "flavor_pol.EVTNAME3"
+	desc = "flavor_pol.EVTDESC3"
+	picture = REFORM_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		has_institution = Scientific_Method
+		owns_core_province = 262 #Krakow
+	}
+	
+	mean_time_to_happen = {
+		months = 100
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA3" # Sponsor the newspaper
+		add_treasury = -50
+		add_country_modifier = {
+			name = pol_merkuriusz_polski_ordynaryjny
+			duration = 7300
+		}
+		hidden_effect = {
+		    262 = {
+				Public_ChangeClassWealthVal = { class= BG type = value inp=50 }
+			}
+		}	
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB3" # Allow it
+		add_country_modifier = {
+			name = pol_merkuriusz_polski_ordynaryjny
+			duration = 3650
+		}
+	}
+	option = {
+		name = "flavor_pol.EVTOPTC3" # Ban it
+		trigger = { is_lesser_in_union = no }
+		Stab_Add50Percent = yes
+	}
+}
+
+###JAN BROZEK
+country_event = {
+	id = flavor_pol.5102
+	title = "flavor_pol.EVTNAME5"
+	desc = "flavor_pol.EVTDESC5"
+	picture = ADVISOR_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1605
+		NOT = { is_year = 1652 }
+		owns_core_province = 262 #Krakow
+		262 = {
+		    OR = {
+			    has_province_modifier = LN_Minor
+				has_province_modifier = LN_Important
+				has_province_modifier = LN_Major
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 120
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA5" # Hire him as advisor
+		add_treasury = -25
+		define_advisor = {
+			type = natural_scientist_BG
+			name = "Jan Brozek"
+			culture = polish
+			discount = yes
+			location = 262
+			skill = 2
+		}
+		hidden_effect = {
+		    262 = {
+				Public_ChangeClassWealthVal = { class= BG type = value inp=25 }
+			}
+		}
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB5" # Ignore him
+		add_prestige = -1
+	}
+}
+
+###MICHAL SEDZIWOJ
+country_event = {
+	id = flavor_pol.5103
+	title = "flavor_pol.EVTNAME6"
+	desc = "flavor_pol.EVTDESC6"
+	picture = ADVISOR_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1600
+		NOT = { is_year = 1636 }
+		owns_core_province = 262 #Krakow
+		262 = {
+		    OR = {
+			    has_province_modifier = LN_Minor
+				has_province_modifier = LN_Important
+				has_province_modifier = LN_Major
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 120
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA5" # Hire him as advisor
+		add_treasury = -25
+		define_advisor = {
+			type = natural_scientist_NO
+			name = "Michal Sedziwoj"
+			culture = polish
+			discount = yes
+			location = 262
+			skill = 2
+		}
+		hidden_effect = {
+		    262 = {
+				Public_ChangeClassWealthVal = { class= NO type = value inp=25 }
+			}
+		}
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB5" # Ignore him
+		add_prestige = -1
+	}
+}
+
+### COLLEGIUM HOSIANUM
+country_event = {
+	id = flavor_pol.5104
+	title = flavor_pol.14.t
+	desc = flavor_pol.14.d
+
+	picture = UNIVERSITY_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		owns_core_province = 1391 #Ermland
+		check_variable = { which = jesuit_support value = 1 }
+		is_religion_enabled = protestant
+		religion = catholic
+	}
+	
+	mean_time_to_happen = {
+		months = 45
+	}
+	
+	option = {
+		name = flavor_pol.14.a #Great!
+		CL_FactionBoost = yes
+		1391 = {
+			add_province_modifier = {
+				name = "pol_collegium_hosianum"
+				duration = -1
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 25 }
+		}
+		hidden_effect = {
+			change_variable = { which = jesuit_support value = 1 }
+		}
+	}
+	option = {
+		name = "OPT.NO2"
+		add_country_modifier = {
+			name = edict_of_tolerance
+			duration = 3650
+		}
+		1391 = {
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -25 }
+		}
+	}
+}
+
+###THE RADZIWILL BIBLE & THE REFORMATION IN POLAND
+country_event = {
+	id = flavor_pol.5105
+	title = flavor_pol.15.t
+	desc = flavor_pol.15.d
+
+	picture = BIG_BOOK_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		religion = catholic
+		is_religion_enabled = reformed
+		owns = 3762 #Brestie
+	}
+	
+	mean_time_to_happen = {
+		years = 25
+	}
+	
+	option = { #We must burn this abomination
+		name = flavor_pol.15.a
+		add_papal_influence = 10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 10 }
+		add_country_modifier = {
+				name = "religious_intolerance"
+				duration = 3650
+ 		}
+	}
+	
+	option = { #Interesting...
+		name = flavor_pol.15.b
+		add_papal_influence = -20
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -20 }
+		add_country_modifier = {
+			name = edict_of_tolerance
+			duration = 3650
+		}
+	}
+}
+
+###THE FATE OF THE COLLEGIUM HOSIANUM
+country_event = {
+	id = flavor_pol.5106
+	title = flavor_pol.16.t
+	desc = flavor_pol.16.d
+
+	picture = UNIVERSITY_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		any_owned_province = {
+			has_province_modifier = pol_collegium_hosianum
+		}
+		NOT = { religion = catholic }
+	}
+	
+	mean_time_to_happen = {
+		months = 45
+	}
+	
+	option = {
+		name = flavor_pol.16.a #Suspend the College
+		1391 = {
+			remove_province_modifier = pol_collegium_hosianum
+		}
+		if = {
+		    limit = {
+			    1391 = {
+				    religion = catholic
+				}
+			}
+			1391 = {
+			    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -25 }
+			}
+		}
+	}
+}
+
+### VARIOUS NEW FLAVOUR EVENTS ####
+
+###PAWEL WLODKOWIC
+country_event = {
+	id = flavor_pol.5107
+	title = "flavor_pol.5107.title"
+	desc = "flavor_pol.5107.desc"
+	picture = ADVISOR_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		religion = catholic
+		is_year = 1411
+		NOT = { is_year = 1435 }
+		owns_core_province = 262 #Krakow
+		262 = {
+		    OR = {
+			    has_province_modifier = LN_Minor
+				has_province_modifier = LN_Important
+				has_province_modifier = LN_Major
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 3
+	}
+	
+	option = {
+		name = "flavor_pol.EVTOPTA5"
+		add_country_modifier = {
+			name = "tolerant_society"
+			duration = 1825
+		}
+		define_advisor = {
+			type = theologian_CL
+			name = "Pawel Wlodkowic"
+			skill = 3
+			discount = yes
+			location = 262
+		}
+	}
+	option = {
+		name = "flavor_pol.EVTOPTB5" # Ignore him
+		add_prestige = -1
+	}
+}
+
+###ZBIGNIEW OLESNICKI
+country_event = {
+	id = flavor_pol.5108
+	title = "flavor_pol.5108.title"
+	desc = "flavor_pol.5108.desc"
+	picture = ADVISOR_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		religion = catholic
+		is_year = 1415
+		NOT = { is_year = 1455 }
+		owns_core_province = 262 #Krakow
+		any_core_province = {
+		    area = malopolska_area
+		    has_cardinal = yes
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 8
+	}
+	
+	option = {
+		name = "EXCELLENTCMNISTER"
+		define_advisor = {
+			type = cardinal_CL
+			name = "Zbigniew Olesnicki"
+			skill = 3
+			discount = yes
+			location = 262
+		}
+	}
+}
+
+###PIOTR SKARGA
+country_event = {
+	id = flavor_pol.5109
+	title = "flavor_pol.5109.title"
+	desc = "flavor_pol.5109.desc"
+	picture = ADVISOR_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		religion = catholic
+		is_religion_enabled = protestant
+		check_variable = { which = jesuit_support value = 1 }
+		is_year = 1571
+		NOT = { is_year = 1612 }
+		owns_core_province = 262 #Krakow
+		262 = {
+		    OR = {
+			    has_province_modifier = LN_Minor
+				has_province_modifier = LN_Important
+				has_province_modifier = LN_Major
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 3
+	}
+	
+	option = {
+		name = "EXCELLENTCMNISTER"
+		define_advisor = {
+			type = inquisitor_CL
+			name = "Piotr Skarga"
+			skill = 3
+			discount = yes
+			location = 262
+		}
+	}
+}
+
+###JAN ZAMOYSKI
+country_event = {
+	id = flavor_pol.5110
+	title = "flavor_pol.5110.title"
+	desc = "flavor_pol.5110.desc"
+	picture = LIBERUM_VETO_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1563
+		NOT = { is_year = 1605 }
+		owns_core_province = 259 #Lublin
+	}
+	
+	mean_time_to_happen = {
+		years = 3
+	}
+	
+	option = {
+		name = "EXCELLENTCMNISTER"
+		define_advisor = {
+			type = statesman_NO
+			name = "Jan Zamoyski"
+			skill = 3
+			discount = yes
+			location = 259
+		}
+	}
+}
+
+###ZAWISZA THE BLACK
+country_event = {
+	id = flavor_pol.5111
+	title = "flavor_pol.5111.title"
+	desc = "flavor_pol.5111.desc"
+	picture = CONQUEST_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1395
+		NOT = { is_year = 1428 }
+		owns_core_province = 1279 #Kielce
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "EXCELLENT"
+		define_general = {
+			name = "Zawisza Czarny z Garbowa"
+			fire = 2
+			shock = 5
+			manuever = 2
+			siege = 1
+			trait = born_to_the_saddle_personality
+		}
+	}
+}
+
+###JAN KAROL CHODKIEWICZ
+country_event = {
+	id = flavor_pol.5112
+	title = "flavor_pol.5112.title"
+	desc = "flavor_pol.5112.desc"
+	picture = CONQUEST_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1596
+		NOT = { is_year = 1621 }
+		owns_core_province = 272 #Vilnius
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "EXCELLENT"
+		define_general = {
+			name = "Jan Karol Chodkiewicz"
+			fire = 3
+			shock = 5
+			manuever = 5
+			siege = 3
+			trait = born_to_the_saddle_personality
+		}
+	}
+}
+
+###STANISLAW ZOLKIEWSKI
+country_event = {
+	id = flavor_pol.5113
+	title = "flavor_pol.5113.title"
+	desc = "flavor_pol.5113.desc"
+	picture = CONQUEST_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1578
+		NOT = { is_year = 1620 }
+		owns_core_province = 260 #Lvivshchyna
+	}
+	
+	mean_time_to_happen = {
+		years = 10
+	}
+	
+	option = {
+		name = "EXCELLENT"
+		define_general = {
+			name = "Stanislaw Zolkiewski"
+			fire = 2
+			shock = 4
+			manuever = 4
+			siege = 2
+			trait = inspirational_leader_general_personality
+		}
+	}
+}
+
+###STANISLAW KONIECPOLSKI
+country_event = {
+	id = flavor_pol.5114
+	title = "flavor_pol.5114.title"
+	desc = "flavor_pol.5114.desc"
+	picture = CONQUEST_eventPicture
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			AND = {
+				tag = POL
+				NOT = { exists = PLC }
+			}
+			tag = PLC
+		}
+		is_year = 1608
+		NOT = { is_year = 1646 }
+		owns_core_province = 2832 #Czestochowa
+	}
+	
+	mean_time_to_happen = {
+		years = 10
+	}
+	
+	option = {
+		name = "EXCELLENT"
+		define_general = {
+			name = "Stanislaw Koniecpolski"
+			fire = 4
+			shock = 5
+			manuever = 4
+			siege = 3
+			trait = hardy_warrior_personality
+		}
+	}
+}
+
+### MISSION EVENTS ###
+
+#THE COMMONWEALTH NAVY
 country_event = {
 	id = flavor_pol.1
 	title = "flavor_pol.EVTNAME1"
@@ -5410,4 +7047,856 @@ country_event = {
 		name = "flavor_pol.EVTOPTB1" # Abandon the plans
 		add_prestige = -5
 	}
+}
+
+### LITHUANIAN CIVIL WAR ###
+
+###TRAKAI GOES TO WAR
+country_event = {
+	id = flavor_pol.724
+	title = "flavor_pol.724.title"
+	desc = "flavor_pol.724.desc"
+	picture = SIEGE_eventPicture
+    major = yes
+    trigger = { 
+        tag = TRK
+		is_subject_of = LIT
+		is_lesser_in_union = no
+		is_at_war = no
+		LIT = { 
+		    junior_union_with = POL 
+			NOT = { dip_tech = 25 }
+		}
+        POL = {
+            has_country_flag = 1_union_krewo
+        }		
+    }
+
+    fire_only_once = yes
+	
+    mean_time_to_happen = {
+		years = 20
+		modifier = {
+			factor = 0.5
+			NOT = { has_opinion = { who = LIT value = 50 } }
+		}
+		modifier = {
+			factor = 0.5
+			NOT = { has_opinion = { who = LIT value = 100 } }
+		}
+		modifier = {
+			factor = 0.5
+			NOT = { has_opinion = { who = LIT value = 200 } }
+		}
+	}
+    
+	option = { #Fight alone
+        ai_chance = { factor = 5 }
+        name = "flavor_pol.724.a" 
+	    LIT = { country_event = { id = flavor_pol.727 days = 10 } }
+		grant_independence = yes
+	} 	
+	
+	option = { #Ask Teutons for Help
+        ai_chance = { factor = 90 }
+		name = "flavor_pol.724.b" 
+		trigger = {
+		    TEU = {
+			    exists = yes
+				is_free_or_tributary_trigger = yes
+			    NOT = { has_country_flag = broken_by_polish }
+				num_of_cities = 5
+				is_at_war = no
+			}
+		}
+	    LIT = { country_event = { id = flavor_pol.727 days = 10 } }
+		TEU = { country_event = { id = flavor_pol.725 } }
+		grant_independence = yes
+	}
+	
+	option = { #Compromise with Grand Duke
+        ai_chance = { factor = 5 }
+        name = "flavor_pol.724.c" 
+		set_country_flag = lithuanian_civil_war_peace
+		POL = { country_event = { id = flavor_pol.728 days = 10 } }
+	} 
+}
+
+###HELP FROM TEUTONIC KNIGHTS
+country_event = {
+	id = flavor_pol.725
+	title = "flavor_pol.725.title"
+	desc = "flavor_pol.725.desc"
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes #from flavor_pol.724
+    fire_only_once = yes
+
+	option = { #Demand territorial concessions
+        ai_chance = { factor = 90 }
+        name = "flavor_pol.725.a" 
+		trigger = { FROM = { owns = 1265 } }
+		FROM = { country_event = { id = flavor_pol.726 } }	
+	} 
+	
+	option = { #Help them anyway
+        ai_chance = { factor = 10 }
+        name = "flavor_pol.725.b"
+		create_alliance = FROM
+		FROM = {
+		    add_opinion = {
+				who = ROOT
+				modifier = supported_our_cause
+		    }
+		}
+        set_ai_attitude = {
+            attitude = attitude_friendly
+            who = TRK
+        }
+		add_trust = {
+            who = TRK
+            value = 50
+            mutual = yes
+        }
+		add_opinion = {
+			who = TRK
+			modifier = alliance_with_trakai
+		}		
+	}	
+	
+	option = { #Remain neutral
+        ai_chance = { factor = 0 }
+		name = "flavor_pol.726.c" 
+	}
+
+}
+
+###TEUTONS DEMAND SAMOGITIA
+country_event = {
+	id = flavor_pol.726
+	title = "flavor_pol.726.title"
+	desc = "flavor_pol.726.desc"
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes
+    fire_only_once = yes
+
+	option = { #Agree
+        ai_chance = { factor = 90 }
+        name = "flavor_pol.726.a"
+        set_global_flag = treaty_of_salynas
+		create_alliance = FROM
+        TEU = {
+            set_ai_attitude = {
+            attitude = attitude_friendly
+            who = TRK
+            } 
+		    add_trust = {
+            who = TRK
+            value = 50
+            mutual = yes
+            }
+            add_opinion = {
+				who = TRK
+				modifier = alliance_with_trakai
+		    }
+            set_country_flag = promised_samogitia			
+	    } 
+	}	
+	option = { #Refuse
+        ai_chance = { factor = 10 }
+        name = "flavor_pol.726.b" 
+	}	 
+}
+
+##LITHUANIAN CIVIL WAR
+country_event = {
+	id = flavor_pol.727
+	title = "flavor_pol.727.title"
+	desc = "flavor_pol.727.desc"
+	picture = SIEGE_eventPicture
+    major = yes
+	is_triggered_only = yes
+    fire_only_once = yes
+   
+	option = { #Then war it is!
+        name = "flavor_pol.727.a" 
+		declare_war_with_cb = {
+			who = TRK
+			casus_belli = cb_disloyal_vassal
+		}
+        POL = { set_country_flag = lithuanian_civil_war }
+        TRK = { set_country_flag = lithuanian_civil_war }	
+	}	
+}
+
+##THE OSTROW AGREEMENT (Victory of the Polish king)
+country_event = {
+	id = flavor_pol.728
+	title = "flavor_pol.728.title"
+	desc = "flavor_pol.728.desc"
+	picture = BATTLE_eventPicture
+    major = yes
+    fire_only_once = yes
+    
+	trigger = {
+	    tag = POL
+		OR = {
+		    TRK = { has_country_flag = lithuanian_civil_war_peace }
+			AND = {
+	            has_country_flag = lithuanian_civil_war
+		        war_score_against = {
+	                who = TRK
+	                value = 40
+                }
+			}
+		}
+	}
+    
+	mean_time_to_happen = { days = 30 }
+	
+	immediate = {
+		white_peace = TRK
+		set_global_flag = ostrow_agreement
+		hidden_effect = {
+		    every_country = {
+		        limit = { 
+			        is_subject_of = LIT
+					OR = {
+				        is_subject_of_type = appanage_subject
+						is_subject_of_type = personal_union
+					}
+			    }
+			    set_country_flag = lithuanian_appanage
+		    }
+		}
+    }
+	
+	option = { #Peace at last!
+        name = "flavor_pol.728.a"
+		add_prestige = 20
+		TRK = {
+            inherit = LIT
+		    change_tag = LIT
+		}
+        create_subject = {
+			subject_type = decentralized_vassal
+			subject = LIT
+		}
+		LIT = {
+            add_liberty_desire = -100
+			set_ruler_flag = grand_duke_of_lithuania
+			if = {
+		        limit = {
+                    OR = {
+			            has_country_modifier = title_5
+			            has_country_modifier = title_6
+			        } 
+		        }
+		        change_title_4 = yes
+	        }
+		}
+		POL = { clr_country_flag = lithuanian_civil_war }
+        LIT = { clr_country_flag = lithuanian_civil_war }	
+    }
+    after = {
+	    every_country = {
+		    limit = { 
+			    has_country_flag = lithuanian_appanage 
+				ai = yes
+			}
+		    clr_country_flag = lithuanian_appanage
+			LIT = {
+			    inherit = PREV
+			}
+		}
+		LIT = {
+			add_country_modifier = {
+			    name = "grand_duchy_of_lithuania"
+			    duration = -1
+		    }
+		}
+    }	
+}
+
+##THE OSTROW AGREEMENT (Victory of the duke of Trakai)
+country_event = {
+	id = flavor_pol.729
+	title = "flavor_pol.729.title"
+	desc = "flavor_pol.729.desc"
+	picture = BATTLE_eventPicture
+    major = yes
+    fire_only_once = yes
+    
+	trigger = {
+	    tag = TRK
+	    has_country_flag = lithuanian_civil_war
+		war_score_against = {
+	        who = POL
+	        value = 40
+        }
+	}
+    
+	mean_time_to_happen = { days = 30 }
+	
+	immediate = {
+		white_peace = POL
+		set_global_flag = ostrow_agreement
+		hidden_effect = {
+		    every_country = {
+		        limit = { 
+			        is_subject_of = LIT
+				    is_subject_of_type = appanage_subject
+			    }
+			    set_country_flag = lithuanian_appanage
+		    }
+		}
+    }
+	
+	option = { #Peace at last!
+        name = "flavor_pol.729.a"
+		add_prestige = 20
+		LIT  = {
+		    break_union = POL
+		}		
+        inherit = LIT
+		change_tag = LIT
+        LIT = { clr_country_flag = lithuanian_civil_war }		
+		POL = {
+		    clr_country_flag = lithuanian_civil_war
+		    add_casus_belli = {
+				target = LIT
+				type = cb_restore_personal_union
+				months = 240
+			}
+		}
+    }
+    after = {
+	    every_country = {
+		    limit = { has_country_flag = lithuanian_appanage }
+		    clr_country_flag = lithuanian_appanage
+			ROOT = {
+			    create_subject = {
+			        subject_type = appanage_subject
+			        subject = PREV
+		        }
+			}
+		}
+    }	
+}
+
+###TREATY OF SALYNAS (main event}
+country_event = {
+	id = flavor_pol.730
+	title = "flavor_pol.730.title"
+	desc = "flavor_pol.730.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    fire_only_once = yes
+    
+	trigger = {
+	    tag = LIT
+	    has_global_flag = treaty_of_salynas
+		has_global_flag = ostrow_agreement
+		is_at_war = no
+	}
+    
+	mean_time_to_happen = { months = 6 }
+	
+	immediate = {
+	    clr_global_flag = treaty_of_salynas
+	}
+	
+	option = {
+        name = "flavor_pol.730.a"
+		every_province = {
+		    limit = {
+			    owned_by = ROOT
+				is_core = TEU
+			}
+			cede_province = TEU
+		}
+		1265 = { #Samogitia
+            cede_province = TEU
+		}
+	    1280 = { #Sudovia
+            cede_province = TEU
+		}
+		3397 = { #Kaunas
+            cede_province = TEU
+		}
+		add_truce_with = TEU
+		TEU = { add_truce_with = ROOT }
+		if = {
+            limit = { is_subject_of = POL }
+			POL = { add_truce_with = TEU }
+            TEU = { add_truce_with = POL }			
+        }
+		TEU = { country_event = { id = flavor_pol.731 days = 1 } }
+        if = {
+            limit = { is_subject_of = POL }
+			POL = { country_event = { id = flavor_pol.731 days = 1 } }	
+        }		
+    }	
+}
+
+###TREATY OF SALYNAS (informative event}
+country_event = {
+	id = flavor_pol.731
+	title = "flavor_pol.731.title"
+	desc = "flavor_pol.731.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    is_triggered_only = yes #from flavor_pol.730
+    fire_only_once = yes
+
+	option = {
+        name = "flavor_pol.731.a"		
+    }	
+}
+
+###GRAND DUCHY OF LITHUANIA RETURNED TO THE KING OF POLAND
+country_event = {
+	id = flavor_pol.732
+	title = "flavor_pol.732.title"
+	desc = "flavor_pol.732.desc"
+	picture = CONQUEST_eventPicture
+    
+	trigger = {
+	    tag = POL
+		has_global_flag = ostrow_agreement
+	    LIT = { 
+			is_subject_of = POL
+			OR = {
+			    is_subject_of_type = decentralized_vassal
+				is_subject_of_type = rebellious_decentralized_vassal
+			}
+			NOT = { has_ruler_flag = grand_duke_of_lithuania }
+		}
+	}
+	
+	mean_time_to_happen = { days = 1 }
+	
+	option = {
+        name = "flavor_pol.732.a"
+        create_subject = {
+			subject_type = permanent_union
+			subject = LIT
+		}
+		hidden_effect = {
+            LIT = {
+			    remove_country_modifier = grand_duchy_of_lithuania
+		    }
+        }		
+    }	
+}
+
+###SVITRIGAILA ASKS FOR OUR HELP
+country_event = {
+	id = flavor_pol.760
+	title = "flavor_pol.760.title"
+	desc = "flavor_pol.760.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    fire_only_once  = yes
+	
+	trigger = {
+	    tag = TEU
+		NOT = { is_year = 1452 } #death of Svitrigaila
+		has_global_flag = ostrow_agreement
+	    LIT = { 
+			is_subject_of = POL 
+			is_subject_of_type = decentralized_vassal
+			NOT = { stability = 3 }
+			NOT = { war_with = ROOT }
+			is_neighbor_of = ROOT
+			any_owned_province = {
+			    region = lithuania_region
+			}
+		}
+	}
+	
+	mean_time_to_happen = { years = 10 }
+	
+	option = { #Help him
+        name = "flavor_pol.760.a"	
+        set_global_flag = svitrigaila_received_help
+		add_treasury = -50
+        LIT = { country_event = { id = flavor_pol.761 days = 30 } }		
+    }
+    option = { #Refuse
+        name = "flavor_pol.760.b"
+        LIT = { country_event = { id = flavor_pol.761 days = 30 } }				
+    }		
+}
+
+###SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.761
+	title = "flavor_pol.761.title"
+	desc = "flavor_pol.761.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    is_triggered_only = yes #from flavor.pol.733
+	fire_only_once  = yes
+	
+	trigger = {
+	    tag = LIT
+		is_subject_of = POL
+        any_owned_province = {
+		    region = lithuania_region
+		}		
+	}
+	
+	option = {
+        name = "flavor_pol.761.a"	
+        if = {
+		    limit =  {
+			    has_global_flag = svitrigaila_received_help
+			}
+			random_owned_province = {
+			    limit = {
+				    region = lithuania_region
+				}
+				spawn_rebels = {
+				    type = pretender_rebels
+				    size = 3
+				    leader = "Svitrigaila Gediminai"
+				    leader_dynasty = "Gediminai"
+					friend = TEU
+					should_take_capital = yes
+					win = yes
+			    }
+			}
+			clr_global_flag = svitrigaila_received_help
+		}
+		else = {
+			random_owned_province = {
+			    limit = {
+				    region = lithuania_region
+				}
+				spawn_rebels = {
+				    type = pretender_rebels
+				    size = 2
+				    leader = "Svitrigaila Gediminai"
+				    leader_dynasty = "Gediminai"
+					should_take_capital = yes
+					win = yes
+			    }
+			}
+		}
+		hidden_effect = {
+            POL = { country_event = { id = flavor_pol.762 days = 1 } }
+        }		
+    }
+    after = {
+        set_country_flag = svitrigaila_rebellion 
+    }	
+}
+
+###SVITRIGAILA'S REBELLION (INFORMATIVE EVENT)
+country_event = {
+	id = flavor_pol.762
+	title = "flavor_pol.761.title"
+	desc = "flavor_pol.761.desc"
+	picture = BATTLE_VISTULA_LAGOON_eventPicture
+    is_triggered_only = yes #from flavor.pol.734
+	fire_only_once  = yes
+	
+	option = {
+        name = "flavor_pol.761.a"
+    }	
+}
+
+###END OF SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.763
+	title = "flavor_pol.763.title"
+	desc = "flavor_pol.763.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+
+	trigger = {
+	    tag = POL
+	    LIT = { 
+			is_subject_of = POL
+            has_country_flag = svitrigaila_rebellion			
+			NOT = { has_ruler = "Svitrigaila" }
+			NOT = { num_of_rebel_armies = 1 }
+			NOT = { num_of_rebel_controlled_provinces = 1 }
+		}
+	}
+	
+	immediate = {
+	    LIT = { clr_country_flag = svitrigaila_rebellion }
+	}
+	
+	option = { #Pardon him
+        name = "flavor_pol.763.a"
+		add_legitimacy = 5
+		add_prestige = -10
+		LIT = {
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+			add_liberty_desire = -10
+			set_country_flag = pardoned_svitrigaila
+		}
+    }
+    option = { #Execute him
+        name = "flavor_pol.763.b"
+		add_legitimacy = -10
+		add_prestige = 5
+		LIT = {
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+			add_liberty_desire = 20
+		}
+    }	
+}
+
+###SECOND SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.764
+	title = "flavor_pol.764.title"
+	desc = "flavor_pol.764.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+    
+	trigger = {
+	    tag = LIT
+		NOT = { is_year = 1452 } #death of Svitrigaila
+		NOT = { stability = 3 }
+		has_country_flag = pardoned_svitrigaila
+		is_subject_of = POL 
+		OR = {
+			is_subject_of_type = permanent_union 
+			is_subject_of_type = permanent_union_limited
+		}
+		any_owned_province = {
+			OR = {
+			    region = ruthenia_region
+				region = belarus_region
+			}
+		}
+		POL = {
+		    has_country_flag = 2_union_horodlo
+		}
+	}
+	
+	mean_time_to_happen = { years = 2 }
+	
+	option = {
+        name = "flavor_pol.764.a"	
+        random_owned_province = {
+			    limit = {
+				    OR = {
+			            region = ruthenia_region
+				        region = belarus_region
+			        }
+				}
+				spawn_rebels = {
+				    type = pretender_rebels
+				    size = 2
+				    leader = "Svitrigaila Gediminai"
+				    leader_dynasty = "Gediminai"
+					win = yes
+			    }
+	    }
+		hidden_effect = {
+            POL = { country_event = { id = flavor_pol.765 days = 1 } }
+        }		
+    }
+    after = {
+        set_country_flag = second_svitrigaila_rebellion 
+    }		
+}
+
+###SECOND SVITRIGAILA'S REBELLION (INFORMATIVE EVENT)
+country_event = {
+	id = flavor_pol.765
+	title = "flavor_pol.764.title"
+	desc = "flavor_pol.764.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+    is_triggered_only = yes #from flavor.pol.737
+	fire_only_once  = yes
+	
+	option = {
+        name = "flavor_pol.764.a"
+    }	
+}
+
+###END OF SECOND SVITRIGAILA'S REBELLION
+country_event = {
+	id = flavor_pol.766
+	title = "flavor_pol.766.title"
+	desc = "flavor_pol.766.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+
+	trigger = {
+	    tag = POL
+	    LIT = { 
+			is_subject_of = POL
+            has_country_flag = second_svitrigaila_rebellion			
+			NOT = { has_ruler = "Svitrigaila" }
+			NOT = { num_of_rebel_armies = 1 }
+			NOT = { num_of_rebel_controlled_provinces = 1 }
+		}
+	}
+	
+	immediate = {
+	    LIT = { clr_country_flag = second_svitrigaila_rebellion }
+	}
+	
+	option = { #Choose Sigismund Kestutatis as a Grand Duke
+        name = "flavor_pol.766.a"
+		add_prestige = 10
+		hidden_effect = {
+		    break_union = LIT
+		}
+		create_subject = {
+			subject_type = decentralized_vassal
+			subject = LIT
+		}
+		LIT = {
+		    define_ruler = {
+                name = "Sigismund Kestutatis"
+                dynasty = "Gediminai"
+                adm = 3
+                dip = 4
+                mil = 4
+                age = 50
+                claim = 95
+            }
+            add_liberty_desire = -100
+			set_ruler_flag = grand_duke_of_lithuania
+			if = {
+		        limit = {
+                    OR = {
+			            has_country_modifier = title_5
+			            has_country_modifier = title_6
+			        } 
+		        }
+		        change_title_4 = yes
+	        }
+		}
+    }
+    after = {
+		LIT = {
+			add_country_modifier = {
+			    name = "grand_duchy_of_lithuania"
+			    duration = -1
+		    }
+		}
+    }	  	
+}
+
+###ELECTION IN LITHUANIA
+country_event = {
+	id = flavor_pol.767
+	title = "flavor_pol.767.title"
+	desc = "flavor_pol.767.desc"
+	picture = LIBERUM_VETO_eventPicture
+	fire_only_once  = yes
+	is_triggered_only = yes #on_monarch_death
+
+	trigger = {
+	    tag = POL
+		has_regency = no
+	    LIT = { 
+			is_subject_of = POL 
+			OR = {
+				is_subject_of_type = permanent_union 
+				is_subject_of_type = permanent_union_limited
+			}		
+		}
+		has_country_flag = 4_union_krakow
+		NOT = {
+			exists = PLC
+		}
+	}
+	
+	option = {
+        name = "flavor_pol.767.a"
+		add_legitimacy = 10
+		hidden_effect = {
+		    break_union = LIT
+		}
+		create_subject = {
+			subject_type = decentralized_vassal
+			subject = LIT
+		}
+		if = {
+		    limit = { NOT = { has_ruler = "Aleksander" } }
+			LIT = {
+			    define_ruler = { 
+			        name = "Aleksander"
+                    dynasty = ROOT
+				    culture = ROOT
+				    religion = ROOT
+                    age = 16
+				    male = yes
+                    claim = 95
+                }
+			}
+		}
+		else = {
+		    LIT = {
+			    define_ruler = { 
+			        name = "Jan Olbracht"
+                    dynasty = ROOT
+				    culture = ROOT
+				    religion = ROOT
+                    age = 16
+				    male = yes
+                    claim = 95
+                }
+			}
+		}
+		LIT = {
+            add_liberty_desire = -100
+			set_ruler_flag = grand_duke_of_lithuania
+			if = {
+		        limit = {
+                    OR = {
+			            has_country_modifier = title_5
+			            has_country_modifier = title_6
+			        } 
+		        }
+		        change_title_4 = yes
+	        }
+		}
+    }
+    after = {
+		LIT = {
+			add_country_modifier = {
+			    name = "grand_duchy_of_lithuania"
+			    duration = -1
+		    }
+		}
+    }	  	
+}
+
+###TURN TRAKAI INTO APPANAGE (HIDDEN EVENT IN CASE IF LIT CIVIL WAR DIDN'T HAPPEN)
+country_event = {
+	id = flavor_pol.768
+	title = "flavor_pol.768.title"
+	desc = "flavor_pol.768.desc"
+	picture = IMPALED_SOLDIERS_eventPicture
+	fire_only_once  = yes
+	hidden = yes
+    
+	trigger = {
+	    tag = LIT
+		dip_tech = 25 #around year 1450
+		TRK = {
+		    exists = yes
+			is_subject_of = ROOT
+			is_subject_of_type = decentralized_vassal
+		}
+	}
+	
+	mean_time_to_happen = { days = 1 }
+	
+	option = {
+        name = "flavor_pol.768.a"
+        create_subject = {
+				subject_type = appanage_subject
+				subject = TRK
+		}
+	}	
 }
