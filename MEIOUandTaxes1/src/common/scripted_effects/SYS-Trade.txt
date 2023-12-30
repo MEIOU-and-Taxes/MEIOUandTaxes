@@ -5,175 +5,175 @@
 # Refresh 'TN_ProvDmnd$prod$' and 'TN_ProvSply$prod$' variables in each province
 # Those variables represent province's supply and demand for each trade goods,
 # Which other effects later reference for trade, fulfillment, and income calculations
-TN_AssignSectorID = {
-    every_province = {
-        limit = {
-            isValidProv = yes
-        }
-        set_key = { lhs = Sector_ID value = 0 }
-        set_key = { lhs = Sector_TagID value = 0 }
-    }
-    every_country = {
-        limit = {
-            isValidCountry = yes
-        }
-        clr_country_flag = Has_TNSector
-        set_key = { lhs = Sector_ID value = 0 }
-        set_key = { lhs = Sector_TagID which = ID_Tag }
-    }
-    set_key = { lhs = Sector_ID value = 1 }
-    every_province = {
-        limit = {
-            has_province_flag = TN_COT
-            isValidProv = yes
-            NOT = { check_key = { lhs = Sector_ID value = 1 } }
-        }
-        owner = {
-            set_country_flag = Has_TNSector
-        }
-        set_province_flag = In_TN_COT
-        set_key = { lhs = Sector_ID which = PREV }
-        set_key = { lhs = Sector_TagID which = owner }
-        # add_province_modifier = {
-        #     name = Plague_mod0
-        #     duration = -1
-        # }
-        every_trade_node_member_province = {
-            limit = {
-                owned_by = PREV
-                NOT = { province_id = PREV }
-            }
-            set_key = { lhs = Sector_ID which = PREV }
-            set_province_flag = In_TN_COT
-            set_key = { lhs = Sector_TagID which = PREV }
-            # add_province_modifier = {
-            #     name = Plague_mod_m0
-            #     duration = -1
-            # }
-        }
-        PREV = { change_key = { lhs = Sector_ID value = 1 } }
-    }
-    every_province = {
-        limit = {
-            isValidProv = yes
-            NOT = { check_key = { lhs = Sector_ID value = 1 } }
-        }
-        if = {
-            limit = {
-                any_trade_node_member_province = {
-                    check_key = { lhs = Sector_ID value = 1 }
-                }
-            }
-            set_global_flag = Find_TN_COT
-            save_event_target_as = Prov
-            save_event_target_as = ProvNew
-            set_province_flag = Visited_TN
-            while = {
-                limit = {
-                    has_global_flag = Find_TN_COT
-                }
-                clr_global_flag = Find_TN_COT
+# TN_AssignSectorID = {
+#     every_province = {
+#         limit = {
+#             isValidProv = yes
+#         }
+#         set_key = { lhs = Sector_ID value = 0 }
+#         set_key = { lhs = Sector_TagID value = 0 }
+#     }
+#     every_country = {
+#         limit = {
+#             isValidCountry = yes
+#         }
+#         clr_country_flag = Has_TNSector
+#         set_key = { lhs = Sector_ID value = 0 }
+#         set_key = { lhs = Sector_TagID which = ID_Tag }
+#     }
+#     set_key = { lhs = Sector_ID value = 1 }
+#     every_province = {
+#         limit = {
+#             NOT = { has_province_flag = In_TN_COT }
+#             isValidProv = yes
+#             NOT = { check_key = { lhs = Sector_ID value = 1 } }
+#         }
+#         owner = {
+#             set_country_flag = Has_TNSector
+#         }
+#         set_province_flag = In_TN_COT
+#         set_key = { lhs = Sector_ID which = PREV }
+#         set_key = { lhs = Sector_TagID which = owner }
+#         # add_province_modifier = {
+#         #     name = Plague_mod0
+#         #     duration = -1
+#         # }
+#         every_trade_node_member_province = {
+#             limit = {
+#                 owned_by = PREV
+#                 NOT = { province_id = PREV }
+#             }
+#             set_key = { lhs = Sector_ID which = PREV }
+#             set_province_flag = In_TN_COT
+#             set_key = { lhs = Sector_TagID which = PREV }
+#             # add_province_modifier = {
+#             #     name = Plague_mod_m0
+#             #     duration = -1
+#             # }
+#         }
+#         PREV = { change_key = { lhs = Sector_ID value = 1 } }
+#     }
+#     every_province = {
+#         limit = {
+#             isValidProv = yes
+#             NOT = { check_key = { lhs = Sector_ID value = 1 } }
+#         }
+#         if = {
+#             limit = {
+#                 any_trade_node_member_province = {
+#                     check_key = { lhs = Sector_ID value = 1 }
+#                 }
+#             }
+#             set_global_flag = Find_TN_COT
+#             save_event_target_as = Prov
+#             save_event_target_as = ProvNew
+#             set_province_flag = Visited_TN
+#             while = {
+#                 limit = {
+#                     has_global_flag = Find_TN_COT
+#                 }
+#                 clr_global_flag = Find_TN_COT
                 
-                event_target:Prov = {
-                    every_empty_neighbor_province = {
-                        limit = {
-                            NOT = { has_province_flag = Visited_TN }
-                            same_trade_node_as = event_target:ProvNew
-                            isValidEmpty = yes
-                        }
-                        set_province_flag = Visited_TN
-                        set_province_flag = Find_TN_COT
-                    }
-                    every_neighbor_province = {
-                        limit = {
-                            NOT = { has_province_flag = Visited_TN }
-                            same_trade_node_as = event_target:ProvNew
-                            isValidProv = yes
-                            event_target:ProvNew = { NOT = { check_key = { lhs = Sector_ID value = 1 } } }
-                        }
-                        set_province_flag = Visited_TN
-                        if = {
-                            limit = {
-                                OR = {
-                                    NOT = { has_province_flag = In_TN_COT }
-                                    NOT = { check_key = { lhs = Sector_ID value = 1 } }
-                                }
-                            }
-                            set_province_flag = Find_TN_COT
-                        }
-                        else = {
-                            event_target:ProvNew = {
-                                set_key = { lhs = Sector_ID which = PREV }
-                                set_key = { lhs = Sector_TagID which = PREV }
-                                set_key = { lhs = Modi_TradeScoreExternal which = PREV }
-                                set_key = { lhs = Modi_TradeScoreInternal which = PREV }
-                                # add_province_modifier = {
-                                #     name = Plague_mod_s0
-                                #     duration = -1
-                                # }
-                            }
-                            clr_province_flag = Find_TN_COT
-                            clr_province_flag = Visited_TN
-                            every_trade_node_member_province = {
-                                clr_province_flag = Find_TN_COT
-                                clr_province_flag = Visited_TN
-                            }
-                        }
-                    }
-                }
+#                 event_target:Prov = {
+#                     # every_empty_neighbor_province = {
+#                     #     limit = {
+#                     #         NOT = { has_province_flag = Visited_TN }
+#                     #         same_trade_node_as = event_target:ProvNew
+#                     #         isValidEmpty = yes
+#                     #     }
+#                     #     set_province_flag = Visited_TN
+#                     #     set_province_flag = Find_TN_COT
+#                     # }
+#                     every_neighbor_province = {
+#                         limit = {
+#                             NOT = { has_province_flag = Visited_TN }
+#                             same_trade_node_as = event_target:ProvNew
+#                             isValidProv = yes
+#                             event_target:ProvNew = { NOT = { check_key = { lhs = Sector_ID value = 1 } } }
+#                         }
+#                         set_province_flag = Visited_TN
+#                         if = {
+#                             limit = {
+#                                 OR = {
+#                                     NOT = { has_province_flag = In_TN_COT }
+#                                     NOT = { check_key = { lhs = Sector_ID value = 1 } }
+#                                 }
+#                             }
+#                             set_province_flag = Find_TN_COT
+#                         }
+#                         else = {
+#                             event_target:ProvNew = {
+#                                 set_key = { lhs = Sector_ID which = PREV }
+#                                 set_key = { lhs = Sector_TagID which = PREV }
+#                                 set_key = { lhs = Modi_TradeScoreExternal which = PREV }
+#                                 set_key = { lhs = Modi_TradeScoreInternal which = PREV }
+#                                 # add_province_modifier = {
+#                                 #     name = Plague_mod_s0
+#                                 #     duration = -1
+#                                 # }
+#                             }
+#                             clr_province_flag = Find_TN_COT
+#                             clr_province_flag = Visited_TN
+#                             every_trade_node_member_province = {
+#                                 clr_province_flag = Find_TN_COT
+#                                 clr_province_flag = Visited_TN
+#                             }
+#                         }
+#                     }
+#                 }
 			
-                random_trade_node_member_province = {
-                    limit = {
-                        has_province_flag = Find_TN_COT
-                    }
-                    clr_province_flag = Find_TN_COT
+#                 random_trade_node_member_province = {
+#                     limit = {
+#                         has_province_flag = Find_TN_COT
+#                     }
+#                     clr_province_flag = Find_TN_COT
                     
-                    set_global_flag = Find_TN_COT
+#                     set_global_flag = Find_TN_COT
                     
-                    save_event_target_as = Prov
-                }
-                if = {
-                    limit = {
-                        NOT = { has_global_flag = Find_TN_COT }
-                        event_target:ProvNew = {
-                            NOT = { check_key = { lhs = Sector_ID value = 1 } }
-                        }
-                    }
-                    random_trade_node_member_province = {
-                        limit = {
-                            check_key = { lhs = Sector_ID value = 1 }
-                        }
-                        event_target:ProvNew = {
-                            set_key = { lhs = Sector_ID which = PREV }
-                            set_key = { lhs = Sector_TagID which = PREV }
-                            set_key = { lhs = Modi_TradeScoreExternal which = PREV }
-                            set_key = { lhs = Modi_TradeScoreInternal which = PREV }
-                            # add_province_modifier = {
-                            #     name = Plague_mod_s0
-                            #     duration = -1
-                            # }
-                        }
-                        clr_province_flag = Find_TN_COT
-                        clr_province_flag = Visited_TN
-                        every_trade_node_member_province = {
-                            clr_province_flag = Find_TN_COT
-                            clr_province_flag = Visited_TN
-                        }
-                    }
-                }
+#                     save_event_target_as = Prov
+#                 }
+#                 if = {
+#                     limit = {
+#                         NOT = { has_global_flag = Find_TN_COT }
+#                         event_target:ProvNew = {
+#                             NOT = { check_key = { lhs = Sector_ID value = 1 } }
+#                         }
+#                     }
+#                     random_trade_node_member_province = {
+#                         limit = {
+#                             check_key = { lhs = Sector_ID value = 1 }
+#                         }
+#                         event_target:ProvNew = {
+#                             set_key = { lhs = Sector_ID which = PREV }
+#                             set_key = { lhs = Sector_TagID which = PREV }
+#                             set_key = { lhs = Modi_TradeScoreExternal which = PREV }
+#                             set_key = { lhs = Modi_TradeScoreInternal which = PREV }
+#                             # add_province_modifier = {
+#                             #     name = Plague_mod_s0
+#                             #     duration = -1
+#                             # }
+#                         }
+#                         clr_province_flag = Find_TN_COT
+#                         clr_province_flag = Visited_TN
+#                         every_trade_node_member_province = {
+#                             clr_province_flag = Find_TN_COT
+#                             clr_province_flag = Visited_TN
+#                         }
+#                     }
+#                 }
                 
-            }
-        }
-    }
-    every_province = {
-        limit = {
-            isValidProv = yes
-        }
-        clr_province_flag = Find_TN_COT
-        clr_province_flag = In_TN_COT
-        clr_province_flag = Visited_TN
-    }
-}
+#             }
+#         }
+#     }
+#     every_province = {
+#         limit = {
+#             isValidEmpty = yes
+#         }
+#         clr_province_flag = Find_TN_COT
+#         clr_province_flag = In_TN_COT
+#         clr_province_flag = Visited_TN
+#     }
+# }
 
 
 TN_DoSupplyDemand = {
@@ -635,7 +635,7 @@ TN_PrepSector = {
         clr_global_flag = HasSilkAccess
         every_trade_node_member_country = {
             limit = {
-                has_country_flag = Has_TNSector
+                #has_country_flag = Has_TNSector
                 NOT = { tag = AAA }
             }
             set_key = { lhs = Tmp_0 value = 0 }
@@ -644,10 +644,11 @@ TN_PrepSector = {
             clr_global_flag = HasRiverSeaBAccess
             clr_global_flag = HasSilkAccess
             clr_country_flag = Found_TN
+            clr_country_flag = TN_fallback
             every_province = {
                 limit = {
                     same_trade_node_as = PREV_PREV
-                    is_key_equal = { lhs = Sector_TagID which = PREV }
+                    owned_by = PREV
                     isValidProv = yes
                 }
                 if = {
@@ -682,14 +683,30 @@ TN_PrepSector = {
                 change_key = { lhs = Tmp_0 value = 1 }
                 multiply_key = { lhs = Tmp_0 which = Tmp_1 }
                 change_key = { lhs = Tmp_0 value = 1 }
+                #The Above returns exactly 1 if no province in the tradenode has any trade power
                 PREV = {
                     set_country_flag = Found_TN
-                    if = {
+                    if = {      #So if all provinces in a node have no tradepower
                         limit = {
+                            NOT = { has_country_flag = TN_fallback }
+                            all_owned_province = {
+                                same_trade_node_as = PREV_PREV
+                                NOT = { province_trade_power = 0.001 }
+                            }
+                        }
+                        PREV = {        #Just pick the first province we scope to, make it the center and add 1 extra value to Tmp_0 so that we only assign a sector center once
+                            save_event_target_as = SectorCentTarget
+                            PREV = { set_country_flag = TN_fallback }
+                        }
+                        log = "Fallback to first province in trade node for [This.Owner.GetName] in [This.TradeNode.GetName]"
+                    }
+                    if = {       
+                        limit = {
+                            NOT = { has_country_flag = TN_fallback }
                             NOT = { check_key = { lhs = Tmp_0 which = PREV } }
                         }
                         set_key = { lhs = Tmp_0 which = PREV }
-                        PREV = { save_event_target_as = Plague }
+                        PREV = { save_event_target_as = SectorCentTarget }
                     }
                 }
             }
@@ -698,7 +715,7 @@ TN_PrepSector = {
                     has_country_flag = Found_TN
                 }
                 clr_country_flag = Found_TN
-                event_target:Plague = {
+                event_target:SectorCentTarget = {
                     set_province_flag = TN_SectorCent
                     if = {
                         limit = {
@@ -738,7 +755,7 @@ TN_PrepSector = {
                     }
                 }
             }
-        }        
+        }       
     }
 }
 
@@ -781,7 +798,7 @@ TN_RefreshPrice = {
 			every_trade_node_member_province = {
 				if = {	
 					limit = {
-						is_key_equal = { lhs = Sector_ID which = PREV }
+						owned_by = PREV
 						has_province_flag = TN_SectorPart
 
 						NOT = {
@@ -832,7 +849,7 @@ TN_RefreshPrice = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						is_key_equal = { lhs = Sector_ID which = PREV }
+						owned_by = PREV
 						has_province_flag = TN_SectorPart
 					}
 					if = {
@@ -934,7 +951,7 @@ TN_SumSector = {
             every_trade_node_member_province = {
 				if = {
 					limit = {
-						is_key_equal = { lhs = Sector_ID which = PREV }
+						owned_by = PREV
 						has_province_flag = TN_SectorPart
 						NOT = {
 							province_id = PREV
@@ -1268,7 +1285,7 @@ TN_SpreadStockpile = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						is_key_equal = { lhs = Sector_ID which = PREV }
+						owned_by = PREV
 						has_province_flag = TN_SectorPart
 						NOT = {
 							province_id = PREV
@@ -1349,7 +1366,7 @@ TN_SpreadStockpile = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						is_key_equal = { lhs = Sector_ID which = PREV }
+						owned_by = PREV
 						has_province_flag = TN_SectorPart
 					}
                     
@@ -1476,7 +1493,7 @@ TN_ScoreSector = {
         # Sector score is owner score, +1 if is capital
     every_country = {
         limit = {
-            has_country_flag = Has_TNSector
+            #has_country_flag = Has_TNSector
             isValidCountry = yes
         }
         #POP_GetMerchant = { return = TN_SectorScore }
@@ -1616,7 +1633,7 @@ TN_ScoreSector = {
 
         every_province = {
             limit = {
-				is_key_equal = { lhs = Sector_TagID which = PREV }
+				owned_by = PREV
                 has_province_flag = TN_SectorCent
             }
             set_key = { lhs = TN_SectorScore which = PREV }
@@ -1651,13 +1668,14 @@ TN_ScoreSector = {
                 limit = {
                     NOT = {
                         any_trade_node_member_province = {
-						    is_key_equal = { lhs = Sector_ID which = PREV }
+						    owned_by = PREV
                             has_province_flag = TN_COT
                             has_province_flag = TN_SectorPart
                         }
                     }
                 }
                 set_key = { lhs = TN_SectorScore value = 0 }
+                #log = "Error: Sector has no Center of Trade!"     #Should be fine, no need to have logging for this on all the time
             }
         }
     }
@@ -1939,7 +1957,7 @@ TN_DoTrade = {
         
         every_province = {
             limit = {
-                is_wasteland = no
+                isValidProv = yes
                 has_province_flag = TN_SectorCentNodeBest
                 check_key = { lhs = TN_SectorScore which = event_target:Prov }
             }
@@ -1997,7 +2015,7 @@ TN_DoTrade = {
 									province_id = event_target:Prov
 								}
                                 NOT = {
-                                    is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
+                                    owned_by = event_target:ProvOwner
                                 }
 							}
 							set_key = { lhs = Public_Tmp8 which = Modi_TradeScoreExternal }
@@ -2315,10 +2333,10 @@ TN_SetReach = {
             set_global_flag = 1_jump
             every_province = {
                 limit = {
-                    is_wasteland = no
+                    isValidProv = yes
                     has_province_flag = TN_SectorCentReachSpread
                     OR = {
-                        is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
+                        owned_by = event_target:ProvNew
                         AND = {
                             owner = {
                                 is_colonial_nation_of = event_target:ProvNew
@@ -2342,10 +2360,10 @@ TN_SetReach = {
                 set_global_flag = 2_jump
                 every_province = {
                     limit = {
-                        is_wasteland = no
+                        isValidProv = yes
                         has_province_flag = TN_SectorCentReachSpread2
                         OR = {
-                            is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
+                            owned_by = event_target:ProvNew
                             AND = {
                                 owner = {
                                     is_colonial_nation_of = event_target:ProvNew
@@ -2966,7 +2984,7 @@ TN_DoTradeSetScoreImport = {
 				
 				if = {
 					limit = {
-                        NOT = { is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner } }
+                        NOT = { owned_by = event_target:ProvOwner }
 					}
 					set_key = { lhs = Public_Tmp0 which = event_target:Prov } ## Tarrifs
 					set_key = { lhs = Public_Tmp1 which = event_target:Prov } ## Price
@@ -3001,7 +3019,7 @@ TN_DoTradeSetScoreImport = {
 					change_key = { lhs = $return$ value = 0.1 }
 					if = {
 						limit = {
-							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
+							owned_by = event_target:ProvOwner
 						}
                         
 						multiply_key = { lhs = $return$ which = Modi_TradeScoreInternal } # API
@@ -3048,7 +3066,7 @@ TN_DoTradeSetScoreExport = {
 				
 				if = {
 					limit = {
-						NOT = { is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner } }
+						NOT = { owned_by = event_target:ProvOwner }
 					}
                     
 					change_key = { lhs = Public_Tmp0 which = $price$ }
@@ -3075,7 +3093,7 @@ TN_DoTradeSetScoreExport = {
 					change_key = { lhs = $return$ value = 0.1 }
 					if = {
 						limit = {
-							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
+							owned_by = event_target:ProvOwner
 						}
                         
 						multiply_key = { lhs = $return$ which = Modi_TradeScoreInternal }
@@ -3461,7 +3479,7 @@ TN_DoTradeByAmountImport = {
 				if = {
 					limit = {
 						NOT = {
-							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
+							owned_by = event_target:ProvOwner
 						}
 					}
 					set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
@@ -3536,7 +3554,7 @@ TN_DoTradeByAmountImport = {
 					if = {
 						limit = {
 							NOT = {
-								is_key_equal = { lhs = Sector_TagID which = PREV }
+								owned_by = PREV
 							}
 						}                       
                         set_key = { lhs = Public_Tmp7 which = PREV }
@@ -3638,7 +3656,7 @@ TN_DoTradeByAmountExport = {
 				if = {
 					limit = {
 						NOT = {
-							is_key_equal = { lhs = Sector_TagID which = event_target:ProvOwner }
+							owned_by = event_target:ProvOwner
 						}
 					}
 					set_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
@@ -3796,7 +3814,7 @@ TN_SetTradeIncome = {
 			every_trade_node_member_province = {
 				if = {
 					limit = {
-						is_key_equal = { lhs = Sector_ID which = PREV }
+						owned_by = PREV
 						has_province_flag = TN_SectorPart
 						check_key = { lhs = TN_ProvSply51 value = 0.001 }
 					}
@@ -5120,7 +5138,7 @@ TN_UpdateSubsistence = {
     every_trade_node_member_province = {
 		if = {
 			limit = {
-				is_key_equal = { lhs = Sector_ID which = PREV }
+				owned_by = PREV
 				has_province_flag = TN_SectorPart
 				NOT = { province_id = PREV }
 			}
