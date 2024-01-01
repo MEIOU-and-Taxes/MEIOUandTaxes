@@ -1,0 +1,1894 @@
+# Rebellion desire decay event
+country_event = {
+	id = flavor_uef.99
+	title = "flavor_uef.99.title"
+	desc = "flavor_uef.99.desc"
+	picture = CIVIL_WAR_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.99.a"
+		
+		subtract_variable = {
+			which = french_rebellion_desire
+			value = 1
+		}
+		
+		country_event = { id = flavor_uef.99 days = 3650 }
+	}
+}
+
+# Check rebellion desire event (for testing and debugging)
+country_event = {
+	id = flavor_uef.0
+	title = "flavor_uef.0.title"
+	desc = {
+		trigger = { check_variable = { which = french_rebellion_desire value = 0.001 } }
+		desc = "flavor_uef.0.desca"
+	}
+	desc = {
+		trigger = { NOT = { check_variable = { which = french_rebellion_desire value = 0.001 } } }
+		desc = "flavor_uef.0.descb"
+	}
+	picture = CIVIL_WAR_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = "flavor_uef.0.a"
+	}
+}
+
+# Demand taxes calculation event
+country_event = {
+	id = flavor_uef.2
+	title = "flavor_uef.2.title"
+	desc = "flavor_uef.2.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+	hidden = yes
+
+	option = {
+		name = flavor_uef.2.a # Accept
+		ai_chance = {
+			factor = 80
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 10
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 12
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 14
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 16
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 18
+					}
+				}
+			}
+		}
+		FROM = {
+			country_event = { id = flavor_uef.3 }
+		}
+	}
+	option = {
+		name = flavor_uef.3.b # Reject
+		ai_chance = {
+			factor = 20
+		}
+		FROM = {
+			country_event = { id = flavor_uef.4 }
+		}
+	}
+}
+# Estates-General accepts tax demand
+country_event = {
+	id = flavor_uef.3
+	title = "flavor_uef.3.title"
+	desc = "flavor_uef.3.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.3.a # Good.
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						has_country_flag = uef_estates_general
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_1
+						}
+					}
+					AND = {
+						has_country_flag = king_of_isles
+						FRA = {
+							is_subject_of = ROOT
+							any_owned_province = {
+								has_province_modifier = uef_estates_general_1
+							}
+						}
+					}
+				}
+			}
+			add_treasury = 100
+		}
+		else_if = {
+			limit = {
+				OR = {
+					AND = {
+						has_country_flag = uef_estates_general
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_2
+						}
+					}
+					AND = {
+						has_country_flag = king_of_isles
+						FRA = {
+							is_subject_of = ROOT
+							any_owned_province = {
+								has_province_modifier = uef_estates_general_2
+							}
+						}
+					}
+				}
+			}
+			add_treasury = 150
+		}
+		else_if = {
+			limit = {
+				OR = {
+					AND = {
+						has_country_flag = uef_estates_general
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_3
+						}
+					}
+					AND = {
+						has_country_flag = king_of_isles
+						FRA = {
+							is_subject_of = ROOT
+							any_owned_province = {
+								has_province_modifier = uef_estates_general_3
+							}
+						}
+					}
+				}
+			}
+			add_treasury = 200
+		}
+		else = {
+			add_treasury = 100
+		}
+	}
+}
+# Estates-General rejects tax demand
+country_event = {
+	id = flavor_uef.4
+	title = "flavor_uef.4.title"
+	desc = "flavor_uef.4.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.4.a # Those pesky peasants...
+		add_prestige = -5
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 5
+				}
+			}
+		}
+	}
+}
+# New Bishoprics 1559
+country_event = {
+	id = flavor_uef.5
+	title = "flavor_uef.5.title"
+	desc = "flavor_uef.5.desc"
+	picture = RELIGION_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		has_global_flag = french_rebellion_start
+		OR = {
+			AND = {
+				has_global_flag = hundred_years_war_ENG_win
+				FRA = {
+					is_subject_of = ROOT
+					any_owned_province = {
+						OR = {
+							religion = protestant
+							religion = reformed
+						}
+					}
+				}
+			}
+			AND = {
+				has_country_flag = uef_estates_general
+				any_owned_province = {
+					OR = {
+						has_province_modifier = uef_estates_general_1
+						has_province_modifier = uef_estates_general_2
+						has_province_modifier = uef_estates_general_3
+						has_province_modifier = french_resistance
+					}
+					OR = {
+						religion = protestant
+						religion = reformed
+					}
+				}
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 5
+	}
+	option = {
+		name = flavor_uef.5.a # Introduce the new bishoprics to fight more effectively against heresy
+		ai_chance = {
+			factor = 75
+		}
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			add_country_modifier = {
+				name = svp_new_bishoprics
+				duration = -1
+			}
+			every_owned_province = {
+				limit = {
+					OR = {
+						region = low_countries_region
+						region = belgii_region
+					}
+				}
+				add_unrest = 2
+			}
+		}
+		else = {
+			FRA = {
+				add_country_modifier = {
+					name = svp_new_bishoprics
+					duration = -1
+				}
+				every_owned_province = {
+					add_unrest = 2
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+	}
+	option = {
+		name = flavor_uef.5.b # We don't need a new system
+		ai_chance = {
+			factor = 25
+		}
+	}
+}
+
+# Compromise of Nobles 1566
+country_event = {
+	id = flavor_uef.6
+	title = "flavor_uef.6.title"
+	desc = "flavor_uef.6.desc"
+	picture = COURT_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		has_global_flag = dutch_rebellion_start
+		OR = {
+			has_country_flag = svp_inquisition
+			has_country_modifier = svp_new_bishoprics
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = flavor_uef.6.a # Agree to compromise
+		ai_chance = { factor = 60 }
+		
+		remove_country_modifier = svp_new_bishoprics
+		clr_country_flag = svp_inquisition
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			set_variable = {
+				which = inquisition
+				value = 0
+			}
+		}
+		else = {
+			set_variable = {
+				which = inquisition
+				value = 0
+			}
+			SVP = {
+				set_variable = {
+					which = inquisition
+					value = 0
+				}
+			}
+		}
+		
+		hidden_effect = {
+			REB = {
+				subtract_variable = {
+					which = french_rebellion_desire
+					value = 3
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_uef.6.b # Reject the petition
+		ai_chance = { factor = 40 }
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			every_owned_province = {
+				limit = {
+					OR = {
+						region = low_countries_region
+						region = belgii_region
+					}
+				}
+				add_unrest = 2
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 3
+				}
+			}
+		}
+	}
+}
+
+# Province incorporated in the Estates-General
+country_event = {
+	id = flavor_uef.7
+	title = "flavor_uef.7.title"
+	desc = "flavor_uef.7.desc"
+	picture = CONQUEST_eventPicture
+	
+	# Event fires if SVP or BUR obtains new provinces in the Low Countries and adds estates general to those provinces
+	trigger = {
+		any_owned_province = {
+			OR = {
+				has_province_modifier = uef_estates_general_1
+				has_province_modifier = uef_estates_general_2
+				has_province_modifier = uef_estates_general_3
+			}
+		}
+		any_owned_province = {
+			OR = {
+				region = low_countries_region
+				region = belgii_region
+			}
+			is_core = ROOT
+			NOT = {
+				OR = {
+					has_province_modifier = uef_estates_general_1
+					has_province_modifier = uef_estates_general_2
+					has_province_modifier = uef_estates_general_3
+				}
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "flavor_uef.7.a"
+		every_owned_province = {
+			limit = {
+				OR = {
+					region = low_countries_region
+					region = belgii_region
+				}
+				is_core = ROOT
+				NOT = {
+					OR = {
+						has_province_modifier = uef_estates_general_1
+						has_province_modifier = uef_estates_general_2
+						has_province_modifier = uef_estates_general_3
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_1
+						}
+					}
+				}
+				add_province_modifier = {
+					name = uef_estates_general_1
+					duration = -1
+				}
+			}
+			else_if = {
+				limit = {
+					ROOT = {
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_2
+						}
+					}
+				}
+				add_province_modifier = {
+					name = uef_estates_general_2
+					duration = -1
+				}
+			}
+			else = {
+				add_province_modifier = {
+					name = uef_estates_general_3
+					duration = -1
+				}
+			}
+		}
+	}
+}
+
+# Demand joining war calculation event
+country_event = {
+	id = flavor_uef.9
+	title = "flavor_uef.9.title"
+	desc = "flavor_uef.9.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.9.a # Accept
+		ai_chance = {
+			factor = 80
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 10
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 12
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 14
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 16
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 18
+					}
+				}
+			}
+		}
+		FROM = {
+			country_event = { id = flavor_svp.10 }
+		}
+	}
+	option = {
+		name = flavor_uef.9.b # Reject
+		ai_chance = {
+			factor = 20
+		}
+		FROM = {
+			country_event = { id = flavor_svp.11 }
+		}
+	}
+}
+# Estates-General accepts join war demand
+country_event = {
+	id = flavor_uef.10
+	title = "flavor_uef.10.title"
+	desc = "flavor_uef.10.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.10.a # Good.
+		join_all_offensive_wars_of = ENG
+	}
+}
+# Estates-General rejects join war demand
+country_event = {
+	id = flavor_uef.11
+	title = "flavor_uef.11.title"
+	desc = "flavor_uef.11.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.11.a # Those pesky peasants...
+		add_prestige = -5
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 1
+				}
+			}
+		}
+	}
+}
+# Breakup disaster events
+# On start
+country_event = {
+	id = flavor_uef.100
+	title = "flavor_uef.100.title"
+	desc = "flavor_uef.100.desc"
+	picture = RELIGIOUS_TURMOIL_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = uef_breakup_starts
+		# Spawn the rebels, hit 1 stab.
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			Stab_Subtract1 = yes
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = protestant_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = protestant_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = reformed_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = reformed_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 0 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = catholic_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 0 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = catholic_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+		}
+		else = {
+			Stab_Subtract1 = yes
+			FRA = {
+				random_owned_province = {
+					limit = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+						MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+						controlled_by = SVP
+					}
+					spawn_rebels = {
+						type = protestant_rebels
+						size = 4
+						unrest = 10
+						win = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+						MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+						controlled_by = SVP
+					}
+					spawn_rebels = {
+						type = protestant_rebels
+						size = 3
+						unrest = 10
+						win = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+						MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+						controlled_by = SVP
+					}
+					spawn_rebels = {
+						type = reformed_rebels
+						size = 4
+						unrest = 10
+						win = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+						MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+						controlled_by = SVP
+					}
+					spawn_rebels = {
+						type = reformed_rebels
+						size = 3
+						unrest = 10
+						win = yes
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_uef.100.a" # Compromise with the rebels
+		ai_chance = {
+			factor = 25
+		}
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			disband_rebels = protestant_rebels
+			disband_rebels = reformed_rebels
+			end_disaster = beeldenstorm
+		}
+		else = {
+			SVP = {
+				disband_rebels = protestant_rebels
+				disband_rebels = reformed_rebels
+			}
+			end_disaster = beeldenstorm
+		}
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			every_owned_province = {
+				limit = {
+					OR = {
+						region = low_countries_region
+						region = belgii_region
+					}
+				}
+				add_province_modifier = {
+					name = beeldenstorm_compromise
+					duration = 18250 # 50 years
+				}
+			}
+		}
+		else = {
+			SVP = {
+				every_owned_province = {
+					add_province_modifier = {
+						name = beeldenstorm_compromise
+						duration = 18250 # 50 years
+					}
+				}
+			}
+		}
+		country_event = { id = flavor_svp.199 days = 5 }
+	}
+	option = {
+		name = "flavor_uef.100.b" # Suppress the rebels
+		ai_chance = {
+			factor = 75
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 3
+				}
+			}
+		}
+	}
+}
+
+# Tenth Penny
+country_event = {
+	id = flavor_uef.101
+	title = "flavor_uef.101.title"
+	desc = "flavor_uef.101.desc"
+	picture = ECONOMY_eventPicture
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	
+	option = {
+		name = flavor_uef.101.a # Demand the Tenth Penny
+		ai_chance = {
+			factor = 25
+		}
+		add_treasury = 500
+		Stab_Subtract1 = yes		
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 4
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_uef.101.b # Let�s not burden the people with additional taxes
+		ai_chance = {
+			factor = 75
+		}
+		add_legitimacy = 10
+	}
+}
+
+# Council of Troubles
+country_event = {
+	id = flavor_uef.102
+	title = "flavor_uef.102.title"
+	desc = "flavor_uef.102.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	
+	option = {
+		name = flavor_uef.102.a # Set it up and execute the leaders of the revolt
+		ai_chance = {
+			factor = 25
+		}
+		Stab_Subtract1 = yes
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			every_owned_province = {
+				limit = {
+					OR = {
+						region = low_countries_region
+						region = belgii_region
+					}
+				}
+				add_unrest = -10
+			}
+		}
+		else = {
+			SVP = {
+				every_owned_province = {
+					add_unrest = -10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 5
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_uef.102.b # Don't set it up
+		ai_chance = {
+			factor = 75
+		}
+		add_legitimacy = 10
+	}
+}
+# Disaster end
+country_event = {
+	id = flavor_uef.199
+	title = "flavor_uef.199.title"
+	desc = "flavor_uef.199.desc"
+	picture = COURT_eventPicture
+
+	is_triggered_only = yes
+	
+	option = {
+		name = flavor_uef.199.a # Finally
+		Stab_Add2 = yes
+	}
+}
+# Information on the new mechanics
+country_event = {
+	id = flavor_uef.200
+	title = "flavor_uef.200.title"
+	desc = "flavor_uef.200.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.200.a"
+	}
+}
+# Centralisation information
+country_event = {
+	id = flavor_uef.201
+	title = "flavor_uef.201.title"
+	desc = "flavor_uef.201.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.201.a"
+	}
+}
+
+
+#############################################
+###### NETHERLANDS INDEPENDENCE EVENTS ######
+#############################################
+
+# Netherlands declare independence!
+country_event = {
+	id = flavor_uef.1001
+	title = "flavor_uef.1001.title"
+	desc = "flavor_uef.1001.desc"
+	picture = ANGRY_MOB_eventPicture
+	
+	major = yes
+	fire_only_once = yes
+	
+	trigger = {
+		has_global_flag = dutch_rebellion_start
+		OR = {
+			AND = {
+				has_country_flag = svp_creator
+				SVP = {
+					is_subject_of = ROOT
+					check_variable = { which = "Cores_on_the_Netherlands" value = 10 }
+				}
+			}
+			AND = {
+				OR = {
+					has_country_flag = uef_estates_general
+					has_country_flag = svp_abolished_estates
+				}
+				NOT = { exists = SVP }
+				check_variable = { which = "Demesne_in_the_Netherlands" value = 10 }
+			}
+		}
+		NOT = { exists = NED }
+		REB = {
+			check_variable = {
+				which = french_rebellion_desire
+				
+				# needs balancing
+				value = 22 # changed from 20
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 20
+		
+		modifier = {
+			factor = 0.75
+			REB = {
+				check_variable = {
+					which = french_rebellion_desire
+					value = 23
+				}
+			}
+		}
+		modifier = {
+			factor = 0.75
+			REB = {
+				check_variable = {
+					which = french_rebellion_desire
+					value = 25
+				}
+			}
+		}
+		modifier = {
+			factor = 0.50
+			REB = {
+				check_variable = {
+					which = french_rebellion_desire
+					value = 30
+				}
+			}
+		}
+		modifier = {
+			factor = 0.1
+			REB = {
+				check_variable = {
+					which = french_rebellion_desire
+					value = 40
+				}
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				NOT = { exists = NED }
+			}
+			NED = { clr_country_flag = POP_Init }
+		}
+		hidden_effect = {
+			# Flag NED provinces and count the number. Also reset the rebellion desire.
+			REB = {
+				set_variable = {
+					which = ned_core_count
+					value = 0
+				}
+				set_variable = {
+					which = french_rebellion_desire
+					value = -1000
+				}
+			}
+			
+			holland_area = {
+				if = {
+					limit = {
+						OR = {
+							owned_by = SVP
+							owned_by = ROOT
+						}
+						NOT = {
+							REB = {
+								check_variable = { which = ned_core_count value = 11 } #TUNING
+							}
+						}
+					}
+					set_province_flag = ned_core
+					REB = {
+						change_variable = {
+							which = ned_core_count
+							value = 1
+						}
+					}
+				}
+			}
+			gelderland_area = {
+				if = {
+					limit = {
+						NOT = { province_id = 2449 } #Opper-Gelre?
+						OR = {
+							owned_by = SVP
+							owned_by = ROOT
+						}
+						NOT = {
+							REB = {
+								check_variable = { which = ned_core_count value = 11 }
+							}
+						}
+					}
+					set_province_flag = ned_core
+					REB = {
+						change_variable = {
+							which = ned_core_count
+							value = 1
+						}
+					}
+				}
+			}
+			frisia_area = {
+				if = {
+					limit = {
+						OR = {
+							owned_by = SVP
+							owned_by = ROOT
+						}
+						NOT = {
+							REB = {
+								check_variable = { which = ned_core_count value = 11 }
+							}
+						}
+					}
+					set_province_flag = ned_core
+					REB = {
+						change_variable = {
+							which = ned_core_count
+							value = 1
+						}
+					}
+				}
+			}
+			flanders_area = {
+				if = {
+					limit = {
+						NOT = { province_id = 87 } #Flinde Lilos
+						NOT = { province_id = 90 } #Brugge
+						OR = {
+							owned_by = SVP
+							owned_by = ROOT
+						}
+						NOT = {
+							REB = {
+								check_variable = { which = ned_core_count value = 11 }
+							}
+						}
+					}
+					set_province_flag = ned_core
+					REB = {
+						change_variable = {
+							which = ned_core_count
+							value = 1
+						}
+					}
+				}
+			}
+			95 = { #Noord Brabant
+				if = {
+					limit = {
+						OR = {
+							owned_by = SVP
+							owned_by = ROOT
+						}
+						NOT = {
+							REB = {
+								check_variable = { which = ned_core_count value = 11 }
+							}
+						}
+					}
+					set_province_flag = ned_core
+					REB = {
+						change_variable = {
+							which = ned_core_count
+							value = 1
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 11
+							}
+						}
+					}
+				}
+				south_brabant_area = {
+					if = {
+						limit = {
+							NOT = { has_province_flag = ned_core }
+							NOT = { province_id = 92 } #Brussels
+							OR = {
+								owned_by = SVP
+								owned_by = ROOT
+							}
+							NOT = {
+								REB = {
+									check_variable = {
+										which = ned_core_count
+										value = 11
+									}
+								}
+							}
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 11
+							}
+						}
+					}
+				}
+				north_brabant_area = {
+					if = {
+						limit = {
+							NOT = { has_province_flag = ned_core }
+							OR = {
+								owned_by = SVP
+								owned_by = ROOT
+							}
+							NOT = {
+								REB = {
+									check_variable = {
+										which = ned_core_count
+										value = 11
+									}
+								}
+							}
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			# Escape clauses in the rare case NED core count has not reached 10 by now.
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 10
+							}
+						}
+					}
+				}
+				SVP = {
+					random_owned_province = {
+						limit = {
+							NOT = { has_province_flag = ned_core }
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 10
+							}
+						}
+					}
+				}
+				SVP = {
+					random_owned_province = {
+						limit = {
+							NOT = { has_province_flag = ned_core }
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 10
+							}
+						}
+					}
+				}
+				SVP = {
+					random_owned_province = {
+						limit = {
+							NOT = { has_province_flag = ned_core }
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 10
+							}
+						}
+					}
+				}
+				ROOT = {
+					random_owned_province = {
+						limit = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+							NOT = { has_province_flag = ned_core }
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 10
+							}
+						}
+					}
+				}
+				ROOT = {
+					random_owned_province = {
+						limit = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+							NOT = { has_province_flag = ned_core }
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						REB = {
+							check_variable = {
+								which = ned_core_count
+								value = 10
+							}
+						}
+					}
+				}
+				ROOT = {
+					random_owned_province = {
+						limit = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+							NOT = { has_province_flag = ned_core }
+						}
+						set_province_flag = ned_core
+						REB = {
+							change_variable = {
+								which = ned_core_count
+								value = 1
+							}
+						}
+					}
+				}
+			}
+			
+			# Add NED cores, remove SVP/overlord cores, cede to NED
+			low_countries_region = {
+				if = {
+					limit = {
+						has_province_flag = ned_core
+					}
+					add_core = NED
+				   #remove_core = SVP
+				   #remove_core = ROOT
+					cede_province = NED
+				}
+			}
+			belgii_region = {
+				if = {
+					limit = {
+						has_province_flag = ned_core
+					}
+					add_core = NED
+				   #remove_core = SVP
+				   #remove_core = ROOT
+					cede_province = NED
+				}
+			}
+			# Change NED capital to Zuyd Holland
+			NED = {
+				if = {
+					limit = {
+						owns = 2370 # Zuyd Holland
+					}
+					set_capital = 2370
+				}
+			}
+			# Give permanent claims to all over Low Countries to both NED and SVP
+			low_countries_region = {
+				if = {
+					limit = {
+						NOT = { is_core = NED }
+					}
+					add_permanent_claim = NED
+				}
+			}
+			belgii_region = {
+				if = {
+					limit = {
+						NOT = { is_core = NED }
+					}
+					add_permanent_claim = NED
+				}
+			}
+			if = {
+				limit = {
+					SVP = { exists = yes }
+				}
+				low_countries_region = {
+					if = {
+						limit = {
+							NOT = { is_core = SVP }
+						}
+						add_permanent_claim = SVP
+					}
+				}
+				belgii_region = {
+					if = {
+						limit = {
+							NOT = { is_core = SVP }
+						}
+						add_permanent_claim = SVP
+					}
+				}
+			}
+			# If SVP doesn't exist, give the claims to ROOT
+			else = {
+				low_countries_region = {
+					if = {
+						limit = {
+							NOT = { is_core = ROOT }
+						}
+						add_permanent_claim = ROOT
+					}
+				}
+				belgii_region = {
+					if = {
+						limit = {
+							NOT = { is_core = ROOT }
+						}
+						add_permanent_claim = ROOT
+					}
+				}
+			}
+			
+			# Give money
+			NED = {
+				add_treasury = 200
+			}
+			
+			# Build army and navy, add forts
+			NED = {
+				capital_scope = {
+					#if = {
+					#	limit = {
+					#		can_build_fort_18th = yes
+					#	}
+					#	add_building = fort_18th
+					#}
+					#else_if = {
+					#	limit = {
+					#		can_build_fort_17th = yes
+					#	}
+					#	add_building = fort_17th
+					#}
+					#else_if = {
+					#	limit = {
+					#		can_build_fort_16th = yes
+					#	}
+					#	add_building = fort_16th
+					#}
+					#else_if = {
+					#	limit = {
+					#		can_build_fort_15th = yes
+					#	}
+					#	add_building = fort_15th
+					#}
+					#else = {
+					#	add_building = fort_14th
+					#}
+					
+					# Should we/can we easily make the unit numbers dynamic?
+					infantry = NED
+					infantry = NED
+					infantry = NED
+					infantry = NED
+					infantry = NED
+					infantry = NED
+					infantry = NED
+					infantry = NED
+					cavalry = NED
+					cavalry = NED
+					artillery = NED
+					artillery = NED
+				}
+				random_owned_province = {
+					limit = {
+						is_capital = no
+						NOT = { has_building = fort_14th }
+						NOT = { has_building = fort_15th }
+						NOT = { has_building = fort_16th }
+						NOT = { has_building = fort_17th }
+						NOT = { has_building = fort_18th }
+					}
+					#if = {
+					#	limit = {
+					#		can_build_fort_18th = yes
+					#	}
+					#	add_building = fort_18th
+					#}
+					#else_if = {
+					#	limit = {
+					#		can_build_fort_17th = yes
+					#	}
+					#	add_building = fort_17th
+					#}
+					#else_if = {
+					#	limit = {
+					#		can_build_fort_16th = yes
+					#	}
+					#	add_building = fort_16th
+					#}
+					#else_if = {
+					#	limit = {
+					#		can_build_fort_15th = yes
+					#	}
+					#	add_building = fort_15th
+					#}
+					#else = {
+					#	add_building = fort_14th
+					#}
+				}
+				random_owned_province = {
+					limit = {
+						has_port = yes
+					}
+					# 5 heavies, 15 lights
+					heavy_ship = NED
+					heavy_ship = NED
+					heavy_ship = NED
+					heavy_ship = NED
+					heavy_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+					light_ship = NED
+				}
+			}
+			# Change national ideas
+			NED = {
+				swap_national_ideas_effect = yes
+				swap_non_generic_missions = yes
+			}
+			# Send event to rivals and possible enemies
+			every_known_country = {
+				limit = {
+					#OR = {
+					#	AND = {
+					#		NOT = { has_opinion = { who = ROOT value = 0 } }
+					#		is_great_power = yes
+					#		capital_scope = {
+					#			continent = europe
+					#		}
+					#	}
+						is_rival = ROOT
+					#}
+				}
+				country_event = { id = flavor_uef.1002 days = 10 }
+			}
+			# Leave the Empire if fighting emperor or HRE member
+			if = {
+				limit = {
+					OR = {
+						is_emperor = yes
+						is_part_of_hre = yes
+					}
+				}
+				NED = { leave_the_hre = yes }
+			}
+
+			# SVP should now be a personal union. The rebelling parts have seceded.
+			if = {
+				limit = {
+					SVP = {
+						exists = yes
+					}
+				}
+				create_union = SVP
+			}
+			
+			# Remove the estates general modifiers
+			NED = {
+				every_owned_province = {
+					remove_province_modifier = uef_estates_general_1
+					remove_province_modifier = uef_estates_general_2
+					remove_province_modifier = uef_estates_general_3
+				}
+			}
+			NED = {
+				if = {
+					limit = {
+						NOT = { has_country_flag = POP_Init }
+					}
+					country_event = { id = Init.1 }
+				}
+			}
+			
+			# Flags
+			clr_global_flag = dutch_rebellion_start
+			set_global_flag = dutch_rebellion_end
+		}
+	}
+	option = {
+		name = "flavor_uef.230.a"
+		ROOT = {
+			declare_war_with_cb = {
+				who = NED
+				casus_belli = cb_overlord_attacking_independence_war
+			}
+		}
+	}
+}
+
+# Netherlands calls allies
+country_event = {
+	id = flavor_uef.1002
+	title = "flavor_uef.1002.title"
+	desc = "flavor_uef.1002.desc"
+	picture = ANGRY_MOB_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.1002.a" # Intervene in the war
+		ai_chance = { factor = 60 }
+		trigger = {
+			NOT = { war_exhaustion = 10 }
+		}
+		create_alliance = NED
+		hidden_effect = {
+			NED = {
+				country_event = { id = flavor_uef.1004 }
+			}
+		}
+	}
+	option = {
+		name = "flavor_uef.1002.b" # Send money and troops
+		trigger = {
+			treasury = 200
+			manpower = 5000
+		}
+		ai_chance = { factor = 40 }
+		
+		add_treasury = -200
+		add_manpower = -5000
+		
+		hidden_effect = {
+			NED = {
+				country_event = { id = flavor_uef.1005 }
+			}
+		}
+	}
+	option = {
+		name = "OPT.DONOTHING"
+		ai_chance = { factor = 0 }
+		add_prestige = -10
+	}
+}
+
+# Country intervenes in our side
+country_event = {
+	id = flavor_uef.1004
+	title = "flavor_uef.1004.title"
+	desc = "flavor_uef.1004.desc"
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.1004.a" #Good
+		
+		# A custom tooltip would be nice to have.
+	}
+}
+
+# Country sends money and troops
+country_event = {
+	id = flavor_uef.1005
+	title = "flavor_uef.1005.title"
+	desc = "flavor_uef.1005.desc"
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.1005.a" #Good
+		
+		add_treasury = 200
+		add_manpower = 5000
+		
+		# Maybe an opinion modifier?
+	}
+}
+
+# Dutch state joins the Netherlands
+country_event = {
+	id = flavor_uef.16
+	title = "flavor_svp.EVTNAME16"
+	desc = "flavor_svp.EVTDESC16"
+	picture = DIPLOMACY_eventPicture
+	
+	major = yes
+	
+	trigger = {
+		#is_year = 1550
+		#NOT = { is_year = 1650 }
+		culture_group = low_frankish
+		NOT = { num_of_cities = 3 }
+		NOT = { tag = NED }
+		NED = {
+			exists = yes
+			ai = yes
+			is_free_or_tributary_trigger = yes
+		}
+		is_free_or_tributary_trigger = yes
+		is_at_war = no
+		all_owned_province = {
+			OR = {
+				region = belgii_region
+				region = low_countries_region
+			}
+		}
+		ai = yes
+	}
+	
+	mean_time_to_happen = {
+		years = 50
+		modifier = {
+			factor = 0.75
+			primary_culture = dutch
+		}
+		modifier = {
+			factor = 1.25
+			primary_culture = flemish
+		}
+		modifier = {
+			factor = 1.25
+			primary_culture = brabantian
+		}
+		modifier = {
+			factor = 0.9
+			has_opinion = {
+				who = NED
+				value = 50
+			}
+		}
+		modifier = {
+			factor = 0.9
+			has_opinion = {
+				who = NED
+				value = 100
+			}
+		}
+		modifier = {
+			factor = 0.9
+			has_opinion = {
+				who = NED
+				value = 150
+			}
+		}
+		modifier = {
+			factor = 1.1
+			NOT = {
+				has_opinion = {
+					who = NED
+					value = -50
+				}
+			}
+		}
+		modifier = {
+			factor = 1.1
+			NOT = {
+				has_opinion = {
+					who = NED
+					value = -100
+				}
+			}
+		}
+		modifier = {
+			factor = 1.1
+			NOT = {
+				has_opinion = {
+					who = NED
+					value = -150
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = "flavor_svp.EVTOPTA16"
+		every_owned_province = {
+			add_core = NED
+		}
+		NED = {
+			inherit = PREV
+		}
+	}
+}

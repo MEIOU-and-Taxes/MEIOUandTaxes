@@ -205,4 +205,320 @@ country_decisions = {
 			factor = 1
 		}
 	}
+
+	# uef information decision
+	uef_information = {
+		potential = {
+			ai = no
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			tag = ENG
+		}
+		allow = {
+			always = yes
+		}
+		effect = {
+			country_event = {
+				id = flavor_uef.200
+			}
+		}
+		ai_will_do = {
+			factor = 0
+		}
+	}
+	# Demand taxes from the Estates-General
+	uef_demand_taxes = {
+		potential = {
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			has_country_flag = uef_estates_general
+		}
+		allow = {
+			NOT = { has_country_modifier = uef_demanded_tax_recently } # You can demand every 5 years
+		}
+		effect = {
+			add_country_modifier = {
+				name = uef_demanded_tax_recently
+				duration = 1825
+			}
+			hidden_effect = {
+				AAA = {
+					country_event = { id = flavor_uef.2 } # The calculation event
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+	# Demand joining war from the Estates-General
+	uef_demand_join_war = {
+		potential = {
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			has_country_flag = uef_estates_general
+		}
+		allow = {
+			NOT = { has_country_modifier = uef_demanded_war_recently } # You can demand every 10 years
+		}
+		effect = {
+			add_country_modifier = {
+				name = uef_demanded_war_recently
+				duration = 3650
+			}
+			hidden_effect = {
+				AAA = {
+					country_event = { id = flavor_uef.9 } # The calculation event
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+				
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+		
+	# Increase centralization efforts
+	uef_increase_centralization = {
+		potential = {
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			has_country_flag = uef_estates_general
+		}
+		allow = {
+			NOT = { has_country_modifier = uef_centralized_recently } # You can demand every 50 years = 18250 days
+			is_at_war = no
+			stability = 1
+		}
+		effect = {
+			Stab_Subtract1 = yes
+			hidden_effect = {
+				add_country_modifier = {
+					name = uef_centralized_recently
+					duration = 18250
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = uef_estates_general
+					any_owned_province = {
+						has_province_modifier = uef_estates_general_1
+					}
+				}
+				every_owned_province = {
+					limit = {
+						has_province_modifier = uef_estates_general_1
+					}
+					remove_province_modifier = uef_estates_general_1
+					add_province_modifier = {
+						name = uef_estates_general_2
+						duration = -1
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_country_flag = uef_estates_general
+					any_owned_province = {
+						has_province_modifier = uef_estates_general_2
+					}
+				}
+				every_owned_province = {
+					limit = {
+						has_province_modifier = uef_estates_general_2
+					}
+					remove_province_modifier = uef_estates_general_2
+					add_province_modifier = {
+						name = uef_estates_general_3
+						duration = -1
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_global_flag = hundred_years_war_ENG_win
+					FRA = {
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_1
+						}
+					}
+				}
+				FRA = {
+					every_owned_province = {
+						limit = {
+							has_province_modifier = uef_estates_general_1
+						}
+						remove_province_modifier = uef_estates_general_1
+						add_province_modifier = {
+							name = uef_estates_general_2
+							duration = -1
+						}
+					}
+				}
+			}
+			else = {
+				FRA = {
+					every_owned_province = {
+						limit = {
+							has_province_modifier = uef_estates_general_2
+						}
+						remove_province_modifier = uef_estates_general_2
+						add_province_modifier = {
+							name = uef_estates_general_3
+							duration = -1
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	# Create inquisition in France
+	uef_create_inquisition = {
+		potential = {
+			overlord_of = FRA
+			OR = {
+				AND = {
+					OR = {
+						religion = protestant
+						religion = reformed
+					}
+					FRA = {
+						religion = catholic
+						any_owned_province = {
+							religion = catholic
+						}
+					}
+				}
+				AND = {
+					religion = catholic
+					FRA = {
+						OR = {
+							religion = protestant
+							religion = reformed
+						}
+						any_owned_province = {
+							OR = {
+								religion = protestant
+								religion = reformed
+							}
+						}
+					}
+				}
+			}
+			NOT = { has_country_flag = uef_inquisition }
+		}
+		allow = {
+			is_at_war = no
+			treasury = 100
+		}
+		effect = {
+			set_country_flag = uef_inquisition
+			add_treasury = -100
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_flag = uef_estates_general
+					}
+					change_variable = {
+						which = inquisition
+						value = 2
+					}
+				}
+				else = {
+					change_variable = {
+						which = inquisition
+						value = 1
+					}
+					FRA = {
+						change_variable = {
+							which = inquisition
+							value = 2
+						}
+					}
+				}
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+	}
+	
+# Cancel the inquisition
+	uef_cancel_inquisition = {
+		potential = {
+			has_country_flag = uef_inquisition
+		}
+		allow = {
+			is_at_war = no
+			had_country_flag = {
+				flag = uef_inquisition
+				days = 3650
+			}
+		}
+		effect = {
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_flag = uef_estates_general
+					}
+					set_variable = {
+						which = inquisition
+						value = 0
+					}
+				}
+				else = {
+					set_variable = {
+						which = inquisition
+						value = 0
+					}
+					FRA = {
+						set_variable = {
+							which = inquisition
+							value = 0
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				clr_country_flag = uef_inquisition
+				REB = {
+					subtract_variable = {
+						which = french_rebellion_desire
+						value = 2
+					}
+				}
+			}
+		}
+	}
 }

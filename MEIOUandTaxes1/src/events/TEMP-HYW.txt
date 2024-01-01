@@ -1369,7 +1369,7 @@ country_event = {
 	trigger = {
 		tag = FRA
 		exists = SCO
-		has_country_flag = treaty_of_troyes
+		has_global_flag = treaty_of_troyes
 		NOT = { has_country_flag = Scottish_help }
 	}
 
@@ -1388,7 +1388,7 @@ country_event = {
 country_event = {
 	id = flavor_hyw.200
 	title = "flavor_hyw.200.t"
-	desc = "flavor_hyw.200.d"
+	desc = "flavor_hyw.200.desc"
 	picture = DIPLOMACY_SIGNING_eventPicture
 	major = yes
 	is_triggered_only = yes
@@ -1443,14 +1443,11 @@ country_event = {
 	
 	trigger = {
 		tag = ENG
-		had_global_flag = { flag = hundred_years_war_ENG_win days = 1825 }
+		has_global_flag = hundred_years_war_ENG_win
 		FRA = {
 			is_subject_of_type_with_overlord = {
 				who = ENG
 				type = permanent_union_limited
-			}
-			NOT = {
-				liberty_desire = 25
 			}
 		}
 	}
@@ -1463,26 +1460,77 @@ country_event = {
 	# Move to Paris and France being the senior partner rather than minor partner.
 	option = {
 		name = "flavor_hyw.201.a"
+		ai_chance = {
+			factor = 90
+		}
 		inherit = FRA
 		change_tag = FRA
 		release = ENG
 		create_subject = { subject_type = permanent_union_limited subject = ENG }
+		hidden_effect = {
+			REB = {
+				set_variable = {
+					which = french_rebellion_desire
+					value = 5
+				}
+			}
+		}
 		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Moves to Paris and begins to behave like a French man:flavor_hyw.201"
 	}
 
 	#Middle option, appoints a regent for his newly conquered realm.
 	#This could be very bad for WoR
+	option = {
+		name = "flavor_hyw.201.b"
+		ai_chance = {
+			factor = 5
+		}
+
+		hidden_effect = {
+			REB = {
+				set_variable = {
+					which = french_rebellion_desire
+					value = 7
+				}
+			}
+		}
+
+		inherit = FRA
+		create_subject = { subject_type = uef_permanent_union subject = FRA }
+		FRA = {
+			define_ruler = {
+				dynasty = ROOT
+			}
+		}
+
+		france_superregion = {
+			limit = {
+				owned_by = ROOT
+			}
+			add_province_modifier = {
+				name = french_resistance
+				duration = -1
+			}
+		}
+		set_country_flag = plantagenet_french_regent
+
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Stays in London but send a faimly member to rule in his name:flavor_hyw.201"
+	}
 
 	# A French prince can become the focal point for French rebellion
 	# A bit like House of Braganza in Portugal
 	option = {
-		name = "flavor_hyw.201.b"
-		hidden_effect = {
-			set_variable = { which = french_rebellion_desire value = 10 }
+		name = "flavor_hyw.201.c"
+		ai_chance = {
+			factor = 5
 		}
-		add_country_modifier = {
-			name = french_rebellion_desire_modifier
-			duration = -1
+		hidden_effect = {
+			REB = {
+				set_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
 		}
 		if = {
 			limit = {
@@ -1499,6 +1547,218 @@ country_event = {
 			}
 		}
 		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Rejected the choice to become French:flavor_hyw.201"
+		set_country_flag = king_of_isles
+		france_superregion = {
+			limit = {
+				owned_by = ROOT
+			}
+			add_province_modifier = {
+				name = uef_estates_general_1
+				duration = -1
+			}
+		}
+	}
+
+	after = {
+		set_country_flag = uef_estates_general
+		add_country_modifier = {
+			name = french_rebellion_desire_modifier
+			duration = -1
+		}
+	}
+}
+
+#How do we deal with Northern France, Is it a English Possession or a French one?
+country_event = {
+	id = flavor_hyw.202
+	title = "flavor_hyw.202.t"
+	desc = "flavor_hyw.202.d"
+	picture = DIPLOMACY_SIGNING_eventPicture
+	major = yes
+	is_triggered_only = yes
+	
+	#Give it back to France
+	option = {
+		name = "flavor_hyw.202.a"
+		ai_chance = {
+			factor = 90
+		}
+
+		
+	}
+
+	#We will keep it
+	option = {
+		name = "flavor_hyw.202.b"
+		ai_chance = {
+			factor = 10
+		}
+		trigger = {
+			NOT =  { has_country_flag = plantagenet_french_regent }
+		}
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		france_superregion = {
+			limit = {
+				owned_by = ROOT
+			}
+			add_nationalism	= 15
+		}
+	}
+
+	#We will keep it
+	option = {
+		name = "flavor_hyw.202.c"
+		ai_chance = {
+			factor = 10
+		}
+		trigger = {
+			has_country_flag = plantagenet_french_regent
+		}
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		france_superregion = {
+			limit = {
+				owned_by = ROOT
+			}
+			add_nationalism	= 15
+		}
+	}
+}
+
+#How do we deal with Aquitaine, Is it a English Possession or a French one?
+country_event = {
+	id = flavor_hyw.203
+	title = "flavor_hyw.203.t"
+	desc = "flavor_hyw.203.d"
+	picture = DIPLOMACY_SIGNING_eventPicture
+	major = yes
+	is_triggered_only = yes
+	
+	#Give it back to France
+	option = {
+		name = "flavor_hyw.203.a"
+		ai_chance = {
+			factor = 90
+		}
+	}
+
+	#We will keep it
+	option = {
+		name = "flavor_hyw.203.b"
+		ai_chance = {
+			factor = 10
+		}
+		trigger = {
+			NOT =  { has_country_flag = plantagenet_french_regent }
+		}
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+	}
+
+	#We will keep it
+	option = {
+		name = "flavor_hyw.203.c"
+		ai_chance = {
+			factor = 10
+		}
+		trigger = {
+			has_country_flag = plantagenet_french_regent
+		}
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+	}
+}
+
+#How do we deal with Calais, Is it a English Possession or a French one?
+country_event = {
+	id = flavor_hyw.204
+	title = "flavor_hyw.204.t"
+	desc = "flavor_hyw.204.d"
+	picture = DIPLOMACY_SIGNING_eventPicture
+	major = yes
+	is_triggered_only = yes
+	
+	#Give it back to France
+	option = {
+		name = "flavor_hyw.204.a"
+		ai_chance = {
+			factor = 90
+		}
+	}
+
+	#We will keep it
+	option = {
+		name = "flavor_hyw.204.b"
+		ai_chance = {
+			factor = 10
+		}
+		trigger = {
+			NOT =  { has_country_flag = plantagenet_french_regent }
+		}
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+	}
+
+	#We will keep it
+	option = {
+		name = "flavor_hyw.204.c"
+		ai_chance = {
+			factor = 10
+		}
+		trigger = {
+			has_country_flag = plantagenet_french_regent
+		}
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
 	}
 }
 
