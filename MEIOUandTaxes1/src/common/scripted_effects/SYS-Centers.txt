@@ -97,7 +97,7 @@ TN_effect10 = {
 TN_effect11 = {
 	if = { # if province is owned by owner and has a merchant or is capital
 		limit = {
-			is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
+			owned_by = event_target:ProvNew
 		}
 		every_trade_node_member_province = {
 			limit = { # flag all the sectors that belong to the same node as the previous province and flag them as trade partners 
@@ -1801,7 +1801,7 @@ TN_effect20 = {
 				AND = {
 					event_target:ProvNew = { num_of_cities = 10 }
 					any_trade_node_member_province = {
-						is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
+						owned_by = event_target:ProvNew
 						has_province_flag = TN_SectorCent
 					}
 				}
@@ -1817,8 +1817,14 @@ TN_effect20 = {
 		if = {
 			limit = { # Check if that sector also can spread trude further  Can keep spreading only if both have sea access.
 				OR = {
-					is_key_equal = { lhs = Sector_TagID which = PREV }
-					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 }
+					owned_by = PREV
+					owner = {
+						is_colonial_nation_of = event_target:ProvNew
+						capital_scope = {
+							same_trade_node_as = PREV_PREV
+						}
+					}
+						
 				}
 				OR = {
 					has_global_flag = Is_TN_Dominant
@@ -1905,7 +1911,7 @@ TN_effect20 = {
 
 		if = {
 			limit = {
-				NOT = { is_key_equal = { lhs = Sector_TagID which = PREV } }
+				NOT = { owned_by = PREV }
 			}
 			change_key = { lhs = Public_Tmp1 value = 0.5 } 
 		}		
@@ -1915,13 +1921,13 @@ TN_effect21 = {
 	# Find if it is connected
 
 	set_province_flag = TN_SectorCentReachWithin
-    save_event_target_as = Plague
+    save_event_target_as = DistanceCalcTarget
     
     tradenode_mult_$id$ = {      
         limit = {
             has_province_flag = TN_SectorCent
             OR = {
-                is_key_equal = { lhs = Sector_TagID which = PREV }
+                owned_by = PREV
                 has_province_flag = TradePost@event_target:ProvNew
             }
         }
@@ -1935,7 +1941,7 @@ TN_effect21 = {
             every_owned_province = {
                 limit = {
                     has_province_flag = TN_SectorCent                            
-                    NOT = { check_key = { lhs = Public_Tmp1 which = event_target:Plague } } # Shorter distance    
+                    NOT = { check_key = { lhs = Public_Tmp1 which = event_target:DistanceCalcTarget } } # Shorter distance    
                 }
                 set_province_flag = jumped_success
             }
@@ -1971,8 +1977,13 @@ TN_effect22 = { # Connect, jump and spread. Dominants
 
 			OR = {
 				OR = {
-					is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
-					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
+					owned_by = event_target:ProvNew
+					owner = {
+						is_colonial_nation_of = event_target:ProvNew
+						capital_scope = {
+							same_trade_node_as = PREV_PREV
+						}
+					} # This is the node where the capital of the Colonial Nation exists.
 				}
 
 				AND = {
@@ -2004,14 +2015,6 @@ TN_effect22 = { # Connect, jump and spread. Dominants
 		PREV = { set_province_flag = jumped_success }
 		
 		if = {
-			limit = {
-				OR = {
-					is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
-					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
-				}
-			}	
-		}
-		else_if = {
 			limit = {
 				has_province_flag = TradePost@event_target:ProvNew # Connect with everything inside
 			}
@@ -2081,8 +2084,13 @@ TN_effect24 = { # Connect, jump and spread.
 			}
 
 			OR = {
-					is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
-				has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
+					owned_by = event_target:ProvNew
+				owner = {
+						is_colonial_nation_of = event_target:ProvNew
+						capital_scope = {
+							same_trade_node_as = PREV_PREV
+						}
+					} # This is the node where the capital of the Colonial Nation exists.
 
 				AND = {		
 					has_province_flag = TN_COT_M	
@@ -2115,8 +2123,13 @@ TN_effect24 = { # Connect, jump and spread.
 		if = {
 			limit = {
 				OR = {
-					is_key_equal = { lhs = Sector_TagID which = event_target:ProvNew }
-					has_trade_modifier = { who = event_target:ProvNew key = trade_capital_2 } # This is the node where the capital of the Colonial Nation exists.
+					owned_by = event_target:ProvNew
+					owner = {
+						is_colonial_nation_of = event_target:ProvNew
+						capital_scope = {
+							same_trade_node_as = PREV_PREV
+						}
+					} # This is the node where the capital of the Colonial Nation exists.
 				}
 			}			
 			set_province_flag = TN_SectorCentReachSpread2

@@ -315,6 +315,7 @@ def compile(compress=False, parse_init=True):
 		'map',
 		'descriptor.mod',
 		'thumbnail.png',
+		'meiou.txt',
 		'checksum_manifest.txt'
 	]
 

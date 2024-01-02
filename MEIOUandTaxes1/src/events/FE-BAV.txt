@@ -17,25 +17,29 @@ namespace = flavor_bav
 # 		add_papal_influence = 5
 # 	}
 # }
+
+### RIVARLY WITH THE HABSBURGS ###
+
 country_event = {
-	id = flavor_bav.3 #Rivalry with the Habsburgs
+	id = flavor_bav.3
 	title = flavor_bav.3.t
 	desc = flavor_bav.3.d
 	picture = COURT_eventPicture
 	fire_only_once = yes
+	major = yes
 	trigger = {
 		OR = {
 			tag = BAV
 			num_of_cities = 8
 		}
 		primary_culture = bavarian
-		is_year = 1450
-		NOT = { is_year = 1500 }
+		dip_tech = 20
 		dynasty = "von Wittelsbach"
 		HAB = {
 			exists = yes
 			is_emperor = yes
 			dynasty = "von Habsburg"
+			NOT = { dip_tech = 30 }
 		}
 	}
 	mean_time_to_happen = {
@@ -49,8 +53,8 @@ country_event = {
 				modifier = bav_against_habsburg
 			}
 		}
-		add_legitimacy = 5
-		add_prestige = 5
+		add_legitimacy = 10
+		add_prestige = 10
 		log = "FE-BAV:[GetYear]:[Root.GetName]:chose to oppose Habsburgs:flavor_bav.3"
 	}
 	option = {
@@ -65,8 +69,11 @@ country_event = {
 		log = "FE-BAV:[GetYear]:[Root.GetName]:chose to reconcile with Habsburgs:flavor_bav.3"
 	}
 }
+
+### THE HISTORIAN OF BAVARIA ###
+
 country_event = {
-	id = flavor_bav.4 #The Historian of Bavaria
+	id = flavor_bav.4
 	title = flavor_bav.4.t
 	desc = flavor_bav.4.d
 	picture = INVENTION_eventPicture
@@ -77,65 +84,78 @@ country_event = {
 			num_of_cities = 8
 		}
 		primary_culture = bavarian
-		is_year = 1510
-		NOT = { is_year = 1520 }
+		is_year = 1500
+		NOT = { is_year = 1525 }
 	}
 	mean_time_to_happen = {
 		months = 36
 	}
 	option = {
 		name = flavor_bav.4.a
-		add_years_of_income = -0.25
-		add_prestige = 5
+		add_treasury = -25
+		add_prestige = 10
 		add_legitimacy = 10
 	}
 	option = {
 		name = flavor_bav.4.b
-		add_prestige = -1
+		add_prestige = -5
 	}
 }
-# country_event = {
-# 	id = flavor_bav.5 #The Duke invites the Jesuits into Bavaria
-# 	title = flavor_bav.5.t
-# 	desc = flavor_bav.5.d
-# 	picture = RELIGION_eventPicture
-# 	fire_only_once = yes
-# 	trigger = {
-# 		tag = BAV
-# 		is_year = 1520
-# 		NOT = {is_year = 1560 }
-# 		is_religion_enabled = protestant
-# 		religion = catholic
-# 		dominant_religion = catholic
-# 		has_country_modifier = DG_Counter_Reformation
-# 	}
-# 	mean_time_to_happen = {
-# 		years = 10
-# 	}
-# 	option = {
-# 		name = flavor_bav.5.a
-# 		add_papal_influence = 10
-# 		add_country_modifier = {
-# 			name = "bavarian_jesuits"
-# 			duration = -1
-# 		}
-# 	}
-# 	option = {
-# 		name = flavor_bav.5.b
-# 		trigger = {
-# 			exists = PAP
-# 		}
-# 		PAP = {
-# 			add_opinion = {
-# 				who = ROOT
-# 				modifier = bav_jesuits_rejected
-# 			}
-# 		}
-# 		add_papal_influence = -10
-# 	}
-# }
+
+### THE DUKE INVITES THE JESUITS INTO BAVARIA ###
+
 country_event = {
-	id = flavor_bav.6 #The Splendor of Antiquarium
+ 	id = flavor_bav.5
+ 	title = flavor_bav.5.t
+ 	desc = flavor_bav.5.d
+	picture = RELIGION_eventPicture
+ 	fire_only_once = yes
+ 	trigger = {
+ 		tag = BAV
+ 		PAP = { has_country_flag = jesuits_founded }
+ 		religion = catholic
+		NOT = { religious_unity = 1.00 }
+		NOT = { check_variable = { which = jesuit_support value = 1 } }
+		NOT = { has_country_flag = jesuits_suppressed }
+		NOT = { is_excommunicated = yes }
+ 	}
+ 	mean_time_to_happen = {
+ 		years = 2
+ 	}
+ 	option = {
+ 		name = flavor_bav.5.a
+ 		CL_EmpowerClergy = yes
+		custom_tooltip = CL_EmpowerClergy_effect
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		hidden_effect = {
+			change_variable = { which = jesuit_support value = 2 }
+		}
+ 		add_country_modifier = {
+ 			name = "bavarian_jesuits"
+ 			duration = -1
+ 		}
+ 	}
+ 	option = {
+ 		name = flavor_bav.5.b
+		add_country_modifier = {
+			name = hee_acceptance
+			duration = 3650
+		}
+ 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		set_country_flag = jesuits_suppressed
+		PAP = {
+ 			add_opinion = {
+ 				who = ROOT
+ 				modifier = bav_jesuits_rejected
+			}
+ 		}
+ 	}
+}
+
+### THE SPLENDOR OF ANTIQUARIUM ###
+
+country_event = {
+	id = flavor_bav.6
 	title = flavor_bav.6.t
 	desc = flavor_bav.6.d
 	picture = IMPORTANT_STATUE_eventPicture
@@ -146,8 +166,8 @@ country_event = {
 			num_of_cities = 8
 		}
 		primary_culture = bavarian
-		is_year = 1550
-		NOT = { is_year = 1600 } #changed from 1580, as it is not about specific ruler (used to be about Albert V)
+		has_institution = Casual_Literacy
+		NOT = { adm_tech = 41 }
 		owns = 65 #Munchen/Munich
 	}
 	mean_time_to_happen = {
@@ -178,6 +198,7 @@ country_event = {
 		add_prestige = -5
 	}
 }
+
 country_event = {
 	id = flavor_bav.202 #One Bavaria
 	#TODO: check why is it an event, isn't there a mission for that?
@@ -692,24 +713,27 @@ country_event = {
 		}
 	}
 }
+
+### DUKE ALBERT'S CAMPAIGNS AGAINST ROBBER BARONS ###
+
 country_event = {
-	id = flavor_bav.301 #Duke Albert's Campaigns Against Robber Barons
+	id = flavor_bav.301
 	title = flavor_bav.301.t
 	desc = flavor_bav.301.d
 	picture = BORDER_TENSION_eventPicture
 	fire_only_once = yes
 	trigger = {
 		tag = BAV
-		NOT = {	is_year = 1555 }
-		owns_core_province = 65 #Munchen/Munich
+		NOT = {	adm_tech = 36 }
+		num_of_cities = 6
 	}
 	mean_time_to_happen = {
 		years = 10
 	}
 	option = {
 		name = flavor_bav.301.a
-		add_years_of_income = -0.25
-		add_manpower = -2
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-5 }
+		add_mil_power = -50
 		add_country_modifier = {
 			name = hee_fought_robber_barons
 			duration = 3650
@@ -717,15 +741,40 @@ country_event = {
 	}
 	option = {
 		name = flavor_bav.301.b
-		add_treasury = 25
+		random_owned_province = {
+		    limit = {
+ 				NOT = { has_province_modifier = peasants_organizing }
+ 				is_capital = no
+ 			}
+			random_list = {
+			    50 = {
+				    add_province_modifier = {
+ 				        name = "peasants_organizing"
+ 				        duration = 3650
+ 			        }
+ 			        custom_tooltip = peasants_organizing_tt
+ 			        add_unrest = 25
+				}
+				50 = {
+				    spawn_rebels = {
+				        type = mob_rebels
+				        size = 1
+			        }
+				}
+			}
+		}
 	}
 }
+
+### ONE DUCHY, UNITED ###
+
 country_event = {
-	id = flavor_bav.302 #One Duchy, United
+	id = flavor_bav.302
 	title = flavor_bav.302.t
 	desc = flavor_bav.302.d
 	picture = CONQUEST_eventPicture
 	fire_only_once = yes
+	major = yes
 	trigger = {
 		tag = BAV
 		NOT = { exists = BAW }
@@ -736,31 +785,35 @@ country_event = {
 			OR = {
 				AND = {
 					culture = bavarian
-					NOT = {	local_autonomy = 20	}
+					NOT = {	local_autonomy = 30	}
 				}
 				NOT = {	culture = bavarian }
 			}
 		}
 	}
 	mean_time_to_happen = {
-		years = 5
+		years = 2
 	}
 	option = {
 		name = flavor_bav.302.a
 		Stab_Add50Percent = yes
 		add_legitimacy = 25
+		add_prestige = 10
 	}
 }
+
+### RECONCILATION WITH THE HABSBURGS ###
+
 country_event = {
-	id = flavor_bav.303 #Reconciliation With the Habsburgs
+	id = flavor_bav.303
 	title = flavor_bav.303.t
 	desc = flavor_bav.303.d
 	picture = DIPLOMACY_eventPicture
 	fire_only_once = yes
+	major = yes
 	trigger = {
 		tag = BAV
-		is_year = 1520
-		NOT = {	is_year = 1600 }
+		dip_tech = 32
 		is_at_war = no
 		NOT = {	is_rival = HAB }
 		is_lesser_in_union = no
@@ -776,6 +829,7 @@ country_event = {
 	}
 	option = {
 		name = flavor_bav.303.a
+		add_dip_power = -25
 		HAB = {
 			add_opinion = {
 				who = ROOT
