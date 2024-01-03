@@ -39,7 +39,7 @@ country_decisions = {
 			war_with = ENG
 			is_year = 1359
 			has_country_flag = ruler_prisonner_of_war
-			war_exhaustion = 15
+			#war_exhaustion = 15		#Also just don't do this check as its just antoher point of failure
 			OR = {
 				NOT = { has_country_flag = negociating_release_jean }
 				had_country_flag = { flag = negociating_release_jean days = 365 }
@@ -49,17 +49,96 @@ country_decisions = {
 			set_heir = heir_fra_hyw_pow
 			Stab_Subtract2 = yes
 			custom_tooltip = POP_NOLoyProv_-50
-			hidden_effect = { 
-				every_owned_province = {
-					subtract_variable = { 
-						which = asq
-						value = 50
-					}
-				}
-			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-50 }
 			add_heir_claim = -50
 			clr_country_flag = ruler_prisonner_of_war
 		}
+		ai_will_do = {
+			factor = 0
+		}
+	}
+
+	#Explanation
+	enforce_treaty = {
+		potential = {
+			OR = {
+				tag = ENG
+				war_with = FRA
+			}
+			OR = {
+				tag = FRA
+				war_with = ENG
+			}
+			has_global_flag = hundred_years_war
+		}
+		allow = {
+			is_in_war = {
+				casus_belli = cb_hyw_treaty
+			}
+			OR = {
+				AND = {
+					war_score_against = {
+						who = FRA
+						value = 75
+					}
+					tag = ENG
+				}
+				AND = {
+					war_score_against = {
+						who = ENG
+						value = 75
+					}
+					tag = FRA
+				}
+			}
+			
+		}
+		effect = {
+			enforce_hyw_treaty_effect = yes
+		}
+	}
+
+	eng_gave_up_hyw = {
+		potential = {
+			tag = ENG
+			has_global_flag = hundred_years_war
+			has_global_flag = treaty_of_arras 
+			NOT = { has_country_flag = eng_gave_up_hyw } 
+		}
+		allow = {
+			is_at_war = no
+		}
+		effect = {
+			set_country_flag = eng_gave_up_hyw
+			if = {
+				limit = {
+					GUY = {
+						exists = yes
+						is_subject_of = ROOT
+					}
+				}
+
+				FRA = {
+					create_subject = {
+						subject_type = daimyo_vassal
+						subject = GUY
+					}
+				}
+
+				GUY = {
+					define_ruler = {
+						dynasty = ROOT
+					}
+
+					add_liberty_desire = -50	
+				}
+			}
+			enforce_treaty_bretigny_fra = yes
+			enforce_treaty_bruges = yes
+			enforce_treaty_arras = yes
+			enforce_treaty_castillion = yes
+		}
+
 		ai_will_do = {
 			factor = 0
 		}

@@ -288,6 +288,7 @@ def compile(compress=False, parse_init=True):
 	# files/paths to link instead of parsing
 	link = [
 		[ 'common', 'graphicalculturetype.txt' ],
+        [ 'common', 'ages' ],
 		[ 'common', 'bookmarks' ],
 		[ 'common', 'countries' ],
 		[ 'common', 'country_colors' ],
