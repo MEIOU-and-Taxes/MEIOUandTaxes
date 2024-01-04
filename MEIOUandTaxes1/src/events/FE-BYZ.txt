@@ -1,0 +1,1563 @@
+########################################
+# Flavor Events for the Eastern Roman Empire
+#
+# Scripted by Oriol Bassols
+########################################
+
+#country_event = { ### Disabled by Demian.  Guarentees victory for player over Turks
+#	id = flavor_byz.1
+#	title = "flavor_byz.1.n"
+#	desc = "flavor_byz.1.t"
+#	picture = NAVAL_MILITARY_eventPicture
+#	
+#	fire_only_once = yes
+#
+#	trigger = {
+#		tag = BYZ
+#		OR = {
+#			defensive_war_with = TUR
+#			defensive_war_with = OTT
+#		}
+#		OR = {
+#			exists = VEN
+#			exists = GEN
+#		}
+#		NOT = { is_year = 1453 }
+#	}
+#
+#	mean_time_to_happen = {
+#		months = 2
+#	}
+#
+#	option = {
+#		name = "flavor_byz.1.a"
+#		trigger = {
+#			exists = VEN
+#		}
+#		ai_chance = {
+#			factor = 40
+#			modifier = {
+#				factor = 2.0
+#				treasury = 250
+#			}
+#		}
+#		add_inflation = 20
+#		VEN = { add_treasury = 200 }
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#	}
+#	option = {
+#		name = "flavor_byz.1.b"
+#		trigger = {
+#			owns = 3399
+#			exists = GEN
+#		}
+#		ai_chance = {
+#			factor = 10
+#		}
+#		define_admiral = {
+#			name = "Giovanni Giustiniani"
+#			shock = 3
+#			fire = 3
+#			manuever = 4
+#		}
+#		3399 = {
+#			cede_province = GEN
+#			add_core = GEN
+#			rename_capital = "Cembalo"
+#			}
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#		galley = 1402
+#	}
+#	option = {
+#		name = "flavor_byz.1.c"
+#
+#		ai_chance = { factor = 50 }
+#		add_prestige = 5
+#		add_war_exhaustion = -1
+#	}
+#}
+
+country_event = { #80 - End of the Civil War (Byzantium)
+	
+	id = flavor_byz.080
+	title = flavor_byz.080.t
+	desc = flavor_byz.080.d
+	picture = COUNTRY_COLLAPSE_eventPicture
+	
+	trigger = {
+		tag = BYZ
+		has_country_flag = matthew_kantakouzenos
+	}
+	
+	mean_time_to_happen = { months = 1 }
+	
+	immediate = { clr_country_flag = matthew_kantakouzenos }
+	
+	option = {
+		name = flavor_byz.080.a #Wait for the right moment to strike
+		ai_chance = { factor = 95 }
+		custom_tooltip = BYZ_matthew_reward
+		155 = { province_event = { id = flavor_byz.081 days = 120 } }
+	}
+	option = {
+		name = flavor_byz.080.b #Restore the Appanage
+		ai_chance = { factor = 5 }
+		add_legitimacy = 10
+		add_prestige = -10
+		3876 = { change_controller = ROOT add_local_autonomy = 100 }
+		2501 = { change_controller = ROOT add_local_autonomy = 100 }
+		disband_rebels = pretender_rebels
+		hidden_effect = {
+			every_province = {
+				limit = {
+					is_city = yes
+				}
+				clr_province_flag = matthew_kantakouzenos
+			}
+		}
+	}
+}
+
+province_event = { #81 - Byzantine Gambit
+	
+	id = flavor_byz.081
+	title = flavor_byz.081.t
+	desc = flavor_byz.081.d
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = flavor_byz.081.a #The fool!
+		if = {
+			limit = { owner = { OR = { num_of_cities = 10 tag = BYZ } } }
+			spawn_rebels = {
+				type = nationalist_rebels
+				size = 0
+				leader = "Matthew Kantakouzenós"
+			}
+		}
+		if = {
+			limit = { owner = { NOT = { num_of_cities = 10 tag = BYZ } } }
+			owner = { add_yearly_manpower = -0.01 }
+			hidden_effect = {
+				set_variable = { which = added_unrest value = 5 }
+				add_base_unrest = yes
+			}
+			custom_tooltip = added_unrest_5
+		}
+		set_province_flag = matthew_kantakouzenos
+	}
+}
+
+province_event = { #82 - Captured Emperor
+	
+	id = flavor_byz.082
+	title = flavor_byz.082.t
+	desc = flavor_byz.082.d
+	picture = ACCUSATION_eventPicture
+	
+	trigger = {
+		has_province_flag = matthew_kantakouzenos
+		controlled_by = owner
+		has_siege = no
+		owner = { NOT = { has_spawned_rebels = nationalist_rebels } }
+		OR = {
+			exists = BYZ
+			exists = MOE
+		}
+	}
+	
+	mean_time_to_happen = { months = 2 }
+	
+	immediate = {
+		hidden_effect = {
+			every_province = {
+				limit = {
+					is_city = yes
+				}
+				clr_province_flag = matthew_kantakouzenos
+			}
+		}
+	}
+	
+	option = {
+		name = flavor_byz.082.a #Ransom him
+		trigger = {
+			NOT = { owner = { tag = BYZ } }
+			NOT = { owner = { tag = MOE } }
+		}
+		ai_chance = {
+			factor = 95
+			modifier = {
+				owner = { alliance_with = BYZ }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { marriage_with = BYZ }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { overlord = { tag = BYZ } }
+				factor = 0.5
+			}
+		}
+		if = {
+			limit = {
+				exists = BYZ
+				owner = { NOT = { tag = BYZ } }
+			}
+			BYZ = { country_event = { id = flavor_byz.083 days = 60 } }
+		}
+		if = {
+			limit = {
+				exists = MOE
+				owner = { NOT = { tag = MOE } }
+			}
+			MOE = { country_event = { id = flavor_byz.083 days = 75 } }
+		}
+	}
+	option = {
+		name = flavor_byz.082.b #Execute him
+		trigger = {
+			NOT = { owner = { tag = BYZ } }
+			NOT = { owner = { tag = MOE } }
+		}
+		ai_chance = { factor = 5 }
+		owner = {
+			add_prestige = 10
+			set_country_flag = matthew_executed
+			if = {
+				limit = { exists = BYZ NOT = { tag = BYZ } }
+				BYZ = { country_event = { id = flavor_byz.086 days = 60 } }
+				if = {
+					limit = { BYZ = { has_country_flag = large_ransom_paid } }
+					BYZ = { add_opinion = { who = ROOT modifier = oathbreaker } }
+				}
+			}
+			if = {
+				limit = { exists = MOE NOT = { tag = MOE } }
+				MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+				if = {
+					limit = { MOE = { has_country_flag = large_ransom_paid } }
+					MOE = { add_opinion = { who = ROOT modifier = executed_monarch } }
+				}
+				if = {
+					limit = { MOE = { has_country_flag = small_ransom_paid } }
+					MOE = { add_opinion = { who = ROOT modifier = oathbreaker } }
+				}
+			}
+		}
+	}
+	#option - support his claim to the throne
+	option = {
+		name = flavor_byz.085.a #Imprison him for treason
+		ai_chance = { factor = 25 }
+		trigger = { owner = { tag = BYZ } }
+		owner = {
+			add_legitimacy = 30
+			if = {
+				limit = { has_ruler = "Ioannes V" }
+				random = { chance = 50 change_adm = 1 }
+				random = { chance = 25 add_ruler_modifier = { name = just } }
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.b #Execute him for treason
+		ai_chance = {
+			factor = 10
+			modifier = {
+				owner = { NOT = { has_ruler = "Ioannes V" } }
+				factor = 4
+			}
+		}
+		trigger = { owner = { tag = BYZ } }
+		owner = {
+			add_legitimacy = 30
+			if = {
+				limit = { has_ruler = "Ioannes V" }
+				random = { chance = 50 change_mil = 1 }
+				random = { chance = 50 add_ruler_modifier = { name = cruel } }
+			}
+			set_country_flag = matthew_executed
+			if = {
+				limit = { exists = BYZ NOT = { tag = BYZ } }
+				BYZ = { country_event = { id = flavor_byz.086 days = 60 } }
+				if = {
+					limit = { BYZ = { has_country_flag = large_ransom_paid } }
+					BYZ = { add_opinion = { who = ROOT modifier = oathbreaker } }
+				}
+			}
+			if = {
+				limit = { exists = MOE NOT = { tag = MOE } }
+				MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+				if = {
+					limit = { MOE = { has_country_flag = large_ransom_paid } }
+					MOE = { add_opinion = { who = ROOT modifier = executed_monarch } }
+				}
+				if = {
+					limit = { MOE = { has_country_flag = small_ransom_paid } }
+					MOE = { add_opinion = { who = ROOT modifier = oathbreaker } }
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.c #Pardon him for his crimes
+		ai_chance = {
+			factor = 5
+			modifier = {
+				owner = { NOT = { legitimacy = 90 } }
+				factor = 0
+			}
+		}
+		trigger = { owner = { tag = BYZ } }
+		owner = {
+			add_prestige = 15
+			if = {
+				limit = { has_ruler = "Ioannes V" }
+				random = { chance = 50 change_dip = 1 }
+				random = { chance = 50 add_ruler_modifier = { name = trusting } }
+				random = { chance = 25 add_ruler_modifier = { name = forgiving } }
+			}
+			if = {
+				limit = { exists = MOE }
+				custom_tooltip = BYZ_matthew_MOE
+			}
+			if = {
+				limit = { exists = MOE }
+				MOE = {
+					country_event = { id = flavor_byz.085 days = 30 }
+					add_claim = 1402
+					add_opinion = { who = ROOT modifier = successful_diplomacy }
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.e #Make him the [Root.Monarch.GetTitle]
+		ai_chance = { factor = 25 }
+		trigger = { owner = { tag = MOE has_regency = yes } }
+		owner = {
+			add_claim = 1402
+			define_ruler = {
+				name = "Matthaios"
+				dynasty = "Kantakouzenós"
+				#birth_date = 1330.1.1
+				#death_date = 1383.4.26
+				DIP = 2
+				ADM = 4
+				MIL = 1
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.f #Make him the heir
+		ai_chance = { factor = 25 }
+		trigger = { owner = { tag = MOE NOT = { has_heir = yes } } }
+		owner = {
+			add_claim = 1402
+			define_heir = {
+				name = "Matthaios"
+				monarch_name = "Matthaios"
+				dynasty = "Kantakouzenós"
+				birth_date = 1330.1.1
+				#death_date = 1383.4.26
+				claim = 95
+				DIP = 2
+				ADM = 4
+				MIL = 1
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.g #Grant him a title and lands
+		ai_chance = { factor = 10 }
+		trigger = { owner = { tag = MOE } }
+		owner = { create_general = { tradition = 50 } }
+	}
+}
+
+country_event = { #83 - Matthew's Capture
+	
+	id = flavor_byz.083
+	title = flavor_byz.083.t
+	desc = flavor_byz.083.d
+	picture = CORRUPTION_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = { tag = MOE }
+			if = {
+				limit = { has_ruler = "Manuel" }
+				custom_tooltip = MOE_matthew_brother
+			}
+			if = {
+				limit = { NOT = { has_ruler = "Manuel" } }
+				custom_tooltip = MOE_matthew_heir
+			}
+			if = {
+				limit = { exists = BYZ }
+				custom_tooltip = MOE_bidding_explained
+			}
+		}
+		if = {
+			limit = { tag = BYZ }
+			custom_tooltip = BYZ_matthew_usurper
+			if = {
+				limit = { exists = MOE }
+				custom_tooltip = BYZ_bidding_explained
+			}
+			if = {
+				limit = { has_spawned_rebels = pretender_rebels }
+				custom_tooltip = BYZ_matthew_rebels_explained
+				hidden_effect = {
+					every_owned_province = {
+						limit = { controlled_by = pretender_rebels }
+						hidden_effect = {
+							set_variable = { which = added_unrest value = 10 }
+							add_base_unrest = yes
+						}
+						custom_tooltip = added_unrest_10
+					}
+					disband_rebels = pretender_rebels #Unfortunately also returns control of provinces (oh well)
+				}
+			}
+		}
+		hidden_effect = { FROM = { owner = { set_country_flag = matthew_ransom } } }
+	}
+	
+	option = {
+		name = flavor_byz.083.b #Send a ransom
+		ai_chance = {
+			factor = 40
+			modifier = {
+				tag = MOE
+				factor = 4
+			}
+			modifier = {
+				tag = BYZ
+				NOT = { legitimacy = 80 }
+				factor = 0.5
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0
+			}
+		}
+		add_inflation = 2
+		set_country_flag = small_ransom_paid
+	}
+	option = {
+		name = flavor_byz.083.a #Send a large ransom
+		ai_chance = {
+			factor = 30
+			modifier = {
+				tag = BYZ
+				factor = 4
+			}
+			modifier = {
+				tag = MOE
+				factor = 0.25
+			}
+			modifier = {
+				tag = MOE
+				NOT = { treasury = 50 }
+				factor = 0
+			}
+			modifier = {
+				NOT = { treasury = 25 }
+				factor = 0
+			}
+		}
+		add_inflation = 5
+		set_country_flag = large_ransom_paid
+	}
+	option = {
+		name = flavor_byz.083.c #Refuse
+		ai_chance = {
+			factor = 30
+			modifier = {
+				tag = BYZ
+				factor = 0.25
+			}
+			modifier = {
+				tag = BYZ
+				NOT = { legitimacy = 80 }
+				factor = 0
+			}
+		}
+		add_prestige = -5
+	}
+}
+
+country_event = { #84 - Fate of the Emperor
+	
+	id = flavor_byz.084
+	title = flavor_byz.084.t
+	desc = flavor_byz.084.d
+	picture = CORRUPTION_eventPicture
+	
+	trigger = {
+		has_country_flag = matthew_ransom
+		had_country_flag = { flag = matthew_ransom days = 60 }
+	}
+	
+	mean_time_to_happen = {
+		
+		months = 4
+		
+		modifier = {
+			BYZ = { has_country_flag = large_ransom_paid }
+			factor = 0.5
+		}
+		modifier = {
+			MOE = { has_country_flag = large_ransom_paid }
+			factor = 0.5
+		}
+		modifier = {
+			BYZ = { has_country_flag = small_ransom_paid }
+			factor = 0.7
+		}
+		modifier = {
+			MOE = { has_country_flag = small_ransom_paid }
+			factor = 0.7
+		}
+	}
+	
+	immediate = {
+		clr_country_flag = matthew_ransom
+		if = {
+			limit = { MOE = { has_country_flag = small_ransom_paid } }
+			custom_tooltip = MOE_small_ransom
+		}
+		if = {
+			limit = { MOE = { has_country_flag = large_ransom_paid } }
+			custom_tooltip = MOE_large_ransom
+		}
+		if = {
+			limit = { BYZ = { has_country_flag = small_ransom_paid } }
+			custom_tooltip = BYZ_small_ransom
+		}
+		if = {
+			limit = { BYZ = { has_country_flag = large_ransom_paid } }
+			custom_tooltip = BYZ_large_ransom
+		}
+		if = {
+			limit = {
+				MOE = { NOT = { has_country_flag = large_ransom_paid } }
+				BYZ = { NOT = { has_country_flag = large_ransom_paid } }
+				MOE = { NOT = { has_country_flag = small_ransom_paid } }
+				BYZ = { NOT = { has_country_flag = small_ransom_paid } }
+			}
+			custom_tooltip = BYZ_matthew_worthless
+		}
+	}
+	
+	option = {
+		name = flavor_byz.084.a #Ransom him to Byzantium
+		trigger = {
+			OR = {
+				BYZ = { has_country_flag = large_ransom_paid }
+				BYZ = { has_country_flag = small_ransom_paid }
+			}
+		}
+		ai_chance = {
+			factor = 50
+			modifier = {
+				BYZ = { has_country_flag = large_ransom_paid }
+				factor = 4
+			}
+			modifier = {
+				MOE = { has_country_flag = large_ransom_paid }
+				factor = 0.25
+			}
+			modifier = {
+				BYZ = { has_country_flag = small_ransom_paid }
+				MOE = { has_country_flag = large_ransom_paid }
+				factor = 0.25
+			}
+		}
+		if = {
+			limit = { BYZ = { has_country_flag = large_ransom_paid } }
+			add_treasury = 25
+		}
+		if = {
+			limit = { BYZ = { has_country_flag = small_ransom_paid } }
+			add_treasury = 10
+		}
+		if = {
+			limit = { exists = BYZ }
+			BYZ = {
+				country_event = { id = flavor_byz.085 days = 30 }
+				BYZ = { add_opinion = { who = ROOT modifier = pretender_returned } }
+			}
+		}
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+			if = {
+				limit = { MOE = { has_country_flag = large_ransom_paid } }
+				MOE = { add_opinion = { who = ROOT modifier = pretender_asylum } }
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.084.b #Ransom him to Morea
+		trigger = {
+			OR = {
+				MOE = { has_country_flag = large_ransom_paid }
+				MOE = { has_country_flag = small_ransom_paid }
+			}
+		}
+		ai_chance = {
+			factor = 40
+			modifier = {
+				MOE = { has_country_flag = large_ransom_paid }
+				factor = 4
+			}
+			modifier = {
+				BYZ = { has_country_flag = large_ransom_paid }
+				factor = 0.25
+			}
+			modifier = {
+				MOE = { has_country_flag = small_ransom_paid }
+				BYZ = { has_country_flag = large_ransom_paid }
+				factor = 0.25
+			}
+		}
+		if = {
+			limit = { MOE = { has_country_flag = large_ransom_paid } }
+			add_treasury = 25
+		}
+		if = {
+			limit = { MOE = { has_country_flag = small_ransom_paid } }
+			add_treasury = 10
+		}
+		if = {
+			limit = { exists = MOE }
+			MOE = {
+				country_event = { id = flavor_byz.085 days = 30 }
+				add_opinion = { who = ROOT modifier = pretender_returned }
+			}
+		}
+		if = {
+			limit = { exists = BYZ }
+			BYZ = { country_event = { id = flavor_byz.086 days = 60 } }
+			if = {
+				limit = { BYZ = { has_country_flag = large_ransom_paid } }
+				BYZ = { add_opinion = { who = ROOT modifier = pretender_supporter } }
+			}
+			if = {
+				limit = { BYZ = { has_country_flag = small_ransom_paid } }
+				BYZ = { add_opinion = { who = ROOT modifier = pretender_asylum } }
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.082.b #Execute him
+		ai_chance = {
+			factor = 10
+			modifier = {
+				OR = {
+					BYZ = { has_country_flag = large_ransom_paid }
+					MOE = { has_country_flag = large_ransom_paid }
+				}
+				factor = 0
+			}
+			modifier = {
+				OR = {
+					BYZ = { has_country_flag = small_ransom_paid }
+					MOE = { has_country_flag = small_ransom_paid }
+				}
+				factor = 0.5
+			}
+			modifier = {
+				OR = {
+					BYZ = { has_country_flag = small_ransom_paid }
+					MOE = { has_country_flag = small_ransom_paid }
+				}
+				NOT = { treasury = 20 }
+				factor = 0
+			}
+		}
+		add_prestige = 10
+		set_country_flag = matthew_executed
+		if = {
+			limit = { exists = BYZ }
+			BYZ = { country_event = { id = flavor_byz.086 days = 60 } }
+			if = {
+				limit = { BYZ = { has_country_flag = large_ransom_paid } }
+				BYZ = { add_opinion = { who = ROOT modifier = oathbreaker } }
+			}
+		}
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+			if = {
+				limit = { MOE = { has_country_flag = large_ransom_paid } }
+				MOE = { add_opinion = { who = ROOT modifier = oathbreaker } }
+			}
+		}
+	}
+	#option - support his claim to the throne
+}
+
+country_event = { #85 - Matthew's Return
+	
+	id = flavor_byz.085
+	title = flavor_byz.085.t
+	desc = flavor_byz.085.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		clr_country_flag = large_ransom_paid
+		clr_country_flag = small_ransom_paid
+		if = {
+			limit = { tag = BYZ }
+			custom_tooltip = BYZ_matthew_ransomed_thanks
+		}
+		if = {
+			limit = { tag = MOE }
+			custom_tooltip = MOE_matthew_ransomed_thanks
+		}
+	}
+	
+	option = {
+		name = flavor_byz.085.a #Imprison him for treason
+		ai_chance = { factor = 25 }
+		trigger = { tag = BYZ }
+		add_legitimacy = 30
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			random = { chance = 50 change_adm = 1 }
+			random = { chance = 25 add_ruler_modifier = { name = just } }
+		}
+		set_country_flag = BYZ_imprisoned_matthew
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+		}
+	}
+	option = {
+		name = flavor_byz.085.b #Execute him for treason
+		ai_chance = {
+			factor = 10
+			modifier = {
+				NOT = { has_ruler = "Ioannes V" }
+				factor = 4
+			}
+		}
+		trigger = { tag = BYZ }
+		add_legitimacy = 30
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			random = { chance = 50 change_mil = 1 }
+			random = { chance = 50 add_ruler_modifier = { name = cruel } }
+		}
+		set_country_flag = matthew_executed
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+			MOE = { add_opinion = { who = ROOT modifier = executed_monarch } }
+		}
+	}
+	option = {
+		name = flavor_byz.085.c #Pardon him for his crimes
+		ai_chance = {
+			factor = 5
+			modifier = {
+				NOT = { legitimacy = 90 }
+				factor = 0
+			}
+		}
+		trigger = { tag = BYZ }
+		add_prestige = 15
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			random = { chance = 50 change_dip = 1 }
+			random = { chance = 50 add_ruler_modifier = { name = trusting } }
+			random = { chance = 25 add_ruler_modifier = { name = forgiving } }
+		}
+		if = {
+			limit = { exists = MOE }
+			custom_tooltip = BYZ_matthew_MOE
+		}
+		if = {
+			limit = { exists = MOE }
+			MOE = {
+				country_event = { id = flavor_byz.088 days = 30 }
+				add_claim = 1402
+				add_opinion = { who = ROOT modifier = successful_diplomacy }
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.e #Make him the [Root.Monarch.GetTitle]
+		ai_chance = { factor = 25 }
+		trigger = { tag = MOE has_regency = yes }
+		add_claim = 1402
+		define_ruler = {
+			name = "Matthaios"
+			dynasty = "Kantakouzenós"
+			#birth_date = 1330.1.1
+			#death_date = 1383.4.26
+			DIP = 2
+			ADM = 4
+			MIL = 1
+		}
+		add_casus_belli = { target = BYZ type = cb_reunion months = 480 }
+	}
+	option = {
+		name = flavor_byz.085.f #Make him the heir
+		ai_chance = { factor = 25 }
+		trigger = { tag = MOE NOT = { has_heir = yes } }
+		add_claim = 1402
+		define_heir = {
+			name = "Matthaios"
+			monarch_name = "Matthaios"
+			dynasty = "Kantakouzenós"
+			birth_date = 1330.1.1
+			#death_date = 1383.4.26
+			claim = 95
+			DIP = 2
+			ADM = 4
+			MIL = 1
+		}
+		add_casus_belli = { target = BYZ type = cb_reunion months = 240 }
+	}
+	option = {
+		name = flavor_byz.085.g #Grant him a title and lands
+		ai_chance = { factor = 10 }
+		trigger = { NOT = { tag = BYZ } } #Just in case
+		create_general = { tradition = 50 }
+		add_casus_belli = { target = BYZ type = cb_reunion months = 120 }
+	}
+}
+
+country_event = { #86 - Matthew's Fate
+	
+	id = flavor_byz.086
+	title = flavor_byz.086.t
+	desc = flavor_byz.086.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = { tag = MOE }
+			if = {
+				limit = { FROM = { has_country_flag = matthew_executed } }
+				custom_tooltip = MOE_matthew_executed
+			}
+			if = {
+				limit = { FROM = { NOT = { has_country_flag = matthew_executed } } }
+				custom_tooltip = MOE_matthew_ransomed
+			}
+		}
+		if = {
+			limit = { tag = BYZ }
+			if = {
+				limit = { FROM = { has_country_flag = matthew_executed } }
+				custom_tooltip = BYZ_matthew_executed
+			}
+			if = {
+				limit = { FROM = { NOT = { has_country_flag = matthew_executed } } }
+				custom_tooltip = BYZ_matthew_ransomed
+			}
+		}
+	}
+	
+	option = {
+		name = flavor_byz.086.a #Alas
+		if = {
+			limit = { has_country_flag = large_ransom_paid }
+			custom_tooltip = BYZ_matthew_ransom_repaid
+			add_inflation = -5
+			add_prestige = -10
+		}
+		if = {
+			limit = { has_country_flag = small_ransom_paid }
+			custom_tooltip = BYZ_matthew_ransom_repaid
+			add_inflation = -2
+			add_prestige = -5
+		}
+		if = {
+			limit = {
+				OR = {
+					tag = MOE
+					FROM = { has_country_flag = matthew_executed }
+				}
+				NOT = { has_country_flag = large_ransom_paid }
+				NOT = { has_country_flag = small_ransom_paid }
+			}
+			add_legitimacy = -5
+			add_prestige = -5
+		}
+		if = {
+			limit = {
+				tag = BYZ
+				FROM = { has_country_flag = matthew_executed }
+			}
+			add_legitimacy = 15
+		}
+		clr_country_flag = large_ransom_paid
+		clr_country_flag = small_ransom_paid
+	}
+}
+
+country_event = { #87 - Matthew's Final Fate
+	
+	id = flavor_byz.087
+	title = flavor_byz.087.t
+	desc = flavor_byz.087.d
+	picture = COURT_eventPicture
+	
+	trigger = {
+		tag = BYZ
+		has_country_flag = BYZ_imprisoned_matthew
+		had_country_flag = { flag = BYZ_imprisoned_matthew days = 1200 }
+		exists = MOE
+		NOT = { war_with = MOE }
+		MOE = { NOT = { is_subject_of = ROOT } }
+	}
+	
+	mean_time_to_happen = { months = 3 }
+	
+	immediate = { clr_country_flag = BYZ_imprisoned_matthew }
+	
+	option = {
+		name = flavor_byz.082.b #Execute him
+		ai_chance = { factor = 30 }
+		set_country_flag = matthew_executed
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+			MOE = { add_opinion = { who = ROOT modifier = executed_monarch } }
+		}
+	}
+	option = {
+		name = flavor_byz.087.a #Send him into exile
+		ai_chance = { factor = 70 }
+		add_prestige = 5
+		custom_tooltip = BYZ_matthew_MOE
+		if = {
+			limit = { exists = MOE }
+			MOE = {
+				country_event = { id = flavor_byz.085 days = 30 }
+				add_claim = 1402
+			}
+		}
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			random = { chance = 50 change_dip = 1 }
+			random = { chance = 50 add_ruler_modifier = { name = trusting } }
+			random = { chance = 25 add_ruler_modifier = { name = forgiving } }
+		}
+	}
+}
+
+country_event = { #88 - Matthew's Return (dupe, needed to avoid loop)
+	
+	id = flavor_byz.088
+	title = flavor_byz.085.t
+	desc = flavor_byz.085.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		clr_country_flag = large_ransom_paid
+		clr_country_flag = small_ransom_paid
+		if = {
+			limit = { tag = BYZ }
+			custom_tooltip = BYZ_matthew_ransomed_thanks
+		}
+		if = {
+			limit = { tag = MOE }
+			custom_tooltip = MOE_matthew_ransomed_thanks
+		}
+	}
+	
+	option = {
+		name = flavor_byz.085.a #Imprison him for treason
+		ai_chance = { factor = 25 }
+		trigger = { tag = BYZ }
+		add_legitimacy = 30
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			random = { chance = 50 change_adm = 1 }
+			random = { chance = 25 add_ruler_modifier = { name = just } }
+		}
+		set_country_flag = BYZ_imprisoned_matthew
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+		}
+	}
+	option = {
+		name = flavor_byz.085.b #Execute him for treason
+		ai_chance = {
+			factor = 10
+			modifier = {
+				NOT = { has_ruler = "Ioannes V" }
+				factor = 4
+			}
+		}
+		trigger = { tag = BYZ }
+		add_legitimacy = 30
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			change_mil = 1
+		}
+		set_country_flag = matthew_executed
+		if = {
+			limit = { exists = MOE }
+			MOE = { country_event = { id = flavor_byz.086 days = 60 } }
+			MOE = { add_opinion = { who = ROOT modifier = executed_monarch } }
+		}
+	}
+	option = {
+		name = flavor_byz.085.c #Pardon him for his crimes
+		ai_chance = {
+			factor = 5
+			modifier = {
+				NOT = { legitimacy = 90 }
+				factor = 0
+			}
+		}
+		trigger = { tag = BYZ }
+		add_prestige = 30
+		if = {
+			limit = { has_ruler = "Ioannes V" }
+			change_dip = 1
+		}
+		if = {
+			limit = { exists = MOE }
+			custom_tooltip = BYZ_matthew_MOE
+		}
+		if = {
+			limit = { exists = MOE }
+			MOE = {
+				country_event = { id = flavor_byz.085 days = 30 }
+				add_claim = 1402
+				add_opinion = { who = ROOT modifier = successful_diplomacy }
+			}
+		}
+	}
+	option = {
+		name = flavor_byz.085.e #Make him the [Root.Monarch.GetTitle]
+		ai_chance = { factor = 25 }
+		trigger = { tag = MOE has_regency = yes }
+		add_claim = 1402
+		define_ruler = {
+			name = "Matthaios"
+			dynasty = "Kantakouzenós"
+			#birth_date = 1330.1.1
+			#death_date = 1383.4.26
+			DIP = 2
+			ADM = 4
+			MIL = 1
+		}
+		add_casus_belli = { target = BYZ type = cb_reunion months = 480 }
+	}
+	option = {
+		name = flavor_byz.085.f #Make him the heir
+		ai_chance = { factor = 25 }
+		trigger = { tag = MOE NOT = { has_heir = yes } }
+		add_claim = 1402
+		define_heir = {
+			name = "Matthaios"
+			monarch_name = "Matthaios"
+			dynasty = "Kantakouzenós"
+			birth_date = 1330.1.1
+			#death_date = 1383.4.26
+			claim = 95
+			DIP = 2
+			ADM = 4
+			MIL = 1
+		}
+		add_casus_belli = { target = BYZ type = cb_reunion months = 240 }
+	}
+	option = {
+		name = flavor_byz.085.g #Grant him a title and lands
+		ai_chance = { factor = 10 }
+		trigger = { NOT = { tag = BYZ } } #Just in case
+		create_general = { tradition = 50 }
+		add_casus_belli = { target = BYZ type = cb_reunion months = 120 }
+	}
+}
+
+province_event = { #Theodosian Walls Crumbling (dharper)
+	
+	id = flavor_byz.99
+	title = flavor_byz.99.t
+	desc = flavor_byz.99.d
+	picture = SIEGE_eventPicture
+	
+	trigger = {
+	#	has_province_modifier = theodosian_walls
+		has_building = theodosian_walls
+		NOT = { has_siege = yes }
+		controlled_by = owner
+		NOT = { owner = { advisor = fortification_expert } }
+	}
+	
+	mean_time_to_happen = {
+		
+		years = 166
+		
+		modifier = {
+			owner = { is_bankrupt = yes }
+			factor = 0.25
+		}
+		modifier = {
+			owner = { num_of_loans = 1 }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { war_exhaustion = 8 }
+			factor = 0.7
+		}
+		modifier = {
+			owner = { war_exhaustion = 4 }
+			factor = 0.7
+		}
+		modifier = {
+			NOT = { owner = { total_development = 200 } }
+			factor = 0.5
+		}
+		modifier = {
+			NOT = { owner = { total_development = 100 } }
+			factor = 0.5
+		}
+		modifier = {
+			NOT = { owner = { total_development = 50 } }
+			factor = 0.5
+		}
+		modifier = {
+			NOT = { owner = { num_of_cities = 2 } }
+			factor = 0.5
+		}
+	}
+	
+	option = {
+		name = flavor_byz.99.a #Fix them
+		ai_chance = {
+			factor = 90
+			modifier = {
+				owner = { NOT = { treasury = 50 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { NOT = { treasury = 25 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { NOT = { treasury = 100 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { NOT = { monthly_income = 10 } } #Byzantium starts with a monthly income of 10.5
+				factor = 0.5
+			}
+			modifier = {
+				owner = { NOT = { monthly_income = 25 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { NOT = { monthly_income = 50 } }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { num_of_loans = 1 }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { num_of_loans = 2 }
+				factor = 0.5
+			}
+			modifier = {
+				owner = { is_at_war = yes }
+				factor = 1.4
+			}
+			modifier = {
+				owner = { NOT = { war_score = 0 } }
+				factor = 1.4
+			}
+		}
+		owner = { add_treasury = -50 }
+	}
+	option = {
+		name = flavor_byz.99.b #We can repair them later
+		ai_chance = { factor = 10 }
+		remove_building = theodosian_walls
+		#remove_province_modifier = theodosian_walls
+		owner = {
+			if = {
+				limit = { NOT = { num_of_cities = 2 } }
+				add_legitimacy = -10
+			}
+			if = {
+				limit = {
+					num_of_cities = 2
+					NOT = { num_of_cities = 5 }
+				}
+				add_legitimacy = -5
+			}
+			if = {
+				limit = {
+					num_of_cities = 5
+					NOT = { num_of_cities = 8 }
+				}
+				add_legitimacy = -3
+			}
+			if = {
+				limit = {
+					num_of_cities = 8
+					NOT = { num_of_cities = 16 }
+				}
+				add_legitimacy = -1
+			}
+		}
+	}
+}
+
+# Gattilusi Family in Lesbos
+province_event = {
+	id = flavor_byz.101
+	title = "flavor_byz.101.name"
+	desc = "flavor_byz.101.desc"
+	picture = SIEGE_eventPicture
+	
+	trigger = {
+		has_province_modifier = gattilusi_fief_loyal
+		NOT = { controlled_by = BYZ }
+		NOT = { controlled_by = REB }
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_byz.101.opta"
+		remove_province_modifier = "gattilusi_fief_loyal"
+		add_permanent_province_modifier = {
+			name = "gattilusi_fief_rebellious"
+			duration = -1
+		}
+	}
+}
+
+province_event = {
+	id = flavor_byz.102
+	title = "flavor_byz.102.name"
+	desc = "flavor_byz.102.desc"
+	picture = SIEGE_eventPicture
+	
+	trigger = {
+		has_province_modifier = gattilusi_fief_rebellious
+		controlled_by = BYZ
+	}
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_byz.102.opta"
+		remove_province_modifier = "gattilusi_fief_rebellious"
+		add_permanent_province_modifier = {
+			name = "gattilusi_fief_loyal"
+			duration = -1
+		}
+	}
+}
+
+country_event = {
+	id = flavor_byz.201
+	title = no_localization
+	desc = no_localization
+	picture = SIEGE_eventPicture
+	
+	is_triggered_only = no
+	fire_only_once = yes
+	
+	hidden = no
+	
+	trigger = {
+		tag = BYZ
+		
+		war_with = OTT
+		
+		AND = {
+			ai = yes
+			
+			NOT = {
+				any_ally = {
+					AND = {
+						ai = no
+						
+						war_with = OTT
+					}
+				}
+				
+				AND = {
+					is_subject = yes
+						
+					overlord = { ai = no }
+				}
+				
+				any_subject_country = { ai = no }
+				
+				any_country = {
+					AND = {
+						has_guaranteed = BYZ
+						
+						war_with = OTT
+						
+						ai = no
+					}
+				}
+			}
+		}
+		
+		OTT = {
+			AND = {
+				ai = yes
+				
+				NOT = {
+					any_ally = {
+						AND = {
+							ai = no
+						
+							war_with = BYZ
+						}
+					}
+					
+					AND = {
+						is_subject = yes
+							
+						overlord = { ai = no }
+					}
+					
+					any_subject_country = { ai = no }
+					
+					any_country = {
+						AND = {
+							has_guaranteed = OTT
+							
+							war_with = BYZ
+							
+							ai = no
+						}
+					}
+				}
+			}
+		}
+		
+		OR = {
+			NOT = {
+				war_score_against = {
+					who = OTT
+					value = -25
+				}
+			}
+			AND = {
+				NOT = {
+					war_score_against = {
+						who = OTT
+						value = -5
+					}
+				}
+				
+				capital_scope = { has_siege = yes }
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		months = 6
+		
+		modifier = {
+			factor = 0.1
+			
+			capital_scope = { has_siege = yes }
+		}
+	}
+	
+	immediate = {
+		every_owned_province = {
+			if = {
+				limit = {
+					is_core = TSL
+				}
+				cede_province = TSL
+			}
+			if = {
+				limit = {
+					is_core = EPI
+				}
+				cede_province = EPI
+			}
+		}
+		
+		every_owned_province = {
+			limit = {
+				NOT = { province_id = 1402 } # Konstantinoupolis
+				
+				OR = {
+					region = east_balkan_region
+					region = greece_region
+					region = north_anatolia_region
+					region = south_anatolia_region
+					province_id = 1333
+				}
+				
+				OR = {
+					NOT = {
+						has_building = fort_14th
+						has_building = fort_15th
+						has_building = fort_16th
+						has_building = fort_17th
+						has_building = fort_18th
+					}
+					
+					controlled_by = OTT
+				}
+			}
+			cede_province = OTT
+		}
+		
+		white_peace = OTT
+		
+		add_truce_with = OTT
+		
+		OTT = { add_manpower = 10 }
+	}
+	
+	option = {
+		name = no_localization
+	}
+}
+
+#country_event = {
+#	id = flavor_byz.203
+#	title = no_localization
+#	desc = no_localization
+#	picture = SIEGE_eventPicture
+#	
+#	is_triggered_only = no
+#	fire_only_once = yes
+#	
+#	hidden = no
+#	
+#	trigger = {
+#		tag = BYZ
+#		
+#		has_country_flag = peace_with_ottomans
+#		
+#		ai = yes
+#		
+#		OTT = {
+#			mil_tech = 11
+#			
+#			ai = yes
+#		}
+#	}
+#	
+#	mean_time_to_happen = { days = 1 }
+#	
+#	immediate = {
+#		clr_country_flag = peace_with_ottomans
+#	}
+#	
+#	option = {
+#		name = no_localization
+#		
+#		ai_chance = { factor = 100 }
+#	}
+#}
+
+country_event = {
+	id = flavor_byz.301
+	title = "flavor_byz.301.name"
+	desc = "flavor_byz.301.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_byz.301.opta"
+		
+		add_dip_power = -250
+		
+		hidden_effect = {
+			set_country_flag = heir_to_rome
+			
+			every_country = {
+				limit = {
+					OR = {
+						france_superregion = {
+							owned_by = PREV
+						}
+						iberia_superregion = {
+							owned_by = PREV
+						}
+						italy_superregion = {
+							owned_by = PREV
+						}
+						balkan_superregion = {
+							owned_by = PREV
+						}
+						north_africa_superregion = {
+							owned_by = PREV
+						}
+						germany_superregion = {
+							owned_by = PREV
+						}
+						greater_austrian_circle_superregion = {
+							owned_by = PREV
+						}
+						near_east_superregion = {
+							owned_by = PREV
+						}
+						anatolia_superregion = {
+							owned_by = PREV
+						}
+						crimea_area = {
+							owned_by = PREV
+						}
+					}
+				}
+				add_opinion = { who = ROOT modifier = opinion_heir_to_rome }
+			}
+		}
+		custom_tooltip = heir_to_rome_relations
+	}
+	option = {
+		name = "flavor_byz.301.optb"
+	}
+}
