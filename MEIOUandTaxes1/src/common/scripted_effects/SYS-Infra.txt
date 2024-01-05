@@ -684,48 +684,6 @@ Infra_SetMaintHelper = {
     }
 }
 
-heuristicHelper = {
-    random_list = { # Random factor
-        1 = {
-            modifier = {
-                factor = 3.5
-                OR = {
-                    is_key_equal = { lhs = Prod_S$slot$ value = 11 }
-                    is_key_equal = { lhs = Prod_S$slot$ value = 13 }
-                    is_key_equal = { lhs = Prod_S$slot$ value = 42 }
-                }
-                
-            }
-            multiply_key = { lhs = Tmp_1 value = -0.66 }
-        }
-        9 = {
-           
-        }
-    }
-}
-Infra_SetMaintLaborHelper = {
-	if = {
-		limit = {
-			check_key = { lhs = $laborVar$ value = 0.1 }
-			NOT = { check_key = { lhs = Prod_Fill$labor$ value = 100 } }
-		}
-		set_key = { lhs = Tmp_2 which = $laborVar$ }
-		divide_key = { lhs = Tmp_2 which = Tmp_9 }
-
-		set_key = { lhs = Tmp_1 which = Building_$type$ }
-		multiply_key = { lhs = Tmp_1 which = Tmp_2 } ## share of labor for this property
-		set_key = { lhs = Tmp_3 which = Prod_Fill$labor$ } ## 100 scale
-		multiply_key = { lhs = Tmp_3 value = 0.01 }
-		multiply_key = { lhs = Tmp_3 which = Tmp_1 }
-		
-		set_key = { lhs = Tmp_2 which = Tmp_1 }
-		divide_key = { lhs = Tmp_2 which = Tmp_3 } ## this is now buildings that are beyond labor capacity
-		multiply_key = { lhs = Tmp_2 value = 0.2 }# Reduce 20% of the labor shortage per iter
-
-		change_key = { lhs = Building_$type$Down which = Tmp_2 }
-	}
-}
-
 Infra_SetMaint = {
     set_key = { lhs = Building_$type$Up value = 0 }   # property expansion desire
     set_key = { lhs = Building_$type$Down value = 0 } # property shrink desire
@@ -763,51 +721,24 @@ Infra_SetMaint = {
 		Infra_SetMaintHelper = { type = $type$ slot = 14 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
 		Infra_SetMaintHelper = { type = $type$ slot = 15 [[IncomeMaint] IncomeMaint = $IncomeMaint$ ] }
 
-		# First we need to see if theres a labor shortage, if so we're going to generally shrink this property as a counterforce
 
-		# Sum our labor
-		set_key = { lhs = Tmp_9 which = Tmp_4 } ## Rural
-		change_key = { lhs = Tmp_9 which = Tmp_5 } ## Urban
-		change_key = { lhs = Tmp_9 which = Tmp_6 } ## Nomad
-		change_key = { lhs = Tmp_9 which = Tmp_7 } ## Literati
-		change_key = { lhs = Tmp_9 which = Tmp_8 } ## Clergy
-		change_key = { lhs = Tmp_9 which = Public_Tmp1 } ## Burghers
-
-		# Apply a BuildingDown of 15% of the labor shortage of each type based on their share of total labor demanded
-		Infra_SetMaintLaborHelper = { type = $type$ labor=R laborVar=Tmp_4 }
-		Infra_SetMaintLaborHelper = { type = $type$ labor=UL laborVar=Tmp_5 }
-		Infra_SetMaintLaborHelper = { type = $type$ labor=NM laborVar=Tmp_6 }
-		Infra_SetMaintLaborHelper = { type = $type$ labor=LT laborVar=Tmp_7 }
-		Infra_SetMaintLaborHelper = { type = $type$ labor=CL laborVar=Tmp_8 }
-		Infra_SetMaintLaborHelper = { type = $type$ labor=BG laborVar=Public_Tmp1 }
-
-		[[max]
-        if = {
-            limit = {
-				check_key = { lhs = Building_$type$Up value = 0.001 }
-				always = $max$
-            }
-			set_key = { lhs = Tmp_3 which = Building_$type$Max }
-			subtract_key = { lhs = Tmp_3 which = Building_$type$ }
-			if = {
-				limit = {
-					check_key = { lhs = Building_$type$Up which = Tmp_3 }
-					check_key = { lhs = Tmp_3 value = 0.001 }
-				}
-				set_key = { lhs = Building_$type$Up which = Tmp_3 }
-			}
-		}
-		]
-		set_key = { lhs = Tmp_3 which = Building_$type$ }
-		subtract_key = { lhs = Tmp_3 value = 1 } #minimum 1 size when trying to shrink
-		subtract_key = { lhs = Tmp_3 which = Building_$type$Down }
+		# Cap downward move so size doesnt go below size = 1
 		if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_3 value = 0	} }
+				check_key = { lhs = Building_$type$Down which = Building_$type$ } # if down >= size
 			}
-			change_key = { lhs = Building_$type$Down which = Tmp_3 }
+			set_key = { lhs = Building_$type$Down which = Building_$type$ }
+			subtract_key = { lhs = Building_$type$Down value = 1 }
 		}
-		
+
+		set_key = { lhs = Tmp_3 value = 0 }
+		[[max]
+		## Decrease desired growth for maintenance calculation to not overspend on maintenance
+		# For this we get the difference from current size to the max and compare it further below with the desire to grow
+		set_key = { lhs = Tmp_3 which = Building_$type$Max }
+		subtract_key = { lhs = Tmp_3 which = Building_$type$ }
+		]
+
 		[[RegularMaint]
         if = {
             limit = {
@@ -817,18 +748,30 @@ Infra_SetMaint = {
 			set_key = { lhs = Tmp_0 which = Building_$type$Up }
 			subtract_key = { lhs = Tmp_0 which = Building_$type$Down }
 
-			set_key = { lhs = Tmp_1 which = Building_$type$ }
+			# Check if desired rate of growht (only if positive) exceeds limit to max, if so only pay maintenance until max cap
 			if = {
 				limit = { 
-					NOT = { check_key = { lhs = Tmp_0 value = 0 } }
+					check_key = { lhs = Tmp_0 which = Tmp_3 } # Tmp_0 = desired growth, Tmp_3 difference to max cap
+					check_key = { lhs = Tmp_3 value = 0.001 }
 				}
-				change_key = { lhs = Tmp_1 which = Tmp_0 } # remove shrinking property from paying maintenance
+				set_key = { lhs = Tmp_0 which = Tmp_3 }
 			}
-			multiply_key = { lhs = Tmp_1 value = $rate$ } ### basically a x on building count to determine maint costs
 
+			set_key = { lhs = Tmp_1 which = Building_$type$ }
+			### Remove shrinking property from paying maintenance
 			if = {
 				limit = { 
-					check_key = { lhs = Tmp_0 value = 0 } # expansion?
+					NOT = { check_key = { lhs = Tmp_0 value = 0 } } # If property wants to shrink
+				}
+				change_key = { lhs = Tmp_1 which = Tmp_0 } # Remove desired shrinkage from property to pay maintenance on
+			}
+
+			multiply_key = { lhs = Tmp_1 value = $rate$ } ### basically a multiplier on building count to determine maint costs
+
+			## If industries want to expand add expansion costs to maintenance costs
+			if = {
+				limit = { 
+					check_key = { lhs = Tmp_0 value = 0 }
 				}
 
 				multiply_key = { lhs = Tmp_0 value = $factor$ } ### how much do new buildings cost
@@ -849,7 +792,8 @@ Infra_SetMaint = {
 			multiply_key = { lhs = Building_$type$24 value = $indust$ }
 		}
 		]
-		[[IncomeMaint]
+
+		[[IncomeMaint] ### This handles commercial
         if = {
             limit = {
 				always = $IncomeMaint$
