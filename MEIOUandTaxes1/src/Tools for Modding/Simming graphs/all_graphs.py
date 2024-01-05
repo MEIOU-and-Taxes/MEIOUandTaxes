@@ -385,13 +385,23 @@ def graphCL_Spend(t, plt):
         # plt.plot(itr, Manpower, label="Manpower")
 
 def graphCommerce_GV(t, plt):
-        "Commercial Size (Genoa/Venice)"
-        Innate = get_data(t, 'Genoa commercial size')
-        Gold = get_data(t, 'Venice commercial size')
-        itr = range(1, len(Innate) + 1)
+        "Commercial Size"
+        Genoa = get_data(t, 'Genoa commercial size')
+        Venice = get_data(t, 'Venice commercial size')
+        Paris = get_data(t, 'Paris commercial size')
+        London = get_data(t, 'London commercial size')
+        Lübeck = get_data(t, 'Lübeck commercial size')
+        Konstantinople = get_data(t, 'Konstantinople commercial size')
+        AlQahira = get_data(t, 'Al Qahira commercial size')
+        itr = range(1, len(Genoa) + 1)
 
-        plt.plot(itr, Innate, label="Genoa")
-        plt.plot(itr, Gold, label="Venice")
+        plt.plot(itr, Genoa, label="Genoa")
+        plt.plot(itr, Venice, label="Venice")
+        plt.plot(itr, Paris, label="Paris")
+        plt.plot(itr, London, label="London")
+        plt.plot(itr, Lübeck, label="Lübeck")
+        plt.plot(itr, Konstantinople, label="Konstantinople")
+        plt.plot(itr, AlQahira, label="AlQahira")
 
 def graphFiber_Diff(t, plt):
         "Fiber (Supply - Demand)"

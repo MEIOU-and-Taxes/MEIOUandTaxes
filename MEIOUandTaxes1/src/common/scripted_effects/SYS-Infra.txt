@@ -542,6 +542,7 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Tmp_1 value = 0 }
 			}
 			else = { ## If Income != 0
+				# Calculate profit margin - Profit / Income
 				set_key = { lhs = Tmp_1 which = Tmp_0 }
 				divide_key = { lhs = Tmp_1 which = Prod_S$slot$Income }
 
@@ -560,10 +561,12 @@ Infra_SetMaintHelper = {
 							NOT = { check_key = { lhs = Tmp_3 value = 1 } } ### Throughputfactor only applied if TP < 100%
 						}
 						multiply_key = { lhs = Tmp_3 which = Tmp_3 } ### Exponential effect
-						multiply_key = { lhs = Tmp_1 which = Tmp_3 }
+
+						### Throughput factor on perceived profits:
+						### TP * TP * PM = Perceived Profit Margin
+						multiply_key = { lhs = Tmp_1 which = Tmp_3 }	
 						set_key = { lhs = Tmp_3 value = 0 }	
 					}
-
 				}
 				else = { ### If industry is making losses, check if industry already developed full skill. If not make it decrease size slower based on lower skill
 					### Add a sophistication (skill) factor
@@ -575,7 +578,10 @@ Infra_SetMaintHelper = {
 							NOT = { check_key = { lhs = Tmp_4 value = 1 } } ### Skill Factor only applied if Skill < 100%
 						}
 						multiply_key = { lhs = Tmp_4 which = Tmp_4 } # Exponential effect of low skill
-						multiply_key = { lhs = Tmp_1 which = Tmp_4 } # reduce perceived loss
+
+						### Skill factor on perceived loss
+						### Skill * Skill * PM = Perceived Loss Margin
+						multiply_key = { lhs = Tmp_1 which = Tmp_4 }
 						set_key = { lhs = Tmp_4 value = 0 }
 					}
 				}
@@ -583,9 +589,9 @@ Infra_SetMaintHelper = {
 			}
 
 			### Actual heuristic for Industry Expansion
-			# Formula for expansion desire for Perceived Profits != 0:
+			# Formula for expansion desire for Perceived Profit Margin != 0:
 			# (   33 							)
-			# ( ------ * Profits + 0.15*Profits ) * 0.2
+			# ( ------ * Profit Margin + 0.2 * Profit Margin ) * 0.15
 			# (  Size							)
 			if = {
 				limit = {
@@ -600,7 +606,7 @@ Infra_SetMaintHelper = {
 			else_if = {
 				limit = {
 					NOT = { check_key = { lhs = Tmp_1 value = 0.04 } } # profit margin < 4 %
-					check_key = { lhs = Tmp_0 value = 0.00 } # Profits > 0
+					check_key = { lhs = Tmp_0 value = 0 } # Profits > 0
 				}
 
 				# NO CHANGE IN SIZE
@@ -618,6 +624,10 @@ Infra_SetMaintHelper = {
 
 			multiply_key = { lhs = Tmp_1 value = 0.15 } ## Balance Factor on desired change
 
+
+
+			##### Calculate actual size changes
+
 			if = { # If Perceived Profit is positive, building will want to expand.
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0 }
@@ -625,6 +635,7 @@ Infra_SetMaintHelper = {
 
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change
 
+				# Cap desired change rate 
 				if = {
 					limit = {
 						check_key = { lhs = Prod_S$slot$Change value = 1.0 } # `Industry_NaturalMax_ChangeUp~value`
@@ -632,7 +643,7 @@ Infra_SetMaintHelper = {
 					set_key = { lhs = Prod_S$slot$Change value = 1.0 } # `Industry_NaturalMax_ChangeUp~value`
 				}
 
-				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
+				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired size change rate * Current size
 				
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
 				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
@@ -651,6 +662,7 @@ Infra_SetMaintHelper = {
 			else = { # if Tmp_1 is negative, will want to shrink.
 				set_key = { lhs = Prod_S$slot$Change which = Tmp_1 } # Desired rate of change -> her 
 
+				# cap desired change rate
 				if = {
 					limit = {
 						NOT = { check_key = { lhs = Prod_S$slot$Change value = -0.25 } } # `Industry_NaturalMax_ChangeDown~value`
@@ -658,7 +670,7 @@ Infra_SetMaintHelper = {
 					set_key = { lhs = Prod_S$slot$Change value = -0.25 } # `Industry_NaturalMax_ChangeDown~value`
 				}
 
-				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired rate * Current size
+				multiply_key = { lhs = Prod_S$slot$Change which = Prod_S$slot$Size } # Desired size change rate * Current size
 				
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
 				[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
