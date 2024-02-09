@@ -1811,45 +1811,50 @@ country_event = {
 	desc = "flavor_hyw.300.d"
 	picture = CIVIL_WAR_eventPicture
 	
-	is_triggered_only = yes
+	trigger = {
+		CAS = {
+			exists = yes
+			has_ruler = "Pedro I"
+			NOT = {  has_country_flag = had_cas_civil_war }
+			NOT = { is_subject_of = ENR }
+		}
+		ENR = {
+			exists = yes
+			has_ruler = "Enrique II"
+			NOT = { is_subject_of = CAS }
+		}
+		tag = FRA
+		has_global_flag = hundred_years_war
+		NOT = { has_country_flag = cas_civil_war_support }
+	}
+
+	immediate = {
+		set_country_flag = cas_civil_war_support
+	}
 	
 	option = {		# Support the Revolt
 		name = "flavor_hyw.300.a"
-		ai_chance = { factor = 75 }
-		if = {
-			limit = {
-				tag = FRA
-			}
-			add_manpower = -3
-			set_country_flag = civil_war_support_FRA
-			country_event = { id = flavor_hyw.301 days = 20 tooltip = "flavor_hyw.301.d" }
+		ai_chance = { factor = 95 }
+		add_manpower = -3
+		set_country_flag = civil_war_support_FRA
+		country_event = { id = flavor_hyw.301 days = 20 tooltip = "flavor_hyw.301.d" }
+		hidden_effect = {
 			GUY = {
-				country_event = { id = flavor_hyw.302 days = 60 tooltip = "flavor_hyw.301.d" }
-			}
-			
-
-			ENR = {
-				add_manpower = 3
-			}
-			
-			kill_leader = {
-				type = "Bertrand du Guesclin"
+				country_event = { id = flavor_hyw.302 days = 60 tooltip = "flavor_hyw.302.d" }
 			}
 		}
-		if = {
-			limit = {
-				NOT = { tag = FRA }
-			}
-			add_manpower = -3
 
-			ENR = {
-				add_manpower = 3
-			}
+		ENR = {
+			add_manpower = 3
+		}
+		
+		kill_leader = {
+			type = "Bertrand du Guesclin"
 		}
 	}
 	option = {		# We do not support rebels
 		name = "flavor_hyw.300.b"
-		ai_chance = { factor = 25 }
+		ai_chance = { factor = 5 }
 		add_prestige = 10
 
 		if = {
@@ -1878,6 +1883,7 @@ country_event = {
 	option = {		# Support the Revolt
 		name = "flavor_hyw.301.a"
 
+		set_country_flag = civil_war_support_from_fra
 		ENR = {
 			define_general = {
 				fire = 3
@@ -1908,6 +1914,9 @@ country_event = {
 		join_all_offensive_wars_of = CAS
 
 		set_country_flag = england_helps_peter
+		CAS = {
+			set_country_flag = peter_gets_english_help
+		}
 	}
 
 	option = {		# Not interested in the affairs of Iberia
@@ -1974,6 +1983,10 @@ country_event = {
 		}
 
 		add_years_of_income = -5
+
+		hidden_effect = {
+			country_event = { id = flavor_hyw.1001 days = 305 }
+		}
 	}
 }
 
@@ -2046,7 +2059,7 @@ country_event = {
 	#It's more beneficial to be french after all
 	option = {
 		name = "flavor_hyw.307.a"
-
+		ai_chance = { factor = 100 }
 		if = {
 			limit = {
 				is_subject_of_type = daimyo_vassal 
@@ -2077,6 +2090,7 @@ country_event = {
 	#Remain loyal
 	option = {
 		name = "flavor_hyw.307.b"
+		ai_chance = { factor = 0 }
 		add_legitimacy = -20
 	}
 }
@@ -2098,7 +2112,8 @@ country_event = {
 
 	option = { #Claims Castile
 		name = "flavor_hyw.308.a"
-		set_country_flag = Lancaster_claims_castile_throne
+		set_ruler_flag = Lancaster_claims_castile_throne
+		ai_chance = { factor = 100 }
 	}
 
 	option = { #Not interested
@@ -2122,10 +2137,19 @@ country_event = {
 	#I'm nothing with France
 	option = {
 		name = "flavor_hyw.309.a"
+		ai_chance = { factor = 100 }
 		add_trust = {
 			who = FRA
 			value = 25
 			mutual = yes
+		}
+
+		FRA = {
+			add_trust = {
+				who = ROOT
+				value = 25
+				mutual = yes
+			}
 		}
 
 		set_country_flag = enrique_is_francophile
@@ -2134,6 +2158,7 @@ country_event = {
 	#Paris has deciacted my policy long enough
 	option = {
 		name = "flavor_hyw.309.b"
+		ai_chance = { factor = 0 }
 		add_legitimacy = -20
 		add_trust = {
 			who = FRA
@@ -2682,10 +2707,6 @@ country_event = {
 	option = {
 		name = "flavor_hyw.1000.a"
 		set_country_flag = Grande_ordonnance_de_1357
-
-		hidden_effect = {
-			country_event = { id = flavor_hyw.1001 days = 305  }
-		}
 	}
 }
 
@@ -3014,6 +3035,105 @@ country_event = {
 	}
 }
 
+#Jacqueries clearup
+country_event = {
+	id = flavor_hyw.1008
+	title = "flavor_hyw.1008.t"
+	desc = "flavor_hyw.1008.d"
+	picture = FAMINE_eventPicture
+
+	trigger = {
+		tag = FRA
+		has_country_flag = jacqueries
+		every_owned_province = {
+			NOT = { has_rebel_faction = militia_rebels }
+		}
+	}
+
+	option = {
+		name = "flavor_hyw.1008.a"
+		country_event = { id = flavor_hyw.1009 days = 60 }
+	}
+}
+
+#Charles V reform to pay for the ransom, establish permenant fouage tax in France for war chest
+country_event = {
+	id = flavor_hyw.1009
+	title = "flavor_hyw.1009.t"
+	desc = "flavor_hyw.1009.d"
+	picture = REFORM_eventPicture
+
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_hyw.1009.a"
+		if = {
+			limit = {
+				Privilege_Has = { Privilege=NOTaxE Lvl=1 }
+			}
+			Privilege_NOTaxE0Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOTaxE Lvl=2 }
+			}
+			Privilege_NOTaxE1Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOTaxE Lvl=3 }
+			}
+			Privilege_NOTaxE2Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOTaxE Lvl=4 }
+			}
+			Privilege_NOTaxE3Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOTaxE Lvl=5 }
+			}
+			Privilege_NOTaxE4Apply = yes
+		}
+
+		if = {
+			limit = {
+				Privilege_Has = { Privilege=NOServiceE Lvl=1 }
+			}
+			Privilege_NOServiceE0Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOServiceE Lvl=2 }
+			}
+			Privilege_NOServiceE1Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOServiceE Lvl=3 }
+			}
+			Privilege_NOServiceE2Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOServiceE Lvl=4 }
+			}
+			Privilege_NOServiceE3Apply = yes
+		}
+		else_if = {
+			limit = {
+				Privilege_Has = { Privilege=NOServiceE Lvl=5 }
+			}
+			Privilege_NOServiceE4Apply = yes
+		}
+
+		Rights_BUTax2Apply = yes
+	}
+}
+
+
 
 #John Ball, a mad priest it seems
 country_event = {
@@ -3226,14 +3346,8 @@ country_event = {
 		Privilege_NOGame0Apply = yes
 		Rights_NOTen4Apply = yes
 
-		custom_tooltip = Rights_NOTen
 		custom_tooltip = Rights_NOTen4_description
-		custom_tooltip = Rights_NOTen4_effects
-		custom_tooltip = Privilege_NOForestry0_t
-		custom_tooltip = Privilege_NOForestry
 		custom_tooltip = Privilege_NOForestry0_description
-		custom_tooltip = Privilege_NOGame0_t
-		custom_tooltip = Privilege_NOGame
 		custom_tooltip = Privilege_NOGame0_description
 	}
 
@@ -3341,8 +3455,8 @@ country_event = {
 			name = "John"
 			dynasty = ROOT
 			age = 19
-			adm = 2
-			dip = 2
+			adm = 4
+			dip = 4
 			mil = 2
 		}
 	}
@@ -3470,6 +3584,8 @@ country_event = {
 	desc = "flavor_hyw.1300.d"
 	picture = DEATH_OF_HEIR_eventPicture
 
+	fire_only_once = yes
+
 	trigger = {
 		tag = ENG
 		has_country_flag = ruler_prisonner_of_war
@@ -3510,8 +3626,6 @@ country_event = {
 		add_prestige = -20
 	}
 }
-
-
 
 
 #Treaty of Tours
