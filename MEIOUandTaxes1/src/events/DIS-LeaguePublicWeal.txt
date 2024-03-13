@@ -1,0 +1,506 @@
+namespace = league_public_weal
+
+# League of the Public Weal
+country_event = {
+	id = league_public_weal.1
+	title = league_public_weal.1.t
+	desc = league_public_weal.1.d
+	picture = CIVIL_WAR_eventPicture
+	
+	is_triggered_only = yes
+	major = yes
+
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		set_country_flag = had_league_public_weal
+		Stab_Subtract2 = yes
+		add_legitimacy = -25
+		hidden_effect = {
+			random_subject_country = {
+				limit = {
+					is_subject_of_type = nominal_subject
+					capital_scope = {
+						superregion = france_superregion
+					}
+				}
+				country_event = {
+					id = league_public_weal.2
+					days = 10
+				}
+			}
+			every_subject_country = {
+				limit = {
+					OR = {
+						is_subject_of_type = vassal
+						is_subject_of_type = appanage_subject
+						is_subject_of_type = daimyo_vassal
+					}
+					capital_scope = {
+						superregion = france_superregion
+					}
+					NOT = {
+						has_country_flag = leader_of_the_league
+					}
+				}
+				add_liberty_desire = 25
+				country_event = {
+					id = league_public_weal.4
+					days = 15
+				}
+			}
+			if = {
+				limit = {
+					BUR = {
+						exists = yes
+						is_subject = no
+					}
+				}
+				BUR = {
+					country_event = {
+						id = league_public_weal.3
+					}
+				}
+			}
+			if = {
+				limit = {
+					BRI = {
+						exists = yes
+						is_subject = no
+					}
+				}
+				BRI = {
+					country_event = {
+						id = league_public_weal.4
+					}
+				}
+			}
+		}
+	}
+
+	option = { # We will crush them!
+		name = league_public_weal.1.a
+		custom_tooltip = league_public_weal.1.a.tooltip
+		tooltip = {
+			every_subject_country = {
+				limit = {
+					OR = {
+						is_subject_of_type = vassal
+						is_subject_of_type = appanage_subject
+						is_subject_of_type = daimyo_vassal
+					}
+				}
+				add_liberty_desire = 50
+			}
+		}
+	}
+}
+
+# League of the Public Weal - Leader
+country_event = {
+	id = league_public_weal.2
+	title = league_public_weal.1.t
+	desc = league_public_weal.2.d
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes
+
+	option = { # We fight for the security of France!
+		name = league_public_weal.2.a
+		custom_tooltip = league_public_weal.2.a.tooltip
+		add_liberty_desire = 50
+		hidden_effect = {
+			country_event = {
+				id = league_public_weal.7
+				days = 60
+			}
+			set_ai_attitude = {
+				attitude = attitude_hostile
+				who = FRA
+			}
+		}
+	}
+}
+
+# League of the Public Weal - Burgundy
+country_event = {
+	id = league_public_weal.3
+	title = league_public_weal.3.t
+	desc = league_public_weal.3.d
+	picture = ACCUSATION_eventPicture
+	
+	is_triggered_only = yes
+
+	option = { # We will return order to France!
+		name = league_public_weal.3.a
+		ai_chance = {
+			factor = 100
+		}
+		custom_tooltip = league_public_weal.3.a.tooltip
+		random_known_country = {
+			limit = {
+				vassal_of = FRA
+				liberty_desire = 50
+			}
+			add_opinion = {
+				who = ROOT
+				modifier = supports_public_weal
+			}
+			create_alliance = ROOT
+			country_event = {
+				id = league_public_weal.6
+			}
+		}
+		FRA = {
+			country_event = {
+				id = league_public_weal.6
+			}
+			add_opinion = {
+				who = BUR
+				modifier = league_public_weal_interference
+			}
+		}
+	}
+	option = { # We should not take part in this affair.
+		name = league_public_weal.3.b
+		ai_chance = {
+			factor = 0
+		}
+		FRA = {
+			add_opinion = {
+				who = BUR
+				modifier = league_public_weal_no_interference
+			}
+		}
+	}
+}
+
+# League of the Public Weal - French Vassals
+country_event = {
+	id = league_public_weal.4
+	title = league_public_weal.4.t
+	desc = league_public_weal.4.d
+	picture = ACCUSATION_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = { # We must protect our rights!
+		name = league_public_weal.4.a
+		ai_chance = {
+			factor = 0
+			modifier = {
+				liberty_desire = 50
+				factor = 100
+			}
+			modifier = {
+				tag = BRI
+				factor = 100
+			}
+		}
+		custom_tooltip = league_public_weal.3.a.tooltip
+		hidden_effect = {
+			trigger_switch = {
+				on_trigger = is_subject_of_type
+				vassal = { 
+					set_key = { lhs = Vassal_Type value = 1 }
+				}
+				appanage_subject = { 
+					set_key = { lhs = Vassal_Type value = 9 }
+				}
+				daimyo_vassal = { 
+					set_key = { lhs = Vassal_Type value = 10 }			
+				}
+				decentralized_vassal = { 
+					set_key = { lhs = Vassal_Type value = 11 }
+				}
+				rebellious_decentralized_vassal = { 
+					set_key = { lhs = Vassal_Type value = 12 }
+				}
+			}
+			set_country_flag = france_former_subjects
+		}
+		random_known_country = {
+			limit = {
+				has_country_flag = leader_of_the_league
+			}
+			add_opinion = {
+				who = ROOT
+				modifier = supports_public_weal
+			}
+			create_alliance = ROOT
+		}
+		FRA = {
+			add_opinion = {
+				who = ROOT
+				modifier = league_public_weal_interference
+			}
+		}
+		hidden_effect = {
+			set_ai_attitude = {
+				attitude = attitude_hostile
+				who = FRA
+			}
+		}
+	}
+	option = { # We should not take part in this affair.
+		name = "league_public_weal.3.b"
+		ai_chance = {
+			factor = 100
+			modifier = {
+				liberty_desire = 50
+				factor = 0
+			}
+			modifier = {
+				tag = BRI
+				factor = 0
+			}
+		}
+		FRA = {
+			add_opinion = {
+				who = ROOT
+				modifier = league_public_weal_no_interference
+			}
+		}
+	}
+}
+
+# Burgundy Supports the League of the Public Weal
+country_event = {
+	id = league_public_weal.6 
+	title = league_public_weal.6.t
+	desc = league_public_weal.6.d
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = { # This is an outrage!
+		name = league_public_weal.6.a
+		trigger = {
+			tag = FRA
+		}
+		add_stability = -1
+		tooltip = {
+			add_opinion = {
+				who = BUR
+				modifier = league_public_weal_interference
+			}
+		}
+	}
+
+	option = { # Excellent.
+		name = league_public_weal.6.b
+		trigger = {
+			NOT = {
+				tag = FRA
+			}
+		}
+		tooltip = {
+			create_alliance = FROM
+			add_opinion = {
+				who = FROM
+				modifier = supports_public_weal
+			}
+		}
+	}
+}
+
+# The League Declares War!
+country_event = {
+	id = league_public_weal.7
+	title = league_public_weal.7.t
+	desc = league_public_weal.7.d
+	picture = BATTLE_eventPicture
+
+	is_triggered_only = yes
+
+	major = yes
+
+	option = { # To arms!
+		name = league_public_weal.7.a
+		declare_war_with_cb = {
+			who = FRA
+			casus_belli = cb_league_public_weal
+		}
+		if = {
+			limit = {
+				BUR = {
+					alliance_with = ROOT
+					NOT = {
+						war_with = FRA
+					}
+				}
+			}
+			BUR = {
+				join_all_offensive_wars_of = ROOT
+			}
+		}
+		if = {
+			limit = {
+				BRI = {
+					alliance_with = ROOT
+					NOT = {
+						war_with = FRA
+					}
+				}
+			}
+			BRI = {
+				join_all_offensive_wars_of = ROOT
+			}
+		}
+		hidden_effect = {
+			FRA = {
+				country_event = {
+					id = league_public_weal.8
+				}
+			}
+			BUR = {
+				country_event = {
+					id = league_public_weal.8
+				}
+			}
+		}
+	}
+}
+
+# The League Declares War! - France
+country_event = {
+	id = league_public_weal.8
+	title = league_public_weal.8.t
+	desc = league_public_weal.8.d
+	picture = BATTLE_eventPicture
+
+	is_triggered_only = yes
+
+	option = { # We fight for the King!
+		name = league_public_weal.8.a
+		trigger = {
+			tag = FRA
+		}
+		tooltip = {
+			FROM = {
+				declare_war_with_cb = {
+					who = FRA
+					casus_belli = cb_league_public_weal
+				}
+			}
+		}
+		every_subject_country = {
+			limit = {
+				OR = {
+					is_subject_of_type = vassal
+					is_subject_of_type = appanage_subject
+					is_subject_of_type = daimyo_vassal
+				}
+				capital_scope = {
+					superregion = france_superregion
+				}
+			}
+			add_liberty_desire = -50
+		}
+	}
+
+	option = { # We fight for our rights!
+		name = league_public_weal.8.b
+		trigger = {
+			tag = BUR
+		}
+		tooltip = {
+			FROM = {
+				declare_war_with_cb = {
+					who = FRA
+					casus_belli = cb_league_public_weal
+				}
+			}
+		}
+	}
+}
+
+
+# End of the War of the Public Weal
+country_event = {
+	id = league_public_weal.100
+	title = league_public_weal.100.t
+	desc = league_public_weal.100.d
+	picture = CIVIL_WAR_eventPicture
+
+	major = yes
+	
+	is_triggered_only = yes
+
+	option = { # Long live the King of France.
+		name = league_public_weal.100.a
+		Stab_Subtract3 = yes
+		add_legitimacy = 25
+		every_subject_country = {
+			limit = {
+				OR = {
+					is_subject_of_type = vassal
+					is_subject_of_type = appanage_subject
+					is_subject_of_type = daimyo_vassal
+				}
+			}
+			add_liberty_desire = -50
+		}
+		every_known_country = {
+			limit = {
+				has_country_flag = france_former_subjects
+			}
+			#Check MEC-Vassals
+			if = {
+				limit = {
+					check_key = { lhs = Vassal_Type value = 1 }
+				}
+				FRA = {
+					vassalize = PREV
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Vassal_Type value = 9 }
+				}
+				FRA = {
+					create_subject = {
+						subject_type = appanage_subject
+						subject = PREV
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Vassal_Type value = 10 }
+				}
+				FRA = {
+					create_subject = {
+						subject_type = daimyo_vassal
+						subject = PREV
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Vassal_Type value = 11 }
+				}
+				FRA = {
+					create_subject = {
+						subject_type = decentralized_vassal
+						subject = PREV
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					check_key = { lhs = Vassal_Type value = 12 }
+				}
+				FRA = {
+					create_subject = {
+						subject_type = rebellious_decentralized_vassal
+						subject = PREV
+					}
+				}
+			}
+		}
+		set_country_flag = breton_independence_revoked
+	}
+}
