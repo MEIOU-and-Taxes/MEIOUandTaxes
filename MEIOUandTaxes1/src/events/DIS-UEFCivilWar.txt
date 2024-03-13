@@ -1,966 +1,1422 @@
 namespace = uef_civil_war
 
+### WAR OF THE ROSES but happen between England and France ###
+
 country_event = {
 	id = uef_civil_war.1
-	title = "uef_civil_war.1.t"
-	desc = "uef_civil_war.1.d"
-	picture = ECONOMY_eventPicture
+	title = uef_civil_war.1.t
+	desc = uef_civil_war.1.d
+	picture = uef_civil_war_eventPicture
+	major = yes
 	is_triggered_only = yes
+	
 	immediate = {
+	    set_global_flag = had_uef_civil_war
+		set_country_flag = uef_civil_war
+		set_global_flag = uef_civil_war
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-40 }
+		Stab_Subtract2 = yes
+
 		hidden_effect = {
-			every_owned_province = {
+			if = {
 				limit = {
-					OR = {
-						culture = english
-						culture = scottish
-					}
-					continent = europe
+					tag = ENG
+					has_global_flag = plantagenet_french_regent
 				}
-				add_nationalism = 15
+
+				FRA = {
+					build_to_forcelimit = {
+						infantry = 1.6
+						cavalry = 0.4
+					}
+					random_owned_province = {
+						limit = {
+							has_port = yes
+						}
+						build_to_forcelimit = {
+							heavy_ship = 0.5
+							light_ship = 0.5
+							transport = 0.5
+						}
+					}
+					add_treasury = 250
+					ENG = {
+						capital_scope = {
+							Rights_SyncFromProv = yes
+						}
+					}
+					Pol_AdaptFromScopeRights = yes
+					if = {
+						limit = {
+							is_year = 1427
+						}
+						define_heir = {
+							name = "Richard"
+							dynasty = "Plantagenet"
+							birth_date = 1411.9.22
+							adm = 5
+							dip = 4
+							mil = 4
+						}
+						kill_ruler = yes
+						Stab_Add1 = yes
+						if = {
+							limit = {
+								has_dlc = "Rights of Man" 
+							}
+							hidden_effect = { add_ruler_personality = tactical_genius_personality }
+						}
+					}
+					else = {
+						define_ruler = {
+							dynasty = "Plantagenet"
+							max_age = 31
+						}
+					}
+					if = {
+						limit = {
+							is_year = 1456
+						}
+						define_heir = {
+							name = "Edward"
+							dynasty = "Plantagenet"
+							birth_date = 1442.4.28
+							adm = 4
+							dip = 3
+							mil = 4
+						}
+						if = {
+							limit = {
+								has_dlc = "Rights of Man" 
+							}
+							hidden_effect = { add_ruler_personality = tactical_genius_personality }
+						}
+					}
+					else = {
+						define_heir = {
+							name = "Edward"
+							dynasty = "Plantagenet"
+						}
+					}
+				}
+
+				ENG = {
+					declare_war_with_cb = {
+						who = FRA
+						casus_belli = cb_overlord_attacking_independence_war
+					}
+				}
+			}
+
+			if = {
+				limit = {
+					tag = UEF
+					has_global_flag = plantagenet_becomes_french_again
+				}
+
+				ENG = {
+					build_to_forcelimit = {
+						infantry = 1.6
+						cavalry = 0.4
+					}
+					random_owned_province = {
+						limit = {
+							has_port = yes
+						}
+						build_to_forcelimit = {
+							heavy_ship = 0.5
+							light_ship = 0.5
+							transport = 0.5
+						}
+					}
+					add_treasury = 250
+					capital_scope = {
+						Rights_SyncFromProv = yes
+					}
+					Pol_AdaptFromScopeRights = yes
+					if = {
+						limit = {
+							is_year = 1427
+						}
+						define_heir = {
+							name = "Richard"
+							dynasty = "Plantagenet"
+							birth_date = 1411.9.22
+							adm = 5
+							dip = 4
+							mil = 4
+						}
+						kill_ruler = yes
+						Stab_Add1 = yes
+						if = {
+							limit = {
+								has_dlc = "Rights of Man" 
+							}
+							hidden_effect = { add_ruler_personality = tactical_genius_personality }
+						}
+					}
+					else = {
+						define_ruler = {
+							dynasty = "Plantagenet"
+							max_age = 31
+						}
+					}
+					if = {
+						limit = {
+							is_year = 1456
+						}
+						define_heir = {
+							name = "Edward"
+							dynasty = "Plantagenet"
+							birth_date = 1442.4.28
+							adm = 4
+							dip = 3
+							mil = 4
+						}
+						if = {
+							limit = {
+								has_dlc = "Rights of Man" 
+							}
+							hidden_effect = { add_ruler_personality = tactical_genius_personality }
+						}
+					}
+					else = {
+						define_heir = {
+							name = "Edward"
+							dynasty = "Plantagenet"
+						}
+					}
+				}
+
+				UEF = {
+					declare_war_with_cb = {
+						who = ENG
+						casus_belli = cb_overlord_attacking_independence_war
+					}
+				}
 			}
 		}
 	}
-	option = {
-		name = "uef.1.a"
-		Stab_Subtract1 = yes
+
+	option = { #Support England
+		name = uef_civil_war.1.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:supported the english side:uef_civil_war.1"
+		set_country_flag = uef_civil_war_support_english
 		if = {
 			limit = {
-				dip = 3
+				has_dlc = "Rights of Man"
 			}
-			random_list = {
-				30 = {
-					country_event = {
-						id = uef_civil_war.49
-					}
-				}
-				10 = {
-					country_event = {
-						id = uef_civil_war.50
-					}
-				}
-				60 = {
-					country_event = {
-						id = uef_civil_war.2
-					}
-				}
+			hidden_effect = {
+				add_ruler_personality = well_connected_personality
 			}
 		}
-		if = {
-			limit = {
-				NOT = {
-					dip = 3
-				}
-			}
-			random_list = {
-				35 = {
-					country_event = {
-						id = uef_civil_war.49
-					}
-				}
-				25 = {
-					country_event = {
-						id = uef_civil_war.50
-					}
-				}
-				40 = {
-					country_event = {
-						id = uef_civil_war.2
-					}
-				}
-			}
-		}
+		
 	}
-	option = {
-		name = "uef.1.b"
-		Stab_Subtract1 = yes
-		hidden_effect = {
-			every_owned_province = {
-				limit = {
-					OR = {
-						culture = english
-						culture = scottish
-					}
-					continent = europe
-				}
-				add_province_modifier = {
-					name = suppress_minority
-					duration = 3650
+	option = {#Support France
+		name = uef_civil_war.1.b
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:supported the french side:uef_civil_war.1"
+		set_country_flag = uef_civil_war_support_french
+		
+		if = {
+			limit = {
+				has_dlc = "Rights of Man"
+			}
+			hidden_effect = {
+				add_ruler_personality = tactical_genius_personality
+			}
+		}
+		if = {
+			limit = {
+				UEF = {
+					exists = yes
 				}
 			}
-			random_owned_province = {
-				limit = {
-					culture = english
-					continent = europe
-				}
-				spawn_rebels = {
-					type = nationalist_rebels
-					size = 3
-					friend = ENG
-				}
-			}
-			random_owned_province = {
-				limit = {
-					culture = scottish
-					continent = europe
-				}
-				spawn_rebels = {
-					type = nationalist_rebels
-					size = 3
-					friend = SCO
-				}
-			}
-			set_global_flag = uef_select_war
+			switch_tag = UEF
+		}
+		else = {
+			switch_tag = FRA
 		}
 	}
 }
 
+### SUPPORT FOR LANCASTER/YORK ###
+
 country_event = {
-	id = uef_civil_war.2
-	title = "uef_civil_war.2.t"
-	desc = "uef_civil_war.2.d"
-	picture = ECONOMY_eventPicture
+	id = uef_civil_war.2 #Local support for chosen side
+	title = uef_civil_war.2.t
+	desc = uef_civil_war.2.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		any_owned_province = {
+			OR = {
+				region = south_england_region
+				region = north_england_region
+				superregion = france_superregion
+			}
+			NOT = { has_province_modifier = uef_civil_war_local_support }
+			NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+			NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
+			NOT = { has_province_modifier = disgruntled_nobles }
+		}
+	}
 	is_triggered_only = yes
+
 	option = {
-		name = "uef.2.a"
-		add_dip_power = -100
-		add_adm_power = -100
-		add_mil_power = -100
-		add_years_of_income = -2.25
-		hidden_effect = {
-			country_event = {
-				id = uef_civil_war.3
+		name = uef_civil_war.2.a
+		random_owned_province = {
+			limit = {
+				OR = {
+					region = south_england_region
+					region = north_england_region
+					superregion = france_superregion
+				}
+				NOT = { has_province_modifier = uef_civil_war_local_support }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
+				NOT = { has_province_modifier = disgruntled_nobles }
 			}
-		}
-	}
-	option = {
-		name = "uef.2.b"
-		add_dip_power = -50
-		add_adm_power = -50
-		add_mil_power = -50
-		add_years_of_income = -1.25
-		hidden_effect = {
-			if = {
-				limit = {
-					dip = 3
-				}
-				random_list = {
-					50 = {
-						country_event = {
-							id = uef_civil_war.21
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					30 = {
-						country_event = {
-							id = uef_civil_war.3
-						}
-					}
-				}
+			add_province_modifier = {
+				name = uef_civil_war_local_support
+				duration = 3650
 			}
-			if = {
+			set_province_flag = disgruntled_nobles_timer
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+			every_neighbor_province = {
 				limit = {
-					NOT = {
-						dip = 3
-					}
+					owned_by = ROOT
+					NOT = { has_province_modifier = uef_civil_war_local_support }
+					NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+					NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
+					NOT = { has_province_modifier = disgruntled_nobles }
 				}
-				random_list = {
-					40 = {
-						country_event = {
-							id = uef_civil_war.21
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					30 = {
-						country_event = {
-							id = uef_civil_war.3
-						}
-					}
+				add_province_modifier = {
+					name = uef_civil_war_local_support
+					duration = 3650
 				}
-			}
-		}
-	}
-	option = {
-		name = "uef.2.c"
-		add_dip_power = -25
-		add_adm_power = -25
-		add_mil_power = -25
-		add_years_of_income = -0.75
-		hidden_effect = {
-			if = {
-				limit = {
-					dip = 3
-				}
-				random_list = {
-					45 = {
-						country_event = {
-							id = uef_civil_war.21
-						}
-					}
-					35 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.3
-						}
-					}
-				}
-			}
-			if = {
-				limit = {
-					NOT = {
-						dip = 3
-					}
-				}
-				random_list = {
-					30 = {
-						country_event = {
-							id = uef_civil_war.21
-						}
-					}
-					50 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.3
-						}
-					}
-				}
+				set_province_flag = disgruntled_nobles_timer
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
 			}
 		}
 	}
 }
+
+# ### LOCAL SUPPORT FOR THE LANCASTER PRETENDERS ###
 
 country_event = {
 	id = uef_civil_war.3
-	title = "uef_civil_war.3.t"
-	desc = "uef_civil_war.3.d"
-	picture = ECONOMY_eventPicture
+	title = uef_civil_war.3.t
+	desc = uef_civil_war.3.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		has_country_flag = uef_civil_war_support_english
+		any_owned_province = {
+			OR = {
+				region = south_england_region
+				region = north_england_region
+				superregion = france_superregion
+			}
+			is_capital = no
+			NOT = { has_province_modifier = uef_civil_war_local_support }
+			NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+			NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
+		}
+	}
 	is_triggered_only = yes
+
 	option = {
-		name = "uef.3.a"
-		every_owned_province = {
+		name = uef_civil_war.3.a
+		random_owned_province = {
 			limit = {
 				OR = {
-					culture = english
-					culture = scottish
+					region = south_england_region
+					region = north_england_region
+					superregion = france_superregion
 				}
-				continent = europe
+				NOT = { has_province_modifier = uef_civil_war_local_support }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
 			}
-			add_local_autonomy = 40
-		}
-		add_legitimacy = -25
-		add_prestige = -45
-		hidden_effect = {
-			country_event = {
-				id = uef_civil_war.4
+			add_province_modifier = {
+				name = uef_civil_war_local_support_for_england
+				duration = 3650
 			}
-		}
-	}
-	option = {
-		name = "uef.3.b"
-		every_owned_province = {
-			limit = {
-				OR = {
-					culture = english
-					culture = scottish
-				}
-				continent = europe
-			}
-			add_local_autonomy = 30
-		}
-		add_legitimacy = -15
-		add_prestige = -35
-		hidden_effect = {
-			if = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-100 }
+			every_neighbor_province = {
 				limit = {
-					dip = 3
+					owned_by = ROOT
+					NOT = { has_province_modifier = uef_civil_war_local_support }
+					NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+					NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
 				}
-				random_list = {
-					50 = {
-						country_event = {
-							id = uef_civil_war.22
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					30 = {
-						country_event = {
-							id = uef_civil_war.4
-						}
-					}
+				add_province_modifier = {
+					name = uef_civil_war_local_support_for_england
+					duration = 3650
 				}
-			}
-			if = {
-				limit = {
-					NOT = {
-						dip = 3
-					}
-				}
-				random_list = {
-					40 = {
-						country_event = {
-							id = uef_civil_war.22
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					30 = {
-						country_event = {
-							id = uef_civil_war.4
-						}
-					}
-				}
-			}
-		}
-	}
-	option = {
-		name = "uef.3.c"
-		every_owned_province = {
-			limit = {
-				OR = {
-					culture = english
-					culture = scottish
-				}
-				continent = europe
-			}
-			add_local_autonomy = 25
-		}
-		add_legitimacy = -10
-		add_prestige = -25
-		hidden_effect = {
-			if = {
-				limit = {
-					dip = 3
-				}
-				random_list = {
-					45 = {
-						country_event = {
-							id = uef_civil_war.22
-						}
-					}
-					35 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.4
-						}
-					}
-				}
-			}
-			if = {
-				limit = {
-					NOT = {
-						dip = 3
-					}
-				}
-				random_list = {
-					30 = {
-						country_event = {
-							id = uef_civil_war.22
-						}
-					}
-					50 = {
-						country_event = {
-							id = uef_civil_war.50
-						}
-					}
-					20 = {
-						country_event = {
-							id = uef_civil_war.4
-						}
-					}
-				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-100 }
 			}
 		}
 	}
 }
+
+# ### LOCAL SUPPORT FOR THE France PRETENDERS ###
 
 country_event = {
 	id = uef_civil_war.4
-	title = "uef_civil_war.4.t"
-	desc = "uef_civil_war.4.d"
-	picture = ECONOMY_eventPicture
-	is_triggered_only = yes
-	option = {
-		name = "uef.4.a"
-		every_owned_province = {
-			limit = {
-				OR = {
-					culture = english
-					culture = scottish
-				}
-				continent = europe
+	title = uef_civil_war.4.t
+	desc = uef_civil_war.4.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		has_country_flag = uef_civil_war_support_france
+		any_owned_province = {
+			OR = {
+				region = south_england_region
+				region = north_england_region
+				superregion = france_superregion
 			}
-			add_province_modifier = {
-				name = uef_autonomy
-				duration = -1
-			}
+			is_capital = no
+			NOT = { has_province_modifier = uef_civil_war_local_support }
+			NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+			NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
 		}
-		set_country_flag = uef_civil_war_ending_1
 	}
-}
-
-country_event = {
-	id = uef_civil_war.21
-	title = "uef_civil_war.21.t"
-	desc = "uef_civil_war.21.d"
-	picture = ECONOMY_eventPicture
 	is_triggered_only = yes
-	
+
 	option = {
-		name = "uef.21.a"
-		every_owned_province = {
+		name = uef_civil_war.4.a
+		random_owned_province = {
 			limit = {
 				OR = {
-					culture = english
-					culture = scottish
+					region = south_england_region
+					region = north_england_region
+					superregion = france_superregion
 				}
-				continent = europe
+				NOT = { has_province_modifier = uef_civil_war_local_support }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
 			}
 			add_province_modifier = {
-				name = uef_immunity
+				name = uef_civil_war_local_support_for_france
 				duration = 3650
 			}
-		}
-		Stab_Subtract1 = yes
-		add_legitimacy = -20
-		add_prestige = -50
-		hidden_effect = {
-			random_list = {
-				70 = {
-					country_event = {
-						id = uef_civil_war.22
-					}
-				}
-				10 = {
-					country_event = {
-						id = uef_civil_war.4
-					}
-				}
-				20 = {
-					country_event = {
-						id = uef_civil_war.50
-					}
-				}
-			}
-		}
-	}
-	option = {
-		name = "uef.21.b"
-		hidden_effect = {
-			country_event = {
-				id = uef_civil_war.50
-			}
-		}
-	}
-}
-
-country_event = {
-	id = uef_civil_war.22
-	title = "uef_civil_war.22.t"
-	desc = "uef_civil_war.22.d"
-	picture = ECONOMY_eventPicture
-	is_triggered_only = yes
-	option = {
-		name = "uef.22.a"
-		every_owned_province = {
-			limit = {
-				OR = {
-					culture = english
-					culture = scottish
-				}
-				continent = europe
-			}
-			add_province_modifier = {
-				name = uef_unrest
-				duration = -1
-			}
-		}
-		set_country_flag = uef_civil_war_ending_1
-	}
-}
-
-country_event = {
-	id = uef_civil_war.49
-	title = "uef_civil_war.49.t"
-	desc = "uef_civil_war.49.d"
-	picture = ECONOMY_eventPicture
-	is_triggered_only = yes
-
-	option = {
-		name = cudivergence.23.a
-		set_global_flag = uef_convert_to_anglois
-		Stab_Subtract1 = yes
-		change_primary_culture = anglois
-		random_owned_province = {
-			limit = {
-				culture = english
-				continent = europe
-			}
-			change_culture = anglois
-		}
-		random_owned_province = {
-			limit = {
-				culture = normand
-				has_port = yes
-				continent = europe
-			}
-			change_culture = anglois
-		}
-		random_owned_province = {
-			limit = {
-				is_capital = yes
-				culture = francien
-			}
-			change_culture = anglois
-		}
-		every_owned_province = {
-			limit = {
-				culture = francien
-			}
-			add_unrest = 5
-		}
-	}
-}
-
-country_event = {
-	id = uef_civil_war.50
-	title = "uef_civil_war.50.t"
-	desc = "uef_civil_war.50.d"
-	picture = ANGRY_MOB_eventPicture
-	is_triggered_only = yes
-	option = {
-		name = "uef.1.b"
-		hidden_effect = {
-			every_owned_province = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=100 }
+			every_neighbor_province = {
 				limit = {
-					OR = {
-						culture = english
-						culture = scottish
-					}
-					continent = europe
+					owned_by = ROOT
+					NOT = { has_province_modifier = uef_civil_war_local_support }
+					NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+					NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
 				}
 				add_province_modifier = {
-					name = suppress_minority
+					name = uef_civil_war_local_support_for_france
 					duration = 3650
 				}
 			}
-			set_global_flag = uef_select_war
-			random_owned_province = {
-				limit = {
-					culture = english
-					continent = europe
-				}
-				spawn_rebels = {
-					type = nationalist_rebels
-					size = 3
-					friend = ENG
+		}
+	}
+}
+
+### NOBLES DISGRUNTLED ###
+country_event = {
+	id = uef_civil_war.5
+	title = uef_civil_war.5.t
+	desc = uef_civil_war.5.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		any_owned_province = {
+			has_province_modifier = uef_civil_war_local_support
+			had_province_flag = {
+				flag = disgruntled_nobles_timer
+				days = 547 #1.5 years
+			}
+		}
+	}
+	is_triggered_only = yes
+
+	immediate = {
+		random_owned_province = {
+			limit = {
+				has_province_modifier = uef_civil_war_local_support
+				had_province_flag = {
+					flag = disgruntled_nobles_timer
+					days = 547
 				}
 			}
-			random_owned_province = {
-				limit = {
-					culture = scottish
-					continent = europe
-				}
-				spawn_rebels = {
-					type = nationalist_rebels
-					size = 3
-					friend = SCO
+			set_province_flag = potential_disgruntled_nobles
+		}
+	}
+
+	option = {
+		name = uef_civil_war.5.a
+		ai_chance = {
+			factor = 50
+		}
+		add_treasury = -15
+		random_owned_province = {
+			limit = {
+				has_province_flag = potential_disgruntled_nobles
+			}
+			Public_ChangeClassWealthVal = { class= NO type = value inp=15 }
+			clr_province_flag = potential_disgruntled_nobles
+		}
+	}
+	option = {
+		name = uef_civil_war.5.b
+		ai_chance = {
+			factor = 50
+		}
+		random_owned_province = {
+			limit = {
+				has_province_flag = potential_disgruntled_nobles
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-30 }
+			remove_province_modifier = uef_civil_war_local_support
+			clr_province_flag = potential_disgruntled_nobles
+			hidden_effect = {
+				add_province_modifier = {
+					name = disgruntled_nobles
+					duration = 1825
 				}
 			}
 		}
 	}
 }
 
+# Soldiers Desert
 country_event = {
-	id = uef_civil_war.51
-	title = "uef_civil_war.51.t"
-	desc = "uef_civil_war.51.d"
-	picture = ANGRY_MOB_eventPicture
-	trigger = {
-		has_global_flag = uef_select_war
-		tag = uef
+	id =  uef_civil_war.7
+	title = uef_civil_war.7.t
+	desc = uef_civil_war.7.d
+	picture = uef_civil_war_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = { # There is nothing we can do.
+		name = uef_civil_war.7.a
+		ai_chance = { factor = 10 }
+		add_legitimacy = -20
 	}
-	mean_time_to_happen = {
-		months = 6
-	}
-	option = {
-		name = "uef.51.a"
-		random_owned_province = {
-			limit = {
-				culture = english
-				continent = europe
-			}
-			spawn_rebels = {
-				type = nationalist_rebels
-				size = 3
-				friend = ENG
-			}
+
+	option = { # Import food from abroad.
+		name = uef_civil_war.7.b
+		ai_chance = { factor = 70 }
+		add_country_modifier = {
+			name = importing_food
+			duration = 1825
 		}
+	}
+
+	option = { # Let them take from the local peasants.
+		name = uef_civil_war.7.c
+		ai_chance = { factor = 20 }
 		random_owned_province = {
 			limit = {
-				culture = scottish
-				continent = europe
+				units_in_province = 1
 			}
-			spawn_rebels = {
-				type = nationalist_rebels
-				size = 3
-				friend = SCO
-			}
+			add_devastation = 10
+		}
+		add_country_modifier = {
+			name = plundering_soldiers
+			duration = 1825
 		}
 	}
 }
 
-country_event = {
-	id = uef_civil_war.61
-	title = "uef_civil_war.61.t"
-	desc = "uef_civil_war.61.d"
-	picture = ANGRY_MOB_eventPicture
-	trigger = {
-		has_global_flag = uef_select_war
-		tag = uef
-	}
-	mean_time_to_happen = {
-		months = 18
-	}
-	option = {
-		name = "uef.61.a"
-		random_owned_province = {
-			limit = {
-				culture = francien
-				continent = europe
-			}
-			add_local_autonomy = 100
-		}
-		random_owned_province = {
-			limit = {
-				culture = francien
-				continent = europe
-			}
-			add_local_autonomy = 100
-		}
-	}
-}
+### LEGITIMACY QUESTIONED ###
 
 country_event = {
-	id = uef_civil_war.91
-	title = "uef_civil_war.91.t"
-	desc = "uef_civil_war.91.d"
-	picture = ANGRY_MOB_eventPicture
+	id = uef_civil_war.8
+	title = uef_civil_war.8.t
+	desc = uef_civil_war.8.d
+	picture = uef_civil_war_eventPicture
 	trigger = {
-		has_disaster = uef_civil_war
-		tag = uef
+		NOT = { legitimacy = 75 }
+		months_of_ruling = 18
 	}
-	mean_time_to_happen = {
-		months = 12
-	}
-	option = {
-		name = "uef.91.a"
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	option = { #Buy their continued support
+		name = uef_civil_war.8.a
+		ai_chance = {
+			factor = 50
+		}
+		add_treasury = -100 #Money distributed to provinces
 		random_owned_province = {
 			limit = {
-				culture = english
-				continent = europe
-			}
-			spawn_rebels = {
-				type = nationalist_rebels
-				size = 3
-				friend = ENG
-			}
-		}
-	}
-}
-
-country_event = {
-	id = uef_civil_war.92
-	title = "uef_civil_war.92.t"
-	desc = "uef_civil_war.92.d"
-	picture = ANGRY_MOB_eventPicture
-	trigger = {
-		has_disaster = uef_civil_war
-		tag = uef
-	}
-	mean_time_to_happen = {
-		months = 12
-	}
-	option = {
-		name = "uef.92.a"
-		random_owned_province = {
-			limit = {
-				culture = scottish
-				continent = europe
-			}
-			spawn_rebels = {
-				type = nationalist_rebels
-				size = 3
-				friend = SCO
-			}
-		}
-	}
-}
-
-country_event = {
-	id = uef_civil_war.93
-	title = "uef_civil_war.92.t"
-	desc = "uef_civil_war.92.d"
-	picture = ANGRY_MOB_eventPicture
-	trigger = {
-		has_disaster = uef_civil_war
-		tag = uef
-	}
-	mean_time_to_happen = {
-		months = 12
-	}
-	option = {
-		name = "uef.92.a"
-		random_owned_province = {
-			limit = {
-				culture_group = gaelic
-				continent = europe
-			}
-			spawn_rebels = {
-				type = nationalist_rebels
-				size = 3
-				friend = IRE
-			}
-		}
-	}
-}
-
-country_event = {
-	id = uef_civil_war.52
-	title = "uef_civil_war.52.t"
-	desc = "uef_civil_war.52.d"
-	picture = ANGRY_MOB_eventPicture
-	trigger = {
-		NOT = {
-			num_of_rebel_controlled_provinces = 1
-		}
-		has_disaster = uef_civil_war
-		AND = {
-			OR = {
-				prestige = 0
-				NOT = {
-					war_exhaustion = 5
-				}
-				is_year = 1600
-			}
-			legitimacy = 100
-			stability = 3
-		}
-		NOT = {
-			OR = {
-				ENG = {
-					exists = yes
-				}
-				SCO = {
-					exists = yes
-				}
-				GBR = {
-					exists = yes
-				}
-			}
-		}
-		has_global_flag = uef_select_war
-		tag = uef
-	}
-	mean_time_to_happen = {
-		months = 12
-	}
-	option = {
-		name = "uef.22.a"
-		every_owned_province = {
-			limit = {
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
 				OR = {
-					culture = english
-					culture = scottish
+					region = south_england_region
+					region = north_england_region
 				}
-				continent = europe
+				units_in_province = 1
+				controlled_by = ROOT
+			}
+			Public_ChangeClassWealthVal = { class= NO type = value inp=50 }
+		}
+		random_owned_province = {
+			limit = {
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
+				OR = {
+					region = south_england_region
+					region = north_england_region
+				}
+				controlled_by = ROOT
+			}
+			Public_ChangeClassWealthVal = { class= NO type = value inp=25 }
+		}
+		random_owned_province = {
+			limit = {
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_england }
+				NOT = { has_province_modifier = uef_civil_war_local_support_for_france }
+				OR = {
+					region = south_england_region
+					region = north_england_region
+				}
+				controlled_by = ROOT
+			}
+			Public_ChangeClassWealthVal = { class= NO type = value inp=25 }
+		}
+	}
+	option = { #How dare they question me?
+		name = uef_civil_war.8.b
+		ai_chance = {
+			factor = 50
+		}
+		add_country_modifier = {
+			name = legitimacy_questioned #TODO: balance, -10% land morale for 5 years vs 1/2 of yearly income
+			duration = 1825
+		}
+	}
+}
+
+### RUMORS OF LARGE REVOLT ###
+
+country_event = {
+	id = uef_civil_war.9
+	title = uef_civil_war.9.t
+	desc = uef_civil_war.9.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		any_owned_province = {
+			unrest = 3
+			controlled_by = ROOT
+		}
+	}
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	option = { #Send money to help the local authorities
+		name = uef_civil_war.9.a
+		ai_chance = {
+			factor = 25
+		}
+		add_treasury = 100 #Money distributed to provinces
+		random_owned_province = {
+			limit = {
+				NOT = {	superregion = british_isles_superregion }
+			    unrest = 3
+			    controlled_by = ROOT
+			}
+			Public_ChangeClassWealthVal = { class= NO type = value inp=100 }
+		}
+	}
+	option = { #The money is needed more closer to home
+		name = uef_civil_war.9.b
+		ai_chance = {
+			factor = 75
+		}
+		random_owned_province = {
+			limit = {
+				unrest = 3
+				controlled_by = ROOT
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-100 }
+			spawn_rebels = {
+				type = pretender_rebels
+				size = 3
 			}
 			add_province_modifier = {
-				name = uef_unrest
-				duration = -1
+				name = uef_civil_war_rebel_refugees
+				duration = 3650
 			}
+			custom_tooltip = uef_civil_war_rebel_refugees_tt
 		}
-		set_country_flag = uef_civil_war_ending_1
-	}
-	option = {
-		name = "uef.4.a"
-		every_owned_province = {
-			limit = {
-				OR = {
-					culture = english
-					culture = scottish
-				}
-				continent = europe
-			}
-			add_province_modifier = {
-				name = uef_autonomy
-				duration = -1
-			}
-		}
-		set_country_flag = uef_civil_war_ending_1
 	}
 }
 
-country_event = {
-	id = uef_civil_war.53
-	title = "uef_civil_war.53.t"
-	desc = "uef_civil_war.53.d"
-	picture = ANGRY_MOB_eventPicture
+### England STRONGHOLD ###
+
+province_event = {
+	id = uef_civil_war.10
+	title = uef_civil_war.10.t
+	desc = uef_civil_war.10.d
+	picture = uef_civil_war_eventPicture
+	is_triggered_only = yes
+	fire_only_once = yes
 	trigger = {
-		has_disaster = uef_civil_war
-		AND = {
-			OR = {
-				ENG = {
-					exists = yes
-				}
-				SCO = {
-					exists = yes
-				}
-				GBR = {
-					exists = yes
-				}
+		FROM = {
+			tag = REB
+		}
+		has_province_modifier = uef_civil_war_rebel_refugees
+		has_province_modifier = uef_civil_war_local_support_for_england
+	}
+	option = {
+		name = uef_civil_war.10.a
+		add_province_modifier = {
+			name = uef_civil_war_rebel_stronghold
+			duration = 1825
+		}
+		custom_tooltip = uef_civil_war_rebel_stronghold_tt
+	}
+}
+
+### France STRONGHOLD ###
+
+province_event = {
+	id = uef_civil_war.11
+	title = uef_civil_war.11.t
+	desc = uef_civil_war.11.d
+	picture = uef_civil_war_eventPicture
+	is_triggered_only = yes
+	fire_only_once = yes
+	trigger = {
+		FROM = {
+			tag = REB
+		}
+		has_province_modifier = uef_civil_war_rebel_refugees
+		has_province_modifier = uef_civil_war_local_support_for_france
+	}
+	option = {
+		name = uef_civil_war.11.a
+		add_province_modifier = {
+			name = uef_civil_war_rebel_stronghold
+			duration = 1825
+		}
+		custom_tooltip = uef_civil_war_rebel_stronghold_tt
+	}
+}
+
+### SUPPORT England ###
+
+country_event = {
+	id = uef_civil_war.12
+	title = uef_civil_war.12.t
+	desc = uef_civil_war.12.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		OR = {
+			capital_scope = { superregion = british_isles_superregion }
+			capital_scope = { superregion = france_superregion }
+			capital_scope = { superregion = iberia_superregion }
+			capital_scope = { superregion = germany_superregion }
+		}
+		NOT = { has_disaster = uef_civil_war }
+		if = { #to filter out Irish minors
+		    limit = {
+			    exists = UEF
 			}
-			NOT = {
-				OR = {
-					ENG = {
-						war_with = uef
-					}
-					SCO = {
-						war_with = uef
-					}
-					GBR = {
-						war_with = uef
-					}
-				}
+		    army_strength = {
+			    who = UEF
+			    value = 0.5
+		    }
+			else = {
+			    army_strength = {
+			        who = ENG
+			        value = 0.5
+		        }
 			}
 		}
-		has_global_flag = uef_select_war
-		tag = uef
+		NOT = { has_country_flag = support_for_uef_civil_war }
+		NOT = { has_country_flag = no_support_for_rose_rebels }
+		any_known_country = {
+		    has_disaster = uef_civil_war
+			has_country_flag = uef_civil_war_support_english
+			any_owned_province = {
+				OR = {
+					any_neighbor_province = {
+						owned_by = ROOT
+					}
+					has_port = yes
+				}
+				unit_in_siege = no
+			}
+		}
 	}
 	mean_time_to_happen = {
 		months = 60
 	}
-	immediate = {
+	option = {
+		name = uef_civil_war.12.a
+		ai_chance = {
+			factor = 50
+		}
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:supported England with token force:uef_civil_war.12"
+		set_country_flag = support_for_uef_civil_war
+		add_mil_power = -50
 		hidden_effect = {
-			every_owned_province = {
-				limit = {
-					OR = {
-						culture = english
-						culture_group = brythonic
-					}
-					continent = europe
+			random_known_country = {
+			    limit = {
+				    has_disaster = uef_civil_war
+			        has_country_flag = uef_civil_war_support_english
 				}
-				remove_core = uef
-				cede_province = ENG
-			}
-			every_owned_province = {
-				limit = {
-					OR = {
-						culture = scottish
-						culture = highland_scottish
-					}
-					continent = europe
+				country_event = {
+					id = uef_civil_war.14
+					days = 1
 				}
-				remove_core = uef
-				cede_province = SCO
-			}
-			every_owned_province = {
-				limit = {
-					OR = {
-						culture_group = gaelic
-					}
-					continent = europe
-				}
-				remove_core = uef
-				cede_province = IRE
-			}
-			set_country_flag = uef_civil_war_ending_2
-		}
-	}
-	option = {
-		name = "uef.53.a"
-		add_core = 236
-		Stab_Subtract1 = yes
-		random_country = {
-			limit = {
-				owns = 236
-			}
-			add_opinion = {
-				who = ROOT
-				modifier = violated_territory
 			}
 		}
 	}
 	option = {
-		name = "uef.53.b"
-		every_owned_province = {
-			limit = {
-				OR = {
-					culture = scottish
+		name = uef_civil_war.12.b
+		ai_chance = {
+			factor = 25
+		}
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:supported France with money:uef_civil_war.12"
+		set_country_flag = support_for_uef_civil_war
+		add_treasury = -50
+		hidden_effect = {
+			random_known_country = {
+			    limit = {
+				    has_disaster = uef_civil_war
+			        has_country_flag = uef_civil_war_support_english
 				}
-				continent = europe
-			}
-			cede_province = SCO
-		}
-		ENG = {
-			add_opinion = {
-				who = ROOT
-				modifier = returned_province
+				country_event = {
+					id = uef_civil_war.14
+					days = 1
+				}
 			}
 		}
-		SCO = {
-			add_opinion = {
-				who = ROOT
-				modifier = returned_province
-			}
+	}
+	option = {
+		name = uef_civil_war.12.c
+		ai_chance = {
+			factor = 25
 		}
-		IRE = {
-			add_opinion = {
-				who = ROOT
-				modifier = returned_province
-			}
-		}
-		change_tag = FRA
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:refuesed to support England:uef_civil_war.12"
+		set_country_flag = no_support_for_rose_rebels
+		add_prestige = 5
 	}
 }
 
+### SUPPORT France ###
+
 country_event = {
-	id = uef_civil_war.100
-	title = "uef_civil_war.100.t"
-	desc = "uef_civil_war.100.d"
-	picture = ECONOMY_eventPicture
+	id = uef_civil_war.13
+	title = uef_civil_war.13.t
+	desc = uef_civil_war.13.d
+	picture = uef_civil_war_eventPicture
+	trigger = {
+		OR = {
+			capital_scope = { superregion = british_isles_superregion }
+			capital_scope = { superregion = france_superregion }
+			capital_scope = { superregion = iberia_superregion }
+			capital_scope = { superregion = germany_superregion }
+		}
+		NOT = { has_disaster = uef_civil_war }
+		if = { #to filter out Irish minors
+		    limit = {
+			    exists = UEF
+			}
+		    army_strength = {
+			    who = UEF
+			    value = 0.5
+		    }
+			else = {
+			    army_strength = {
+			        who = ENG
+			        value = 0.5
+		        }
+			}
+		}
+		NOT = { has_country_flag = support_for_uef_civil_war }
+		NOT = { has_country_flag = no_support_for_rose_rebels }
+		any_known_country = {
+		    has_disaster = uef_civil_war
+			has_country_flag = uef_civil_war_support_france
+			any_owned_province = {
+				OR = {
+					any_neighbor_province = {
+						owned_by = ROOT
+					}
+					has_port = yes
+				}
+				unit_in_siege = no
+			}
+		}
+	}
+	mean_time_to_happen = {
+		months = 60
+	}
+	option = {
+		name = uef_civil_war.12.a
+		ai_chance = {
+			factor = 50
+		}
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:supported France with money:uef_civil_war.13"
+		set_country_flag = support_for_uef_civil_war
+		hidden_effect = {
+			random_known_country = {
+			    limit = {
+				    has_disaster = uef_civil_war
+			        has_country_flag = uef_civil_war_support_france
+				}
+				country_event = {
+					id = uef_civil_war.14
+					days = 1
+				}
+			}
+		}
+	}
+	option = {
+		name = uef_civil_war.12.b
+		ai_chance = {
+			factor = 25
+		}
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:supported France with money:uef_civil_war.13"
+		set_country_flag = support_for_uef_civil_war
+		add_treasury = -50
+		hidden_effect = {
+			random_known_country = {
+			    limit = {
+				    has_disaster = uef_civil_war
+			        has_country_flag = uef_civil_war_support_france
+				}
+				country_event = {
+					id = uef_civil_war.14
+					days = 1
+				}
+			}
+		}
+	}
+	option = {
+		name = uef_civil_war.12.c
+		ai_chance = {
+			factor = 25
+		}
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:refuesed to support France:uef_civil_war.13"
+		set_country_flag = no_support_for_rose_rebels
+		add_prestige = 5
+	}
+}
+
+### X INTERVENES! ###
+
+country_event = {
+	id = uef_civil_war.14
+	title = uef_civil_war.14.t
+	desc = uef_civil_war.14.d
+	picture = uef_civil_war_eventPicture
 	is_triggered_only = yes
 	option = {
-		name = "uef.100.a"
-		Stab_Add50Percent = yes
-		add_prestige = 50
+		name = uef_civil_war.14.a
+		if = {
+			limit = {
+				any_owned_province = {
+					any_neighbor_province = {
+						owned_by = FROM
+					}
+					unit_in_siege = no
+				}
+			}
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = {
+						owned_by = FROM
+					}
+					unit_in_siege = no
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					size = 2
+					friend = FROM
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_owned_province = {
+						any_neighbor_province = {
+							owned_by = FROM
+						}
+						unit_in_siege = no
+					}
+				}
+				any_owned_province = {
+					has_port = yes
+					unit_in_siege = no
+				}
+			}
+			random_owned_province = {
+				limit = {
+					has_port = yes
+					unit_in_siege = no
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					size = 2
+					friend = FROM
+				}
+			}
+		}
+	}
+}
+
+### THE END OF THE WAR OF THE ROSES (THE RULING DYNASTY DEFEATS THE REBELS) ###
+
+country_event = {
+	id = uef_civil_war.100 #The End of the War of the Roses (the ruling dynasty defeats the rebels)
+	title = uef_civil_war.100.t
+	desc = uef_civil_war.100.d
+	picture = uef_civil_war_eventPicture
+	major = yes
+	is_triggered_only = yes #from "on_end" in disaster
+
+	immediate = {
 		hidden_effect = {
-			clr_global_flag = uef_select_war
-			set_country_flag = uefl_monarchy_civil_war_happened
+			remove_country_modifier = low_fertility
+			remove_country_modifier = legitimacy_questioned
+			every_owned_province = {
+				remove_province_modifier = uef_civil_war_local_support
+			 	remove_province_modifier = uef_civil_war_local_support_for_england
+			 	remove_province_modifier = uef_civil_war_local_support_for_france
+			  	remove_province_modifier = uef_civil_war_rebel_refugees
+			 	remove_province_modifier = uef_civil_war_rebel_stronghold
+			}
+			set_country_flag = had_uef_civil_war
+			clr_global_flag = uef_civil_war
+		}
+	}
+	option = {
+		name = uef_civil_war.100.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:ruling dynasty won the UEF Civil war:uef_civil_war.100"
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:end of UEF Civil war:uef_civil_war.100"
+		Stab_Add1 = yes
+		add_prestige = 20
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 20 }
+		hidden_effect = {
+			every_country = {
+				limit = {
+					has_country_flag = support_for_uef_civil_war
+				}
+				country_event = {
+					id = uef_civil_war.104 #Relations Deteriorate with England
+					days = 1
+				}
+			}
+			clr_country_flag = uef_civil_war_support_france
+			clr_country_flag = uef_civil_war_support_english
+		}
+	}
+}
+
+### THE END OF THE WAR OF THE ROSES (REBELLING France WINS THE WAR) ###
+
+country_event = {
+	id = uef_civil_war.101
+	title = uef_civil_war.101.t
+	desc = uef_civil_war.101.d
+	picture = uef_civil_war_eventPicture
+	major = yes
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		tag = ENG
+		has_disaster = uef_civil_war
+		has_country_flag = uef_civil_war_support_france
+		has_global_flag = plantagenet_becomes_french_again
+		is_in_war = {
+			casus_belli = cb_overlord_attacking_independence_war
+		}
+		OR = {
+			AND = {
+				war_score_against = {
+					who = FRA
+					value = 50
+				}
+				ai = yes
+				FRA = {
+					ai = yes
+				}
+			}
+			AND = {
+				war_score_against = {
+					who = FRA
+					value = 75
+				}
+				ai = no
+				FRA = {
+					ai = no
+				}
+			}
+			AND = {
+				war_score_against = {
+					who = UEF
+					value = 50
+				}
+				ai = yes
+				UEF = {
+					ai = yes
+				}
+			}
+			AND = {
+				war_score_against = {
+					who = UEF
+					value = 75
+				}
+				ai = no
+				UEF = {
+					ai = no
+				}
+			}
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			set_country_flag = had_uef_civil_war
+			clr_global_flag = uef_civil_war
+		}
+		end_disaster = uef_civil_war
+		set_country_flag = uef_plantagnet_civil_war_ending_1
+		if = {
+			limit = {
+				war_with = FRA
+			}
+			white_peace = FRA
+		}
+		else = {
+			white_peace = UEF
+		}
+	}
+
+	option = {
+		name = uef_civil_war.101.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:rebelling House of Lancaster won the War of The Roses:uef_civil_war.101"
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:end of War of the Roses:uef_civil_war.101"
+		Stab_Add50Percent = yes
+		add_prestige = -10
+		hidden_effect = {
+			every_country = {
+				limit = {
+					has_country_flag = support_for_uef_civil_war
+				}
+				country_event = {
+					id = uef_civil_war.103 #Improved Relations with England
+					days = 1
+				}
+				every_country = {
+					limit = {
+						has_country_flag = no_support_for_rose_rebels
+					}
+					country_event = {
+						id = uef_civil_war.104 #Relations Deteriorate with England
+						days = 1
+					}
+				}
+			}
+		}
+		custom_tooltip = post_uef_civil_war_loyalty_shift_rebels_won
+		every_owned_province = {
+			limit = {
+				OR = {
+					has_province_modifier = uef_civil_war_rebel_refugees
+					has_province_modifier = uef_civil_war_rebel_stronghold
+				}
+			}
+			hidden_effect = { Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=30 } }
+		}
+		every_owned_province = {
+			limit = {
+				has_province_modifier = uef_civil_war_local_support
+			}
+			hidden_effect = { Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-30 } }
+		}
+	}
+	after = {
+		hidden_effect = {
+			clr_country_flag = uef_civil_war_support_english
+			clr_country_flag = uef_civil_war_support_france
+			remove_country_modifier = importing_food
+			remove_country_modifier = plundering_soldiers
+			remove_country_modifier = legitimacy_questioned
+			remove_country_modifier = low_fertility
+			every_owned_province = {
+				remove_province_modifier = uef_civil_war_local_support
+				remove_province_modifier = uef_civil_war_local_support_for_england
+				remove_province_modifier = uef_civil_war_local_support_for_france
+				remove_province_modifier = uef_civil_war_rebel_refugees
+				remove_province_modifier = uef_civil_war_rebel_stronghold
+			}
+		}
+	}
+}
+
+### THE END OF THE WAR OF THE ROSES (REBELLING France WINS THE WAR) ###
+
+country_event = {
+	id = uef_civil_war.102
+	title = uef_civil_war.102.t
+	desc = uef_civil_war.102.d
+	picture = uef_civil_war_eventPicture
+	major = yes
+	is_triggered_only = yes
+	fire_only_once = yes
+	trigger = {
+		has_disaster = uef_civil_war
+		has_country_flag = uef_civil_war_support_english
+		is_in_war = {
+			casus_belli = cb_overlord_attacking_independence_war
+		}
+		OR = {
+			AND = {
+				war_score_against = {
+					who = FRA
+					value = 50
+				}
+				ai = yes
+				FRA = {
+					ai = yes
+				}
+			}
+			AND = {
+				war_score_against = {
+					who = FRA
+					value = 75
+				}
+				ai = no
+				FRA = {
+					ai = no
+				}
+			}
+			AND = {
+				war_score_against = {
+					who = UEF
+					value = 50
+				}
+				ai = yes
+				UEF = {
+					ai = yes
+				}
+			}
+			AND = {
+				war_score_against = {
+					who = UEF
+					value = 75
+				}
+				ai = no
+				UEF = {
+					ai = no
+				}
+			}
+		}
+	}
+	immediate = {
+		hidden_effect = {
+			set_country_flag = had_uef_civil_war
+			clr_global_flag = uef_civil_war
+		}
+		end_disaster = uef_civil_war
+		set_country_flag = uef_plantagnet_civil_war_ending_1
+		if = {
+			limit = {
+				war_with = FRA
+			}
+			white_peace = FRA
+		}
+		else = {
+			white_peace = UEF
+		}
+	}
+	option = {
+		name = uef_civil_war.102.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:France won the civil war:uef_civil_war.102"
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:end of civil war:uef_civil_war.102"
+		Stab_Add50Percent = yes
+		add_prestige = -10
+		hidden_effect = {
+			every_country = {
+				limit = {
+					has_country_flag = support_for_uef_civil_war
+				}
+				country_event = {
+					id = uef_civil_war.103 #Improved Relations with England
+					days = 1
+				}
+			}
+			every_country = {
+				limit = {
+					has_country_flag = no_support_for_rose_rebels
+				}
+				country_event = {
+					id = uef_civil_war.104 #Relations Deteriorate with England
+					days = 1
+				}
+			}
+			custom_tooltip = post_uef_civil_war_loyalty_shift_rebels_won
+			every_owned_province = {
+				limit = {
+					OR = {
+						has_province_modifier = uef_civil_war_rebel_refugees
+						has_province_modifier = uef_civil_war_rebel_stronghold
+					}
+				}
+				hidden_effect = { Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=30 } }
+			}
+			every_owned_province = {
+				limit = {
+					has_province_modifier = uef_civil_war_local_support
+				}
+				hidden_effect = { Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-30 } }
+			}
+		}
+	}
+	after = {
+		hidden_effect = {
+			clr_country_flag = uef_civil_war_support_english
+			clr_country_flag = uef_civil_war_support_france
+			remove_country_modifier = legitimacy_questioned
+			remove_country_modifier = low_fertility
+			every_owned_province = {
+				remove_province_modifier = uef_civil_war_local_support
+				remove_province_modifier = uef_civil_war_local_support_for_england
+				remove_province_modifier = uef_civil_war_local_support_for_france
+				remove_province_modifier = uef_civil_war_rebel_refugees
+				remove_province_modifier = uef_civil_war_rebel_stronghold
+			}
+		}
+	}
+}
+
+### IMPROVED RELATIONS WITH ENGLAND ###
+
+country_event = {
+	id = uef_civil_war.103
+	title = uef_civil_war.103.t
+	desc = uef_civil_war.103.d
+	picture = uef_civil_war_eventPicture
+	is_triggered_only = yes
+	immediate = {
+		clr_country_flag = support_for_uef_civil_war
+		clr_country_flag = no_support_for_rose_rebels
+	}
+	option = {
+		name = uef_civil_war.103.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:improved relation with [From.GetName]:uef_civil_war.103"
+		FROM = {
+			add_opinion = {
+				who = ROOT
+				modifier = eng_support_during_uef_civil_war
+			}
+			reverse_add_opinion = {
+				who = ROOT
+				modifier = eng_support_during_uef_civil_war
+			}
+		}
+	}
+}
+
+### RELATIONS DETERIORATE WITH ENGLAND ###
+
+country_event = {
+	id = uef_civil_war.104
+	title = uef_civil_war.104.t
+	desc = uef_civil_war.104.d
+	picture = uef_civil_war_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = uef_civil_war.104.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:worsened relation with [From.GetName]:uef_civil_war.104"
+		trigger = {
+				has_country_flag = support_for_uef_civil_war
+		}
+		FROM = {
+			add_opinion = {
+				who = ROOT
+				modifier = eng_supported_rebels_during_uef_civil_war
+			}
+			reverse_add_opinion = {
+				who = ROOT
+				modifier = eng_supported_rebels_during_uef_civil_war
+			}
+		}
+		clr_country_flag = support_for_uef_civil_war
+	}
+	option = {
+		name = uef_civil_war.104.b
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:worsened relation with [From.GetName]:uef_civil_war.104"
+		trigger = {
+			has_country_flag = no_support_for_rose_rebels
+		}
+		FROM = {
+			add_opinion = {
+				who = ROOT
+				modifier = eng_didnt_support_rebels_uef_civil_war
+			}
+			reverse_add_opinion = {
+				who = ROOT
+				modifier = eng_didnt_support_rebels_uef_civil_war
+			}
+		}
+		clr_country_flag = no_support_for_rose_rebels
+	}
+}
+
+### HOUSE OF X ENDS THE WAR OF THE ROSES ###
+
+country_event = {
+	id = uef_civil_war.106 #House of X ends the War of the Roses
+	title = uef_civil_war.106.t
+	desc = uef_civil_war.106.d
+	picture = uef_civil_war_eventPicture
+	major = yes
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		has_disaster = uef_civil_war
+		NOT = { dynasty = Plantagnet }
+		is_in_war = {
+			casus_belli = cb_overlord_attacking_independence_war
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			clr_country_flag = uef_civil_war_support_english
+			clr_country_flag = uef_civil_war_support_france
+			remove_country_modifier = legitimacy_questioned
+			remove_country_modifier = low_fertility
+			every_owned_province = {
+				remove_province_modifier = uef_civil_war_local_support
+				remove_province_modifier = uef_civil_war_local_support_for_england
+				remove_province_modifier = uef_civil_war_local_support_for_france
+				remove_province_modifier = uef_civil_war_rebel_refugees
+				remove_province_modifier = uef_civil_war_rebel_stronghold
+			}
+			set_country_flag = had_uef_civil_war
+			clr_global_flag = uef_civil_war
+		}
+		end_disaster = uef_civil_war
+		set_country_flag = uef_plantagnet_civil_war_ending_2
+	}
+	option = {
+		name = uef_civil_war.106.a
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:other dynasty (Root.Monarch.Dynastyt.GetName) got the throne:uef_civil_war.106"
+		log = "DIS-uef_civil_war:[GetYear]:[Root.GetName]:end of Civil war:uef_civil_war.106"
+		Stab_Subtract1 = yes
+		if = {
+			limit = {
+				war_with = FRA
+			}
+			white_peace = FRA
+		}
+		else = {
+			white_peace = UEF
 		}
 	}
 }
