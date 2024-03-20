@@ -8,6 +8,8 @@
 
 namespace = nobles_estate_events
 
+#TODO: use AI goal flags in option selection
+
 ###NOBLE BIRTH
 country_event = {
 	id = nobles_estate_events.1
@@ -16,20 +18,28 @@ country_event = {
 	picture = NOBLE_ESTATE_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
 		NOT = { government = tribal }
-		faction_influence = {
-            faction = FC_NO
-            influence = 40
-        }
-		OR = { #Military is only partially reformed
-		    Rights_NOSer2Has = yes
-		    Rights_NOSer3Has = yes
-			Rights_NOSer4Has = yes
+		OR = { #event text do not match well with republics that do not keep courtly stylings
+			NOT = { government = republic }
+			nobilisation_trigger = yes
 		}
-		NOT = { has_country_modifier = NO_Commissions_S }
-		NOT = { has_country_modifier = NO_Commissions_M }
-		NOT = { has_country_modifier = NO_Commissions_L }
+
+		faction_influence = {
+			faction = FC_NO
+			influence = 35
+		}
+		Rights_NOSer4HasGreater = no #Military is only partially reformed
+		Rights_NOGov6HasGreater = no #Military is only partially reformed
+		NOT = { 
+			has_country_modifier = NO_Commissions_S 
+			has_country_modifier = NO_Commissions_M
+			has_country_modifier = NO_Commissions_L 
+		}
+		NOT = { 
+			has_country_modifier = FC_NO_Crackdown_S
+			has_country_modifier = FC_NO_Crackdown_M
+			has_country_modifier = FC_NO_Crackdown_L
+		}
 	}
 	
 	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
@@ -39,7 +49,7 @@ country_event = {
 	}
 	
 	option = {
-		name = nobles_estate_events.1.a #
+		name = nobles_estate_events.1.a #Guarantee their rights
 		ai_chance = {
 			factor = 50
 			modifier = {
@@ -52,10 +62,11 @@ country_event = {
 			}
 		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		Pol_FacInfReactPos = { Fac=NO }
 		NO_Commissions = yes
 	}
 	option = {
-		name = nobles_estate_events.1.b #
+		name = nobles_estate_events.1.b #We cannot make such promises
 		ai_chance = {
 			factor = 50
 			modifier = {
@@ -64,6 +75,7 @@ country_event = {
 			}
 		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		Pol_FacInfReact = { Fac=NO }
 	}
 }
 
@@ -77,10 +89,9 @@ country_event = {
 	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
 	
 	trigger = {
-		has_estate = estate_no
 		faction_influence = {
             faction = FC_NO
-            influence = 40
+            influence = 35
         }
 		Advisor_HasFaction = { NO=yes Level=2 }
 	}
@@ -90,7 +101,7 @@ country_event = {
 	}
 	
 	option = {
-		name = nobles_estate_events.2.a #Ok
+		name = OPT.ISEE
 		NO_FactionBoost = yes
 	}
 }
@@ -104,7 +115,6 @@ country_event = {
 	goto = noble_encroachment
 	
 	trigger = {
-		has_estate = estate_no
 		any_owned_province = {
 		    is_capital = no
 			is_overseas = no
@@ -112,12 +122,7 @@ country_event = {
 			check_key = { lhs = Prov_NOPow value = 75 }
 			NOT = { local_autonomy = 90 }
 		}
-		OR = { #Nobles exercise significant power in the countryside
-		    Rights_NOGov1Has = yes
-		    Rights_NOGov2Has = yes
-			Rights_NOGov3Has = yes
-			Rights_NOGov4Has = yes
-		}
+		Rights_NOGov5HasGreater = no #Nobles exercise significant power in the countryside
 	}
 	
 	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
@@ -180,14 +185,14 @@ country_event = {
 	picture = NOBLE_ESTATE_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
 		check_key = { lhs = Prov_NOPow value = 50 }
-		OR = { #Nobles exercise significant power in the countryside
-		    Rights_NOGov1Has = yes
-		    Rights_NOGov2Has = yes
-			Rights_NOGov3Has = yes
-			Rights_NOGov4Has = yes
-		}
+		Rights_NOGov5HasGreater = no #Nobles exercise significant power in the countryside
+		NOT = { has_country_modifier = NO_Serfs_S }
+		NOT = { has_country_modifier = NO_Serfs_M }
+		NOT = { has_country_modifier = NO_Serfs_L }
+		NOT = { has_country_modifier = NO_ProtectSerfs_S }
+		NOT = { has_country_modifier = NO_ProtectSerfs_M }
+		NOT = { has_country_modifier = NO_ProtectSerfs_L }
 	}
 	
 	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
@@ -209,6 +214,7 @@ country_event = {
 				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
 			}
 		}
+		Pol_FacInfReactPos = { Fac=NO }
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
 		NO_Serfs = yes
 	    custom_tooltip = NO_Serfs_effect
@@ -222,6 +228,7 @@ country_event = {
 				check_key = { lhs = Prov_NOLoy value = 75 }
 			}
 		}
+		Pol_FacInfReact = { Fac=NO }
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
 	}
 }
@@ -234,11 +241,10 @@ country_event = {
 	picture = NOBLE_ESTATE_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
 		NOT = {
 		    faction_influence = {
                 faction = FC_NO
-                influence = 40
+                influence = 35
             }
 		}
 		NOT = { Advisor_HasFaction = { NO=yes Level=1 } }
@@ -251,7 +257,7 @@ country_event = {
 	}
 	
 	option = {
-		name = nobles_estate_events.5.a #Ok
+		name = OPT.ISEE
 		NO_FactionCrackdown = yes
 	}
 }
@@ -264,9 +270,11 @@ country_event = {
 	picture = NOBLE_ESTATE_DEMANDS_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
-		has_estate = estate_bg
 		NOT = { government = tribal }
+		OR = { #event text do not match well with republics that do not keep courtly stylings
+			NOT = { government = republic }
+			nobilisation_trigger = yes
+		}
 		faction_influence = {
             faction = FC_NO
             influence = 35
@@ -297,15 +305,16 @@ country_event = {
 				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
 			}
 		}
+		Pol_FacInfReactPos = { Fac=NO }
+		Pol_FacInfReact = { Fac=BG }
+		add_faction_influence = {
+            faction = FC_BG
+            influence = -10
+        } 
 		add_country_modifier = {
 			name = "nobility_sumptuary_restrictions"
 			duration = 1825 #5 years
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
-		add_faction_influence = {
-            faction = FC_BG
-            influence = -10
-        }         
 	}
 	option = {
 		name = nobles_estate_events.6.b #No
@@ -316,8 +325,8 @@ country_event = {
 				check_key = { lhs = Prov_NOLoy value = 75 }
 			}
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+		Pol_FacInfReactPos = { Fac=BG }
+		Pol_FacInfReact = { Fac=NO }
 	}
 }
 
@@ -329,9 +338,17 @@ country_event = {
 	picture = NOBLE_ESTATE_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
 		NOT = { government = tribal }
+		OR = { #event text do not match well with republics that do not keep courtly stylings
+			NOT = { government = republic }
+			nobilisation_trigger = yes
+		}
 		has_regency = no
+		NOT = { 
+			has_country_modifier = FC_NO_Crackdown_S
+			has_country_modifier = FC_NO_Crackdown_M
+			has_country_modifier = FC_NO_Crackdown_L
+		}
 		faction_influence = {
             faction = FC_NO
             influence = 30
@@ -351,6 +368,9 @@ country_event = {
 		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-5 }
 	}
+	#TODO: if not meeting criteria, privilege will not change, even if you push the button, we need to:
+	#either limit options based on Privilege_NOTitlesXCanRaise trigger, or make it that this option bypasses the checks and executes
+	#Privilege_NOTitlesXRaise + remove_estate_privilege = Privilege_NOTitlesX-1
 	option = {
 		name = nobles_estate_events.7.b #Elaborate Ceremonies
 		trigger = {
@@ -373,10 +393,10 @@ country_event = {
 		name = nobles_estate_events.7.c #Minimum of Ceremonies
 		trigger = {
 		    Privilege_HasGreater = { Privilege=NOTitles Lvl=1 }
-			    NOT = {
-			        faction_influence = {
-                    faction = FC_NO
-                    influence = 65
+			NOT = {
+			    faction_influence = {
+					faction = FC_NO
+					influence = 65
                 }
 			}
 		}
@@ -399,8 +419,7 @@ country_event = {
 	picture = NOBLE_ESTATE_DEMANDS_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
-		NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+		NOT = { check_key = { lhs = Prov_NOLoy value = 35 } }
 		check_key = { lhs = Prov_NOPow value = 50 }
 		any_owned_province = {
 			is_capital = no
@@ -419,23 +438,11 @@ country_event = {
 				limit = {
 					is_capital = no
 					is_overseas = no
-					is_city = yes
-					NOT = { local_autonomy = 75 }
-				    check_key = { lhs = Prov_NOPow value = 75 }
-					NOT = { has_province_flag = noble_estate_revolt }
-				}
-				set_province_flag = noble_estate_revolt
-			}
-			random_owned_province = {
-				limit = {
-					is_capital = no
-					is_overseas = no
 				    is_city = yes
 					NOT = { local_autonomy = 75 }
 				    check_key = { lhs = Prov_NOPow value = 75 }
-				    NOT = { has_province_flag = noble_estate_revolt }
 				}
-				set_province_flag = noble_estate_revolt
+				save_event_target_as = noble_estate_revolt
 			}
 		}
 	}
@@ -445,14 +452,13 @@ country_event = {
 	}
 	
 	option = { 
-		name = nobles_estate_events.8.a #Let it be.
+		name = OPT.LEAVETHEMBE
 		ai_chance = {
 			factor = 50
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
-		every_owned_province = {
-			limit = { has_province_flag = noble_estate_revolt }
+		event_target:noble_estate_revolt = {
 			add_local_autonomy = 25
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
 		}
 	}
 	option = {
@@ -464,19 +470,10 @@ country_event = {
 				is_at_war = yes
 			}
 		}
-		every_owned_province = {
-			limit = { has_province_flag = noble_estate_revolt }
+		event_target:noble_estate_revolt = {
 			spawn_rebels = {
 				type = warlord_rebels
 				size = 1
-			}
-		}
-	}
-	after = {
-	    hidden_effect = {
-			every_owned_province = {
-				limit = { has_province_flag = noble_estate_revolt }
-				clr_province_flag = noble_estate_revolt
 			}
 		}
 	}
@@ -490,8 +487,7 @@ country_event = {
 	picture = NOBLE_ESTATE_TAKE_OVER_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
-		NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+		NOT = { check_key = { lhs = Prov_NOLoy value = 35 } }
 		check_key = { lhs = Prov_NOPow value = 50 }
 		is_at_war = yes
 		OR = { #Military is only partially reformed
@@ -509,7 +505,7 @@ country_event = {
 	}
 	
 	option = { 
-		name = nobles_estate_events.9.a #This isn't ideal.
+		name = OPT.UNFORTUNATE #This isn't ideal.
 		ai_chance = {
 			factor = 1
 		}
@@ -536,7 +532,8 @@ country_event = {
             faction = FC_BG
             influence = 10
         }
-		create_general = { tradition = 10 }
+		add_army_tradition = -10
+		create_general = { tradition = 30 }
 	}
 	option = {
 		name = nobles_estate_events.9.c #It is high time we replaced them with men of true ability.
@@ -560,7 +557,8 @@ country_event = {
             faction = FC_CL
             influence = 10
         }
-		create_general = { tradition = 10 }
+		add_army_tradition = -10
+		create_general = { tradition = 30 }
 	}
 }
 
@@ -572,7 +570,6 @@ country_event = {
 	picture = NOBLE_ESTATE_eventPicture
 	
 	trigger = {
-		has_estate = estate_no
 		NOT = { government = tribal }
 		faction_influence = {
             faction = FC_NO
@@ -614,7 +611,8 @@ country_event = {
 			discount = yes
 			skill = 2
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+		Pol_FacInfReactPos = { Fac=NO }
+		Pol_FacInfReact = { Fac=BG }
 		add_faction_influence = {
             faction = FC_NO
             influence = 10
@@ -649,7 +647,8 @@ country_event = {
 			discount = yes
 			skill = 2
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+		Pol_FacInfReact = { Fac=NO }
+		Pol_FacInfReactPos = { Fac=BG }
 		add_faction_influence = {
             faction = FC_BG
             influence = 10
@@ -684,7 +683,8 @@ country_event = {
 			discount = yes
 			skill = 2
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		Pol_FacInfReact = { Fac=NO }
+		Pol_FacInfReactPos = { Fac=CL }
 		add_faction_influence = {
             faction = FC_CL
             influence = 10
@@ -702,8 +702,7 @@ country_event = {
 	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
 	
 	trigger = {
-		has_estate = estate_no
-		check_key = { lhs = Prov_NOLoy value = 60 }
+		check_key = { lhs = Prov_NOLoy value = 50 }
 		check_key = { lhs = Prov_NOPow value = 60 }
 	}
 	
@@ -718,8 +717,7 @@ country_event = {
 					25 = { set_country_flag = noble_army_reformer }
 				}
 			}
-			if = {
-				limit = { NOT = { num_of_ports = 1 } }
+			else = {
 				random_list = {
 					33 = { set_country_flag = noble_general }
 					33 = { set_country_flag = noble_statesman }
@@ -741,19 +739,15 @@ country_event = {
 	}
 
 	option = {
-		name = nobles_estate_events.11.a #Ok
+		name = OPT.VERYWELL
 		add_meritocracy_effect = yes
 		trigger_switch = {
 			on_trigger = has_country_flag
 			noble_general = {
 				create_general = { tradition = 50 }
-				clr_country_flag = noble_general
 			}
 			noble_admiral = {
-				create_admiral = {
-					tradition = 50
-				}
-				clr_country_flag = noble_admiral
+				create_admiral = { tradition = 50 }
 			}
 			noble_statesman = {
 				if = {
@@ -768,8 +762,7 @@ country_event = {
 						discount = yes
 					}
 				}
-				if = {
-					limit = { NOT = { monthly_income = 25} }
+				else = {
 					define_advisor = {
 						type = statesman_NO
 						culture = event_target:noble_province
@@ -778,7 +771,6 @@ country_event = {
 						discount = yes
 					}
 				}
-				clr_country_flag = noble_statesman
 			}
 			noble_army_reformer = {
 				if = {
@@ -793,8 +785,7 @@ country_event = {
 						discount = yes
 					}
 				}
-				if = {
-					limit = { NOT = { monthly_income = 25 } }
+				else = {
 					define_advisor = {
 						type = army_reformer_NO
 						culture = event_target:noble_province
@@ -803,9 +794,12 @@ country_event = {
 						discount = yes
 					}
 				}
-				clr_country_flag = noble_army_reformer
 			}
 		}
+		clr_country_flag = noble_general
+		clr_country_flag = noble_army_reformer
+		clr_country_flag = noble_statesman
+		clr_country_flag = noble_admiral
 	}
 }
 
@@ -820,6 +814,6 @@ country_event = {
 #	is_triggered_only = yes
 #	
 #	option = {
-#		name = nobles_estate_events.12.a #Yes
+#		name = OPT.CRUSHREBELS
 #	}
 #}
