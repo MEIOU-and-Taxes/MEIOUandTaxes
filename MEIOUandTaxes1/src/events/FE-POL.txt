@@ -3470,6 +3470,9 @@ country_event = {
  	}
 	option = { #Regular election
 		name = "flavor_pol.610.a"
+		trigger = {
+		    NOT = { has_country_modifier = vivente_rege_election }
+		}
 		add_legitimacy = 10
  		NO_FactionBoost = yes
 		hidden_effect = {
@@ -3482,24 +3485,17 @@ country_event = {
 	option = { #Vivente rege election
 		name = "flavor_pol.610.b"
 		trigger = {
-		    has_heir = yes
-			has_female_heir = no
-			OR = {
-			    has_reform = Pol_Structure4
-				has_reform = Pol_Structure5
-			}
+		    has_country_modifier = vivente_rege_election
 		}
 		
-		add_legitimacy = 10
-		add_heir_claim = 20
-		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-10 }
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
+		add_legitimacy = 5
 		
 		hidden_effect = {
 			change_variable = {
 				which = vivente_rege
 				value = 1
 			}
+			remove_country_modifier = vivente_rege_election
 		}
 		
 		custom_tooltip = flavor_pol.610.tooltip.b
@@ -3507,12 +3503,14 @@ country_event = {
 	option = { #End of Elective Monarchy
 		name = "flavor_pol.610.c"
 		trigger = {
-		    has_heir = yes
-			has_female_heir = no
-			has_reform = Pol_Structure5
+			OR = {
+			    has_reform = Pol_Structure4
+				has_reform = Pol_Structure5
+			}
+			has_country_modifier = vivente_rege_election
 			check_variable = {
 			    which = vivente_rege
-			    value = 2
+			    value = 3
 		    }
 		}
 		
@@ -3559,8 +3557,29 @@ country_event = {
 				which = vivente_rege
 				value = 0
 			}
+			remove_country_modifier = vivente_rege_election
 		}
         custom_tooltip = flavor_pol.610.tooltip.c        	
+	}
+}
+
+### VIVENTE REGE ELECTION OF X
+country_event = {
+	id = flavor_pol.611
+	title = "flavor_pol.611.title"
+	desc = "flavor_pol.611.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes #from hold_vivente_rege_election decision
+	
+	option = {
+		name = "flavor_pol.611.a"
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-15 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
+		add_country_modifier = { 
+		     name = vivente_rege_election
+			 duration = -1
+		}
 	}
 }
 
@@ -6385,6 +6404,12 @@ country_event = {
 				which = vivente_rege
 				value = 0
 			}
+			if = {
+     	    	limit = {
+	        		has_country_modifier = vivente_rege_election
+         		}
+	        	remove_country_modifier = vivente_rege_election
+        	}
 		}
 		custom_tooltip = flavor_pol.610.tooltip.c
 	}
