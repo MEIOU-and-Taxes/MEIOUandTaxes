@@ -2822,11 +2822,12 @@ TN_DoTradeHelper1 = {
             set_key = { lhs = TN_SectorTraffic$prod$ which = Public_Tmp4 }
             change_key = { lhs = TN_SectorStockpileOffer$prod$ which = Public_Tmp4 }
 
-            multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ }            
-            multiply_key = { lhs = Public_Tmp4 value = 0.99 }
-            subtract_key = { lhs = TN_SectorTrade which = Public_Tmp4 } # merchants lose
+            multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ } # total value of goods: price*amount
+            change_key = { lhs = TN_SectorTrade which = Public_Tmp4 } # merchant asset gain due to goods value
+            multiply_key = { lhs = Public_Tmp4 value = 0.99 } # merchants buy locally for 99% of sector price
+            subtract_key = { lhs = TN_SectorTrade which = Public_Tmp4 } # merchants cash loss from purchase
 			
-            change_key = { lhs = TN_SectorEarn$prod$ which = Public_Tmp4 } # sector wins. Distributed on provinces per output          
+            change_key = { lhs = TN_SectorEarn$prod$ which = Public_Tmp4 } # sector cash gain from sale, distributed on provinces per output
 			
 			set_key = { lhs = TradeDisplay_SectorEarn$prod$ which = Public_Tmp4 }
 			
@@ -2869,11 +2870,12 @@ TN_DoTradeHelper1 = {
             
             set_key = { lhs = TN_SectorMarketPurchase$prod$ which = Public_Tmp4 }
 
-            multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ }
-            multiply_key = { lhs = Public_Tmp4 value = 1.01 }
-            
-            change_key = { lhs = TN_SectorTrade which = Public_Tmp4 } # distributed just to commercial industries
-            change_key = { lhs = TN_SectorSpend$prod$ which = Public_Tmp4 }
+            multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ } # total value of goods: price * amount
+            subtract_key = { lhs = TN_SectorTrade which = Public_Tmp4 } # merchant asset loss due to goods value
+            multiply_key = { lhs = Public_Tmp4 value = 1.01 } # merchants sell locally for 101% of sector price
+            change_key = { lhs = TN_SectorTrade which = Public_Tmp4 } # merchants cash gain from sale
+
+            change_key = { lhs = TN_SectorSpend$prod$ which = Public_Tmp4 } # sector cash loss from purchase
 			
 			change_key = { lhs = TradeDisplay_SectorSpend$prod$ which = Public_Tmp4 }
 
@@ -3477,23 +3479,26 @@ TN_DoTradeByAmountImport = {
 					set_key = { lhs = Public_Tmp0 value = 0 }                   
 				}
                 
+                # Public_Tmp4: how much the good costs to import
                 set_key = { lhs = Public_Tmp4 which = Public_Tmp3 } # distance converted to a multiplier
                 multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ } # distance * prod prc conductee
                 change_key = { lhs = Public_Tmp4 which = Public_Tmp0 } # + tariff
                 
+                # Actual transaction price is the midpoint between conductor's sector price and total import cost
+                # Public_Tmp7: Excess profit per-good earned by conductee (half of conductor's sector price minus total import cost)
                 set_key = { lhs = Public_Tmp7 which = Public_Tmp1 } # conductor prod prc
                 subtract_key = { lhs = Public_Tmp7 which = Public_Tmp4 } # difference 
                 multiply_key = { lhs = Public_Tmp7 value = 0.5 } #divide_key = { lhs = Public_Tmp7 value = 2 }                
                 
-                set_key = { lhs = Public_Tmp5 which = TN_ProvPrc$prod$ }
-                change_key = { lhs = Public_Tmp5 which = Public_Tmp7 } # cost per good
-                
-                multiply_key = { lhs = Public_Tmp5 which = $amount$ } # total cost
+                # Public_Tmp5: Total excess profit earned by conductee
+                set_key = { lhs = Public_Tmp5 which = Public_Tmp7 }
+                multiply_key = { lhs = Public_Tmp5 which = $amount$ }
                 
                 subtract_key = { lhs = TN_SectorStockpileOffer$prod$ which = $amount$ }
                 subtract_key = { lhs = TN_SectorStockpile$prod$ which = $amount$ }
                 change_key = { lhs = TN_SectorStockpileOut$prod$ which = $amount$ }
                 change_key = { lhs = TN_SectorExported$prod$ which = $amount$ }
+                change_key = { lhs = TN_SectorTrade which = Public_Tmp5 }
 
                 if = {
                     limit = {
@@ -3504,25 +3509,21 @@ TN_DoTradeByAmountImport = {
                     set_key = { lhs = link_id which = event_target:Prov }
                     DoTradeDisplaySold = { prod = $prod$ amount = $amount$ tradelink = link_id }
                 }
-
-
-                change_key = { lhs = TN_SectorTrade which = Public_Tmp5 }				
 				
-				event_target:Prov = {					
-					set_key = { lhs = Public_Tmp4 which = PREV }
+				event_target:Prov = {
+                    # Public_Tmp7: Excess profit per-good earned by conductor (half of conductor's sector price minus total import cost)
 					set_key = { lhs = Public_Tmp7 which = PREV }
 					set_key = { lhs = $amount$ which = PREV }
                     
-					set_key = { lhs = Public_Tmp5 which = Public_Tmp4 }
-					change_key = { lhs = Public_Tmp5 which = Public_Tmp7 }
-                    
-					multiply_key = { lhs = Public_Tmp5 which = $amount$ }
+                    # Public_Tmp5: Total excess profit earned by conductor
+                    set_key = { lhs = Public_Tmp5 which = PREV }
 					
 					change_key = { lhs = TN_SectorStockpile$prod$ which = $amount$ }
 					change_key = { lhs = TN_SectorStockpileIn$prod$ which = $amount$ }
 					subtract_key = { lhs = TN_SectorStockpileBid$prod$ which = $amount$ }
                     change_key = { lhs = TN_SectorImported$prod$ which = $amount$ }
-                    subtract_key = { lhs = TN_SectorTrade which = Public_Tmp5 }					
+
+                    change_key = { lhs = TN_SectorTrade which = Public_Tmp5 }
                    
                     if = {
                         limit = {
@@ -3541,7 +3542,7 @@ TN_DoTradeByAmountImport = {
 								owned_by = PREV
 							}
 						}                       
-                        set_key = { lhs = Public_Tmp7 which = PREV }
+                        #set_key = { lhs = Public_Tmp7 which = PREV } # Removed by jark 2024-03-30: this is already set above
 						multiply_key = { lhs = Public_Tmp7 which = $amount$ }
 						change_key = { lhs = Tariff_Income which = Public_Tmp7 }
 					}
@@ -3628,14 +3629,14 @@ TN_DoTradeByAmountExport = {
 					}
 				}
 				set_key = { lhs = Public_Tmp0 which = event_target:Prov }
-				
-				set_key = { lhs = Public_Tmp4 which = Public_Tmp3 }	# Distance
-				subtract_key = { lhs = Public_Tmp4 value = 1 }
-				multiply_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
-				subtract_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ }
-				multiply_key = { lhs = Public_Tmp4 value = -1 }
-                
                 set_key = { lhs = Tmp_9 which = $amount$ }
+				
+                # Public_Tmp4: Conductee's local price minus distance-added cost
+				set_key = { lhs = Public_Tmp4 which = Public_Tmp3 }	# Distance multiplier
+				subtract_key = { lhs = Public_Tmp4 value = 1 }
+				multiply_key = { lhs = Public_Tmp4 which = Public_Tmp0 } # Distance-added cost
+				subtract_key = { lhs = Public_Tmp4 which = TN_ProvPrc$prod$ }
+				multiply_key = { lhs = Public_Tmp4 value = -1 } # Local price minus distance-added cost
 				
 				if = {
 					limit = {
@@ -3645,26 +3646,27 @@ TN_DoTradeByAmountExport = {
 					}
 					set_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
 					change_key = { lhs = Public_Tmp1 which = TN_ProvPrc$prod$ }
-					multiply_key = { lhs = Public_Tmp1 value = 0.5 }
-					multiply_key = { lhs = Public_Tmp1 which = Tariff_Rate$prod$ }
-					subtract_key = { lhs = Public_Tmp4 which = Public_Tmp1 }
-					multiply_key = { lhs = Public_Tmp1 which = $amount$ }
+					multiply_key = { lhs = Public_Tmp1 value = 0.5 } # midpoint between conductor and conductee sector prices
+					multiply_key = { lhs = Public_Tmp1 which = Tariff_Rate$prod$ } # Tariff value: midpoint price * tariff rate
+					subtract_key = { lhs = Public_Tmp4 which = Public_Tmp1 } # Reduce local price by tariff amount
+					multiply_key = { lhs = Public_Tmp1 which = $amount$ } # Total tariff income: tariff value per good * goods sold
 					change_key = { lhs = Tariff_Income which = Public_Tmp1 }
 				}
 				
+                # Public_Tmp7: Excess profit per-good earned by conductee (half of [conductee's sector price minus total costs (conductor sector price, distance-added cost, tariffs)])
 				set_key = { lhs = Public_Tmp7 which = Public_Tmp4 }
 				subtract_key = { lhs = Public_Tmp7 which = Public_Tmp0 }
-                multiply_key = { lhs = Public_Tmp7 value = 0.5 } #divide_key = { lhs = Public_Tmp7 value = 2 }				
+                multiply_key = { lhs = Public_Tmp7 value = 0.5 } #divide_key = { lhs = Public_Tmp7 value = 2 }
 				
-				set_key = { lhs = Public_Tmp5 which = TN_ProvPrc$prod$ }
-				subtract_key = { lhs = Public_Tmp5 which = Public_Tmp7 }
+                # Public_Tmp5: Total excess profit earned by conductee
+				set_key = { lhs = Public_Tmp5 which = Public_Tmp7 }
 				multiply_key = { lhs = Public_Tmp5 which = $amount$ }
 				
 				change_key = { lhs = TN_SectorStockpile$prod$ which = $amount$ }
 				change_key = { lhs = TN_SectorStockpileIn$prod$ which = $amount$ }
 				subtract_key = { lhs = TN_SectorStockpileBid$prod$ which = $amount$ }
                 change_key = { lhs = TN_SectorImported$prod$ which = $amount$ }
-				subtract_key = { lhs = TN_SectorTrade which = Public_Tmp5 }				
+				change_key = { lhs = TN_SectorTrade which = Public_Tmp5 }
                 
                 if = {
                     limit = {
@@ -3677,14 +3679,9 @@ TN_DoTradeByAmountExport = {
                 }                			
                 
 				event_target:Prov = {
-                    
-					set_key = { lhs = Public_Tmp4 which = PREV }
-					set_key = { lhs = Public_Tmp7 which = PREV }
 					set_key = { lhs = $amount$ which = PREV }
-					
-					set_key = { lhs = Public_Tmp5 which = Public_Tmp4 }
-					subtract_key = { lhs = Public_Tmp5 which = Public_Tmp7 }
-					multiply_key = { lhs = Public_Tmp5 which = $amount$ }
+                    # Public_Tmp5: Total excess profit earned by conductor
+					set_key = { lhs = Public_Tmp5 which = PREV }
 					
 					subtract_key = { lhs = TN_SectorStockpileOffer$prod$ which = $amount$ }
 					subtract_key = { lhs = TN_SectorStockpile$prod$ which = $amount$ }
@@ -3699,7 +3696,7 @@ TN_DoTradeByAmountExport = {
                         set_key = { lhs = link_id which = PREV }
                         DoTradeDisplaySold = { prod = $prod$ amount = $amount$ tradelink = link_id }
                     }
-					change_key = { lhs = TN_SectorTrade which = Public_Tmp5 }									
+					change_key = { lhs = TN_SectorTrade which = Public_Tmp5 }
                 }
                 
 				
