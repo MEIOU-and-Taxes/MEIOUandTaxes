@@ -16,10 +16,10 @@ Promotion_Calc = {
 	#Promotion_NODemotion = yes
 	
 	## Calc Burgher Promotion/Demotion - output in k pop - based on ideal resting point
-	#Promotion_GetCommerceDataHelper = yes
-	#Promotion_DeriveBurgherRestingPoint = yes
-	#Promotion_BGPromotion = yes
-	#Promotion_BGDemotion = yes
+	Promotion_GetCommerceDataHelper = yes
+	Promotion_DeriveBurgherRestingPoint = yes
+	Promotion_BGPromotion = yes
+	Promotion_BGDemotion = yes
 
 	## Calc Clergy Promotion/Demotion - output in % of total pop
 	#Promotion_CLPromotion = yes
@@ -373,25 +373,36 @@ Promotion_DeriveBurgherRestingPoint = {
 	if = {
 		limit = {
 			check_key = { lhs = RE_Total value = 0.1 }
+			has_province_flag = Building_CommercialHas
 		}
 
-		# Get a base % of resident population as ideal burgher pops: (6 / (Residents * 10 + 100)
-		set_key = { lhs = Tmp_3 value = 8 } # increase this to buff all cities, decrease to nerf them
-
-		set_key = { lhs = Tmp_4 which = RE_Total }
-		multiply_key = { lhs = Tmp_4 value = 8 } # increase this to nerf larger cities, decrease to nerf them
-		change_key = { lhs = Tmp_4 value = 350 } # increase this to flatten progression between large and big cities
-
-		divide_key = { lhs = Tmp_3 which = Tmp_4 }
+		# Calc and apply multiplier based on labour supply vs. demand
+		set_key = { lhs = Tmp_4 which = WK_BGTDmnd } 
+		divide_key = { lhs = Tmp_4 which = WK_BG }
 
 		# Add API effects on base rate
-		change_key = { lhs = Tmp_3 which = Modi_IdealBurgherSizePerc_Add }
-		multiply_key = { lhs = Tmp_3 which = Modi_IdealBurgherSizePerc_Multi }
+		change_key = { lhs = Tmp_4 which = Modi_IdealBurgherSizePerc_Add }
+		multiply_key = { lhs = Tmp_4 which = Modi_IdealBurgherSizePerc_Multi }
 
 		# Calc absolute idea burgher pops
-		set_key = { lhs = Ideal_BurgherSize which = Tmp_3 }
-		multiply_key = { lhs = Ideal_BurgherSize which = RE_Total }
-		change_key = { lhs = Ideal_BurgherSize which = Modi_IdealBurgherSize_Add }
+		set_key = { lhs = Ideal_BurgherSize which = Tmp_4 }
+		if = {
+			limit = {
+				check_key = { lhs = BG_Total value = 0.01 } ## If there are less then 10 burghers as base, use 10 as lower limit
+			}
+			multiply_key = { lhs = Ideal_BurgherSize which = BG_Total }
+		}
+		else = {
+			multiply_key = { lhs = Ideal_BurgherSize which = 0.01 }
+		}
+
+		# Check if ideal size is below additive limit, if so use additive limit as ideal size
+		if = {
+			limit = { 
+				check_key = { lhs = Modi_IdealBurgherSize_Add which = Ideal_BurgherSize }
+			}
+			set_key = { lhs = Ideal_BurgherSize which = Modi_IdealBurgherSize_Add }
+		}
 	}
 }
 
