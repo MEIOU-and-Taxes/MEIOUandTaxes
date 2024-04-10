@@ -1815,7 +1815,7 @@ NAI = {
 	PEACE_ALLY_REBELS_MULT = 1.0, -- Multiplies PEACE_REBELS_FACTOR for allies in a war
 	PEACE_DESIRE_AI_PREFS_QUICK_PEACE = 100, -- How much AI wants to peace out when player enabled AI setting "Seek Quick Peace"
 	PEACE_CALL_FOR_PEACE_FACTOR = 5,	-- How much AI wants peace based on having call for peace
-	PEACE_MANDATE_THREAT_FACTOR = 0.5,  -- Modifies how much AI wants peace based on threat to celestial empire mandate.
+	PEACE_MANDATE_THREAT_FACTOR = 2,  -- Modifies how much AI wants peace based on threat to celestial empire mandate.
 
 	PEACE_TERMS_BASE_SCORE = 10, -- Base AI scoring for any peace demand
 	PEACE_RANDOM_FACTOR = 0.75, -- How much randomness is applied to AI weighting (as a fraction of the goal score)
