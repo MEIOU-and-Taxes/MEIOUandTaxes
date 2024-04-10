@@ -465,7 +465,7 @@ Growth_DoMove = {
                     set_key = { lhs = Public_Tmp5 value = 0 }
 
                     # Calculate migration on province level
-                    # how money pops want to go in vs. out
+                    # how many pops want to go in vs. out
                     Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 freedom = Tmp_8 }
                     Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 }
                     Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 }
@@ -481,7 +481,7 @@ Growth_DoMove = {
                     }
                 }
 
-                # ceiling for outward migration is inward migration
+                # cap actual migration to smaller of outward/inward
                 if = {
                     limit = {
                         check_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
@@ -495,9 +495,9 @@ Growth_DoMove = {
                         has_province_flag = Growth_Zone
                     }
                     # Get previous calculation results
-                    set_key = { lhs = Public_Tmp2 which = PREV } # Total inward migration
-                    set_key = { lhs = Public_Tmp3 which = PREV } # Total outward migration
-                    set_key = { lhs = Public_Tmp4 which = PREV } # Total inward migration
+                    set_key = { lhs = Public_Tmp2 which = PREV } # Total outward migration
+                    set_key = { lhs = Public_Tmp3 which = PREV } # Total inward migration
+                    set_key = { lhs = Public_Tmp4 which = PREV } # Total actual migration, smaller of outward/inward
 
                     # Distribute migration on provinces
                     Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }
@@ -619,8 +619,8 @@ Growth_DoMove = {
 ## Conditionals:
 # $zone$ = enables 50% multiplier on amount of possible migration
 ### Outputs:
-# Public_Tmp2, Public_Tmp4 = Inward migration absolute
-# Public_Tmp3, Public_Tmp5 = Outward migration absolute
+# Public_Tmp2, Public_Tmp4 = Outward migration absolute
+# Public_Tmp3, Public_Tmp5 = Inward migration absolute
 Growth_DoMove_HandleLocalMigration = {
     if = {
         limit = {
@@ -641,7 +641,7 @@ Growth_DoMove_HandleLocalMigration = {
 
         subtract_key = { lhs = Public_Tmp9 value = 1 }
 		
-		## Case: Migratory outward pressured pops % of province >= Possible Migrants in % of zone pops --> inward migration
+		## Case: Migratory outward pressured pops % of province >= Possible Migrants in % of zone pops --> outward migration
         if = {
             limit = {
                 check_key = { lhs = Growth_Pressure$class$ which = Public_Tmp1 }
@@ -663,7 +663,7 @@ Growth_DoMove_HandleLocalMigration = {
             change_key = { lhs = Public_Tmp2 which = Tmp_$tmp$ }
             change_key = { lhs = Public_Tmp4 which = Tmp_$tmp$ }
         }
-        else = { # Migratory outward pressured pops % of province < Possible Migrants in % of zone pops --> outward migration
+        else = { # Migratory outward pressured pops % of province < Possible Migrants in % of zone pops --> inward migration
 			
 			#       ($class$_Total * [[zone] * 0.5] + 10)* (Pressure/Possible Migrants%) 
 			#       ------------------------------------------------------------
@@ -693,8 +693,9 @@ Growth_DoMove_HandleLocalMigration = {
 ## Keys:
 # Growth_Pressure$class$ = Local outward migratory pressure in % of the population
 # Public_Tmp1 = (PossibleMigrants in Growth Zone / Total pops in growth zone)
-# Public_Tmp2, Public_Tmp4 = Total per Growth Zone Inward migration absolute
-# Public_Tmp3, Public_Tmp5 = Total per Growth Zone Outward migration absolute
+# Public_Tmp2 = Total per Growth Zone Outward migration absolute
+# Public_Tmp3 = Total per Growth Zone Inward migration absolute
+# Public_Tmp4 = Total per Growth Zone migration absolute (smaller of Public_Tmp2/Public_Tmp3)
 #
 ### Outputs:
 # $class$_In | $class$_Out = Migration for this province (mutually exclusive, either in or out per class)
@@ -718,7 +719,7 @@ Growth_DoMove_DistributeMigration = {
 				# total outward migration
                 set_key = { lhs = Public_Tmp9 which = Tmp_$tmp$ } # Result of local migration calc
 				multiply_key = { lhs = Public_Tmp9 which = Public_Tmp4 }
-                divide_key = { lhs = Public_Tmp9 which = Public_Tmp2 } 
+                divide_key = { lhs = Public_Tmp9 which = Public_Tmp2 }
 
                 change_key = { lhs = $class$_Out which = Public_Tmp9 }
             }
@@ -809,11 +810,8 @@ Growth_SetPressure = {
                     limit = {
                         check_key = { lhs = Tmp_1 value = 1 }
                     }
-                    set_key = { lhs = Tmp_0 which = Tmp_1 }
-                    subtract_key = { lhs = Tmp_1 value = 1 }
-                    multiply_key = { lhs = Tmp_1 value = 1.25 } # `Growth_MaxMigrationPressureEmptyAmenities~value`
-                    change_key = { lhs = Tmp_1 value = 2 }
-                    subtract_key = { lhs = Tmp_1 which = Tmp_0 }
+                    multiply_key = { lhs = Tmp_1 value = 0.25 }
+                    change_key = { lhs = Tmp_1 value = 0.75 }
                 }
                 else = {
                     multiply_key = { lhs = Tmp_1 value = 0.2 }  # `Growth_MinMultMigrationPressureEmptyAmenities~value`
