@@ -557,7 +557,8 @@ tmplt2H_locc = """
         localisation_key = GVR_%a
         trigger = {
             variable_arithmetic_trigger = {
-                export_to_variable = { which = temp value = 0 }
+                export_to_variable = { which = temp value = religion }
+                subtract_variable = { which = temp which = temp }
                 change_variable = { which = temp which = %d }
                 divide_variable = { which = temp value = %b }
                 multiply_variable = { which = temp value = %b }
