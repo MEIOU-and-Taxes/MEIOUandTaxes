@@ -8,7 +8,7 @@ enforce_hyw_treaty_effect = {
 				NOT = { has_global_flag = treaty_of_arras }
 				NOT = { has_global_flag = treaty_of_bruges }
 				NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_castillion }
+				NOT = { has_global_flag = treaty_of_picquigny }
 				NOT = { has_global_flag = treaty_of_orlean }
 			}
 		}
@@ -35,7 +35,7 @@ enforce_hyw_treaty_effect = {
 				NOT = { has_global_flag = treaty_of_arras }
 				NOT = { has_global_flag = treaty_of_bruges }
 				NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_castillion }
+				NOT = { has_global_flag = treaty_of_picquigny }
 				NOT = { has_global_flag = treaty_of_orlean }
 			}
 		}
@@ -58,41 +58,14 @@ enforce_hyw_treaty_effect = {
 		limit = {
 			has_global_flag = hundred_years_war
 			AND = {
-				NOT = { has_global_flag = treaty_of_bretigny }
-				NOT = { has_global_flag = treaty_of_rouen }
+				OR = {
+					has_global_flag = treaty_of_bretigny
+					has_global_flag = treaty_of_rouen
+				}
 				NOT = { has_global_flag = treaty_of_arras }
 				NOT = { has_global_flag = treaty_of_bruges }
 				NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_castillion }
-				NOT = { has_global_flag = treaty_of_orlean }
-			}
-		}
-
-		if = {
-			limit = {
-				tag = ENG
-			}
-			enforce_treaty_rouen = yes
-		}
-
-		if = {
-			limit = {
-				tag = FRA
-			}
-			enforce_treaty_bruges = yes
-		}
-	}
-	else_if = {
-		limit = {
-			has_global_flag = hundred_years_war
-			AND = {
-				NOT = { has_global_flag = treaty_of_bretigny }
-				NOT = { has_global_flag = treaty_of_rouen }
-				NOT = { has_global_flag = treaty_of_arras }
-				NOT = { has_global_flag = treaty_of_bruges }
-				has_global_flag = treaty_of_bretigny_failed
-				NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_castillion }
+				NOT = { has_global_flag = treaty_of_picquigny }
 				NOT = { has_global_flag = treaty_of_orlean }
 			}
 		}
@@ -108,19 +81,19 @@ enforce_hyw_treaty_effect = {
 			limit = {
 				tag = FRA
 			}
-			enforce_treaty_castillion = yes
+			enforce_treaty_bruges = yes
 		}
 	}
 	else_if = {
 		limit = {
 			has_global_flag = hundred_years_war
 			AND = {
+				has_global_flag = treaty_of_troyes
 				NOT = { has_global_flag = treaty_of_bretigny }
-				NOT = { has_global_flag = treaty_of_rouen }
 				NOT = { has_global_flag = treaty_of_arras }
 				NOT = { has_global_flag = treaty_of_bruges }
-				has_global_flag = treaty_of_troyes
-				NOT = { has_global_flag = treaty_of_castillion }
+				NOT = { has_global_flag = treaty_of_troyes }
+				NOT = { has_global_flag = treaty_of_picquigny }
 				NOT = { has_global_flag = treaty_of_orlean }
 			}
 		}
@@ -148,7 +121,7 @@ enforce_hyw_treaty_effect = {
 				has_global_flag = treaty_of_arras
 				NOT = { has_global_flag = treaty_of_bruges }
 				NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_castillion }
+				NOT = { has_global_flag = treaty_of_picquigny }
 				NOT = { has_global_flag = treaty_of_orlean }
 			}
 		}
@@ -164,13 +137,13 @@ enforce_hyw_treaty_effect = {
 			limit = {
 				tag = FRA
 			}
-			enforce_treaty_castillion = yes
+			enforce_treaty_picquigny = yes
 		}
 	}
 }
 
 enforce_treaty_bretigny_eng = {
-	bretigny_group = {
+	bretigny_eng_group = {
 		limit = {
 			is_city = yes
 			OR = {
@@ -181,12 +154,29 @@ enforce_treaty_bretigny_eng = {
 		}
 		cede_province = GUY
 	}
+
+	if = {
+		limit = {
+			BRI = {
+				exists = yes
+				dynasty = "Montfort"
+			}
+			FRA = {
+				has_country_flag = king_jean_released
+			}
+		}
+		170 = {
+			add_core = ENG
+			cede_province = ENG
+		}
+	}
+
 	set_global_flag = treaty_of_bretigny
 }
 
 enforce_treaty_bretigny_fra = {
 	FRA = {
-		bretigny_group = {
+		bretigny_fra_group = {
 			limit = {
 				is_city = yes
 				OR = {
@@ -202,7 +192,6 @@ enforce_treaty_bretigny_fra = {
 		}
 	}
 	clr_global_flag = treaty_of_bretigny
-	set_global_flag = treaty_of_bretigny_failed
 }
 
 enforce_treaty_rouen = {
@@ -218,17 +207,30 @@ enforce_treaty_rouen = {
 		add_core = ENG
 		cede_province = ENG
 	}
+	if = {
+		limit = {
+			ANJ = {
+				exists = no
+			}
+		}
+		178 = {
+			set_province_flag = lost_to_english
+		}
+	}
+
+	3374 = {
+		set_province_flag = lost_to_english
+	}
 	set_global_flag = treaty_of_rouen
 }
 
 enforce_treaty_bruges = {
-	enforce_treaty_bretigny_fra = yes
 	if = {
 		limit = {
 			has_global_flag = treaty_of_rouen
 		}
 		clr_global_flag = treaty_of_rouen
-		rouen_group = {
+		bruges_group = {
 			limit = {
 				is_city = yes
 				OR = {
@@ -242,12 +244,45 @@ enforce_treaty_bruges = {
 			add_core = ENG
 			cede_province = ENG
 		}
+	
+		if = {
+			limit = {
+				NRM = {
+					exists = yes
+				}
+			}
+			FRA = {
+				create_subject = {
+					subject_type = appanage_subject
+					subject = NRM
+				}
+			}
+	
+			NRM = {
+				define_ruler = {
+					dynasty = FRA
+				}
+			}
+	
+		}
+	}
+	if = {
+		limit = {
+			has_global_flag = treaty_of_rouen
+		}
+		clr_global_flag = treaty_of_rouen
+	}
+	if = {
+		limit = {
+			has_global_flag = treaty_of_bretigny
+		}
+		clr_global_flag = treaty_of_bretigny
 	}
 	set_global_flag = treaty_of_bruges
 }
 
-enforce_treaty_castillion = {
-	rouen_group = {
+enforce_treaty_picquigny = {
+	france_superregion = {
 		limit = {
 			is_city = yes
 			OR = {
@@ -255,32 +290,45 @@ enforce_treaty_castillion = {
 				owner = { is_subject_of = ENG }
 				owner = { junior_union_with = ENG }
 			}
+			is_core = ROOT
 		}
 		add_core = FRA
 		cede_province = FRA
 	}
-	set_global_flag = treaty_of_castillion
+
+	if = {
+		limit = {
+			63 = {
+				controlled_by = FRA
+			}
+		}
+
+		add_core = FRA
+		cede_province = FRA
+	}
+	set_global_flag = treaty_of_picquigny
 	set_global_flag = hundred_years_war_FRA_win
 	clr_global_flag = hundred_years_war
 }
 
 enforce_treaty_troyes = {
+	troyes_eng_group = {
+		limit = {
+			is_city = yes
+			OR = {
+				owned_by = FRA
+				owner = { is_subject_of = FRA }
+				owner = { junior_union_with = FRA }
+			}
+		}
+		add_core = ENG
+		cede_province = ENG
+	}
 	if = {
 		limit = {
-			has_global_flag = treaty_of_bretigny_failed
+			alliance_with = BUR
 		}
-		troyes_eng_group = {
-			limit = {
-				is_city = yes
-				OR = {
-					owned_by = FRA
-					owner = { is_subject_of = FRA }
-					owner = { junior_union_with = FRA }
-				}
-			}
-			add_core = ENG
-			cede_province = ENG
-		}
+
 		troyes_bur_group = {
 			limit = {
 				is_city = yes
@@ -293,8 +341,9 @@ enforce_treaty_troyes = {
 			add_core = BUR
 			cede_province = BUR
 		}
-		set_global_flag = treaty_of_troyes
 	}
+	
+	set_global_flag = treaty_of_troyes
 }
 
 enforce_treaty_arras = {
@@ -361,15 +410,25 @@ enforce_treaty_orlean_splits_with_bur = {
 			alliance_with = BUR
 		}
 
-		france_superregion = {
+		champagne_area = {
 			limit = {
-				is_city = yes
 				OR = {
 					owned_by = FRA
 					owner = { junior_union_with = FRA }
+					owned_by = ENG
 				}
-				NOT = { area = val_de_loire_area }
-				NOT = { area = anjou_poitou_area }
+			}
+			add_core = BUR
+			cede_province = BUR
+		}
+
+		ardennes_area = {
+			limit = {
+				OR = {
+					owned_by = FRA
+					owner = { junior_union_with = FRA }
+					owned_by = ENG
+				}
 			}
 			add_core = BUR
 			cede_province = BUR
@@ -391,13 +450,24 @@ enforce_treaty_orlean_do_nothing = {
 			alliance_with = BUR
 		}
 
-		france_superregion = {
+		champagne_area = {
 			limit = {
-				is_city = yes
 				OR = {
+					owned_by = FRA
+					owner = { junior_union_with = FRA }
 					owned_by = ENG
-					#owner = { is_subject_of = ENG }
-					owner = { junior_union_with = ENG }
+				}
+			}
+			add_core = BUR
+			cede_province = BUR
+		}
+
+		ardennes_area = {
+			limit = {
+				OR = {
+					owned_by = FRA
+					owner = { junior_union_with = FRA }
+					owned_by = ENG
 				}
 			}
 			add_core = BUR

@@ -1,16 +1,15 @@
 country_decisions = {
 # Negociate the freedom of Jean II
 	negociate_freedom_jean = {
-		
 		potential = {
 			tag = FRA
-			war_with = ENG
+			#war_with = ENG
 			has_country_flag = ruler_prisonner_of_war
 			has_global_flag = hundred_years_war
 		}
 		allow = {
 			tag = FRA
-			war_with = ENG
+			#war_with = ENG
 			is_year = 1358
 			has_country_flag = ruler_prisonner_of_war
 			#war_exhaustion = 15		#Don't check for War Exhaustion, King was Captured, that's the issue
@@ -18,6 +17,11 @@ country_decisions = {
 				NOT = { has_country_flag = negociating_release_jean }
 				had_country_flag = { flag = negociating_release_jean days = 365 }
 			}
+			OR = {
+				NOT = { has_country_flag = france_rejects_condition }
+				had_country_flag = { flag = france_rejects_condition days = 365 }
+			}
+			NOT = { has_country_flag = eng_rejects_condition }
 		}
 		effect = {
 			ENG = { country_event = { id = prisonner_of_war.501 days = 0 } }
@@ -25,38 +29,6 @@ country_decisions = {
 		}
 		ai_will_do = {
 			factor = 1
-			# modifier = {
-			# 	factor = 1.1
-			# 	war_exhaustion = 10
-			# }
-			# modifier = {
-			# 	factor = 1.2
-			# 	war_exhaustion = 20
-			# }
-			# modifier = {
-			# 	factor = 1.3
-			# 	war_exhaustion = 30
-			# }
-			# modifier = {
-			# 	factor = 1.4
-			# 	war_exhaustion = 40
-			# }
-			# modifier = {
-			# 	factor = 1.5
-			# 	war_exhaustion = 50
-			# }
-			# modifier = {
-			# 	factor = 5
-			# 	has_any_disaster = yes
-			# }
-			# modifier = {
-			# 	factor = 2
-			# 	NOT = { manpower_percentage = 0.25 }
-			# }
-			# modifier = {
-			# 	factor = 2
-			# 	NOT = { manpower_percentage = 0.10 }
-			# }
 		}
 	}
 	
@@ -67,21 +39,79 @@ country_decisions = {
 			government = monarchy
 			capetian_dynasty_trigger = yes
 			has_reform = salic_law_reform
+			NOT = { has_heir = "Placeholder" }
 		}
 		
 		allow = {
 			has_regency = no
-			OR = {
-				heir_has_ruler_dynasty = no
-				has_female_heir = yes
-			}
+			has_heir = yes
+			has_female_heir = yes
+			NOT = { ruler_age = 45 } 
 		}
 		
 		effect = {
-			define_heir = {
-				male = yes
-				dynasty = ROOT
-				claim = 100
+			trigger_switch = {
+				on_trigger = legitimacy
+				100 = { 
+					define_heir = {
+						male = yes
+						dynasty = ROOT
+						claim = 100
+						max_random_adm = 3
+						max_random_dip = 3
+						max_random_mil = 3
+					}
+				 }
+				80 = { 
+					define_heir = {
+						male = yes
+						dynasty = ROOT
+						claim = 80
+						max_random_adm = 3
+						max_random_dip = 3
+						max_random_mil = 3
+					}
+				 }
+				60 = { 
+					define_heir = {
+						male = yes
+						dynasty = ROOT
+						claim = 60
+						max_random_adm = 3
+						max_random_dip = 3
+						max_random_mil = 3
+					}
+				 }
+				40 = { 
+					define_heir = {
+						male = yes
+						dynasty = ROOT
+						claim = 40
+						max_random_adm = 3
+						max_random_dip = 3
+						max_random_mil = 3
+					}
+				 }
+				20 = { 
+					define_heir = {
+						male = yes
+						dynasty = ROOT
+						claim = 20
+						max_random_adm = 3
+						max_random_dip = 3
+						max_random_mil = 3
+					}
+				 }
+				0 = { 
+					define_heir = {
+						male = yes
+						dynasty = ROOT
+						claim = 0
+						max_random_adm = 3
+						max_random_dip = 3
+						max_random_mil = 3
+					}
+				 }
 			}
 		}
 		
@@ -142,6 +172,114 @@ country_decisions = {
 		
 		ai_will_do = {
 			factor = 100
+		}
+	}
+
+	enact_edict_de_nantes = {
+		potential = {
+			tag = FRA
+			normal_or_historical_nations = yes
+			OR = {
+				ai = no
+				is_playing_custom_nation = no
+			}
+			NOT = { has_country_modifier = edict_de_nantes }
+			NOT = { has_country_flag = had_edict_de_nantes }
+			NOT = { has_country_flag = revoked_the_edict_of_nantes }
+			has_country_flag = FRA_wars_of_religion_ended
+			has_ruler_flag = worth_a_mass
+			OR = {
+				is_religion_enabled = protestant
+				is_religion_enabled = reformed
+			}
+			is_vassal = no
+			is_lesser_in_union = no
+		}
+		allow = {
+			religion = catholic
+			dominant_religion = catholic
+			OR = {
+				num_of_religion = { religion = protestant value = 3 }
+				num_of_religion = { religion = reformed value = 3 }
+			}	
+		}
+		effect = {
+			set_country_flag = had_edict_de_nantes
+			add_country_modifier = {
+				name = "edict_de_nantes"
+				duration = -1
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+	revoke_edict_de_nantes = {
+		potential = {
+			has_country_modifier = edict_de_nantes
+			NOT = { has_ruler_flag = worth_a_mass }
+			had_country_flag = {
+				flag = edict_de_nantes
+				days = 10950
+			}
+			NOT = { has_country_flag = revoked_the_edict_of_nantes }
+		}
+		allow = {
+			OR = {
+				NOT = { religion = catholic }
+				AND = {
+					NOT = { num_of_religion = { religion = protestant value = 1 } }
+					NOT = { num_of_religion = { religion = reformed value = 1 } }
+				}
+				183 = { controlled_by = REB }
+			}	
+		}
+		effect = {
+			remove_country_modifier = edict_de_nantes
+			add_country_modifier = {
+				name = "edict_de_fontainebleau"
+				duration = -1
+			}
+			set_country_flag = revoked_the_edict_of_nantes
+			clr_country_flag = had_edict_de_nantes
+			add_prestige = 10
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+
+	centralise_france = {
+		major = yes
+		potential = {
+			has_reform = Pol_French_Feudalism
+		}
+		allow = {
+			OR = {
+				has_institution = Meritocracy_Inst
+				AND = {
+					adm_tech = 20
+					has_institution = Banking
+				}
+				adm_tech = 30
+			}
+			dip_power = 200
+			all_subject_country = {
+				NOT = { liberty_desire = 50 }
+			}
+		}
+		effect = {
+			add_dip_power = -200
+			Stab_Subtract1 = yes
+			custom_tooltip = centralise_france_effect
+			hidden_effect = { 
+				remove_government_reform = Pol_French_Feudalism
+				add_government_reform = Pol_Privileges1
+			}
+		}
+		ai_will_do = {
+			factor = 1
 		}
 	}
 }
