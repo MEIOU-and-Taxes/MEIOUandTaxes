@@ -468,11 +468,11 @@ Promotion_BGPromotion = {
 			set_key = { lhs = Tmp_6 value = -0.01 }
 		}
 
-		# Get Commerce Throughput modifier - Through*-0.05 + 0.05 -> modi [0.001, 0.05]
-		multiply_key = { lhs = Tmp_2 value = -0.05 } #inverted effect
-		change_key = { lhs = Tmp_2 value = 0.05 } #inverted effect
+		# Get Commerce Throughput modifier - Through*-0.005 + 0.035
+		multiply_key = { lhs = Tmp_2 value = -0.005 } #inverted effect - additional magnitue (0) because throughput is 0-100 scale
+		change_key = { lhs = Tmp_2 value = 0.035 }
 		
-		# Upper lower case handling: [0.001,0.05]
+		# Upper lower case handling: [-0.01,0.05]
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_2 value = 0.05 }
@@ -481,9 +481,9 @@ Promotion_BGPromotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_2 value = 0.001 } }
+				NOT = { check_key = { lhs = Tmp_2 value = 0 } }
 			}
-			set_key = { lhs = Tmp_2 value = 0.001 }
+			set_key = { lhs = Tmp_2 value = -0.01 }
 		}		
 
 
@@ -492,16 +492,24 @@ Promotion_BGPromotion = {
 		change_key = { lhs = Tmp_3 which = Tmp_6 } # RE Comfort Fulfill modifier
 		change_key = { lhs = Tmp_3 which = Tmp_2 } # Commerce Troughput modifier
 
-		multiply_key = { lhs = Tmp_3 which = Modi_BurgherPromoteSpeed }
-
-		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result = Rate * DifferenceToIdealPop
-
+		# ensure rate of changecan never be below 0%
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_4 value = 0.05 }
 				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
 			}
-			set_key = { lhs = Tmp_3 value = 0.001 }
+			set_key = { lhs =  lhs = Tmp_3 value = 0 }
+		}
+
+		multiply_key = { lhs = Tmp_3 which = Modi_BurgherPromoteSpeed }
+
+		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result = Rate(Tmp3) * DifferenceToIdealPop (Tmp4)
+
+		# safety check to ensure no wrong direction effect
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+			}
+			set_key = { lhs = Tmp_3 value = 0 }
 		}
 
 		set_key = { lhs = RE_PromotedBG which = Tmp_3 }
@@ -511,7 +519,7 @@ Promotion_BGPromotion = {
 Promotion_BGDemotion = {
 	if = {
 		limit = {
-			check_key = { lhs = BG_Total which = Ideal_BurgherSize } # Burgher < IdealSize
+			check_key = { lhs = BG_Total which = Ideal_BurgherSize } # Burgher > IdealSize
 		}
 		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
 
@@ -527,7 +535,7 @@ Promotion_BGDemotion = {
 		divide_key = { lhs = Tmp_5 which = BG_FillLifeC }
 		multiply_key = { lhs = Tmp_5 value = 0.01 }
 
-		# Upper lower case handling: [-0.01,0.01]
+		# Upper lower case handling: [0,0.01]
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_5 value = 0.05 }
@@ -536,14 +544,14 @@ Promotion_BGDemotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_5 value = 0.005 } }
+				NOT = { check_key = { lhs = Tmp_5 value = 0 } }
 			}
 			set_key = { lhs = Tmp_5 value = 0 }
 		}
 
-		# Get Commerce Throughput modifier - (Through + 1.05)*0.05  -> modi [0.003, 0.05]
-		change_key = { lhs = Tmp_2 value = -1.05 }
-		multiply_key = { lhs = Tmp_2 value = 0.05 } 
+		# Get Commerce Throughput modifier - Throughput*0.005-0.04  -> modi [0, 0.05]
+		multiply_key = { lhs = Tmp_2 value = 0.005 } 
+		change_key = { lhs = Tmp_2 value = -0.04 }
 		
 		# Upper lower case handling: [-0.01,0.02]
 		if = {
@@ -554,26 +562,33 @@ Promotion_BGDemotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_2 value = 0.003 } }
+				NOT = { check_key = { lhs = Tmp_2 value = -0.01 } }
 			}
-			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_2 value = -0.01 }
 		}		
-
 
 		## Get Yearly Change
 		change_key = { lhs = Tmp_3 which = Tmp_5 } # BG LifeC Fulfill modifier
 		change_key = { lhs = Tmp_3 which = Tmp_2 } # Commerce Troughput modifier
 
+		# ensure rate of changecan never be below 0%
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+			}
+			set_key = { lhs =  lhs = Tmp_3 value = 0 }
+		}
+
 		multiply_key = { lhs = Tmp_3 which = Modi_BurgherDemoteSpeed }
 
 		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result - Rate * DifferenceToIdealPop
 
+		# safety check to ensure no wrong direction effect
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_4 value = 0.05 }
 				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
 			}
-			set_key = { lhs = Tmp_3 value = 0.001 }
+			set_key = { lhs = Tmp_3 value = 0 }
 		}
 
 		set_key = { lhs = BG_DemotedRE which = Tmp_3 }
