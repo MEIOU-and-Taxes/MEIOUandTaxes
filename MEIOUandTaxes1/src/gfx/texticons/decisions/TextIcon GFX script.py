@@ -2,7 +2,7 @@ import os
 
 def generate_sprite_types(folder_name):
     # Template for the spriteTypes structure
-    template = '''spriteTypes = {{
+    template = '''spriteType = {{
     name = "GFX_{name}"
     texturefile = "gfx//texticons//decisions//{folder_name}//{name}{ext}"
 }}\n'''
