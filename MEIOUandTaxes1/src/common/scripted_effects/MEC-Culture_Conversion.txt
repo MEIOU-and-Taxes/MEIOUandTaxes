@@ -1,0 +1,1375 @@
+# Inputs: 
+# $case$ - special case name 
+# $multiplier$ - speed buff or special case
+# Conditional Inputs:
+# preset_CV - preset culture to convert to when progress reaches 100
+# preset_progress - Preset progress value
+# preset_effect_modifier - Modifier that gets set at culture conversion
+setup_CV_special_case = {
+	set_province_flag = CV_SC_$case$
+	set_key = {
+		lhs = CV_special_case_multiplier
+		value = $multiplier$
+	}
+	set_province_flag = CV_nopreset
+	[[preset_CV] 
+		clr_province_flag = CV_nopreset
+		set_province_flag = $preset_CV$
+	]
+	[[preset_progress]
+		set_key = {
+			lhs = Culture_Progress
+			value = $preset_progress$
+		}
+	]
+	[[preset_effect_mod] # modifier will be set for 25 years
+		set_province_flag = $preset_effect_mod$
+	]
+}
+
+# This effect calculates the yearly culture conversion progress of a province and updates the relevant variables.
+calc_culture_conversion_progress = {
+	# save the owner as event target
+	owner = { save_event_target_as = culture_owner }
+
+	# calculate culture conversion progress gain tv_culture_conversion_progress_gain
+
+	# base gain = 2 - base 50 year conversions
+	set_key = {
+		lhs = Tmp_8
+		value = 2 
+	}
+	
+	apply_regional_conversion_cases = yes # apply regional special case boosts to base conversion speed
+
+	### initialize multipliers / dividers
+
+	# Local development
+	export_to_key = {
+		lhs = Tmp_0	# province development
+		value = development
+	}
+	set_key = {
+		lhs = Tmp_4	#Development Divider
+		which = Tmp_0
+	}
+	
+	divide_key = {
+		lhs = Tmp_4
+		value = 80
+	}
+	
+	change_key = {
+		lhs = Tmp_4
+		value = 1
+	}
+	
+	# country culture conversion modifier
+	export_to_key = {
+		lhs = Tmp_1	# Owners culture conversion cost/speed modifier (vanilla mod)
+		value = modifier:culture_conversion_cost	
+		who = owner
+	}
+	
+	export_to_key = {
+		lhs = Tmp_2	# Province culture conversion cost / speed modifier (vanilla mod)
+		value = modifier:local_culture_conversion_cost
+	}
+	# calculate tv_culture_conversion_multiplier
+	if = {
+		limit = {
+			check_key = {
+				lhs = Tmp_1 # check if multiplier is >= 0
+				value = 0
+			}
+		}
+		
+		set_key = {
+			lhs = Tmp_5 #tv_tmp0 - base of 1 = no modifier
+			value = 1
+		}
+		
+		change_key = { # add country culture conversion modifier
+			lhs = Tmp_5 
+			which = Tmp_1
+		}
+		
+		if = {
+			limit = {
+				check_key = {
+					lhs = Tmp_2 # check if multiplier is 0
+					value = 0
+				}
+			}
+			
+			change_key = { # Add province culture conversion modifier
+				lhs = Tmp_5
+				which = Tmp_2
+			}
+		}
+		
+		set_key = {
+			lhs = Tmp_6
+			value = 1
+		}
+		
+		if = {
+			limit = {
+				is_key_equal = {
+					lhs = Tmp_5
+					value = 0
+				}
+			}
+			log = "<ERROR><28D43300><THIS:[This.GetName]><PREV:[Prev.GetName]><ROOT:[Root.GetName]><FROM:[From.GetName]> Division by zero!"
+		}
+		else = {
+			divide_key = { # calculate tv_culture_conversion_multiplier
+				lhs = Tmp_6
+				which = Tmp_5
+			}
+		}
+	}
+	else = {
+		set_key = {
+			lhs = Tmp_6
+			value = 1
+		}
+		
+		subtract_key = {
+			lhs = Tmp_6
+			which = Tmp_1
+		}
+		
+		subtract_key = {
+			lhs = Tmp_6
+			which = Tmp_2
+		}
+	}
+	
+
+	### Local autonomy multiplier
+	export_to_key = {
+		lhs = Tmp_3	# Province Autonomy
+		value = local_autonomy
+	}	
+	# calculate tv_local_autonomy_multiplier
+	set_key = {
+		lhs = Tmp_7
+		value = 150
+	}
+	multiply_key = {
+		lhs = Tmp_3
+		value = 1.5
+	}
+	subtract_key = {
+		lhs = Tmp_7
+		which = Tmp_3
+	}
+	multiply_key = { lhs = Tmp_7 value = 0.01 }
+	
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Tmp_7 value = 0.05 } }
+		}
+		set_key = { lhs = Tmp_7 value = 0.05 }
+	}
+	
+	### Tolerance to province religion
+	export_to_key = {
+		lhs = Tmp_0
+		value = tolerance_to_this
+	}
+	
+	if = { # if tolerance positive slight bonus on conversion speed - 1% per 1 tolerance
+		limit = { check_key = { lhs = Tmp_0 value = 0 } }
+		
+		multiply_key = { lhs = Tmp_0 value = 0.001 }
+		
+		change_key = { lhs = Tmp_0 value = 1 }
+		set_key = { lhs = Tmp_5 which = Tmp_0 }
+	}
+	else = { # if negative do calculation for negative modi
+	
+		change_key = { lhs = Tmp_0 value = 3 } # cutoff is -3 tolerance
+		
+		if = { # if below cutoff set multiplier to minimum boundary
+			limit = { NOT = { check_key = { lhs = Tmp_0 value = 0.001 } } }
+			
+			set_key = { lhs = Tmp_5 value = 0.05 }
+		}
+		else = { # if above cutoff do calc
+		
+			divide_key = { lhs = Tmp_0 value = 3 } # calculate modi
+		
+			if = { # no positive influence
+				limit = { check_key = { lhs = Tmp_0 value = 1.001 } }
+				
+				set_key = { lhs = Tmp_5 value = 1 }
+			}
+			else_if = { # if below minimum boundary set to min
+				limit = { NOT = { check_key = { lhs = Tmp_0 value = 0.10 } } }
+				
+				set_key = { lhs = Tmp_5 value = 0.10 }
+			}
+			else = { # set multiplier to calculated value
+				set_key = { lhs = Tmp_5 which = Tmp_0 }
+			}
+		}
+	}
+		
+	# Special case multiplier
+	if = {
+		limit = {
+			NOT = { is_key_equal = { lhs = CV_special_case_multiplier value = 0 } }
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			which = CV_special_case_multiplier
+		}
+	}
+	else_if = {
+		limit = {
+			has_global_flag = historical_conversion
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 0.1
+		}
+	}
+	
+	# use tv_development_divider
+	if = {
+		limit = {
+			is_key_equal = {
+				lhs = Tmp_4
+				value = 0
+			}
+		}	
+		log = "<ERROR><29AF39C0><THIS:[This.GetName]><PREV:[Prev.GetName]><ROOT:[Root.GetName]><FROM:[From.GetName]> Division by zero!"	
+	}
+	else = {
+		divide_key = {
+			lhs = Tmp_8
+			which = Tmp_4
+		}
+	}
+	
+	# use autonomy multiplier
+	multiply_key = {
+		lhs = Tmp_8
+		which = Tmp_7
+	}
+	
+	# apply culture conversion multiplier
+	multiply_key = {
+		lhs = Tmp_8
+		which = Tmp_6
+	}
+
+	# apply tolerance multiplier
+	multiply_key = {
+		lhs = Tmp_8
+		which = Tmp_5
+	}
+
+	# change Culture_Progress
+	# if the progress is complete
+	change_key = {
+		lhs = Culture_Progress
+		which = Tmp_8
+	}
+	
+	# cleanup
+	set_key = { lhs = Tmp_0 value = 0 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	set_key = { lhs = Tmp_2 value = 0 }
+	set_key = { lhs = Tmp_3 value = 0 }
+	set_key = { lhs = Tmp_4 value = 0 } # development divisor
+	set_key = { lhs = Tmp_5 value = 0 } # tolerance multiplier
+	set_key = { lhs = Tmp_6 value = 0 } # Culture conversion multiplier
+	set_key = { lhs = Tmp_7 value = 0 } # Autonomy multiplier
+	set_key = { lhs = Tmp_8 value = 0 } # used for progress
+	set_key = { lhs = Tmp_9 value = 0 }
+}
+
+apply_regional_conversion_cases = {
+	if = { #Turkish->Greek
+		limit = {
+			owner = {
+				OR = {
+					primary_culture = turkish
+					primary_culture = osmanli
+				}
+			}
+			culture = cappadocian
+		}
+		if = {
+			limit = {
+				province_id = 3879
+			}
+			multiply_key = {
+				lhs = Tmp_8
+				value = 0.1
+			}
+		}
+		else_if = {
+			limit = {
+				province_id = 5079
+			}
+			multiply_key = {
+				lhs = Tmp_8
+				value = 0.3
+			}
+		}
+		else = {
+			multiply_key = {
+				lhs = Tmp_8
+				value = 0.6
+			}
+		}
+	}
+	if = { #Turkish->Greek
+		limit = {
+			owner = {
+				OR = {
+					primary_culture = turkish
+					primary_culture = osmanli
+				}
+			}
+			OR = {
+				province_id = 5045
+				culture = laz
+			}
+		}
+		if = {
+			limit = {
+				province_id = 3396
+			}
+			multiply_key = {
+				lhs = Tmp_8
+				value = 0.2
+			}
+		}
+		else = {
+			multiply_key = {
+				lhs = Tmp_8
+				value = 0.35
+			}
+		}
+	}
+	else_if = { #Turkish->Greek
+		limit = {
+			owner = {
+				culture_group = greek_group
+			}
+			OR = {
+				culture = turkish
+				culture = osmanli
+			}
+			has_owner_religion = yes
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 1.5
+		}
+	}
+	else_if = { #Dies out fast
+		limit = {
+			culture = old_uyghur
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 4
+		}
+	}
+	else_if = { #Tartar->Rus
+		limit = {
+			owner = {
+				culture_group = east_slavic
+			}
+			culture_group = tartar_group
+			NOT = { continent = central_asia }
+			NOT = { area = nogai_area }
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 2.5
+		}
+	}
+	else_if = { #Korean settlement of Dongyye
+        limit = {
+            owner = {
+                culture_group = korean_group
+            }
+            culture_group = jurchen_group
+            area = donggye_area
+        }
+		if = { #Korean settlement of Dongyye
+			limit = {
+				has_province_modifier = korean_settlement
+			}
+			multiply_key = {
+				lhs = Tmp_8
+				value = 6
+			}
+		}
+		else = {
+			multiply_key = {
+				lhs = Tmp_8
+				value = 3
+			}
+		}
+	}
+	else_if = { #Korean influence on Liaoning
+        limit = {
+            owner = {
+                culture_group = korean_group
+            }
+           	NOT = { culture_group = korean_group }
+               #OR = {
+                   area = liaoning_area
+                   #area = dalian_area
+               #}
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 2
+        }
+    }
+	else_if = { #Korean settlement & influence upon Central Inner Manchuria
+        limit = {
+            owner = {
+                culture_group = korean_group
+            }
+			OR = {
+					culture_group = jurchen_group
+					culture_group = altaic
+				}
+			OR = {
+				area = west_jurcen_area
+				#area = east_jurcen_area
+				#area = hu_lan_area
+				area = west_hulun_area
+				#area = east_hulun_area
+			}
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.5
+        }
+    }	
+	else_if = { #Korean settlement of the Eastern Mongols
+        limit = {
+            owner = {
+                culture_group = korean_group
+            }
+			OR = {
+				culture_group = jurchen_group
+				culture_group = altaic
+				}
+			OR = { 
+				area = outer_liaoning_area
+				area = xinhai_area
+				area = nen_area
+			}
+		}
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.25
+        }
+    }	
+	else_if = { #Korean influence on Outer Manchuria
+        limit = {
+            owner = {
+                culture_group = korean_group
+            }
+			NOT = { culture = russian }
+			region = east_manchuria_region
+			NOT = { area = argun_area }
+		}
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.1
+        }
+    }
+	else_if = { #UEF Frenchification of England
+        limit = {
+            owner = {
+                tag = UEF
+            }
+            OR = {
+				culture = english
+				culture = northern_e
+				culture = cornish
+			}
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.5
+        }
+    }
+	else_if = { #Placeholder Vietnamization
+        limit = {
+            owner = {
+                culture_group = vietic
+            }
+            OR = {
+				  region = vietnam_region
+				  area = champa_area
+				  area = indrapura_area
+				  area = mekong_area
+				}
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.5
+        }
+    }
+	else_if = { #Making Occitanian/Bretons harder to convert, conditions placeholder
+        limit = {
+            owner = {
+                culture_group = langue_d_oil
+				culture_group = iberian
+				primary_culture = english
+            }
+            OR = {
+				culture_group = langue_d_oc
+				culture = breton
+				culture = welsh
+			}
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 0.5
+        }
+    }
+	else_if = { #Sinofication of Manchuria
+        limit = {
+            owner = {
+                culture_group = chinese_group
+            }
+			region = west_manchuria_region
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.5
+        }
+    }
+	else_if = { #Sinofication of Tumed Plain
+        limit = {
+            owner = {
+                culture_group = chinese_group
+            }
+			area = ordos_area
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.5
+        }
+    }
+	else_if = { #Sinofication of Yunnan
+        limit = {
+            owner = {
+                culture_group = chinese_group
+            }
+			region = yunnan_region
+			check_key = { lhs = RE_Total value = 15 }
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 2
+        }
+    }
+	else_if = { #Grikofication of Peninsular Southern Italy
+        limit = {
+            owner = {
+                culture_group = greek_group
+            }
+			OR = {
+				area = apulia_area
+				area = calabria_area
+			}
+			religion = orthodox
+			owner = { religion = orthodox }
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.15
+        }
+    }
+	else_if = { #Grikofication of Sicily
+        limit = {
+            owner = {
+                culture_group = greek_group
+            }
+			region = sicily_region
+			NOT = { province_id = 126 }
+            religion = orthodox
+			owner = { religion = orthodox }
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.3
+        }
+    }
+	else_if = { #Arabification of Sicily
+        limit = {
+            owner = {
+                culture_group = maghreb
+            }
+			region = sicily_region
+            religion_group = muslim
+			owner = { religion_group = muslim }
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.15
+        }
+    }
+	else_if = { #Latinization of Dalmatia
+        limit = {
+            owner = {
+                culture_group = latin
+            }
+			area = east_adriatic_coast_area
+			check_key = { lhs = RE_Total value = 7.5 }
+			
+        }
+        multiply_key = {
+            lhs = Tmp_8
+            value = 1.25
+        }
+    }
+	else_if = { #Romanianization of the Steppe
+		limit = {
+			owner = {
+				culture_group = romanian
+			}
+			OR = {
+				culture_group = tartar_group
+				province_id = 1298
+			}
+			OR = {
+					area = cherson_area
+					area = zaporizhia_area
+					area = basarabia_area
+					province_id = 282
+					province_id = 4018
+					province_id = 4110
+					province_id = 302
+					province_id = 1298
+			}					
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 2
+		}
+	}
+	else_if = { #Tartar -> Circassian
+		limit = {
+			owner = {
+				culture = circassian
+			}
+			OR = { 
+				culture_group = tartar_group
+				culture = alanian
+				province_id = 1298
+				province_id = 1299
+			}
+			OR = {
+					area = astrakhan_area
+					area = east_circassia_area
+					area = azov_area
+					province_id = 1299
+					NOT = { province_id = 302 }
+					NOT = { province_id = 995 }
+			}		
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 1.5
+		}
+	}
+	else_if = { # turkman -> turkish
+		limit = {
+			OR = {
+				AND = {
+					OR = {
+						culture = turkoman
+						culture = yorouk
+					}
+					owner = {
+						OR = {
+							primary_culture = turkish
+							primary_culture = osmanli
+						}
+					}
+				}
+				AND = {
+					OR = {
+						culture = turkish
+						culture = osmanli
+					}
+					owner = {
+						OR = {
+							primary_culture = turkoman
+							primary_culture = yorouk
+						}
+					}
+				}
+			}
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 2
+		}
+	}
+	else_if = { # greek -> turk if sunni, normal speed
+		limit = {
+			culture_group = greek_group
+			owner = { culture_group = oghuz }
+			has_owner_religion = yes
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 1.5
+		}
+	}
+	else_if = { # greek -> turk if sunni, normal speed
+		limit = {
+			culture_group = greek_group
+			owner = { primary_culture = osmanli }
+			has_owner_religion = no
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 0.333
+		}
+	}
+	else_if = { #Formerly a hard block to not convert accepted culture, was changed to penalty due to being ahistorical
+		limit = {
+			OR = {
+				has_owner_accepted_culture = yes
+				AND = {
+					owner = { total_development = 1200 }
+					culture_group = owner
+				}
+			}
+			NOT = { culture_group = tartar_group }
+			NOT = { culture_group = old_turkic }
+			NOT = { culture_group = altaic }
+		}
+		multiply_key = {
+			lhs = Tmp_8
+			value = 0.2
+		}
+	}
+}
+
+CV_change_culture_special_case_cleanup = {
+	set_key = { lhs = CV_special_case_multiplier value = 0 }
+	trigger_switch = {
+		on_trigger = has_province_flag
+		CV_SC_german_ostsiedlung = { clr_province_flag = CV_SC_german_ostsiedlung }
+		CV_SC_frankish_settlers = { clr_province_flag = CV_SC_frankish_settlers }
+	}
+}
+
+CV_change_culture_special_case = {
+	trigger_switch = {
+		on_trigger = has_province_flag
+		CV_nopreset = { change_culture = owner }
+		german_silesian = { change_culture = german_silesian if = { limit = { owner = { primary_culture = silesian } } owner = { change_primary_culture = german_silesian } } clr_province_flag = german_silesian }
+		low_saxon = { change_culture = low_saxon clr_province_flag = low_saxon }
+		high_saxon = { change_culture = high_saxon clr_province_flag = high_saxon }
+		pommeranian = { change_culture = pommeranian clr_province_flag = pommeranian }
+	}
+	trigger_switch = {
+		on_trigger = has_province_flag
+		ostsiedlung_province_effect = { add_province_modifier = { name = ostsiedlung_province_effect duration = 9125 } }
+	}	
+	hidden_effect = { CV_change_culture_special_case_cleanup = yes }
+}
+
+cv_change_culture = {
+	hidden_effect = {
+		if = {
+			limit = { CV_is_special_case = yes }
+			
+			#See above script
+			CV_change_culture_special_case = yes
+		}
+		else_if = { # capital conversion
+			limit = {
+				is_capital = yes
+			}
+			change_culture = owner
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = zhuang
+					culture = tay_nung
+				}
+				owner = { culture_group = chinese_group }
+				any_neighbor_province = {
+					OR = {
+						culture = yueyu
+						#culture = xiyue
+						culture = pinghua
+					}
+				}
+			}
+			change_culture = pinghua
+		}
+		else_if = {
+			limit = {
+				culture = malayan
+				owner = { culture_group = southeastasian_group }
+				any_neighbor_province = {
+					OR = {
+						culture = thai
+						culture = dambru
+					}
+				}
+			}
+			change_culture = dambru
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = karelian
+					culture = sapmi
+					culture = nenet
+				}
+				owner = { culture_group = east_slavic }
+				any_neighbor_province = {
+					culture_group = east_slavic
+				}
+			}
+			change_culture = pomor
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = ruthenian
+					culture = lithuanian
+					culture = byelorussian
+				}
+				OR = {
+					region = lithuania_region
+					region = belarus_region
+				}
+				owner = { culture_group = west_slavic }
+				any_neighbor_province = {
+					culture_group = west_slavic
+				}
+			}
+			change_culture = litvin
+		}
+		else_if = {
+			limit = {
+				owner = {
+					culture_group = mashreqi
+				}
+				OR = {
+					culture = syriac
+					culture = aramaic
+				}
+			}
+			change_culture = moslawi # north mesopotamian arabic
+		}
+		else_if = {
+			limit = {
+				owner = {
+					culture_group = persian_group
+				}
+				OR = {
+					culture = khaliji
+					culture = bahrani
+				}
+			}
+			change_culture = khuzi # iranian arabic
+		}
+		else_if = {
+			limit = {
+				owner = {
+					culture_group = persian_group
+				}
+				culture_group = tartar_group
+			}
+			change_culture = sart
+		}
+		else_if = {
+			limit = {
+				owner = {
+					culture_group = tartar_group
+				}
+				culture_group = persian_group
+				NOT = { culture = sart }
+				NOT = { culture = hazara }
+				NOT = { culture = aimak }
+			}
+			change_culture = sart
+		}
+		else_if = {
+            limit = {
+                owner = {
+                    AND = {
+                        culture_group = persian_group
+                        religion_group = muslim
+                    }    
+                    NOT = { primary_culture = tajihk }
+                }
+                OR = {
+                    culture = hazara 
+                    culture = aimak
+                }
+                has_owner_religion = yes                
+            }
+            change_culture = tajihk
+        }
+		else_if = {
+			limit = {
+				owner = {
+					OR = {
+						primary_culture = turco_mongol
+						primary_culture = mongolic_turk
+					}
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						continent = europe
+						region = kazakh_region
+					}
+				}
+				change_culture = tartar
+			}
+			else_if = {
+				limit = {
+					continent = north_asia
+				}
+				change_culture = siberian
+			}
+			else_if = {
+				limit = {
+					OR = {
+						continent = central_asia
+						continent = mena
+						continent = indian_continent
+					}
+				}
+				change_culture = chaghatai
+			}
+			else_if = {
+				limit = {
+					OR = {
+						continent = asia
+						continent = southeast_asia
+						continent = oceania
+					}
+				}
+				change_culture = mongol
+			}
+			else = {
+				change_culture = owner
+			}
+		}
+		else_if = {
+			limit = {
+				culture = greek
+				owner = {
+					primary_culture = osmanli
+				}
+				province_group = bosphorous_strait_group
+				region = west_anatolia_region
+			}
+			change_culture = osmanli
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = laz
+					province_id = 5045
+				}
+				owner = {
+					culture_group = oghuz
+				}
+			}
+			change_culture = pontic
+		}
+		else_if = {
+			limit = {
+				culture = greek
+				owner = {
+					culture_group = oghuz
+				}
+			}
+			change_culture = anatolian
+		}
+		else_if = {
+			limit = {
+				culture = turkoman
+				owner = {
+					primary_culture = osmanli
+				}
+			}
+			change_culture = turkish
+		}
+		else_if = {
+			limit = {
+				culture = cappadocian
+				owner = {
+					OR = {
+						primary_culture = turkish
+						primary_culture = osmanli
+					}
+				}
+			}
+			change_culture = turkish
+		}
+		else_if = {
+			limit = {
+				owner = { culture_group = greek_group }
+				OR = {
+					culture = turkish
+					culture = osmanli
+					culture = yorouk
+					culture = turkoman
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						culture = turkoman
+						AND = {
+							area = cappadocia_area
+							any_neighbor_province = { culture = cappadocian }
+						}
+					}
+				}
+				change_culture = cappadocian
+			}
+			else = {
+				change_culture = anatolian
+			}
+		}
+		#Korean-Manchu-Some Mongol culture in Inner Manchuria
+		else_if = {
+			limit = {
+				owner = { culture_group = korean_group }
+				OR = {
+					area = west_jurcen_area
+					#area = east_jurcen_area
+					area = west_hulun_area
+					#area = east_hulun_area
+					culture_group = jurchen_group
+				}
+				OR = {
+					owner = { NOT = { has_country_flag = hulun_migration } }
+					AND = {
+						NOT = { province_id = 2800 }
+						NOT = { province_id = 3686 }
+						NOT = { province_id = 2328 }
+					}
+				}
+			}
+			change_culture = korean_girin
+		}
+		#Korean-Chinese culture in Liaoning
+		else_if = {
+			limit = {
+				owner = { culture_group = korean_group }
+				#OR = {
+					area = liaoning_area
+				#	area = dalian_area
+				#}
+			}
+			change_culture = korean_liaoning
+		}
+		
+		#Korean-Jurchen culture in Outer Manchuria
+		else_if = {
+			limit = {
+				owner = { culture_group = korean_group }
+				OR = { 
+					culture_group = nivkh_group
+					culture = neghidal
+				}
+			}
+			change_culture = korean_jurchen
+		}			
+		#Korean-Mongol culture in Manchuria	
+		else_if = {
+			limit = {
+				owner = { culture_group = korean_group }
+				OR = {
+					culture_group = altaic
+					culture = oroqen
+				}
+			}
+			change_culture = korean_mongol
+		}
+		#Angloisification of England
+		else_if = {
+			limit = {
+				owner = { tag = UEF }
+				has_country_flag = plantagenet_becomes_french_again
+				OR = {
+						culture = english
+						culture = northern_e
+						culture = cornish
+                }
+			}
+			change_culture = anglois
+		}
+		#Crusader nations becoming frankish
+		else_if = {		
+			limit = { 
+				owner = {
+					OR = {
+						tag = KOJ
+						tag = KAF
+						tag = KEG
+					}
+				}
+				continent = mena
+				religion = catholic
+			}
+			change_culture = frankish
+		}
+		#Sinofication of Manchuria
+		else_if = { 
+			limit = {
+				owner = { culture_group = chinese_group }
+				region = west_manchuria_region
+			}
+			change_culture = dongbei
+		}
+		#Sinofication of Tumed 
+		else_if = { 
+			limit = {
+				owner = { culture_group = chinese_group }
+				area = ordos_area
+			}
+			change_culture = jinyu
+		}
+		#Sinofication of Yunnan and Friends
+		else_if = { 
+			limit = {
+				owner = { culture_group = chinese_group }
+				OR = {
+						region = yunnan_region
+						province_id = 672
+						province_id = 2082
+					}
+			}
+			change_culture = yungui
+		}
+		#Grikofication of Peninsular South Italy
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				region = naples_region
+			}
+			change_culture = grecanici
+		}
+		
+		#Grikofication of Sicily
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				region = sicily_region 
+			}
+			change_culture = sikelianoi
+		}
+		
+		#Griko Melting Pot For Slavic Balkans
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				OR = {
+						region = east_balkan_region
+						region = central_balkan_region
+						region = west_balkan_region
+					}
+				NOT = { area = dobrogea_area }
+			}
+			change_culture = slavoi
+		}
+		
+		#Griko Melting Pot For Romanians
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				culture_group = romanian
+				NOT = { area = dobrogea_area }
+			}
+			change_culture = vlachoi
+		}
+		
+		#Griko Melting Pot For Crimea & the Steppe
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				OR = {
+					region = crimea_region
+					culture_group = tartar_group
+					culture_group = caucasus_group
+				}
+				NOT = { area = crimea_area }
+			}
+			change_culture = methoriakoi
+		}
+		
+		#Griko Melting Pot For Georgia
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				culture_group = georgian_group
+				NOT = { area = trebizond_area }
+			}
+			change_culture = georgianoi
+		}
+		
+		#Griko Melting Pot For Armenia
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				OR = {
+					area = malatya_area
+					area = sophene_area
+					area = hakkari_area
+					culture_group = armenian
+				}
+				NOT = { area = cilicia_area }
+			}
+			change_culture = armenioi
+		}
+		
+		#Griko Melting Pot For Levant
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				region = syria_region
+			}
+			change_culture = suroi
+		}
+		
+		#Griko Melting Pot For Iraq
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				culture_group = mashreqi
+				OR = {
+					area = diyar_mudar_area
+					area = diyar_rabia_area
+					area = diyar_bakir_area
+					region = lower_mesopotamia_region
+				}
+			}
+			change_culture = irakinoi
+		}
+		
+		#Griko Melting Pot For Egypt
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				region = egypt_region
+			}
+			change_culture = aigyptioi
+		}
+		
+		#Griko Melting Pot For West Persia to cover any edge cases
+		else_if = { 
+			limit = {
+				owner = { culture_group = greek_group }
+				OR = {
+					region = iran_region
+					region = fars_region
+					area = shemakha_area
+					culture_group = persian_group
+				}
+			}
+			change_culture = perses
+		}
+		
+		
+		#Arabification of Sicily
+		else_if = { 
+			limit = {
+				owner = { culture_group = maghreb }
+				region = sicily_region 
+			}
+			change_culture = siqiliya
+		}
+		
+		#Latinization of Dalmatia
+		else_if = { 
+			limit = {
+				owner = { culture_group = latin }
+				area = east_adriatic_coast_area
+			}
+			change_culture = dalmatian
+		}
+
+		#Iberia becoming Arabic under Muslim rule of Al-Gharb
+		else_if = {
+			limit = {
+				owner = { tag = ALM }
+				culture_group = iberian
+			}
+			change_culture = maure
+		}
+			
+		else_if = { # Standard conversion, owner prioritised. includes capital/union
+			limit = {
+				OR = {
+					#AND = { #  also capital conversion
+					is_capital = yes
+						#owner = { any_owned_province = { has_owner_culture = yes } }
+					#}
+					any_friendly_coast_border_province = {
+						owned_by = PREV
+						has_owner_culture = yes
+					}
+				}
+			}
+			change_culture = owner
+		}
+		else = {
+			owner = {
+				random_owned_province = {
+					limit = {
+						NOT = { culture = ROOT }
+						any_friendly_coast_border_province = {
+							province_id = ROOT
+						}
+						OR = {
+							has_owner_accepted_culture = yes
+							AND = {
+								culture_group = owner
+								OR = {
+									owner = { total_development = 1200 }
+									# Special cases
+									culture_group = greek_group
+									culture_group = oghuz
+									culture_group = tartar_group 
+									culture_group = old_turkic 
+									culture_group = altaic
+								}
+							}
+						}
+					}
+					ROOT = {
+						change_culture = PREV
+					}
+				}
+			}
+		}
+		export_to_key = { lhs = Culture_Prev value = culture }
+		set_key = { lhs = Culture_Progress value = 0 }
+	}
+}

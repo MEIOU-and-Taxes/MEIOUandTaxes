@@ -1,0 +1,1670 @@
+namespace = ChinaCollapse
+
+# Warning event
+country_event = {
+	id = ChinaCollapse.001
+	title = ChinaCollapse.001.t
+	desc = ChinaCollapse.001.desc
+	picture = COMET_SIGHTED_eventPicture
+	
+	trigger = {
+		is_emperor_of_china = yes
+		NOT = { imperial_mandate = 50 }
+		NOT = { has_country_flag = China_Warning }
+		NOT = { has_country_flag = China_Collapsing }
+	}
+	
+	mean_time_to_happen = { months = 6 }
+	
+	option = {
+		name = ChinaCollapse.001.a
+		set_country_flag = China_Warning
+		add_prestige = -5
+		Stab_Subtract1 = yes
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:was warned about possible collapse:ChinaCollapse.001"
+	}
+}
+
+# Disaster Begins, Trigger Peasant Revolt
+country_event = {
+	id = ChinaCollapse.002
+	title = ChinaCollapse.002.t
+	desc = ChinaCollapse.002.desc
+	picture = BURNING_CITY_eventPicture
+	major = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = ChinaCollapse.002.a
+		set_country_flag = China_Collapsing
+		clr_country_flag = China_Warning #so you can be warned again
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:collapse disaster started, stability drop:ChinaCollapse.002"
+		Stab_Subtract2 = yes
+		hidden_effect = {
+			if = {
+				limit = { NOT = { has_country_flag = China_PeasantUprising } }
+				country_event = { id = ChinaCollapse.004 days = 10 }
+			}
+		}
+	}
+}
+# Disaster Ends
+country_event = {
+	id = ChinaCollapse.003
+	title = ChinaCollapse.003.t
+	desc = ChinaCollapse.003.desc
+	picture = hindu_ashram
+	major = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = OPT.EXCELLENT
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:collapse disaster ended, prestige increase:ChinaCollapse.003"
+		clr_country_flag = China_Collapsing
+		clr_country_flag = China_Collapse
+		clr_country_flag = China_PeasantUprising
+		clr_country_flag = China_PeasantsFailed
+		clr_country_flag = China_Warlords
+		set_key = { lhs = China_GovUnity value = 0 } 
+		set_key = { lhs = China_GovStrength value = 0 }
+		set_key = { lhs = China_WarlordUnity value = 0 }
+		set_key = { lhs = China_WarlordStrength value = 0 }
+		set_key = { lhs = China_RebelUnity value = 0 }
+		set_key = { lhs = China_RebelStrength value = 0 }
+		every_province = {
+			limit = {
+				isValidProv = yes
+			}
+			clr_province_flag = China_Collapse
+			clr_province_flag = China_Split
+			clr_province_flag = China_SplitCenter
+		}
+		add_prestige = 25
+		add_mandate = 25
+		Stab_Add3 = yes
+		hidden_effect = { clear_saved_name = China_Contender_Name }
+	}
+}
+# Peasant Revolt!
+country_event = {
+	id = ChinaCollapse.004
+	title = ChinaCollapse.004.t
+	desc = ChinaCollapse.004.desc
+	picture = mahayana_temple_destroyed
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = ChinaCollapse.004.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:peasant uprisings started, prestige drop, increased unrest, lowered morale:ChinaCollapse.004"
+		set_country_flag = China_PeasantUprising #makes Militia rebels the dominant kind in the whole country
+		add_country_modifier = {
+			name = China_PeasantUprising #maybe general reduction of available manpower by e.g.20% if we are using state army instaed of warlord? if so, add it in next event, not this one
+			duration = -1
+		}
+		add_prestige = -25
+		hidden_effect = {
+			country_event = { id = ChinaCollapse.005 days = 30 }
+		}
+	}
+}
+
+# Peasants Will Rebel
+country_event = {
+	id = ChinaCollapse.005
+	title = ChinaCollapse.005.t
+	desc = ChinaCollapse.005.desc
+	picture = PLAGUE_RETURN_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = ChinaCollapse.005.a
+		#does it mean we used warlords to crush them?
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:peasant uprisings crushed, warlords are the opposing faction:ChinaCollapse.005"
+		hidden_effect = {
+			set_country_flag = China_PeasantsFailed
+			set_country_flag = China_Warlords #Mepper: Increased chance of Warlord rebels tenfold when having this modifier. 
+			#Set initial situation for the collapse event
+			## Variable are 0-5 scale, 0 meaning very high, 5 meaning very low
+			set_key = { lhs = China_GovUnity value = 2 } ## Gov is Mostly United
+			set_key = { lhs = China_GovStrength value = 5 } ## Gov is Collapsing
+			set_key = { lhs = China_WarlordUnity value = 5 } ## Warlords are Utterly Divided
+			set_key = { lhs = China_WarlordStrength value = 0 } ## Warlords are Powerful
+			set_key = { lhs = China_RebelUnity value = 4 } # Rebels are Divided
+			set_key = { lhs = China_RebelStrength value = 4 } # Rebels are Very Weak
+		}
+		add_prestige = -10
+		add_manpower = -250 #Warlords will take a bunch of soldiers under their command
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+		NO_RecruitLords = yes		#Promote lesser nobility effect, Nobles will become much stronger from doing this
+		NO_FactionBoost = yes #Also give Noble Influence
+		Pol_FacInfReactPosMajor = { Fac = NO }
+		remove_country_modifier = China_PeasantUprising #Militia rebels are no longer the dominant kind in the country
+		add_country_modifier = { name = China_PeasantsCrushed duration = 1825 } #-30 global unrest for a year? Mepper: I made it 5 years, otherwise its very minor
+		#custom_tooltip = China_Warlords
+		hidden_effect = { set_key = { lhs = China_Revolt value = 6 } }
+		ai_chance = { factor = 60 }
+	}
+	
+	option = {
+		name = ChinaCollapse.005.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:peasant uprisings continue, warlords are not the opposing faction:ChinaCollapse.005"
+		hidden_effect = {
+			#Set initial situation for the collapse event
+			## Variable are 0-5 scale, 0 meaning very high, 5 meaning very low
+			set_key = { lhs = China_GovUnity value = 0 } ## Gov is United
+			set_key = { lhs = China_GovStrength value = 5 } # Gov is Collapsing
+			set_key = { lhs = China_WarlordUnity value = 1 } # Warlords are Strong
+			set_key = { lhs = China_WarlordStrength value = 1 } # Warlords are Mostly Unified
+			set_key = { lhs = China_RebelUnity value = 0 } # Rebels are United
+			set_key = { lhs = China_RebelStrength value = 0 } # Rebels are Powerful
+		}
+		add_prestige = 25
+		add_manpower = -500		#Bureau army mutinies
+		add_army_tradition = -25
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=25 }	#Bureu becomes much more corrupt
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-25 }	#Nobles will become disloyal also
+		BU_FactionBoost = yes			#Bureau becomes much more influential in government
+		Pol_FacInfReactPosMajor = { Fac = BU }
+		ai_chance = { factor = 40 }
+	}
+}
+
+
+# Peasants Win! New Dynasty
+country_event = {
+	id = ChinaCollapse.006
+	title = ChinaCollapse.006.t
+	desc = ChinaCollapse.006.desc
+	picture = all_lightning
+	major = yes
+	
+	is_triggered_only = yes #from Militia rebels enforcing their demands
+
+	option = { 
+		name = ChinaCollapse.006.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:peasant uprisings succeded:ChinaCollapse.006"
+		add_prestige = -50
+		random_list = { 
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CEN
+					}
+				}
+				ChangeTagEffect = { scope=CEN }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CLI
+					}
+				}
+				ChangeTagEffect = { scope=CLI }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CMN
+					}
+				}
+				ChangeTagEffect = { scope=CMN }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CNG
+					}
+				}
+				ChangeTagEffect = { scope=CNG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CSE
+					}
+				}
+				ChangeTagEffect = { scope=CSE }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CTA
+					}
+				}
+				ChangeTagEffect = { scope=CTA }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CYN
+					}
+				}
+				ChangeTagEffect = { scope=CYN }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = CYU
+					}
+				}
+				ChangeTagEffect = { scope=CYU }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = DAA
+					}
+				}
+				ChangeTagEffect = { scope=DAA }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = DNA
+					}
+				}
+				ChangeTagEffect = { scope=DNA }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = DSH
+					}
+				}
+				ChangeTagEffect = { scope=DSH }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = DXI
+					}
+				}
+				ChangeTagEffect = { scope=DXI }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = JIN
+					}
+				}
+				ChangeTagEffect = { scope=JIN }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = DXI
+					}
+				}
+				ChangeTagEffect = { scope=DXI }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = LDG
+					}
+				}
+				ChangeTagEffect = { scope=LDG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = LNG
+					}
+				}
+				ChangeTagEffect = { scope=LNG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = MNG
+					}
+				}
+				ChangeTagEffect = { scope=MNG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = QII
+					}
+				}
+				ChangeTagEffect = { scope=QII }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = QIN
+					}
+				}
+				ChangeTagEffect = { scope=QIN }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = SHU
+					}
+				}
+				ChangeTagEffect = { scope=SHU }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = SNG
+					}
+				}
+				ChangeTagEffect = { scope=SNG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = TIA
+					}
+				}
+				ChangeTagEffect = { scope=TIA }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = TNG
+					}
+				}
+				ChangeTagEffect = { scope=TNG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = WUU
+					}
+				}
+				ChangeTagEffect = { scope=WUU }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = XIA
+					}
+				}
+				ChangeTagEffect = { scope=XIA }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = XNG
+					}
+				}
+				ChangeTagEffect = { scope=XNG }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = YUE
+					}
+				}
+				ChangeTagEffect = { scope=YUE }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = ZHE
+					}
+				}
+				ChangeTagEffect = { scope=ZHE }
+			}
+			10 = { 
+				trigger = { 
+					NOT = { 
+						exists = ZOU
+					}
+				}
+				ChangeTagEffect = { scope=ZOU }
+			}
+		}
+		hidden_effect = { 
+			MakeChinaGreat = yes
+		}
+		remove_country_modifier = China_PeasantUprising
+		add_country_modifier = { name = China_PeasantDynasty duration = 5475 }
+		clr_country_flag = China_Collapsing
+		clr_country_flag = China_PeasantUprising
+		set_mandate = 40
+		Stab_Add3 = yes
+		add_government_reform = celestial_empire
+		set_meritocracy = 50
+		add_corruption = 20
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=-30 }
+		#government reforms
+		#TODO: how it works with rebels demands effect?
+		Rights_NOGov4Apply = yes
+		Rights_NOTen4Apply = yes
+		Rights_NOObl3Apply = yes
+		Rights_NOSer4Apply = yes
+
+		define_ruler = { #this will work well only if we add effect to change tag
+			dynasty = ROOT
+			culture = ROOT
+			religion = ROOT
+			claim = 95
+		}
+		end_disaster = China_Collapse
+	}
+}
+
+# Peasants Fail
+country_event = {
+	id = ChinaCollapse.007
+	title = ChinaCollapse.007.t
+	desc = ChinaCollapse.007.desc
+	picture = all_rebels_crushed
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		had_country_flag = { #give them 6 years to try to win
+			flag = China_PeasantUprising
+			days = 2190
+		}
+		NOT = { has_country_flag = China_PeasantsFailed }
+		NOT = { has_spawned_rebels = militia_rebels }
+	}
+	
+	option = {
+		name = OPT.EXCELLENT
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:peasant uprisings failed:ChinaCollapse.007"
+		set_country_flag = China_PeasantsFailed
+		remove_country_modifier = China_PeasantUprising
+		add_country_modifier = { name = China_PeasantsCrushed duration = 1095 }
+		add_mandate = 25
+		Stab_Add2 = yes
+		add_prestige = 10
+	}
+}
+
+
+### Phase 2 for a fighting dynasty, The Wait
+# The Generals Reward
+country_event = {
+	id = ChinaCollapse.008
+	title = ChinaCollapse.008.t
+	desc = ChinaCollapse.008.desc
+	picture = vajrayana_monastery
+	
+	is_triggered_only = yes
+	
+	trigger = { #path taken: not crushing rebels with help of warlords in event 5, rebels unable to enforce demands in specified timeframe
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		has_country_flag = China_PeasantsFailed
+		#NOT = { has_country_flag = China_Warlords }
+		is_key_equal = { lhs = China_Revolt value = 0 }
+	}
+
+	immediate = {	
+		hidden_effect = {		
+			set_saved_name = {
+				key = China_Contender_Name
+				type = advisor
+				scope = ROOT
+			}
+		}
+	}
+	option = {
+		name = ChinaCollapse.008.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:weak general oppossing peasant rebels:ChinaCollapse.008"
+		hidden_effect = { set_key = { lhs = China_Generals value = 0 } }
+		add_meritocracy = -15
+		add_prestige = -10
+		add_army_tradition = -25
+		create_general = { tradition = 50 }
+		create_general = { tradition = 50 }
+		create_general = { tradition = 50 }
+		hidden_effect = {
+			subtract_key = { lhs = China_GovStrength value = 2 } # Restore some Gov Strength
+			change_key = { lhs = China_WarlordStrength value = 1 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.008.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:strong general oppossing peasant rebels:ChinaCollapse.008"
+		hidden_effect = { set_key = { lhs = China_Generals value = 1 } }
+		add_meritocracy = 5
+		create_general = { tradition = 75 }
+		create_general = { tradition = 75 }
+		hidden_effect = {
+			change_key = { lhs = China_WarlordUnity value = 1 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.008.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:very strong general oppossing peasant rebels:ChinaCollapse.008"
+		hidden_effect = { set_key = { lhs = China_Generals value = 2 } } #picking strong general leads to A potential contender event
+		define_general = {
+			name = China_Contender_Name
+			shock = 6
+			fire = 5
+			manuever = 6
+			siege = 4
+		}
+		add_meritocracy = 15
+		add_prestige = 10
+		add_army_tradition = 25
+	}
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 1 } }
+	}
+}
+
+# A Potential Contender
+country_event = {
+	id = ChinaCollapse.009
+	title = ChinaCollapse.009.t
+	desc = ChinaCollapse.009.desc
+	picture = confucianism_alchemy
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 1 }
+		is_key_equal = { lhs = China_Generals value = 2 }
+	}
+	
+	option = {
+		name = ChinaCollapse.009.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:rewarded powerful general:ChinaCollapse.009"
+		hidden_effect = { set_key = { lhs = China_Generals value = 3 } }
+		add_years_of_income = -0.2 
+		add_meritocracy = -5
+		add_prestige = -5
+		hidden_effect = {
+			subtract_key = { lhs = China_GovStrength value = 3 } # Restore lots of Gov Strength
+			change_key = { lhs = China_WarlordUnity value = 1 }
+			change_key = { lhs = China_WarlordStrength value = 2 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.009.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:spurned powerful general:ChinaCollapse.009"
+		hidden_effect = { set_key = { lhs = China_Generals value = 4 } }
+		add_manpower = -5
+		add_prestige = 10
+		hidden_effect = {
+			subtract_key = { lhs = China_WarlordUnity value = 1 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.009.b
+		trigger = {
+			NOT = { full_idea_group = espionage_ideas }
+		}
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:tried to kill its powerful general:ChinaCollapse.009"
+		hidden_effect = { set_key = { lhs = China_Generals value = 5 } }
+		add_mil_power = -25
+		random_list = {
+			50 = {
+				country_event = { id = ChinaCollapse.010 days = 30 random = 10 }
+			}
+			50 = {
+				country_event = { id = ChinaCollapse.011 days = 30 random = 10 }
+			}
+		}
+	}
+	option = {
+		name = ChinaCollapse.009.b
+		trigger = {
+			full_idea_group = espionage_ideas
+		}
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:tried to kill its powerful general:ChinaCollapse.009"
+		hidden_effect = { set_key = { lhs = China_Generals value = 5 } }
+		add_mil_power = -25
+		custom_tooltip = ChinaCollapse.009.b_tooltip
+		random_list = {
+			80 = {
+				country_event = { id = ChinaCollapse.010 days = 30 random = 10 }
+			}
+			20 = {
+				country_event = { id = ChinaCollapse.011 days = 30 random = 10 }
+			}
+		}
+	}
+}
+
+# General Killed
+country_event = {
+	id = ChinaCollapse.010
+	title = ChinaCollapse.010.t
+	desc = ChinaCollapse.010.desc
+	picture = turmoil_holy_war
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.GOOD2"
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:succesfully killed its powerful general:ChinaCollapse.010"
+		hidden_effect = { set_key = { lhs = China_Generals value = 6 } }
+	}
+}
+# General Survives
+country_event = {
+	id = ChinaCollapse.011
+	title = ChinaCollapse.011.t
+	desc = ChinaCollapse.011.desc
+	picture = ukonusko_ukko
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "OPT.DAMN"
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:failed to kill its powerful general:ChinaCollapse.011"
+		hidden_effect = { set_key = { lhs = China_Generals value = 4 } }
+		add_manpower = -5
+	}
+}
+
+# A Realm of Contenders
+country_event = {
+	id = ChinaCollapse.012
+	title = ChinaCollapse.012.t
+	desc = ChinaCollapse.012.desc
+	picture = HORDE_ON_HORSEBACK_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 1 }	#Generals Reward happened
+		NOT = { is_key_equal = { lhs = China_Generals value = 2 } }
+		NOT = { is_key_equal = { lhs = China_Generals value = 5 } } #let assassination plot resove itself before this
+	}
+	
+	option = {
+		name = ChinaCollapse.012.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:united/upheld followers:ChinaCollapse.012"
+		hidden_effect = { set_key = { lhs = China_Followers value = 1 } }
+		add_meritocracy = -10
+		add_prestige = -10
+		add_dip_power = -25
+		custom_tooltip = China_FollowersUnited
+		hidden_effect = {
+			subtract_key = { lhs = China_GovStrength value = 2 } # Restore some Gov Strength
+			change_key = { lhs = China_WarlordStrength value = 1 }
+			change_key = { lhs = China_WarlordUnity value = 1 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.012.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:divided/ignored followers:ChinaCollapse.012"
+		hidden_effect = { set_key = { lhs = China_Followers value = 2 } }
+		custom_tooltip = China_FollowersDivided
+		hidden_effect = {
+			change_key = { lhs = China_GovStrength value = 2 } # lost some Gov Strength
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.012.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:angered/replaced followers:ChinaCollapse.012"
+		hidden_effect = { set_key = { lhs = China_Followers value = 3 } }
+		
+		add_mil_power = -50
+		custom_tooltip = China_FollowersAngry
+		hidden_effect = {
+			subtract_key = { lhs = China_GovStrength value = 2 } # Restore rest of Gov Strength
+			change_key = { lhs = China_WarlordUnity value = 3 }
+			change_key = { lhs = China_WarlordStrength value = 2 }
+		}
+	}
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 2 } }
+	}
+}
+
+# The Rebellious Masses
+country_event = {
+	id = ChinaCollapse.013
+	title = ChinaCollapse.013.t
+	desc = ChinaCollapse.013.desc
+	picture = BORDER_TENSION_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 2 } #event ChinaCollapse.012 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.013.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:ignored commoners:ChinaCollapse.013"
+		hidden_effect = { set_key = { lhs = China_Commoners value = 1 } }
+		custom_tooltip = China_CommonersIgnored
+	}
+	
+	option = {
+		name = ChinaCollapse.013.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:assissted commoners with full grain provision:ChinaCollapse.013"
+		hidden_effect = { set_key = { lhs = China_Commoners value = 2 } }
+		custom_tooltip = China_CommonersAssisted
+		hidden_effect = {
+			clr_country_flag = TN_Dole_Universal
+			remove_country_modifier = BU_GrainDoleMinor
+			remove_country_modifier = BU_GrainDoleMajor
+			remove_country_modifier = BU_GrainDoleFull
+			# BrutusY: Should remove existing TaxRelief as well
+			clr_country_flag = BU_TaxReliefStarted
+			remove_country_modifier = BU_TaxRelief
+		}
+		# BrutusY: Makes sense to make this TaxRelief go into effect immediately
+		BU_TaxRelief = yes
+		BU_DistributeGrainFull = yes
+		add_adm_power = -100
+		add_dip_power = -100
+		hidden_effect = {
+			change_key = { lhs = China_RebelStrength value = 3 }
+			change_key = { lhs = China_RebelUnity value = 2 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.013.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:crackdown on commoners:ChinaCollapse.013"
+		hidden_effect = { set_key = { lhs = China_Commoners value = 3 } }
+		add_mil_power = -100
+		add_manpower = -50
+		custom_tooltip = China_CommonersCrackdown
+		add_country_modifier = { name = China_PeasantCrackdown duration = 3650 }
+		hidden_effect = {
+			subtract_key = { lhs = China_GovStrength value = 1 } # Restore rest of Gov Strength
+			change_key = { lhs = China_RebelStrength value = 1 }
+			change_key = { lhs = China_RebelUnity value = 1 }
+		}
+	}
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 3 } }
+	}
+}
+
+# A Disturbing Movement
+country_event = {
+	id = ChinaCollapse.014
+	title = ChinaCollapse.014.t
+	desc = ChinaCollapse.014.desc
+	picture = confucianism_court
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 3 } #event ChinaCollapse.013 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.014.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:ignored a disturbing movement:ChinaCollapse.014"
+		hidden_effect = { set_key = { lhs = China_Movement value = 1 } }
+		custom_tooltip = China_MovementIgnored
+		Stab_Subtract50Percent = yes
+	}
+	
+	option = {
+		name = ChinaCollapse.014.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:asssasinated leaders of a disturbing movement:ChinaCollapse.014"
+		hidden_effect = { set_key = { lhs = China_Movement value = 2 } }
+		
+		add_treasury = -250
+		add_manpower = -25
+		add_dip_power = -100
+		add_mil_power = -100
+		hidden_effect = {
+			change_key = { lhs = China_RebelStrength value = 1 }
+			change_key = { lhs = China_RebelUnity value = 1 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.014.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:reformed in answer to a disturbing movement:ChinaCollapse.014"
+		trigger = {
+			Rights_NOTen4HasGreater = no
+			Rights_NOGov5HasGreater = no
+		}
+		hidden_effect = { set_key = { lhs = China_Movement value = 3 } }
+		Stab_Subtract6 = yes
+		add_adm_power = -500
+		add_dip_power = -500
+		add_mil_power = -500
+		Rights_NOTen4Apply = yes
+		Rights_NOGov5Apply = yes
+		custom_tooltip = China_MovementReform
+		hidden_effect ={
+			change_key = { lhs = China_RebelStrength value = 2 }
+			change_key = { lhs = China_RebelUnity value = 3 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.014.d
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:cracked down on a disturbing movement:ChinaCollapse.014"
+		hidden_effect = { set_key = { lhs = China_Movement value = 4 } }
+		add_mil_power = -100
+		add_manpower = -50
+		custom_tooltip = China_MovementCrackdown
+		hidden_effect = {
+			change_key = { lhs = China_RebelStrength value = 2 }
+			change_key = { lhs = China_RebelUnity value = 3 }
+		}
+	}
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 6 } }
+	}
+}
+
+
+# An Untamed Frontier
+country_event = {
+	id = ChinaCollapse.015
+	title = ChinaCollapse.015.t
+	desc = ChinaCollapse.015.desc
+	picture = GENGIS_KHAN_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 4 } #event ChinaCollapse.014 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.015.a
+		hidden_effect = { set_key = { lhs = China_Fringe value = 0 } } #TODO: China_Fringe keys do not do anything atm 
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:(no effect yet) released all tags outside core realm as subjects:ChinaCollapse.015"
+		### TODO: RELEASE ALL TAGS OUTSIDE CORE REALM, THEN MAKES THEM SUBJECTS WITH A CHINESE CULTURE
+		custom_tooltip = China_FringeAppoint
+	}
+	
+	option = {
+		name = ChinaCollapse.015.b
+		hidden_effect = { set_key = { lhs = China_Fringe value = 1 } }
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:(no effect yet) released all tags outside core realm and abandonned them:ChinaCollapse.015"
+		### TODO: RELEASE ALL TAGS OUTSIDE CORE REALM
+		custom_tooltip = China_FringeAbandoned
+	}
+	
+	option = {
+		name = ChinaCollapse.015.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:ignored the border states:ChinaCollapse.015"
+		hidden_effect = { set_key = { lhs = China_Fringe value = 2 } }
+		
+		custom_tooltip = China_FringeIgnored
+	}
+	
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 5 } }
+	}
+}
+
+# One Wall, One Weakness
+country_event = {
+	id = ChinaCollapse.016
+	title = ChinaCollapse.016.t
+	desc = ChinaCollapse.016.desc
+	picture = BORDER_TENSION_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 5 } #event ChinaCollapse.015 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.016.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:(no effect yet) defended the border:ChinaCollapse.016"
+		hidden_effect = { set_key = { lhs = China_Borders value = 0 } } #TODO: China_Borders keys do not do anything atm 
+		custom_tooltip = China_BordersDefended
+	}
+	
+	option = {
+		name = ChinaCollapse.016.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:(no effect yet) maintained the border:ChinaCollapse.016"
+		hidden_effect = { set_key = { lhs = China_Borders value = 1 } }
+		
+		add_treasury = -250
+		add_manpower = -25
+		add_mil_power = -50
+		custom_tooltip = China_BordersMaintained
+	}
+	
+	option = {
+		name = ChinaCollapse.016.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:(no effect yet) abandonned the border:ChinaCollapse.016"
+		hidden_effect = { set_key = { lhs = China_Borders value = 2 } }
+		
+		custom_tooltip = China_BordersAbandoned
+	}
+	
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 6 } }
+	}
+}
+
+# A Dynasty Without End
+country_event = {
+	id = ChinaCollapse.017
+	title = ChinaCollapse.017.t
+	desc = ChinaCollapse.017.desc
+	picture = MING_COURT_eventPicture.dds
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 6 } #event ChinaCollapse.016 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.017.a
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:did the preemptive strike against family:ChinaCollapse.017"
+		hidden_effect = { set_key = { lhs = China_Family value = 1 } }
+		
+		add_mil_power = -100
+		Stab_Subtract1 = yes
+		add_prestige = -50
+		#custom_tooltip = China_FamilyPREEMPTIVE
+	}
+	
+	option = {
+		name = ChinaCollapse.017.b
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:did family appointments:ChinaCollapse.017"
+		hidden_effect = { set_key = { lhs = China_Family value = 2 } }
+		
+		add_dip_power = -100
+		#custom_tooltip = China_FamilyAppointments
+		hidden_effect = {
+			change_key = { lhs = China_GovUnity value = 3 }
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.017.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:ignored family appointments:ChinaCollapse.017"
+		hidden_effect = { set_key = { lhs = China_Family value = 3 } }
+		
+		#custom_tooltip = China_FamilyIgnored
+		hidden_effect = {
+			change_key = { lhs = China_GovUnity value = 1 }
+		}
+	}
+	
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 7 } }
+	}
+}
+
+# China, Long United...
+country_event = {
+	id = ChinaCollapse.018
+	title = ChinaCollapse.018.t
+	desc = ChinaCollapse.018.desc
+	picture = WOUNDED_SOLDIERS_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 7 } #event ChinaCollapse.017 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.018.a
+		trigger = { Rights_BGCom5HasGreater = yes }
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:got support from Burghers:ChinaCollapse.018:availabe because of Rights_BGCom5HasGreater"
+		hidden_effect = { set_key = { lhs = China_Realm value = 0 } }
+		
+		add_treasury = 1000 #TODO: I would prefer reduced corruption from specific elite + increased loyalty
+		#custom_tooltip = China_RealmMerchants
+	}
+	
+	option = {
+		name = ChinaCollapse.018.b
+		trigger = { Rights_NOGov5HasGreater = no }
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:got support from Nobles:ChinaCollapse.018:availabe because of Rights_NOGov5HasGreater"
+		hidden_effect = { set_key = { lhs = China_Realm value = 1 } }
+		
+		add_manpower = 50 #TODO: I would prefer reduced corruption from specific elite + increased loyalty
+		#custom_tooltip = China_RealmAristocracy
+	}
+	
+	option = {
+		name = ChinaCollapse.018.c
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:got support from Bureaucracts:ChinaCollapse.018"
+		hidden_effect = { set_key = { lhs = China_Realm value = 2 } }
+		
+		add_corruption = -10
+		#custom_tooltip = China_RealmBureaucracy
+	}
+	
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 8 } }
+	}
+}
+
+# The Final Stand
+country_event = {
+	id = ChinaCollapse.019
+	title = ChinaCollapse.019.t
+	desc = ChinaCollapse.019.desc
+	picture = CIVIL_WAR_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 8 } #event ChinaCollapse.018 happened
+	}
+	
+	option = {
+		name = ChinaCollapse.019.a
+		trigger = { 
+			owns_core_province = 708 
+			NOT = { 708 = 	{ is_capital_of = ROOT } } 
+		}
+		hidden_effect = { set_key = { lhs = China_Stand value = 0 } }
+		Effect_set_capital = { target=708 }
+		
+		add_corruption = 10
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:moved capital to [Root.Capital.GetName]:ChinaCollapse.019"
+		#custom_tooltip = China_StandBeijing
+	}
+	
+	option = {
+		name = ChinaCollapse.019.b
+		trigger = { 
+			owns_core_province = 2150 
+			NOT = { 2150 = 	{ is_capital_of = ROOT } } 
+		}
+		hidden_effect = { set_key = { lhs = China_Stand value = 1 } }
+		Effect_set_capital = { target=2150 }
+		
+		add_corruption = 10
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:moved capital to [Root.Capital.GetName]:ChinaCollapse.019"
+		#custom_tooltip = China_StandNanjing
+	}
+	
+	option = {
+		name = ChinaCollapse.019.c
+		trigger = { 
+			owns_core_province = 701 
+			NOT = { 701 = 	{ is_capital_of = ROOT } } 
+		}
+		hidden_effect = { set_key = { lhs = China_Stand value = 2 } }
+		Effect_set_capital = { target=701 }
+		
+		add_corruption = 10
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:moved capital to [Root.Capital.GetName]:ChinaCollapse.019"
+		#custom_tooltip = China_StandKaifeng
+	}
+	
+	option = {
+		name = ChinaCollapse.019.d
+		trigger = { 
+			owns_core_province = 2252 
+			NOT = { 2252 = 	{ is_capital_of = ROOT } } 
+		}
+		hidden_effect = { set_key = { lhs = China_Stand value = 3 } }
+		Effect_set_capital = { target=2252 }
+		
+		add_corruption = 10
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:moved capital to [Root.Capital.GetName]:ChinaCollapse.019"
+		#custom_tooltip = China_StandXian
+	}
+	
+	option = {
+		name = ChinaCollapse.019.e
+		trigger = { 
+			owns_core_province = 2121 
+			NOT = { 2121 = 	{ is_capital_of = ROOT } } 
+		}
+		hidden_effect = { set_key = { lhs = China_Stand value = 4 } }
+		Effect_set_capital = { target=2121 }
+		
+		add_corruption = 10
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:moved capital to [Root.Capital.GetName]:ChinaCollapse.019"
+		#custom_tooltip = China_StandGuangdong
+	}
+	
+	option = {
+		name = ChinaCollapse.019.f
+		log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:have not moved its capital:ChinaCollapse.019"
+		hidden_effect = { set_key = { lhs = China_Stand value = 5 } }
+		
+		#custom_tooltip = China_StandCurrent
+	}
+	
+	after = {
+		hidden_effect = { set_key = { lhs = China_Revolt value = 9 } }
+	}
+}
+
+# ...Must Divide
+country_event = {
+	id = ChinaCollapse.020
+	title = ChinaCollapse.020.t
+	desc = ChinaCollapse.020.desc
+	picture = all_ruined_temple
+	major = yes
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		is_emperor_of_china = yes
+		has_disaster = China_Collapse
+		is_key_equal = { lhs = China_Revolt value = 9 }  #event ChinaCollapse.019 happened
+	}
+	
+	immediate = {
+		hidden_effect = { 
+		## Variable are 0-5 scale, 0 meaning very high, 5 meaning very low
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:before collapse, China_GovUnity = [GV_China_GovUnity]:ChinaCollapse.020:scale (high 0-5 low)"
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:before collapse, China_GovStrength = [GV_China_GovStrength]:ChinaCollapse.020:scale (high 0-5 low)"
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:before collapse, China_WarlordUnity = [GV_China_WarlordUnity]:ChinaCollapse.020:scale (high 0-5 low)"
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:before collapse, China_WarlordStrength = [GV_China_WarlordStrength]:ChinaCollapse.020:scale (high 0-5 low)"
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:before collapse, China_RebelUnity = [GV_China_RebelUnity]:ChinaCollapse.020:scale (high 0-5 low)"
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:before collapse, China_RebelStrength = [GV_China_RebelStrength]:ChinaCollapse.020:scale (high 0-5 low)"
+
+			### COLLAPSE TIME
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = China_RebelStrength value = 5 } }
+				}
+				if = {
+					limit = {
+						NOT = { check_key = { lhs = China_WarlordStrength value = 5 } }
+					}
+					if = {
+						limit = {
+							NOT = { check_key = { lhs = China_GovStrength value = 1 } }
+						}
+						#capital region stays with government, two others are split between rebels and warlords depending on their relative power to each other
+						if = { #capital region (north China) stays with government
+							limit = { capital_scope = { superregion = north_china_superregion } }
+							north_china_superregion = {
+								limit = {
+									owned_by = PREV
+								}
+								set_key = { lhs = China_Type value = 0 } #Gov
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with government:ChinaCollapse.020"
+							}
+							if = { #East China goes to stronger of two (Rebels/Warlords), Southwest China goes to weaker of two
+								limit = { check_key = { lhs = China_RebelStrength which = China_WarlordStrength } } 
+								east_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								southwest_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with warlords:ChinaCollapse.020"
+							}
+							else = { #East China goes to stronger of two (Rebels/Warlords), Southwest China goes to weaker of two
+								east_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								southwest_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with warlords:ChinaCollapse.020"
+							}
+						}
+						else_if = { #capital region (east China) stays with government
+							limit = { capital_scope = { superregion = east_china_superregion } }
+							east_china_superregion = {
+								limit = {
+									owned_by = PREV
+								}
+								set_key = { lhs = China_Type value = 0 } #Gov
+							}
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with government:ChinaCollapse.020"
+							if = { #North China goes to stronger of two (Rebels/Warlords), Southwest China goes to weaker of two
+								limit = { check_key = { lhs = China_RebelStrength which = China_WarlordStrength } }
+								north_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								southwest_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with warlords:ChinaCollapse.020"
+							}
+							else = { #North China goes to stronger of two (Rebels/Warlords), Southwest China goes to weaker of two
+								north_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								southwest_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with warlords:ChinaCollapse.020"
+							}
+						}
+						else = { #capital region (Southwest China) stays with government
+							southwest_china_superregion = {
+								limit = {
+									owned_by = PREV
+								}
+								set_key = { lhs = China_Type value = 0 } #Gov
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with government:ChinaCollapse.020"
+							}
+							if = { #East China goes to stronger of two (Rebels/Warlords), North China goes to weaker of two
+								limit = { check_key = { lhs = China_RebelStrength which = China_WarlordStrength } }
+								east_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								north_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with warlords:ChinaCollapse.020"
+							}
+							else = { #East China goes to stronger of two (Rebels/Warlords), North China goes to weaker of two
+								east_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								north_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with warlords:ChinaCollapse.020"
+							}
+						}
+					}
+					else = {
+						random_list = {
+							40 = {
+								north_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								east_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with rebels:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with warlords:ChinaCollapse.020"
+								if = {
+									limit = { check_key = { lhs = China_RebelStrength which = China_WarlordStrength } }
+									southwest_china_superregion = {
+										limit = {
+											owned_by = PREV
+										}
+										set_key = { lhs = China_Type value = 2 } #Rebels
+									}
+									log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+								}							
+								else = {
+									southwest_china_superregion = {
+										limit = {
+											owned_by = PREV
+										}
+										set_key = { lhs = China_Type value = 1 } #Warlords
+									}
+									log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with warlords:ChinaCollapse.020"
+								}
+							}
+							60 = {
+								north_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 1 } #Warlords
+								}
+								east_china_superregion = {
+									limit = {
+										owned_by = PREV
+									}
+									set_key = { lhs = China_Type value = 2 } #Rebels
+								}
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with warlords:ChinaCollapse.020"
+								log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with rebels:ChinaCollapse.020"
+								if = {
+									limit = { check_key = { lhs = China_RebelStrength which = China_WarlordStrength } }
+									southwest_china_superregion = {
+										limit = {
+											owned_by = PREV
+										}
+										set_key = { lhs = China_Type value = 2 } #Rebels
+									}
+									log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+								}
+								else = {
+									southwest_china_superregion = {
+										limit = {
+											owned_by = PREV
+										}
+										set_key = { lhs = China_Type value = 1 } #Warlords
+									}
+									log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with warlords:ChinaCollapse.020"
+								}
+							}
+						}
+					}
+				}
+				else = {
+					if = {
+						limit = {
+							NOT = { check_key = { lhs = China_GovStrength value = 1 } } #TODO: this could be simplified in code
+						}
+						if = { #capital region (north China) stays with government, rest of the country stays with rebels
+							limit = { capital_scope = { superregion = north_china_superregion } }
+
+							every_owned_province = {
+								limit = {
+									superregion = north_china_superregion
+								}
+								set_key = { lhs = China_Type value = 2 } #Gov
+							}
+
+							every_owned_province = {
+								limit = {
+									OR = {
+										superregion = east_china_superregion
+										superregion = southwest_china_superregion
+									}
+								}
+								set_key = { lhs = China_Type value = 2 } #Rebels
+							}
+
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with government:ChinaCollapse.020"
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with rebels:ChinaCollapse.020"
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+						}
+						else_if = { #capital region (East China) stays with government, rest of the country stays with rebels
+							limit = { capital_scope = { superregion = east_china_superregion } }
+							every_owned_province = {
+								limit = {
+									superregion = east_china_superregion
+								}
+								set_key = { lhs = China_Type value = 2 } #Gov
+							}
+
+							every_owned_province = {
+								limit = {
+									OR = {
+										superregion = north_china_superregion
+										superregion = southwest_china_superregion
+									}
+								}
+								set_key = { lhs = China_Type value = 2 } #Rebels
+							}
+							
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with rebels:ChinaCollapse.020"
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with government:ChinaCollapse.020"
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+						}
+						else = { #capital region (South West China) stays with government, rest of the country stays with rebels
+							every_owned_province = {
+								limit = {
+									superregion = southwest_china_superregion
+								}
+								set_key = { lhs = China_Type value = 2 } #Gov
+							}
+
+							every_owned_province = {
+								limit = {
+									OR = {
+										superregion = north_china_superregion
+										superregion = east_china_superregion
+									}
+								}
+								set_key = { lhs = China_Type value = 2 } #Rebels
+							}
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with rebels:ChinaCollapse.020"
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with rebels:ChinaCollapse.020"
+							log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with government:ChinaCollapse.020"
+						}
+					}
+					else = { #everyone stays with rebels (except capital region)
+						every_owned_province = {
+							limit = {
+								OR = {
+									superregion = north_china_superregion
+									superregion = east_china_superregion
+									superregion = southwest_china_superregion
+								}
+							}
+							set_key = { lhs = China_Type value = 2 } #Rebels
+						}
+						log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with rebels:ChinaCollapse.020"
+						log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with rebels:ChinaCollapse.020"
+						log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with rebels:ChinaCollapse.020"
+					}
+				}
+			}
+			else_if = { #if China_RebelStrength = 5 (very low)
+				limit = {
+					check_key = { lhs = China_GovStrength value = 1 } #government is at 1 or higher (mostly united or worse)
+				}
+				every_owned_province = {
+					limit = {
+						OR = {
+							superregion = north_china_superregion
+							superregion = east_china_superregion
+							superregion = southwest_china_superregion
+						}
+					}
+					set_key = { lhs = China_Type value = 1 } #Warlords
+				}
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:government strength at 1 or higher (worse):ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with warlords:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with warlords:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with warlords:ChinaCollapse.020"
+			}
+			else_if = {
+				limit = {
+					NOT = { check_key = { lhs = China_GovStrength value = 1 } }
+					NOT = { check_key = { lhs = China_WarlordStrength value = 5 } }
+				}
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:government strength below 1:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:warlord strength below 5:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:capital superregion sided with government:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:two other superregions sided with warlords:ChinaCollapse.020"
+
+				#TODO: change this code to the form consistent with code above
+				north_china_superregion = {
+					limit = {
+						owned_by = PREV
+					}
+					if = {
+						limit = {
+							PREV = { capital_scope = { superregion = north_china_superregion } }
+						}
+						set_key = { lhs = China_Type value = 0 } #Gov
+					}
+					else = {
+						set_key = { lhs = China_Type value = 1 } #Warlords
+					}
+				}
+				east_china_superregion = {
+					limit = {
+						owned_by = PREV
+					}
+					if = {
+						limit = {
+							PREV = { capital_scope = { superregion = north_china_superregion } }
+						}
+						set_key = { lhs = China_Type value = 0 } #Gov
+					}
+					else = {
+						set_key = { lhs = China_Type value = 1 } #Warlords
+					}
+				}
+				southwest_china_superregion = {
+					limit = {
+						owned_by = PREV
+					}
+					if = {
+						limit = {
+							PREV = { capital_scope = { superregion = north_china_superregion } }
+						}
+						set_key = { lhs = China_Type value = 0 } #Gov
+					}
+					else = {
+						set_key = { lhs = China_Type value = 1 } #Warlords
+					}
+				}
+			}
+			else = {
+				every_owned_province = {
+					limit = {
+						OR = {
+							superregion = north_china_superregion
+							superregion = east_china_superregion
+							superregion = southwest_china_superregion
+						}
+					}
+					set_key = { lhs = China_Type value = 0 } #Gov
+				}
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:North China sided with government:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:East China sided with government:ChinaCollapse.020"
+				log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:South West China sided with government:ChinaCollapse.020"
+			}
+
+			capital_scope = {
+				region = {
+					if = {
+						limit = { owned_by = ROOT }
+					}
+					set_key = { lhs = China_Type value = 0 } #Gov
+				}
+			}
+			log = "FE-ChinaCollapse:[GetYear]:[Root.GetName]:capital region sided with government:ChinaCollapse.020"
+			
+			every_owned_province = {
+				limit = {
+					OR = {
+						is_key_equal = { lhs = China_Type value = 0 } #Gov
+						is_key_equal = { lhs = China_Type value = 1 } #Warlords
+						is_key_equal = { lhs = China_Type value = 2 } #Rebels
+					}
+					OR = {
+						superregion = north_china_superregion
+						superregion = east_china_superregion
+						superregion = southwest_china_superregion
+					}
+				}
+				set_province_flag = China_Collapse
+			}
+			set_key = { lhs = China_Revolt value = 10 }
+			Big_China_Export_Tech = yes
+			China_Break = yes
+			Local_DisolveTag = yes
+			Local_Cleanup = yes
+			China_SetupTags = yes
+			restore_country_name = yes
+			end_disaster = China_Collapse
+			set_global_flag = China_Broken
+			every_province = {
+				limit = {
+					has_province_flag = China_Collapse
+				}
+				clr_province_flag = China_Collapse
+			}
+		}
+	}
+	
+	option = {
+		name = ChinaCollapse.020.a
+	}
+}
+country_event = {
+	id = ChinaCollapse.099
+	title = ChinaCollapse.099.t
+	desc = ChinaCollapse.009.desc
+	picture = COMET_SIGHTED_eventPicture
+
+	mean_time_to_happen = { months = 3 }
+
+	trigger = {
+		is_emperor_of_china = yes
+		NOT = { imperial_mandate = 35 }
+		NOT = { has_country_flag = China_Collapsing }
+		has_country_modifier = recently_unified_china
+	}
+	
+	option = {
+		name = ChinaCollapse.001.a
+		remove_country_modifier = recently_unified_china #If player manages to break china down to 35 mandate after unification they loose modifier.
+		clr_global_flag = China_Unified
+		clr_country_flag = China_PeasantUprising
+		Stab_Subtract2 = yes
+	}
+}
+# Warning event
+country_event = {
+	id = ChinaCollapse.100
+	title = ChinaCollapse.001.t
+	desc = ChinaCollapse.001.desc
+	picture = COMET_SIGHTED_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = ChinaCollapse.001.a
+		add_mandate = -80
+	}
+}

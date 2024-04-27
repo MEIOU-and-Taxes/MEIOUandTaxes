@@ -1,0 +1,3716 @@
+namespace = POP_StartUp
+#######################################
+# Value initualization for simulation # (IDs, Traveltime and CE, Population, Autonomy, Concerns)
+#######################################
+country_event = {
+    id = POP_StartUp.001
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 1"
+		# Setup POP
+		StartUp_ApplyDeathTrauma = yes # Trauma from POP loss
+        country_event = {
+            id = POP_StartInit.003 ## initialise institution spread
+        }
+
+        set_key = { lhs = ID_Region value = 1 }
+        set_key = { lhs = ID_SR value = 1 }
+        set_key = { lhs = ID_Cont value = 1 }
+        set_key = { lhs = ID_TN value = 1 }
+        
+        country_event = { # Assign unique tag ID's
+            id = POP_StartInit.012
+        }
+		
+
+        regiongroup = { # Assign unique region ID's
+            region = {
+				limit = {
+					isValidEmpty = yes
+				}
+                set_key = { lhs = ID_Region which = ROOT }
+            }
+
+            ROOT = {
+                change_key = { lhs = ID_Region value = 1 }
+            }
+        }
+        srgroup = { # Assign unique subregion (?) ID's
+            set_key = { lhs = ID_SR which = ROOT }
+
+            sr_effect = {
+                effect = sr_effect0
+            }
+
+            ROOT = {
+                change_key = { lhs = ID_SR value = 1 }
+            }
+        }
+        contgroup = { # Assign unique continent ID's
+            set_key = { lhs = ID_Cont which = ROOT }
+
+            cont_effect = {
+                effect = cont_effect0
+            }
+
+            ROOT = {
+                change_key = { lhs = ID_Cont value = 1 }
+            }
+        }
+
+        set_key = { lhs = ID_TN value = 1 }
+
+        tradenode_centers = { # Assign unique trade node center ID's
+			if = { ### Alert us to double TN provs
+				limit = {
+					check_key = {
+						lhs = ID_TN
+						value = 1
+					}
+				}
+				add_permanent_province_modifier = {
+					name = river_notify
+					duration = -1
+				}
+			}
+			if = {
+				limit = {
+				    NOT = { is_wasteland = yes }
+				}
+            	set_key = { lhs = ID_TN which = PREV }
+			}
+			else = {
+				add_permanent_province_modifier = {
+					name = river_notify
+					duration = -1
+				}
+			}
+
+			every_trade_node_member_province = {
+				if = { ### Alert us to double TN provs
+					limit = {
+						NOT = { province_id = PREV }
+					}
+					if = {
+						limit = {
+				        	NOT = { is_wasteland = yes }
+							NOT = {
+								check_key = { lhs = ID_TN value = 1 }
+							}
+						}
+						set_key = { lhs = ID_TN which = PREV }
+					}
+					else = {
+						add_permanent_province_modifier = {
+							name = river_notify
+							duration = -1
+						}
+					}
+				}
+			}
+
+            PREV = {
+                change_key = { lhs = ID_TN value = 1 }
+            }
+        }
+		
+        country_event = {
+            id = POP_Census.002 # Set API Modifiers
+        }
+		
+        set_key = { lhs = ID_Region value = 0 }
+        set_key = { lhs = ID_SR value = 0 }
+        set_key = { lhs = ID_Cont value = 0 }
+        set_key = { lhs = ID_TN value = 0 }
+        
+        country_event = { ### Apply Pass system
+            id = POP_StartInit.001
+        }
+
+        country_event = {
+            id = POP_StartUp.013 # Calc land to sea distance for coastal provinces
+        }
+		
+        every_province = {
+            limit = {
+				isValidEmpty = yes
+            }
+            Prov_Init = yes # Initialize province powerbroker power and loyalty values 
+		}
+
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+			Admin_Init = yes # Initialize country wage and bureaucrat rates
+			Ruler_Calc = yes # Recalc ruler power / executive authority
+
+            country_event = { id = phlopsi_ce_main.1 } # Calc CE for each country
+        }
+		
+        # Initialize political system for reforms, privileges etc.
+        country_event = { # Initialize provincial Rights data
+            id = POP_StartInit.005
+        }
+        country_event = { # Initialize country Rights data
+            id = POP_StartInit.006
+        }
+        Rights_Presim = yes
+        Rights_Init = yes
+        
+        country_event = { ## Apply Post system
+            id = POP_StartInit.004
+        }
+
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+			
+            # Add starting corruption based on ruler impact (executive authority)
+			set_key = { lhs = Tmp_0 which = Ruler_CrptImpact }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 51.2 } } add_corruption = 51.2 subtract_key = { lhs = Tmp_0 value = 51.2 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 25.6 } } add_corruption = 25.6 subtract_key = { lhs = Tmp_0 value = 25.6 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 12.8 } } add_corruption = 12.8 subtract_key = { lhs = Tmp_0 value = 12.8 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 6.4 } } add_corruption = 6.4 subtract_key = { lhs = Tmp_0 value = 6.4 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 3.2 } } add_corruption = 3.2 subtract_key = { lhs = Tmp_0 value = 3.2 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 1.6 } } add_corruption = 1.6 subtract_key = { lhs = Tmp_0 value = 1.6 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 0.8 } } add_corruption = 0.8 subtract_key = { lhs = Tmp_0 value = 0.8 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 0.4 } } add_corruption = 0.4 subtract_key = { lhs = Tmp_0 value = 0.4 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 0.2 } } add_corruption = 0.2 subtract_key = { lhs = Tmp_0 value = 0.2 } }
+			if = { limit = { check_key = { lhs = Tmp_0 value = 0.1 } } add_corruption = 0.1 subtract_key = { lhs = Tmp_0 value = 0.1 } }
+        }
+        country_event = {
+            id = POP_StartInit.008 # Apply preset class ratio's and map populations
+        }
+
+        every_province = {
+            limit = {
+				isValidEmpty = yes
+            }
+            save_event_target_as = Prov
+
+            if = { # Initialize provincial local autonomy
+                limit = {
+                    is_city = yes
+                }
+                add_local_autonomy = -100
+
+                export_to_key = { lhs = Tmp_0 value = modifier:local_autonomy }
+
+                owner = {
+                    export_to_key = { lhs = Tmp_0 value = modifier:global_autonomy }
+
+                    PREV = {
+                        change_key = { lhs = Tmp_0 which = PREV }
+                    }
+
+                    set_key = { lhs = Tmp_0 value = 0 }
+                }
+                
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } add_local_autonomy = 51.2 subtract_key = { lhs = Tmp_0 value = 0.512 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } add_local_autonomy = 25.6 subtract_key = { lhs = Tmp_0 value = 0.256 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } add_local_autonomy = 12.8 subtract_key = { lhs = Tmp_0 value = 0.128 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } add_local_autonomy = 6.4 subtract_key = { lhs = Tmp_0 value = 0.064 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } add_local_autonomy = 3.2 subtract_key = { lhs = Tmp_0 value = 0.032 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } add_local_autonomy = 1.6 subtract_key = { lhs = Tmp_0 value = 0.016 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } add_local_autonomy = 0.8 subtract_key = { lhs = Tmp_0 value = 0.008 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } add_local_autonomy = 0.4 subtract_key = { lhs = Tmp_0 value = 0.004 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } add_local_autonomy = 0.2 subtract_key = { lhs = Tmp_0 value = 0.002 } }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } add_local_autonomy = 0.1 subtract_key = { lhs = Tmp_0 value = 0.001 } }
+                
+                set_key = { lhs = Tmp_0 value = 0 }
+				trigger_switch = {
+					on_trigger = has_province_flag
+					add_local_autonomy_10 = {
+						add_local_autonomy = 10
+					}
+					add_local_autonomy_15 = {
+						add_local_autonomy = 15
+					}
+					add_local_autonomy_25 = {
+						add_local_autonomy = 25
+					}
+					add_local_autonomy_50 = {
+						add_local_autonomy = 50
+					}
+					add_local_autonomy_75 = {
+						add_local_autonomy = 75
+					}
+					add_local_autonomy_100 = {
+						add_local_autonomy = 100
+					}
+				}
+            }
+
+            POP_ClassTotalCalc = yes
+    
+            set_key = { lhs = Land_SoilD which = Land_Soil }
+            multiply_key = { lhs = Land_SoilD value = 100 }
+        }
+		Init_LAModify = yes # Country based local autonomy adjustments
+
+        Concern_DoIterMain = yes # Concern calculation iteration
+
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+##########################################
+# Land Size and agriculture calculations #
+##########################################
+country_event = {
+    id = POP_StartUp.002
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 2"
+        every_province = {
+            limit = {
+				isValidEmpty = yes # Every province not yet calculated and no wasteland
+            }
+            remove_province_modifier = Timber_Disp
+            #remove_province_modifier = Prod_Price_disp
+            remove_province_modifier = Infra_disp
+            
+            remove_province_modifier = Disp_Pop
+            remove_province_modifier = Disp_Prod
+            remove_province_modifier = Disp_Prod2
+            remove_province_modifier = Disp_Trade
+			remove_province_modifier = DG_RelGrp
+            remove_province_modifier = Tax_Mod
+			remove_province_modifier = Disp_Mil
+            remove_province_modifier = POP_Unrest
+            remove_province_modifier = Prov_Info_mod
+            remove_province_modifier = POP_NaturalFeature 
+            
+            
+            add_permanent_province_modifier = { 
+                name = Timber_Disp
+                duration = -1  
+            }
+            
+            if = {
+				limit = {
+					isValidProv = yes
+				}
+				add_permanent_province_modifier = {
+					name = Tax_Mod
+					duration = -1
+				}
+			}
+            
+            add_permanent_province_modifier = {
+				name = Disp_Mil
+				duration = -1
+			}
+            
+            add_permanent_province_modifier = {
+                name = Prov_Info_mod
+                duration = -1
+            }
+            
+            add_permanent_province_modifier = {
+                name = POP_Unrest
+                duration = -1
+            }
+            
+            add_permanent_province_modifier = { 
+				name = DG_RelGrp
+				duration = -1  
+				desc = DG_RelGrp_tooltip
+			}
+            
+            add_permanent_province_modifier = { 
+                name = Disp_Pop
+                duration = -1  
+            }
+            
+            add_permanent_province_modifier = { 
+                name = Infra_disp
+                duration = -1  
+            }
+            
+            add_permanent_province_modifier = { 
+                name = Disp_Prod
+                duration = -1  
+            }
+            add_permanent_province_modifier = { 
+                name = Disp_Prod2
+                duration = -1  
+            }
+            
+            add_permanent_province_modifier = { 
+                name = Disp_Trade
+                duration = -1  
+            }
+            
+            #add_permanent_province_modifier = {
+			#	name = Disp_Prp
+			#	duration = -1
+			#}
+		}
+		NaturalFeatures = yes # Initializing natural features flags / variables
+
+        every_province = {
+            limit = {
+				isValidEmpty = yes # Every province not yet calculated and no wasteland
+            }
+            if = {
+                limit = {
+                    OR = {
+                        area = yucatan_area
+                        area = mayapan_area
+                    }
+                }
+                multiply_key = { lhs = Land_Rain value = 0.6 }
+            }
+            if = {
+                limit = {
+                    superregion = west_africa_superregion
+                }
+                multiply_key = { lhs = Land_Rain value = 1.2 }
+            }
+        }
+            
+        every_province = {
+            limit = {
+				isValidEmpty = yes # Every province not yet calculated and no wasteland
+            }
+			Land_CalcInitialVars = yes # Set monthly min/max temperature data for crop calculations (out of data map)
+			Land_CalcCrops = yes # Calc Crop output, suitability, labor cost etc. - Full calculation iteration for crops
+            
+            set_key = { lhs = Land_Size which = Land_PSize }
+            multiply_key = { lhs = Land_Size value = 5.117 }
+			# People per KM
+            multiply_key = { lhs = Land_Size value = 0.5 } # 500 people per km, at best in best conditions
+            set_key = { lhs = Tmp_2 value = 1 } # Arable terrain
+			set_key = { lhs = Land_Forest value = 0 }
+
+            ###################################################################
+            # Initalize forest area coverage and arable land size calculation #
+            ###################################################################
+            trigger_switch = {
+                on_trigger = has_terrain
+
+                jungle_flats = {
+                    set_key = { lhs = Tmp_2 value = 0.9 }
+					if = {
+						limit = {
+							OR = {
+								region = vietnam_region
+								region = java_region
+								area = champa_area
+								province_id = 627 # Bali
+								province_id = 3921 # Palembang
+								province_id = 3215 # Hanthawaddy
+								area = mekong_area
+								area = lampang_area
+								area = suktho_thai_area
+								#Mesoamerica
+								province_id = 843
+								province_id = 2414
+								province_id = 3512
+								province_id = 3515
+								province_id = 1710
+								province_id = 2647
+								province_id = 1709
+								area = oyo_area
+								area = ife_area
+								area = west_niger_area
+							}
+						}
+						set_key = { lhs = Land_Forest value = 70 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 80 }
+					}
+                }
+                jungle_hills = {
+                    set_key = { lhs = Tmp_2 value = 0.80 }
+					if = {
+						limit = {
+							OR = {
+								region = vietnam_region
+								region = java_region
+								area = champa_area
+								province_id = 627 # Bali
+								province_id = 3921 # Palembang
+								province_id = 3215 # Hanthawaddy
+								area = mekong_area
+								area = lampang_area
+								area = suktho_thai_area
+								#Mesoamerica
+								province_id = 2646
+								province_id = 2413
+								province_id = 2599
+								area = oyo_area
+								area = ife_area
+								area = west_niger_area
+							}
+						}
+						set_key = { lhs = Land_Forest value = 70 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 80 }
+					}
+                }
+
+                forest_flats = {
+					if = {
+						limit = {
+							OR = {
+								continent = indian_continent
+								province_id = 3228 # in Khmer
+								region = west_japan_region
+								region = east_japan_region
+								region = central_japan_region
+								region = guangdong_region
+								region = fujian_region
+								region = zhejiang_region
+								region = jiangxi_region
+								region = jiangnan_region
+								region = huguang_region
+								area = trebizond_area
+							}
+						}
+						set_key = { lhs = Land_Forest value = 60 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 70 }
+					}
+                }
+                forest_hills = {
+                    set_key = { lhs = Tmp_2 value = 0.85 }
+					if = {
+						limit = {
+							OR = {
+								continent = indian_continent
+								province_id = 3228 # in Khmer
+								region = west_japan_region
+								region = east_japan_region
+								region = central_japan_region
+								region = guangdong_region
+								region = fujian_region
+								region = zhejiang_region
+								region = jiangxi_region
+								region = jiangnan_region
+								region = huguang_region
+								area = trebizond_area
+								#Spain
+								province_id = 182
+								province_id = 3347
+								province_id = 2566
+							}
+						}
+						set_key = { lhs = Land_Forest value = 65 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 75 }
+					}
+                }
+                forest_mountains = {
+                    set_key = { lhs = Tmp_2 value = 0.45 }
+					if = {
+						limit = {
+							OR = {
+								continent = indian_continent
+								province_id = 3228 # in Khmer
+								region = west_japan_region
+								region = east_japan_region
+								region = central_japan_region
+								region = guangdong_region
+								region = fujian_region
+								region = zhejiang_region
+								region = jiangxi_region
+								region = jiangnan_region
+								region = huguang_region
+								area = trebizond_area
+								#Mesoamerica
+								province_id = 840
+								province_id = 3518
+								province_id = 2204
+								province_id = 2601
+								province_id = 2643
+								province_id = 2402
+								province_id = 3534
+								#Spain
+								province_id = 3352
+							}
+						}
+						set_key = { lhs = Land_Forest value = 70 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 80 }
+					}
+                }
+                forest_highlands = {
+                    set_key = { lhs = Tmp_2 value = 0.60 }
+					if = {
+						limit = {
+							OR = {
+								area = central_doab_area
+								area = gwalior_area
+								area = kalpi_area
+								province_id = 3228 # in Khmer
+								region = west_japan_region
+								region = east_japan_region
+								region = central_japan_region
+								region = guangdong_region
+								region = fujian_region
+								region = zhejiang_region
+								region = jiangxi_region
+								region = jiangnan_region
+								region = huguang_region
+								area = trebizond_area
+								#Mesoamerica
+								province_id = 844
+								province_id = 841
+								province_id = 2412
+								province_id = 2203
+								#Spain
+								province_id = 208
+								province_id = 2567
+								province_id = 1422
+								province_id = 2454
+								province_id = 2313
+								province_id = 3864
+								#Greece
+								province_id = 3871
+							}
+						}
+						set_key = { lhs = Land_Forest value = 60 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 75 }
+					}
+                }
+
+                wood_flats = {
+					if = {
+						limit = {
+							superregion = iberia_superregion
+						}
+						set_key = { lhs = Land_Forest value = 20 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 40 }
+					}
+                }
+                wood_hills = {
+                    set_key = { lhs = Tmp_2 value = 0.85 }
+					if = {
+						limit = {
+							OR = {
+								#Spain
+								area = castille_area
+								area = alentejo_area
+								area = leon_area
+								area = extremadura_area
+								area = lower_guadalquivir_area
+								province_id = 2312
+								province_id = 2310
+							}
+						}
+						set_key = { lhs = Land_Forest value = 30 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 45 }
+					}
+                }
+                wood_mountains = {
+                    set_key = { lhs = Tmp_2 value = 0.45 }
+					if = {
+						limit = {
+							#Spain
+							province_id = 222
+						}
+						set_key = { lhs = Land_Forest value = 30 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 50 }
+					}
+                }
+                wood_highlands = {
+                    set_key = { lhs = Tmp_2 value = 0.60 }
+					if = {
+						limit = {
+							OR = {
+								#Spain
+								province_id = 198
+								province_id = 225
+								province_id = 3363
+								province_id = 1421
+								province_id = 221
+								province_id = 3361
+								province_id = 3360
+							}
+						}
+						set_key = { lhs = Land_Forest value = 30 }
+					}
+					else = {
+						set_key = { lhs = Land_Forest value = 45 }
+					}
+                }
+
+                shrub_flats = {
+                    set_key = { lhs = Tmp_2 value = 0.95 }
+                }
+                shrub_hills = {
+                    set_key = { lhs = Tmp_2 value = 0.85 }
+                }
+                shrub_mountains = {
+                    set_key = { lhs = Tmp_2 value = 0.45 }
+                    set_key = { lhs = Land_Forest value = 20 }
+                }
+                shrub_highlands = {
+                    set_key = { lhs = Tmp_2 value = 0.65 }
+                    set_key = { lhs = Land_Forest value = 10 }
+                }
+
+                grass_flats = {
+                    set_key = { lhs = Tmp_2 value = 1.0 }
+                }
+                grass_hills = {
+                    set_key = { lhs = Tmp_2 value = 0.95 }
+                }
+                grass_mountains = {
+                    set_key = { lhs = Tmp_2 value = 0.50 }
+                }
+                grass_highlands = {
+                    set_key = { lhs = Tmp_2 value = 0.70 }
+                }
+
+                desert_flats = {
+                    set_key = { lhs = Tmp_2 value = 0.50 }
+                }
+                desert_hills = {
+                    set_key = { lhs = Tmp_2 value = 0.45 }
+                }
+                desert_mountains = {
+                    set_key = { lhs = Tmp_2 value = 0.25 }
+                }
+                desert_highlands = {
+                    set_key = { lhs = Tmp_2 value = 0.35 }
+                }
+
+                floodplains = {
+					if = {
+						limit = {
+							OR = {
+								area = mexico_area
+								#China
+								province_id = 2510
+								province_id = 2793
+								province_id = 2797
+								province_id = 5463
+								province_id = 2144
+								province_id = 1089
+								province_id = 2613
+								province_id = 713
+								province_id = 5426
+								province_id = 1172
+								province_id = 5467
+								province_id = 5475
+								province_id = 5465
+								province_id = 5464
+								#Japan
+								province_id = 2293
+								province_id = 3948
+								#Korea
+								province_id = 2802
+								province_id = 1822
+								province_id = 737
+							}
+							NOT = { region = east_bengal_region }
+						}
+						set_key = { lhs = Land_Forest value = 30 }
+					}
+					else_if = {
+						limit = {
+							OR = {
+								#Africa
+								superregion = west_africa_superregion
+								province_id = 1573
+								province_id = 1216
+								province_id = 2991
+								province_id = 5136
+								#East Asia
+								region = guangxi_region
+								province_id = 670
+								province_id = 2486
+								region = korea_region
+								#SEA
+								continent = southeast_asia
+								#India
+								region = east_bengal_region
+								superregion = central_india_superregion
+								region = central_india_region
+								region = gondwana_region
+								region = assam_region
+								area = kalpi_area
+								area = hadoti_area
+								#Iran
+								province_id = 417
+								province_id = 426
+								superregion = north_india_superregion
+								area = central_doab_area
+								area = gwalior_area
+								region = west_bengal_region
+							}
+							NOT = { region = vietnam_region }
+						}
+						set_key = { lhs = Land_Forest value = 40 }
+					}
+					else_if = {
+						limit = {
+							OR = {
+								superregion = north_china_superregion
+								superregion = east_china_superregion
+								superregion = southwest_china_superregion
+							}
+						}
+						set_key = { lhs = Land_Forest value = 5 }
+					}
+                }
+                alpine_tundra = {
+					if = {
+						limit = {
+							OR = {
+								culture_group = andean_group
+								culture_group = north_central_tradition_group
+								}
+						}
+						set_key = { lhs = Tmp_2 value = 0.75 }
+						set_key = { lhs = Land_Forest value = 50 }
+					}
+					else = {
+						set_key = { lhs = Tmp_2 value = 0.40 }
+						set_key = { lhs = Land_Forest value = 25 }
+					}
+                }
+                marsh = {
+                    set_key = { lhs = Tmp_2 value = 0.85 }
+					if = {
+						limit = {
+							OR = {
+								province_id = 1123
+								province_id = 2894
+								province_id = 1120
+								province_id = 1134
+								province_id = 2769
+								province_id = 2790
+								province_id = 1549
+								province_id = 2779
+								province_id = 1504
+								province_id = 315
+								province_id = 2752
+								province_id = 3492
+							}
+						}
+						set_key = { lhs = Land_Forest value = 60 }
+					}
+					else_if = {
+						limit = {
+							continent = north_america # all quite useful
+						}
+						set_key = { lhs = Land_Forest value = 45 }
+					}
+					else_if = {
+						limit = {
+							OR = {
+								province_id = 40
+								province_id = 1281
+								province_id = 1395
+								province_id = 1394
+								province_id = 2837
+								province_id = 2939
+								province_id = 2840
+								province_id = 3401
+								province_id = 2390
+								province_id = 1450
+								province_id = 2090
+								province_id = 2089
+								province_id = 2982
+								province_id = 1166
+								province_id = 4283
+								province_id = 2983
+								province_id = 3030
+								province_id = 3029
+								province_id = 2767
+							}
+						}
+						set_key = { lhs = Land_Forest value = 35 }
+					}
+					else_if = {
+						limit = {
+							OR = {
+								province_id = 5462
+								province_id = 5466
+								province_id = 5434
+								province_id = 5377
+								province_id = 2668
+								province_id = 3671
+								province_id = 1499
+							}
+						}
+						set_key = { lhs = Land_Forest value = 25 }
+					}
+					else_if = {
+						limit = {
+							OR = {
+								province_id = 200
+								province_id = 3861
+								province_id = 2436
+								province_id = 1119
+								province_id = 1560
+								province_id = 286
+								province_id = 2380
+								province_id = 5325
+								province_id = 5349
+								province_id = 563
+							}
+						}
+						set_key = { lhs = Land_Forest value = 15 }
+					}
+                }
+                taiga = {
+                    set_key = { lhs = Tmp_2 value = 0.60 }
+                    set_key = { lhs = Land_Forest value = 85 }
+                }
+                tundra = {
+                    set_key = { lhs = Tmp_2 value = 0.25 }
+                    set_key = { lhs = Land_Forest value = 35 }
+                }
+                small_island = {
+                    set_key = { lhs = Land_Forest value = 70 }
+                }
+            }
+			
+			if = {
+				limit = {
+					OR = {
+						has_terrain = grass_flats
+						has_terrain = shrub_flats
+					}
+				}
+				change_key = { lhs = Land_Forest value = 5 }
+			}
+			else_if = {
+				limit = {
+					NOT = { has_terrain = desert_flats }
+					NOT = { has_terrain = desert_hills }
+					NOT = { has_terrain = desert_mountains }
+					NOT = { has_terrain = desert_highlands }
+				}
+				change_key = { lhs = Land_Forest value = 10 }
+			}
+			
+            # Modify Land Size based on Temperature
+			if = {
+				limit = {
+					Prod_Potato = yes
+				}
+				set_key = { lhs = Tmp_3 which = Land_AvgTemp }
+				subtract_key = { lhs = Tmp_3 value = 10 }
+			}
+			else = {
+				set_key = { lhs = Tmp_3 which = Land_AvgTemp }
+				subtract_key = { lhs = Tmp_3 value = 15 }
+			}
+	
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_3 value = 0 }
+				}
+				set_key = { lhs = Tmp_3 value = 1 }
+			}
+            else = {
+                divide_key = { lhs = Tmp_3 value = 15 }
+                change_key = { lhs = Tmp_3 value = 1 }
+
+                if = {
+                    limit = {
+                        NOT = {
+                            check_key = { lhs = Tmp_3 value = 0.1 }
+                        }
+                    }
+                    set_key = { lhs = Tmp_3 value = 0.1 }
+                }
+            }
+			
+            multiply_key = { lhs = Land_Size which = Tmp_3 } # Temperature, livability
+
+			#set_key = { lhs = Tmp_0 which = Land_Forest }
+            #multiply_key = { lhs = Tmp_0 value = 0.825 }
+            #change_key = { lhs = Tmp_0 value = 0.175 }
+            #multiply_key = { lhs = Land_Forest which = Tmp_0 }
+            multiply_key = { lhs = Land_Forest which = Land_Size }
+            divide_key = { lhs = Land_Forest value = 100 }
+			
+            ###
+            # Calculation of Water and Soil Properties
+            ###
+			set_key = { lhs = Tmp_1 which = Land_Inundation }
+			multiply_key = { lhs = Tmp_1 value = 0.75 } # Inundation influence on water supply 75%
+			set_key = { lhs = Tmp_0 which = Land_Rain }
+            multiply_key = { lhs = Tmp_0 value = 2 } # Rain Influence on water supply 200%
+			change_key = { lhs = Tmp_0 which = Tmp_1 }
+
+			if = { # Interval boundaries for water supply from [0.1, 1]
+				limit = {
+					check_key = { lhs = Tmp_0 value = 1 }
+				}
+				set_key = { lhs = Tmp_0 value = 1 }
+			}
+            else_if = {
+                limit = {
+                    NOT = {
+                        check_key = { lhs = Tmp_0 value = 0.1 }
+                    }
+                }
+                set_key = { lhs = Tmp_0 value = 0.1 }
+            }
+
+            if = { # Special water conditions for warm (and dry) areas
+                limit = {
+                    check_key = { lhs = Land_AvgTemp value = 15 }
+                }
+                set_key = { lhs = Tmp_2 which = Land_AvgTemp }
+                divide_key = { lhs = Tmp_2 value = 30 }
+
+                if = {
+                    limit = {
+                        check_key = { lhs = Tmp_2 which = Tmp_0 }
+                    }
+                    divide_key = { lhs = Tmp_2 which = Tmp_0 }
+                    divide_key = { lhs = Tmp_0 which = Tmp_2 }
+                }
+
+                if = {
+                    limit = {
+                        NOT = {
+                            check_key = { lhs = Tmp_0 value = 0.2 }
+                        }
+                    }
+                    set_key = { lhs = Tmp_0 value = 0.2 }
+                }
+            }
+            else = {
+                set_key = { lhs = Tmp_0 value = 1 }
+            }
+			
+			# Greattt soil from floodplains
+			#if = {
+			#	limit = {
+			#		has_terrain = floodplains
+			#	}
+			#	change_key = { lhs = Land_Soil value = 1 }
+			#	divide_key = { lhs = Land_Soil value = 2 }
+			#}
+			
+			# Boost from great soil
+			set_key = { lhs = Tmp_1 which = Land_Soil }
+			subtract_key = { lhs = Tmp_1 value = 0.6 }
+			multiply_key = { lhs = Tmp_1 value = 3.538 } # (x2 + 0.65 scale -> 1.0 scale)
+			if = {
+                limit = {
+                    NOT = {
+                        check_key = { lhs = Tmp_1 value = 1.0 }
+                    }
+                }
+                set_key = { lhs = Tmp_1 value = 1.0 }
+            }
+			
+			subtract_key = { lhs = Land_Size which = Land_Forest } # Subtract Forest from available arable land size
+			
+            # Multipliers on arable Land Size for water and soil
+			multiply_key = { lhs = Land_Size which = Tmp_1 } # Soil
+			multiply_key = { lhs = Land_Size which = Tmp_0 } # Water
+            multiply_key = { lhs = Land_Size which = Tmp_0 } # Water
+			
+            ## Some local, special balancing of land sizes
+            set_key = { lhs = Tmp_2 which = starting_rural_pop_1850 }
+			multiply_key = { lhs = Tmp_2 value = 0.5 }
+            set_key = { lhs = Tmp_3 which = SF_Total }
+			multiply_key = { lhs = Tmp_3 value = 1.65 }
+			if = {
+                limit = {
+                    check_key = { lhs = Tmp_3 which = Tmp_2 }
+                }
+                set_key = { lhs = Tmp_2 which = Tmp_3 }
+            }
+            ### Apply local and province based modifications
+            province_event = {
+                id = POP_StartInit.009
+            }
+            set_key = { lhs = Tmp_0 which = Land_Size }
+			subtract_key = { lhs = Tmp_0 value = 2500 }
+			if = {
+                limit = {
+                     NOT = { check_key = { lhs = Tmp_0 value = 1 } }
+                }
+                set_key = { lhs = Tmp_0 value = 1 }
+            }
+			divide_key = { lhs = Tmp_0 value = 5000 }
+			if = {
+                limit = {
+                     NOT = { check_key = { lhs = Tmp_0 value = 0.05 } }
+                }
+                set_key = { lhs = Tmp_0 value = 0.05 }
+            }
+			else_if = {
+                limit = {
+                     check_key = { lhs = Tmp_0 value = 0.95 }
+                }
+                set_key = { lhs = Tmp_0 value = 0.95 }
+            }
+			
+			set_key = { lhs = Tmp_1 value = 1 }
+			subtract_key = { lhs = Tmp_1 which = Tmp_0 }
+			multiply_key = { lhs = Tmp_1 value = 0.9 }
+			change_key = { lhs = Tmp_1 value = 0.1 }
+			
+			multiply_key = { lhs = Land_Size which = Tmp_1 }
+			
+            set_key = { lhs = Tmp_0 which = Land_Forest }
+			subtract_key = { lhs = Tmp_0 value = 1000 }
+			if = {
+                limit = {
+                     NOT = { check_key = { lhs = Tmp_0 value = 1 } }
+                }
+                set_key = { lhs = Tmp_0 value = 1 }
+            }
+			divide_key = { lhs = Tmp_0 value = 5000 }
+			if = {
+                limit = {
+                     NOT = { check_key = { lhs = Tmp_0 value = 0.1 } }
+                }
+                set_key = { lhs = Tmp_0 value = 0.1 }
+            }
+			else_if = {
+                limit = {
+                     check_key = { lhs = Tmp_0 value = 0.95 }
+                }
+                set_key = { lhs = Tmp_0 value = 0.95 }
+            }
+			
+			set_key = { lhs = Tmp_1 value = 1 }
+			subtract_key = { lhs = Tmp_1 which = Tmp_0 }
+			multiply_key = { lhs = Tmp_1 value = 0.9 }
+			change_key = { lhs = Tmp_1 value = 0.1 }
+			
+			multiply_key = { lhs = Land_Forest which = Tmp_1 }
+			
+			divide_key = { lhs = Land_Size value = 1000 }
+			multiply_key = { lhs = Land_Size value = 1000 }
+			change_key = { lhs = Land_Size value = 1 }
+			
+            divide_key = { lhs = Land_Forest value = 1000 }
+            multiply_key = { lhs = Land_Forest value = 1000 }
+
+			set_key = { lhs = Tmp_0 value = 0 }
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			
+			# Display
+			multiply_key = { lhs = Land_Soil value = 100 }
+        }
+
+        every_province = {
+            limit = {
+				isValidEmpty = yes
+            }
+			Infra_SetBuildingMax = yes # Sets provincial district max limits based on calculated land size, forest area and preset resource keys
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+###################################################
+# Initialization of Education System and Literacy #
+###################################################
+country_event = {
+    id = POP_StartUp.003
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 3"
+        every_province = {
+            limit = {
+                isValidEmpty = yes
+            }
+           
+           # Disabled for now.
+           
+           #set_key = { lhs = SF_Lit value = 0.1 }
+           #set_key = { lhs = RE_Lit value = 0.3 }
+           #set_key = { lhs = NO_Lit value = 0.4 }
+           #set_key = { lhs = BG_Lit value = 0.5 }
+           #set_key = { lhs = CL_Lit value = 0.85 }
+           #
+           #set_key = { lhs = SF_Edu which = SF_Lit }
+           #set_key = { lhs = RE_Edu which = RE_Lit }
+           #set_key = { lhs = NO_Edu which = NO_Lit }
+           #set_key = { lhs = BG_Edu which = BG_Lit }
+           #set_key = { lhs = CL_Edu which = CL_Lit }
+           #
+           #multiply_key = { lhs = SF_Edu which = SF_Total }
+           #multiply_key = { lhs = RE_Edu which = RE_Total }
+           #multiply_key = { lhs = NO_Edu which = NO_Total }
+           #multiply_key = { lhs = BG_Edu which = BG_Total }
+           #multiply_key = { lhs = CL_Edu which = CL_Total }
+           set_key = { lhs = Tmp_1 value = 0.3 }
+           set_key = { lhs = Tmp_0 which = Tmp_1 }           
+           multiply_key = { lhs = Tmp_0 which = RE_Total }
+
+            Edu_DoProv = yes
+            
+            if = {
+				limit = {
+					check_key = { lhs = Tmp_0 value = 0.001 }
+				}
+				set_key = { lhs = LT_Total which = Tmp_0 }
+				divide_key = { lhs = LT_Total value = 20 }
+            
+				set_key = { lhs = LT_Ratio which = LT_Total }
+				multiply_key = { lhs = LT_Ratio value = 100 }
+				divide_key = { lhs = LT_Ratio which = RE_Total }
+			}
+			else = {
+				set_key = { lhs = LT_Total value = 0 }
+				set_key = { lhs = LT_Ratio value = 0 }
+			}
+			
+            ##Use this one if you want to actually develop education
+            
+            
+			#if = {
+			#	limit = {
+			#		check_key = { lhs = RE_Edu value = 0.001 }
+			#	}
+			#	set_key = { lhs = LT_Total which = RE_Edu }
+			#	divide_key = { lhs = LT_Total value = 20 }
+            #
+			#	set_key = { lhs = LT_Ratio which = LT_Total }
+			#	multiply_key = { lhs = LT_Ratio value = 100 }
+			#	divide_key = { lhs = LT_Ratio which = RE_Total }
+			#}
+			#else = {
+			#	set_key = { lhs = LT_Total value = 0 }
+			#	set_key = { lhs = LT_Ratio value = 0 }
+			#}
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+###########################
+# Adjust institution init #
+###########################
+country_event = {
+    id = POP_StartUp.004
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 4"
+        183 = { #Paris
+            add_institution_embracement = {
+                which = Banking
+                value = 99
+            }
+        }
+        101 = { #Liguria/Genoa
+            add_institution_embracement = {
+                which = Banking
+                value = 99
+            }
+        }
+        90 = { #Brugge
+            add_institution_embracement = {
+                which = Banking
+                value = 98
+            }
+        }
+        2354 = { #Champaigne/Troyes
+            add_institution_embracement = {
+                which = Banking
+                value = 50
+            }
+        }
+        976 = { #Lyon
+            add_institution_embracement = {
+                which = Banking
+                value = 50
+            }
+        }
+        176 = { #Guiana/Bordeaux
+            add_institution_embracement = {
+                which = Banking
+                value = 50
+            }
+        }		
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+###############################################################################################
+# Initialization of Production and Slot systems, Armies and Navies, and Sector trade capitals #
+###############################################################################################
+country_event = {
+    id = POP_StartUp.005
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+
+    immediate = { 
+		log = "Event 5"
+        StartUp_InitResource = yes # Initialization of resource depots and fisheries
+        StartUp_InitBuilding = yes # Initialization of districts and infrastructure
+
+        StartUp_InitProduce = yes # Initialization of industries and slots
+
+        # Initialization of property shares of classes
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidEmpty = yes
+                }
+                Prp_Init = { type = Agriculture Rural=yes }
+                Prp_Init = { type = Forestry Rural=yes }
+                Prp_Init = { type = Fishery Rural=yes }
+                Prp_Init = { type = Extraction Rural=yes pm=pm }
+                Prp_Init = { type = Industrial Urban=yes }
+                Prp_Init = { type = Academic Knowledge=yes }
+                Prp_Init = { type = Commercial Trade=yes }
+            }
+        }
+        # Trigger first iteration of industrial production calculation (Prod_DoMain effect)
+        country_event = {
+			id = POP_Census.020
+		}
+
+        # Spawn Startup Armies and Navy's based on certain conditions and balancing
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            StartUp_InitArmy = yes
+            StartUp_InitNavy = yes
+        }
+        
+
+        ## Initialization of countries sector trade centers
+        country_event = {
+            id = POP_StartInit.010
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.006
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 6"
+		YUA = {
+			every_known_country = {
+				limit = {
+					isValidCountry = yes
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = opinion_red_turban_rebellion
+				}
+				PREV = {
+					remove_opinion = {
+						who = PREV
+						modifier = opinion_red_turban_rebellion
+					}
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = opinion_disloyal_prince
+				}
+				PREV = {
+					remove_opinion = {
+						who = PREV
+						modifier = opinion_disloyal_prince
+					}
+				}
+				remove_opinion = {
+					who = PREV
+					modifier = opinion_disloyal_yuan_tributary
+				}
+				PREV = {
+					remove_opinion = {
+						who = PREV
+						modifier = opinion_disloyal_yuan_tributary
+					}
+				}
+				remove_historical_rival = PREV
+				PREV = { remove_historical_rival = PREV }
+			}
+            every_owned_province = {
+                remove_province_modifier = YUA_Sim
+            }
+		}
+        # Clear all preset government spending flags (?)
+		regiongroup = {
+			region = {
+				limit = {
+					isValidEmpty = yes
+				}
+				clr_province_flag = Infra_Capitol100
+				clr_province_flag = Infra_Capitol75
+				clr_province_flag = Infra_Capitol50
+				clr_province_flag = Infra_Capitol25
+				
+				clr_province_flag = Infra_Harbourage100
+				clr_province_flag = Infra_Harbourage75
+				clr_province_flag = Infra_Harbourage50
+				clr_province_flag = Infra_Harbourage25
+				
+				clr_province_flag = Infra_Pathing100
+				clr_province_flag = Infra_Pathing75
+				clr_province_flag = Infra_Pathing50
+				clr_province_flag = Infra_Pathing25
+				
+				clr_province_flag = Infra_Amenities100
+				clr_province_flag = Infra_Amenities75
+				clr_province_flag = Infra_Amenities50
+				clr_province_flag = Infra_Amenities25
+				
+				clr_province_flag = Infra_Irrigation100
+				clr_province_flag = Infra_Irrigation75
+				clr_province_flag = Infra_Irrigation50
+				clr_province_flag = Infra_Irrigation25
+				
+				# clr_province_flag = Infra_Courthouse100
+				# clr_province_flag = Infra_Courthouse75
+				# clr_province_flag = Infra_Courthouse50
+				# clr_province_flag = Infra_Courthouse25
+				
+				clr_province_flag = Infra_Garrison100
+				clr_province_flag = Infra_Garrison75
+				clr_province_flag = Infra_Garrison50
+				clr_province_flag = Infra_Garrison25
+			}
+		}
+		
+        # Calculate and initalize manpower for all provinces
+		country_event = {
+			id = POP_MP.001
+		}
+		
+
+		log = "Tax/admin"
+		country_event = { id = POP_Census.0093 } # Initialize Taxes and Administration efficiencies
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+country_event = {
+    id = POP_StartUp.007
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 7"
+
+		log = "Begin sim"
+        ## START ACTUAL SIMULATION - max 1000 iterations
+        while = {
+            limit = {
+                NOT = {
+                    check_key = { lhs = iter which = iter_max }
+                }
+            }
+			country_event = {
+				id = SYS_Pulse.005 # Calculate and set the state maintenance and military maintenance of tags (units on the map)
+			}
+            country_event = {
+                id = POP_Census.002 # Recalc all API Modifiers
+            }
+            country_event = {
+                id = POP_Census.103 # Calculate Concerns and Treatments
+            }
+            country_event = {
+                id = POP_Stockpile.0011 # Calculate a tags military and navy stockpile expenses
+            }
+            country_event = {
+                id = POP_Census.001 # Crop calculation iteration & calculation of infrastructure maintenance
+            }
+			country_event = {
+				id = POP_Census.020 # Production / Economy main iteration
+			}
+            country_event = {
+                id = POP_Census.0012 # Set Grain Dole, Tarifs, Sector Score and Rates, Sector Subsistance
+            }
+            country_event = {
+                id = SYS_Centers.001 # trade calculation for trade centers
+            }
+            country_event = {
+                id = SYS_Centers.002 # trade calculation for production centers
+            }
+            country_event = {
+                id = SYS_Centers.003 # trade calculation for cities centres
+            }
+            country_event = {
+                id = POP_Census.0013 # Assign trade center modifiers
+            }
+            country_event = {
+                id = POP_Census.0015 # Actual trade calculation "Do trade by resolving bids and offers in each sectors" - scripted_effects/SYS-Trade.txt/TN_DoTrade effect
+            }
+            country_event = {
+                id = POP_Census.0016 # After trade calculation - stockpile spread, spending, display setting etc.
+            }
+            country_event = {
+                id = POP_Census.0017 # Calculate property / industry profits, maintenance, etc.
+            }
+            country_event = {
+                id = POP_Census.0018 # NO CONTENT
+            }
+            country_event = {
+                id = POP_Stockpile.0012 # Calc military spending 
+            }
+            country_event = {
+                id = POP_Census.0021 # Pre political scripts
+            }
+            country_event = {
+                id = POP_Census.0022 # Run tax script
+            }
+            country_event = {
+                id = SYS_Post.001 # Run Trade Post script
+            }
+            country_event = { # Calculate income, spending, and class fulfillments for each fulfillment types
+                id = POP_Census.0019
+            } # Summarize various variables into total class and slot incomes
+
+            country_event = {
+                id = POP_Census.105 # Calculate vanilla development values out of system values
+            }
+            country_event = {
+                id = POP_Census.0023 # Set system values to display and vanilla values for provinces, cleanup
+            }
+            country_event = {
+                id = POP_Census.0024 # Set system values to display and vanilla values for tags, cleanup
+            }
+            country_event = {
+                id = POP_Census.107 # class AI spending on infrastructure and building projects
+            }
+			country_event = {
+				id = POP_Stockpile.002
+			}
+            if = { # Give simulation countries some money
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 15 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = yes weight1=1 weight2=1 }
+                }
+            }
+            else_if = { # Initial breakaway
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 26 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=1 weight2=2 }
+                }
+            }
+            else_if = { # Let them have some, but dont let it deviate
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 41 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=2 weight2=3 }
+                }
+            }
+            else_if = { # Mostly deviate, keep a strong buffer
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 61 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=3 weight2=4 }
+                }
+            }
+            else_if = { # Now just a buffer
+                limit = {
+                    NOT = { check_key = { lhs = iter value = 81 } }
+                }
+                every_province = {
+                    limit = {
+                        isValidProv = yes
+                    }
+                    StartUp_CalcWealth = yes
+                    StartUp_SetWealth = { override = no weight1=4 weight2=5 }
+                }
+            }
+			
+			if = {
+                limit = {
+					OR = {
+						is_key_equal = { lhs = iter value = 5 }
+						is_key_equal = { lhs = iter value = 10 }
+						is_key_equal = { lhs = iter value = 20 }
+						is_key_equal = { lhs = iter value = 30 }
+						is_key_equal = { lhs = iter value = 40 }
+						is_key_equal = { lhs = iter value = 60 }
+						is_key_equal = { lhs = iter value = 80 }
+						is_key_equal = { lhs = iter value = 100 }
+						is_key_equal = { lhs = iter value = 150 }
+						is_key_equal = { lhs = iter value = 200 }
+						is_key_equal = { lhs = iter value = 250 }
+						is_key_equal = { lhs = iter value = 300 }
+						is_key_equal = { lhs = iter value = 350 }
+						is_key_equal = { lhs = iter value = 400 }
+						is_key_equal = { lhs = iter value = 450 }
+						is_key_equal = { lhs = iter value = 500 }
+						is_key_equal = { lhs = iter value = 550 }
+						is_key_equal = { lhs = iter value = 600 }
+						is_key_equal = { lhs = iter value = 650 }
+						is_key_equal = { lhs = iter value = 700 }
+						is_key_equal = { lhs = iter value = 750 }
+						is_key_equal = { lhs = iter value = 800 }
+						is_key_equal = { lhs = iter value = 850 }
+						is_key_equal = { lhs = iter value = 900 }
+						is_key_equal = { lhs = iter value = 950 }
+						is_key_equal = { lhs = iter value = 1000 }
+					}
+                }
+                Dev_Set = { inp = Dev_Notables type = base_tax }
+                Dev_Set = { inp = Dev_Urban type = base_production }
+                Dev_Set = { inp = Dev_Rural type = base_manpower }
+                country_event = {
+                    id = POP_MP.001
+                }
+				every_country = {
+                    limit = {
+                        isValidCountry = yes
+                    }
+					set_country_flag = tf_recalculate_communication_efficiency
+                }
+                country_event = {
+                    id = phlopsi_ce_main.3
+                }
+				country_event = { id = POP_Census.0093 } # Calc of the tax system
+				every_country = {
+                    limit = {
+                        isValidCountry = yes
+                    }
+					Tax_Update = yes
+                }
+                country_event = {
+                    id = AI_Tax.003
+                }
+				every_country = {
+                    limit = {
+                        isValidCountry = yes
+                    }
+                    StartUp_InitArmy = yes
+                    StartUp_InitNavy = yes
+                }
+                
+				if = { # Give simulation countries some money
+					limit = {
+						is_key_equal = { lhs = iter value = 5 }
+					}
+					every_country = {
+						limit = {
+							isValidCountry = yes
+						}
+						add_years_of_income = 2.5
+					}
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 10 }
+					}
+					clr_global_flag = POP_Sim1
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 20 }
+					}
+					clr_global_flag = POP_Sim2
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 40 }
+					}
+					clr_global_flag = POP_Sim4
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 60 }
+					}
+					every_country = {
+						limit = {
+							isValidCountry = yes
+						}
+						add_years_of_income = 2.5
+					}
+					clr_global_flag = POP_Sim6
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 80 }
+					}
+					clr_global_flag = POP_Sim8
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 100 }
+					}
+					clr_global_flag = POP_Sim10
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 150 }
+					}
+					clr_global_flag = POP_Sim15
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 200 }
+					}
+					clr_global_flag = POP_Sim20
+				}
+			}
+
+            regiongroup = { # Set local autonomy after iteration
+                region = {
+                    limit = {
+                        isValidEmpty = yes
+                    }
+                    if = {
+                        limit = {
+                            check_key = { lhs = RE_Total value = 0.001 }
+                        }
+                        set_key = { lhs = LT_Total which = RE_Total }
+                        divide_key = { lhs = LT_Total value = 100 }
+
+                        set_key = { lhs = LT_Ratio which = LT_Total }
+                        multiply_key = { lhs = LT_Ratio value = 100 }
+                        divide_key = { lhs = LT_Ratio which = RE_Total }
+                    }
+                    else = {
+                        set_key = { lhs = LT_Total value = 0 }
+                        set_key = { lhs = LT_Ratio value = 0 }
+                    }
+                    
+                    if = {
+                        limit = {
+                            is_city = yes
+                        }
+                        export_to_key = { lhs = Tmp_0 value = modifier:local_autonomy }
+
+                        owner = {
+                            export_to_key = { lhs = Tmp_0 value = modifier:global_autonomy }
+
+                            PREV = {
+                                change_key = { lhs = Tmp_0 which = PREV }
+                            }
+
+                            set_key = { lhs = Tmp_0 value = 0 }
+                        }
+						
+						divide_key = { lhs = Tmp_0 value = 1.5 }
+                        
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } add_local_autonomy = 51.2 subtract_key = { lhs = Tmp_0 value = 0.512 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } add_local_autonomy = 25.6 subtract_key = { lhs = Tmp_0 value = 0.256 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } add_local_autonomy = 12.8 subtract_key = { lhs = Tmp_0 value = 0.128 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } add_local_autonomy = 6.4 subtract_key = { lhs = Tmp_0 value = 0.064 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } add_local_autonomy = 3.2 subtract_key = { lhs = Tmp_0 value = 0.032 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } add_local_autonomy = 1.6 subtract_key = { lhs = Tmp_0 value = 0.016 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } add_local_autonomy = 0.8 subtract_key = { lhs = Tmp_0 value = 0.008 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } add_local_autonomy = 0.4 subtract_key = { lhs = Tmp_0 value = 0.004 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } add_local_autonomy = 0.2 subtract_key = { lhs = Tmp_0 value = 0.002 } }
+                        if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } add_local_autonomy = 0.1 subtract_key = { lhs = Tmp_0 value = 0.001 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.001 } } } add_local_autonomy = -0.1 subtract_key = { lhs = Tmp_0 value = -0.001 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.002 } } } add_local_autonomy = -0.2 subtract_key = { lhs = Tmp_0 value = -0.002 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.004 } } } add_local_autonomy = -0.4 subtract_key = { lhs = Tmp_0 value = -0.004 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.008 } } } add_local_autonomy = -0.8 subtract_key = { lhs = Tmp_0 value = -0.008 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.016 } } } add_local_autonomy = -1.6 subtract_key = { lhs = Tmp_0 value = -0.016 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.032 } } } add_local_autonomy = -3.2 subtract_key = { lhs = Tmp_0 value = -0.032 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.064 } } } add_local_autonomy = -6.4 subtract_key = { lhs = Tmp_0 value = -0.064 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.128 } } } add_local_autonomy = -12.8 subtract_key = { lhs = Tmp_0 value = -0.128 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.256 } } } add_local_autonomy = -25.6 subtract_key = { lhs = Tmp_0 value = -0.256 } }
+                        if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.512 } } } add_local_autonomy = -51.2 subtract_key = { lhs = Tmp_0 value = -0.512 } }
+                        
+                        set_key = { lhs = Tmp_0 value = 0 }
+						trigger_switch = {
+							on_trigger = has_province_flag
+							add_local_autonomy_10 = {
+								add_local_autonomy = 10
+							}
+							add_local_autonomy_15 = {
+								add_local_autonomy = 15
+							}
+							add_local_autonomy_25 = {
+								add_local_autonomy = 25
+							}
+							add_local_autonomy_50 = {
+								add_local_autonomy = 50
+							}
+							add_local_autonomy_75 = {
+								add_local_autonomy = 75
+							}
+							add_local_autonomy_100 = {
+								add_local_autonomy = 100
+							}
+						}
+                    }
+                }
+            }
+			Init_LAModify = yes
+
+            if = { # reset sector demand and supply, stockpiles etc. until iteration 10
+                limit = {
+                    NOT = {
+                        check_key = { lhs = iter value = 10 }
+                    }
+                }
+                every_province = {
+                    limit = {
+                        isValidEmpty = yes
+                    }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd1 which = TN_ProvSply1 } } set_key = { lhs = TN_SectorStockpile1 which = TN_ProvDmnd1 } }
+                    else = { set_key = { lhs = TN_SectorStockpile1 which = TN_ProvSply1 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd2 which = TN_ProvSply2 } } set_key = { lhs = TN_SectorStockpile2 which = TN_ProvDmnd2 } }
+                    else = { set_key = { lhs = TN_SectorStockpile2 which = TN_ProvSply2 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd4 which = TN_ProvSply4 } } set_key = { lhs = TN_SectorStockpile4 which = TN_ProvDmnd4 } }
+                    else = { set_key = { lhs = TN_SectorStockpile4 which = TN_ProvSply4 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd5 which = TN_ProvSply5 } } set_key = { lhs = TN_SectorStockpile5 which = TN_ProvDmnd5 } }
+                    else = { set_key = { lhs = TN_SectorStockpile5 which = TN_ProvSply5 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd6 which = TN_ProvSply6 } } set_key = { lhs = TN_SectorStockpile6 which = TN_ProvDmnd6 } }
+                    else = { set_key = { lhs = TN_SectorStockpile6 which = TN_ProvSply6 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd9 which = TN_ProvSply9 } } set_key = { lhs = TN_SectorStockpile9 which = TN_ProvDmnd9 } }
+                    else = { set_key = { lhs = TN_SectorStockpile9 which = TN_ProvSply9 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd10 which = TN_ProvSply10 } } set_key = { lhs = TN_SectorStockpile10 which = TN_ProvDmnd10 } }
+                    else = { set_key = { lhs = TN_SectorStockpile10 which = TN_ProvSply10 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd21 which = TN_ProvSply21 } } set_key = { lhs = TN_SectorStockpile21 which = TN_ProvDmnd21 } }
+                    else = { set_key = { lhs = TN_SectorStockpile21 which = TN_ProvSply21 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd22 which = TN_ProvSply22 } } set_key = { lhs = TN_SectorStockpile22 which = TN_ProvDmnd22 } }
+                    else = { set_key = { lhs = TN_SectorStockpile22 which = TN_ProvSply22 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd23 which = TN_ProvSply23 } } set_key = { lhs = TN_SectorStockpile23 which = TN_ProvDmnd23 } }
+                    else = { set_key = { lhs = TN_SectorStockpile23 which = TN_ProvSply23 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd24 which = TN_ProvSply24 } } set_key = { lhs = TN_SectorStockpile24 which = TN_ProvDmnd24 } }
+                    else = { set_key = { lhs = TN_SectorStockpile24 which = TN_ProvSply24 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd25 which = TN_ProvSply25 } } set_key = { lhs = TN_SectorStockpile25 which = TN_ProvDmnd25 } }
+                    else = { set_key = { lhs = TN_SectorStockpile25 which = TN_ProvSply25 } }
+                    if = { limit = { check_key = { lhs = TN_ProvDmnd41 which = TN_ProvSply41 } } set_key = { lhs = TN_SectorStockpile41 which = TN_ProvDmnd41 } }
+                    else = { set_key = { lhs = TN_SectorStockpile41 which = TN_ProvSply41 } }
+
+                    multiply_key = { lhs = TN_SectorStockpile1 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile2 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile4 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile5 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile6 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile9 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile10 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile21 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile22 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile23 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile24 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile25 value = 3 }
+                    multiply_key = { lhs = TN_SectorStockpile41 value = 3 }
+
+                    set_key = { lhs = TN_SectorStockpileSize1 which = TN_SectorStockpile1 }
+                    set_key = { lhs = TN_SectorStockpileSize2 which = TN_SectorStockpile2 }
+                    set_key = { lhs = TN_SectorStockpileSize4 which = TN_SectorStockpile4 }
+                    set_key = { lhs = TN_SectorStockpileSize5 which = TN_SectorStockpile5 }
+                    set_key = { lhs = TN_SectorStockpileSize6 which = TN_SectorStockpile6 }
+                    set_key = { lhs = TN_SectorStockpileSize9 which = TN_SectorStockpile9 }
+                    set_key = { lhs = TN_SectorStockpileSize10 which = TN_SectorStockpile10 }
+                    set_key = { lhs = TN_SectorStockpileSize21 which = TN_SectorStockpile21 }
+                    set_key = { lhs = TN_SectorStockpileSize22 which = TN_SectorStockpile22 }
+                    set_key = { lhs = TN_SectorStockpileSize23 which = TN_SectorStockpile23 }
+                    set_key = { lhs = TN_SectorStockpileSize24 which = TN_SectorStockpile24 }
+                    set_key = { lhs = TN_SectorStockpileSize25 which = TN_SectorStockpile25 }
+                    set_key = { lhs = TN_SectorStockpileSize41 which = TN_SectorStockpile41 }
+
+                    multiply_key = { lhs = TN_SectorStockpileSize1 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize2 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize4 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize5 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize6 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize9 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize10 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize21 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize22 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize23 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize24 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize25 value = 2 }
+                    multiply_key = { lhs = TN_SectorStockpileSize41 value = 2 }
+
+                    set_key = { lhs = Infra_Wealth which = Infra_Spend }
+                    multiply_key = { lhs = Infra_Wealth value = 6 }
+                    change_key = { lhs = Infra_Wealth value = 100 }
+                }
+            }
+
+            change_key = { lhs = iter value = 1 }
+			
+			country_event = {
+                id = POP_Census.109 # Output calculated data and reset/prepare values for the next iteration
+            }
+        }
+		log = "End sim"
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.008
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+		log = "Event 8"
+		log = "Finalise sims"
+        ## SIMULATION FINISHED
+        # Set all calculated values to the map and the save to be exported
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidEmpty = yes
+                }
+                clr_province_flag = TN_Port
+                clr_province_flag = TN_Major
+                clr_province_flag = TN_Important
+                clr_province_flag = TN_Minor
+            }
+        }
+
+        country_event = {
+            id = POP_Growth.001
+        }
+        country_event = {
+            id = POP_Growth.002
+        }
+
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+			Tax_Update = yes
+            add_yearly_sailors = 2
+        }
+
+        country_event = {
+            id = POP_MP.001
+        }
+
+        country_event = {
+            id = SYS_Pulse.014
+        }
+
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            country_event = { id = phlopsi_ce_main.1 }
+
+        }
+        country_event = {
+            id = POP_Census.0093
+        }
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            country_event = {
+                id = POP_Census.110
+            }
+		}
+
+        country_event = {
+            id = POP_Census.105
+        }
+
+        country_event = {
+            id = SYS_Pulse.009
+        }
+        country_event = {
+            id = SYS_Pulse.009
+        }
+        country_event = {
+            id = SYS_Pulse.009
+        }
+        country_event = {
+            id = SYS_Pulse.009
+        }
+
+		clr_global_flag = POP_Sim
+        
+		every_province = {
+			limit = {
+				isValidEmpty = yes
+			}
+            POP_SetClass = yes
+
+			Dev_Set = { inp = Dev_Notables type = base_tax }
+			Dev_Set = { inp = Dev_Urban type = base_production }
+			Dev_Set = { inp = Dev_Rural type = base_manpower }
+			
+			Infra_SetRankInfra = { type = Pathing }
+			Infra_SetRankInfra = { type = Harbourage }
+			Infra_SetRankInfra = { type = Amenities }
+			Infra_SetRankInfra = { type = Irrigation }
+			Infra_SetRankInfra = { type = Capitol }
+			Infra_SetRankInfra = { type = Courthouse }
+			Infra_SetRankInfra = { type = Garrison }
+		}
+
+        country_event = { 
+            id = POP_Building.201
+        }
+		
+		country_event = {
+			id = POP_Census.0021
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.009
+    title =  POP_StartUp.009.t
+    desc =  POP_StartUp.009.d
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    is_triggered_only = yes
+
+    immediate = {
+        hidden_effect = {
+            AAA = {
+                PREV = {
+                    set_key = { lhs = iter which = PREV }
+                    set_key = { lhs = iter_max which = PREV }
+                }
+            }
+        }
+    }
+
+    option = { #### Play Game
+		name = POP_StartUp.009.player
+        custom_tooltip = POP_StartUp.009.playertip
+        hidden_effect = {
+            AAA = {
+                set_global_flag = LogGraphing # Enables in-game observer logging
+                set_global_flag = China_Broken
+                ### pre-clean data
+                country_event = { id = POP_StartUp.018 } 
+                ## load sim file
+                country_event = { id = POP_Init.001 }
+                country_event = { id = POP_Init.002 }
+                country_event = { id = POP_Init.003 }
+                ## load additional prov data
+                country_event = { id = distance_calc.1 }  # Reset province position values from generated files
+                country_event = { id = POP_Rugged.001 } 
+                ### startup for post-sim
+                country_event = { id = POP_StartUp.019 } 
+                
+                # flavor and CB setup
+                country_event = { id = steppe.1 }
+                country_event = { id = setup_event.1 }
+                country_event = { id = calcul_byoa.1 }
+                country_event = { id = ghazi.4 }
+
+                country_event = { id = setup_event.11 }
+                
+                country_event = { id = cb_types.1 }
+                
+                country_event = { id = SYS_Pulse.005 }
+                
+                # Reload DG data
+                country_event = { id = POP_DG.001 }
+                
+                # Finish post-sim startup
+                country_event = { id = POP_Census.0093 }
+                country_event = { id = POP_StartUp.020 }
+                country_event = { id = AI_Tax.005 }
+                country_event = { id = POP_StartUp.022 }
+
+                # Diplomacy Startup
+                country_event = { id = mec_diplomacy.002 }
+
+                # TagID System
+                country_event = { id = SYS_Local.001 }
+            }
+        }
+    }
+    option = { ### Run Sim
+		name = POP_StartUp.009.a
+        custom_tooltip = POP_StartUp.009.atip
+        hidden_effect = {
+            AAA = {
+                set_global_flag = POP_Sim
+                if = {
+                    limit = {
+                        NOT = { has_country_flag = Done_SimInit }
+                    }
+                    country_event = { id = POP_StartUp.021 } ### startup to start a sim
+                    country_event = { id = distance_calc.1 }  # Set province position values from generated files
+                    country_event = { id = POP_Rugged.001 } 
+                    country_event = { id = POP_Setup.001 }
+                    country_event = { id = POP_StartUp.001 }
+                    country_event = { id = POP_StartUp.002 }
+                    country_event = { id = POP_StartUp.003 }
+                    country_event = { id = POP_StartUp.004 }
+                    country_event = { id = POP_StartUp.005 }
+                    country_event = { id = POP_DG.001 }
+                    country_event = { id = POP_StartUp.006 }
+                    set_country_flag = Done_SimInit
+                }
+                country_event = { id = POP_StartUp.007 } ### ACTUAL SIM
+            }
+            country_event = { id = POP_StartUp.010 }
+        }
+    }
+    option = { ### Change Iter Max via Toggle
+		name = POP_StartUp.009.b
+        custom_tooltip = POP_StartUp.009.btip
+        hidden_effect = {
+            AAA = { 
+                if = { # Change amount
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 20 }
+                    }
+                    set_key = { lhs = iter_max value = 50 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 50 }
+                    }
+                    set_key = { lhs = iter_max value = 100 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 100 }
+                    }
+                    set_key = { lhs = iter_max value = 175 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 175 }
+                    }
+                    set_key = { lhs = iter_max value = 250 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 250 }
+                    }
+                    set_key = { lhs = iter_max value = 350 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 350 }
+                    }
+                    set_key = { lhs = iter_max value = 500 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 500 }
+                    }
+                    set_key = { lhs = iter_max value = 650 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 650 }
+                    }
+                    set_key = { lhs = iter_max value = 800 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 800 }
+                    }
+                    set_key = { lhs = iter_max value = 1000 }
+                }
+                else_if = {
+                    limit = {
+                        is_key_equal = { lhs = iter_max value = 1000 }
+                    }
+                    set_key = { lhs = iter_max value = 20 }
+                }
+            }
+            country_event = { id = POP_StartUp.010 }
+        }
+    }
+    option = { #### Finalise Sim
+		name = POP_StartUp.009.c
+        custom_tooltip = POP_StartUp.009.ctip
+        hidden_effect = {
+            AAA = {
+                if = {
+                    limit = {
+                        NOT = { has_country_flag = Done_SimFinal }
+                    }
+                    country_event = { id = POP_StartUp.008 }
+                    set_country_flag = Done_SimFinal
+                }
+            }
+        }
+    }
+}
+
+country_event = {
+    id = POP_StartUp.010
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+    }
+
+    option = {
+		name = no_localisation
+        country_event = { id = POP_StartUp.009 }
+    }
+}
+
+country_event = {
+    id = POP_StartUp.013
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        every_province = {
+            limit = {
+				isValidEmpty = yes
+                has_port = yes
+            }
+
+            sea_zone = {
+                PREV = {
+                    set_key = { lhs = Coord_SeaX which = PREV }
+
+                    set_key = { lhs = Coord_SeaY which = PREV }
+                }
+            }
+
+            distance_2d_effect = {
+                which = Land_PSea
+                which_x1 = Coord_PortX
+                which_y1 = Coord_PortY
+                which_x2 = Coord_SeaX
+                which_y2 = Coord_SeaY
+            }
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.014
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+			Ruler_AuthRulerFactors = yes
+			Ruler_AuthInstitutionFactors = yes
+			set_key = { lhs = Ruler_AuthRuler which = Ruler_AuthRulerRest }
+			set_key = { lhs = Ruler_AuthInstitution which = Ruler_AuthInstitutionRest }
+			Ruler_Calc = yes
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.018
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        set_key = { lhs = LegalismDate value = 1000 }
+        set_key = { lhs = MeritocracyDate value = 1000 }
+        set_key = { lhs = BankingDate value = 1350 }
+        Post_TmpInit = yes
+        every_province = {
+            set_key = { lhs = Infra_Pathing value = 0 }
+            set_key = { lhs = Infra_Amenities value = 0 }
+            set_key = { lhs = Infra_Harbourage value = 0 }
+            set_key = { lhs = Infra_Courthouse value = 0 }
+            set_key = { lhs = Infra_Capitol value = 0 }
+            set_key = { lhs = Infra_Garrison value = 0 }
+            set_key = { lhs = Infra_Irrigation value = 0 }
+            clr_province_flag = small_university
+            clr_province_flag = medium_university
+            clr_province_flag = large_university
+            clr_province_flag = TN_Silk ### temporary
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.019
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        country_event = { # Assign unique tag ID's
+            id = POP_StartInit.012
+        }
+        
+        country_event = {
+            id = POP_StartInit.003 ## initialise institution spread
+        }
+        country_event = { ## Apply Post system
+            id = POP_StartInit.004
+        }
+        country_event = {
+            id = SYS_Post.001
+        }
+        
+        every_province = {
+            limit = {
+                isValidProv = yes
+            }
+            add_building = Placeholder1
+            add_building = Placeholder2
+            add_building = Placeholder3
+            add_building = Placeholder4
+            add_building = Placeholder5
+            add_building = Placeholder6
+            add_building = Placeholder7
+            set_key = { lhs = Mil_StateSpendMulti value = 1 } # remove after early feb
+        }
+
+        701 = {
+            cede_province = CYU
+        }
+        YUA = {
+            set_capital = 708
+        }
+        every_country = {
+            limit = {
+                NOT = { has_country_flag = POP_Init }
+                exists = yes
+            }
+            Init_Startup = yes
+        }
+		
+        # Reinitialize political system for reforms, privileges etc.
+        country_event = { # Initialize country Rights data
+            id = POP_StartInit.006
+        }
+        country_event = { # Initialize Red Turban Rights data
+            id = POP_StartInit.007
+        }
+        every_country = {
+            limit = {
+                exists = yes
+                OR = {
+                    culture_group = jurchen_group
+                    culture_group = altaic
+                    culture_group = tungusic
+                    culture_group = nivkh_group
+                }
+            }
+            add_government_reform = Pol_NominalEmpire
+        }
+        every_country = {
+            limit = {
+                OR = {
+                    tag = AAA
+
+                    isValidCountry = yes
+                }
+            }
+            country_event = { ## Various Flavour setup
+                id = POP_StartInit.013
+            }
+            
+            if = {
+                limit = {
+                    NOT = { tag = AAA }
+                }
+                set_country_flag = POP_Init
+                set_country_flag = AITax_Yearly
+            }
+        }
+		set_key = { lhs = POP_Year value = 1356 }
+		set_country_flag = Anatolian_PowerActive
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+
+country_event = {
+    id = POP_StartUp.020
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        StartUp_ApplyDeathTrauma = yes # Trauma from POP loss
+
+        #country_event = {
+        #	id = distance_calc.1
+        #}
+        country_event = { ### Apply Pass system
+            id = POP_StartInit.001
+        }
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            remove_country_modifier = Sim_Mod
+            Stat_Pre = yes
+            set_country_flag = Tax_ScopeAll
+            set_country_flag = Tax_DelegationS
+            set_key = { lhs = Construct_Parallel value = 4 }
+            set_key = { lhs = Courthouse_Parallel value = 4 }
+            if = {
+                limit = {
+                    ai = no
+                }
+                set_country_flag = Automatic_Maint
+                set_key = { lhs = Tax_CostAdmInp value = 20 }
+                set_key = { lhs = Tax_CostDipInp value = 25 }
+                set_key = { lhs = Tax_CostMilInp value = 30 }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        is_at_war = yes
+                        tag = OTT
+                        culture_group = chinese_group
+                        culture_group = japanese_g
+                        tag = LXA
+                        tag = SON
+                        tag = LIT
+                        tag = WHI
+                        tag = MOS
+                        tag = QAR
+                        tag = MOL
+                    }
+                }
+                set_key = { lhs = Tax_CostAdmInp value = 0.4 }
+                set_key = { lhs = Tax_CostDipInp value = 0.4 }
+                set_key = { lhs = Tax_CostMilInp value = 0.4 }
+            }
+            else = {
+                set_key = { lhs = Tax_CostAdmInp value = 0.2 }
+                set_key = { lhs = Tax_CostDipInp value = 0.2 }
+                set_key = { lhs = Tax_CostMilInp value = 0.2 }
+            }
+            set_country_flag = tf_recalculate_communication_efficiency
+        }
+        country_event = { id = phlopsi_ce_main.3 }
+		east_manchuria_region = {
+			limit = {
+				owned_by = YUA
+			}
+			Rights_NOGov1Apply = yes
+			Rights_NOObl1Apply = yes
+			Rights_NOTen3Apply = yes
+			Rights_NOSer1Apply = yes
+			Rights_BGCom5Apply = yes
+			Rights_BGGov3Apply = yes
+			Rights_CLHie3Apply = yes
+			Rights_CLObl3Apply = yes
+			Rights_CLTax3Apply = yes
+			Rights_BUTax1Apply = yes
+			Privilege_NOProcessing0Apply = yes
+			Privilege_NOGame0Apply = yes
+			Privilege_NOForestry0Apply = yes
+			Privilege_NOSeigneurial0Apply = yes
+			Privilege_NOTitles1Apply = yes
+			Privilege_NOAutonomy3Apply = yes
+			Privilege_NODiplomacy0Apply = yes
+			Privilege_NODynastic1Apply = yes
+			Privilege_NOHierarchy0Apply = yes
+			Privilege_NOTaxE3Apply = yes
+			Privilege_NOServiceE3Apply = yes
+			
+			Privilege_BUOffice1Apply = yes
+			Privilege_BUFarm0Apply = yes
+			Privilege_BUTenure0Apply = yes
+			Privilege_BUWages1Apply = yes
+			Privilege_BUHierarchy0Apply = yes
+			Privilege_BUHire0Apply = yes
+			Privilege_BUExams0Apply = yes
+			Privilege_BUOversight0Apply = yes
+			Privilege_BUEnlist0Apply = yes
+			Privilege_BUStructure0Apply = yes
+			Privilege_BUCourts0Apply = yes
+			Privilege_BUPolitics0Apply = yes
+			Privilege_BURotate0Apply = yes
+		}
+		west_manchuria_region = {
+			limit = {
+				owned_by = YUA
+			}
+			Rights_NOGov1Apply = yes
+			Rights_NOObl1Apply = yes
+			Rights_NOTen3Apply = yes
+			Rights_NOSer1Apply = yes
+			Rights_BGCom5Apply = yes
+			Rights_BGGov3Apply = yes
+			Rights_CLHie3Apply = yes
+			Rights_CLObl3Apply = yes
+			Rights_CLTax3Apply = yes
+			Rights_BUTax1Apply = yes
+			Privilege_NOProcessing0Apply = yes
+			Privilege_NOGame0Apply = yes
+			Privilege_NOForestry0Apply = yes
+			Privilege_NOSeigneurial0Apply = yes
+			Privilege_NOTitles1Apply = yes
+			Privilege_NOAutonomy3Apply = yes
+			Privilege_NODiplomacy0Apply = yes
+			Privilege_NODynastic1Apply = yes
+			Privilege_NOHierarchy0Apply = yes
+			Privilege_NOTaxE3Apply = yes
+			Privilege_NOServiceE3Apply = yes
+			
+			Privilege_BUOffice1Apply = yes
+			Privilege_BUFarm0Apply = yes
+			Privilege_BUTenure0Apply = yes
+			Privilege_BUWages1Apply = yes
+			Privilege_BUHierarchy0Apply = yes
+			Privilege_BUHire0Apply = yes
+			Privilege_BUExams0Apply = yes
+			Privilege_BUOversight0Apply = yes
+			Privilege_BUEnlist0Apply = yes
+			Privilege_BUStructure0Apply = yes
+			Privilege_BUCourts0Apply = yes
+			Privilege_BUPolitics0Apply = yes
+			Privilege_BURotate0Apply = yes
+		}
+		inner_mongolia_region = {
+			limit = {
+				owned_by = YUA
+			}
+			Rights_NOGov1Apply = yes
+			Rights_NOObl1Apply = yes
+			Rights_NOTen3Apply = yes
+			Rights_NOSer1Apply = yes
+			Rights_BGCom5Apply = yes
+			Rights_BGGov3Apply = yes
+			Rights_CLHie3Apply = yes
+			Rights_CLObl3Apply = yes
+			Rights_CLTax3Apply = yes
+			Rights_BUTax1Apply = yes
+			Privilege_NOProcessing0Apply = yes
+			Privilege_NOGame0Apply = yes
+			Privilege_NOForestry0Apply = yes
+			Privilege_NOSeigneurial0Apply = yes
+			Privilege_NOTitles1Apply = yes
+			Privilege_NOAutonomy3Apply = yes
+			Privilege_NODiplomacy0Apply = yes
+			Privilege_NODynastic1Apply = yes
+			Privilege_NOHierarchy0Apply = yes
+			Privilege_NOTaxE3Apply = yes
+			Privilege_NOServiceE3Apply = yes
+			
+			Privilege_BUOffice1Apply = yes
+			Privilege_BUFarm0Apply = yes
+			Privilege_BUTenure0Apply = yes
+			Privilege_BUWages1Apply = yes
+			Privilege_BUHierarchy0Apply = yes
+			Privilege_BUHire0Apply = yes
+			Privilege_BUExams0Apply = yes
+			Privilege_BUOversight0Apply = yes
+			Privilege_BUEnlist0Apply = yes
+			Privilege_BUStructure0Apply = yes
+			Privilege_BUCourts0Apply = yes
+			Privilege_BUPolitics0Apply = yes
+			Privilege_BURotate0Apply = yes
+		}
+		outer_mongolia_region = {
+			limit = {
+				owned_by = YUA
+			}
+			Rights_NOGov1Apply = yes
+			Rights_NOObl1Apply = yes
+			Rights_NOTen3Apply = yes
+			Rights_NOSer1Apply = yes
+			Rights_BGCom5Apply = yes
+			Rights_BGGov3Apply = yes
+			Rights_CLHie3Apply = yes
+			Rights_CLObl3Apply = yes
+			Rights_CLTax3Apply = yes
+			Rights_BUTax1Apply = yes
+			Privilege_NOProcessing0Apply = yes
+			Privilege_NOGame0Apply = yes
+			Privilege_NOForestry0Apply = yes
+			Privilege_NOSeigneurial0Apply = yes
+			Privilege_NOTitles1Apply = yes
+			Privilege_NOAutonomy3Apply = yes
+			Privilege_NODiplomacy0Apply = yes
+			Privilege_NODynastic1Apply = yes
+			Privilege_NOHierarchy0Apply = yes
+			Privilege_NOTaxE3Apply = yes
+			Privilege_NOServiceE3Apply = yes
+			
+			Privilege_BUOffice1Apply = yes
+			Privilege_BUFarm0Apply = yes
+			Privilege_BUTenure0Apply = yes
+			Privilege_BUWages1Apply = yes
+			Privilege_BUHierarchy0Apply = yes
+			Privilege_BUHire0Apply = yes
+			Privilege_BUExams0Apply = yes
+			Privilege_BUOversight0Apply = yes
+			Privilege_BUEnlist0Apply = yes
+			Privilege_BUStructure0Apply = yes
+			Privilege_BUCourts0Apply = yes
+			Privilege_BUPolitics0Apply = yes
+			Privilege_BURotate0Apply = yes
+		}
+        
+        every_province = {
+            if = { #set universities flag
+                limit = {
+                    Prod_HasProd = { Prod = 30 }
+                }
+                set_province_flag = Has_Uni
+            }
+            #Land_CalcInitialVars = yes
+            #Land_CalcCrops = yes
+            if = {
+                limit = {
+                    always = no # yes to display CE rivers
+                }
+                if = {
+                    limit = {
+                        check_key = { lhs = TN_River value = 1 }
+                    }
+                    add_permanent_province_modifier = {
+                        name = river_notify
+                        duration = -1
+                    }
+                }
+                if = {
+                    limit = {
+                        has_province_flag = TN_RiverJoint
+                    }
+                    add_permanent_province_modifier = {
+                        name = river_junction
+                        duration = -1
+                    }
+                }
+            }
+            if = {
+                limit = {
+                    always = no # yes to display CE paths
+                }
+                if = {
+                    limit = {
+                        check_key = { lhs = TN_Pass value = 1 }
+                    }
+                    add_permanent_province_modifier = {
+                        name = river_notify
+                        duration = -1
+                    }
+                }
+                if = {
+                    limit = {
+                        has_province_flag = TN_PassJoint
+                    }
+                    add_permanent_province_modifier = {
+                        name = river_junction
+                        duration = -1
+                    }
+                }
+            }
+            if = {
+                limit = {
+                    is_city = yes
+                }
+                set_province_flag = Colony_Init
+                #Startup_Edu_DoProv = yes
+            }
+        }
+        
+        # Update center setup
+        country_event = {
+            id = SYS_Centers.001
+        }
+        country_event = {
+            id = SYS_Centers.002
+        }
+        country_event = {
+            id = SYS_Centers.003
+        }
+        NaturalFeatures = yes
+        # For Timur
+        Clan_Setup = yes
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidEmpty = yes
+                }
+                if = {
+                    limit = {
+                        is_city = no
+                        is_colony = no
+                    }
+                    Dev_DoUncolonised = yes
+                }
+
+                remove_province_modifier = urban_goods_linen
+                remove_province_modifier = urban_goods_silk
+                remove_province_modifier = urban_goods_cloth
+                remove_province_modifier = urban_goods_luxury_cloth
+                remove_province_modifier = urban_goods_metalwork
+                remove_province_modifier = urban_goods_steel
+                remove_province_modifier = urban_goods_glassware
+                remove_province_modifier = urban_goods_naval_supplies
+                remove_province_modifier = urban_goods_paper
+                remove_province_modifier = urban_goods_leather
+                remove_province_modifier = urban_goods_carpet
+                remove_province_modifier = urban_goods_chinaware
+                remove_province_modifier = urban_goods_jewelry
+
+                remove_province_modifier = pearls_low
+                remove_province_modifier = pearls_medium
+                remove_province_modifier = pearls_large
+
+                remove_province_modifier = fur_low
+                remove_province_modifier = fur_medium
+                remove_province_modifier = fur_large
+
+                remove_province_modifier = ivory_low
+                remove_province_modifier = ivory_medium
+                remove_province_modifier = ivory_large
+
+                change_trade_goods = smm_default
+
+                clr_province_flag = small_university
+                clr_province_flag = medium_university
+                clr_province_flag = Infra_Capitol50
+                clr_province_flag = Infra_Pathing25
+                clr_province_flag = Infra_Harbourage25
+                export_to_key = { lhs = Culture_Prev value = culture }
+            }
+        }
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidProv = yes
+                }
+                Rights_SyncFromOwner = yes
+                add_permanent_province_modifier = { name = Tax_Mod duration = -1 }
+                
+                Dev_DoMain = { iterate=no }
+                if = {
+                    limit = {
+                        check_key = { lhs = Building_Extraction value = 1 }
+                    }
+                    trigger_switch = {
+                        on_trigger = has_province_flag
+                        silver = {
+                            add_permanent_province_modifier = {
+                                name = silver_1
+                                duration = -1
+                            }
+                        }
+                        gold = {
+                            add_permanent_province_modifier = {
+                                name = gold_1
+                                duration = -1
+                            }
+                        }
+                        gems = {
+                            add_permanent_province_modifier = {
+                                name = gems_1
+                                duration = -1
+                            }
+                        }
+                        obsidian = {
+                            add_permanent_province_modifier = {
+                                name = obsidian_1
+                                duration = -1
+                            }
+                        }
+                    }
+                }
+                
+                if = {
+                    limit = {
+                        is_city = yes
+                    }
+                    export_to_key = { lhs = Tmp_0 value = modifier:local_autonomy }
+
+                    owner = {
+                        export_to_key = { lhs = Tmp_0 value = modifier:global_autonomy }
+
+                        PREV = {
+                            change_key = { lhs = Tmp_0 which = PREV }
+                        }
+
+                        set_key = { lhs = Tmp_0 value = 0 }
+                    }
+                    
+                    divide_key = { lhs = Tmp_0 value = 1.5 }
+                    
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } add_local_autonomy = 51.2 subtract_key = { lhs = Tmp_0 value = 0.512 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } add_local_autonomy = 25.6 subtract_key = { lhs = Tmp_0 value = 0.256 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } add_local_autonomy = 12.8 subtract_key = { lhs = Tmp_0 value = 0.128 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } add_local_autonomy = 6.4 subtract_key = { lhs = Tmp_0 value = 0.064 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } add_local_autonomy = 3.2 subtract_key = { lhs = Tmp_0 value = 0.032 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } add_local_autonomy = 1.6 subtract_key = { lhs = Tmp_0 value = 0.016 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } add_local_autonomy = 0.8 subtract_key = { lhs = Tmp_0 value = 0.008 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } add_local_autonomy = 0.4 subtract_key = { lhs = Tmp_0 value = 0.004 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } add_local_autonomy = 0.2 subtract_key = { lhs = Tmp_0 value = 0.002 } }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } add_local_autonomy = 0.1 subtract_key = { lhs = Tmp_0 value = 0.001 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.001 } } } add_local_autonomy = -0.1 subtract_key = { lhs = Tmp_0 value = -0.001 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.002 } } } add_local_autonomy = -0.2 subtract_key = { lhs = Tmp_0 value = -0.002 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.004 } } } add_local_autonomy = -0.4 subtract_key = { lhs = Tmp_0 value = -0.004 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.008 } } } add_local_autonomy = -0.8 subtract_key = { lhs = Tmp_0 value = -0.008 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.016 } } } add_local_autonomy = -1.6 subtract_key = { lhs = Tmp_0 value = -0.016 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.032 } } } add_local_autonomy = -3.2 subtract_key = { lhs = Tmp_0 value = -0.032 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.064 } } } add_local_autonomy = -6.4 subtract_key = { lhs = Tmp_0 value = -0.064 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.128 } } } add_local_autonomy = -12.8 subtract_key = { lhs = Tmp_0 value = -0.128 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.256 } } } add_local_autonomy = -25.6 subtract_key = { lhs = Tmp_0 value = -0.256 } }
+                    if = { limit = { NOT = { check_key = { lhs = Tmp_0 value = -0.512 } } } add_local_autonomy = -51.2 subtract_key = { lhs = Tmp_0 value = -0.512 } }
+                    
+                    set_key = { lhs = Tmp_0 value = 0 }
+                    trigger_switch = {
+                        on_trigger = has_province_flag
+                        add_local_autonomy_10 = {
+                            add_local_autonomy = 10
+                        }
+                        add_local_autonomy_15 = {
+                            add_local_autonomy = 15
+                        }
+                        add_local_autonomy_25 = {
+                            add_local_autonomy = 25
+                        }
+                        add_local_autonomy_50 = {
+                            add_local_autonomy = 50
+                        }
+                        add_local_autonomy_75 = {
+                            add_local_autonomy = 75
+                        }
+                        add_local_autonomy_100 = {
+                            add_local_autonomy = 100
+                        }
+                    }
+
+                    if = {
+                        limit = {
+                            NOT = {
+                                has_building = fort_14th
+                                has_building = fort_15th
+                            }
+                        }
+                        add_building = fort_no
+                    }
+
+                    add_building = pelpel
+                }
+            }
+        }
+        Init_LAModify = yes
+        
+        country_event = {
+            id = POP_Building.999
+        }
+
+        north_china_superregion = {
+            add_province_triggered_modifier = unification_china
+        }
+        east_china_superregion = {
+            add_province_triggered_modifier = unification_china
+        }
+        southwest_china_superregion = {
+            add_province_triggered_modifier = unification_china
+        }
+        indian_continent = {
+            add_province_triggered_modifier = unification_india
+        }
+        country_event = {
+            id = POP_Census.002 # Set API Modifiers
+        }
+        Diplomacy_Do_Yearly = yes
+        Diplomacy_Do_Monthly = yes
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            rank_change_effect = yes
+            Stab_Add1 = yes # To counter advisors
+            set_key = { lhs = State_AlignmentDuration value = 2 }
+            
+            country_event = {
+                id = POP_StartUp.014
+            }
+            if = { # Still kinda got their shit together, not for much longer
+                limit = {
+                    OR = {
+                        tag = WHI
+                        tag = BLU
+                        tag = MGH # strong ruler
+                        tag = QAR # strong ruler
+                        tag = AKK # strong ruler
+                    }
+                }
+                add_horde_unity = -20 # 20%
+            }
+            else_if = {
+                limit = {
+                    tag = DLH
+                }
+                add_legitimacy = -20
+            }
+            else_if = {
+                limit = {
+                    tag = MAD
+                }
+                add_legitimacy = -50
+            }
+            else_if = {
+                limit = {
+                    is_nomad = yes
+                }
+                add_horde_unity = -50 # 50%
+            }
+
+            Nat_Main = yes
+        
+            set_key = { lhs = Tmp_0 which = Ruler_CrptImpact }
+            
+            if = { limit = { check_key = { lhs = Tmp_0 value = 51.2 } } add_corruption = 51.2 subtract_key = { lhs = Tmp_0 value = 51.2 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 25.6 } } add_corruption = 25.6 subtract_key = { lhs = Tmp_0 value = 25.6 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 12.8 } } add_corruption = 12.8 subtract_key = { lhs = Tmp_0 value = 12.8 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 6.4 } } add_corruption = 6.4 subtract_key = { lhs = Tmp_0 value = 6.4 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 3.2 } } add_corruption = 3.2 subtract_key = { lhs = Tmp_0 value = 3.2 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 1.6 } } add_corruption = 1.6 subtract_key = { lhs = Tmp_0 value = 1.6 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 0.8 } } add_corruption = 0.8 subtract_key = { lhs = Tmp_0 value = 0.8 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 0.4 } } add_corruption = 0.4 subtract_key = { lhs = Tmp_0 value = 0.4 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 0.2 } } add_corruption = 0.2 subtract_key = { lhs = Tmp_0 value = 0.2 } }
+            if = { limit = { check_key = { lhs = Tmp_0 value = 0.1 } } add_corruption = 0.1 subtract_key = { lhs = Tmp_0 value = 0.1 } }
+
+            set_key = { lhs = Tmp_0 value = 0 }
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.021
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        set_global_flag = POP_Sim1
+        set_global_flag = POP_Sim2
+        set_global_flag = POP_Sim4
+        set_global_flag = POP_Sim6
+        set_global_flag = POP_Sim8
+        set_global_flag = POP_Sim10
+        set_global_flag = POP_Sim15
+        set_global_flag = POP_Sim20
+        
+        YUA = {
+            every_province = {
+                limit = {
+                    OR = {
+                        owned_by = CSE
+                        owned_by = QIN
+                        owned_by = CYU
+                        owned_by = SNG
+                        owned_by = XNG
+                        owned_by = ZOU
+                        owned_by = MNG
+                        owned_by = CEN
+                        owned_by = CNG
+                        owned_by = DAA
+                        owned_by = YUE
+                        owned_by = ZHN
+                        owned_by = TIA
+                        owned_by = WUU
+                        owned_by = XIA
+                        owned_by = SHU
+                        owned_by = DXI
+                        owned_by = JCH
+                        owned_by = LNG
+                        owned_by = CTA
+                        owned_by = CMN
+                        owned_by = QII
+                    }
+                }
+                cede_province = YUA
+            }
+            every_owned_province = {
+                add_province_modifier = { name = YUA_Sim duration = -1 }
+            }
+            define_ruler = {
+                ADM = 4
+                DIP = 4
+                MIL = 4
+            }
+            set_capital = 701
+            add_stability = 2
+            add_prestige = 40
+            add_war_exhaustion = -10
+            add_meritocracy = 30
+            add_country_modifier = { name = Sim_Mod duration = -1 }
+        }
+        DLH = {
+            add_country_modifier = { name = Sim_Mod duration = -1 }
+        }
+        FEZ = {
+            add_country_modifier = { name = Sim_Mod duration = -1 }
+        }
+        MAD = {
+            add_country_modifier = { name = Sim_Mod duration = -1 }
+        }
+        country_event = {
+            id = POP_Census.002 # Set API Modifiers
+        }
+        Diplomacy_Do_Yearly = yes
+        Diplomacy_Do_Monthly = yes
+        every_province = {
+            set_key = { lhs = Mil_StateSpendMulti value = 1 }
+        }
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            export_to_key = {
+                lhs = StartingCorruption
+                value = corruption
+            }
+            if = {
+                limit = {
+                    has_country_flag = fresh_state
+                }
+                subtract_key = { lhs = StartingCorruption value = 10 }
+            }
+            set_country_flag = POP_Init
+            if = { # Still kinda got their shit together, not for much longer
+                limit = {
+                    OR = {
+                        tag = WHI
+                        tag = BLU
+                        tag = MGH # strong ruler
+                        tag = QAR # strong ruler
+                        tag = AKK # strong ruler
+                    }
+                }
+                add_horde_unity = -20 # 20%
+            }
+            else_if = {
+                limit = {
+                    tag = DLH
+                }
+                add_legitimacy = -20
+            }
+            else_if = {
+                limit = {
+                    tag = MAD
+                }
+                add_legitimacy = -50
+            }
+            else_if = {
+                limit = {
+                    tag = FRA
+                }
+                add_stability = -2
+                add_legitimacy = -50
+            }
+            else_if = {
+                limit = {
+                    is_nomad = yes
+                }
+                add_horde_unity = -50 # 50%
+            }
+            country_event = {
+                id = POP_StartUp.014 # Precalc Ruler/Institutional Authority & Power for every country
+            }
+            set_key = { lhs = Mil_BUBudgetMult value = 60 }
+            set_key = { lhs = Mil_BUSliderSave value = 1 }
+            if = {
+                limit = {
+                    tag = YUA
+                }
+                #set_country_flag = Mil_BUScale
+                #set_key = { lhs = Mil_BUScaleMult value = 40 }
+            }
+        }
+    }
+
+    option = {
+		name = no_localisation
+    }
+}
+country_event = {
+    id = POP_StartUp.022
+    title = no_localisation
+    desc = no_localisation
+	picture = CITY_DEVELOPMENT_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+    
+    immediate = {
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidEmpty = yes
+                }
+                Land_CalcCrops = yes
+                set_key = { lhs = Land_SoilD which = Land_Soil }
+                multiply_key = { lhs = Land_SoilD value = 100 }
+            }
+        }
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            Tax_Update = yes
+        }
+        
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            set_country_flag = AITax_Yearly
+        }
+        regiongroup = {
+            region = {
+                limit = {
+                    isValidProv = yes
+                }
+                Stat_Set = yes
+            }
+        }
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            Stat_CountrySet = yes
+            if = {
+                limit = {
+                    OR = {
+                        tag = FRA # their army got utterly wiped in a battle just the day like before
+                        is_subject_of = FRA
+                    }
+                }
+                if = {
+                    limit = {
+                        tag = BUR
+                    }
+                    export_to_key = { lhs = Tmp_0 value = max_manpower }
+                    multiply_key = { lhs = Tmp_0 value = 0.3 }
+                    
+                    add_manpower = -10000
+
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+                    
+                    add_war_exhaustion = 7
+                }
+                if = {
+                    limit = {
+                        tag = FRA
+                    }
+                    export_to_key = { lhs = Tmp_0 value = max_manpower }
+                    multiply_key = { lhs = Tmp_0 value = 0.1 }
+                    
+                    add_manpower = -10000
+
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+
+                    add_war_exhaustion = 8
+                }
+                else = {
+                    export_to_key = { lhs = Tmp_0 value = max_manpower }
+                    multiply_key = { lhs = Tmp_0 value = 0.15 }
+                    
+                    add_manpower = -10000
+
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                    if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+                    add_war_exhaustion = 10
+                }
+            }
+            else_if = {
+                limit = {
+                    tag = BYZ
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.35 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else_if = {
+                limit = {
+                    tag = FEZ
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.4 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else_if = {
+                limit = {
+                    tag = CHU
+                }
+                add_manpower = -10000
+            }
+            else_if = {
+                limit = {
+                    tag = BUL
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.3 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else_if = {
+                limit = {
+                    tag = CAS
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.2 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else_if = {
+                limit = {
+                    tag = DLH
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.3 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else_if = {
+                limit = {
+                    is_subject_other_than_tributary_trigger = yes
+                    is_subject_of = DLH
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.5 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        tag = ENG
+                        is_subject_of = ENG
+                    }
+                }
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.4 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            else = {
+                export_to_key = { lhs = Tmp_0 value = max_manpower }
+                multiply_key = { lhs = Tmp_0 value = 0.5 }
+                
+                add_manpower = -10000
+
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1048.576 } } subtract_key = { lhs = Tmp_0 value = 1048.576 } add_manpower = 1048.576 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 524.288 } } subtract_key = { lhs = Tmp_0 value = 524.288 } add_manpower = 524.288 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 262.144 } } subtract_key = { lhs = Tmp_0 value = 262.144 } add_manpower = 262.144 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 131.072 } } subtract_key = { lhs = Tmp_0 value = 131.072 } add_manpower = 131.072 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 65.536 } } subtract_key = { lhs = Tmp_0 value = 65.536 } add_manpower = 65.536 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 32.768 } } subtract_key = { lhs = Tmp_0 value = 32.768 } add_manpower = 32.768 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 16.384 } } subtract_key = { lhs = Tmp_0 value = 16.384 } add_manpower = 16.384 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 8.192 } } subtract_key = { lhs = Tmp_0 value = 8.192 } add_manpower = 8.192 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 4.096 } } subtract_key = { lhs = Tmp_0 value = 4.096 } add_manpower = 4.096 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 2.048 } } subtract_key = { lhs = Tmp_0 value = 2.048 } add_manpower = 2.048 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 1.024 } } subtract_key = { lhs = Tmp_0 value = 1.024 } add_manpower = 1.024 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.512 } } subtract_key = { lhs = Tmp_0 value = 0.512 } add_manpower = 0.512 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.256 } } subtract_key = { lhs = Tmp_0 value = 0.256 } add_manpower = 0.256 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.128 } } subtract_key = { lhs = Tmp_0 value = 0.128 } add_manpower = 0.128 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.064 } } subtract_key = { lhs = Tmp_0 value = 0.064 } add_manpower = 0.064 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.032 } } subtract_key = { lhs = Tmp_0 value = 0.032 } add_manpower = 0.032 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.016 } } subtract_key = { lhs = Tmp_0 value = 0.016 } add_manpower = 0.016 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.008 } } subtract_key = { lhs = Tmp_0 value = 0.008 } add_manpower = 0.008 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.004 } } subtract_key = { lhs = Tmp_0 value = 0.004 } add_manpower = 0.004 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.002 } } subtract_key = { lhs = Tmp_0 value = 0.002 } add_manpower = 0.002 }
+                if = { limit = { check_key = { lhs = Tmp_0 value = 0.001 } } subtract_key = { lhs = Tmp_0 value = 0.001 } add_manpower = 0.001 }
+
+            }
+            
+            FC_Init = yes
+            FC_Census = yes
+            #FC_MiniCensus = yes
+
+            StartUp_InitArmy = yes
+            
+            set_key = { lhs = MP_MP value = 0 }
+            set_key = { lhs = MP_MPRecov value = 0 }
+
+            if = {
+                limit = {
+                    NOT = {
+                        tag = OTT
+                    }
+                }
+                StartUp_InitNavy = yes
+            }
+            else = {
+                add_treasury = 500
+            }
+            
+            add_country_modifier = {
+                name = Exec_Auth
+                duration = -1
+            }
+            add_country_modifier = {
+                name = Pol_UI
+                duration = -1
+            }
+            add_country_modifier = {
+                name = Desire_UI
+                duration = -1
+            }
+            country_event = { id = setup_event.4 days = 1 } # generate heir if there's no info there wasn't one
+
+
+            if = {
+                limit = {
+                    culture_group = japanese_g
+                }
+                country_event = { id = japan.1 } # Correcting opinions between daimyos
+            }
+            
+            tech_add_modifiers_all = yes
+        }
+
+            
+        every_country = {
+            limit = {
+                isValidCountry = yes
+            }
+            Pol_ReformInit = yes #Set Government Reforms
+            Stab_Disp = yes
+            if = {
+                limit = {
+                    AND = {
+                        AND = {
+                            NOT = { has_reform = Pol_NominalEmpire } 	#key = 10
+                            NOT = { has_reform = celestial_empire } 	#key = 3
+                            NOT = { has_reform = shogunate } 			#key = 4
+                            NOT = { has_reform = Horde_Monarchy } 		#key = 8
+                            NOT = { has_reform = Horde_MonarchyS }		#key = 8
+                            NOT = { has_reform = Yuan_Monarchy }		#key = 9
+                            NOT = { has_reform = free_city } 			#key = 11
+                            NOT = { has_reform = trading_city }			#key = 2
+                            NOT = { has_reform = colonial_government }	#key = 6	
+                            NOT = { has_reform = Pol_French_Feudalism }	#key = 12	
+                        }
+                        OR = {
+                            is_key_equal = { lhs = Pol_Privileges value = 1 }
+                            is_key_equal = { lhs = Pol_Privileges value = 0 }
+                        }
+                        
+                    }
+                }
+                add_government_reform = Pol_Privileges1
+            }
+            if = {
+                limit = {
+                    OR = {
+                        primary_culture = turkish
+                        primary_culture = osmanli
+                        primary_culture = yorouk
+                        primary_culture = turkoman
+                    }
+                }
+                add_country_modifier = { name = ghazi_system duration = -1 }
+                country_event = { id = ghazi.2 days = 2 }
+                country_event = { id = ghazi.3 days = 8 }
+            }
+            else_if = {
+                limit = {
+                    OR = {
+                        primary_culture = greek
+                        check_variable = { which = "Demesne_in_Anatolia" value = 1 }
+                    }
+                }
+                country_event = { id = ghazi.2 days = 2 }
+            }
+            if = {
+                limit = {
+                    ai = no
+                }
+                Nat_Main = yes
+                Nat_SumStats = yes
+                set_country_flag = UI_SelectScopeChange_1
+                set_country_flag = PieChart_View_ResourceShare
+                country_event = { id = setup_event.2 } # scenario description event
+                country_event = { id = POP_Census.893 days = 6 }
+                hidden_effect = { country_event = { id = POP_Census.934 } }
+            }
+            country_event = { id = SYS_UI.001 }
+            country_event = { id = SYS_UI.003 }
+            country_event = { id = SYS_UI.004 }
+            #Edu_DoCountry = yes
+            MP_Init = yes
+            Centralism_Check = yes
+        }
+        #AAA = { set_country_flag = Do_World_Edu country_event = { id = POP_Census.117 } }
+        country_event = { id = POP_Census.009 }
+        Plague_InitSystem = yes
+    }
+
+    option = {
+		name = no_localisation
+    }
+}

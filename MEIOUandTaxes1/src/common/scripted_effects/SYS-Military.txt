@@ -1,0 +1,747 @@
+Military_DoPre = {
+	Military_DoPre$type$ = yes
+	Military_DoPreHelper$type$ = yes
+}
+
+Military_DoAfterHelper0 = {
+	set_key = { lhs = $from$_MP$who$Disband value = 0 }
+}
+Military_DoAfterHelper1 = {
+	if = {
+		limit = {
+			check_key = { lhs = $from$_MP$who$Cur which = $who$_MP }
+		}
+		set_key = { lhs = $from$_MP$who$Cur which = $who$_MP }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = $from$_MP$who$Cur value = 0  } }
+		}
+		set_key = { lhs = $from$_MP$who$Cur value = 0  }
+	}
+}
+Military_DoAfterHelper2 = {
+	multiply_key = { lhs = $from$_MP$who$BuildSize which = Mil_Fill }
+	
+	if = {
+		limit = {
+			check_key = { lhs = $from$_MP$who$BuildSize value = 0.001 }
+		}
+		change_key = { lhs = $from$_MP$who$Cur which = $from$_MP$who$BuildSize }
+	}
+	if = {
+		limit = {
+			check_key = { lhs = $from$_MP$who$Cur which = $who$_MP }
+		}
+		set_key = { lhs = $from$_MP$who$Cur which = $who$_MP }
+	}
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = $from$_MP$who$Cur value = 0  } }
+		}
+		set_key = { lhs = $from$_MP$who$Cur value = 0  }
+	}
+}
+# who is the one 'from' taxes from.
+# $from$_SpendMP = Total expenditure
+# $from$_SpendMPMaint = Expenditure from training
+# $from$_SpendMPBuild = Expenditure from recruitment
+Military_DoAfter = {
+	set_key = { lhs = $from$_SpendMP value = 0 }
+	set_key = { lhs = $from$_SpendMPMaint value = 0 }
+	set_key = { lhs = $from$_SpendMPBuild value = 0 }
+	
+    # Calculate how much it spends from training. Mil_MaintSpend is the cost of each unit. $from$_MPMaint total amount of units
+	set_key = { lhs = $from$_SpendMPMaint which = $from$_MPMaint }
+	multiply_key = { lhs = $from$_SpendMPMaint which = Modi_Mil$from$Cost }
+	multiply_key = { lhs = $from$_SpendMPMaint which = Modi_Mil$from$Maint }
+	if = {
+		limit = {
+			check_key = { lhs = $from$_SpendMPMaint value = 0.001 }
+			check_key = { lhs = Mil_MPMaint value = 0.001 }
+		}
+		divide_key = { lhs = $from$_SpendMPMaint which = Mil_MPMaint }
+	}
+	else = {
+		set_key = { lhs = $from$_SpendMPMaint value = 0 }
+	}
+	multiply_key = { lhs = $from$_SpendMPMaint which = Mil_MaintSpend }
+	
+	change_key = { lhs = $from$_SpendMP which = $from$_SpendMPMaint }
+	
+	[[who0] Military_DoAfterHelper1 = { from = $from$ who = $who0$ } ]
+	[[who1] Military_DoAfterHelper1 = { from = $from$ who = $who1$ } ]
+	[[who2] Military_DoAfterHelper1 = { from = $from$ who = $who2$ } ]
+	[[who3] Military_DoAfterHelper1 = { from = $from$ who = $who3$ } ]
+	[[who4] Military_DoAfterHelper1 = { from = $from$ who = $who4$ } ]
+	[[who5] Military_DoAfterHelper1 = { from = $from$ who = $who5$ } ]
+	[[who6] Military_DoAfterHelper1 = { from = $from$ who = $who6$ } ]
+	
+	if = {
+		limit = {
+			check_key = { lhs = $from$_MPBuild value = 0.001 }
+		}
+		set_key = { lhs = $from$_SpendMPBuild which = $from$_MPBuild }
+		multiply_key = { lhs = $from$_SpendMPBuild which = Modi_Mil$from$Cost }
+		multiply_key = { lhs = $from$_SpendMPBuild which = Modi_Mil$from$Build }
+		if = {
+			limit = {
+				check_key = { lhs = $from$_SpendMPBuild value = 0.001 }
+				check_key = { lhs = Mil_MPBuild value = 0.001 }
+			}
+			divide_key = { lhs = $from$_SpendMPBuild which = Mil_MPBuild }
+		}
+		else = {
+			set_key = { lhs = $from$_SpendMPBuild value = 0 }
+		}
+		multiply_key = { lhs = $from$_SpendMPBuild which = Mil_BuildSpend }
+		
+		change_key = { lhs = $from$_SpendMP which = $from$_SpendMPBuild }
+		
+		[[who0] Military_DoAfterHelper2 = { from = $from$ who = $who0$ } ]
+		[[who1] Military_DoAfterHelper2 = { from = $from$ who = $who1$ } ]
+		[[who2] Military_DoAfterHelper2 = { from = $from$ who = $who2$ } ]
+		[[who3] Military_DoAfterHelper2 = { from = $from$ who = $who3$ } ]
+		[[who4] Military_DoAfterHelper2 = { from = $from$ who = $who4$ } ]
+		[[who5] Military_DoAfterHelper2 = { from = $from$ who = $who5$ } ]
+		[[who6] Military_DoAfterHelper2 = { from = $from$ who = $who6$ } ]
+	}
+	
+	set_key = { lhs = $from$_MPCur value = 0 }
+	set_key = { lhs = $from$_MPBuildSize value = 0 }
+	set_key = { lhs = $from$_MPDisband value = 0 }
+	[[who0] Military_TotalsSum = { from = $from$ who = $who0$ } ]
+	[[who1] Military_TotalsSum = { from = $from$ who = $who1$ } ]
+	[[who2] Military_TotalsSum = { from = $from$ who = $who2$ } ]
+	[[who3] Military_TotalsSum = { from = $from$ who = $who3$ } ]
+	[[who4] Military_TotalsSum = { from = $from$ who = $who4$ } ]
+	[[who5] Military_TotalsSum = { from = $from$ who = $who5$ } ]
+	[[who6] Military_TotalsSum = { from = $from$ who = $who6$ } ]
+}
+
+# Get amount of goods per category needed for maintenance / training
+Military_GetMaint = {
+	set_key = { lhs = $out$1 value = 0.35 } # Food (0.75 ducat)
+	set_key = { lhs = $out$2 value = 0.1 }  # Salt (0.35 ducat)
+	set_key = { lhs = $out$5 value = 0.1 }  # Fuel (0.2 ducat)
+	set_key = { lhs = $out$21 value = 0.1 } # Consumer Product (0.6 ducat)
+	set_key = { lhs = $out$22 value = 0.25 } # Military Product (1.8 ducat)
+	set_key = { lhs = $out$24 value = 0.1 } # Industrial Product (0.25 ducat)
+	set_key = { lhs = $out$41 value = 0.025 }  # Knowledge (0.25 ducat)
+	
+	# Scale up 1, 2 and 5 to equal roughly the ducat value of no 21 and 24. 24 is split between 2 and 5
+	# however, fuel costs are lower compared to industrial, so nomad provs will be a bit cheaper
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = 0.017 } # Nomad provinces need more general goods
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$1 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = 0.006 } # Nomad provinces need more general goods
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$2 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = 0.01 } # Nomad provinces need more general goods
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$5 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = -0.01 } # Nomad provinces need less urban for armies
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$21 which = Public_Tmp9 }
+	multiply_key = { lhs = $out$24 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = -0.01 } # Clan provinces need less uni's for armies
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$41 which = Public_Tmp9 }
+	
+	[[size]
+		multiply_key = { lhs = $out$1 which = $size$ }
+		multiply_key = { lhs = $out$2 which = $size$ }
+		multiply_key = { lhs = $out$5 which = $size$ }
+		multiply_key = { lhs = $out$21 which = $size$ }
+		multiply_key = { lhs = $out$22 which = $size$ }
+		multiply_key = { lhs = $out$24 which = $size$ }
+		multiply_key = { lhs = $out$41 which = $size$ }
+
+		owner = {
+			export_to_key = { lhs = Tmp_0 value = trigger_value:artillery_fraction }
+						
+			set_key = { lhs = $out$5 which = PREV }
+			set_key = { lhs = $out$22 which = PREV }
+			set_key = { lhs = $out$24 which = PREV }
+			set_key = { lhs = $out$41 which = PREV }
+
+			multiply_key = { lhs = $out$5  which = Tmp_0 }
+			multiply_key = { lhs = $out$22 which = Tmp_0 }
+			multiply_key = { lhs = $out$24 which = Tmp_0 }
+			multiply_key = { lhs = $out$41 which = Tmp_0 }			
+
+			multiply_key = { lhs = $out$5  value = 0.1 }
+			multiply_key = { lhs = $out$22 value = 0.15 }
+			multiply_key = { lhs = $out$24 value = 0.15 }
+			multiply_key = { lhs = $out$41 value = 0.3 }
+
+			PREV = {
+				change_key = { lhs = $out$5 which = PREV }
+				change_key = { lhs = $out$22 which = PREV }
+				change_key = { lhs = $out$24 which = PREV }
+				change_key = { lhs = $out$41 which = PREV }
+			}
+		}
+	]
+	
+	### Military tech modifier on Good costs = (MilTech * 0.005 + 0.5)
+	export_to_key = { lhs = Public_Tmp9 value = mil_tech who = owner }
+	multiply_key = { lhs = Public_Tmp9 value = 0.005 }	
+	change_key = { lhs = Public_Tmp9 value = 0.5 }
+	
+	### Modify certain good needs by mil tech modifier
+	multiply_key = { lhs = $out$22 which = Public_Tmp9 } # Military Product
+	multiply_key = { lhs = $out$24 which = Public_Tmp9 } # Industrial Product
+	multiply_key = { lhs = $out$41 which = Public_Tmp9 } # Knowledge
+	
+	### Modify all good needs by training modifier
+	multiply_key = { lhs = $out$1 which = Modi_MilTrain }
+	multiply_key = { lhs = $out$2 which = Modi_MilTrain }
+	multiply_key = { lhs = $out$5 which = Modi_MilTrain }
+	multiply_key = { lhs = $out$21 which = Modi_MilTrain }
+	multiply_key = { lhs = $out$22 which = Modi_MilTrain }
+	multiply_key = { lhs = $out$24 which = Modi_MilTrain }
+	multiply_key = { lhs = $out$41 which = Modi_MilTrain }
+}
+
+# Get amount of goods per category needed for recruitment per unit
+Military_GetBuild = {
+	set_key = { lhs = $out$1 value = 0.5 }   # Food (1.25 ducat)
+	set_key = { lhs = $out$2 value = 0.2 }   # Salt (0.7 ducat)
+	set_key = { lhs = $out$5 value = 0.2 }   # Fuel (0.4 ducat)
+	set_key = { lhs = $out$21 value = 0.35 } # Consumer Product (2.1 ducat)
+	set_key = { lhs = $out$22 value = 1.4 }  # Military Product (8 ducat)
+	set_key = { lhs = $out$24 value = 0.3 }  # Industrial Product (1.5 ducat)
+	set_key = { lhs = $out$41 value = 0.025 }  # Knowledge (0.25 ducat)
+	
+	# Scale up 1, 2 and 5 to equal roughly the ducat value of no 21 and 24. 24 is split between 2 and 5
+	# however, fuel costs are lower compared to industrial, so nomad provs will be a bit cheaper
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = 0.017 } # Nomad provinces need more general goods
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$1 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = 0.006 } # Nomad provinces need more general goods
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$2 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = 0.03 } # Nomad provinces need more general goods
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$5 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = -0.01 } # Nomad provinces need less urban for armies
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$21 which = Public_Tmp9 }
+	multiply_key = { lhs = $out$24 which = Public_Tmp9 }
+
+	set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+	multiply_key = { lhs = Public_Tmp9 value = -0.01 } # Clan provinces need less uni's for armies
+	change_key = { lhs = Public_Tmp9 value = 1 }
+	multiply_key = { lhs = $out$41 which = Public_Tmp9 }
+	
+	[[size]
+		multiply_key = { lhs = $out$1 which = $size$ }
+		multiply_key = { lhs = $out$2 which = $size$ }
+		multiply_key = { lhs = $out$5 which = $size$ }
+		multiply_key = { lhs = $out$21 which = $size$ }
+		multiply_key = { lhs = $out$22 which = $size$ }
+		multiply_key = { lhs = $out$24 which = $size$ }
+		multiply_key = { lhs = $out$41 which = $size$ }
+		
+		owner = { # Make artillery more expensive.
+			export_to_key = { lhs = Tmp_0 value = trigger_value:artillery_fraction }
+						
+			set_key = { lhs = $out$5 which = PREV }
+			set_key = { lhs = $out$22 which = PREV }
+			set_key = { lhs = $out$24 which = PREV }
+			set_key = { lhs = $out$41 which = PREV }
+
+			multiply_key = { lhs = $out$5  which = Tmp_0 }
+			multiply_key = { lhs = $out$22 which = Tmp_0 }
+			multiply_key = { lhs = $out$24 which = Tmp_0 }
+			multiply_key = { lhs = $out$41 which = Tmp_0 }			
+
+			multiply_key = { lhs = $out$5  value = 0.1 }
+			multiply_key = { lhs = $out$22 value = 0.15 }
+			multiply_key = { lhs = $out$24 value = 0.15 }
+			multiply_key = { lhs = $out$41 value = 0.3 }
+
+			PREV = {
+				change_key = { lhs = $out$5 which = PREV }
+				change_key = { lhs = $out$22 which = PREV }
+				change_key = { lhs = $out$24 which = PREV }
+				change_key = { lhs = $out$41 which = PREV }
+			}
+		}
+	]
+
+	
+	### Military tech modifier on Good costs = (MilTech * 0.005 + 0.5)
+	export_to_key = { lhs = Public_Tmp9 value = mil_tech who = owner }
+	multiply_key = { lhs = Public_Tmp9 value = 0.005 }
+	change_key = { lhs = Public_Tmp9 value = 0.5 }
+	
+	### Modify certain good needs by mil tech modifier
+	multiply_key = { lhs = $out$22 which = Public_Tmp9 } # Military Product
+	multiply_key = { lhs = $out$24 which = Public_Tmp9 } # Industrial Product
+	multiply_key = { lhs = $out$41 which = Public_Tmp9 } # Knowledge
+	
+	### Modify all good needs by training modifier
+	multiply_key = { lhs = $out$1 which = Modi_MilRecruit }
+	multiply_key = { lhs = $out$2 which = Modi_MilRecruit }
+	multiply_key = { lhs = $out$5 which = Modi_MilRecruit }
+	multiply_key = { lhs = $out$21 which = Modi_MilRecruit }
+	multiply_key = { lhs = $out$22 which = Modi_MilRecruit }
+	multiply_key = { lhs = $out$24 which = Modi_MilRecruit }
+	multiply_key = { lhs = $out$41 which = Modi_MilRecruit }
+}
+
+Military_GetBudget = {
+	set_key = { lhs = $from$_MilBudget value = 0 }
+	if = { # If Wealth >= 1 and Class pop exist in province calculate budget
+		limit = {
+			check_key = { lhs = $wealth$ value = 1 } 
+		}
+		# Calculate base budget - (25 + ClassPower) * Wealth / 125 * 0.04 * Modi_MilClassBudget
+		set_key = { lhs = $from$_MilBudget  value = 25 }
+	
+		[[clans]
+		if = {
+			limit = {
+				always = $clans$
+			}
+			set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+			multiply_key = { lhs = Public_Tmp9 value = 1.5 }
+			if = {
+				limit = {
+					check_key = { lhs = Public_Tmp9 value = 100 }
+				}
+				set_key = { lhs = Public_Tmp9 value = 100 }
+			}
+			change_key = { lhs = $from$_MilBudget  which = Public_Tmp9 }
+			# If clans multiply budget with (TRPow*2*0.01)+Budget (Boundaries: upper TRPow = 50, lower TRPow = 2.5)
+			if = {
+				limit = {
+					check_key = { lhs = Prov_TRPow value = 50 }
+				}
+				set_key = { lhs = Public_Tmp9 value = 100 }
+			}
+			else = {
+				set_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+				multiply_key = { lhs = Public_Tmp9 value = 2 }
+				if = {
+					limit = {
+						NOT = { check_key = { lhs = Public_Tmp9 value = 5 } }
+					}
+					set_key = { lhs = Public_Tmp9 value = 5 }
+				}
+			}
+			multiply_key = { lhs = $from$_MilBudget  which = Public_Tmp9 }
+			multiply_key = { lhs = $from$_MilBudget  value = 0.01 }
+		}
+		]
+		[[elite]
+		if = {
+			limit = {
+				always = $elite$
+			}
+			change_key = { lhs = $from$_MilBudget  which = Prov_$from$Pow } # Elites are simply + power
+			# If non clans elite subtract clans part of budget - ((100 - TRPow)*0.01) * Budget
+			if = {
+				limit = {
+					check_key = { lhs = Prov_TRPow value = 50 }
+				}
+				set_key = { lhs = Public_Tmp9 value = 0 }
+			}
+			else = {
+				set_key = { lhs = Public_Tmp9 value = 50 }
+				subtract_key = { lhs = Public_Tmp9 which = Prov_TRPow }
+				multiply_key = { lhs = Public_Tmp9 value = 2 }
+				multiply_key = { lhs = $from$_MilBudget  which = Public_Tmp9 }
+				multiply_key = { lhs = $from$_MilBudget  value = 0.01 }
+			}
+		}
+		]
+		multiply_key = { lhs = $from$_MilBudget  which = $wealth$ }
+		if = {
+			limit = {
+				check_key = { lhs = $from$_MilBudget value = 0.01 } 
+			}
+			divide_key = { lhs = $from$_MilBudget  value = 125 } # /125
+			multiply_key = { lhs = $from$_MilBudget  value = 0.04 } # /20
+			multiply_key = { lhs = $from$_MilBudget  which = Modi_Mil$from$Budget }
+		}
+	}
+}
+
+Mil_DoBudgetBU = {
+	### Get Military Expenside Slider Position
+	if = {
+		limit = {
+			OR = {
+				check_key = { lhs = Mil_BUSlider value = 1.001 }
+				NOT = { check_key = { lhs = Mil_BUSlider value = 0.3 } } ## min from the defines, also change the calc of the slider
+			}
+		}
+		set_key = { lhs = Mil_BUSlider value = 1 }
+	}
+	else_if = {
+		limit = {
+			NOT = { check_key = { lhs = Mil_BUSlider value = 0.333 } } ## rounding errors
+		}
+		set_key = { lhs = Mil_BUSlider value = 0.333 }
+	}
+	set_key = { lhs = Mil_BUSliderSave which = Mil_BUSlider } # Clear country key
+	# Add Slider Key to all provinces - Mil_BUSlider added monthly by event POP_Stockpile.002 in pulse system
+	every_owned_province = {
+		set_key = { lhs = MP_Losses value = 0 }
+		set_key = { lhs = Mil_BUSliderSave which = PREV }
+	}
+	set_key = { lhs = Mil_BUSlider value = 0 } # Clear country key
+	####
+	# HANDLE BUDGETING EXCEPTIONS
+	###
+	## this is all yearly income
+	## use the tax income
+	set_key = { lhs = BU_MilBudget which = TaxD_Total }
+	subtract_key = { lhs = BU_MilBudget value = 5 } ## factor out base Familial Estates income
+	if = {
+		limit = {
+			check_key = { lhs = BU_MilBudget value = 0.01 }
+		}
+		multiply_key = { lhs = BU_MilBudget value = 0.01 } ## full budget Tmp_1
+		multiply_key = { lhs = BU_MilBudget which = Mil_BUBudgetMult } ## BUDGETTING % IN MENU
+	}
+	
+	change_key = { lhs = BU_MilBudget value = 5 } ## add back 5 ducats of base Familial Estates income
+
+	set_key = { lhs = Tmp_0 value = 0 }
+	set_key = { lhs = Mil_StateSpendMulti value = 0 }
+	## Calculate Total and per Province taxed manpower
+	every_owned_province = {
+		set_key = { lhs = BU_MilBudget value = 0 }
+		# Add up all taxed manpower in Tmp_0
+		set_key = { lhs = Tmp_0 which = BU_MPSF }
+		change_key = { lhs = Tmp_0 which = BU_MPRE }
+		change_key = { lhs = Tmp_0 which = BU_MPNO }
+		change_key = { lhs = Tmp_0 which = BU_MPBG }
+		change_key = { lhs = Tmp_0 which = BU_MPCL }
+		change_key = { lhs = Tmp_0 which = BU_MPSpecial }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 0.1 }
+			}
+			multiply_key = { lhs = Tmp_0 value = 0.01 } # can reduce it without needing to rescale it
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 0.001 }
+			}
+			set_key = { lhs = Tmp_0 value = 0.001 }
+		}
+		PREV = { change_key = { lhs = Tmp_0 which = PREV } } # Store total sum in owner
+
+		### Also, we're going to figure out potential MP costs
+		# Sum up the maximum manpower
+		set_key = { lhs = Mil_StateSpendMulti value = 0 }
+		change_key = { lhs = Mil_StateSpendMulti which = Mil_VolunteerHigh }
+		change_key = { lhs = Mil_StateSpendMulti which = Mil_LevyHigh }
+		change_key = { lhs = Mil_StateSpendMulti which = Mil_ConscriptHigh }
+		# Price this manpower
+		multiply_key = { lhs = Mil_StateSpendMulti which = Mil_CostMaint }
+		multiply_key = { lhs = Mil_StateSpendMulti which = Modi_MilBUCost }
+		multiply_key = { lhs = Mil_StateSpendMulti which = Modi_MilBUMaint }
+		if = {
+			limit = {
+				check_key = { lhs = Mil_StateSpendMulti value = 0.001 }
+			}
+			multiply_key = { lhs = Mil_StateSpendMulti value = 0.01 } # can reduce it without needing to rescale it
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Mil_StateSpendMulti value = 0.001 } }
+				}
+				set_key = { lhs = Mil_StateSpendMulti value = 0.001 }
+			}
+		}
+		PREV = { change_key = { lhs = Mil_StateSpendMulti which = PREV } } # Store total sum in owner
+	}
+	set_key = { lhs = Tmp_1 which = Tmp_0 }
+	
+	# Now we need to figure out a stat for AI Tax, so it can understand that all this potential manpower is liekly not actually achievable
+	set_key = { lhs = Tmp_2 which = BU_MilBudget }
+	multiply_key = { lhs = Tmp_2 value = 0.01 } # can reduce it without needing to rescale it
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Tmp_2 value = 0.001 } }
+		}
+		set_key = { lhs = Tmp_2 value = 0.001 }
+	}
+	# If Potential Manpower is >>> Budgeted Manpower, set the AI Delegator to see that
+	if = {
+		limit = {
+			check_key = { lhs = Mil_StateSpendMulti which = Tmp_2 }
+			NOT = { is_key_equal = { lhs = Mil_StateSpendMulti which = Tmp_2 } }
+		}
+		divide_key = { lhs = Tmp_2 which = Mil_StateSpendMulti }
+		set_key = { lhs = Mil_StateSpendMulti which = Tmp_2 }
+	}
+	# Otherwise, set it to a flat 1x, all manpower is seen
+	else = {
+		set_key = { lhs = Mil_StateSpendMulti value = 1 }
+	}
+	# Distribute Budget over provinces
+	every_owned_province = {
+		if = {
+			limit = {
+				owner = { has_country_flag = Mil_BUScale }
+			}
+			set_key = { lhs = Mil_BUScaleMult which = PREV }
+			multiply_key = { lhs = Mil_StateSpendMulti which = Mil_BUScaleMult }
+			multiply_key = { lhs = Mil_StateSpendMulti value = 0.01 }
+			set_key = { lhs = BU_MilBudget which = Mil_StateSpendMulti }
+			set_key = { lhs = Mil_StateSpendMulti which = Mil_BUScaleMult }
+		}
+		else = {
+			set_key = { lhs = Mil_StateSpendMulti which = PREV }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 0.001 }
+			}
+			set_key = { lhs = Tmp_1 which = PREV }
+			divide_key = { lhs = Tmp_0 which = Tmp_1 }
+			set_key = { lhs = BU_MilBudget which = PREV }
+			multiply_key = { lhs = BU_MilBudget which = Tmp_0 }
+		}
+		# Universally apply this visibility
+	}
+}
+
+Military_GetSpend = {
+	set_key = { lhs = $return$ value = 0 }
+
+	set_key = { lhs = PublicHelper_Tmp1 which = $in$1 } 
+	set_key = { lhs = PublicHelper_Tmp2 which = $in$2 } 
+	set_key = { lhs = PublicHelper_Tmp3 which = $in$5 } 
+	set_key = { lhs = PublicHelper_Tmp4 which = $in$21 }
+	set_key = { lhs = PublicHelper_Tmp5 which = $in$22 }
+	set_key = { lhs = PublicHelper_Tmp6 which = $in$24 }
+	set_key = { lhs = PublicHelper_Tmp7 which = $in$41 }
+	
+	multiply_key = { lhs = PublicHelper_Tmp1 which = TN_SectorSpend1 }
+	multiply_key = { lhs = PublicHelper_Tmp2 which = TN_SectorSpend2 }
+	multiply_key = { lhs = PublicHelper_Tmp3 which = TN_SectorSpend5 }
+	multiply_key = { lhs = PublicHelper_Tmp4 which = TN_SectorSpend21 }
+	multiply_key = { lhs = PublicHelper_Tmp5 which = TN_SectorSpend22 }
+	multiply_key = { lhs = PublicHelper_Tmp6 which = TN_SectorSpend24 }
+	multiply_key = { lhs = PublicHelper_Tmp7 which = TN_SectorSpend41 }
+	
+	change_key = { lhs = $return$ which = PublicHelper_Tmp1 }
+	change_key = { lhs = $return$ which = PublicHelper_Tmp2 }
+	change_key = { lhs = $return$ which = PublicHelper_Tmp3 }
+	change_key = { lhs = $return$ which = PublicHelper_Tmp4 }
+	change_key = { lhs = $return$ which = PublicHelper_Tmp5 }
+	change_key = { lhs = $return$ which = PublicHelper_Tmp6 }
+	change_key = { lhs = $return$ which = PublicHelper_Tmp7 }
+}
+
+Military_GetFillHelper = {
+	set_key = { lhs = Public_Tmp9 value = 100 }
+	change_key = { lhs = Public_Tmp9 which = TN_ProvFill$prod$ }
+	change_key = { lhs = Public_Tmp9 which = Mil_Fill$prod$ }
+	
+	multiply_key = { lhs = Public_Tmp9 value = 0.005 }	
+	multiply_key = { lhs = $return$ which = Public_Tmp9 }
+}
+
+Military_GetFill = {
+	set_key = { lhs = $return$ value = 1 }
+	
+	Military_GetFillHelper = { prod = 1 return = $return$ }
+	Military_GetFillHelper = { prod = 2 return = $return$ }
+	Military_GetFillHelper = { prod = 5 return = $return$ }
+	Military_GetFillHelper = { prod = 21 return = $return$ }
+	Military_GetFillHelper = { prod = 22 return = $return$ }
+	Military_GetFillHelper = { prod = 24 return = $return$ }
+	Military_GetFillHelper = { prod = 41 return = $return$ }
+}
+# Get cost per good per unit, for both training and recruitment
+Military_GetCost = {
+	Military_Get$type$ = { out = Mil_ } # Get amount of goods per category needed for $type$
+	
+	### Multiply Goods need by Sector Price to get costs
+	multiply_key = { lhs = Mil_1 which = TN_ProvPrc1 }   # Food
+	multiply_key = { lhs = Mil_2 which = TN_ProvPrc2 }   # Salt
+	multiply_key = { lhs = Mil_5 which = TN_ProvPrc5 }   # Fuel
+	multiply_key = { lhs = Mil_21 which = TN_ProvPrc21 } # Consumer Product
+	multiply_key = { lhs = Mil_22 which = TN_ProvPrc22 } # Military Product
+	multiply_key = { lhs = Mil_24 which = TN_ProvPrc24 } # Industrial Product
+	multiply_key = { lhs = Mil_41 which = TN_ProvPrc41 } # Knowledge
+	
+	### Sum up total costs in $return$
+	set_key = { lhs = $return$ which = Mil_1 }     # Food
+	change_key = { lhs = $return$ which = Mil_2 }  # Salt
+	change_key = { lhs = $return$ which = Mil_5 }  # Fuel
+	change_key = { lhs = $return$ which = Mil_21 } # Consumer Product
+	change_key = { lhs = $return$ which = Mil_22 } # Military Product
+	change_key = { lhs = $return$ which = Mil_24 } # Industrial Product
+	change_key = { lhs = $return$ which = Mil_41 } # Knowledge
+}
+
+Military_DoTransport = {
+	set_key = { lhs = Mil_5  value = 0.050 } # Fuel
+	set_key = { lhs = Mil_22 value = 0.000 } # Military
+	set_key = { lhs = Mil_23 value = 0.038 } # Naval
+	set_key = { lhs = Mil_24 value = 0.005 } # Industrial
+	
+	multiply_key = { lhs = Mil_5 which = SP_Transport }
+	multiply_key = { lhs = Mil_23 which = SP_Transport }
+	multiply_key = { lhs = Mil_24 which = SP_Transport }
+	
+	export_to_key = { lhs = Public_Tmp9 value = dip_tech }
+	multiply_key = { lhs = Public_Tmp9 value = 0.015 }
+	change_key = { lhs = Public_Tmp9 value = 0.8 }
+	
+	multiply_key = { lhs = Mil_23 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_24 which = Public_Tmp9 }
+	
+	subtract_key = { lhs = Public_Tmp9 value = 0.75 }
+	
+	if = {
+		limit = {
+			check_key = { lhs = Public_Tmp9 value = 0 }
+		}
+		multiply_key = { lhs = Mil_5 which = Public_Tmp9 }
+	}
+	else = {
+		set_key = { lhs = Mil_5 value = 0 }
+	}
+	
+	change_key = { lhs = Mil_Navy5 which = Mil_5 }
+	change_key = { lhs = Mil_Navy23 which = Mil_23 }
+	change_key = { lhs = Mil_Navy24 which = Mil_24 }
+}
+
+Military_DoGalley = {
+	set_key = { lhs = Mil_5  value = 0.050 } # Fuel
+	set_key = { lhs = Mil_22 value = 0.015 } # Military
+	set_key = { lhs = Mil_23 value = 0.050 } # Naval
+	set_key = { lhs = Mil_24 value = 0.013 } # Industrial
+	
+	multiply_key = { lhs = Mil_22 which = SP_Galley }
+	multiply_key = { lhs = Mil_23 which = SP_Galley }
+	multiply_key = { lhs = Mil_24 which = SP_Galley }
+	
+	export_to_key = { lhs = Public_Tmp9 value = dip_tech }
+	multiply_key = { lhs = Public_Tmp9 	value = 0.015 }
+	change_key = { lhs = Public_Tmp9 	value = 0.8 }
+	
+	multiply_key = { lhs = Mil_22 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_23 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_24 which = Public_Tmp9 }
+
+	subtract_key = { lhs = Public_Tmp9 value = 0.75 }
+	
+	if = {
+		limit = {
+			check_key = { lhs = Public_Tmp9 value = 0 }
+		}
+		multiply_key = { lhs = Mil_5 which = Public_Tmp9 }
+	}
+	else = {
+		set_key = { lhs = Mil_5 value = 0 }
+	}
+
+	change_key = { lhs = Mil_Navy5  which = Mil_5 }
+	change_key = { lhs = Mil_Navy22 which = Mil_22 }
+	change_key = { lhs = Mil_Navy23 which = Mil_23 }
+	change_key = { lhs = Mil_Navy24 which = Mil_24 }
+}
+
+Military_DoLight = {
+	set_key = { lhs = Mil_5  value = 0.075 } # Fuel
+	set_key = { lhs = Mil_22 value = 0.020 } # Military
+	set_key = { lhs = Mil_23 value = 0.088 } # Naval
+	set_key = { lhs = Mil_24 value = 0.025 } # Industrial
+	
+	multiply_key = { lhs = Mil_5 which = SP_Light }
+	multiply_key = { lhs = Mil_22 which = SP_Light }
+	multiply_key = { lhs = Mil_23 which = SP_Light }
+	multiply_key = { lhs = Mil_24 which = SP_Light }
+	
+	export_to_key = { lhs = Public_Tmp9 value = dip_tech }
+	multiply_key = { lhs = Public_Tmp9 value = 0.015 }
+	change_key = { lhs = Public_Tmp9 value = 0.8 }
+	
+	multiply_key = { lhs = Mil_22 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_23 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_24 which = Public_Tmp9 }
+	
+	subtract_key = { lhs = Public_Tmp9 value = 0.75 }
+	
+	if = {
+		limit = {
+			check_key = { lhs = Public_Tmp9 value = 0 }
+		}
+		multiply_key = { lhs = Mil_5 which = Public_Tmp9 }
+	}
+	else = {
+		set_key = { lhs = Mil_5 value = 0 }
+	}
+	
+	change_key = { lhs = Mil_Navy5 which = Mil_5 }
+	change_key = { lhs = Mil_Navy22 which = Mil_22 }
+	change_key = { lhs = Mil_Navy23 which = Mil_23 }
+	change_key = { lhs = Mil_Navy24 which = Mil_24 }
+}
+
+Military_DoHeavy = {
+	set_key = { lhs = Mil_5  value = 0.250 } # Fuel
+	set_key = { lhs = Mil_22 value = 0.100 } # Military
+	set_key = { lhs = Mil_23 value = 0.300 } # Naval
+	set_key = { lhs = Mil_24 value = 0.100 } # Industrial
+	
+	multiply_key = { lhs = Mil_5 which = SP_Heavy }
+	multiply_key = { lhs = Mil_22 which = SP_Heavy }
+	multiply_key = { lhs = Mil_23 which = SP_Heavy }
+	multiply_key = { lhs = Mil_24 which = SP_Heavy }
+	
+	export_to_key = { lhs = Public_Tmp9 value = dip_tech }
+	multiply_key = { lhs = Public_Tmp9 value = 0.015 }
+	change_key = { lhs = Public_Tmp9 value = 0.8 }
+	
+	multiply_key = { lhs = Mil_22 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_23 which = Public_Tmp9 }
+	multiply_key = { lhs = Mil_24 which = Public_Tmp9 }
+	
+	subtract_key = { lhs = Public_Tmp9 value = 0.75 }
+	
+	if = {
+		limit = {
+			check_key = { lhs = Public_Tmp9 value = 0 }
+		}
+		multiply_key = { lhs = Mil_5 which = Public_Tmp9 }
+	}
+	else = {
+		set_key = { lhs = Mil_5 value = 0 }
+	}
+	
+	change_key = { lhs = Mil_Navy5 which = Mil_5 }
+	change_key = { lhs = Mil_Navy22 which = Mil_22 }
+	change_key = { lhs = Mil_Navy23 which = Mil_23 }
+	change_key = { lhs = Mil_Navy24 which = Mil_24 }
+}

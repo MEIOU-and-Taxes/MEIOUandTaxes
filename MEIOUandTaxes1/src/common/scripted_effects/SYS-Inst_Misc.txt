@@ -1,0 +1,343 @@
+Centralism_Check = {
+	if = {
+		limit = {
+			is_nomad = yes
+			has_reform = Pol_Identity3
+		}
+		add_country_modifier = {
+			name = Centralism_NotReady
+			duration = -1
+			hidden = yes
+		}
+	}
+	else_if = {
+		limit = {
+			has_country_modifier = Centralism_NotReady
+		}
+		remove_country_modifier = Centralism_NotReady
+	}
+}
+Inst_Get_Legalism = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, is capital
+    if = {
+        limit = {
+            OR = {
+                check_key = { lhs = Infra_Capitol value = 2 }
+
+                AND = {
+                    is_capital = yes
+
+                    check_key = { lhs = Infra_Capitol value = 1 }
+                }
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    } 
+
+    # Base 2, ruler adm value
+    if = {
+        limit = {
+            owner = {
+                adm = 4
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 5
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 6
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    }
+
+    # Factor 1, tribal power
+    set_key = { lhs = Tmp_1 value = 100 }
+    subtract_key = { lhs = Tmp_1 which = Prov_TRPow }
+    multiply_key = { lhs = Tmp_1 value = 0.01 }
+    multiply_key = { lhs = Tmp_1 which = Tmp_1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+    # Factor 2, state reach
+    set_key = { lhs = Tmp_1 which = Prov_BUPow }
+    multiply_key = { lhs = Tmp_1 value = 0.01 }
+    change_key = { lhs = Tmp_1 value = 1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Meritocracy_Inst = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, is capital
+    if = {
+        limit = {
+            OR = {
+                check_key = { lhs = Infra_Capitol value = 2 }
+
+                AND = {
+                    is_capital = yes
+
+                    check_key = { lhs = Infra_Capitol value = 1 }
+                }
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    }
+
+    # Base 2, ruler adm value
+    if = {
+        limit = {
+            owner = {
+                adm = 4
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 5
+            }
+        }
+        change_key = { lhs = $return$ value = 0.5 }
+    }
+    if = {
+        limit = {
+            owner = {
+                adm = 6
+            }
+        }
+        change_key = { lhs = $return$ value = 1 }
+    }
+    multiply_key = { lhs = $return$ value = 2 } # two factors for meritocracy inst gain
+
+    # Factor 1, Local Corruption
+    set_key = { lhs = Tmp_1 value = 100 }
+    subtract_key = { lhs = Tmp_1 which = Prov_BULoy }
+	multiply_key = { lhs = Tmp_1 value = 0.01 }
+    multiply_key = { lhs = Tmp_1 which = Tmp_1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 2, State Corruption
+    set_key = { lhs = Tmp_1 value = 100 }
+    subtract_key = { lhs = Tmp_1 which = State_Crpt }
+	multiply_key = { lhs = Tmp_1 value = 0.01 }
+    multiply_key = { lhs = Tmp_1 which = Tmp_1 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Banking = {
+    set_key = { lhs = $return$ value = 0 }
+    
+    # Base 1, province trade value
+    export_to_key = { lhs = Tmp_1 value = modifier:trade_value }
+    subtract_key = { lhs = Tmp_1 value = 3 }    #Reduced to 3 from 5 Trade Value needed to account for lower values overall seen in-game
+    multiply_key = { lhs = Tmp_1 value = 0.25 }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_1 value = 2 }
+        }
+        set_key = { lhs = Tmp_1 value = 2 }
+    }
+
+    change_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 1, province subsistence rating
+    set_key = { lhs = Tmp_1 value = 60 }
+    subtract_key = { lhs = Tmp_1 which = TN_SubsistenceDisp }
+    divide_key = { lhs = Tmp_1 value = 60 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 2, province burgher power
+    set_key = { lhs = Tmp_1 which = Prov_BGPow }
+    subtract_key = { lhs = Tmp_1 value = 40 }
+    divide_key = { lhs = Tmp_1 value = 60 }
+    multiply_key = { lhs = $return$ which = Tmp_1 }
+	
+	# Factor 3, commerce reform
+	if = {
+        limit = {
+            owner = {
+                Rights_BGCom8HasGreater = yes
+            }
+        }
+        multiply_key = { lhs = $return$ value = 1.5 }
+    }
+	if = {
+        limit = {
+            owner = {
+                Rights_BGCom9HasGreater = yes
+            }
+        }
+        multiply_key = { lhs = $return$ value = 1.25 }
+    }
+	if = {
+        limit = {
+            owner = {
+                Rights_BGCom10HasGreater = yes
+            }
+        }
+        multiply_key = { lhs = $return$ value = 1.25 }
+    }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Casual_Literacy = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, knowledge production size
+    set_key = { lhs = $return$ which = TN_ProvSply41 }
+    subtract_key = { lhs = $return$ value = 1 }
+    divide_key = { lhs = $return$ value = 4 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 1 }
+        }
+        set_key = { lhs = $return$ value = 1 }
+    }
+
+    multiply_key = { lhs = $return$ which = $return$ }
+
+    # Factor 1, flat value
+    multiply_key = { lhs = $return$ value = 2 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Columbian_Exchange = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, province trade value
+    export_to_key = { lhs = Tmp_1 value = modifier:trade_value }
+    subtract_key = { lhs = Tmp_1 value = 4 }
+    multiply_key = { lhs = Tmp_1 value = 0.25 }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_1 value = 2 }
+        }
+        set_key = { lhs = Tmp_1 value = 2 }
+    }
+    if = {
+        limit = {
+            NOT = { Banking = 100 }
+			NOT = { continent = north_america }
+			NOT = { continent = south_america }
+        }
+        multiply_key = { lhs = Tmp_1 value = 0.5 }
+    }
+
+    change_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 1, flat value
+    multiply_key = { lhs = $return$ value = 1.5 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Scientific_Method = {
+    set_key = { lhs = $return$ value = 0 }
+    
+    # Base 1, amount of academic infrastructure
+    set_key = { lhs = $return$ which = Building_Academic }
+    subtract_key = { lhs = $return$ value = 4 }
+    divide_key = { lhs = $return$ value = 2 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 1 }
+        }
+        set_key = { lhs = $return$ value = 1 }
+    }
+}
+
+Inst_Get_Global_Trade = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, province trade value
+    export_to_key = { lhs = Tmp_1 value = modifier:trade_value }
+    subtract_key = { lhs = Tmp_1 value = 5 }
+    multiply_key = { lhs = Tmp_1 value = 0.2 }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_1 value = 2 }
+        }
+        set_key = { lhs = Tmp_1 value = 2 }
+    }
+
+    change_key = { lhs = $return$ which = Tmp_1 }
+
+    # Factor 1, flat value
+    multiply_key = { lhs = $return$ value = 1.5 }
+
+    set_key = { lhs = Tmp_1 value = 0 }
+}
+
+Inst_Get_Academia = {
+    set_key = { lhs = $return$ value = 0 }
+    
+    # Base 1, amount of academic infrastructure 
+    #Same as Scientific Method, but requires twice as much Academic Infrastructure
+    set_key = { lhs = $return$ which = Building_Academic }
+    subtract_key = { lhs = $return$ value = 9 }
+    divide_key = { lhs = $return$ value = 4 }
+    
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 1 }
+        }
+        set_key = { lhs = $return$ value = 1 }
+    }
+}
+
+Inst_Get_Nationalism = {
+    set_key = { lhs = $return$ value = 0 }
+    set_key = { lhs = percentage_own_culture_group which = owner }
+
+	#increase = (percentage_own_culture_group -20)/20, capped at 2
+	#everything above 60% caps at 2, everything below 20% has no increase, linear relation in between
+    set_key = { lhs = $return$ which = percentage_own_culture_group }
+    subtract_key = { lhs = $return$ value = 20 }
+    divide_key = { lhs = $return$ value = 20 }
+
+    if = { 
+        limit = { 
+            check_key = { lhs = $return$ value = 2 }
+        }
+        set_key = { lhs = $return$ value = 2 }
+    }
+}
+
+Inst_Get_Industrialisation = {
+    set_key = { lhs = $return$ value = 0 }
+
+    # Base 1, amount of industrial infrastructure
+    set_key = { lhs = $return$ which = Building_Industrial }
+    subtract_key = { lhs = $return$ value = 24 }
+    divide_key = { lhs = $return$ value = 10 }
+
+    if = {
+        limit = {
+            check_key = { lhs = $return$ value = 2 }
+        }
+        set_key = { lhs = $return$ value = 2 }
+    }
+}

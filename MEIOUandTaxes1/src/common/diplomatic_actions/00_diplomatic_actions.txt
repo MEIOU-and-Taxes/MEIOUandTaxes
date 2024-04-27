@@ -1,0 +1,5717 @@
+# INSTRUCTIONS:
+#
+# condition				A diplomatic action can have any number of condition blocks, each with its own
+#						tooltip, potential and allow section
+#
+# 	tooltip					Sets a custom text string similar to the hardcoded limits
+# 							If no tooltip is scripted, the tooltip for the actual trigger will be shown
+#							Note that the custom tooltip is only shown if the allow trigger is NOT met
+#
+# 	potential				Determines if the trigger is applicable or not
+# 	allow					Determines if the action is valid or not
+#
+# effect				A diplomatic action can only have one effect block
+
+# ROOT					actor
+# FROM					target
+
+########################################
+# DIPLOMATIC ACTIONS
+########################################
+# royal_marriage
+# declarewar
+# requestpeace
+# support_independence_action
+# allianceaction
+# embargoaction
+# annexationaction
+# integrationaction
+# vassalaction
+# guaranteeaction
+# warningaction
+# threaten_war
+# milaccess
+# fleet_access
+# offer_fleet_access
+# offermilaccess
+# insultaction
+# giftaction
+# claimaction
+# callaction
+# offerloan
+# warsubsidy
+# sellprov
+# imperial_relations_action
+# imperial_realm_war_action
+# religious_unity_action
+# grant_electorate
+# remove_electorate
+# grant_freecity
+# remove_freecity
+# demand_unlawful_territory_action
+# call_crusade_action
+# excommunicate_action
+# enforce_peace
+# improve_relation
+# fabricate_claim
+# justify_trade_conflict
+# transfer_trade_power
+# infiltrate_administration
+# sabotage_reputation
+# support_rebels
+# sow_discontent
+# agitate_for_liberty
+# form_coalition
+# request_to_join_federation
+# invite_to_federation
+# support_heir
+# break_marriage
+# designate_march
+# ask_for_march
+# sell_ships_action
+# abandon_union
+# takeondebt
+# influence_nation
+# claim_states
+# steer_trade
+# stealmap
+# spy_network
+# invite_to_trade_league
+# request_to_join_trade_league
+# sharemap
+# intervene_in_war
+# break_alliance
+# tributary_state_action
+# ask_for_tributary_state_action
+# knowledge_sharing
+
+royal_marriage = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = MARWAR
+		potential = {
+		}
+		allow = {
+			NOT = { war_with = FROM }
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+				FROM = { tag = CHG }
+				FROM = { tag = WHI }
+				FROM = { tag = GOL }
+				FROM = { tag = BLU }
+				FROM = { tag = MGH }
+			}
+		}
+		allow = {
+			is_year = 1360
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+			FROM = {
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+			}
+		}
+	}
+	condition = {
+        tooltip = NOMINALNOPE
+        potential = {
+            is_subject_of_type = daimyo_vassal
+        }
+        allow = {
+            overlord = {
+                OR = {
+                    has_reform = Pol_NominalEmpire
+                    has_reform = Yuan_Monarchy
+                    has_reform = Horde_MonarchyS
+                    has_reform = Horde_Monarchy
+                    has_reform = celestial_empire
+                    has_reform = shogunate
+                    #will be revisited during Japan rework
+                }
+				#is_key_equal = { lhs = Pol_Privileges value = 10 }
+			}
+        }
+    }
+    condition = {
+        tooltip = NOT_ALLOWED_REBEL_TAG
+
+        potential = {
+            has_country_flag = civil_war_rebel_tag
+        }
+        allow = {
+            always = no
+        }
+    }
+}
+
+callaction = {
+    condition = {
+        tooltip = CIVIL_WAR_NO_OUTSIDERS
+
+        potential = {
+            has_country_flag = ongoing_civil_war
+        }
+        allow = {
+            always = no
+        }
+    }
+}
+
+declarewar = {
+    condition = {
+        tooltip = CHINA_JUSTDIVIDED
+        potential = {
+            has_country_modifier = China_SubTag
+        }
+        allow = {
+            always = no
+        }
+    }
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = AI_WAR_STRENGTH_BLOCK
+		potential = {
+			ai = yes
+            is_free_or_tributary_trigger = yes
+            NOT = { is_league_leader = yes }
+		}
+		allow = {
+			check_key = { lhs = Diplo_Alliance_Strength which = FROM } # alliance strength at least as high as target
+		}
+	}
+	condition = {
+		tooltip = DONTTOUCHTHAT
+		potential = {
+			FROM = { NOT = { num_of_cities = 2 } owns_or_non_sovereign_subject_of = 1402 }
+			1402 = {
+				has_building = theodosian_walls_b
+				NOT = { any_neighbor_province = { NOT = { country_or_non_sovereign_subject_holds = ROOT } } }
+			}
+			NOT = { owns_or_non_sovereign_subject_of = 1402 } # Konstantinoupolis
+			ai = yes
+		}
+		allow = {
+			mil_tech = 21
+			army_size = 20	#Higher army size increases the likelihood the AI will have sufficient cannons
+			manpower = 20
+			num_of_artillery = 3	#Make sure that the AI has enough starting cannons for the siege
+		}
+	}
+	condition = {
+		tooltip = autonomous_vassal_no_overlord_dow
+		potential = {
+			FROM = {
+				is_subject_of = ROOT
+				is_subject_of_type = daimyo_vassal
+			}
+			NOT = { 
+                OR = {
+                    has_reform = Pol_NominalEmpire
+                    has_reform = Yuan_Monarchy
+                    has_reform = Horde_MonarchyS
+                    has_reform = Horde_Monarchy
+                    has_reform = celestial_empire
+                    has_reform = shogunate
+                    #will be revisited during Japan rework
+                }
+				#is_key_equal = { lhs = Pol_Privileges value = 10 }	
+			}
+		}
+		allow = { 
+			NOT = { 
+				FROM = {
+					is_subject_of = ROOT
+					is_subject_of_type = daimyo_vassal
+				}
+			}
+            OR = {
+                has_reform = Pol_NominalEmpire
+                has_reform = Yuan_Monarchy
+                has_reform = Horde_MonarchyS
+                has_reform = Horde_Monarchy
+                has_reform = celestial_empire
+                has_reform = shogunate
+                #will be revisited during Japan rework
+            }
+			#is_key_equal = { lhs = Pol_Privileges value = 10 }
+		}
+	}
+	condition = {
+		tooltip = TIMURNOPEIRAN
+		potential = {
+			Timur_Has = yes
+			ai = yes
+			FROM = { Timur_WestConquer = no }
+			any_known_country = { Timur_WestConquer = yes }
+		}
+		allow = {
+			always = no # kill them first
+		}
+	}
+	condition = {
+        tooltip = JAPANESEEMPIRE
+        potential = {
+            culture_group = japanese_g
+            is_subject = no
+            NOT = { overlord_of = FROM }
+            FROM = { 
+                culture_group = japanese_g
+                is_subject = yes
+            }
+        }
+        allow = {
+            always = no
+        }
+    }
+	condition = {
+		tooltip = DONTTOUCHTHAT
+		potential = {
+			exists = yes
+		}
+		allow = {
+			NOT = { tag = AAA }
+			NOT = { FROM = { tag = AAA } }
+		}
+	}
+    # condition = {
+	# 	tooltip = SOMETOOLTIP
+	# 	potential = {
+	# 		exists = yes
+	# 	}
+	# 	allow = {
+	# 		NOT = {capital_scope = { superregion = west_africa_superregion } }
+	# 		FROM = { capital_scope = { superregion = west_africa_superregion } }
+	# 	}
+	# }
+	condition = {
+		tooltip = UNSTABLEHORDEWAR 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+			}
+		}
+		allow = {
+			OR = {
+				ai = no
+				is_year = 1360
+			}
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+		}
+	}
+	condition = {
+		tooltip = NOTTWILIGHT
+		potential = {
+			ai = yes
+			FROM = { ai = yes }
+			OR = {
+				tag = DLH
+				is_subject_of = DLH
+			}
+			OR = {
+				has_country_flag = Twilight
+				FROM = { has_country_flag = Twilight }
+			}
+		}
+		allow = {
+			OR = {
+				AND = {
+					has_country_flag = Twilight
+					has_country_flag = TwilightEclipse
+				}
+				AND = {
+					FROM = { has_country_flag = Twilight }
+					FROM = { has_country_flag = TwilightEclipse }
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = NOTTSHAHRUKH
+		potential = {
+			ai = yes
+			FROM = { ai = yes }
+			OR = {
+				tag = TIM
+				is_subject_of = TIM
+			}
+		}
+		allow = {
+			NOT = { has_ruler_modifier = shahrukhs_empire }
+			FROM = { NOT = { has_ruler_modifier = shahrukhs_empire } }
+		}
+	}
+	condition = {
+		tooltip = BYZNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+				tag = BYZ
+			}
+		}
+		allow = {
+			OR = {
+				is_year = 1372
+				tag = OTT
+				2552 = { owned_by = BYZ }
+			}
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE
+		potential = {
+			ai = yes
+			FROM = {
+				tag = CHG
+			}
+		}
+		allow = {
+			is_year = 1360
+			OR = {
+				is_year = 1371
+				CHG = {
+					NOT = { has_country_flag = Horde_Collapse_Ongoing }
+					NOT = { has_country_flag = Horde_Ruler_Murdered }
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+	condition = {
+        tooltip = NOMINALNOPE
+        potential = {
+            is_subject_of_type = daimyo_vassal
+        }
+        allow = {
+            overlord = {
+                OR = {
+                    has_reform = Pol_NominalEmpire
+                    has_reform = Yuan_Monarchy
+                    has_reform = Horde_MonarchyS
+                    has_reform = Horde_Monarchy
+                    has_reform = celestial_empire
+                    has_reform = shogunate
+                    #will be revisited during Japan rework
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = HYWNOPE
+		potential = {
+			has_global_flag = hundred_years_war
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				tag = FRA
+				tag = ENG
+			}
+		}
+		allow = {
+			OR = {
+				AND = {
+					tag = ENG
+					FROM = { tag = FRA }
+				}
+				AND = {
+					tag = FRA
+					FROM = { tag = ENG }
+				}
+				core_claim = FROM
+			}
+		}
+	}
+    condition = {
+        tooltip = CIVIL_WAR_NO_OUTSIDERS
+
+        potential = {
+            always = yes
+        }
+        allow = {
+            NOT = { FROM = { has_country_flag = civil_war_rebel_tag } }
+        }
+    }
+    condition = {
+        tooltip = NOT_ALLOWED_REBEL_TAG
+
+        potential = {
+            has_country_flag = civil_war_rebel_tag
+        }
+        allow = {
+            always = no
+        }
+    }
+ 	effect = {
+		hidden_effect = {
+			if = {
+				limit = { FROM = { ai = yes isValidCountry = yes } }
+	
+				FROM = { set_country_flag = AITax_Yearly } # Refire Tax Calculation
+			}
+			if = {
+				limit = { ai = yes isValidCountry = yes }
+	
+				set_country_flag = AITax_Yearly # Refire Tax Calculation
+            }
+
+            ###########################
+            ## Estimate Navy Strength #
+            ###########################
+            country_event = { id = AI_War.01 days = 1}
+
+            ###########################
+            #### Handle subject CTA ###
+            ###########################
+			if = {
+				limit = { 
+					OR = {
+						has_subject_of_type	= appanage_subject
+						has_subject_of_type	= daimyo_vassal
+                        has_subject_of_type = personal_union_limited
+						has_subject_of_type = temporary_union_limited
+						has_subject_of_type = permanent_union_limited
+					}
+				}
+				set_country_flag = subject_cta_attacker
+				if = { 
+                    limit = {
+                        ai = yes
+                    }
+                    country_event = { id = mec_vassals.6 }
+                }
+                else = {
+                    country_event = { id = mec_vassals.6 days = 11 }
+                }
+			}
+			every_ally = {
+				limit = {
+                    OR = {
+                        is_in_war = {
+                            attacker_leader = ROOT
+                        }
+                        is_in_war = {
+                            defender_leader = ROOT
+                        }
+                    }
+					OR = {
+						has_subject_of_type	= appanage_subject
+						has_subject_of_type	= daimyo_vassal
+                        has_subject_of_type = personal_union_limited
+						has_subject_of_type = temporary_union_limited
+						has_subject_of_type = permanent_union_limited
+					}
+				}
+				set_country_flag = subject_cta_attacker
+                if = { 
+                    limit = {
+                        ai = yes
+                    }
+                    country_event = { id = mec_vassals.6 days = 1 random = 4 }
+                }
+                else = {
+                    country_event = { id = mec_vassals.6 days = 11 }
+                }
+			}
+			every_subject_country = {
+				limit = {
+					OR = {
+						has_subject_of_type	= appanage_subject
+						has_subject_of_type	= daimyo_vassal
+                        has_subject_of_type = personal_union_limited
+						has_subject_of_type = temporary_union_limited
+						has_subject_of_type = permanent_union_limited
+					}
+				}
+				set_country_flag = subject_cta_attacker
+				if = { 
+                    limit = {
+                        ai = yes
+                    }
+                    country_event = { id = mec_vassals.6 days = 1 random = 4 }
+                }
+                else = {
+                    country_event = { id = mec_vassals.6 days = 11 }
+                }
+			}
+
+			FROM = {
+				if = {
+					limit = { 
+						OR = {
+							has_subject_of_type	= appanage_subject
+							has_subject_of_type	= daimyo_vassal
+                            has_subject_of_type = personal_union_limited
+						    has_subject_of_type = temporary_union_limited
+						    has_subject_of_type = permanent_union_limited
+						}
+					}
+
+					set_country_flag = subject_cta_defender
+					
+					if = { 
+                        limit = {
+                            ai = yes
+                        }
+                        country_event = { id = mec_vassals.6 days = 6 }
+                    }
+                    else = {
+                        country_event = { id = mec_vassals.6 days = 14 }
+                    }	
+				}
+				every_ally = {
+					limit = {
+						OR = {
+							has_subject_of_type	= appanage_subject
+							has_subject_of_type	= daimyo_vassal
+                            has_subject_of_type = personal_union_limited
+						    has_subject_of_type = temporary_union_limited
+						    has_subject_of_type = permanent_union_limited
+						}
+					}
+					set_country_flag = subject_cta_defender
+					if = { 
+                        limit = {
+                            ai = yes
+                        }
+                        country_event = { id = mec_vassals.6 days = 6 random = 4 }
+                    }
+                    else = {
+                        country_event = { id = mec_vassals.6 days = 14 }
+                    }	
+				}
+				every_subject_country = {
+					limit = {
+						OR = {
+							has_subject_of_type	= appanage_subject
+							has_subject_of_type	= daimyo_vassal
+                            has_subject_of_type = personal_union_limited
+						    has_subject_of_type = temporary_union_limited
+						    has_subject_of_type = permanent_union_limited
+						}
+					}
+					set_country_flag = subject_cta_defender
+					if = { 
+                        limit = {
+                            ai = yes
+                        }
+                        country_event = { id = mec_vassals.6 days = 6 random = 4 }
+                    }
+                    else = {
+                        country_event = { id = mec_vassals.6 days = 14 }
+                    }	
+				}
+			}
+		}
+ 	}
+    condition = {
+		tooltip = HUNDREDYEARSWAR_FRA
+		potential = {
+			tag = FRA
+			has_global_flag = hundred_years_war
+		}
+		allow = {
+			FROM = {
+				OR = {
+					tag = ENG
+					is_subject_of = ENG
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = HUNDREDYEARSWAR_ENG
+		potential = {
+			tag = ENG
+			has_global_flag = hundred_years_war
+		}
+		allow = {
+			FROM = {
+				OR = {
+					tag = FRA
+					is_subject_of = FRA
+					# tag = SCO
+					# is_subject_of = SCO
+				}
+			}
+		}
+	}
+}
+
+requestpeace = {
+    condition = {
+        tooltip = NO_CIVIL_WAR
+        potential = {
+            has_country_flag = ongoing_civil_war
+        }
+        allow = {
+            FROM = { NOT = { has_country_flag = ongoing_civil_war } } #it allows to request peace in other wars when civil war starts
+        }
+    }
+    condition = {
+        tooltip = OVERLORD_PEACE
+        potential = {
+            FROM = { is_subject_other_than_tributary_trigger = yes }
+            war_with = FROM
+        }
+        allow = {
+            OR = {
+                is_in_war = {
+                    attacker_leader = FROM
+                    defenders = ROOT
+                }
+                is_in_war = {
+                    defender_leader = FROM
+                    attackers = ROOT
+                }
+                FROM = {
+                    overlord = {
+                        NOT = { war_with = ROOT }
+                    }
+                }
+            }
+
+
+        }
+    }
+    condition = {
+        tooltip = OVERLORD_PEACE
+        potential = {
+            is_subject_other_than_tributary_trigger = yes
+            war_with = FROM
+        }
+        allow = {
+            OR = {
+                overlord = {
+                    NOT = { war_with = FROM }
+                }
+                is_in_war = {
+                    attacker_leader = ROOT
+                    defenders = FROM
+                }
+                is_in_war = {
+                    defender_leader = ROOT
+                    attackers = FROM
+                }
+            }
+        }
+    }
+	condition = {
+        tooltip = lit_civil_war_sue_for_peace
+        potential = {
+            has_country_flag = lithuanian_civil_war
+        }
+        allow = {
+            FROM = { 
+				NOT = { has_country_flag = lithuanian_civil_war }
+		    }
+        }
+    }
+}
+
+support_independence_action = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = NEEDS_1358
+		potential = {
+			NOT = { is_year = 1358 }
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAP
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = no
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = no
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAPFROM
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = yes
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = yes
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATION
+		potential = {
+			NOT = { is_year = 1550 }
+			capital_scope = { region = north_caucasus_region }
+		}
+		allow = {
+			FROM = {
+				OR = {
+				    has_country_flag = CAUCASIANISOLATION
+                    is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATIONFROM
+		potential = {
+			NOT = { is_year = 1550 }
+			FROM = { capital_scope = { region = north_caucasus_region } }
+		}
+		allow = {
+			OR = {
+				has_country_flag = CAUCASIANISOLATION
+                is_neighbor_of = FROM
+			}
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+				FROM = { tag = CHG }
+				FROM = { tag = WHI }
+				FROM = { tag = GOL }
+				FROM = { tag = BLU }
+				FROM = { tag = MGH }
+			}
+		}
+		allow = {
+			is_year = 1360
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+			FROM = {
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+			}
+		}
+	}
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+             superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+}
+
+allianceaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = ALLIANCELIMIT
+		potential = {
+			always = yes
+		}
+		allow = {
+			check_key = { lhs = Diplo_Poss_Ally value = 1 }
+		}
+	}
+	condition = {
+		tooltip = FROMALLIANCELIMIT
+		potential = {
+			always = yes
+		}
+		allow = {
+			FROM = {
+				check_key = { lhs = Diplo_Poss_Ally value = 1 }
+			}
+		}
+	}
+    condition = {
+		tooltip = ALLIANCE_MIN_RELATIONS_CONDITIONS
+		potential = {
+			always=yes
+		}
+		allow = {
+            FROM = {
+				has_opinion = {
+					who = ROOT
+					value = 80
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = ALLIANCE_NEGOTIATIONS
+		potential = {
+			always = yes
+		}
+		allow = {
+			NOT = { has_global_flag = mec_diplomacy_alliance_negotiations }
+		}
+	}
+	condition = {
+		tooltip = JAPANSHOGUN
+		potential = {
+			OR = { 
+				has_global_flag = nanbokucho
+				has_global_flag = sengoku_jidai
+			}
+			OR = {
+				culture_group = japanese_g
+				FROM = {
+					culture_group = japanese_g
+				}
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				is_neighbor_of = FROM
+				any_subject_country = {
+					is_subject_other_than_tributary_trigger = yes
+					is_neighbor_of = FROM
+				}
+				FROM = {
+					any_subject_country = {
+						is_subject_other_than_tributary_trigger = yes
+						is_neighbor_of = ROOT
+					}
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = NANBOKUCHO
+		potential = {
+			culture_group = japanese_g
+			OR = {
+				has_country_modifier = title_5
+				has_country_modifier = title_6
+			}
+			FROM = {
+				culture_group = japanese_g
+				OR = {
+					has_country_modifier = title_5
+					has_country_modifier = title_6
+				}
+			}
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = TIMURNOPEIRAN
+		potential = {
+			OR = {
+				Timur_Has = yes
+				FROM = {
+					Timur_Has = yes
+				}
+			}
+			OR = {
+				culture_group = persian_group
+				FROM = { culture_group = persian_group }
+			}
+			ai = yes
+			FROM = { ai = yes }
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAP
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = no
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = no
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAPFROM
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = yes
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = yes
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATION
+		potential = {
+			NOT = { is_year = 1550 }
+			capital_scope = { region = north_caucasus_region }
+		}
+		allow = {
+			FROM = {
+                OR = {
+                    has_country_flag = CAUCASIANISOLATION
+                    is_neighbor_of = ROOT
+                }
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATIONFROM
+		potential = {
+			NOT = { is_year = 1550 }
+			FROM = { capital_scope = { region = north_caucasus_region } }
+		}
+		allow = {
+			OR = {
+				has_country_flag = CAUCASIANISOLATION
+                is_neighbor_of = FROM
+			}
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+				FROM = { tag = CHG }
+				FROM = { tag = WHI }
+				FROM = { tag = GOL }
+				FROM = { tag = BLU }
+				FROM = { tag = MGH }
+			}
+		}
+		allow = {
+			is_year = 1360
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+			FROM = {
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+			}
+		}
+	}
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+	
+	condition = {
+		tooltip = IRELANDNOPE
+		potential = {
+			ROOT = {
+				OR = {
+					primary_culture = irish 
+					primary_culture = hiberno_norman
+				}
+			}
+			FROM = { 
+					NOT = {
+						OR = {
+							primary_culture = irish 
+							primary_culture = hiberno_norman
+						}
+					}
+			}
+		}
+		allow = {
+			OR = {
+				FROM = { has_institution = Banking }
+				tag = IRE
+			}
+		}
+	}
+	
+	condition = {
+		tooltip = IRELANDNOPE
+		potential = {
+			FROM = {
+				always = yes 
+			}
+			FROM = { 
+					OR = {
+						primary_culture = irish 
+						primary_culture = hiberno_norman
+					}
+			}
+			NOT = { 
+					OR = {
+						primary_culture = irish 
+						primary_culture = hiberno_norman
+					}
+			}
+			
+		}
+		allow = {
+			OR = {
+				FROM = { has_institution = Banking }
+				tag = IRE
+			}
+		}
+	}
+	condition = {
+		tooltip = WEAK_ALLY_AI_BLOCK
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+		}
+		allow = {
+			FROM = {
+				military_strength = {
+					who = ROOT
+					value = 0.25
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = EMPERORNOPE
+		potential = {
+			ROOT = { is_emperor_of_china = yes }
+		}
+		allow = {
+			NOT = { is_emperor_of_china = yes }
+		}
+	}
+	condition = {
+		tooltip = EMPERORNOPE
+		potential = {
+			ROOT = { always = yes }
+		}
+		allow = {
+			FROM = { 
+				NOT = { is_emperor_of_china = yes }
+			}
+		}
+	}
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+             superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = FRASCHISMNOPE
+        potential = { 
+            tag = FRA
+            FROM = { tag = PAP }
+            exists = AVI 
+        }
+        allow = { always = no }
+    }
+	#condition = {
+		#tooltip = NOMINALNOPE
+		#potential = {
+		#	OR = {
+		#		is_subject_of_type = appanage_subject
+		#		is_subject_of_type = daimyo_vassal
+		#	}
+		#}
+		#allow = {
+		#	overlord = {
+        #        OR = {
+        #            has_reform = Pol_NominalEmpire
+        #            has_reform = Yuan_Monarchy
+        #            has_reform = Horde_MonarchyS
+        #            has_reform = Horde_Monarchy
+        #            has_reform = celestial_empire
+        #            has_reform = shogunate
+        #            #will be revisited during Japan rework
+        #        }
+		#	}
+		#}
+	#}
+	effect = {
+		# update alliance limit keys
+		hidden_effect = {
+			subtract_key = {
+				lhs = Diplo_Poss_Ally
+				value = 1
+			}
+			FROM = {
+				subtract_key = {
+					lhs = Diplo_Poss_Ally
+					value = 1
+				}		
+			}
+		}
+	}
+}
+
+embargoaction = {
+
+}
+
+annexationaction = {
+	condition = {
+		tooltip = ANNEX_TOO_LOW
+		potential = {
+			FROM = {
+				is_subject_of = ROOT
+			}
+		}
+		allow = {
+			FROM = {
+				has_opinion = {
+					who = ROOT
+					value = 100
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = decentralized_vassal_need_unitary
+		potential = {
+			FROM = {
+				is_subject_of = ROOT
+				is_subject_of_type = decentralized_vassal
+			}
+		}
+		allow = {
+			OR = { 
+				AND = {
+					FROM = {
+						culture_group = japanese_g
+					}
+					culture_group = japanese_g
+					has_reform = shogunate
+					#is_key_equal = { lhs = Pol_Privileges value = 4 }
+				}
+				has_reform = Pol_Structure5
+				#is_key_equal = { lhs = Pol_Structure value = 4 }
+				AND = {
+					OR = {
+						has_reform = Pol_Structure4
+						has_reform = Pol_Structure5
+						#check_key = { lhs = Pol_Structure value = 3 }
+					}
+					OR = {
+						has_reform = Pol_Military3
+						has_reform = Pol_Military4
+						#check_key = { lhs = Pol_Military value = 2 }
+					}
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = feudatory_appanage_need_federalism
+		potential = {
+			FROM = {
+				is_subject_of = ROOT
+				OR = {
+					is_subject_of_type = daimyo_vassal
+					is_subject_of_type = appanage_subject
+				}
+			}
+		}
+		allow = {
+			AND = {
+				OR = {
+					has_reform = Pol_Structure3
+					has_reform = Pol_Structure4
+					has_reform = Pol_Structure5
+				}
+				OR = {
+					has_reform = Pol_Military2
+					has_reform = Pol_Military3
+					has_reform = Pol_Military4
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = vassal_need_neighbour
+		potential = {
+			FROM = {
+				is_subject_of = ROOT
+				OR = {
+					is_subject_of_type = decentralized_vassal
+					is_subject_of_type = daimyo_vassal
+					is_subject_of_type = appanage_subject
+				}
+			}
+		}
+		allow = {
+			OR = {
+                is_neighbor_of = FROM
+				any_owned_province = {
+					any_friendly_coast_border_province = {
+						owner = {
+							tag = FROM
+						}
+					}
+				}
+				any_subject_country = {
+					no_border_count_trigger = no
+					any_neighbor_country = {
+						tag = FROM
+					}
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = ANNEX_INTEGRATION_UNFINISHED
+		potential = {
+			FROM = {
+				OR = {
+					is_subject_of_type = vassal
+					is_subject_of_type = custom_vassal
+				}
+			}
+		}
+		allow = {
+			FROM = {
+				subject_integrated_trigger = yes
+			}
+		}
+	}
+	#condition = {
+	#	tooltip = ANNEXINVALID
+	#	potential = {
+	#		FROM = {
+	#			is_vassal_of_trigger = { scp_root = yes }
+	#		}
+	#	}
+	#	allow = {
+	#		FROM = {
+	#			years_in_vassalage_under = {
+	#				who = ROOT
+	#				years = 10
+	#			}
+	#		}
+	#	}
+	#}
+}
+
+integrationaction = {
+	condition = {
+		tooltip = INTEGRATETOOLOWDESC
+		potential = {
+			senior_union_with = FROM
+		}
+		allow = {
+			FROM = {
+				has_opinion = {
+					who = ROOT
+					value = 100
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = ANNEX_INTEGRATION_UNFINISHED
+		potential = {
+			FROM = {
+				is_subject_of = ROOT
+				OR = {
+					is_subject_of_type = personal_union
+					is_subject_of_type = personal_union_limited
+				}
+			}
+		}
+		allow = {
+			FROM = {
+				subject_integrated_trigger = yes
+			}
+		}
+	}
+	#condition = {
+	#	tooltip = INTEGRATEINVALID
+	#	potential = {
+	#		senior_union_with = FROM
+	#	}
+	#	allow = {
+	#		FROM = {
+	#			years_in_union_under = {
+	#				who = ROOT
+	#				years = 50
+	#			}
+	#		}
+	#	}
+	#}
+}
+
+vassalaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = VASSALINVALID
+		potential = {
+		}
+		allow = {
+			FROM = {
+				OR = {
+					alliance_with = ROOT
+					guaranteed_by = ROOT
+				}
+				has_opinion = {
+					who = ROOT
+					value = 180
+				}
+			}
+			FROM = { is_at_war = no }
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+				FROM = { tag = CHG }
+				FROM = { tag = WHI }
+				FROM = { tag = GOL }
+				FROM = { tag = BLU }
+				FROM = { tag = MGH }
+			}
+		}
+		allow = {
+			is_year = 1360
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+			FROM = {
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+			}
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAP
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = no
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = no
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAPFROM
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = yes
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = yes
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATION
+		potential = {
+			NOT = { is_year = 1550 }
+			capital_scope = { region = north_caucasus_region }
+		}
+		allow = {
+			FROM = {
+                OR = {
+                    has_country_flag = CAUCASIANISOLATION
+                    is_neighbor_of = ROOT
+                }
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATIONFROM
+		potential = {
+			NOT = { is_year = 1550 }
+			FROM = { capital_scope = { region = north_caucasus_region } }
+		}
+		allow = {
+			OR = {
+				has_country_flag = CAUCASIANISOLATION
+                is_neighbor_of = FROM
+			}
+		}
+	}
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+             superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = POPENOPE
+        potential = { 
+            OR = {
+                FROM = { tag = PAP }
+                FROM = { tag = AVI }
+            } 
+        }
+        allow = { 
+            always = no 
+        }
+    }
+}
+
+guaranteeaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = TIMURNOPEIRAN
+		potential = {
+			OR = {
+				Timur_Has = yes
+				FROM = {
+					Timur_Has = yes
+				}
+			}
+			OR = {
+				culture_group = persian_group
+				FROM = { culture_group = persian_group }
+			}
+			ai = yes
+			FROM = { ai = yes }
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+				FROM = { tag = CHG }
+				FROM = { tag = WHI }
+				FROM = { tag = GOL }
+				FROM = { tag = BLU }
+				FROM = { tag = MGH }
+			}
+		}
+		allow = {
+			is_year = 1360
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+			FROM = {
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+			}
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAP
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = no
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = no
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = EASTWESTGAPFROM
+		potential = {
+			NOT = { is_year = 1500 }
+			EastWest = yes
+			NorthOrthodox = yes
+		}
+		allow = {
+			FROM = {
+				OR = {
+					EastWest = no
+					NorthOrthodox = yes
+					is_neighbor_of = ROOT
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATION
+		potential = {
+			NOT = { is_year = 1550 }
+			capital_scope = { region = north_caucasus_region }
+		}
+		allow = {
+			FROM = {
+                OR = {
+                    has_country_flag = CAUCASIANISOLATION
+                    is_neighbor_of = ROOT
+                }
+			}
+		}
+	}
+	condition = {
+		tooltip = CAUCASIANISOLATIONFROM
+		potential = {
+			NOT = { is_year = 1550 }
+			FROM = { capital_scope = { region = north_caucasus_region } }
+		}
+		allow = {
+			OR = {
+				has_country_flag = CAUCASIANISOLATION
+                is_neighbor_of = FROM
+			}
+		}
+	}
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+    condition = {
+        tooltip = NOT_ALLOWED_REBEL_TAG
+
+        potential = {
+            has_country_flag = civil_war_rebel_tag
+        }
+        allow = {
+            always = no
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+             superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = FRASCHISMNOPE
+        potential = { 
+            tag = FRA
+            FROM = { tag = PAP }
+            exists = AVI 
+        }
+        allow = { always = no }
+    }
+}
+
+warningaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = TIMURWARN
+		potential = {
+			FROM = {
+				tag = TIM
+			}
+		}
+		allow = {
+			always = no
+		}
+	}
+    condition = {
+        tooltip = NOT_ALLOWED_REBEL_TAG
+
+        potential = {
+            has_country_flag = civil_war_rebel_tag
+        }
+        allow = {
+            always = no
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+             superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+}
+
+threaten_war = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+             superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = CHINA_JUSTDIVIDED
+        potential = {
+            has_country_modifier = China_SubTag
+        }
+        allow = {
+            always = no
+        }
+    }
+    condition = {
+		tooltip = HUNDREDYEARSWAR_FRA
+		potential = {
+			tag = FRA
+			has_global_flag = hundred_years_war
+		}
+		allow = {
+			FROM = {
+				OR = {
+					tag = ENG
+					is_subject_of = ENG
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = HUNDREDYEARSWAR_ENG
+		potential = {
+			tag = ENG
+			has_global_flag = hundred_years_war
+		}
+		allow = {
+			FROM = {
+				OR = {
+					tag = FRA
+					is_subject_of = FRA
+					# tag = SCO
+					# is_subject_of = SCO
+				}
+			}
+		}
+	}
+}
+
+milaccess = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+fleet_access = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+offer_fleet_access = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+offermilaccess = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+insultaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+giftaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+claimaction = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+offerloan = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }	
+}
+
+warsubsidy = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+sellprov = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = OTTNOPE
+		potential = {
+			ai = yes
+			primary_culture = turkish
+			FROM = { tag = BYZ }
+		}
+		allow = {
+			always = no
+		}
+	}
+}
+
+demand_unlawful_territory_action = {
+	#condition = {
+	#	tooltip = demand_unlawful_territory_reforms
+	#	potential = {
+	#		always = yes
+	#	}
+	#	allow = {
+	#		hre_reform_passed = reichsreform
+	#	}
+	#}
+	condition = {
+		tooltip = demand_unlawful_territory_byzantines 
+		potential = {
+			always = yes
+		}
+		allow = { 
+			FROM = {
+				NOT = {
+					tag = BYZ
+					NOT = {
+						religion = catholic
+					}
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = demand_unlawful_territory_ai
+		potential = {
+			always = yes
+		}
+		allow = {
+			OR = {
+				ai = no
+				FROM = {
+					NOT = {
+						OR = {
+							diplomatic_reputation = 3
+							alliance_with = ROOT
+							guaranteed_by = ROOT
+							dip = 6
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+enforce_peace = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+    condition = {
+        tooltip = CIVIL_WAR_NO_OUTSIDERS
+
+        potential = {
+            always = yes
+        }
+        allow = {
+            FROM = { NOT = { has_country_flag = civil_war_rebel_tag } }
+        }
+    }
+    condition = {
+        tooltip = OVERLORD_PEACE
+        potential = {
+            FROM = { is_subject_other_than_tributary_trigger = yes }
+            war_with = FROM
+        }
+        allow = {
+            OR = {
+                is_in_war = {
+                    attacker_leader = FROM
+                    defenders = ROOT
+                }
+                is_in_war = {
+                    defender_leader = FROM
+                    attackers = ROOT
+                }
+                FROM = {
+                    overlord = {
+                        NOT = { war_with = ROOT }
+                    }
+                }
+            }
+
+
+        }
+    }
+    condition = {
+        tooltip = OVERLORD_PEACE
+        potential = {
+            is_subject_other_than_tributary_trigger = yes
+            war_with = FROM
+        }
+        allow = {
+            OR = {
+                overlord = {
+                    NOT = { war_with = FROM }
+                }
+                is_in_war = {
+                    attacker_leader = ROOT
+                    defenders = FROM
+                }
+                is_in_war = {
+                    defender_leader = ROOT
+                    attackers = FROM
+                }
+            }
+        }
+    }
+}
+
+improve_relation = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+fabricate_claim = { # Already range limited to neighboring provinces
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+justify_trade_conflict = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+transfer_trade_power = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+form_coalition = {
+	condition = {
+		tooltip = MINAGGRESSIVEEXPANSION
+		potential = {
+		}
+		allow = {
+			has_opinion_modifier = {
+				modifier = aggressive_expansion
+				who = FROM
+			}		
+			NOT = {
+				has_opinion_modifier = {
+					modifier = aggressive_expansion
+					who = FROM
+					value = -50
+				}
+			}
+		}
+	}
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+}
+
+infiltrate_administration = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+sabotage_reputation = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+support_rebels = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+sow_discontent = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+study_technology = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+agitate_for_liberty = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+request_to_join_federation = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+invite_to_federation = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+support_heir = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+#break_marriage = {
+#}
+#
+#designate_march = {
+#
+#}
+
+tributary_state_action = { #automatically checks the same triggers but reversed FROM/ROOT for "Become their tributary"
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = MOSCOVY_NO_TRIBUTARIES_OUTSIDE_NOMADS
+		potential = {
+			OR = {
+				is_subject_of_type = muscovite_tributary_state
+				culture_group = east_slavic
+			}
+		}
+		allow = {
+			FROM = {
+				is_nomad = yes
+				is_neighbor_of = ROOT
+			}
+		}
+	}
+	condition = {
+		tooltip = NOCHINATRIBUTE
+		potential = {
+            culture_group = chinese_group
+			has_country_flag = InMiddleKingdom
+			
+			FROM = {
+			    has_country_flag = InMiddleKingdom
+			}
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = NOCHINATRIBUTE
+		potential = {
+			tag = YUA
+			
+			FROM = {
+				culture_group = chinese_group
+			}
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = NOCHINATRIBUTE
+		potential = {
+			culture_group = chinese_group
+			
+			FROM = {
+				tag = YUA
+			}
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = UNSTABLEHORDE 
+		potential = {
+			OR = {
+				tag = CHG
+				tag = WHI
+				tag = GOL
+				tag = BLU
+				tag = MGH
+				FROM = { tag = CHG }
+				FROM = { tag = WHI }
+				FROM = { tag = GOL }
+				FROM = { tag = BLU }
+				FROM = { tag = MGH }
+			}
+		}
+		allow = {
+			is_year = 1360
+			NOT = { has_country_flag = Horde_Collapse_Ongoing }
+			NOT = { has_country_flag = Horde_Ruler_Murdered }
+			NOT = { has_country_modifier = horde_collapse }
+			FROM = {
+				NOT = { has_country_flag = Horde_Collapse_Ongoing }
+				NOT = { has_country_flag = Horde_Ruler_Murdered }
+				NOT = { has_country_modifier = horde_collapse }
+			}
+		}
+	}
+	condition = {
+		tooltip = TIMURNOPEIRAN
+		potential = {
+			OR = {
+				Timur_Has = yes
+				FROM = {
+					Timur_Has = yes
+				}
+			}
+			OR = {
+				culture_group = persian_group
+				FROM = { culture_group = persian_group }
+			}
+			ai = yes
+			FROM = { ai = yes }
+		}
+		allow = {
+			always = no
+		}
+	}
+	condition = {
+		tooltip = TIMURNOPE 
+		potential = {
+			OR = {
+				Timur_Has = yes
+				FROM = {
+					Timur_Has = yes
+				}
+			}
+		}
+		allow = {
+			OR = {
+				AND = {
+					FROM = {
+						Timur_Has = yes
+						has_opinion = {
+							who = ROOT
+							value = 125
+						}
+					}
+				}
+				AND = {
+					Timur_Has = yes
+					has_opinion = {
+						who = FROM
+						value = 125
+					}
+				}
+			}
+		}
+	}
+	condition = {
+		tooltip = TIBETNOPE
+		potential = {
+			ai = yes
+			FROM = {
+				ai = yes
+			}
+			OR = {
+				culture_group = tibetic
+				culture_group = pahari_group
+				FROM = { culture_group = tibetic }
+				FROM = { culture_group = pahari_group }
+			}
+		}
+		allow = {
+			OR = {
+				culture_group = FROM
+				FROM = { culture_group = ROOT }
+				NOT = { technology_group = indian }
+				is_year = 1800
+			}
+		}
+	}
+    condition = {
+        tooltip = SAHARANOPE
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = north_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                    superregion = west_africa_superregion
+                }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+    condition = {
+        tooltip = SAHARANOPEFROM
+        potential = {
+            NOT = { is_year = 1600 }
+            capital_scope = {
+                superregion = west_africa_superregion
+            }
+            FROM = {
+                capital_scope = {
+                  superregion = north_africa_superregion
+               }
+            }
+        }
+        allow = {
+            FROM = { is_neighbor_of = ROOT }
+        }
+    }
+}
+
+#ask_for_tributary_state_action = { #not necessarily to check for the reverse of the above conditions, game checks automatically and will double up on tooltips if you try
+#}
+
+knowledge_sharing = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+	condition = {
+		tooltip = CANTEMBRACEINSTITUTIONS
+		potential = {
+		}
+		allow = {
+			FROM = {
+				if = {
+					limit = {
+						NOT = { has_institution = Legalism }
+						ROOT = { has_institution = Legalism }
+					}
+					Inst_Can_Legalism_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Meritocracy_Inst }
+						ROOT = { has_institution = Meritocracy_Inst }
+					}
+					Inst_Can_Meritocracy_Inst_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Banking }
+						ROOT = { has_institution = Banking }
+					}
+					Inst_Can_Banking_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Columbian_Exchange }
+						ROOT = { has_institution = Columbian_Exchange }
+					}
+					Inst_Can_Columbian_Exchange_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Casual_Literacy }
+						ROOT = { has_institution = Casual_Literacy }
+					}
+					Inst_Can_Casual_Literacy_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Scientific_Method }
+						ROOT = { has_institution = Scientific_Method }
+					}
+					Inst_Can_Scientific_Method_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Global_Trade }
+						ROOT = { has_institution = Global_Trade }
+					}
+					Inst_Can_Global_Trade_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Academia }
+						ROOT = { has_institution = Academia }
+					}
+					Inst_Can_Academia_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Nationalism }
+						ROOT = { has_institution = Nationalism }
+					}
+					Inst_Can_Nationalism_Embrace = yes
+				}
+				else_if = {
+					limit = {
+						NOT = { has_institution = Industrialisation }
+						ROOT = { has_institution = Industrialisation }
+					}
+					Inst_Can_Industrialisation_Embrace = yes
+				}
+				else = {
+					always = no
+				}
+			}
+		}
+	}
+}
+
+request_to_join_trade_league = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+    condition = {
+		tooltip = POPENOPE
+		potential = {
+			OR = {
+                tag = AVI
+                tag = PAP
+            }
+		}
+		allow = {
+			always = no
+		}
+	}
+}
+
+invite_to_trade_league = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+    condition = {
+		tooltip = POPENOPE
+		potential = {
+			OR = {
+                FROM = { tag = PAP }
+                FROM = { tag = AVI }
+            }
+		}
+		allow = {
+			always = no
+		}
+	}
+}
+
+condottieri_action = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+sell_ships_action = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+abandon_union_action = {
+	condition = {
+		potential = {
+		}
+		allow = {
+			ROOT = {
+				senior_union_with = FROM
+				is_at_war = no
+			}
+		}
+	}
+}
+
+steer_trade = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+influence_nation = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+break_alliance = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+takeondebt = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+intervene_in_war = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+claim_states = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+spy_network = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+counterespionage = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+stealmap = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+sharemap = {
+    condition = {
+        tooltip = OUTSIDE_DIPLOMATIC_RANGE
+        potential = {
+            always = yes
+        }
+        allow = {
+            OR = {
+                AND = {
+                    ROOT = {
+                        is_emperor = yes
+                    }
+                    FROM = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        is_emperor = yes
+                    }
+                    ROOT = { is_part_of_hre = yes }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }     
+                    }
+                    ROOT = { 
+                        OR = {
+                            religion = catholic 
+                            religion = avignonist
+                        }
+                    }
+                }
+                AND = {
+                    FROM = {
+                        OR = {
+                            religion = catholic
+                            religion = avignonist
+                        }
+                    }
+                    ROOT = {
+                        OR = {
+                            tag = PAP
+                            tag = AVI
+                        }
+                    }
+                }
+                variable_arithmetic_trigger = {
+                    custom_tooltip = DIPLOMATIC_RANGE
+                    export_to_variable = {
+                        variable_name = border_distance
+                        value = border_distance
+                        who = FROM
+                        with = ROOT
+                    }
+                    check_variable = {
+                        which = oko
+                        which = border_distance
+                    }
+                }
+            }
+        }
+    }
+}
+
+trade_favors_for_men = {
+	condition = {
+		tooltip = NOPE
+        potential = {
+            always = yes
+        }
+        allow = {
+            always = no
+        }
+	}
+}
+trade_favors_for_sailors = {
+	condition = {
+		tooltip = NOPE
+        potential = {
+            always = yes
+        }
+        allow = {
+            always = no
+        }
+	}
+}

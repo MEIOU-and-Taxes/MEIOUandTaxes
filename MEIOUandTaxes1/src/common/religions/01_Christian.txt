@@ -1,0 +1,1154 @@
+
+#Christian
+#	Western
+#		Catholic					# 01
+#		Protestant					# 02
+#		Reformed					# 03
+#		Hussite						# 04
+#		Waldensian					# 05
+#		Lollard						# 06
+#		Avignonist					# 07
+#	Eastern
+#		Orthodox					# 08
+#		Oriental					# 09
+#		Assyrian					# 10
+#		Monophysite					# 11
+#	Dualist
+#		Bogomilist					# 12
+
+christian = { 
+	can_form_personal_unions = yes
+	crusade_name = CRUSADE
+	center_of_religion = 2530
+	flags_with_emblem_percentage = 33
+	flag_emblem_index_range = { 1 57}
+	catholic = { 
+		color = { 224 200 40 }
+		icon = 1
+		allowed_conversion = { }
+		allowed_center_conversion = { lollard hussite protestant waldensian reformed }
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = catholic
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = catholic
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		country = { 
+			tolerance_own = 1
+			global_missionary_strength = 0.01
+			diplomats = 1
+			advisor_pool = 1
+			institution_spread_from_true_faith = 0.10
+			interest = 2
+			adm_tech_cost_modifier = 0.05
+		}
+		country_as_secondary = { 
+			tolerance_own = -1
+			diplomats = 1
+			advisor_pool = 1
+			institution_spread_from_true_faith = 0.10
+			interest = 2
+			adm_tech_cost_modifier = 0.05
+		}
+		hre_religion = yes
+		on_convert = { 
+			change_religion = catholic
+		}
+		uses_piety = yes
+		has_patriarchs = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+		papacy = { 
+			papal_tag = PAP
+			election_cost = 150
+			seat_of_papacy = 2530
+			levy_church_tax = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = papal_sanction_for_church_taxes }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got Papal sanction for church taxes"
+					add_country_modifier = { 
+						name = "papal_sanction_for_church_taxes"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+				}
+			}
+			bless_monarch = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { prestige = 10 }
+					NOT = { has_country_modifier = papal_blessing }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got rules blessing from the Pope"
+					add_country_modifier = { 
+						name = "papal_blessing"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+				}
+			}
+			indulgence_for_sins = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+					government = monarchy
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { 
+						legitimacy = 50 
+						heir_claim = 50
+					}
+					NOT = { has_country_modifier = papal_indulgence }
+					NOT = { is_key_equal = { lhs = aspect_07 value = 3 } } #Indulgences shouldn't be condemned
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got papal support for the dynasty"
+					add_country_modifier = { 
+						name = "papal_indulgence"
+						duration = 3650
+					}
+					add_reform_desire = 0.00001
+				}
+				ai_will_do = { 
+					factor = 1
+#					modifier = { 
+#						factor = 0
+#						NOT = { 
+#							OR = { 
+#								has_country_flag = AI_Interaction_legitimacy_equivalent_HighInterest
+#								has_country_flag = AI_Interaction_legitimacy_equivalent_MedInterest
+#								has_country_flag = AI_Interaction_legitimacy_equivalent_LowInterest
+#							}
+#						}
+#					}
+				}
+			}
+			local_saint = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+					any_owned_province = {
+					    religion = ROOT
+						culture = ROOT
+						NOT = { has_province_modifier = catholic_pilgrimage }
+					}
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { stability = 3 }
+					custom_trigger_tooltip = { tooltip="prayers_not_condemned" NOT = { is_key_equal = { lhs = aspect_08 value = 3 } } } #Saint prayers shouldn't be condemned
+					custom_trigger_tooltip = { tooltip="sainthood_candidate" has_country_flag = sainthood_candidate }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got beatification of a local saint"
+					random_owned_province = {
+					    limit = {
+						    religion = ROOT
+						    culture = ROOT
+						    NOT = { has_province_modifier = catholic_pilgrimage }
+						}	
+					    province_event = { id = DG_Catholics.502 days = 0 }
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						stability = 1
+					}
+				}
+			}
+			forgiveness_for_usury = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = usury_forgiven }
+					NOT = { is_key_equal = { lhs = aspect_09 value = 1 } } #Usury shouldn't be condemned
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got forgivness for usury"
+					add_country_modifier = { 
+						name = "usury_forgiven"
+						duration = 3650
+					}
+					add_reform_desire = 0.00001
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						NOT = { 
+							num_of_loans = 1
+						}
+					}
+				}
+			}
+			proclaim_holy_war = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					is_at_war = yes
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = papal_sanction_for_holy_war }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got Papal sanction for a Holy War"
+					add_country_modifier = { 
+						name = "papal_sanction_for_holy_war"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						manpower_percentage = 0.4
+					}
+				}
+			}
+			send_papal_legate = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = papal_legate }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got Papal legate"
+					country_event = { id = DG_Catholics.412 days = 0 }
+					add_country_modifier = { 
+						name = "papal_legate"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+				}
+			}
+		}
+	}
+	protestant = { 
+		color = { 33 33 169 }
+		icon = 2
+		allowed_conversion = { }
+		allowed_center_conversion = { catholic lollard hussite waldensian reformed}
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = protestant
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = protestant
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		country = { 
+			global_missionary_strength = 0.01
+			production_efficiency = 0.025
+			global_autonomy = -0.05
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			idea_cost = -0.05
+			technology_cost = -0.05
+			tolerance_own = -1
+		}
+		country_as_secondary = { 
+			global_autonomy = -0.05
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			idea_cost = -0.05
+			technology_cost = -0.05
+			tolerance_own = -2
+		}
+		hre_heretic_religion = yes
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = protestant
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = protestant
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		on_convert = { 
+			change_religion = protestant
+		}
+		uses_piety = yes
+		has_patriarchs = yes
+		uses_church_power = yes
+		date = 1525.5.1
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	reformed = { 
+		color = { 105 57 172 }
+		icon = 3
+		allowed_conversion = { catholic lollard hussite protestant waldensian}
+		allowed_center_conversion = { catholic lollard hussite protestant waldensian}
+		hre_heretic_religion = yes
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = reformed
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = reformed
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		province = { }
+		country = { 
+			merchants = 1
+			land_morale = 0.05
+			tolerance_own = 1
+			tolerance_heretic = -1
+			religious_unity = -0.05
+			production_efficiency = 0.025
+			idea_cost = -0.05
+			technology_cost = -0.05
+		}
+		country_as_secondary = { 
+			merchants = 1
+			land_morale = 0.05
+			tolerance_heretic = -1
+			religious_unity = -0.05
+			production_efficiency = 0.025
+			idea_cost = -0.05
+			technology_cost = -0.05
+			global_missionary_strength = -0.01
+		}
+		on_convert = { 
+			change_religion = reformed
+		}
+		uses_piety = yes
+		has_patriarchs = yes
+		uses_church_power = yes
+		date = 1536.5.1
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	hussite = { 
+		color = { 93 213 195 }
+		icon = 4
+		allowed_conversion = { }
+		allowed_center_conversion = { catholic lollard waldensian protestant reformed}
+		hre_heretic_religion = yes
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = hussite
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = hussite
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		province = { }
+		country = { 
+			adm_tech_cost_modifier = -0.10
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			land_morale = 0.10
+			yearly_corruption = 0.10
+		}
+		country_as_secondary = { 
+			adm_tech_cost_modifier = -0.10
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			land_morale = 0.10
+			yearly_corruption = 0.10
+			tolerance_own = -1
+			global_missionary_strength = -0.01
+		}
+		on_convert = { 
+			change_religion = hussite
+		}
+		date = 1420.7.1
+		uses_piety = yes
+		has_patriarchs = yes
+		misguided_heretic = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	waldensian = { 
+		color = { 55 51 65 }
+		icon = 5
+		allowed_conversion = { }
+		allowed_center_conversion = { catholic lollard hussite protestant reformed}
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = waldensian
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = waldensian
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		province = { }
+		country = { 
+			adm_tech_cost_modifier = -0.10
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			land_morale = 0.10
+			yearly_corruption = 0.10
+		}
+		country_as_secondary = { 
+			adm_tech_cost_modifier = -0.10
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			land_morale = 0.10
+			yearly_corruption = 0.10
+			tolerance_own = -1
+			global_missionary_strength = -0.01
+		}
+		on_convert = { 
+			change_religion = waldensian
+		}
+		date = 2000.1.1
+		uses_piety = yes
+		has_patriarchs = yes
+		misguided_heretic = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	lollard = { 
+		color = { 55 51 65 }
+		icon = 6
+		allowed_conversion = { }
+		allowed_center_conversion = { catholic waldensian reformed protestant hussite}
+		will_get_center = { 
+			any_owned_province = { 
+				AND = { 
+					continent = europe
+					religion = lollard
+					NOT = { 
+						province_id = 2530
+					}
+					is_reformation_center = no
+					is_island = no
+					expelling_minorities = no
+					development = 10
+					NOT = { 
+						any_neighbor_province = { 
+							is_reformation_center = yes
+						}
+					}
+					NOT = { 
+						any_province = { 
+							superregion = PREV
+							is_reformation_center = yes
+							religion = lollard
+						}
+					}
+					NOT = { 
+						has_climate = tropical
+					}
+					NOT = { 
+						has_climate = arid
+					}
+					NOT = { 
+						has_climate = arctic
+					}
+					NOT = { 
+						has_terrain = arctic
+					}
+					NOT = { 
+						has_terrain = taiga
+					}
+					NOT = { 
+						has_terrain = tundra
+					}
+				}
+			}
+		}
+		province = { }
+		country = { 
+			tolerance_of_heretics_capacity = 1 #Less problems with heretics
+			adm_tech_cost_modifier = -0.10
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			land_morale = 0.10
+			yearly_corruption = 0.10
+		}
+		country_as_secondary = { 
+			adm_tech_cost_modifier = -0.10
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			land_morale = 0.10
+			yearly_corruption = 0.10
+			tolerance_own = -1
+			global_missionary_strength = -0.01
+		}
+		on_convert = { 
+			change_religion = lollard
+		}
+		date = 2000.1.1
+		uses_piety = yes
+		has_patriarchs = yes
+		misguided_heretic = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	avignonist = { 
+		color = { 217 91 7 }
+		icon = 7
+		date = 2000.1.1
+		country = { 
+			tolerance_own = 1
+			global_missionary_strength = 0.01
+			diplomats = 1
+			advisor_pool = 1
+			institution_spread_from_true_faith = 0.10
+			interest = 2
+			adm_tech_cost_modifier = 0.05
+		}
+		country_as_secondary = { 
+			tolerance_own = -1
+			diplomats = 1
+			advisor_pool = 1
+			institution_spread_from_true_faith = 0.10
+			interest = 2
+			adm_tech_cost_modifier = 0.05
+		}
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+		papacy = { 
+			papal_tag = AVI
+			election_cost = 150
+			seat_of_papacy = 202
+			levy_church_tax = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = AVI }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					AVI = { has_regency = no }
+					NOT = { war_with = AVI }
+					OR = {
+						AND = { exists = AVI reverse_has_opinion = { who = AVI value = 10 } }
+						AND = { NOT = { exists = AVI } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = papal_sanction_for_church_taxes }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got Papal sanction for church taxes"
+					add_country_modifier = { 
+						name = "papal_sanction_for_church_taxes"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+				}
+			}
+			bless_monarch = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = AVI }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					AVI = { has_regency = no }
+					NOT = { war_with = AVI }
+					OR = {
+						AND = { exists = AVI reverse_has_opinion = { who = AVI value = 10 } }
+						AND = { NOT = { exists = AVI } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { prestige = 10 }
+					NOT = { has_country_modifier = papal_blessing }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got rules blessing from the Pope"
+					add_country_modifier = { 
+						name = "papal_blessing"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+				}
+			}
+			indulgence_for_sins = { 
+				cost = 50
+				potential = { 
+					NOT = { has_country_flag = civil_war_rebel_tag }
+					NOT = { tag = AVI }
+					government = monarchy
+				}
+				allow = { 
+					AVI = { has_regency = no }
+					NOT = { war_with = AVI }
+					OR = {
+						AND = { exists = AVI reverse_has_opinion = { who = AVI value = 10 } }
+						AND = { NOT = { exists = AVI } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { 
+						legitimacy = 50 
+						heir_claim = 50
+					}
+					NOT = { has_country_modifier = papal_indulgence }
+					NOT = { is_key_equal = { lhs = aspect_07 value = 3 } } #Indulgences shouldn't be condemned
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got papal papal support for the dynasty"
+					add_country_modifier = { 
+						name = "papal_indulgence"
+						duration = 3650
+					}
+					add_reform_desire = 0.00001
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						NOT = { 
+							OR = { 
+								has_country_flag = AI_Interaction_legitimacy_equivalent_HighInterest
+								has_country_flag = AI_Interaction_legitimacy_equivalent_MedInterest
+								has_country_flag = AI_Interaction_legitimacy_equivalent_LowInterest
+							}
+						}
+					}
+				}
+			}
+			local_saint = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = PAP }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+					any_owned_province = {
+					    religion = ROOT
+						culture = ROOT
+						NOT = { has_province_modifier = catholic_pilgrimage }
+					}
+				}
+				allow = { 
+					PAP = { has_regency = no }
+					NOT = { war_with = PAP }
+					OR = {
+						AND = { exists = PAP reverse_has_opinion = { who = PAP value = 10 } }
+						AND = { NOT = { exists = PAP } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { stability = 3 }
+					custom_trigger_tooltip = { tooltip="prayers_not_condemned" NOT = { is_key_equal = { lhs = aspect_08 value = 3 } } } #Saint prayers shouldn't be condemned
+					custom_trigger_tooltip = { tooltip="sainthood_candidate" has_country_flag = sainthood_candidate }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got beatification of a local saint"
+					random_owned_province = {
+					    limit = {
+						    religion = ROOT
+						    culture = ROOT
+						    NOT = { has_province_modifier = catholic_pilgrimage }
+						}	
+					    province_event = { id = DG_Catholics.502 days = 0 }
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						stability = 1
+					}
+				}
+			}
+			forgiveness_for_usury = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = AVI }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					AVI = { has_regency = no }
+					NOT = { war_with = AVI }
+					OR = {
+						AND = { exists = AVI reverse_has_opinion = { who = AVI value = 10 } }
+						AND = { NOT = { exists = AVI } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = usury_forgiven }
+					NOT = { is_key_equal = { lhs = aspect_09 value = 1 } } #Usury shouldn't be condemned
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got forgivness for usury"
+					add_country_modifier = { 
+						name = "usury_forgiven"
+						duration = 3650
+					}
+					add_reform_desire = 0.00001
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						NOT = { 
+							num_of_loans = 1
+						}
+					}
+				}
+			}
+			proclaim_holy_war = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = AVI }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					AVI = { has_regency = no }
+					is_at_war = yes
+					NOT = { war_with = AVI }
+					OR = {
+						AND = { exists = AVI reverse_has_opinion = { who = AVI value = 10 } }
+						AND = { NOT = { exists = AVI } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = papal_sanction_for_holy_war }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got Papal sanction for a Holy War"
+					add_country_modifier = { 
+						name = "papal_sanction_for_holy_war"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+					modifier = { 
+						factor = 0
+						manpower_percentage = 0.4
+					}
+				}
+			}
+			send_papal_legate = { 
+				cost = 50
+				potential = { 
+					NOT = { tag = AVI }
+					NOT = { has_country_flag = civil_war_rebel_tag }
+				}
+				allow = { 
+					AVI = { has_regency = no }
+					NOT = { war_with = AVI }
+					OR = {
+						AND = { exists = AVI reverse_has_opinion = { who = AVI value = 10 } }
+						AND = { NOT = { exists = AVI } check_key = { lhs = Prov_CLLoy value = 60 } }
+					}
+					NOT = { has_country_modifier = papal_legate }
+				}
+				effect = { 
+					log = "DG - Curia_interactions:[GetYear]:[This.GetName]:got Papal legate"
+					country_event = { id = DG_Catholics.412 days = 0 }
+					add_country_modifier = { 
+						name = "papal_legate"
+						duration = 3650
+					}
+				}
+				ai_will_do = { 
+					factor = 1
+				}
+			}
+		}
+	}
+	orthodox = { 
+		color = { 178 127 0 }
+		icon = 10
+		country = { 
+			tolerance_own = 1
+			global_missionary_strength = 0.01
+			prestige = 0.50
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			stability_cost_modifier = -0.1
+			tolerance_heretic = -1
+		}
+		country_as_secondary = { 
+			prestige = 0.50
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			global_autonomy = -0.025
+			tolerance_own = -1
+		}
+		allowed_conversion = { oriental}
+		on_convert = { 
+			change_religion = orthodox
+		}
+		uses_piety = yes
+		has_patriarchs = yes
+		misguided_heretic = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	oriental = { 
+		flags_with_emblem_percentage = 20
+		flag_emblem_index_range = { 1 4}
+		color = { 178 178 102 }
+		icon = 5
+		country = { 
+			global_missionary_strength = 0.01
+			tolerance_of_heretics_capacity = 1 #Less problems with heretics
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			improve_relation_modifier = 0.25
+			tolerance_heretic = 1
+		}
+		country_as_secondary = { 
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			improve_relation_modifier = 0.25
+			tolerance_heretic = 1
+			tolerance_own = -1
+		}
+		allowed_conversion = { orthodox}
+		on_convert = { 
+			change_religion = oriental
+		}
+		uses_piety = yes
+		has_patriarchs = yes
+		misguided_heretic = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	assyrian = { 
+		color = { 255 128 35 }
+		icon = 34
+		country = { 
+			global_missionary_strength = 0.01
+			tolerance_of_heretics_capacity = 1 #Less problems with heretics
+			improve_relation_modifier = 0.25
+			tolerance_heathen = 1
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+		}
+		country_as_secondary = { 
+			improve_relation_modifier = 0.25
+			tolerance_heathen = 1
+			legitimacy = 0.50
+			republican_tradition = 0.25
+			horde_unity = 0.25
+			devotion = 1
+			tolerance_own = -1
+		}
+		on_convert = {
+			change_religion = assyrian
+		}
+		uses_piety = yes
+		has_patriarchs = yes
+		misguided_heretic = yes
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	monophysite = { 
+		color = { 178 127 11 }
+		icon = 3
+		on_convert = {
+			change_religion = monophysite
+		}
+		date = 2000.1.1
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+	bogomilist = { 
+		color = { 195 24 45 }
+		icon = 6
+		on_convert = {
+			change_religion = bogomilist
+		}
+		date = 2000.1.1
+		heretic = { Fundamentalist Sectarian Populist Reactionary Millenarian Apocalyptic Ultraorthodox Humanistic Syncretic Messianic}
+	}
+}
