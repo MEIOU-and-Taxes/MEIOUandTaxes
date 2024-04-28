@@ -116,35 +116,34 @@ country_event = {
 		add_legitimacy = 25
 		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=10 }
 		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-10 }
-		FRA = {
+		if = {
+			limit = {
+				ORL = {
+					is_subject = yes
+					government = monarchy
+					vassal_of = FRA
+					NOT = { junior_union_with = FRA }
+				}
+			}
+
+			ORL = {
+				country_event = { id = ambrosian_republic.3 }
+			}
+		}
+		else_if = {
+			limit = { 
+				FRA = {
+					is_subject = no
+					government = monarchy
+					capetian_dynasty_trigger = yes
+				}
+			}
 			country_event = { id = ambrosian_republic.3 }
 		}
 		log = "FE-MLO:[GetYear]:[Root.GetName]:have not formed The Ambrosian Republic but rejects Valentina:flavor_mlo.1"
 	}
 	option = {
-		name = flavor_mlo.1.c
-		ai_chance = {
-			factor = 5
-		}
-		trigger = {
-			ORL = {
-				is_subject = yes
-				government = monarchy
-				vassal_of = FRA
-				NOT = { junior_union_with = FRA }
-			}
-		}
-		Stab_Subtract2 = yes
-		add_legitimacy = 25
-		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=10 }
-		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-10 }
-		log = "FE-MLO:[GetYear]:[Root.GetName]:have not formed The Ambrosian Republic and Choose Orlean Valentina's line:flavor_mlo.1"
-		ORL = {
-			create_union = MLO
-		}
-	}
-	option = {
-		name = flavor_mlo.1.d
+		name = "flavor_mlo.1.c"
 		ai_chance = {
 			factor = 5
 			modifier = {
@@ -152,24 +151,55 @@ country_event = {
 				alliance_with = FRA
 			}
 			modifier = {
-				factor = 0
-				is_rival = FRA
+				factor = 5
+				marriage_with = FRA
 			}
 		}
 		trigger = {
-			FRA = {
-				is_subject = no
-				government = monarchy
-				capetian_dynasty_trigger = yes
+			any_known_country = {
+				has_country_flag = valentina_visconti
 			}
 		}
 		Stab_Subtract2 = yes
 		add_legitimacy = 25
 		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=10 }
 		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-10 }
-		log = "FE-MLO:[GetYear]:[Root.GetName]:have not formed The Ambrosian Republic and Choose French Valentina's line:flavor_mlo.1"
-		FRA = {
-			create_union = MLO
+		log = "FE-MLO:[GetYear]:[Root.GetName]:have not formed The Ambrosian Republic and Choose Orlean Valentina's line:flavor_mlo.1"
+		if = {
+			limit = {
+				ORL = {
+					is_subject = yes
+					government = monarchy
+					vassal_of = FRA
+					NOT = { junior_union_with = FRA }
+					has_country_flag = valentina_visconti
+				}
+			}
+
+			ORL = {
+				inherit = ROOT
+			}
+		}
+		else_if = {
+			limit = { 
+				FRA = {
+					is_subject = no
+					government = monarchy
+					capetian_dynasty_trigger = yes
+					has_country_flag = valentina_visconti
+				}
+			}
+			FRA = {
+				create_union = ROOT
+			}
+		}
+		else = {
+			random_known_country = {
+				limit = {
+					has_country_flag = valentina_visconti
+				}
+				create_union = ROOT
+			}
 		}
 	}
 }
@@ -678,7 +708,7 @@ country_event = {
 	desc = flavor_mlo.9.d
 	picture = PAINTER_ARTIST_eventPicture
 	fire_only_once = yes
-	major = yes
+	#major = yes
 	trigger = {
 		owns = 104 #Lumbardia/Milan
 		is_year = 1497
@@ -715,7 +745,6 @@ country_event = {
 	desc = flavor_mlo.10.d
 	picture = COURT_eventPicture
 	fire_only_once = yes
-	major = yes
 	trigger = {
 		owns = 104 #Lumbardia/Milan
 		adm_tech = 30
@@ -983,20 +1012,21 @@ country_event = {
 }
 
 
-#de Valois family PU Milan
+#Valentina Visconti
 country_event = {
 	id = flavor_mlo.100
 	title = "flavor_mlo.100.t"
-	desc = "flavor_mlo.100.d"
+	desc = "flavor_mlo.100.desc"
 	picture = Valentina_Visconti_Event_Picture
 	
-	major = yes
+	#major = yes
 	fire_only_once = yes
 	
 	trigger = {
 		tag = MLO
 		is_subject = no
 		government = monarchy
+		NOT = { has_ruler = "Bernabò" }
 		dynasty = "Visconti"
 	}
 	
@@ -1021,7 +1051,7 @@ country_event = {
 	}
 	
 	option = {
-		name = flavor_mlo.100.a	
+		name = flavor_mlo.100.a
 		ai_chance = { factor = 90 }
 		trigger = {
 			ORL = {
@@ -1127,8 +1157,24 @@ country_event = {
 	is_triggered_only = yes
 	
 	option = {
-		name = ambrosian_republic.3.a
+		name = ambrosian_republic.3.a1
 		ai_chance = { factor = 75 }
+		trigger = {
+			NOT = { tag = ORL }
+		}
+		add_casus_belli = {
+			type = cb_restore_personal_union
+			months = 300
+			target = MLO
+		}
+	}
+
+	option = {
+		name = ambrosian_republic.3.a2
+		ai_chance = { factor = 75 }
+		trigger = {
+			tag = ORL
+		}
 		add_casus_belli = {
 			type = cb_restore_personal_union
 			months = 300
