@@ -19,7 +19,7 @@ country_decisions = {
 			FRA = {
 				create_union = NAV	
 			}
-			remove_government_reform = house_of_capet_reform
+			remove_government_reform = salic_law_reform
 		}
 		ai_will_do = {
 			factor = 1
@@ -27,74 +27,160 @@ country_decisions = {
 		ai_importance = 400
 	}
 	
-	install_charles_v = {
+	# install_charles_v = {
+	# 	potential = {
+	# 		tag = FRA
+	# 		war_with = ENG
+	# 		has_country_flag = ruler_prisonner_of_war
+	# 		has_global_flag = hundred_years_war
+	# 	}
+	# 	allow = {
+	# 		tag = FRA
+	# 		war_with = ENG
+	# 		is_year = 1359
+	# 		has_country_flag = ruler_prisonner_of_war
+	# 		OR = {
+	# 			NOT = { has_country_flag = negociating_release_jean }
+	# 			had_country_flag = { flag = negociating_release_jean days = 365 }
+	# 		}
+	# 	}
+	# 	effect = {
+	# 		set_heir = heir_fra_hyw_pow
+	# 		Stab_Subtract2 = yes
+	# 		Public_ChangePowerbrokerLoyaltyTooltipProv = {
+	# 			Powerbroker = NO
+	# 			Amount = -50
+	# 		}
+	# 		Pol_FacInfReactPosMajor = { Fac = NO }
+	# 		add_heir_claim = -50
+	# 		clr_country_flag = ruler_prisonner_of_war
+	# 	}
+	# 	ai_will_do = {
+	# 		factor = 0
+	# 	}
+	# }
+
+	french_treaty_of_bretigny = {
 		potential = {
 			tag = FRA
-			war_with = ENG
-			has_country_flag = ruler_prisonner_of_war
 			has_global_flag = hundred_years_war
+			war_with = ENG
+			is_in_war = {
+				casus_belli = cb_breton_succession_war
+			}
 		}
 		allow = {
-			tag = FRA
-			war_with = ENG
-			is_year = 1359
-			has_country_flag = ruler_prisonner_of_war
-			#war_exhaustion = 15		#Also just don't do this check as its just antoher point of failure
-			OR = {
-				NOT = { has_country_flag = negociating_release_jean }
-				had_country_flag = { flag = negociating_release_jean days = 365 }
+			BLO = {
+				war_score_against = {
+					who = GUY
+					value = 65
+				}
 			}
 		}
 		effect = {
-			set_heir = heir_fra_hyw_pow
-			Stab_Subtract2 = yes
-			custom_tooltip = POP_NOLoyProv_-50
-			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-50 }
-			add_heir_claim = -50
-			clr_country_flag = ruler_prisonner_of_war
+			enforce_hyw_treaty_effect = yes
+			white_peace = ENG
+			every_subject_country = {
+				white_peace = ENG
+			}
+			every_ally = {
+				limit = {
+					war_with = ENG
+					NOT = { tag = MNF }
+				}
+				white_peace = ENG
+				add_war_exhaustion = -5
+			}
 		}
-		ai_will_do = {
-			factor = 0
+	}
+
+	#French Decision
+	enforce_treaty_fra = {
+		potential = {
+			tag = FRA
+			OR = {
+				war_with = ENG
+				war_with = GUY
+			}
+			has_global_flag = hundred_years_war
+			OR = {
+				is_in_war = {
+					casus_belli = cb_hyw_treaty_fra
+				}
+				is_in_war = {
+					casus_belli = cb_hyw_treaty_eng
+				}
+			}
+		}
+		allow = {
+			OR = {
+				war_score_against = {
+					who = ENG
+					value = 75
+				}
+				war_score_against = {
+					who = GUY
+					value = 75
+				}
+			}
+		}
+		effect = {
+			enforce_hyw_treaty_effect = yes
+			white_peace = ENG
+			every_subject_country = {
+				white_peace = ENG
+			}
+		}
+	}
+
+	#English Decision
+	enforce_treaty_eng = {
+		potential = {
+			tag = ENG
+			war_with = FRA
+			has_global_flag = hundred_years_war
+			OR = {
+				is_in_war = {
+					casus_belli = cb_hyw_treaty_fra
+				}
+				is_in_war = {
+					casus_belli = cb_hyw_treaty_eng
+				}
+			}
+		}
+		allow = {
+			war_score_against = {
+				who = FRA
+				value = 75
+			}
+		}
+		effect = {
+			enforce_hyw_treaty_effect = yes
+			white_peace = ENG
+			every_subject_country = {
+				white_peace = ENG
+			}
 		}
 	}
 
 	#Explanation
-	enforce_treaty = {
+	enforce_treaty_info = {
 		potential = {
 			OR = {
 				tag = ENG
-				war_with = FRA
-			}
-			OR = {
 				tag = FRA
-				war_with = ENG
 			}
 			has_global_flag = hundred_years_war
 		}
 		allow = {
-			is_in_war = {
-				casus_belli = cb_hyw_treaty
-			}
-			OR = {
-				AND = {
-					war_score_against = {
-						who = FRA
-						value = 75
-					}
-					tag = ENG
-				}
-				AND = {
-					war_score_against = {
-						who = ENG
-						value = 75
-					}
-					tag = FRA
-				}
-			}
-			
+			always = yes
 		}
 		effect = {
-			enforce_hyw_treaty_effect = yes
+		}
+
+		ai_importance = 0
+		ai_will_do = {
+			factor = 0
 		}
 	}
 
@@ -102,7 +188,6 @@ country_decisions = {
 		potential = {
 			tag = ENG
 			has_global_flag = hundred_years_war
-			has_global_flag = treaty_of_arras 
 			NOT = { has_country_flag = eng_gave_up_hyw } 
 		}
 		allow = {
@@ -110,6 +195,10 @@ country_decisions = {
 		}
 		effect = {
 			set_country_flag = eng_gave_up_hyw
+			enforce_treaty_bretigny_fra = yes
+			enforce_treaty_bruges = yes
+			enforce_treaty_arras = yes
+			enforce_treaty_picquigny = yes
 			if = {
 				limit = {
 					GUY = {
@@ -133,14 +222,393 @@ country_decisions = {
 					add_liberty_desire = -50	
 				}
 			}
-			enforce_treaty_bretigny_fra = yes
-			enforce_treaty_bruges = yes
-			enforce_treaty_arras = yes
-			enforce_treaty_castillion = yes
 		}
 
 		ai_will_do = {
 			factor = 0
+		}
+	}
+
+	brittany_rejects_english_presence = {
+		potential = {
+			is_year	= 1359
+			NOT = { is_year = 1407 }
+			tag = BRI
+			is_subject = no
+			has_global_flag = hundred_years_war
+			ENG = {
+				OR = { 
+					owns = 170 #Brest
+					owns = 4008 #Saint Malo
+				}
+			}
+		}
+
+		allow = {
+			NOT = { war_with  = ENG }
+			NOT = { war_with  = FRA }
+		}
+
+		effect = {
+			country_event = { id = flavor_hyw.350 days = 20 tooltip = "flavor_hyw.350.d" }
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+	}
+
+	brittany_rejects_french_aggression = {
+		potential = {
+			is_year	= 1359
+			NOT = { is_year = 1407 }
+			tag = BRI
+			has_global_flag = hundred_years_war
+			OR = { 
+				owns = 170 #Brest
+				owns = 4008 #Saint Malo
+			}
+			is_subject = no
+		}
+
+		allow = {
+			NOT = { war_with  = ENG }
+			war_with  = FRA
+			NOT = {
+				is_in_war = {
+					casus_belli = cb_hyw_treaty_fra
+				}
+			}
+			NOT = {
+				is_in_war = {
+					casus_belli = cb_hyw_treaty_eng
+				}
+			}
+		}
+
+		effect = {
+			country_event = { id = flavor_hyw.351 days = 20 tooltip = "flavor_hyw.351.d" }
+		}
+
+		ai_will_do = {
+			factor = 1
+		}
+	}
+
+	# uef information decision
+	uef_information = {
+		potential = {
+			ai = no
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			tag = ENG
+		}
+		allow = {
+			always = yes
+		}
+		effect = {
+			country_event = {
+				id = flavor_uef.200
+			}
+		}
+		ai_will_do = {
+			factor = 0
+		}
+	}
+
+	# Demand taxes from the Estates-General
+	uef_demand_taxes = {
+		potential = {
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			has_country_flag = uef_estates_general
+		}
+		allow = {
+			NOT = { has_country_modifier = uef_demanded_tax_recently } # You can demand every 5 years
+		}
+		effect = {
+			add_country_modifier = {
+				name = uef_demanded_tax_recently
+				duration = 1825
+			}
+			hidden_effect = {
+				AAA = {
+					country_event = { id = flavor_uef.2 } # The calculation event
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+	# Demand joining war from the Estates-General
+	uef_demand_join_war = {
+		potential = {
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			has_country_flag = uef_estates_general
+		}
+		allow = {
+			NOT = { has_country_modifier = uef_demanded_war_recently } # You can demand every 10 years
+		}
+		effect = {
+			add_country_modifier = {
+				name = uef_demanded_war_recently
+				duration = 3650
+			}
+			hidden_effect = {
+				AAA = {
+					country_event = { id = flavor_uef.9 } # The calculation event
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+				
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+		
+	# Increase centralization efforts
+	uef_increase_centralization = {
+		potential = {
+			has_global_flag = hundred_years_war_ENG_win
+			overlord_of = FRA
+			has_country_flag = uef_estates_general
+		}
+		allow = {
+			NOT = { has_country_modifier = uef_centralized_recently } # You can demand every 50 years = 18250 days
+			is_at_war = no
+			stability = 1
+		}
+		effect = {
+			Stab_Subtract1 = yes
+			hidden_effect = {
+				add_country_modifier = {
+					name = uef_centralized_recently
+					duration = 18250
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = uef_estates_general
+					any_owned_province = {
+						has_province_modifier = uef_estates_general_1
+					}
+				}
+				every_owned_province = {
+					limit = {
+						has_province_modifier = uef_estates_general_1
+					}
+					remove_province_modifier = uef_estates_general_1
+					add_province_modifier = {
+						name = uef_estates_general_2
+						duration = -1
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_country_flag = uef_estates_general
+					any_owned_province = {
+						has_province_modifier = uef_estates_general_2
+					}
+				}
+				every_owned_province = {
+					limit = {
+						has_province_modifier = uef_estates_general_2
+					}
+					remove_province_modifier = uef_estates_general_2
+					add_province_modifier = {
+						name = uef_estates_general_3
+						duration = -1
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_global_flag = hundred_years_war_ENG_win
+					FRA = {
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_1
+						}
+					}
+				}
+				FRA = {
+					every_owned_province = {
+						limit = {
+							has_province_modifier = uef_estates_general_1
+						}
+						remove_province_modifier = uef_estates_general_1
+						add_province_modifier = {
+							name = uef_estates_general_2
+							duration = -1
+						}
+					}
+				}
+			}
+			else = {
+				FRA = {
+					every_owned_province = {
+						limit = {
+							has_province_modifier = uef_estates_general_2
+						}
+						remove_province_modifier = uef_estates_general_2
+						add_province_modifier = {
+							name = uef_estates_general_3
+							duration = -1
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	# Create inquisition in France
+	uef_create_inquisition = {
+		potential = {
+			overlord_of = FRA
+			OR = {
+				AND = {
+					OR = {
+						religion = protestant
+						religion = reformed
+					}
+					FRA = {
+						religion = catholic
+						any_owned_province = {
+							religion = catholic
+						}
+					}
+				}
+				AND = {
+					religion = catholic
+					FRA = {
+						OR = {
+							religion = protestant
+							religion = reformed
+						}
+						any_owned_province = {
+							OR = {
+								religion = protestant
+								religion = reformed
+							}
+						}
+					}
+				}
+			}
+			NOT = { has_country_flag = uef_inquisition }
+		}
+		allow = {
+			is_at_war = no
+			treasury = 100
+		}
+		effect = {
+			set_country_flag = uef_inquisition
+			add_treasury = -100
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_flag = uef_estates_general
+					}
+					change_variable = {
+						which = inquisition
+						value = 2
+					}
+				}
+				else = {
+					change_variable = {
+						which = inquisition
+						value = 1
+					}
+					FRA = {
+						change_variable = {
+							which = inquisition
+							value = 2
+						}
+					}
+				}
+				REB = {
+					change_variable = {
+						which = french_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+	}
+	
+	# Cancel the inquisition
+	uef_cancel_inquisition = {
+		potential = {
+			has_country_flag = uef_inquisition
+		}
+		allow = {
+			is_at_war = no
+			had_country_flag = {
+				flag = uef_inquisition
+				days = 3650
+			}
+		}
+		effect = {
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_flag = uef_estates_general
+					}
+					set_variable = {
+						which = inquisition
+						value = 0
+					}
+				}
+				else = {
+					set_variable = {
+						which = inquisition
+						value = 0
+					}
+					FRA = {
+						set_variable = {
+							which = inquisition
+							value = 0
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				clr_country_flag = uef_inquisition
+				REB = {
+					subtract_variable = {
+						which = french_rebellion_desire
+						value = 2
+					}
+				}
+			}
 		}
 	}
 }
