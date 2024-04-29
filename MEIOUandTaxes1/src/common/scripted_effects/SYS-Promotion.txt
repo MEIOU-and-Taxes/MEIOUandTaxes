@@ -1,26 +1,33 @@
-##
-# Globally used TMP vars: Tmp_7 = SF Share, Tmp_8 = NM_Share, Tmp_9 = RE_Share of total population
+############################################
+### POPULATION PROMOTION DEMOTION SYSTEM ###
+############################################
+
+# Coded by Beorsferth & Firekahuna - contact for questions
+
+## Globally used TMP vars: Tmp_7 = SF Share, Tmp_8 = NM_Share, Tmp_9 = RE_Share of total population
 
 Promotion_Calc = {
 	Promotion_Reset = yes # Reset last years values
 
 	Promotion_CalcShares = yes # Calculate Relative Share of lower classes of total pop
 
+	[[RE]
 	Promotion_DeriveResidentRestingPoint = yes
 	Promotion_REPromotion = yes
 	Promotion_REDemotion = yes
-
+	]
 	## Calc Nobility Promotion/Demotion - output in % of total pop - based on government
 	#Promotion_DeriveNobleRestingPoint = yes
 	#Promotion_NOPromotion = yes 
 	#Promotion_NODemotion = yes
-	
+
+	[[BG]
 	## Calc Burgher Promotion/Demotion - output in k pop - based on ideal resting point
 	Promotion_GetCommerceDataHelper = yes
 	Promotion_DeriveBurgherRestingPoint = yes
 	Promotion_BGPromotion = yes
 	Promotion_BGDemotion = yes
-
+	]
 	## Calc Clergy Promotion/Demotion - output in % of total pop
 	#Promotion_CLPromotion = yes
 	#Promotion_CLDemotion = yes
@@ -139,11 +146,19 @@ Promotion_REPromotion = {
 
 		multiply_key = { lhs = Tmp_1 which = Tmp_2 } # Get end result: Rate * DifferenceToIdealPop
 
+		# Safety check to ensure that promotion is always in the correct direction
 		if = {
 			limit = {
 				NOT = { check_key = { lhs = Tmp_1 value = 0 } }
 			}
 			set_key = { lhs = Tmp_1 value = 0 }
+		}
+		# safety check to ensure promotion cannot exceed available source
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_1 which = SF_Total }
+			}
+			set_key = { lhs = Tmp_1 which = SF_Total  }
 		}
 
 		set_key = { lhs = SF_PromotedRE which = Tmp_1 }
@@ -368,7 +383,11 @@ Promotion_NODemotion = {
 	}
 }
 
-# Tmp_0, 1 2 used for commerce data, Tmp 7-9 used for Lower Pop Ratio's
+# Tmp_0, 1, 2 and 3 are used for commerce data, Tmp 7-9 used for Lower Pop Ratio's
+# Tmp_0 which = Prod_S0Size <-- Commerce Size <--- Commented out below for performance, uncomment if needed
+# Tmp_1 which = Prod_S0ProfitPerc <-- Commerce Profit <--- Commented out below for performance, uncomment if needed
+# Tmp_2 which = Prod_S0Throughput <-- Commerce Throughput
+# Tmp_3 which = Prod_S0DmndLBG  <-- Commerce Demand
 Promotion_DeriveBurgherRestingPoint = {
 	if = {
 		limit = {
@@ -377,7 +396,7 @@ Promotion_DeriveBurgherRestingPoint = {
 		}
 
 		# Calc and apply multiplier based on labour supply vs. demand
-		set_key = { lhs = Tmp_4 which = WK_BGTDmnd } 
+		set_key = { lhs = Tmp_4 which = Tmp_3 } 
 		divide_key = { lhs = Tmp_4 which = WK_BG }
 
 		# Add API effects on base rate
@@ -466,11 +485,11 @@ Promotion_BGPromotion = {
 			set_key = { lhs = Tmp_6 value = -0.01 }
 		}
 
-		# Get Commerce Throughput modifier - Through*-0.05 + 0.05 -> modi [0.001, 0.05]
-		multiply_key = { lhs = Tmp_2 value = -0.05 } #inverted effect
-		change_key = { lhs = Tmp_2 value = 0.05 } #inverted effect
+		# Get Commerce Throughput modifier - Through*-0.005 + 0.035
+		multiply_key = { lhs = Tmp_2 value = -0.005 } #inverted effect - additional magnitue (0) because throughput is 0-100 scale
+		change_key = { lhs = Tmp_2 value = 0.035 }
 		
-		# Upper lower case handling: [0.001,0.05]
+		# Upper lower case handling: [-0.01,0.05]
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_2 value = 0.05 }
@@ -479,9 +498,9 @@ Promotion_BGPromotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_2 value = 0.001 } }
+				NOT = { check_key = { lhs = Tmp_2 value = 0 } }
 			}
-			set_key = { lhs = Tmp_2 value = 0.001 }
+			set_key = { lhs = Tmp_2 value = -0.01 }
 		}		
 
 
@@ -490,16 +509,42 @@ Promotion_BGPromotion = {
 		change_key = { lhs = Tmp_3 which = Tmp_6 } # RE Comfort Fulfill modifier
 		change_key = { lhs = Tmp_3 which = Tmp_2 } # Commerce Troughput modifier
 
-		multiply_key = { lhs = Tmp_3 which = Modi_BurgherPromoteSpeed }
-
-		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result - Rate * DifferenceToIdealPop
-
+		# ensure rate of changecan never be below 0%
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_4 value = 0.05 }
 				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
 			}
-			set_key = { lhs = Tmp_3 value = 0.001 }
+			set_key = { lhs =  lhs = Tmp_3 value = 0 }
+		}
+
+		multiply_key = { lhs = Tmp_3 which = Modi_BurgherPromoteSpeed }
+
+		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result = Rate(Tmp3) * DifferenceToIdealPop (Tmp4)
+
+		# safety check to ensure no wrong direction effect
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+			}
+			set_key = { lhs = Tmp_3 value = 0 }
+		}
+
+		# safety check to ensure promotion cannot exceed available source
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_3 which = RE_Total }
+			}
+			set_key = { lhs = Tmp_3 which = RE_Total  }
+		}
+
+		# Ensure no hyper promotion happens - Limit it to always 10% of current pops:
+		set_key = { lhs=Tmp_4 which = BG_Total }
+		multiply_key = { lhs=Tmp_4 value = 0.1 }
+		if = {
+			limit = {
+				check_key = { lhs=Tmp_3 which=Tmp_4 }
+			}
+			set_key = {lhs=Tmp_3 which = Tmp_4 }
 		}
 
 		set_key = { lhs = RE_PromotedBG which = Tmp_3 }
@@ -509,7 +554,7 @@ Promotion_BGPromotion = {
 Promotion_BGDemotion = {
 	if = {
 		limit = {
-			check_key = { lhs = BG_Total which = Ideal_BurgherSize } # Burgher < IdealSize
+			check_key = { lhs = BG_Total which = Ideal_BurgherSize } # Burgher > IdealSize
 		}
 		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
 
@@ -525,7 +570,7 @@ Promotion_BGDemotion = {
 		divide_key = { lhs = Tmp_5 which = BG_FillLifeC }
 		multiply_key = { lhs = Tmp_5 value = 0.01 }
 
-		# Upper lower case handling: [-0.01,0.01]
+		# Upper lower case handling: [0,0.01]
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_5 value = 0.05 }
@@ -534,14 +579,14 @@ Promotion_BGDemotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_5 value = 0.005 } }
+				NOT = { check_key = { lhs = Tmp_5 value = 0 } }
 			}
 			set_key = { lhs = Tmp_5 value = 0 }
 		}
 
-		# Get Commerce Throughput modifier - (Through + 1.05)*0.05  -> modi [0.003, 0.05]
-		change_key = { lhs = Tmp_2 value = -1.05 }
-		multiply_key = { lhs = Tmp_2 value = 0.05 } 
+		# Get Commerce Throughput modifier - Throughput*0.005-0.04  -> modi [0, 0.05]
+		multiply_key = { lhs = Tmp_2 value = 0.005 } 
+		change_key = { lhs = Tmp_2 value = -0.04 }
 		
 		# Upper lower case handling: [-0.01,0.02]
 		if = {
@@ -552,27 +597,52 @@ Promotion_BGDemotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_2 value = 0.003 } }
+				NOT = { check_key = { lhs = Tmp_2 value = -0.01 } }
 			}
-			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_2 value = -0.01 }
 		}		
-
 
 		## Get Yearly Change
 		change_key = { lhs = Tmp_3 which = Tmp_5 } # BG LifeC Fulfill modifier
 		change_key = { lhs = Tmp_3 which = Tmp_2 } # Commerce Troughput modifier
 
+		# ensure rate of changecan never be below 0%
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+			}
+			set_key = { lhs =  lhs = Tmp_3 value = 0 }
+		}
+
 		multiply_key = { lhs = Tmp_3 which = Modi_BurgherDemoteSpeed }
 
 		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result - Rate * DifferenceToIdealPop
 
+		# safety check to ensure no wrong direction effect
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_4 value = 0.05 }
 				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
 			}
-			set_key = { lhs = Tmp_3 value = 0.001 }
+			set_key = { lhs = Tmp_3 value = 0 }
 		}
+		# safety check to ensure promotion cannot exceed available source
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_3 which = BG_Total }
+			}
+			set_key = { lhs = Tmp_3 which = BG_Total }
+		}
+
+		# Ensure no hyper demotion happens - Limit it to always 10% of current pops:
+		set_key = { lhs=Tmp_4 which = BG_Total }
+		multiply_key = { lhs=Tmp_4 value = 0.1 }
+		if = {
+			limit = {
+				check_key = { lhs=Tmp_3 which=Tmp_4 }
+			}
+			set_key = {lhs=Tmp_3 which = Tmp_4 }
+		}
+
 
 		set_key = { lhs = BG_DemotedRE which = Tmp_3 }
 		set_key = { lhs = BG_Demoted which = Tmp_3 }
@@ -657,145 +727,145 @@ Promotion_GetCommerceDataHelper = {
 		limit = {
 			is_key_equal = { lhs = Prod_S0 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S0Size }
-		set_key = { lhs = Tmp_1 which = Prod_S0ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S0Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S0ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S0Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S0DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S0DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S1 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S1Size }
-		set_key = { lhs = Tmp_1 which = Prod_S1ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S1Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S1ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S1Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S1DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S1DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S2 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S2Size }
-		set_key = { lhs = Tmp_1 which = Prod_S2ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S2Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S2ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S2Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S2DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S2DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S3 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S3Size }
-		set_key = { lhs = Tmp_1 which = Prod_S3ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S3Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S3ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S3Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S3DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S3DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S4 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S4Size }
-		set_key = { lhs = Tmp_1 which = Prod_S4ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S4Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S4ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S4Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S4DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S4DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S5 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S5Size }
-		set_key = { lhs = Tmp_1 which = Prod_S5ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S5Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S5ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S5Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S5DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S5DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S6 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S6Size }
-		set_key = { lhs = Tmp_1 which = Prod_S6ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S6Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S6ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S6Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S6DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S6DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S7 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S7Size }
-		set_key = { lhs = Tmp_1 which = Prod_S7ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S7Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S7ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S7Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S7DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S7DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S8 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S8Size }
-		set_key = { lhs = Tmp_1 which = Prod_S8ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S8Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S8ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S8Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S8DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S8DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S9 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S9Size }
-		set_key = { lhs = Tmp_1 which = Prod_S9ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S9Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S9ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S9Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S9DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S9DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S10 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S10Size }
-		set_key = { lhs = Tmp_1 which = Prod_S10ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S10Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S10ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S10Throughput}
-		set_key = { lhs = WK_BGTDmnd which = Prod_S10DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S10DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S11 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S11Size }
-		set_key = { lhs = Tmp_1 which = Prod_S11ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S11Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S11ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S11Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S11DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S11DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S12 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S12Size }
-		set_key = { lhs = Tmp_1 which = Prod_S12ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S12Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S12ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S12Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S12DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S12DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S13 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S13Size }
-		set_key = { lhs = Tmp_1 which = Prod_S13ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S13Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S13ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S13Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S13DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S13DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S14 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S14Size }
-		set_key = { lhs = Tmp_1 which = Prod_S14ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S14Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S14ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S14Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S14DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S14DmndLBG } 
 	}
 	else_if = {
 		limit = {
 			is_key_equal = { lhs = Prod_S15 value = 32 }
 		}
-		set_key = { lhs = Tmp_0 which = Prod_S15Size }
-		set_key = { lhs = Tmp_1 which = Prod_S15ProfitPerc }
+		# set_key = { lhs = Tmp_0 which = Prod_S15Size }
+		# set_key = { lhs = Tmp_1 which = Prod_S15ProfitPerc }
 		set_key = { lhs = Tmp_2 which = Prod_S15Throughput }
-		set_key = { lhs = WK_BGTDmnd which = Prod_S15DmndLBG } 
+		set_key = { lhs = Tmp_3 which = Prod_S15DmndLBG } 
 	}
 }
 
