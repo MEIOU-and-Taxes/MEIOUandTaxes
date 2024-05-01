@@ -6,7 +6,7 @@
 
 namespace = flavor_svp
 
-# Rebellion desire decay event
+# Rebellion desire decay event, executed for REB tag
 country_event = {
 	id = flavor_svp.99
 	title = "flavor_svp.99.title"
@@ -27,6 +27,7 @@ country_event = {
 }
 
 # Check rebellion desire event (for testing and debugging)
+# TODO: move it to country modifier or decision tooltip so values can be seen, similar to Medici system.
 country_event = {
 	id = flavor_svp.0
 	title = "flavor_svp.0.title"
@@ -46,10 +47,11 @@ country_event = {
 }
 
 # Estates-General of [GetYear] (1464)
+# TODO: maybe move calling of this event to decisions?
 country_event = {
 	id = flavor_svp.1
 	title = "flavor_svp.1.title"
-	desc = "flavor_svp.1.desc"
+	desc = "flavor_svp.1.desc" #TODO: better explanation of what is going to happen
 	picture = LIBERUM_VETO_eventPicture
 	fire_only_once = yes
 	
@@ -60,7 +62,7 @@ country_event = {
 		NOT = { has_country_flag = svp_estates_general }
 		NOT = { culture_group = low_frankish }
 		is_subject = no
-		check_variable = { which = "Cores_on_the_Netherlands" value = 13 }
+		check_variable = { which = "Cores_on_the_Netherlands" value = 13 } # This requires direct ownership. Ownership via vassals goes through decision.
 	}
 	mean_time_to_happen = {
 		years = 5
@@ -77,6 +79,7 @@ country_event = {
 				set_variable = { which = dutch_rebellion_desire value = 8 } #changed from 10
 				country_event = { id = flavor_svp.99 days = 3650 }
 			}
+			#No requests right after setting up Estates General
 			add_country_modifier = {
 				name = svp_centralized_recently
 				duration = 10950 #30 Years
@@ -85,8 +88,13 @@ country_event = {
 				name = svp_demanded_tax_recently
 				duration = 3650
 			}
+			add_country_modifier = {
+				name = svp_demanded_manpower_recently
+				duration = 3650
+			}
 		}
-		every_owned_province = {
+		##TODO: better explanation of what is going to happen custom tooltip
+		every_owned_province = { #TODO: terrible display, may need custom tooltip
 			limit = {
 				OR = {
 					region = low_countries_region
@@ -118,7 +126,7 @@ country_event = {
 			}
 			set_province_flag = svp_local_privileges
 		}
-		every_owned_province = {
+		every_owned_province = { #TODO: terrible display, may need custom tooltip
 			limit = {
 				OR = {
 					province_id = 87 # Flandres
@@ -352,6 +360,7 @@ country_event = {
 				}
 			}
 			add_unrest = 15
+			#TODO: local loyalty
 		}
 		custom_tooltip = flavor_svp_danger_tooltip
 	}
@@ -364,7 +373,7 @@ country_event = {
 	desc = EVT_AI
 	picture = LIBERUM_VETO_eventPicture
 	
-	is_triggered_only = yes
+	is_triggered_only = yes #from decision svp_demand_taxes
 
 	option = {
 		name = OPT.ACCEPT1
@@ -441,13 +450,16 @@ country_event = {
 
 	option = {
 		name = OPT.GOOD
+		log = "FE-SVP:[GetYear]:[Root.GetName]:Estates General accepted tax demand:flavor_svp.3"
 		if = {
 			limit = {
 				OR = {
 					AND = {
 						has_country_flag = svp_estates_general
+						#TODO: can provinces have different levels of this modifier? 
+						#If not, it should be a country modifier, if yes: this defaults to the lowest value from all owned provinces
 						any_owned_province = {
-							has_province_modifier = estates_general_1
+							has_province_modifier = estates_general_1 
 						}
 					}
 					AND = {
@@ -461,7 +473,7 @@ country_event = {
 					}
 				}
 			}
-			add_treasury = 100
+			add_treasury = 100 #TODO: instead of that, take X ducats from each province and add to ROOT
 		}
 		else_if = {
 			limit = {
@@ -533,6 +545,8 @@ country_event = {
 				}
 			}
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:Estates General rejected tax demand:flavor_svp.3"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.3"
 	}
 }
 # New Bishoprics 1559
@@ -621,12 +635,15 @@ country_event = {
 			}
 		}
 		custom_tooltip = flavor_svp_danger_tooltip
+		log = "FE-SVP:[GetYear]:[Root.GetName]:created new bishoprics in Low Countries to fight heresy:flavor_svp.5"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.5"
 	}
 	option = {
 		name = flavor_svp.5.b # We don't need a new system
 		ai_chance = {
 			factor = 25
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:have not created new bishoprics in Low Countries to fight heresy:flavor_svp.5"
 	}
 }
 
@@ -687,6 +704,8 @@ country_event = {
 				}
 			}
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:accepted petition to stop fighting heresy in Low Countries:flavor_svp.6"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.6"
 	}
 	option = {
 		name = OPT.REJECTPETITION
@@ -714,6 +733,8 @@ country_event = {
 				}
 			}
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:rejected petition to stop fighting heresy in Low Countries:flavor_svp.6"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.6"
 	}
 }
 
@@ -955,6 +976,7 @@ country_event = {
 		else = {
 			add_manpower = 3
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:Estates General accepted manpower demand:flavor_svp.10"
 	}
 }
 # Estates-General rejects manpower demand
@@ -978,6 +1000,8 @@ country_event = {
 				}
 			}
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:Estates General rejected manpower demand:flavor_svp.11"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.11"
 	}
 }
 # Beeldenstorm disaster events
@@ -992,6 +1016,7 @@ country_event = {
 	
 	immediate = {
 		set_global_flag = beeldenstorm_happened
+		log = "FE-SVP:[GetYear]:[Root.GetName]:Beeldenstorm revolt started:flavor_svp.100"
 		# Spawn the rebels, hit 1 stab.
 		if = {
 			limit = {
@@ -1138,6 +1163,7 @@ country_event = {
 		ai_chance = {
 			factor = 25
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:compromised with rebels:flavor_svp.100"
 		if = {
 			limit = {
 				has_country_flag = svp_estates_general
@@ -1180,19 +1206,17 @@ country_event = {
 				}
 			}
 		}
-		country_event = { id = flavor_svp.199 days = 5 }
+		# country_event = { id = flavor_svp.199 days = 5 } #no need for it, end_disaster = beeldenstorm triggers this event
 	}
 	option = {
 		name = "flavor_svp.100.b" # Suppress the rebels
 		ai_chance = {
 			factor = 75
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:tried to suppress the rebels:flavor_svp.100"
 		if = {
 			limit = {
-				OR = {
-					tag = SPA
-					tag = CAS
-				}
+				culture_group = iberian
 			}
 			define_general = {
 				fire = 5
@@ -1216,6 +1240,7 @@ country_event = {
 			}
 		}
 	}
+	log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.100"
 }
 
 # Tenth Penny
@@ -1233,7 +1258,7 @@ country_event = {
 		ai_chance = {
 			factor = 25
 		}
-		add_treasury = 500
+		add_treasury = 500 #TODO: take it from province wealth
 		Stab_Subtract1 = yes		
 		custom_tooltip = flavor_svp_danger_tooltip
 		hidden_effect = {
@@ -1244,13 +1269,16 @@ country_event = {
 				}
 			}
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:demanded tenth penny tax from Low Countries:flavor_svp.101"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.101"
 	}
 	option = {
-		name = flavor_svp.101.b # Let�s not burden the people with additional taxes
+		name = flavor_svp.101.b # Let us not burden the people with additional taxes
 		ai_chance = {
 			factor = 75
 		}
 		add_legitimacy = 10
+		log = "FE-SVP:[GetYear]:[Root.GetName]:skipped tenth penny tax from Low Countries:flavor_svp.101"
 	}
 }
 
@@ -1300,6 +1328,8 @@ country_event = {
 				}
 			}
 		}
+		log = "FE-SVP:[GetYear]:[Root.GetName]:executed the leaders of the revolt:flavor_svp.102"
+		log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:flavor_svp.102"
 	}
 	option = {
 		name = flavor_svp.102.b # Don't set it up
@@ -1307,6 +1337,7 @@ country_event = {
 			factor = 75
 		}
 		add_legitimacy = 10
+		log = "FE-SVP:[GetYear]:[Root.GetName]:not executed the leaders of the revolt:flavor_svp.102"
 	}
 }
 # Disaster end
@@ -1320,14 +1351,15 @@ country_event = {
 	
 	option = {
 		name = flavor_svp.199.a # Finally
-		Stab_Add2 = yes
+		Stab_Add1 = yes
+		log = "FE-SVP:[GetYear]:[Root.GetName]:Beeldenstorm revolt ended:flavor_svp.199"
 	}
 }
 # Information on the new mechanics
 country_event = {
 	id = flavor_svp.200
 	title = "flavor_svp.200.title"
-	desc = "OPT.OK"
+	desc = "flavor_svp.200.desc" #TODO: different description for SVP and for direct control over the region
 	picture = BURGUNDY_COURT_eventPicture
 	is_triggered_only = yes
 	
@@ -1994,37 +2026,9 @@ country_event = {
 				add_treasury = 200
 			}
 			
-			# Build army and navy, add forts
+			# Build army and navy
 			NED = {
-				capital_scope = {
-					#if = {
-					#	limit = {
-					#		can_build_fort_18th = yes
-					#	}
-					#	add_building = fort_18th
-					#}
-					#else_if = {
-					#	limit = {
-					#		can_build_fort_17th = yes
-					#	}
-					#	add_building = fort_17th
-					#}
-					#else_if = {
-					#	limit = {
-					#		can_build_fort_16th = yes
-					#	}
-					#	add_building = fort_16th
-					#}
-					#else_if = {
-					#	limit = {
-					#		can_build_fort_15th = yes
-					#	}
-					#	add_building = fort_15th
-					#}
-					#else = {
-					#	add_building = fort_14th
-					#}
-					
+				capital_scope = {				
 					# Should we/can we easily make the unit numbers dynamic?
 					infantry = NED
 					infantry = NED
@@ -2039,43 +2043,7 @@ country_event = {
 					artillery = NED
 					artillery = NED
 				}
-				random_owned_province = {
-					limit = {
-						is_capital = no
-						NOT = { has_building = fort_14th }
-						NOT = { has_building = fort_15th }
-						NOT = { has_building = fort_16th }
-						NOT = { has_building = fort_17th }
-						NOT = { has_building = fort_18th }
-					}
-					#if = {
-					#	limit = {
-					#		can_build_fort_18th = yes
-					#	}
-					#	add_building = fort_18th
-					#}
-					#else_if = {
-					#	limit = {
-					#		can_build_fort_17th = yes
-					#	}
-					#	add_building = fort_17th
-					#}
-					#else_if = {
-					#	limit = {
-					#		can_build_fort_16th = yes
-					#	}
-					#	add_building = fort_16th
-					#}
-					#else_if = {
-					#	limit = {
-					#		can_build_fort_15th = yes
-					#	}
-					#	add_building = fort_15th
-					#}
-					#else = {
-					#	add_building = fort_14th
-					#}
-				}
+
 				random_owned_province = {
 					limit = {
 						has_port = yes
@@ -2109,6 +2077,7 @@ country_event = {
 				swap_non_generic_missions = yes
 			}
 			#NED Spawns late, gives it two ideas that work well for it
+			#TODO: maybe we should fill those groups as vanilla does not do it?
 			NED = {
 				add_idea_group = naval_ideas
 				add_idea_group = economic_ideas
@@ -2173,7 +2142,7 @@ country_event = {
 		}
 	}
 	option = {
-		name = "flavor_svp.1001.a"
+		name = OPT.CRUSHREBELS
 		ROOT = {
 			declare_war_with_cb = {
 				who = NED
@@ -2181,6 +2150,7 @@ country_event = {
 			}
 		}
 	}
+	#TODO: option to let it slide and accept?
 }
 
 # Netherlands calls allies
