@@ -316,7 +316,8 @@ def compile(compress=False, parse_init=True):
 		'descriptor.mod',
 		'thumbnail.png',
 		'meiou.txt',
-		'checksum_manifest.txt'
+		'checksum_manifest.txt',
+		'savefile_cleaner.py'
 	]
 
 	if not parse_init:
