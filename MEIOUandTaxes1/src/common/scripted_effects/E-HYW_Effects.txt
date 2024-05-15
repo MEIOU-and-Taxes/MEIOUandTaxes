@@ -172,6 +172,7 @@ enforce_treaty_bretigny_eng = {
 			}
 		}
 		cede_province = GUY
+		set_province_flag = ceded_by_treaty_bretigny
 	}
 
 	if = {
@@ -226,12 +227,11 @@ enforce_treaty_rouen = {
 		}
 		add_core = ENG
 		cede_province = ENG
+		set_province_flag = ceded_by_treaty_rouen
 	}
 	if = {
 		limit = {
-			NOT = {
-				exists = ANJ
-			}
+			NOT = { exists = ANJ }
 		}
 		178 = {
 			set_province_flag = lost_to_english
@@ -245,58 +245,93 @@ enforce_treaty_rouen = {
 }
 
 enforce_treaty_bruges = {
+	#This is French treaty, supposed to cancel the impact of previous English victories
+	#to do that, it cancells Treaty of Bretigny and Treaty of Rouen if they were enacted
+	#on top of it, it takes further provinces from England and their subjects, so English posessions should be limited to only Bordeaux and Calais
 	log =  "FE-TempHYW:Treaty of Bruges signed:enforce_treaty_bruges"
-	if = {
-		limit = {
-			has_global_flag = treaty_of_rouen
-		}
-		clr_global_flag = treaty_of_rouen #TODO: if there is no treaty_of_rouen flag, nothing happens, is this planned?
-		bruges_group = {
-			limit = {
-				is_city = yes
-				OR = {
-					owned_by = FRA
-					owner = { is_subject_of = FRA }
-					owner = { junior_union_with = FRA }
-				}
-				NOT = { province_id = 176 }
-				NOT = { province_id = 2514 }
-			}
-			add_core = ENG
-			cede_province = ENG
-		}
-	
-		if = {
-			limit = {
-				NRM = {
-					exists = yes
-				}
-			}
-			FRA = {
-				create_subject = {
-					subject_type = appanage_subject
-					subject = NRM
-				}
-			}
-			log =  "FE-TempHYW: Normandy became an appanage of France:enforce_treaty_bruges"
-	
-			NRM = {
-				define_ruler = {
-					dynasty = FRA
-				}
-			}
-			log =  "FE-TempHYW: Normandy got ruler from French dynasty:enforce_treaty_bruges"
-		}
-	}
-	else = {
-		log =  "FE-TempHYW:WARNING this effect was executed with no benefit to the enacting tag:enforce_treaty_bruges"
-	}
+
 	if = {
 		limit = {
 			has_global_flag = treaty_of_bretigny
 		}
 		clr_global_flag = treaty_of_bretigny
+		bretigny_eng_group = {
+			limit = {
+				owner = {
+					OR = {
+						tag = ENG
+						is_subject_of = ENG
+					}
+				}
+				has_province_flag = ceded_by_treaty_bretigny
+			}
+			clr_province_flag = ceded_by_treaty_bretigny
+			set_province_flag = ceded_by_treaty_bruges
+			add_core = FRA
+			cede_province = FRA
+		}
+		log =  "FE-TempHYW:Treaty of Bretigny revoked, provinces moved back to France:enforce_treaty_bruges"
 	}
+
+	if = {
+		limit = {
+			has_global_flag = treaty_of_rouen
+		}
+		clr_global_flag = treaty_of_rouen
+		rouen_group = {
+			limit = {
+				owner = {
+					OR = {
+						tag = ENG
+						is_subject_of = ENG
+					}
+				}
+				has_province_flag = ceded_by_treaty_rouen
+			}
+			clr_province_flag = ceded_by_treaty_rouen
+			set_province_flag = ceded_by_treaty_bruges
+			add_core = FRA
+			cede_province = FRA
+		}
+		log =  "FE-TempHYW:Treaty of Rouen revoked, provinces moved back to France:enforce_treaty_bruges"
+	}
+
+	bruges_group = {
+		limit = {
+			is_city = yes
+			OR = {
+				owned_by = ENG
+				owner = { is_subject_of = ENG }
+				owner = { junior_union_with = ENG }
+			}
+			NOT = { province_id = 176 } #Bordeaux
+			NOT = { province_id = 2514 } #Baiona
+		}
+		add_core = FRA
+		cede_province = FRA
+	}
+	
+	#TODO: clarify NRM name/status
+	if = {
+		limit = {
+			exists = NRM
+		}
+		FRA = {
+			create_subject = {
+				subject_type = appanage_subject
+				subject = NRM
+			}
+		}
+		log =  "FE-TempHYW: Alencon became an appanage of France:enforce_treaty_bruges"
+		
+		NRM = {
+			define_ruler = {
+				dynasty = FRA
+			}
+		}
+		log =  "FE-TempHYW: Alencon got ruler from French dynasty:enforce_treaty_bruges"
+	}
+
 	set_global_flag = treaty_of_bruges
 }
 
