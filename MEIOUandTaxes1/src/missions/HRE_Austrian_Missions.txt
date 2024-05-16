@@ -1,0 +1,968 @@
+hab_hre = {
+	slot = 2
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_hab
+	}
+	has_country_shield = yes
+	
+	hab_unite_austria = {
+		icon = mission_unite_home_region
+		required_missions = { }
+		position = 1
+		
+		provinces_to_highlight = {
+			OR = {
+				province_id = 134	#Ob der Enns
+				province_id = 1510	#Unter der Enns
+				province_id = 83	#Ostmark
+				province_id = 2384	#Untersteiermark
+				province_id = 3747	#Gorenjska
+				province_id = 129	#Kranjska
+				province_id = 3322	#Vorarlberg
+				province_id = 73	#Tirol
+				province_id = 2625	#Bozen
+				province_id = 62	#Lienz
+				AND={
+					area = inner_austria_area
+					owner = {theocracy_trigger = no}
+					owner = {free_city_trigger = no}
+				}
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		
+		trigger = {
+			owns_or_non_sovereign_subject_of = 134
+			owns_or_non_sovereign_subject_of = 1510
+			owns_or_non_sovereign_subject_of = 83
+			owns_or_non_sovereign_subject_of = 2384
+			owns_or_non_sovereign_subject_of = 3747
+			owns_or_non_sovereign_subject_of = 129
+			owns_or_non_sovereign_subject_of = 3322
+			owns_or_non_sovereign_subject_of = 73
+			owns_or_non_sovereign_subject_of = 2625
+			owns_or_non_sovereign_subject_of = 62
+			inner_austria_area = {
+				type = all
+				OR = {
+					country_or_non_sovereign_subject_holds = ROOT
+					owner = {theocracy_trigger = yes}
+					owner = {free_city_trigger = yes}
+				}
+			}
+			is_at_war = no
+			custom_trigger_tooltip = {tooltip ="is_free_or_tributary_trigger_tooltip" is_free_or_tributary_trigger = yes }
+		}
+		
+		effect = {
+			if = {
+				limit = {
+					NOT = { tag = HAB }
+					OR = {
+						primary_culture = austrian
+						primary_culture = slovenian
+					}
+					government = monarchy
+				}
+				country_event = { id = mission_event.041 }
+			}
+			else = {
+				add_prestige = 10
+				add_country_modifier = {
+					name = "austria_reunited"
+					duration = 9125 #25 years
+				}
+			}
+		}
+	}
+	
+	#hab_claim_emperorship = {
+	#	icon = mission_empire
+	#	required_missions = { hab_unite_austria }
+	#	position = 2
+	#	
+	#	trigger = {
+	#		is_emperor = yes
+	#	}
+	#	
+	#	effect = {
+	#		add_prestige = 25
+	#		add_country_modifier = {
+	#			name = "succesful_bid_for_imperial_crown"
+	#			duration = 9125 #25 years
+	#		}
+	#	}
+	#}
+	
+	hab_focus_on_hre = {
+		icon = mission_have_two_subjects
+		required_missions = { hab_unite_austria }
+		position = 2
+		
+		trigger = {
+			is_emperor = yes
+			stability = 1
+			prestige = 25 #reduced from 50 (lower resting point in 3.0)
+			imperial_influence = 25
+			hre_reform_passed = reichsreform
+		}
+		
+		effect = {
+			if = {
+				limit = {
+					exists = BOH
+					is_subject = no
+					BOH = {
+						is_subject = no
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 300
+					target = BOH
+				}
+			}
+			else = {
+				royal_bohemia_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+				north_bohemia_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	hab_subjugate_bohemia = {
+		icon = mission_monarch_in_throne_room
+		required_missions = { hab_focus_on_hre }
+		position = 3
+		
+		ai_weight = {
+			factor = 4
+			modifier = {
+				factor = 0
+				royal_bohemia_area = {
+					owner = {
+						alliance_with = ROOT
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				north_bohemia_area = {
+					owner = {
+						alliance_with = ROOT
+					}
+				}
+			}
+		}
+		
+		provinces_to_highlight = {
+			OR = {
+				area = royal_bohemia_area
+				area = north_bohemia_area
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		
+		trigger = {
+			royal_bohemia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			north_bohemia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			76 = { #Salzburg
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			165 = { #Zurichgau
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			2359 = { #Basel
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			1448 = { #Waldstetten
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			1374 = { #Bern
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			hidden_effect = {
+				remove_casus_belli = {
+					type = cb_restore_personal_union
+					target = BOH
+				}
+			}
+		}
+	}
+	
+	hab_connect_sundgau_to_wien = {
+		icon = mission_build_up_to_force_limit
+		required_missions = { hab_subjugate_bohemia }
+		position = 4
+		
+		provinces_to_highlight = {
+			OR = {
+				province_id = 76
+				province_id = 165
+				province_id = 2359
+				province_id = 1448
+				province_id = 1374
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		
+		trigger = {
+			owns_or_non_sovereign_subject_of = 76
+			owns_or_non_sovereign_subject_of = 165
+			owns_or_non_sovereign_subject_of = 2359
+			owns_or_non_sovereign_subject_of = 1448
+			owns_or_non_sovereign_subject_of = 1374
+		}
+		
+		effect = {
+			add_adm_power = 50
+		}
+	}
+	
+	hab_ally_in_iberia = {
+		icon = mission_alliances
+		required_missions = { hab_connect_sundgau_to_wien }
+		position = 5
+
+		trigger = {
+			any_known_country = {
+				num_of_provinces_in_states = 20
+				#any_neighbor_province = {
+				#	owned_by = FRA
+				#}
+				capital_scope = {
+					superregion = iberia_superregion
+				}
+				religion_group = christian
+				alliance_with = HAB
+				marriage_with = HAB
+				has_opinion = {
+					who = HAB
+					value = 150
+				}
+				HAB = {
+					has_opinion = {
+						who = PREV
+						value = 150
+					}
+				}
+			}
+		}
+		
+		effect = {
+			187 = { #Bar
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			193 = { #Amont
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			4228 = { #Milieu
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			2366 = { #Aval
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	hab_encircle_france = {
+		icon = mission_cannons_firing
+		required_missions = { hab_ally_in_iberia }
+		position = 6
+		
+		provinces_to_highlight = {
+			OR = {
+				province_id = 187
+				province_id = 193
+				province_id = 4228
+				province_id = 2366
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		
+		trigger = {
+			owns_or_non_sovereign_subject_of = 187
+			owns_or_non_sovereign_subject_of = 193
+			owns_or_non_sovereign_subject_of = 4228
+			owns_or_non_sovereign_subject_of = 2366
+		}
+		
+		effect = {
+			champagne_area = {
+				limit = {
+					NOT = { owned_by = ROOT	}
+					NOT = { is_core = ROOT	}
+				}
+				add_permanent_claim = ROOT
+			}
+		}
+	}
+
+	hab_expand_the_western_border = {
+		icon = mission_unite_home_region
+		required_missions = { hab_encircle_france }
+		position = 7
+		
+		provinces_to_highlight = {
+			area = champagne_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		
+		trigger = {
+			champagne_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		
+		effect = {
+			Stab_Add2 = yes
+		}
+	}
+	
+	hab_aeiou_mission = {
+		icon = mission_empire
+		required_missions = {
+			hab_expand_the_western_border
+			hab_conquer_galicia
+			hab_dominate_adriatic
+		}
+		position = 8
+		
+		trigger = {
+			hre_reform_passed = erbkaisertum
+			total_development = 500
+			is_emperor = yes
+		}
+		
+		effect = {
+			add_country_modifier = {
+				name = "hab_aeiou"
+				duration = 9125 #25 years
+			}
+		}
+	}
+	
+	hab_form_germany = {
+		icon = mission_empire
+		required_missions = { }
+		position = 9
+		
+		trigger = {
+			NOT = { exists = GER }
+			NOT = { tag = ERG }
+			custom_trigger_tooltip = {tooltip ="is_free_or_tributary_trigger_tooltip" is_free_or_tributary_trigger = yes }
+			is_at_war = no
+			OR = {
+				NOT = { hre_size = 1 }
+				AND = {
+					hre_size = 1
+					NOT = { hre_size = 2 }
+					is_emperor = yes
+				}
+				adm_tech = 60
+			}
+			austrian_circle_region = {
+				type = all
+				OR = {
+					owner = { free_city_trigger = yes }
+					country_or_non_sovereign_subject_holds = ROOT
+				}
+			}
+			upper_saxon_circle_region = {
+				type = all
+				OR = {
+					owner = { free_city_trigger = yes }
+					country_or_non_sovereign_subject_holds = ROOT
+				}
+			}
+			swabia_bavarian_region = {
+				type = all
+				OR = {
+					owner = { free_city_trigger = yes }
+					country_or_non_sovereign_subject_holds = ROOT
+				}
+			}
+			upper_rhenish_circle_region = {
+				type = all
+				OR = {
+					owner = { free_city_trigger = yes }
+					country_or_non_sovereign_subject_holds = ROOT
+				}
+			}
+			lower_saxon_circle_region = {
+				type = all
+				OR = {
+					owner = { free_city_trigger = yes }
+					country_or_non_sovereign_subject_holds = ROOT
+				}
+			}
+		}
+		
+		effect = {
+			country_event = { id = mission_event.017 }
+		}
+	}
+}
+
+hab_east = {
+	slot = 1	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_hab
+	}
+	has_country_shield = yes
+	
+	hab_focus_on_the_east = {
+		icon = mission_assemble_an_army
+		required_missions = { hab_unite_austria }
+		position = 2
+
+		trigger = {
+			army_size_percentage = 1
+			manpower_percentage = 0.4
+			num_of_generals = 1
+		}
+		
+		effect = {
+			add_mil_power = 50
+			add_army_tradition = 10
+			add_country_modifier = {
+				name = "morale_boost"
+				duration = 9125 #25 years
+			}
+		}
+	}
+	
+	hab_decline_of_hungary = {
+		icon = mission_conquer_50_development
+		required_missions = { hab_focus_on_the_east }
+		position = 3
+		
+		trigger = {
+			HUN = {
+				exists = yes
+			}
+			total_development = 150
+			total_development = HUN
+		}
+		effect = {
+			if = {
+				limit = {
+					exists = HUN
+					is_subject = no
+					HUN = {
+						is_subject = no
+					}
+				}
+				add_casus_belli = {
+					type = cb_restore_personal_union
+					months = 300
+					target = HUN
+				}
+			}
+			else = {
+				east_slovakia_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+				west_slovakia_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+				transdanubia_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+				alfold_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+				kisalfold_area = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	hab_subjugate_hungary = {
+		icon = mission_have_two_subjects
+		required_missions = { hab_decline_of_hungary }
+		position = 4
+		
+		provinces_to_highlight = {
+			OR = {
+				area = east_slovakia_area
+				area = west_slovakia_area
+				area = transdanubia_area
+				area = alfold_area
+				area = kisalfold_area
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			east_slovakia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			west_slovakia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			transdanubia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			alfold_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			kisalfold_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			croatia_area = {
+				limit = {
+					NOT = { owned_by = ROOT	}
+					NOT = { is_core = ROOT	}
+				}
+				add_permanent_claim = ROOT
+			}
+			2388 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			add_country_modifier = {
+				name = "royal_hungary"
+				duration = 9125 #25 years
+			}
+		}
+	}
+	
+	hab_control_croatia = {
+		icon = mission_conquer_5_states
+		required_missions = { hab_subjugate_hungary }
+		position = 5
+
+		provinces_to_highlight = {
+			OR = {
+				area = croatia_area
+				province_id = 2388
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			croatia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			2388 = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		
+		effect = {
+			bosnia_area = {
+				limit = {
+					NOT = { owned_by = ROOT	}
+					NOT = { is_core = ROOT	}
+				}
+				add_permanent_claim = ROOT
+			}
+		}
+	}
+	
+	hab_austrian_bosnia = {
+		icon = mission_conquer_50_development
+		required_missions = { hab_control_croatia }
+		position = 6
+
+		provinces_to_highlight = {
+			area = bosnia_area
+			NOT = { owned_by = ROOT }
+		}
+		
+		trigger = {
+			bosnia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		
+		effect = {
+			2536 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			2833 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			258 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			2507 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			260 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			3792 = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	hab_conquer_galicia = {
+		icon = mission_cossack_cavalry
+		completed_by = 1772.8.5
+		required_missions = { hab_austrian_bosnia }
+		position = 7
+		
+		provinces_to_highlight = {
+			OR = {
+				province_id = 2536
+				province_id = 2833
+				province_id = 258
+				province_id = 2507
+				province_id = 260
+				province_id = 3792
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			owns_or_non_sovereign_subject_of = 2536
+			owns_or_non_sovereign_subject_of = 2833
+			owns_or_non_sovereign_subject_of = 258
+			owns_or_non_sovereign_subject_of = 2507
+			owns_or_non_sovereign_subject_of = 260
+			owns_or_non_sovereign_subject_of = 3792
+			
+		}
+		effect = {
+			add_country_modifier = {
+				name = "hab_secured_eastern_front"
+				duration = 9125 #25 years
+			}
+		}
+	}
+}
+	
+hab_italy = {
+	slot = 3
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = d_of_hab
+	}
+	has_country_shield = yes
+	
+	hab_focus_on_italy = {
+		icon = mission_high_income
+		required_missions = { hab_unite_austria }
+		position = 2
+		
+		trigger = {
+			monthly_income = 1.5
+			capital_scope = {
+				development = 30
+				base_production = 15
+			}
+		}
+		
+		effect = {
+			venetia_area = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+			friuli_area = {
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT }
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	hab_expand_into_northern_italy = {
+		icon = mission_trade_company_region_abroad
+		required_missions = { hab_focus_on_italy }
+		position = 3
+		
+		provinces_to_highlight = {
+			OR = {
+				area = venetia_area
+				area = friuli_area
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		
+		trigger = {
+			venetia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			friuli_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		
+		effect = {
+			carinthia_area = {
+				limit = {
+					NOT = { owned_by = ROOT	}
+					NOT = { is_core = ROOT	}
+				}
+				add_permanent_claim = ROOT
+			}
+			east_adriatic_coast_area = {
+				limit = {
+					NOT = { owned_by = ROOT	}
+					NOT = { is_core = ROOT	}
+				}
+				add_permanent_claim = ROOT
+			}
+		}
+	}
+	
+	hab_secure_dalmatian_coast = {
+		icon = mission_sea_battles
+		required_missions = { hab_expand_into_northern_italy }
+		position = 4
+		
+		provinces_to_highlight = {
+			OR = {
+				area = carinthia_area
+				area = east_adriatic_coast_area
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			carinthia_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			east_adriatic_coast_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_country_modifier = {
+				name = "hab_dalmatia_secured"
+				duration = 9125 #25 years
+			}
+		}
+	}
+	
+	hab_enter_adriatic_trade = {
+		icon = mission_galleys_in_port
+		required_missions = { hab_secure_dalmatian_coast }
+		position = 5
+		
+		trigger = {
+			num_of_light_ship = 10
+			130 = { #Istria
+				trade_share = {
+					country = HAB
+					share = 25
+				}
+			}
+		}
+		
+		effect = {
+			112 = { #Venice
+				if = {
+					limit = {
+						NOT = { owned_by = ROOT	}
+						NOT = { is_core = ROOT	}
+					}
+					add_permanent_claim = ROOT
+				}
+			}
+		}
+	}
+	
+	hab_conquer_venice = {
+		icon = mission_invade_island
+		required_missions = { hab_enter_adriatic_trade }
+		position = 6
+		
+		provinces_to_highlight = {
+			province_id = 112
+		}
+		
+		trigger = {
+			owns_or_non_sovereign_subject_of = 112
+		}
+		
+		effect = {
+			add_years_of_income = 2
+		}
+	}
+	
+	hab_dominate_adriatic = {
+		icon = mission_war_chest
+		required_missions = { hab_conquer_venice }
+		position = 7
+		
+		trigger = {
+			num_of_light_ship = 20
+			112 = { #Venice
+				trade_share = {
+					country = HAB
+					share = 60
+				}
+			}
+		}
+		
+		effect = {
+			add_dip_power = 50
+			add_country_modifier = {
+				name = "hab_dalmatia_dominant"
+				duration = 9125 #25 years
+			}
+		}
+	}
+}

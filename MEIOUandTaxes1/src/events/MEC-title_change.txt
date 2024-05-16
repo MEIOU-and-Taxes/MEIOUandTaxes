@@ -1,0 +1,1520 @@
+########################################
+#       Changing Tier Levels.txt       #
+# for MEIOU by GG                      #
+# v1 2009.09.28                        #
+# v2 2010.02.03 FB                     #
+# v2.01 2010.06.03 kfoelsch fixed king #
+# v3.01 2014.02.08 gigau added to M&T  #
+########################################
+# SUMMARY
+# Purpose - to change the tier levels
+# count <> marquis <> duke <> prince/grand duke <> king <> emperor
+#
+# OVERVIEW
+# - For HRE members, promotion requires authorization of the Emperor
+# - For non HRE catholic nations, the authorization of the Pope <- to be checked for Anti Pope
+# - For vassals, the authorization of the overlord
+# - For the others, a high prestige.
+# - shugos get promoted to sengoku and sengokus get demoted to shugo
+# - a powerful enough sengoku gets promoted to shogun
+# - if the shogun is still powerful, the following one becomes contender
+#
+# IDs 0title_change.1 - 0title_change.xx
+# title_change.1-34 - responses to promotions requested (triggered by decisions)
+# title_change.1	- Towards margraviateship in the HRE
+# title_change.2	- Towards dukeship in the HRE
+# title_change.3	- Towards princedom in the HRE
+# title_change.4	- Towards kingship in the HRE
+# title_change.11	- Towards margraviateship as vassal
+# title_change.12	- Towards dukeship as vassal
+# title_change.13	- Towards princedom as vassal
+# title_change.14	- Towards kingship as vassal
+# title_change.21	- Towards margraviateship as catholic
+# title_change.22	- Towards dukeship as catholic
+# title_change.23	- Towards princedom as catholic
+# title_change.24	- Towards kingship as catholic
+# title_change.25	- Towards empire crown as catholic
+# title_change.31	- Towards margraviateship as orthodox - TO DO
+# title_change.32	- Towards dukeship as orthodox - TO DO
+# title_change.33	- Towards princedom as orthodox - TO DO
+# title_change.34	- Towards kingship as orthodox - TO DO
+# title_change.35	- Towards empire crown as orthodox - TO DO
+# title_change.51-55 - promotions gifted on merit
+# title_change.51	- count > marquis
+# title_change.52	- marquis > duke
+# title_change.53	- duke > prince/grand duke
+# title_change.54	- prince/grand duke > king
+# title_change.55	- king > emperor
+# title_change.71-99 - special cases
+# title_change.71	- New Japan becomes an empire - TO DO
+# title_change.72	- New Yavapeh becomes an empire - TO DO
+# title_change.73	- New Gupta nation becomes an empire - TO DO
+# title_change.74	- Prussia formed as a feudal duchy - TO DO
+# title_change.75	- Prussia formed as an absolute monarchy - TO DO
+#
+#####################################
+# General changes:
+# v2 added title_change.51-55 - promotions gifted on merit
+#
+#
+#####################################
+# Outstanding issues:
+# - orthodoc promotions
+# - special cases
+#
+#####################################
+# Notes:
+# - Events title_change.1 - title_change.35 supplement Decisions in ChangingTierLevel.txt
+#
+#
+#####################################
+namespace = title_change
+
+# title_change.1	- Towards margraviateship in the HRE
+country_event = {
+	id = title_change.1
+	title = "title_change.1.n"		# Margravate
+	desc = "title_change.1.t"		# A member of the Empire has asked us to be granted the title of Margrave over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_margraviate_hre
+	# ROOT = the emperor
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.41 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 4
+					total_development = 20
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.42 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_2 = yes
+		}
+	}
+}
+
+# title_change.2	- Towards dukeship in the HRE
+country_event = {
+	id = title_change.2
+	title = "title_change.2.n"		# Ducal crown
+	desc = "title_change.2.t"		# A member of the Empire has asked us to be granted the duke title over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_dukedom_hre
+	# ROOT = the emperor
+	
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.41 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 8
+					total_development = 40
+				}
+				factor = 3
+			}			
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.42 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_3 = yes
+		}
+	}
+}
+
+# title_change.3	- Towards princedom in the HRE
+country_event = {
+	id = title_change.3
+	title = "title_change.3.n"		# Princes crown
+	desc = "title_change.3.t"		# A member of the Empire has asked us to be granted the title Prince over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_princedom_hre
+	# ROOT = the emperor
+	
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.41 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 20
+					total_development = 80
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.42 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_4 = yes
+		}
+	}
+}
+
+# title_change.4	- Towards kingship in the HRE
+country_event = {
+	id = title_change.4
+	title = "title_change.4.n"		# Kings crown
+	desc = "title_change.4.t"		# A member of the Empire has asked us to be granted the title of King over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_kingship_hre
+	# ROOT = the emperor
+	
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.41 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					total_development = 240
+					num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+						value = 40
+						is_city = yes
+					}
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.42 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_5 = yes
+		}
+	}
+}
+
+# title_change.11	- Towards margraviateship as a vassal
+country_event = {
+	id = title_change.11
+	title = "title_change.11.n"		# Margraves crown
+	desc = "title_change.11.t"		# A vassal has asked us to be granted the title of Margrave over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_margraviate_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 4
+					total_development = 30
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_2 = yes
+		}
+	}
+}
+
+# title_change.12	- Towards dukeship as a vassal
+country_event = {
+	id = title_change.12
+	title = "title_change.12.n"		# Ducal crown
+	desc = "title_change.12.t"		# A vassal has asked us to be granted the duke title over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_dukedom_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 8
+					total_development = 60
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_3 = yes
+		}
+	}
+}
+
+# title_change.13	- Towards princedom as a vassal
+country_event = {
+	id = title_change.13
+	title = "title_change.13.n"		# Princes crown
+	desc = "title_change.13.t"		# A vassal has asked us to be granted the title of Prince over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_princedom_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 20
+					total_development = 120
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_4 = yes
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.14	- Towards kingship as a vassal
+country_event = {
+	id = title_change.14
+	title = "title_change.14.n"		# Kings crown
+	desc = "title_change.14.t"		# A vassal has asked us to be granted the title of King over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_kingship_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					total_development = 300
+					num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+						value = 50
+						is_city = yes
+					}
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_5 = yes
+		}
+	}
+}
+
+# title_change.21	- Towards margraviateship as catholic
+country_event = {
+	id = title_change.21
+	title = "title_change.21.n"		# Margraves crown
+	desc = "title_change.21.t"		# A catholic country has asked us to be granted the title of Margrave over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_margraviate_catholic
+	# ROOT = PAP
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+			modifier = {
+				is_female = yes NOT = { piety = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				vassal_of = FROM
+				factor = 0
+			}
+			modifier = {
+				factor = 0
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.45 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 4
+					total_development = 20
+				}
+				factor = 3
+			}
+			modifier = {
+				factor = 10
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.46 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_2 = yes
+		}
+	}
+}
+
+# title_change.22	- Towards dukeship as catholic
+country_event = {
+	id = title_change.22
+	title = "title_change.22.n"		# Ducal crown
+	desc = "title_change.22.t"		# A catholic country has asked us to be granted the duke title over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_dukedom_catholic
+	# ROOT = PAP
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+			modifier = {
+				is_female = yes NOT = { piety = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				vassal_of = FROM
+				factor = 0
+			}
+			modifier = {
+				factor = 0
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.45 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 8
+					total_development = 40
+				}
+				factor = 3
+			}
+			modifier = {
+				factor = 10
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.46 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_3 = yes
+		}
+	}
+}
+
+# title_change.23	- Towards princedom as catholic
+country_event = {
+	id = title_change.23
+	title = "title_change.23.n"		# Princes crown
+	desc = "title_change.23.t"		# A catholic country has asked us to be granted the title of Prince over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_princedom_catholic
+	# ROOT = PAP
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+			modifier = {
+				is_female = yes NOT = { piety = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				vassal_of = FROM
+				factor = 0
+			}
+			modifier = {
+				factor = 0
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.45 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = { #twice above the required value
+				OR = {
+					num_of_cities = 20
+					total_development = 80
+				}
+				factor = 3
+			}
+			modifier = {
+				factor = 10
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.46 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_4 = yes
+		}
+	}
+}
+
+# title_change.24	- Towards kingship as catholic
+country_event = {
+	id = title_change.24
+	title = "title_change.24.n"		# Kings crown
+	desc = "title_change.24.t"		# A catholic country has asked us to be granted the title of King over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_kingship_catholic
+	# ROOT = PAP
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+			modifier = {
+				is_female = yes NOT = { piety = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				vassal_of = FROM
+				factor = 0
+			}
+			modifier = {
+				factor = 0
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.45 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = {
+				factor = 10
+				FROM = { is_papal_controller = yes }
+			}
+			modifier = { #twice above the required value
+				OR = {
+					total_development = 300
+					num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+						value = 50
+						is_city = yes
+					}
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.46 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_5 = yes
+		}
+	}
+}
+
+# title_change.25	- Towards empire crown as catholic
+country_event = {
+	id = title_change.25
+	title = "title_change.25.n"		# Emperors crown
+	desc = "title_change.25.t"		# A catholic country has asked us to be granted the title of Emperor over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_emperor_catholic
+	# ROOT = PAP
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+			modifier = {
+				is_female = yes NOT = { piety = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				vassal_of = FROM
+				factor = 0
+			}
+			modifier = {
+				factor = 0
+				FROM = { is_papal_controller = yes }
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.45 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+			modifier = {
+				factor = 10
+				FROM = { is_papal_controller = yes }
+			}
+			modifier = { #twice above the required value
+				OR = {
+					total_development = 1600
+					num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+						value = 160
+						is_city = yes
+					}
+				}
+				factor = 3
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.46 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_6 = yes
+		}
+	}
+}
+
+# title_change.26	- Towards margraviateship as a Chinese subject
+country_event = {
+	id = title_change.26
+	title = "title_change.26.n"		# Margraves crown
+	desc = "title_change.26.t"		# A vassal has asked us to be granted the title of Margrave over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_margraviate_china
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_2 = yes
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.27	- Towards dukeship as a Chinese subject
+country_event = {
+	id = title_change.27
+	title = "title_change.26.n"		# Ducal crown
+	desc = "title_change.26.t"		# A vassal has asked us to be granted the duke title over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_dukedom_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_3 = yes
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.28	- Towards princedom as a Chinese subject
+country_event = {
+	id = title_change.28
+	title = "title_change.26.n"		# Princes crown
+	desc = "title_change.26.t"		# A vassal has asked us to be granted the title of Prince over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_princedom_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_4 = yes
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.29	- Towards kingship as a Chinese subject
+country_event = {
+	id = title_change.29
+	title = "title_change.26.n"		# Kings crown
+	desc = "title_change.26.t"		# A vassal has asked us to be granted the title of King over his demesne.
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes		# called by decision: up_to_kingship_vassal
+	# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+	
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_5 = yes
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.31	- Towards margraviateship as orthodox
+# title_change.32	- Towards dukeship as orthodox
+# title_change.33	- Towards princedom as orthodox
+# title_change.34	- Towards kingship as orthodox
+# title_change.35	- Towards empire crown as orthodox
+
+# title_change.36	- Towards Shugo
+country_event = {
+
+	id = title_change.36
+	title = "title_change.36.n"		# Shugo title
+	desc = "title_change.36.t"		# A vassal has asked us to be granted the title of Shugo
+	picture = COURT_eventPicture
+
+	is_triggered_only = yes		# called by decision: request_shugo_appointement
+					# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_2 = yes
+			add_legitimacy = 10
+			if = {
+				limit = {
+					NOT = {
+						overlord_of = ROOT
+					}
+				}
+				free_vassal = FROM
+				hidden_effect = {
+					FROM = { 
+						dependency_lost_color_effect = yes
+						set_key = { lhs = Vassal_Type value = 10 }	
+					}
+				}
+				create_subject = {
+					who = FROM
+					subject_type = daimyo_vassal
+				}
+			}
+		}
+	}
+}
+
+# title_change.37	- Towards Tandai
+country_event = {
+
+	id = title_change.37
+	title = "title_change.37.n"		# Tandai title
+	desc = {
+		trigger = {
+			FROM = {
+				capital_scope = {
+					OR = {
+						area = north_kyushu_area
+						area = south_kyushu_area
+					}
+				}
+			}
+		}
+		desc = title_change.37.ta # A vassal has asked us to be granted the title of Kyushu Tandai
+	}
+	desc = {
+		trigger = {
+			FROM = {
+				capital_scope = {
+					OR = {
+						area = sanin_area
+						area = sanyo_area
+					}
+				}
+			}
+		}
+		desc = title_change.37.tb # A vassal has asked us to be granted the title of Chugoku Tandai
+	}
+	desc = {
+		trigger = {
+			FROM = {
+				capital_scope = {
+					area = shikoku_area
+				}
+			}
+		}
+		desc = title_change.37.tc # A vassal has asked us to be granted the title of Shikoku Tandai
+	}
+	desc = {
+		trigger = {
+			FROM = {
+				capital_scope = {
+					area = tohoku_area
+				}
+			}
+		}
+		desc = title_change.37.td # A vassal has asked us to be granted the title of Ou Tandai
+	}
+	picture = COURT_eventPicture
+
+	is_triggered_only = yes		# called by decision: request_kyushu_tandai_appointement, request_chugoku_tandai_appointement, request_shikoku_tandai_appointement, request_ou_tandai_appointement
+					# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			change_title_3 = yes
+			if = {
+				limit = {
+					capital_scope = {
+						OR = {
+							area = north_kyushu_area
+							area = south_kyushu_area
+						}
+					}
+				}
+				set_country_flag = kyushu_tandai
+			}
+			if = {
+				limit = {
+					capital_scope = {
+						OR = {
+							area = sanin_area
+							area = sanyo_area
+						}
+					}
+				}
+				set_country_flag = chugoku_tandai
+			}
+			if = {
+				limit = {
+					capital_scope = {
+						area = shikoku_area
+					}
+				}
+				set_country_flag = shikoku_tandai
+			}
+			if = {
+				limit = {
+					capital_scope = {
+						area = tohoku_area
+					}
+				}
+				set_country_flag = ou_tandai
+			}
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.28	- Towards Kanrei
+country_event = {
+
+	id = title_change.38
+	title = "title_change.38.n"		# Princes crown
+	desc = "title_change.38.t"		# A vassal has asked us to be granted the title of Prince over his demesne.
+	picture = COURT_eventPicture
+
+	is_triggered_only = yes		# called by decision: TBD
+					# ROOT = the overlord
+	option = {
+		name = "OPT.HELLNO"		# Hell no !
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 100 } }
+				factor = 2
+			}
+			modifier = {
+				NOT = { has_opinion = { who = FROM value = 50 } }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_refused }
+			country_event = { id = title_change.43 days = 5 }
+			add_country_modifier = { name = "promotion_denied" duration = 3000 }
+		}
+	}
+
+	option = {
+		name = "OPT.WHYNOT"		# Why not ?
+		ai_chance = {
+			factor = 50
+			modifier = {
+				has_opinion = { who = FROM value = 150 }
+				factor = 2
+			}
+			modifier = {
+				has_opinion = { who = FROM value = 180 }
+				factor = 5
+			}
+		}
+		FROM = {
+			add_opinion = { who = ROOT modifier = promotion_accepted }
+			country_event = { id = title_change.44 days = 5 }
+			add_country_modifier = { name = "newly_promoted" duration = 3000 }
+			if = {
+				limit = {
+					NOT = {
+						any_known_country = {
+							has_country_flag = kyoto_kanrei
+						}
+					}
+				}
+				change_title_3 = yes
+				set_country_flag = kyoto_kanrei
+			}
+			set_country_flag = kanrei_appointement
+			add_legitimacy = 10
+		}
+	}
+}
+
+# title_change.41-50 - Notification of the reply
+country_event = {
+	id = title_change.41
+	title = "title_change.41.n"
+	desc = "title_change.41.negative"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		clr_country_flag = promotion_requested
+		name = "OPT.UNFORTUNATE"
+		add_prestige = -15
+		add_legitimacy = -5
+		log = "MEC-Title_Change:[GetYear]:[This.GetName]:request for increased title in the HRE was rejected"
+	}
+}
+
+country_event = {
+	id = title_change.42
+	title = "title_change.41.n"
+	desc = "title_change.41.positive"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		clr_country_flag = promotion_requested
+		name = "OPT.HURRAH"
+		add_prestige = 10
+		add_legitimacy = 5
+		log = "MEC-Title_Change:[GetYear]:[This.GetName]:request for increased title in the HRE was accepted"
+	}
+}
+
+country_event = {
+	id = title_change.43
+	title = "title_change.45.n"
+	desc = "title_change.45.negative"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		clr_country_flag = promotion_requested
+		name = "OPT.UNFORTUNATE"
+		add_prestige = -15
+		add_legitimacy = -5
+		log = "MEC-Title_Change:[GetYear]:[This.GetName]:request for increased title as a vassal was rejected"
+	}
+}
+
+country_event = {
+	id = title_change.44
+	title = "title_change.45.n"
+	desc = "title_change.45.positive"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		clr_country_flag = promotion_requested
+		name = "OPT.HURRAH"
+		add_prestige = 10
+		add_legitimacy = 10
+		log = "MEC-Title_Change:[GetYear]:[This.GetName]:request for increased title as a vassal was accepted"
+	}
+}
+
+country_event = {
+	id = title_change.45
+	title = "title_change.45.n"
+	desc = "title_change.45.negative"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		clr_country_flag = promotion_requested
+		name = "OPT.UNFORTUNATE"
+		add_prestige = -15
+		add_legitimacy = -5
+		log = "MEC-Title_Change:[GetYear]:[This.GetName]:request for increased title was rejected by the Pope"
+	}
+}
+
+country_event = {
+	id = title_change.46
+	title = "title_change.45.n"
+	desc = "title_change.45.positive"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		clr_country_flag = promotion_requested
+		name = "OPT.HURRAH"
+		add_prestige = 10
+		add_legitimacy = 10
+		log = "MEC-Title_Change:[GetYear]:[This.GetName]:request for increased title was accepted by the Pope"
+	}
+}
+
+
+# Removed pending reviewal of the feature
+
+# title_change.71-99 - special cases
+# title_change.71	- New Japan becomes an empire
+# title_change.72	- New Yavapeh becomes an empire
+# title_change.73	- New Gupta nation becomes an empire
+# title_change.74	- Prussia formed as a feudal duchy
+# title_change.75	- Prussia formed as an absolute monarchy
+

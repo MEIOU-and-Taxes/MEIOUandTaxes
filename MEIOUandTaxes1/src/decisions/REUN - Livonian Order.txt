@@ -1,0 +1,170 @@
+country_decisions = {
+	treaty_of_vilnius = {
+		#representing Second Treaty of Vilnius
+		potential = {
+			owns = 1264
+			OR = {
+				tag = LIV
+				tag = LVO
+			}
+			OR = {
+				AND = {
+					OR = {
+						is_subject_of = LIT
+						is_subject_of = POL
+						is_subject_of = PLC
+					}
+					has_global_flag = livonian_war_decided
+				}
+				#AND = { 
+				#	is_free_or_tributary_trigger = yes
+				#	OR = {
+				#		religion = protestant
+				#		religion = reformed
+				#	}
+				#}
+				#NOT = { government = theocracy }
+			}
+			NOT = { has_global_flag = treaty_of_vilnius }
+		}
+		allow = {
+			is_at_war = no
+		}
+		effect = {
+			set_global_flag = treaty_of_vilnius
+			
+			every_subject_country = {
+				if = {
+					limit = {
+						NOT = { tag = RIG }
+					}
+					overlord = {
+						inherit = PREV
+					}
+				}
+				else = {
+					every_owned_province = {
+						limit = {
+							NOT = { province_id = 38 }
+						}
+						cede_province = ROOT
+					}
+					#secularise Riga
+					if = {
+						limit = {
+							government = theocracy
+						}
+						grant_independence_effect = yes
+						secularisation_effect = yes
+					}
+				}
+			}
+
+			if = {
+				limit = {
+					is_subject_other_than_tributary_trigger = yes
+				}
+				every_owned_province = {
+					limit = {
+						NOT = { province_id = 39 }
+						NOT = { province_id = 1264 }
+					}
+					remove_core = ROOT
+					set_province_flag = to_cede_treaty_of_vilnius
+				}
+				overlord = {
+				    create_subject = {
+			        subject_type = decentralized_vassal
+			        subject = ROOT
+		            }
+					every_province = {
+						limit = {
+							has_province_flag = to_cede_treaty_of_vilnius
+						}
+						clr_province_flag = to_cede_treaty_of_vilnius
+						log = "FE-FormingNewNations:[GetYear]:[This.Owner.GetName]:ceded [This.GetName] to [Prev.GetName]:treaty_of_vilnius"
+						cede_province = PREV
+						add_claim = PREV
+						add_local_autonomy = 10
+						if = {
+							limit = {
+								is_core = ROOT
+							}
+							add_local_autonomy = -10
+						}
+						else = {
+							add_territorial_core = ROOT
+						}
+					}
+				}
+			}
+			log = "FE-FormingNewNations:[GetYear]:[Root.GetName]:formed [KUR.GetName] via decision:treaty_of_vilnius"
+			ChangeTagEffect = { scope=KUR }
+			if = {
+				limit = {
+					NOT = { capital = 1264 }
+				}
+				Effect_set_capital = { target = 1264 }
+				log = "FE-FormingNewNations:[GetYear]:[Root.GetName]:moved capital to [1264.GetName]:treaty_of_vilnius"
+			}
+			if = {
+				limit = {
+					government = monarchy
+				    NOT = { has_country_modifier = title_4 }
+			        NOT = { has_country_modifier = title_5 }
+			        NOT = { has_country_modifier = title_6 }
+				}
+				change_title_4 = yes
+			}
+			if = {
+				limit = {
+					government = theocracy
+				}
+				if = {
+					limit = {
+						adm_tech = 45
+					}
+					Pol_ChangeGovMonarchy = { Succession=1 Assembly=3 } 
+					add_government_reform = Pol_Nobility3
+				}
+				else_if = {
+					limit = {
+						adm_tech = 32
+					}
+					Pol_ChangeGovMonarchy = { Succession=1 Assembly=2 } 
+					add_government_reform = Pol_Nobility2
+				}
+				else = {
+					Pol_ChangeGovMonarchy = { Succession=1 Assembly=1 } 
+					add_government_reform = Pol_Nobility1
+				}
+				if = {
+					limit = {
+						religion = catholic
+						exists = PAP
+					}
+					PAP = {
+						add_opinion = {
+							who = ROOT
+							modifier = opinion_displeased
+						}
+					}
+				}
+			}
+			baltic_region = {
+				hidden_effect = {
+					remove_core = LVO
+				}
+				add_core = LIV
+			}
+			LIV = {
+				change_primary_culture = latvian
+			}
+			Stab_Add1 = yes
+			add_legitimacy = 100
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+}

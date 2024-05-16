@@ -1,0 +1,396 @@
+### PEASANTS' WAR
+country_event = {
+	id = peasants_war.1
+	title = "EVTNAME3021"
+	desc = "EVTDESC3021"
+	picture = ANGRY_MOB_eventPicture
+	goto = peasants_revolt_prov
+	major = yes
+	
+	is_triggered_only = yes
+
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+	    set_country_flag = peasant_war
+		set_country_flag = had_peasant_war
+	}
+
+	option = {
+		name = "EVTOPTA3021"
+		random_owned_province = {
+			limit = {
+			    is_city = yes
+				is_in_capital_area = yes
+				NOT = { check_key = { lhs = Concern_WelfareTreatR value = 2 } }
+			}
+			save_event_target_as = peasants_revolt_prov
+			spawn_rebels = {
+				type = mob_rebels
+				size = 2
+				win = yes
+				unrest = 15
+			}
+			#TODO: destruction of wealth? province trauma?
+		}
+		Stab_Subtract2 = yes
+	    add_prestige = -10
+	}
+}
+
+### PEASANT PROTESTS
+country_event = {
+	id = peasants_war.2
+	title = "EVTNAME3022"
+	desc = "EVTDESC3022"
+	picture = ANGRY_MOB_eventPicture
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = peasant_protests }
+		NOT = { has_country_modifier = NO_ProtectSerfs_S }
+		NOT = { has_country_modifier = NO_ProtectSerfs_M }
+		NOT = { has_country_modifier = NO_ProtectSerfs_L }
+		NOT = { has_country_modifier = NO_Serfs_S }
+		NOT = { has_country_modifier = NO_Serfs_M }
+		NOT = { has_country_modifier = NO_Serfs_L }
+	}
+
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	immediate = {
+		set_country_flag = peasant_protests
+	}
+
+	option = {
+		name = "EVTOPTA3022"			# Enforce serfdom
+		ai_chance = {
+			factor = 40
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+		}
+		random_owned_province = {
+		    limit = {
+			    is_city = yes
+				is_in_capital_area = yes
+				NOT = { controlled_by = REB }
+			}
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1
+				unrest = 10
+			}
+		}
+		capital_scope = { 
+			spawn_rebels = {
+				type = mob_rebels
+				size = 2
+				unrest = 10
+			}
+		}
+		NO_Serfs = yes
+	    custom_tooltip = NO_Serfs_effect
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+	}
+	option = {
+		name = "EVTOPTB3022"			# Restrict serfdom
+		ai_chance = {
+			factor = 60
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_NOLoy value = 75 }
+			}
+		}
+		NO_ProtectSerfs = yes
+		custom_tooltip = NO_ProtectSerfs_effect
+		add_adm_power = -25
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-10 }
+	}
+}
+
+### RELIGIOUS REVOLT
+country_event = {
+	id = peasants_war.3
+	title = "EVTNAME3023"
+	desc = "EVTDESC3023"
+	picture = ANGRY_MOB_eventPicture
+    goto = heretic_province
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = religious_revolt }
+		western_christian = yes
+		is_religion_enabled = protestant		
+		any_owned_province = {
+		    is_city = yes
+			is_in_capital_area = yes
+			NOT = { controlled_by = REB }
+		    has_owner_religion = no
+			OR = {
+			    religion = catholic
+				religion = protestant
+				religion = reformed
+				religion = hussite
+			}
+		}
+	}
+
+	mean_time_to_happen = {
+		days = 1
+		
+	}
+	
+	immediate = {
+		set_country_flag = religious_revolt
+		hidden_effect = {
+		    random_owned_province = {
+			    limit = {
+				    is_city = yes
+        			is_in_capital_area = yes
+        			NOT = { controlled_by = REB }
+	        	    has_owner_religion = no
+        			OR = {
+        			    religion = catholic
+        				religion = protestant
+	        			religion = reformed
+        				religion = hussite
+		        	}
+				}
+				save_event_target_as = heretic_province
+			}
+		}
+	}
+
+	option = {
+		name = "EVTOPTA3023" # Crush the rebels!
+		ai_chance = { factor = 40 }		
+		event_target:heretic_province = { 
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1
+				unrest = 10
+			}
+		}
+		add_mil_power = -50
+		if = {
+			limit = {
+				has_disaster = peasant_war
+			}
+			add_country_modifier = {
+				name = "religious_intolerance"
+				duration = -1
+				desc = "END_OF_PEASANTS_WAR"
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTB3023" # Let them chose their own faith
+		ai_chance = { factor = 60 }
+		add_dip_power = -50
+		reverse_add_opinion = { who = PAP modifier = opinion_pope_religious_tolerance }
+		add_papal_influence = -10
+		add_devotion = -25
+		if = {
+			limit = {
+				has_disaster = peasant_war
+			}
+			add_country_modifier = {
+				name = "heretic_tolerance"
+				duration = -1
+				desc = "END_OF_PEASANTS_WAR"
+			}
+		}
+	}
+}
+
+### OBSOLETE FORCES
+country_event = {
+	id = peasants_war.4
+	title = "EVTNAME3024"
+	desc = "EVTDESC3024"
+	picture = BATTLE_eventPicture
+	
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = obsolete_forces }
+		OR = {
+		    NOT = { Rights_BUSer1Has = yes }
+		    mil_tech = 25
+		}
+		NOT = { mil_tech = 40 }
+	}
+
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		set_country_flag = obsolete_forces
+	}
+
+	option = {
+		name = "EVTOPTA3024"			# They have no place in our society
+		ai_chance = { factor = 50 }
+		if = {
+			limit = {
+				has_disaster = peasant_war
+			}
+			add_country_modifier = {
+				name = "obsolete_forces"
+				duration = -1
+				desc = "END_OF_PEASANTS_WAR"
+			}
+		}
+	}
+	option = {
+		name = "EVTOPTB3024"			# They may still be of some use
+		ai_chance = { factor = 50 }
+		add_mil_power = -100
+		add_army_tradition = -10
+		if = {
+			limit = {
+				has_disaster = peasant_war
+			}
+			add_country_modifier = {
+				name = "support_troops"
+				duration = -1
+				desc = "END_OF_PEASANTS_WAR"
+			}
+		}
+	}
+}
+
+### NATIONAL DECENTRALISATION
+country_event = {
+	id = peasants_war.5
+	title = "EVTNAME3025"
+	desc = "EVTDESC3025"
+	picture = ANGRY_MOB_eventPicture
+	goto = rebellion_province
+	
+	is_triggered_only = yes
+
+	trigger = {
+	    NOT = { has_country_modifier = isolate_rebels }
+		any_owned_province = {
+		    is_city = yes
+			is_in_capital_area = yes
+			NOT = { controlled_by = REB }
+			NOT = { check_key = { lhs = Concern_WelfareTreatR value = 1.5 } }
+		}
+	}
+
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+	    hidden_effect = {
+		    random_owned_province = {
+			    limit = {
+				    is_city = yes
+        			is_in_capital_area = yes
+        			NOT = { controlled_by = REB }
+	        	    NOT = { check_key = { lhs = Concern_WelfareTreatR value = 1.5 } }
+				}
+				save_event_target_as = rebellion_province
+			}
+		}
+	}
+
+	option = {
+		name = "EVTOPTA3025"			# Crush the rebels
+		ai_chance = { factor = 40 }
+		event_target:rebellion_province = { 
+			spawn_rebels = {
+				type = mob_rebels
+				size = 2
+				unrest = 10
+			}
+		}
+		add_country_modifier = {
+			name = "isolate_rebels"
+			duration = 365
+		}
+	}
+	option = {
+		name = "EVTOPTB3025"			# We have to negotiate a solution
+		ai_chance = {
+			factor = 60
+			modifier = {
+				factor = 0.3
+				NOT = { treasury = 50 }
+			}
+			modifier = {
+				factor = 0.3
+				num_of_loans = 1
+			}
+		}
+		add_treasury = -50
+		event_target:rebellion_province = { 
+			Public_ChangeClassWealthVal = { class=SF type=value inp=50 }
+		}
+	}
+}
+
+### ORDER IS RETURNING
+country_event = {
+	id = peasants_war.6
+	title = "EVTNAME3026"
+	desc = "EVTDESC3026"
+	picture = ANGRY_MOB_eventPicture
+	
+	is_triggered_only = yes
+	
+	major = yes
+
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		clr_country_flag = peasant_war
+		disband_rebels = mob_rebels
+	}
+	
+	option = {
+		name = "EVTOPTA3026"			# Restore order
+		if = {
+			limit = {
+				government = monarchy
+				is_lesser_in_union = no
+			}
+			add_legitimacy = 10
+		}
+		add_prestige = 10
+		Stab_Add50Percent = yes
+		
+		add_country_modifier = {
+			name = recent_peasants_war
+			duration = 9125
+		}
+		
+		clr_country_flag = peasant_protests
+		clr_country_flag = religious_revolt
+		clr_country_flag = obsolete_forces
+		
+		remove_country_modifier = religious_intolerance
+		remove_country_modifier = heretic_tolerance
+		remove_country_modifier = support_troops
+		remove_country_modifier = obsolete_forces
+		remove_country_modifier = isolate_rebels
+	}
+}

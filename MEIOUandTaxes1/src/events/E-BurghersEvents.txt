@@ -1,0 +1,792 @@
+###########################################################
+# Events for the Burghers Estate
+#
+# written by Henrik Lohmander
+#
+# rewritten for MEIOU&Taxes by Piterdaw
+###########################################################
+
+namespace = burghers_estate_events
+
+#ADVANCEMENT OF THE MERCHANT CLASSES
+country_event = {
+	id = burghers_estate_events.1
+	title = burghers_estate_events.1.t
+	desc = burghers_estate_events.1.d
+	picture = BURGHER_ESTATE_eventPicture
+	
+	trigger = {
+		check_key = { lhs = Prov_BGPow value = 40 }
+		Advisor_HasFaction = { BG=yes Level=2 }
+	}
+
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	option = {
+		name = OPT.DULYNOTED2
+		BG_FactionBoost = yes
+	}
+}
+
+### ROBBER BARONS
+country_event = {
+	id = burghers_estate_events.2
+	title = burghers_estate_events.2.t
+	desc = burghers_estate_events.2.d
+	picture = BURGHER_ESTATE_eventPicture
+	goto = robber_baron_province
+	trigger = {
+		check_key = { lhs = Prov_NOPow value = 60 }
+		any_owned_province = {
+		    is_capital = no
+			is_overseas = no
+			check_key = { lhs = Prov_BGPow value = 25 }
+			OR = {
+			    has_province_modifier = TN_Minor
+				has_province_modifier = TN_Important
+				has_province_modifier = TN_Major
+				has_province_modifier = TN_Dominant
+			}
+		}
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					is_capital = no
+	    	    	is_overseas = no
+	        		OR = {
+	    	    	    has_province_modifier = TN_Minor
+	    	    		has_province_modifier = TN_Important
+		        		has_province_modifier = TN_Major
+		    	    	has_province_modifier = TN_Dominant
+		        	}
+				}
+				save_event_target_as = robber_baron_province
+			}
+		}
+	}
+
+	option = {
+		name = burghers_estate_events.2.a #They only take what is their right.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+		}
+		if = {
+			limit = { check_key = { lhs = Prov_NOPow value = 90 } }
+			add_country_modifier = { name = minor_trade_crisis duration = 4000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_NOPow value = 80 } }
+			add_country_modifier = { name = minor_trade_crisis duration = 3200 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_NOPow value = 70 } }
+			add_country_modifier = { name = minor_trade_crisis duration = 2400 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_NOPow value = 60 } }
+			add_country_modifier = { name = minor_trade_crisis duration = 1600 }
+		}
+		else = {
+			add_country_modifier = { name = minor_trade_crisis duration = 800 }
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	}
+	option = {
+		name = burghers_estate_events.2.b #We must curb such excesses!
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_NOLoy value = 75 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+	}
+}
+
+#DECLINE OF THE MERCHANT CLASSES
+country_event = {
+	id = burghers_estate_events.3
+	title = burghers_estate_events.3.t
+	desc = burghers_estate_events.3.d
+	picture = BURGHER_ESTATE_eventPicture
+	
+	trigger = {
+	    check_key = { lhs = Prov_BGPow value = 5 } 
+		NOT = { check_key = { lhs = Prov_BGPow value = 30 } }
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	} 
+	
+	option = {
+		name = burghers_estate_events.3.a #Ok
+		BG_FactionCrackdown = yes
+	}
+}
+
+### GROWING CITY REQUESTS PRIVILEGES
+country_event = {
+	id = burghers_estate_events.4
+	title = burghers_estate_events.4.t
+	desc = burghers_estate_events.4.d
+	picture = BURGHER_ESTATE_eventPicture
+	goto = growing_city
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	trigger = {
+		any_owned_province = {
+		    check_key = { lhs = Prov_BGPow value = 40 }
+			OR = {
+			    has_province_modifier = TN_Minor
+				has_province_modifier = TN_Important
+				has_province_modifier = TN_Major
+				has_province_modifier = TN_Dominant
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = Prov_BGPow value = 40 }
+			        OR = {
+		        	    has_province_modifier = TN_Minor
+		        		has_province_modifier = TN_Important
+	        			has_province_modifier = TN_Major
+		        		has_province_modifier = TN_Dominant
+	        		}
+				}
+				save_event_target_as = growing_city
+			}
+		}
+	}
+	
+	option = {
+		name = OPT.ACCEPTPETITION
+		custom_tooltip = city_privileges_tooltip
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+		hidden_effect = {
+		    event_target:growing_city = {
+			    Public_ChangePowBG = { inp = 20 type = value }
+			}
+		}
+	}
+	option = {
+		name = OPT.REJECTPETITION
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-5 }
+	}
+}
+
+### PARALLEL AUTHORITY
+country_event = {
+	id = burghers_estate_events.6
+	title = burghers_estate_events.6.t
+	desc = burghers_estate_events.6.d
+	picture = BURGHER_ESTATE_UPSET_eventPicture
+	
+	trigger = {
+		faction_influence = {
+            faction = FC_BG
+            influence = 20
+        }
+		faction_influence = {
+            faction = FC_CL
+            influence = 20
+        }
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	} 
+	
+	option = {
+		name = burghers_estate_events.6.a #The Clergy cannot do whatever they please!
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_BGLoy value = 30 } }
+			}
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_CLLoy value = 70 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		add_faction_influence = {
+            faction = FC_BG
+            influence = 10
+        }
+		add_faction_influence = {
+            faction = FC_CL
+            influence = -10
+        }
+	}
+	option = {
+		name = burghers_estate_events.6.b #These men stand above us all and should be afforded respect.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 30 } }
+			}
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_BGLoy value = 70 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+		add_faction_influence = {
+            faction = FC_BG
+            influence = -10
+        }
+		add_faction_influence = {
+            faction = FC_CL
+            influence = 10
+        }
+	}
+}
+
+### EXTENSION OF PRIVILEGES
+country_event = {
+	id = burghers_estate_events.7
+	title = burghers_estate_events.7.t
+	desc = burghers_estate_events.7.d
+	picture = BURGHER_ESTATE_UPSET_eventPicture
+	
+	trigger = {
+	    faction_influence = {
+            faction = FC_BG
+            influence = 25
+        }
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = burghers_estate_events.7.a #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_BGLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_BGLoy value = 50 } }
+			}
+		}
+        BG_TaxRelief = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=7.5 }
+
+		custom_tooltip = BG_TaxRelief_expl
+	}
+	option = {
+		name = burghers_estate_events.7.b #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_BGLoy value = 70 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	}
+}
+
+### SOCIAL MOBILITY
+country_event = {
+	id = burghers_estate_events.10
+	title = burghers_estate_events.10.t
+	desc = burghers_estate_events.10.d
+	picture = BURGHER_ESTATE_UPSET_eventPicture
+	
+	trigger = {
+		OR = {
+		    faction_influence = {
+                faction = FC_BG
+                influence = 30
+            }
+			Advisor_HasFaction = { BG=yes Level=1 }
+		}
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = burghers_estate_events.10.a # "We must not stand in the way of these new men."
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_BGLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_BGLoy value = 50 } }
+			}
+		}
+		BG_FactionBoost = yes
+		define_advisor = {
+			type = trader_BG
+		    discount = yes
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+		if = {
+			limit = { check_key = { lhs = Prov_NOPow value = 50 } }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		}
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 50 } }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+		}
+	}
+	option = {
+		name = burghers_estate_events.10.b #"We must protect the ancient rights of the other Estates."
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_NOLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_NOLoy value = 50 } }
+			}
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_CLLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_CLLoy value = 50 } }
+			}
+		}
+		BG_FactionCrackdown = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+		if = {
+			limit = { check_key = { lhs = Prov_NOPow value = 50 } }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+		}
+		if = {
+			limit = { check_key = { lhs = Prov_CLPow value = 50 } }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+		}
+	}
+}
+
+### GROWTH OF THE ECONOMY
+country_event = {
+	id = burghers_estate_events.11
+	title = burghers_estate_events.11.t
+	desc = burghers_estate_events.11.d
+	picture = BURGHER_ESTATE_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	trigger = {
+		check_key = { lhs = Prov_BGLoy value = 60 }
+		check_key = { lhs = Prov_BGPow value = 40 } 
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = OPT.GREAT
+		if = {
+			limit = { check_key = { lhs = Prov_BGPow value = 80 } }
+			add_country_modifier = { name = trusted_merchants duration = 4000 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_BGPow value = 70 } }
+			add_country_modifier = { name = trusted_merchants duration = 3200 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_BGPow value = 60 } }
+			add_country_modifier = { name = trusted_merchants duration = 2400 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = Prov_BGPow value = 50 } }
+			add_country_modifier = { name = trusted_merchants duration = 1600 }
+		}
+		else = {
+			add_country_modifier = { name = trusted_merchants duration = 800 }
+		}
+	}
+}
+
+### THE RISKS OF TRADE
+country_event = {
+	id = burghers_estate_events.12
+	title = burghers_estate_events.12.t
+	desc = burghers_estate_events.12.d
+	picture = BURGHER_ESTATE_eventPicture
+	goto = bankrupted_merchants_province
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	trigger = {
+		any_owned_province = {
+		    check_key = { lhs = Prov_BGPow value = 30 }
+			OR = {
+			    has_province_modifier = TN_Minor
+				has_province_modifier = TN_Important
+				has_province_modifier = TN_Major
+				has_province_modifier = TN_Dominant
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = Prov_BGPow value = 30 }
+			        OR = {
+		        	    has_province_modifier = TN_Minor
+		        		has_province_modifier = TN_Important
+	        			has_province_modifier = TN_Major
+		        		has_province_modifier = TN_Dominant
+	        		}
+				}
+				save_event_target_as = bankrupted_merchants_province
+			}
+		}
+	}
+	
+	option = {
+		name = burghers_estate_events.12.a #Compensate the Traders.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_BGLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_BGLoy value = 50 } }
+			}
+			modifier = {
+				factor = 0.3
+				num_of_loans = 1
+			}
+			modifier = {
+				factor = 0.3
+				NOT = { treasury = 25 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+		add_treasury = -25
+		event_target:bankrupted_merchants_province = {
+			Public_ChangeClassWealthVal = { class=BG type=value inp=25 }
+		}
+	}
+	option = {
+		name = burghers_estate_events.12.b #They knew what they were getting into.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_BGLoy value = 70 }
+			}
+		}
+		add_country_modifier = { name = minor_trade_crisis duration = 730 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-5 }
+	}
+}
+
+### URBANIZATION
+country_event = {
+	id = burghers_estate_events.13
+	title = burghers_estate_events.13.t
+	desc = burghers_estate_events.13.d
+	picture = BURGHER_ESTATE_eventPicture
+	goto = urbanization_province
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	trigger = {
+		any_owned_province = {
+		    check_key = { lhs = Prov_BGPow value = 25 }
+			OR = {
+			    AND = { 
+				    check_key = { lhs = Class_Urban value = 10 }
+					NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b5=urban_infrastructure_5 b5=urban_infrastructure_6 b6=urban_infrastructure_7 } }
+				}
+			    AND = { 
+				    check_key = { lhs = Class_Urban value = 30 }
+					NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_3 b2=urban_infrastructure_4 b3=urban_infrastructure_5 b4=urban_infrastructure_6 b5=urban_infrastructure_7 } }
+				}
+				AND = { 
+				    check_key = { lhs = Class_Urban value = 80 }
+					NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_4 b2=urban_infrastructure_5 b3=urban_infrastructure_6 b4=urban_infrastructure_7 } }
+				}
+				AND = { 
+				    check_key = { lhs = Class_Urban value = 200 }
+					NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_5 b2=urban_infrastructure_6 b3=urban_infrastructure_7 } }
+				}
+				check_key = { lhs = Class_Urban value = 500 }
+			}
+			NOT = { has_province_modifier = unsanitary_suburbs }
+		}
+	}
+	
+	immediate = {
+	    hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = Prov_BGPow value = 25 }
+					OR = {
+					    AND = { 
+				            check_key = { lhs = Class_Urban value = 10 }
+			        		NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b5=urban_infrastructure_5 b5=urban_infrastructure_6 b6=urban_infrastructure_7 } }
+		        		}
+			            AND = {
+				            check_key = { lhs = Class_Urban value = 30 }
+					        NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_3 b2=urban_infrastructure_4 b3=urban_infrastructure_5 b4=urban_infrastructure_6 b5=urban_infrastructure_7 } }
+				        }
+				        AND = { 
+				            check_key = { lhs = Class_Urban value = 80 }
+					        NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_4 b2=urban_infrastructure_5 b3=urban_infrastructure_6 b4=urban_infrastructure_7 } }
+				        }
+				        AND = { 
+				            check_key = { lhs = Class_Urban value = 200 }
+					        NOT = { HasBuildingOrBetter = { b1=urban_infrastructure_5 b2=urban_infrastructure_6 b3=urban_infrastructure_7 } }
+				        }
+				        check_key = { lhs = Class_Urban value = 500 }
+			        }
+					NOT = { has_province_modifier = unsanitary_suburbs }
+				}
+				save_event_target_as = urbanization_province
+			}
+		}
+	}	
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = burghers_estate_events.13.a #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_BGLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_BGLoy value = 50 } }
+			}
+			modifier = {
+				factor = 0.3
+				num_of_loans = 1
+			}
+			modifier = {
+				factor = 0.3
+				NOT = { treasury = 40 }
+			}
+		}
+		add_treasury = -40
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+		hidden_effect = {
+			event_target:urbanization_province = {
+				Public_ChangeClassWealthVal = { class=RE type=value inp=40 }
+			}
+		}
+	}
+	option = {
+		name = burghers_estate_events.13.b #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_BGLoy value = 70 }
+			}
+		}
+		event_target:urbanization_province = {
+			add_province_modifier = {
+				name = "unsanitary_suburbs"
+				duration = 7300
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-5 }
+	}
+}
+
+### ECONOMIC POLICY
+country_event = {
+	id = burghers_estate_events.14
+	title = burghers_estate_events.14.t
+	desc = burghers_estate_events.14.d
+	picture = BURGHER_ESTATE_UPSET_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	trigger = {
+		faction_influence = {
+            faction = FC_BG
+            influence = 30
+        }
+		OR = {
+		    Rights_BGCom1Has = yes
+			Rights_BGCom2Has = yes
+			Rights_BGCom3Has = yes
+			Rights_BGCom4Has = yes
+			Rights_BGCom5Has = yes
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	option = {
+		name = burghers_estate_events.14.a #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				NOT = { check_key = { lhs = Prov_BGLoy value = 25 } }
+			}
+			modifier = {
+				factor = 1.2
+				NOT = { check_key = { lhs = Prov_BGLoy value = 50 } }
+			}
+		}
+		BG_TaxRelief = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=7.5 }
+
+		custom_tooltip = BG_TaxRelief_expl
+	}
+	option = {
+		name = burghers_estate_events.14.b #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				check_key = { lhs = Prov_BGLoy value = 70 }
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	}
+}
+
+### PROTESTS AMONG BURGHERS
+country_event = {
+	id = burghers_estate_events.15
+	title = burghers_estate_events.15.t
+	desc = burghers_estate_events.15.d
+	picture = BURGHER_ESTATE_UPSET_eventPicture
+	goto = city_protests_province
+	
+	trigger = {
+	    num_of_cities = 5
+		NOT = { check_key = { lhs = Prov_BGLoy value = 30 } }
+		any_owned_province = {
+			check_key = { lhs = Prov_BGPow value = 40 }
+			check_key = { lhs = Class_Urban value = 10 }
+		}
+	}
+	
+	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
+	
+	mean_time_to_happen = {
+		days = 1
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = Prov_BGPow value = 40 }
+		        	check_key = { lhs = Class_Urban value = 10 }
+				}
+				save_event_target_as = city_protests_province
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		days = 1
+		modifier = {
+			factor = 2.0
+			NOT = { check_key = { lhs = Prov_BGLoy value = 20 } }
+		}
+	}
+	
+	option = {
+		name = burghers_estate_events.15.a #
+		ai_chance = {
+			factor = 0
+		}
+		event_target:city_protests_province = {
+			spawn_rebels = {
+			    type = mob_rebels
+			    size = 0.5
+		    }
+		}
+	}
+	option = {
+		name = burghers_estate_events.15.b #
+		ai_chance = {
+			factor = 1
+		}
+		BG_Autonomy = yes
+		custom_tooltip = BG_Autonomy_effect
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+
+		custom_tooltip = BG_Autonomy_expl
+	}
+}
