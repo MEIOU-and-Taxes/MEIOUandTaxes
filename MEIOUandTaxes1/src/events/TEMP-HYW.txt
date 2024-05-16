@@ -2196,41 +2196,32 @@ country_event = {
 	title = "flavor_hyw.303.t"
 	desc = "flavor_hyw.303.d"
 	picture = CIVIL_WAR_eventPicture
+	is_triggered_only = yes
+	fire_only_once = yes
 	
 	trigger = {
 		CAS = {
 			exists = yes
 			has_ruler = "Pedro I"
-			NOT = {
-				has_country_flag = had_cas_civil_war
-			}
-			NOT = {
-				is_subject_of = ENR
-			}
+			NOT = { has_country_flag = had_cas_civil_war }
+			NOT = { is_subject_of = ENR }
 			war_with = ENR
 		}
 		ENR = {
 			exists = yes
 			has_ruler = "Enrique II"
-			NOT = {
-				is_subject_of = CAS
-			}
+			NOT = { is_subject_of = CAS }
 			war_with = CAS
 		}
 		tag = GUY
-		NOT = { has_global_flag = battle_of_najera_happened }
-		NOT = { has_country_flag = had_death_of_black_prince }
-		dynasty = "Plantagenet"
 		OR = {
-			NOT = { has_ruler = "Edward IV 'the Black Prince'" }
-			NOT = { has_heir = "Edward IV 'the Black Prince'" }
+			has_ruler = "Edward IV 'the Black Prince'" 
+			has_heir = "Edward IV 'the Black Prince'" 
 		}
 	}
 
 	option = {
-		# 
 		name = "flavor_hyw.303.a"
-		set_global_flag = battle_of_najera_happened
 		white_peace = ENR
 		country_event = {
 			id = flavor_hyw.304
@@ -2273,7 +2264,7 @@ country_event = {
 		hidden_effect = {
 			country_event = {
 				id = flavor_hyw.305
-				days = 305
+				days = 1000
 			}
 		}
 	}
@@ -2692,10 +2683,12 @@ country_event = {
 	#Send proposal
 	option = {
 		name = "flavor_hyw.356.a"
-		country_event = {
-			id = flavor_hyw.357
-			days = 20
-			tooltip = "flavor_hyw.357.d"
+		ENG = {
+			country_event = {
+				id = flavor_hyw.357
+				days = 20
+				tooltip = "flavor_hyw.357.d"
+			}
 		}
 	}
 	#We will work out some other way
@@ -2713,8 +2706,11 @@ country_event = {
 	is_triggered_only = yes
 	#Accept
 	option = {
-		name = "flavor_hyw.357.a"
-		break_alliance = FRA
+		name = "OPT.ACCEPT2"
+		FROM = {
+			break_alliance = FRA
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:broke alliance with [FRA.GetName]:flavor_hyw.357"
 		if = {
 			limit = {
 				ENG = {
@@ -2722,9 +2718,14 @@ country_event = {
 				}
 			}
 			170 = {
-				add_core = ROOT
-				cede_province = ROOT
+				add_core = FROM
+				cede_province = FROM
 			}
+			FROM = {
+				add_treasury = -100
+			}
+			add_treasury = 100
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:sold [170.GetName] to [From.GetName]:flavor_hyw.357"
 		}
 		if = {
 			limit = {
@@ -2733,14 +2734,20 @@ country_event = {
 				}
 			}
 			4008 = {
-				add_core = ROOT
-				cede_province = ROOT
+				add_core = FROM
+				cede_province = FROM
 			}
+			FROM = {
+				add_treasury = -100
+			}
+			add_treasury = 100
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:sold [4008.GetName] to [From.GetName]:flavor_hyw.357"
 		}
 	}
 	#Send Bretons away
 	option = {
-		name = "flavor_hyw.357.a"
+		name = "flavor_hyw.357.b"
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:rejected to sell [170.GetName] and [4008.GetName] to [From.GetName]:flavor_hyw.357"
 	}
 }
 
@@ -2940,12 +2947,10 @@ country_event = {
 	#Valois Dynasty is on the verge of collapse
 	option = {
 		name = "flavor_hyw.1000.a"
-		set_country_flag = Grande_ordonnance_de_1357
-		hidden_effect = {
-			country_event = {
-				id = flavor_hyw.1001
-				days = 60
-			}
+		#set_country_flag = Grande_ordonnance_de_1357
+		country_event = {
+			id = flavor_hyw.1001
+			days = 60
 		}
 	}
 }
@@ -2963,7 +2968,7 @@ country_event = {
 			limit = {
 				has_ruler = "Charles V le Sage"
 			}
-			change_adm = -3
+			change_adm = -3 #what does it represent?
 			change_dip = -3
 			change_mil = -3
 		}
@@ -2986,7 +2991,7 @@ country_event = {
 		Pol_ChangeRelationsStateTooltip = {
 			BG = yes
 			type = value
-			val = 20
+			val = 20 #TODO: those values are tought to follow - why relations are going up but loyalty down?
 		}
 		Public_ChangePowerbrokerLoyaltyTooltipProv = {
 			Powerbroker = BG
@@ -3257,7 +3262,7 @@ country_event = {
 			add_legitimacy = 40
 		}
 		add_war_exhaustion = -5
-		set_country_flag = Grande_ordonnance_de_1357_finished
+		#set_country_flag = Grande_ordonnance_de_1357_finished
 	}
 }
 
@@ -3996,64 +4001,6 @@ country_event = {
 	}
 }
 
-#Jean II died in 1364, so keeping him for too long will damage his values 
-country_event = {
-	id = flavor_hyw.1300
-	title = "flavor_hyw.1300.t"
-	desc = "flavor_hyw.1300.d"
-	picture = DEATH_OF_HEIR_eventPicture
-	fire_only_once = yes
-	trigger = {
-		tag = ENG
-		FRA = {
-			has_country_flag = ruler_prisonner_of_war
-		}
-		has_global_flag = hundred_years_war
-		#is_year = 1364
-	}
-	mean_time_to_happen = {
-		months = 120
-		modifier = {
-			factor = 0.5
-			FRA = {
-				stability = -3
-			}
-		}
-		modifier = {
-			factor = 0.1
-			is_year = 1364
-		}
-	}
-	option = {
-		name = "flavor_hyw.1300.a"
-		FRA = {
-			country_event = {
-				id = flavor_hyw.1301
-				days = 2
-				tooltip = "flavor_hyw.1301.d"
-			}
-		}
-		add_prestige = -20
-	}
-}
-
-#Jean II died in 1364, so keeping him for too long will damage his values 
-country_event = {
-	id = flavor_hyw.1301
-	title = "flavor_hyw.1301.t"
-	desc = "flavor_hyw.1301.d"
-	picture = DEATH_OF_HEIR_eventPicture
-	is_triggered_only = yes
-	option = {
-		name = "flavor_hyw.1301.a"
-		clr_country_flag = negociating_release_jean
-		clr_country_flag = ruler_prisonner_of_war
-		set_heir = heir_fra_hyw_pow
-		set_country_flag = king_jean_died_in_capativity
-		add_prestige = -20
-		Stab_Subtract3 = yes
-	}
-}
 
 #If French player doesn't ransom, he too will suffer from penalties. 
 country_event = {
@@ -4064,8 +4011,10 @@ country_event = {
 	trigger = {
 		is_year = 1358
 		has_country_flag = ruler_prisonner_of_war
+		NOT = { has_country_flag = negociating_release_jean }
+		NOT = { has_country_modifier = not_negotiating_with_english }
 		OR = {
-			NOT = { has_country_flag = negociating_release_jean }
+			had_country_flag = { flag = france_rejects_condition days = 365 }
 			had_country_flag = { flag = negociating_release_jean days = 365 }
 		}
 		tag = FRA
@@ -4087,7 +4036,6 @@ country_event = {
 			limit = {
 				is_at_war = yes
 			}
-
 			add_war_exhaustion = 2
 		}
 
