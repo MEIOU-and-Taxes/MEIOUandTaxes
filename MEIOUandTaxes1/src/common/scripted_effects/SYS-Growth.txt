@@ -33,12 +33,23 @@ Growth_GetBirthProv = {
 
     # Update overall pop birth key for all classes
     # --> the birth keys are the sum of birth and death
-    set_key = { lhs = Class_TotalBirth which = SF_Birth }
-    change_key = { lhs = Class_TotalBirth which = NM_Birth }
-    change_key = { lhs = Class_TotalBirth which = RE_Birth }
-    change_key = { lhs = Class_TotalBirth which = NO_Birth }
-    change_key = { lhs = Class_TotalBirth which = BG_Birth }
-    change_key = { lhs = Class_TotalBirth which = CL_Birth }
+    set_key = { lhs = Class_RuralBirth      which = SF_Birth }
+    change_key = { lhs = Class_RuralBirth   which = NM_Birth }
+
+    set_key = { lhs = Class_UrbanBirth which = RE_Birth }
+
+    set_key = { lhs = Class_NotablesBirth       which = CL_Birth }
+    change_key = { lhs = Class_NotablesBirth    which = BG_Birth }
+    change_key = { lhs = Class_NotablesBirth    which = NO_Birth }
+
+    set_key = { lhs = Class_TotalBirth      which = Class_RuralBirth }
+    change_key = { lhs = Class_TotalBirth   which = Class_UrbanBirth }
+    change_key = { lhs = Class_TotalBirth   which = Class_NotablesBirth }
+
+    set_key = { lhs = Class_RuralChange which = Class_RuralBirth }
+    set_key = { lhs = Class_UrbanChange which = Class_UrbanBirth }
+    set_key = { lhs = Class_NotablesChange which = Class_NotablesBirth }
+    set_key = { lhs = Class_TotalChange which = Class_TotalBirth }
 }
 
 # Handle birth and death calculation for each class
@@ -570,20 +581,43 @@ Growth_DoMove = {
             isValidProv = yes
         }
 		set_province_flag = POP_ChangedPop
-		
-        set_key = { lhs = Class_TotalIn which = SF_In }
-        change_key = { lhs = Class_TotalIn which = NM_In }
-        change_key = { lhs = Class_TotalIn which = RE_In }
-        change_key = { lhs = Class_TotalIn which = NO_In }
-        change_key = { lhs = Class_TotalIn which = BG_In }
-        change_key = { lhs = Class_TotalIn which = CL_In }
 
-        set_key = { lhs = Class_TotalOut which = SF_Out }
-        change_key = { lhs = Class_TotalOut which = NM_Out }
-        change_key = { lhs = Class_TotalOut which = RE_Out }
-        change_key = { lhs = Class_TotalOut which = NO_Out }
-        change_key = { lhs = Class_TotalOut which = BG_Out }
-        change_key = { lhs = Class_TotalOut which = CL_Out }
+        ## Sum up changes per class category
+        set_key = { lhs = Class_RuralIn      which = SF_In }
+        change_key = { lhs = Class_RuralIn   which = NM_In }
+
+        set_key = { lhs = Class_UrbanIn which = RE_In }
+
+        set_key = { lhs = Class_NotablesIn       which = CL_In }
+        change_key = { lhs = Class_NotablesIn    which = BG_In }
+        change_key = { lhs = Class_NotablesIn    which = NO_In }
+
+        set_key = { lhs = Class_TotalIn      which = Class_RuralIn }
+        change_key = { lhs = Class_TotalIn   which = Class_UrbanIn }
+        change_key = { lhs = Class_TotalIn   which = Class_NotablesIn }
+
+        set_key = { lhs = Class_RuralOut      which = SF_Out }
+        change_key = { lhs = Class_RuralOut   which = NM_Out }
+
+        set_key = { lhs = Class_UrbanOut which = RE_Out }
+
+        set_key = { lhs = Class_NotablesOut       which = CL_Out }
+        change_key = { lhs = Class_NotablesOut    which = BG_Out }
+        change_key = { lhs = Class_NotablesOut    which = NO_Out }
+
+        set_key = { lhs = Class_TotalOut      which = Class_RuralOut }
+        change_key = { lhs = Class_TotalOut   which = Class_UrbanOut }
+        change_key = { lhs = Class_TotalOut   which = Class_NotablesOut }
+
+        ### THOSE KEYS ARE INITIALLY SET IN BIRTH CALCULATION --> THEY SUM UP TOTAL PROVINCE POP CHANGE
+        change_key = { lhs = Class_RuralChange which = Class_RuralIn }
+        subtract_key = { lhs = Class_RuralChange which = Class_RuralOut }
+        change_key = { lhs = Class_UrbanChange which = Class_UrbanIn }
+        subtract_key = { lhs = Class_UrbanChange which = Class_UrbanOut }
+        change_key = { lhs = Class_NotablesChange which = Class_NotablesIn }
+        subtract_key = { lhs = Class_NotablesChange which = Class_NotablesOut }
+        change_key = { lhs = Class_TotalChange which = Class_TotalIn }
+        subtract_key = { lhs = Class_TotalChange which = Class_TotalOut }
 
         change_key = { lhs = SF_Total which = SF_In }
         change_key = { lhs = NM_Total which = NM_In }
