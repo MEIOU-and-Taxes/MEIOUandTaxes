@@ -4336,13 +4336,23 @@ TN_SetIncome = {
     if = { limit = { NOT = { check_key = { lhs = BU_Wealth value = 0 } } } set_key = { lhs = BU_Wealth value = 0 } }
 
     # Get wealth per capita
-    TN_GetWealthPC = { class = SF }
-    TN_GetWealthPC = { class = NM }
-    TN_GetWealthPC = { class = RE }
-    TN_GetWealthPC = { class = NO }
-    TN_GetWealthPC = { class = BG }
-    TN_GetWealthPC = { class = CL }
-    
+    set_key = { lhs = Class_RuralWealthPC       value = 0 }
+    set_key = { lhs = Class_UrbanWealthPC       value = 0 }
+    set_key = { lhs = Class_NotablesWealthPC    value = 0 }
+    set_key = { lhs = Class_TotalWealthPC       value = 0 }
+
+    TN_GetWealthPC = { class = SF aggr = Rural }
+    TN_GetWealthPC = { class = NM aggr = Rural }
+    TN_GetWealthPC = { class = RE aggr = Urban }
+    TN_GetWealthPC = { class = NO aggr = Notables }
+    TN_GetWealthPC = { class = BG aggr = Notables }
+    TN_GetWealthPC = { class = CL aggr = Notables }
+
+    divide_key = { lhs = Class_RuralWealthPC       which = Class_Rural }
+    divide_key = { lhs = Class_UrbanWealthPC       which = Class_Urban }
+    divide_key = { lhs = Class_NotablesWealthPC    which = Class_Notables }
+    divide_key = { lhs = Class_TotalWealthPC       which = Class_Total }
+
     change_key = { lhs = Infra_Wealth which = Infra_Income }
     change_key = { lhs = Infra_Wealth which = Infra_StateSpend }
     subtract_key = { lhs = Infra_Wealth which = Infra_Spend }
@@ -4694,6 +4704,9 @@ TN_GetWealthPC = {
         }
         set_key = { lhs = $class$_WealthPC which = $class$_Wealth }
         divide_key = { lhs = $class$_WealthPC which = $class$_Total }
+
+        # Add aggregate numbers
+        change_key = { lhs = Class_$aggr$WealthPC which = $class$_Wealth }
     }
     else = {
         set_key = { lhs = $class$_WealthPC value = 0 }
