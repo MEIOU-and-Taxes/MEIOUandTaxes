@@ -2538,7 +2538,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
                 expedition_name=expedition.name, event_num_no_attack_failure=str(expedition_no_attack_failure_start_number + index).zfill(3)).splitlines(True))))
             loc.write(f' MEC_Expeditions.{str(expedition_landing_start_number + index).zfill(3)}.title: "Expedition from [From.GetName]"\n')
             loc.write(f' MEC_Expeditions.{str(expedition_landing_start_number + index).zfill(3)}.desc: "Foreigners have arrived wanting to setup a trading fort on our our province of [Root.GetName]. This would effectively give them control of the province. They offer to pay for the province, '
-                      f'but our diplomatic advisor suspects that if we don\'t accept they will try to take it by force anyway. Our military advisor estimates that if it comes down to a fight they have a [GV_MEC_Expeditions_Comparison] out of 10 chance of losing the province."\n')
+                      f'but our diplomatic advisor suspects that if we don\'t accept, they will try to take it by force anyway. Our military advisor estimates that if it comes down to a fight, we have a [GV_MEC_Expeditions_Comparison] out of 10 chance of losing the province."\n')
 
         # Write the Expedition Success section header
         events.write(hash_line)
