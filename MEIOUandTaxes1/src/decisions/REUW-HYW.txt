@@ -2,17 +2,15 @@ country_decisions = {
 	claim_french_throne = {
 		potential = {
 			tag = NAV
-			exists = FRA
 			has_ruler = "Charles II le Mauvais"
-			FRA = { 
-				is_lesser_in_union = yes
-				junior_union_with = NAV
-			}
 		}
 		allow = {
 			is_at_war = no
+			senior_union_with = FRA
 		}
 		effect = {
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:before the decision, [FRA.GetName] was ruled by [FRA.Monarch.GetName] [FRA.Dynasty.GetName]:claim_french_throne"
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:claimed French throne:claim_french_throne"
 			inherit = FRA
 			change_tag = FRA
 			release = NAV
@@ -45,7 +43,7 @@ country_decisions = {
 	# 		}
 	# 	}
 	# 	effect = {
-	# 		set_heir = heir_fra_hyw_pow
+	# 		set_heir = heir_pow
 	# 		Stab_Subtract2 = yes
 	# 		Public_ChangePowerbrokerLoyaltyTooltipProv = {
 	# 			Powerbroker = NO
@@ -69,17 +67,21 @@ country_decisions = {
 				casus_belli = cb_breton_succession_war
 			}
 		}
-		allow = {
-			BLO = {
-				war_score_against = {
-					who = GUY
-					value = 65
+		allow = { #Aquitaine is fully occupied?
+			GUY = { #TODO: check sides of that war, maybe we need to be checking for other participants as war score is different
+				NOT = { 
+					war_score_against = {
+						who = BLO
+						value = -90
+					}
 				}
 			}
 		}
 		effect = {
 			enforce_hyw_treaty_effect = yes
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:forced next treaty in HYW order:french_treaty_of_bretigny"
 			white_peace = ENG
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:stopped war against [ENG.GetName] with white peace:french_treaty_of_bretigny"
 			every_subject_country = {
 				white_peace = ENG
 			}
@@ -95,7 +97,7 @@ country_decisions = {
 	}
 
 	#French Decision
-	enforce_treaty_fra = {
+	enforce_treaty_fra = { #TODO better description
 		potential = {
 			tag = FRA
 			OR = {
@@ -122,19 +124,40 @@ country_decisions = {
 					who = GUY
 					value = 75
 				}
+				AND = {
+					NOT = {
+						GUY = {
+							war_score_against = {
+								who = FRA
+								value = -75
+							}
+						}
+					}
+					NOT = {
+						ENG = {
+							war_score_against = {
+								who = FRA
+								value = -25
+							}
+						}
+					}
+				}
 			}
 		}
 		effect = {
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:forced next treaty in HYW order:enforce_treaty_fra"
 			enforce_hyw_treaty_effect = yes
 			white_peace = ENG
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:stopped war against [ENG.GetName] with white peace:enforce_treaty_fra"
 			every_subject_country = {
 				white_peace = ENG
 			}
+			#TODO: do we need allies signing peace here as well?
 		}
 	}
 
 	#English Decision
-	enforce_treaty_eng = {
+	enforce_treaty_eng = { #TODO better description
 		potential = {
 			tag = ENG
 			war_with = FRA
@@ -156,16 +179,19 @@ country_decisions = {
 		}
 		effect = {
 			enforce_hyw_treaty_effect = yes
-			white_peace = ENG
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:forced next treaty in HYW order:enforce_treaty_eng"
+			white_peace = FRA
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:stopped war against [FRA.GetName] with white peace:enforce_treaty_fra"
 			every_subject_country = {
-				white_peace = ENG
+				white_peace = FRA
 			}
 		}
 	}
 
 	#Explanation
-	enforce_treaty_info = {
+	enforce_treaty_info = { #TODO: review the text
 		potential = {
+			ai = no
 			OR = {
 				tag = ENG
 				tag = FRA
@@ -194,6 +220,7 @@ country_decisions = {
 			is_at_war = no
 		}
 		effect = {
+			log = "FE-TempHYW:[GetYear]:[Root.GetName]:gave up in HYW:eng_gave_up_hyw"
 			set_country_flag = eng_gave_up_hyw
 			enforce_treaty_bretigny_fra = yes
 			enforce_treaty_bruges = yes
@@ -216,9 +243,8 @@ country_decisions = {
 
 				GUY = {
 					define_ruler = {
-						dynasty = ROOT
+						dynasty = ROOT #TODO: ROOT is England, should it not be France?
 					}
-
 					add_liberty_desire = -50	
 				}
 			}
@@ -234,7 +260,7 @@ country_decisions = {
 			is_year	= 1359
 			NOT = { is_year = 1407 }
 			tag = BRI
-			is_subject = no
+			is_free_or_tributary_trigger = yes
 			has_global_flag = hundred_years_war
 			ENG = {
 				OR = { 
@@ -250,7 +276,11 @@ country_decisions = {
 		}
 
 		effect = {
-			country_event = { id = flavor_hyw.350 days = 20 tooltip = "flavor_hyw.350.d" }
+			country_event = { 
+				id = flavor_hyw.350
+				days = 20
+				tooltip = "flavor_hyw.350.d" 
+			}
 		}
 
 		ai_will_do = {
@@ -268,7 +298,7 @@ country_decisions = {
 				owns = 170 #Brest
 				owns = 4008 #Saint Malo
 			}
-			is_subject = no
+			is_free_or_tributary_trigger = yes
 		}
 
 		allow = {
@@ -287,7 +317,11 @@ country_decisions = {
 		}
 
 		effect = {
-			country_event = { id = flavor_hyw.351 days = 20 tooltip = "flavor_hyw.351.d" }
+			country_event = { 
+				id = flavor_hyw.351
+				days = 20 
+				tooltip = "flavor_hyw.351.d" 
+			}
 		}
 
 		ai_will_do = {

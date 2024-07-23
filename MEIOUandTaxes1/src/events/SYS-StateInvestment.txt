@@ -342,7 +342,7 @@ country_event = {
                                 clr_province_flag = possible_investment
                             }
                             POP_RemoveDucat = { type = which inp = Public_Tmp7 }
-                            set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
+                            
                         }
                         else = {
                             #_#_log = "SYS-StateInvestmentBudget:[GetYear]:[This.GetName]::investment budget of:[GV_Ai_Invest_BudgetFixed]:no investment"
@@ -355,14 +355,73 @@ country_event = {
 	option = {
 		name = no_localisation
 	}
+    after = {
+        set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
+    }
+}
+country_event = {
+    id = AI_Invest.100
+    title = no_localisation
+    desc = no_localisation
+    picture = ai_only
+
+
+    hidden = yes
+    is_triggered_only = yes
+
+    immediate = {
+            every_country = {
+                limit = {
+                    ai = no
+                    isValidCountry = yes
+                }
+                AAA = {
+                    if = {
+                        limit = {
+                            has_country_flag = triannual1
+                        }
+                        PREV = {
+                            country_event = {
+                                id = AI_Invest.2
+                                days = 1
+                            }
+                        }
+                    }
+                    else_if = {
+                        limit = { 
+                            has_country_flag = quadannual1
+                        }
+                        PREV = {
+                            country_event = {
+                                id = AI_Invest.3
+                                days = 1
+                            }
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            has_country_flag = pentannual1
+                        }
+                        PREV = {
+                            country_event = {
+                                id = AI_Invest.4
+                                days = 1
+                            }
+                        }
+                    }
+                }
+            }
+    }
+    option = {
+        name = no_localisation
+        #log = "AAA tried to invest to player"
+    }
 }
 country_event = {
     id = AI_Invest.2
-    title = no_localisation
-    desc = no_localisation
-	picture = ai_only
-
-    hidden = yes
+    title = "AI_Invest_title"
+    desc = "AI_Invest_desc"
+	picture = ECONOMY_eventPicture
 
     is_triggered_only = yes
 
@@ -373,87 +432,25 @@ country_event = {
         has_country_flag = invest_every_3
 	}
 
+    mean_time_to_happen = {
+        days = 1
+    }
+
     immediate = {
-		if = {
-			limit = {
-                NOT = { num_of_loans = 1 }
-                monthly_income = 0
-                OR = {
-                    AND = {
-                        is_at_war = yes
-                        war_score = 15
-                    }
-                    is_at_war = no
-                }
-            }
-		
-			set_key = { lhs = Public_Tmp1 value = 0 }
-			set_key = { lhs = Public_Tmp2 value = 0 }
-			set_key = { lhs = Public_Tmp3 value = 0 }
-			set_key = { lhs = Public_Tmp4 value = 0 }
-			set_key = { lhs = Public_Tmp5 value = 0 }
-			set_key = { lhs = Public_Tmp6 value = 0 }
-			
-			export_to_key = {
-				lhs = Public_Tmp1
-				value = treasury
-			}
-			export_to_key = {
-				lhs = Public_Tmp2
-				value = monthly_income
-			}
-			
-            set_key = { lhs = Ai_Invest_BudgetFixed which = Public_Tmp1 }
-            set_key = { lhs = Tmp_0 which = Ai_Invest_Budget }
-            multiply_key = { lhs = Tmp_0 value = 0.01 }
-            multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_0 }
-               
-			if = {
+        hidden_effect = {
+            if = {
                 limit = {
-                    check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
-                }
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = Invest
-                        controlled_by = owner
-                        #OR = {
-                        #    AND = {
-                        #        is_capital = yes
-                        #        check_key = { lhs = Prov_BUPow value = 1 }
-                        #    }
-                        #    AND = {
-                        #        any_province_in_state = {
-                        #            is_capital_of = owner
-                        #        }
-                        #        check_key = { lhs = Prov_BUPow value = 7 }
-                        #    }
-                        #    check_key = { lhs = Prov_BUPow value = 15 }
-                        #}
-                        check_key = { lhs = Prov_BUPow value = 2.5 }    #NEVER invest under 2.5 State Reach (investment pool won't drain)
-                        is_core = PREV
-                    }
-                    clr_province_flag = invested
-                    set_province_flag = possible_investment
-                    set_key = { lhs = Public_Tmp1 value = 0 }
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
-                    set_key = { lhs = Public_Tmp6 value = 0 }
-                    
-                    Infra_AISpendCheck_Agriculture = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax }
-                    Infra_AISpendCheck_Forestry = { type = Forestry return=Public_Tmp2 cap = Building_ForestryMax }
-                    Infra_AISpendCheck_Extraction = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax }
-                    Infra_AISpendCheck_Fishery = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax }
-                    if = {
-                        limit = {
-                            NOT = { has_province_flag = NIndus }
+                    NOT = { num_of_loans = 1 }
+                    monthly_income = 0
+                    OR = {
+                        AND = {
+                            is_at_war = yes
+                            war_score = 15
                         }
-                        Infra_AISpendCheck_Industrial = { type = Industrial return = Public_Tmp5 }
-						Infra_AISpendCheck_Academic = { type = Academic return = Public_Tmp6 }
-                    }                    
+                        is_at_war = no
+                    }
                 }
-		
+                set_key = { lhs = Tmp_Misc0 value = 0 }
                 set_key = { lhs = Public_Tmp1 value = 0 }
                 set_key = { lhs = Public_Tmp2 value = 0 }
                 set_key = { lhs = Public_Tmp3 value = 0 }
@@ -461,207 +458,263 @@ country_event = {
                 set_key = { lhs = Public_Tmp5 value = 0 }
                 set_key = { lhs = Public_Tmp6 value = 0 }
                 
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = possible_investment
-                    }
-                    PREV = { #add scores of every province to the country
-                        change_key = { lhs = Public_Tmp1 which = PREV } 
-                        change_key = { lhs = Public_Tmp2 which = PREV }
-                        change_key = { lhs = Public_Tmp3 which = PREV }
-                        change_key = { lhs = Public_Tmp4 which = PREV }
-                        change_key = { lhs = Public_Tmp5 which = PREV }
-                        change_key = { lhs = Public_Tmp6 which = PREV }
-                    }
+                export_to_key = {
+                    lhs = Ai_Invest_BudgetFixed
+                    value = treasury
                 }
-                    #sum all scores into 1
-                set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp2 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp3 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp4 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp5 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
                 
-                set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
-                divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
-                
-                set_key = { lhs = Tmp_9 value = 0 }
-                set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
-                
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = possible_investment
-                    }
-                    set_key = { lhs = Tmp_9 value = 0 }
-                        # set total score per province of each type of building (the one that came from Infra_AISpendCheck)
-                    set_key = { lhs = Tmp_1 which = Public_Tmp1 } 
-                    set_key = { lhs = Tmp_2 which = Public_Tmp2 }
-                    set_key = { lhs = Tmp_3 which = Public_Tmp3 }
-                    set_key = { lhs = Tmp_4 which = Public_Tmp4 }
-                    set_key = { lhs = Tmp_5 which = Public_Tmp5 }
-                    set_key = { lhs = Tmp_6 which = Public_Tmp6 }
-                    
-                        # calculate each score's percentage % from the total country's score for each type of building
-                    set_key = { lhs = Public_Tmp9 which = PREV } #total country score
-                    divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
-                    divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_3 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_4 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
-                    
-                        # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
-                    multiply_key = { lhs = Tmp_1 value = 100 }
-                    multiply_key = { lhs = Tmp_2 value = 100 }
-                    multiply_key = { lhs = Tmp_3 value = 100 }
-                    multiply_key = { lhs = Tmp_4 value = 100 }
-                    multiply_key = { lhs = Tmp_5 value = 100 }
-                    multiply_key = { lhs = Tmp_6 value = 100 }
-                        # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
-                    if = {
-                        limit = {
-                            is_capital = no
-                        }
-                        if = {
-                            limit = {
-                                check_key = { lhs = Tmp_1 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_1 value = 80 }
-                                }
-                                set_province_flag = AgricultureInvestment8
-                            }
-                            else = {
-                                set_province_flag = AgricultureInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_2 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_2 value = 80 }
-                                }
-                                set_province_flag = ForestryInvestment8
-                            }
-                            else = {
-                                set_province_flag = ForestryInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_3 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_3 value = 80 }
-                                }
-                                set_province_flag = ExtractionInvestment8
-                            }
-                            else = {
-                                set_province_flag = ExtractionInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_4 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_4 value = 80 }
-                                }
-                                set_province_flag = FisheryInvestment8
-                            }
-                            else = {
-                                set_province_flag = FisheryInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_5 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_5 value = 80 }
-                                }
-                                set_province_flag = IndustrialInvestment8
-                            }
-                            else = {
-                                set_province_flag = IndustrialInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_6 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_6 value = 80 }
-                                }
-                                set_province_flag = AcademicInvestment8
-                            }
-                            else = {
-                                set_province_flag = AcademicInvestment6
-                            }
-                        }
-                    }
-
-                    # calculate score / total budget to get in raw money value how much it will be invested
-                    set_key = { lhs = Public_Tmp0 which = PREV } # total budget
-                    
-                    divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
-                    
-                    # invest
-                    
-                    Do_Invest_Player = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
-                    
-                    Do_Invest_Player = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
-                    
-                    Do_Invest_Player = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
+                set_key = { lhs = Tmp_Misc0 which = Ai_Invest_Budget }
+                multiply_key = { lhs = Tmp_Misc0 value = 0.01 }
+                multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_Misc0 }
                    
-                    Do_Invest_Player = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
-                    
-                    Do_Invest_Player = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
-                    
-                    Do_Invest_Player = { type=Academic return=Public_Tmp6 score=Tmp_6 }
-                    
-                    clr_province_flag = possible_investment
-                }
                 if = {
                     limit = {
-                        has_country_flag = show_investment
-                        check_key = { lhs = Tmp_0 value = 0.001 }
+                        check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
                     }
-                    random_owned_province = {
+                    
+                    set_key = { lhs = Public_Tmp1 value = 0 }
+                    set_key = { lhs = Public_Tmp2 value = 0 }
+                    set_key = { lhs = Public_Tmp3 value = 0 }
+                    set_key = { lhs = Public_Tmp4 value = 0 }
+                    set_key = { lhs = Public_Tmp5 value = 0 }
+                    set_key = { lhs = Public_Tmp6 value = 0 }
+                    every_owned_province = {
                         limit = {
-                            has_province_flag = invested
+                            has_province_flag = Invest
+                            controlled_by = owner
+                            is_core = owner
+                            check_key = { lhs = Prov_BUPow value = 2.5 }    #NEVER invest under 2.5 State Reach (investment pool won't drain)
                         }
-                        province_event = { id = AI_Invest.9 }
+                        clr_province_flag = invested
+                        set_province_flag = possible_investment
+                        set_key = { lhs = Public_Tmp1 value = 0 }
+                        set_key = { lhs = Public_Tmp2 value = 0 }
+                        set_key = { lhs = Public_Tmp3 value = 0 }
+                        set_key = { lhs = Public_Tmp4 value = 0 }
+                        set_key = { lhs = Public_Tmp5 value = 0 }
+                        set_key = { lhs = Public_Tmp6 value = 0 }
+                        
+                        Infra_AISpendCheck_Agriculture = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax }
+                        Infra_AISpendCheck_Forestry = { type = Forestry return=Public_Tmp2 cap = Building_ForestryMax }
+                        Infra_AISpendCheck_Extraction = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax }
+                        Infra_AISpendCheck_Fishery = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax }
+                        if = {
+                            limit = {
+                                NOT = {
+                                    has_province_flag = NIndus
+                                } 
+                            }
+                            Infra_AISpendCheck_Industrial = { type = Industrial return = Public_Tmp5 }
+                            Infra_AISpendCheck_Academic = { type = Academic return = Public_Tmp6 }  
+                        }
+                        
+                        PREV = { #add scores of every province to the country
+                            change_key = { lhs = Public_Tmp1 which = PREV } 
+                            change_key = { lhs = Public_Tmp2 which = PREV }
+                            change_key = { lhs = Public_Tmp3 which = PREV }
+                            change_key = { lhs = Public_Tmp4 which = PREV }
+                            change_key = { lhs = Public_Tmp5 which = PREV }
+                            change_key = { lhs = Public_Tmp6 which = PREV }
+                        }     
                     }
+
+                    #sum all scores into 1
+                    set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp2 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp3 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp4 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp5 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
+                    
+                    set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
+                    divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
+                    
+                    set_key = { lhs = Tmp_9 value = 0 }
+                    set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
+                    every_owned_province = {
+                        limit = {
+                            has_province_flag = possible_investment
+                        }
+                        set_key = { lhs = Tmp_9 value = 0 }
+                            # set total score per province of each type of building (the one that came from Infra_AISpendCheck)
+                        set_key = { lhs = Tmp_1 which = Public_Tmp1 } 
+                        set_key = { lhs = Tmp_2 which = Public_Tmp2 }
+                        set_key = { lhs = Tmp_3 which = Public_Tmp3 }
+                        set_key = { lhs = Tmp_4 which = Public_Tmp4 }
+                        set_key = { lhs = Tmp_5 which = Public_Tmp5 }
+                        set_key = { lhs = Tmp_6 which = Public_Tmp6 }
+                        
+                            # calculate each score's percentage % from the total country's score for each type of building
+                        set_key = { lhs = Public_Tmp9 which = PREV } #total country score
+                        divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
+                        divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_3 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_4 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
+                        
+                            # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
+                        multiply_key = { lhs = Tmp_1 value = 100 }
+                        multiply_key = { lhs = Tmp_2 value = 100 }
+                        multiply_key = { lhs = Tmp_3 value = 100 }
+                        multiply_key = { lhs = Tmp_4 value = 100 }
+                        multiply_key = { lhs = Tmp_5 value = 100 }
+                        multiply_key = { lhs = Tmp_6 value = 100 }
+                            # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
+                        if = {
+                            limit = {
+                                NOT = { is_capital = yes }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_1 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_1 value = 80 }
+                                    }
+                                    set_province_flag = AgricultureInvestment8
+                                }
+                                else = {
+                                    set_province_flag = AgricultureInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_2 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_2 value = 80 }
+                                    }
+                                    set_province_flag = ForestryInvestment8
+                                }
+                                else = {
+                                    set_province_flag = ForestryInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_3 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_3 value = 80 }
+                                    }
+                                    set_province_flag = ExtractionInvestment8
+                                }
+                                else = {
+                                    set_province_flag = ExtractionInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_4 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_4 value = 80 }
+                                    }
+                                    set_province_flag = FisheryInvestment8
+                                }
+                                else = {
+                                    set_province_flag = FisheryInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_5 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_5 value = 80 }
+                                    }
+                                    set_province_flag = IndustrialInvestment8
+                                }
+                                else = {
+                                    set_province_flag = IndustrialInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_6 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_6 value = 80 }
+                                    }
+                                    set_province_flag = AcademicInvestment8
+                                }
+                                else = {
+                                    set_province_flag = AcademicInvestment6
+                                }
+                            }
+                        }
+            
+                        # calculate score / total budget to get in raw money value how much it will be invested
+                        set_key = { lhs = Public_Tmp0 which = PREV } # total budget
+                        
+                        if = {
+                            limit = {
+                                check_key = { lhs = Public_Tmp0 value = 0.001 }
+                            }
+                            divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
+                        }
+                        
+                        # invest
+                        
+                        Do_Invest_Player = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
+                        
+                        Do_Invest_Player = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
+                        
+                        Do_Invest_Player = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
+                       
+                        Do_Invest_Player = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
+                        
+                        Do_Invest_Player = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
+                        
+                        Do_Invest_Player = { type=Academic return=Public_Tmp6 score=Tmp_6 }
+                        
+                        clr_province_flag = possible_investment
+                    }
+                    if = {
+                        limit = {
+                            has_country_flag = show_investment
+                            check_key = { lhs = Tmp_Misc0 value = 0.001 }
+                        }
+                        random_owned_province = {
+                            limit = {
+                                has_province_flag = invested
+                            }
+                            province_event = { 
+                                id = AI_Invest.9
+                            }
+                        }
+                    }
+                    POP_RemoveDucat = { type = which inp = Public_Tmp7 }
+                    
                 }
-                POP_RemoveDucat = { type = which inp = Public_Tmp7 }
-                set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
             }
-		}
+        }
 	}
 	option = {
-		name = no_localisation
+		name = "OPT.GREAT"
+        log = "Player tried to invest"
 	}
+    after = {
+        set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
+    }
 }
 country_event = {
     id = AI_Invest.3
-    title = no_localisation
-    desc = no_localisation
-	picture = ai_only
-
-    hidden = yes
+    title = "AI_Invest_title"
+    desc = "AI_Invest_desc"
+	picture = ECONOMY_eventPicture
 
     is_triggered_only = yes
 
@@ -672,87 +725,25 @@ country_event = {
         has_country_flag = invest_every_4
 	}
 
+    mean_time_to_happen = {
+        days = 1
+    }
+
     immediate = {
-		if = {
-			limit = {
-                NOT = { num_of_loans = 1 }
-                monthly_income = 0
-                OR = {
-                    AND = {
-                        is_at_war = yes
-                        war_score = 15
-                    }
-                    is_at_war = no
-                }
-            }
-		
-			set_key = { lhs = Public_Tmp1 value = 0 }
-			set_key = { lhs = Public_Tmp2 value = 0 }
-			set_key = { lhs = Public_Tmp3 value = 0 }
-			set_key = { lhs = Public_Tmp4 value = 0 }
-			set_key = { lhs = Public_Tmp5 value = 0 }
-			set_key = { lhs = Public_Tmp6 value = 0 }
-			
-			export_to_key = {
-				lhs = Public_Tmp1
-				value = treasury
-			}
-			export_to_key = {
-				lhs = Public_Tmp2
-				value = monthly_income
-			}
-			
-            set_key = { lhs = Ai_Invest_BudgetFixed which = Public_Tmp1 }
-            set_key = { lhs = Tmp_0 which = Ai_Invest_Budget }
-            multiply_key = { lhs = Tmp_0 value = 0.01 }
-            multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_0 }
-               
-			if = {
+        hidden_effect = {
+            if = {
                 limit = {
-                    check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
-                }
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = Invest
-                        controlled_by = owner
-                        #OR = {
-                        #    AND = {
-                        #        is_capital = yes
-                        #        check_key = { lhs = Prov_BUPow value = 1 }
-                        #    }
-                        #    AND = {
-                        #        any_province_in_state = {
-                        #            is_capital_of = owner
-                        #        }
-                        #        check_key = { lhs = Prov_BUPow value = 7 }
-                        #    }
-                        #    check_key = { lhs = Prov_BUPow value = 15 }
-                        #}
-                        check_key = { lhs = Prov_BUPow value = 2.5 }    #NEVER invest under 2.5 State Reach (investment pool won't drain)
-                        is_core = PREV
-                    }
-                    clr_province_flag = invested
-                    set_province_flag = possible_investment
-                    set_key = { lhs = Public_Tmp1 value = 0 }
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
-                    set_key = { lhs = Public_Tmp6 value = 0 }
-                    
-                    Infra_AISpendCheck_Agriculture = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax }
-                    Infra_AISpendCheck_Forestry = { type = Forestry return=Public_Tmp2 cap = Building_ForestryMax }
-                    Infra_AISpendCheck_Extraction = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax }
-                    Infra_AISpendCheck_Fishery = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax }
-                    if = {
-                        limit = {
-                            NOT = { has_province_flag = NIndus }
+                    NOT = { num_of_loans = 1 }
+                    monthly_income = 0
+                    OR = {
+                        AND = {
+                            is_at_war = yes
+                            war_score = 15
                         }
-                        Infra_AISpendCheck_Industrial = { type = Industrial return = Public_Tmp5 }
-						Infra_AISpendCheck_Academic = { type = Academic return = Public_Tmp6 }
-                    }                    
+                        is_at_war = no
+                    }
                 }
-		
+                set_key = { lhs = Tmp_Misc0 value = 0 }
                 set_key = { lhs = Public_Tmp1 value = 0 }
                 set_key = { lhs = Public_Tmp2 value = 0 }
                 set_key = { lhs = Public_Tmp3 value = 0 }
@@ -760,302 +751,291 @@ country_event = {
                 set_key = { lhs = Public_Tmp5 value = 0 }
                 set_key = { lhs = Public_Tmp6 value = 0 }
                 
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = possible_investment
-                    }
-                    PREV = { #add scores of every province to the country
-                        change_key = { lhs = Public_Tmp1 which = PREV } 
-                        change_key = { lhs = Public_Tmp2 which = PREV }
-                        change_key = { lhs = Public_Tmp3 which = PREV }
-                        change_key = { lhs = Public_Tmp4 which = PREV }
-                        change_key = { lhs = Public_Tmp5 which = PREV }
-                        change_key = { lhs = Public_Tmp6 which = PREV }
-                    }
+                export_to_key = {
+                    lhs = Ai_Invest_BudgetFixed
+                    value = treasury
                 }
-                    #sum all scores into 1
-                set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp2 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp3 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp4 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp5 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
                 
-                set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
-                divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
-                
-                set_key = { lhs = Tmp_9 value = 0 }
-                set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
-                
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = possible_investment
-                    }
-                    set_key = { lhs = Tmp_9 value = 0 }
-                        # set total score per province of each type of building (the one that came from Infra_AISpendCheck)
-                    set_key = { lhs = Tmp_1 which = Public_Tmp1 } 
-                    set_key = { lhs = Tmp_2 which = Public_Tmp2 }
-                    set_key = { lhs = Tmp_3 which = Public_Tmp3 }
-                    set_key = { lhs = Tmp_4 which = Public_Tmp4 }
-                    set_key = { lhs = Tmp_5 which = Public_Tmp5 }
-                    set_key = { lhs = Tmp_6 which = Public_Tmp6 }
-                    
-                        # calculate each score's percentage % from the total country's score for each type of building
-                    set_key = { lhs = Public_Tmp9 which = PREV } #total country score
-                    divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
-                    divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_3 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_4 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
-                    
-                        # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
-                    multiply_key = { lhs = Tmp_1 value = 100 }
-                    multiply_key = { lhs = Tmp_2 value = 100 }
-                    multiply_key = { lhs = Tmp_3 value = 100 }
-                    multiply_key = { lhs = Tmp_4 value = 100 }
-                    multiply_key = { lhs = Tmp_5 value = 100 }
-                    multiply_key = { lhs = Tmp_6 value = 100 }
-                        # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
-                    if = {
-                        limit = {
-                            is_capital = no
-                        }
-                        if = {
-                            limit = {
-                                check_key = { lhs = Tmp_1 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_1 value = 80 }
-                                }
-                                set_province_flag = AgricultureInvestment8
-                            }
-                            else = {
-                                set_province_flag = AgricultureInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_2 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_2 value = 80 }
-                                }
-                                set_province_flag = ForestryInvestment8
-                            }
-                            else = {
-                                set_province_flag = ForestryInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_3 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_3 value = 80 }
-                                }
-                                set_province_flag = ExtractionInvestment8
-                            }
-                            else = {
-                                set_province_flag = ExtractionInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_4 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_4 value = 80 }
-                                }
-                                set_province_flag = FisheryInvestment8
-                            }
-                            else = {
-                                set_province_flag = FisheryInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_5 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_5 value = 80 }
-                                }
-                                set_province_flag = IndustrialInvestment8
-                            }
-                            else = {
-                                set_province_flag = IndustrialInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_6 value = 50 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_6 value = 70 }
-                                }
-                                set_province_flag = AcademicInvestment8
-                            }
-                            else = {
-                                set_province_flag = AcademicInvestment6
-                            }
-                        }
-                    }
-
-                    # calculate score / total budget to get in raw money value how much it will be invested
-                    set_key = { lhs = Public_Tmp0 which = PREV } # total budget
-                    
-                    divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
-                    
-                    
-                    
-                    # invest
-                    
-                    Do_Invest_Player = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
-                    
-                    Do_Invest_Player = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
-                    
-                    Do_Invest_Player = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
+                set_key = { lhs = Tmp_Misc0 which = Ai_Invest_Budget }
+                multiply_key = { lhs = Tmp_Misc0 value = 0.01 }
+                multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_Misc0 }
                    
-                    Do_Invest_Player = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
-                    
-                    Do_Invest_Player = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
-                    
-                    Do_Invest_Player = { type=Academic return=Public_Tmp6 score=Tmp_6 }
-                    
-                    clr_province_flag = possible_investment
-                }
                 if = {
                     limit = {
-                        has_country_flag = show_investment
-                        check_key = { lhs = Tmp_0 value = 0.001 }
+                        check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
                     }
-                    random_owned_province = {
+                    
+                    set_key = { lhs = Public_Tmp1 value = 0 }
+                    set_key = { lhs = Public_Tmp2 value = 0 }
+                    set_key = { lhs = Public_Tmp3 value = 0 }
+                    set_key = { lhs = Public_Tmp4 value = 0 }
+                    set_key = { lhs = Public_Tmp5 value = 0 }
+                    set_key = { lhs = Public_Tmp6 value = 0 }
+                    every_owned_province = {
                         limit = {
-                            has_province_flag = invested
+                            has_province_flag = Invest
+                            controlled_by = owner
+                            is_core = owner
+                            check_key = { lhs = Prov_BUPow value = 2.5 }    #NEVER invest under 2.5 State Reach (investment pool won't drain)
                         }
-                        province_event = { id = AI_Invest.9 }
+                        clr_province_flag = invested
+                        set_province_flag = possible_investment
+                        set_key = { lhs = Public_Tmp1 value = 0 }
+                        set_key = { lhs = Public_Tmp2 value = 0 }
+                        set_key = { lhs = Public_Tmp3 value = 0 }
+                        set_key = { lhs = Public_Tmp4 value = 0 }
+                        set_key = { lhs = Public_Tmp5 value = 0 }
+                        set_key = { lhs = Public_Tmp6 value = 0 }
+                        
+                        Infra_AISpendCheck_Agriculture = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax }
+                        Infra_AISpendCheck_Forestry = { type = Forestry return=Public_Tmp2 cap = Building_ForestryMax }
+                        Infra_AISpendCheck_Extraction = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax }
+                        Infra_AISpendCheck_Fishery = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax }
+                        if = {
+                            limit = {
+                                NOT = {
+                                    has_province_flag = NIndus
+                                }
+                            }
+                            Infra_AISpendCheck_Industrial = { type = Industrial return = Public_Tmp5 }
+                            Infra_AISpendCheck_Academic = { type = Academic return = Public_Tmp6 }  
+                        }  
+                        PREV = { #add scores of every province to the country
+                            change_key = { lhs = Public_Tmp1 which = PREV } 
+                            change_key = { lhs = Public_Tmp2 which = PREV }
+                            change_key = { lhs = Public_Tmp3 which = PREV }
+                            change_key = { lhs = Public_Tmp4 which = PREV }
+                            change_key = { lhs = Public_Tmp5 which = PREV }
+                            change_key = { lhs = Public_Tmp6 which = PREV }
+                        }     
                     }
+
+                    #sum all scores into 1
+                    set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp2 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp3 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp4 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp5 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
+                    
+                    set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
+                    divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
+                    
+                    set_key = { lhs = Tmp_9 value = 0 }
+                    set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
+                    every_owned_province = {
+                        limit = {
+                            has_province_flag = possible_investment
+                        }
+                        set_key = { lhs = Tmp_9 value = 0 }
+                            # set total score per province of each type of building (the one that came from Infra_AISpendCheck)
+                        set_key = { lhs = Tmp_1 which = Public_Tmp1 } 
+                        set_key = { lhs = Tmp_2 which = Public_Tmp2 }
+                        set_key = { lhs = Tmp_3 which = Public_Tmp3 }
+                        set_key = { lhs = Tmp_4 which = Public_Tmp4 }
+                        set_key = { lhs = Tmp_5 which = Public_Tmp5 }
+                        set_key = { lhs = Tmp_6 which = Public_Tmp6 }
+                        
+                            # calculate each score's percentage % from the total country's score for each type of building
+                        set_key = { lhs = Public_Tmp9 which = PREV } #total country score
+                        divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
+                        divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_3 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_4 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
+                        
+                            # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
+                        multiply_key = { lhs = Tmp_1 value = 100 }
+                        multiply_key = { lhs = Tmp_2 value = 100 }
+                        multiply_key = { lhs = Tmp_3 value = 100 }
+                        multiply_key = { lhs = Tmp_4 value = 100 }
+                        multiply_key = { lhs = Tmp_5 value = 100 }
+                        multiply_key = { lhs = Tmp_6 value = 100 }
+                            # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
+                        if = {
+                            limit = {
+                                NOT = { is_capital = yes }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_1 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_1 value = 80 }
+                                    }
+                                    set_province_flag = AgricultureInvestment8
+                                }
+                                else = {
+                                    set_province_flag = AgricultureInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_2 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_2 value = 80 }
+                                    }
+                                    set_province_flag = ForestryInvestment8
+                                }
+                                else = {
+                                    set_province_flag = ForestryInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_3 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_3 value = 80 }
+                                    }
+                                    set_province_flag = ExtractionInvestment8
+                                }
+                                else = {
+                                    set_province_flag = ExtractionInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_4 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_4 value = 80 }
+                                    }
+                                    set_province_flag = FisheryInvestment8
+                                }
+                                else = {
+                                    set_province_flag = FisheryInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_5 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_5 value = 80 }
+                                    }
+                                    set_province_flag = IndustrialInvestment8
+                                }
+                                else = {
+                                    set_province_flag = IndustrialInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_6 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_6 value = 80 }
+                                    }
+                                    set_province_flag = AcademicInvestment8
+                                }
+                                else = {
+                                    set_province_flag = AcademicInvestment6
+                                }
+                            }
+                        }
+            
+                        # calculate score / total budget to get in raw money value how much it will be invested
+                        set_key = { lhs = Public_Tmp0 which = PREV } # total budget
+                        
+                        if = {
+                            limit = {
+                                check_key = { lhs = Public_Tmp0 value = 0.001 }
+                            }
+                            divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
+                        }
+                        
+                        # invest
+                        
+                        Do_Invest_Player = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
+                        
+                        Do_Invest_Player = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
+                        
+                        Do_Invest_Player = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
+                       
+                        Do_Invest_Player = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
+                        
+                        Do_Invest_Player = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
+                        
+                        Do_Invest_Player = { type=Academic return=Public_Tmp6 score=Tmp_6 }
+                        
+                        clr_province_flag = possible_investment
+                    }
+                    if = {
+                        limit = {
+                            has_country_flag = show_investment
+                            check_key = { lhs = Tmp_Misc0 value = 0.001 }
+                        }
+                        random_owned_province = {
+                            limit = {
+                                has_province_flag = invested
+                            }
+                            province_event = { 
+                                id = AI_Invest.9
+                            }
+                        }
+                    }
+                    POP_RemoveDucat = { type = which inp = Public_Tmp7 }
+                    
                 }
-                POP_RemoveDucat = { type = which inp = Public_Tmp7 }
-                set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
             }
-		}
+        }
 	}
 	option = {
-		name = no_localisation
+		name = "OPT.GREAT"
+        log = "Player tried to invest"
 	}
+    after = {
+        set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
+    }
 }
 country_event = {
     id = AI_Invest.4
-    title = no_localisation
-    desc = no_localisation
-	picture = ai_only
-
-    hidden = yes
+    title = "AI_Invest_title"
+    desc = "AI_Invest_desc"
+	picture = ECONOMY_eventPicture
 
     is_triggered_only = yes
 
     trigger = {
-        isValidCountry = yes
         ai = no
+        isValidCountry = yes
         has_country_flag = Automatic_Invest
         has_country_flag = invest_every_5
 	}
 
-    immediate = {
-		if = {
-			limit = {
-                NOT = { num_of_loans = 1 }
-                monthly_income = 0
-                OR = {
-                    AND = {
-                        is_at_war = yes
-                        war_score = 15
-                    }
-                    is_at_war = no
-                }
-            }
-		
-			set_key = { lhs = Public_Tmp1 value = 0 }
-			set_key = { lhs = Public_Tmp2 value = 0 }
-			set_key = { lhs = Public_Tmp3 value = 0 }
-			set_key = { lhs = Public_Tmp4 value = 0 }
-			set_key = { lhs = Public_Tmp5 value = 0 }
-			set_key = { lhs = Public_Tmp6 value = 0 }
-			
-			export_to_key = {
-				lhs = Public_Tmp1
-				value = treasury
-			}
-			export_to_key = {
-				lhs = Public_Tmp2
-				value = monthly_income
-			}
-			
-            set_key = { lhs = Ai_Invest_BudgetFixed which = Public_Tmp1 }
-            set_key = { lhs = Tmp_0 which = Ai_Invest_Budget }
-            multiply_key = { lhs = Tmp_0 value = 0.01 }
-            multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_0 }
-            
-            #log = "[This.GetName] [This.GV_Ai_Invest_BudgetFixed]"
+    mean_time_to_happen = {
+        days = 1
+    }
 
-			if = {
+    immediate = {
+        hidden_effect = {
+            if = {
                 limit = {
-                    check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
-                }
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = Invest
-                        controlled_by = owner
-                        #OR = {
-                        #    AND = {
-                        #        is_capital = yes
-                        #        check_key = { lhs = Prov_BUPow value = 1 }
-                        #    }
-                        #    AND = {
-                        #        any_province_in_state = {
-                        #            is_capital_of = owner
-                        #        }
-                        #        check_key = { lhs = Prov_BUPow value = 7 }
-                        #    }
-                        #    check_key = { lhs = Prov_BUPow value = 15 }
-                        #}
-                        check_key = { lhs = Prov_BUPow value = 2.5 }    #NEVER invest under 2.5 State Reach (investment pool won't drain)
-                        is_core = PREV
-                    }
-                    clr_province_flag = invested
-                    set_province_flag = possible_investment
-                    set_key = { lhs = Public_Tmp1 value = 0 }
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
-                    set_key = { lhs = Public_Tmp6 value = 0 }
-                    
-                    Infra_AISpendCheck_Agriculture = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax }
-                    Infra_AISpendCheck_Forestry = { type = Forestry return=Public_Tmp2 cap = Building_ForestryMax }
-                    Infra_AISpendCheck_Extraction = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax }
-                    Infra_AISpendCheck_Fishery = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax }
-                    if = {
-                        limit = {
-                            NOT = { has_province_flag = NIndus }
+                    NOT = { num_of_loans = 1 }
+                    monthly_income = 0
+                    OR = {
+                        AND = {
+                            is_at_war = yes
+                            war_score = 15
                         }
-                        Infra_AISpendCheck_Industrial = { type = Industrial return = Public_Tmp5 }
-						Infra_AISpendCheck_Academic = { type = Academic return = Public_Tmp6 }
-                    }                    
+                        is_at_war = no
+                    }
                 }
-		
+                set_key = { lhs = Tmp_Misc0 value = 0 }
                 set_key = { lhs = Public_Tmp1 value = 0 }
                 set_key = { lhs = Public_Tmp2 value = 0 }
                 set_key = { lhs = Public_Tmp3 value = 0 }
@@ -1063,202 +1043,256 @@ country_event = {
                 set_key = { lhs = Public_Tmp5 value = 0 }
                 set_key = { lhs = Public_Tmp6 value = 0 }
                 
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = possible_investment
-                    }
-                    PREV = { #add scores of every province to the country
-                        change_key = { lhs = Public_Tmp1 which = PREV } 
-                        change_key = { lhs = Public_Tmp2 which = PREV }
-                        change_key = { lhs = Public_Tmp3 which = PREV }
-                        change_key = { lhs = Public_Tmp4 which = PREV }
-                        change_key = { lhs = Public_Tmp5 which = PREV }
-                        change_key = { lhs = Public_Tmp6 which = PREV }
-                    }
+                export_to_key = {
+                    lhs = Ai_Invest_BudgetFixed
+                    value = treasury
                 }
-                    #sum all scores into 1
-                set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp2 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp3 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp4 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp5 }
-                change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
                 
-                set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
-                divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
-                
-                set_key = { lhs = Tmp_9 value = 0 }
-                set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
-                
-                every_owned_province = {
-                    limit = {
-                        has_province_flag = possible_investment
-                    }
-                    set_key = { lhs = Tmp_9 value = 0 }
-                        # set total score per province of each type of building (the one that came from Infra_AISpendCheck)
-                    set_key = { lhs = Tmp_1 which = Public_Tmp1 } 
-                    set_key = { lhs = Tmp_2 which = Public_Tmp2 }
-                    set_key = { lhs = Tmp_3 which = Public_Tmp3 }
-                    set_key = { lhs = Tmp_4 which = Public_Tmp4 }
-                    set_key = { lhs = Tmp_5 which = Public_Tmp5 }
-                    set_key = { lhs = Tmp_6 which = Public_Tmp6 }
-                    
-                        # calculate each score's percentage % from the total country's score for each type of building
-                    set_key = { lhs = Public_Tmp9 which = PREV } #total country score
-                    divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
-                    divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_3 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_4 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
-                    divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
-                    
-                        # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
-                    multiply_key = { lhs = Tmp_1 value = 100 }
-                    multiply_key = { lhs = Tmp_2 value = 100 }
-                    multiply_key = { lhs = Tmp_3 value = 100 }
-                    multiply_key = { lhs = Tmp_4 value = 100 }
-                    multiply_key = { lhs = Tmp_5 value = 100 }
-                    multiply_key = { lhs = Tmp_6 value = 100 }
-                        # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
-                    if = {
-                        limit = {
-                            is_capital = no
-                        }
-                        if = {
-                            limit = {
-                                check_key = { lhs = Tmp_1 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_1 value = 80 }
-                                }
-                                set_province_flag = AgricultureInvestment8
-                            }
-                            else = {
-                                set_province_flag = AgricultureInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_2 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_2 value = 80 }
-                                }
-                                set_province_flag = ForestryInvestment8
-                            }
-                            else = {
-                                set_province_flag = ForestryInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_3 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_3 value = 80 }
-                                }
-                                set_province_flag = ExtractionInvestment8
-                            }
-                            else = {
-                                set_province_flag = ExtractionInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_4 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_4 value = 80 }
-                                }
-                                set_province_flag = FisheryInvestment8
-                            }
-                            else = {
-                                set_province_flag = FisheryInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_5 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_5 value = 80 }
-                                }
-                                set_province_flag = IndustrialInvestment8
-                            }
-                            else = {
-                                set_province_flag = IndustrialInvestment6
-                            }
-                        }
-                        else_if = {
-                            limit = {
-                                check_key = { lhs = Tmp_6 value = 60 }
-                            }
-                            if = {
-                                limit = {
-                                    check_key = { lhs = Tmp_6 value = 80 }
-                                }
-                                set_province_flag = AcademicInvestment8
-                            }
-                            else = {
-                                set_province_flag = AcademicInvestment6
-                            }
-                        }
-                    }
-
-                    # calculate score / total budget to get in raw money value how much it will be invested
-                    set_key = { lhs = Public_Tmp0 which = PREV } # total budget
-                    
-                    divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
-                    divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
-                    
-                    
-                    
-                    
-                    # invest
-                    
-                    Do_Invest_Player = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
-                    
-                    Do_Invest_Player = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
-                    
-                    Do_Invest_Player = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
-                    
-                    Do_Invest_Player = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
-                    
-                    Do_Invest_Player = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
+                set_key = { lhs = Tmp_Misc0 which = Ai_Invest_Budget }
+                multiply_key = { lhs = Tmp_Misc0 value = 0.01 }
+                multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_Misc0 }
                    
-                    Do_Invest_Player = { type=Academic return=Public_Tmp6 score=Tmp_6 }
-                    
-                    clr_province_flag = possible_investment
-                }
                 if = {
                     limit = {
-                        has_country_flag = show_investment
-                        check_key = { lhs = Tmp_0 value = 0.001 }
+                        check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
                     }
-                    random_owned_province = {
+                    
+                    set_key = { lhs = Public_Tmp1 value = 0 }
+                    set_key = { lhs = Public_Tmp2 value = 0 }
+                    set_key = { lhs = Public_Tmp3 value = 0 }
+                    set_key = { lhs = Public_Tmp4 value = 0 }
+                    set_key = { lhs = Public_Tmp5 value = 0 }
+                    set_key = { lhs = Public_Tmp6 value = 0 }
+                    every_owned_province = {
                         limit = {
-                            has_province_flag = invested
+                            has_province_flag = Invest
+                            controlled_by = owner
+                            is_core = owner
+                            check_key = { lhs = Prov_BUPow value = 2.5 }    #NEVER invest under 2.5 State Reach (investment pool won't drain)
                         }
-                        province_event = { id = AI_Invest.9 }
+                        clr_province_flag = invested
+                        set_province_flag = possible_investment
+                        set_key = { lhs = Public_Tmp1 value = 0 }
+                        set_key = { lhs = Public_Tmp2 value = 0 }
+                        set_key = { lhs = Public_Tmp3 value = 0 }
+                        set_key = { lhs = Public_Tmp4 value = 0 }
+                        set_key = { lhs = Public_Tmp5 value = 0 }
+                        set_key = { lhs = Public_Tmp6 value = 0 }
+                        
+                        Infra_AISpendCheck_Agriculture = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax }
+                        Infra_AISpendCheck_Forestry = { type = Forestry return=Public_Tmp2 cap = Building_ForestryMax }
+                        Infra_AISpendCheck_Extraction = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax }
+                        Infra_AISpendCheck_Fishery = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax }
+                        if = {
+                            limit = {
+                                NOT = {
+                                    has_province_flag = NIndus
+                                }
+                            }
+                            Infra_AISpendCheck_Industrial = { type = Industrial return = Public_Tmp5 }
+                            Infra_AISpendCheck_Academic = { type = Academic return = Public_Tmp6 }  
+                        }
+                        PREV = { #add scores of every province to the country
+                            change_key = { lhs = Public_Tmp1 which = PREV } 
+                            change_key = { lhs = Public_Tmp2 which = PREV }
+                            change_key = { lhs = Public_Tmp3 which = PREV }
+                            change_key = { lhs = Public_Tmp4 which = PREV }
+                            change_key = { lhs = Public_Tmp5 which = PREV }
+                            change_key = { lhs = Public_Tmp6 which = PREV }
+                        }     
                     }
+
+                    #sum all scores into 1
+                    set_key = { lhs = Public_Tmp0 which = Public_Tmp1 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp2 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp3 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp4 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp5 }
+                    change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
+                    
+                    set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
+                    divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
+                    
+                    set_key = { lhs = Tmp_9 value = 0 }
+                    set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
+                    every_owned_province = {
+                        limit = {
+                            has_province_flag = possible_investment
+                        }
+                        set_key = { lhs = Tmp_9 value = 0 }
+                            # set total score per province of each type of building (the one that came from Infra_AISpendCheck)
+                        set_key = { lhs = Tmp_1 which = Public_Tmp1 } 
+                        set_key = { lhs = Tmp_2 which = Public_Tmp2 }
+                        set_key = { lhs = Tmp_3 which = Public_Tmp3 }
+                        set_key = { lhs = Tmp_4 which = Public_Tmp4 }
+                        set_key = { lhs = Tmp_5 which = Public_Tmp5 }
+                        set_key = { lhs = Tmp_6 which = Public_Tmp6 }
+                        
+                            # calculate each score's percentage % from the total country's score for each type of building
+                        set_key = { lhs = Public_Tmp9 which = PREV } #total country score
+                        divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
+                        divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_3 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_4 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
+                        divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
+                        
+                            # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
+                        multiply_key = { lhs = Tmp_1 value = 100 }
+                        multiply_key = { lhs = Tmp_2 value = 100 }
+                        multiply_key = { lhs = Tmp_3 value = 100 }
+                        multiply_key = { lhs = Tmp_4 value = 100 }
+                        multiply_key = { lhs = Tmp_5 value = 100 }
+                        multiply_key = { lhs = Tmp_6 value = 100 }
+                            # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
+                        if = {
+                            limit = {
+                                NOT = { is_capital = yes }
+                            }
+                            if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_1 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_1 value = 80 }
+                                    }
+                                    set_province_flag = AgricultureInvestment8
+                                }
+                                else = {
+                                    set_province_flag = AgricultureInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_2 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_2 value = 80 }
+                                    }
+                                    set_province_flag = ForestryInvestment8
+                                }
+                                else = {
+                                    set_province_flag = ForestryInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_3 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_3 value = 80 }
+                                    }
+                                    set_province_flag = ExtractionInvestment8
+                                }
+                                else = {
+                                    set_province_flag = ExtractionInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_4 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_4 value = 80 }
+                                    }
+                                    set_province_flag = FisheryInvestment8
+                                }
+                                else = {
+                                    set_province_flag = FisheryInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_5 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_5 value = 80 }
+                                    }
+                                    set_province_flag = IndustrialInvestment8
+                                }
+                                else = {
+                                    set_province_flag = IndustrialInvestment6
+                                }
+                            }
+                            else_if = {
+                                limit = {
+                                    check_key = { lhs = Tmp_6 value = 60 }
+                                }
+                                if = {
+                                    limit = {
+                                        check_key = { lhs = Tmp_6 value = 80 }
+                                    }
+                                    set_province_flag = AcademicInvestment8
+                                }
+                                else = {
+                                    set_province_flag = AcademicInvestment6
+                                }
+                            }
+                        }
+            
+                        # calculate score / total budget to get in raw money value how much it will be invested
+                        set_key = { lhs = Public_Tmp0 which = PREV } # total budget
+                        
+                        if = {
+                            limit = {
+                                check_key = { lhs = Public_Tmp0 value = 0.001 }
+                            }
+                            divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
+                            divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
+                        }
+                        
+                        # invest
+                        
+                        Do_Invest_Player = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
+                        
+                        Do_Invest_Player = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
+                        
+                        Do_Invest_Player = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
+                       
+                        Do_Invest_Player = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
+                        
+                        Do_Invest_Player = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
+                        
+                        Do_Invest_Player = { type=Academic return=Public_Tmp6 score=Tmp_6 }
+                        
+                        clr_province_flag = possible_investment
+                    }
+                    if = {
+                        limit = {
+                            has_country_flag = show_investment
+                            check_key = { lhs = Tmp_Misc0 value = 0.001 }
+                        }
+                        random_owned_province = {
+                            limit = {
+                                has_province_flag = invested
+                            }
+                            province_event = { 
+                                id = AI_Invest.9
+                            }
+                        }
+                    }
+                    POP_RemoveDucat = { type = which inp = Public_Tmp7 }
+                    
                 }
-                POP_RemoveDucat = { type = which inp = Public_Tmp7 }
-                set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
             }
-		}
+        }
 	}
 	option = {
-		name = no_localisation
+		name = "OPT.GREAT"
+        #log = "Player tried to invest"
 	}
+    after = {
+        set_key = { lhs = Ai_Invest_BudgetFixed value = 0 }
+    }
 }
 #Auto Investor
 country_event = {
