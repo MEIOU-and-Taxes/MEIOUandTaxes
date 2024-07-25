@@ -239,6 +239,7 @@ SlotsOpeningMain = {
                         has_province_flag = wants_to_open_fibre
                         has_province_flag = wants_to_open_food
                         has_province_flag = wants_to_open_fuel
+                        has_province_flag = wants_to_open_timber
                         has_province_flag = wants_to_open_knowledge
                         has_province_flag = wants_to_open_luxury
                         has_province_flag = wants_to_open_consumer
@@ -409,6 +410,13 @@ SlotsOpeningMain = {
                     set_province_flag = open_industrial
                     clr_province_flag = wants_to_open_industrial
                 }
+                else_if = {
+                    limit = {
+                        has_province_flag = wants_to_open_timber
+                    }
+                    set_province_flag = open_timber
+                    clr_province_flag = wants_to_open_timber
+                }
                 else = { set_province_flag = you_suck }
                 
                 OpenSlotsEffect = yes
@@ -425,6 +433,7 @@ SlotsOpeningMain = {
             clr_province_flag = wants_to_open_naval
             clr_province_flag = wants_to_open_raw
             clr_province_flag = wants_to_open_salt
+            clr_province_flag = wants_to_open_timber
             
             clr_province_flag = open_consumer
             clr_province_flag = open_exotics
@@ -438,6 +447,7 @@ SlotsOpeningMain = {
             clr_province_flag = open_naval
             clr_province_flag = open_raw
             clr_province_flag = open_salt
+            clr_province_flag = open_timber
         }
     }
     if = {
@@ -462,6 +472,7 @@ OpenSlotsHelper = {
     set_key = { lhs = Public_Tmp1 value = 0 }
     set_key = { lhs = Public_Tmp2 value = 0 }
     set_key = { lhs = Public_Tmp3 value = 0 }
+    set_key = { lhs = Public_Tmp4 value = 0 }
     
     if = {
         limit = {
@@ -480,6 +491,7 @@ OpenSlotsHelper = {
                 set_key = { lhs = TN_SectorSply5 which = PREV }
                 set_key = { lhs = TN_SectorSply6 which = PREV }
                 set_key = { lhs = TN_SectorSply9 which = PREV }
+                set_key = { lhs = TN_SectorSply10 which = PREV }
                 set_key = { lhs = TN_SectorSply21 which = PREV }
                 set_key = { lhs = TN_SectorSply22 which = PREV }
                 set_key = { lhs = TN_SectorSply23 which = PREV }
@@ -493,6 +505,7 @@ OpenSlotsHelper = {
                 set_key = { lhs = TN_SectorDmnd5 which = PREV }
                 set_key = { lhs = TN_SectorDmnd6 which = PREV }
                 set_key = { lhs = TN_SectorDmnd9 which = PREV }
+                set_key = { lhs = TN_SectorDmnd10 which = PREV }
                 set_key = { lhs = TN_SectorDmnd21 which = PREV }
                 set_key = { lhs = TN_SectorDmnd22 which = PREV }
                 set_key = { lhs = TN_SectorDmnd23 which = PREV }
@@ -597,16 +610,10 @@ OpenSlotsHelper = {
     if = {
         limit = { # Raw
             check_key = { lhs = TN_SectorDmnd6 which = TN_SectorSply6 }
-            OR = {
-                AND = {
-                    Prod_Can_13 = yes
-                    Prod_NotHasProd = { Prod = 13 }
-                }
-                AND = {
-                    Prod_Can_15 = yes
-                    Prod_NotHasProd = { Prod = 14 }
-                }
-            }  
+            AND = {
+                Prod_Can_15 = yes
+                Prod_NotHasProd = { Prod = 15 }
+            }
         }
         set_key = { lhs = Tmp_4 which = TN_SectorDmnd6 }
         subtract_key = { lhs = Tmp_4 which = TN_SectorSply6 }
@@ -657,6 +664,27 @@ OpenSlotsHelper = {
             multiply_key = { lhs = Tmp_5 which = TN_ProvPrc9 }
             set_province_flag = wants_to_open
             set_province_flag = wants_to_open_exotics
+        }
+    }
+
+    if = {      
+        limit = {       #Timber
+            check_key = { lhs = TN_SectorDmnd10 which = TN_SectorSply10 }
+            AND = {
+                Prod_Can_13 = yes
+                Prod_NotHasProd = { Prod = 13 }
+            }
+        }
+        set_key = { lhs = Public_Tmp4 which = TN_SectorDmnd10 }
+        subtract_key = { lhs = Public_Tmp4 which = TN_SectorSply10 }
+
+        if = {
+            limit = {
+                check_key = { lhs = Public_Tmp4 value = 0.001 }
+            }
+            multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc10 }
+            set_province_flag = wants_to_open
+            set_province_flag = wants_to_open_timber
         }
     }
        
@@ -852,6 +880,7 @@ OpenSlotsHelper2 = {
     set_key = { lhs = Public_Tmp1 value = 0 }
     set_key = { lhs = Public_Tmp2 value = 0 }
     set_key = { lhs = Public_Tmp3 value = 0 }
+    set_key = { lhs = Public_Tmp4 value = 0 }
     
         # If sector demand > sply, calculate the price difference.
     
@@ -961,6 +990,14 @@ OpenSlotsHelper2 = {
         set_key = { lhs = Public_Tmp3 which = TN_SectorDmnd4 }
         subtract_key = { lhs = Public_Tmp3 which = TN_SectorSply4 }
         multiply_key = { lhs = Public_Tmp3 which = TN_ProvPrc4 }
+    }
+    if = {
+        limit = { # Timber
+            has_province_flag = wants_to_open_timber
+        }
+        set_key = { lhs = Public_Tmp4 which = TN_SectorDmnd10 }
+        subtract_key = { lhs = Public_Tmp4 which = TN_SectorSply10 }
+        multiply_key = { lhs = Public_Tmp4 which = TN_ProvPrc10 }
     }
 }
 #
@@ -1289,30 +1326,8 @@ OpenSlotsEffect = {
                 limit = {
                     check_key = { lhs = WK_SFNet value = 3 }
                 }
-                set_key = { lhs = Public_Tmp6 which = Building_ForestryMax }
-                subtract_key = { lhs = Public_Tmp6 which = Building_Forestry }
                 set_key = { lhs = Public_Tmp7 which = Building_ExtractionMax }
                 subtract_key = { lhs = Public_Tmp7 which = Building_Extraction }
-                if = {
-                    limit = { # Timber
-                        Prod_Can_13 = yes  
-                        check_key = { lhs = Public_Tmp6 value = 100 }
-                        check_key = { lhs = WK_SFNet value = 3 }
-                    }
-                    set_key = { lhs = Tmp_0 which = TN_ProvPrc5 }
-                    multiply_key = { lhs = Tmp_0 value = 2.8 }
-                    
-                    set_key = { lhs = Tmp_1 which = TN_ProvPrc6 }
-                    multiply_key = { lhs = Tmp_1 value = 2.8 }
-                    
-                    change_key = { lhs = Tmp_0 which = Tmp_1 }
-                        # Labour
-                    set_key = { lhs = Public_Tmp9 which = Class_PR }
-                    multiply_key = { lhs = Public_Tmp9 value = 1 }
-                    
-                    subtract_key = { lhs = Tmp_0 which = Public_Tmp9 }
-                }
-                else = { set_key = { lhs = Tmp_0 value = 0 } }
                 if = {
                     limit = { # Metals
                         check_key = { lhs = Public_Tmp7 value = 100 }
@@ -1329,16 +1344,6 @@ OpenSlotsEffect = {
                 }
                 else = { set_key = { lhs = Tmp_1 value = 0 } }
                 if = {
-                    limit = { # Timber
-                        check_key = { lhs = Tmp_0 value = 0.001 }
-                        check_key = { lhs = Tmp_0 which = Tmp_1 } 
-                        Prod_NotHasProd = { Prod = 13 } 
-                    }
-                    set_province_flag = wants_to_open_slot
-                    set_province_flag = will_open_raw
-                    set_key = { lhs = Tmp_0 value = 13 }
-                }
-                else_if = {
                     limit = { # Metals
                         check_key = { lhs = Tmp_1 value = 0.001 }
                         check_key = { lhs = Tmp_1 which = Tmp_0 }
@@ -2149,7 +2154,37 @@ OpenSlotsEffect = {
                     set_key = { lhs = Tmp_0 value = 42 }
                 }
             }
-            clr_province_flag = open_fibre
+            clr_province_flag = open_fibre  
+        }
+        open_timber = {
+            set_key = { lhs = Public_Tmp4 which = Building_ForestryMax }
+            subtract_key = { lhs = Public_Tmp4 which = Building_Forestry }
+            if = {
+                limit = { # Timber
+                    Prod_Can_13 = yes  
+                    check_key = { lhs = Public_Tmp4 value = 35 }
+                    check_key = { lhs = WK_SFNet value = 3 }
+                }
+                set_key = { lhs = Tmp_0 which = TN_ProvPrc10 }
+                multiply_key = { lhs = Tmp_0 value = 1 }
+                
+                    # Labour
+                set_key = { lhs = Public_Tmp9 which = Class_PR }
+                multiply_key = { lhs = Public_Tmp9 value = 1 }
+                
+                subtract_key = { lhs = Tmp_0 which = Public_Tmp9 }
+            }
+            else = { set_key = { lhs = Tmp_0 value = 0 } }
+            if = {
+                limit = { # Timber
+                    check_key = { lhs = Tmp_0 value = 0.001 }
+                    check_key = { lhs = Tmp_0 which = Tmp_1 } 
+                    Prod_NotHasProd = { Prod = 13 } 
+                }
+                set_province_flag = wants_to_open_slot
+                set_province_flag = will_open_timber
+                set_key = { lhs = Tmp_0 value = 13 }
+            }
         }
     }
     OpenProdEffect = yes
