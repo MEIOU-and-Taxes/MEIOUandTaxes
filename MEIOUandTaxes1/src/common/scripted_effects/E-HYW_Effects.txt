@@ -97,7 +97,7 @@ enforce_hyw_treaty_effect = { #Selection of next treaty in order of progression
 			NOT = { 
 				has_global_flag = treaty_of_arras
 				has_global_flag = treaty_of_orlean
-				has_global_flag = treaty_of_troyes
+				#has_global_flag = treaty_of_troyes
 				has_global_flag = treaty_of_picquigny
 			}
 		}
@@ -297,6 +297,14 @@ enforce_treaty_bruges = {
 		limit = {
 			exists = NRM
 		}
+
+		NRM = {
+			define_ruler = {
+				dynasty = ROOT
+			}
+		}
+		log =  "FE-TempHYW:Alencon got ruler from French dynasty:enforce_treaty_bruges"
+
 		FRA = {
 			create_subject = {
 				subject_type = appanage_subject
@@ -304,13 +312,6 @@ enforce_treaty_bruges = {
 			}
 		}
 		log =  "FE-TempHYW:Alencon became an appanage of France:enforce_treaty_bruges"
-		
-		NRM = {
-			define_ruler = {
-				dynasty = FRA
-			}
-		}
-		log =  "FE-TempHYW:Alencon got ruler from French dynasty:enforce_treaty_bruges"
 	}
 
 	set_global_flag = treaty_of_bruges
@@ -386,32 +387,54 @@ enforce_treaty_troyes = {
 
 enforce_treaty_arras = {
 	log =  "FE-TempHYW:Treaty of Arras signed:enforce_treaty_arras"
-	troyes_eng_group = {
-		limit = {
-			is_city = yes
-			OR = {
-				owned_by = ENG
-				owner = { is_subject_of = ENG }
-				owner = { junior_union_with = ENG }
-			}
-		}
-		add_core = FRA
-		cede_province = FRA
-	}
-	troyes_bur_group = {
-		limit = {
-			is_city = yes
-			OR = {
-				owned_by = BUR
-				owner = { is_subject_of = BUR }
-				owner = { junior_union_with = BUR }
-			}
-		}
-		add_core = FRA
-		cede_province = FRA
-	}
 	set_global_flag = treaty_of_arras
 	clr_global_flag = treaty_of_troyes
+	if = {
+		limit = {
+			troyes_eng_group = {
+				OR = {
+					owned_by = ENG
+					owner = { is_subject_of = ENG }
+					owner = { junior_union_with = ENG }
+				}
+			}
+			troyes_bur_group = {
+				OR = {
+					owned_by = BUR
+					owner = { is_subject_of = BUR }
+					owner = { junior_union_with = BUR }
+				}
+			}
+		}
+		troyes_eng_group = {
+			limit = {
+				is_city = yes
+				OR = {
+					owned_by = ENG
+					owner = { is_subject_of = ENG }
+					owner = { junior_union_with = ENG }
+				}
+			}
+			add_core = FRA
+			cede_province = FRA
+		}
+		troyes_bur_group = {
+			limit = {
+				is_city = yes
+				OR = {
+					owned_by = BUR
+					owner = { is_subject_of = BUR }
+					owner = { junior_union_with = BUR }
+				}
+			}
+			add_core = FRA
+			cede_province = FRA
+		}
+	}
+	else = {
+		log =  "FE-TempHYW:Treaty of Arras had no effect, so next treaty in order is enacted:enforce_treaty_arras"
+		enforce_treaty_picquigny = yes
+	}
 }
 
 enforce_treaty_orlean = {
@@ -480,7 +503,11 @@ enforce_treaty_orlean_splits_with_bur = { #TODO: looks identical to enforce_trea
 			add_core = BUR
 			cede_province = BUR
 		}
-
+		create_subject = { subject_type = permanent_union_limited subject = FRA }
+		FRA = {
+			remove_government_reform = salic_law_reform
+			add_government_reform = Pol_Succession1
+		}
 	}
 	else = {
 		create_subject = { subject_type = permanent_union_limited subject = FRA }
