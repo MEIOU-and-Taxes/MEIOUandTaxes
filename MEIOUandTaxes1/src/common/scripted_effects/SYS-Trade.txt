@@ -3828,6 +3828,7 @@ TN_SetTradeIncome = {
 
 					set_key = { lhs = Stat_Inp which = TN_SectorTV }
 					multiply_key = { lhs = Stat_Inp which = TN_ProvSply51 }
+                    multiply_key = { lhs = Stat_Inp value = 1.0 } # Modify in constants.txt `TRADE_POWER_VALUE_MULTIPLIER~value`
 			
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 819.2 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 409.6 }
@@ -4606,30 +4607,27 @@ TN_GetProdSlotDirectU = {
     TN_GetProdCheckSlotDmnd = { slot = 15 prod = $prod$ }
 }
 
+# Set Demand per Good per class per fulfillment type
 TN_GetProdClassHelper = {
     if = {
         limit = {
             check_key = { lhs = $class$_Fill$type$ value = 0.001 }
             check_key = { lhs = $class$_Total value = 0.001 }
         }
-        TN_GetDmndProd = { prod=$prod$ class=$class$ return = Tmp_1 }
+        TN_GetDmndProd = { prod=$prod$ class=$class$ return = Tmp_1 } # Get base need per good and apply API modifiers
         
-        if = {
-            limit = {
-                always = yes 
-            }
-            set_key = { lhs = $class$_Need$prod$ which = Tmp_1 }
-        }
+        set_key = { lhs = $class$_Need$prod$ which = Tmp_1 } # Set goods need per product per class (also used as display variable)
 
+        # Modify demand by last years (?) fulfillment
         multiply_key = { lhs = Tmp_1 which = $class$_Fill$type$ }
-        change_key = { lhs = TN_ProvDmnd$prod$ which = Tmp_1 }
+        change_key = { lhs = TN_ProvDmnd$prod$ which = Tmp_1 } # add demanded goods to province demand
         
         if = {
             limit = {
                 owner = { ai = no }
                 #always = yes
             }
-            set_key = { lhs = $class$_Dmnd$prod$ which = Tmp_1 }
+            set_key = { lhs = $class$_Dmnd$prod$ which = Tmp_1 } # store actual demanded goods for player display only
         }
 
         set_key = { lhs = Tmp_1  value = 0 }

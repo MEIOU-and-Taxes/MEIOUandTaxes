@@ -1625,6 +1625,23 @@ on_new_monarch = {
 		}
 		remove_country_modifier = HRE_infertile_dynasty
 	}
+
+	if = {
+		limit = {
+			has_ruler = "Charles V le Sage"
+			has_heir_flag = renewed_french_phase
+		}
+		set_country_flag = charles_v_succession
+	}
+
+	if = {
+		limit = {
+			has_country_flag = charles_v_succession
+		}
+
+		country_event = { id = bourguignon_armagnac.2003 days = 5 }
+		clr_country_flag = charles_v_succession
+	}
 	
 	
 	events = {
@@ -1680,6 +1697,7 @@ on_new_monarch = {
 		rivalry.3 					# Nations that share a dynasty will cease to be historical rivals
 		DG_Hussites.009             # Monarch and the Hussites
 		flavor_pol.610              # Election of X
+		flavor_brb.20				# Succession of Wenceslaus I, Duke of Luxembourg
 	}
 
 	random_events = {
@@ -2219,9 +2237,16 @@ on_annexed = {
 		set_emperor_of_china = ROOT
 		set_country_flag = annexed_emperor_of_china
 	}
+	if = {
+		limit = {
+			has_country_flag = has_overriden_color_flag
+		}
+		restore_country_color = yes	
+		#log = "[Root.GetName] had color restored:on_annexed"
+		clr_country_flag = has_overriden_color_flag
+	}
 	events = {
 	}
-	
 }
 
 on_embrace_revolution = {
@@ -2361,11 +2386,20 @@ on_monthly_pulse = {
 on_yearly_pulse = {
 	events = {
 		MEC_Post.001
+<<<<<<< HEAD
 		institution_events.3
 		institution_events.4
 		institution_events.5
 		institution_events.7
 		institution_events.8
+=======
+		flavor_hyw.11
+		flavor_hyw.12
+		flavor_hyw.13
+		flavor_hyw.16
+		flavor_hyw.18
+		flavor_hyw.19
+>>>>>>> origin/v3.0-dev
 	}
 	if = {
 		limit = {
@@ -2571,8 +2605,6 @@ on_bi_yearly_pulse_3 = {
 
 			country_event = { id = holyromanempire.3 days = 1 } # Fix HRE dynastic inheritance elector setup
 		}
-
- 		country_event = { id = flavor_hyw.100 }
 	}
 	events = {
 		red_turban.6
@@ -2580,6 +2612,9 @@ on_bi_yearly_pulse_3 = {
 		red_turban.42
 
 		flavor_swe.4305
+
+		flavor_hyw.100 #Gaining Calais back (Hundred Years War)
+		flavor_hyw.303 #Spaniards not paying the Black Prince back
 	}
 }
 
@@ -2671,7 +2706,6 @@ on_bi_yearly_pulse_5 = {
 on_thri_yearly_pulse = {
 	events = {
 		#POP_Census.116 # edu system
-		flavor_hyw.13 #England lost their French possesions, so loses the HYW
 		mec_coal_events.0	#AI system to open coal slots, no need to fire this often
 	}
 }
@@ -2698,7 +2732,6 @@ on_thri_yearly_pulse_2 = {
 
 on_thri_yearly_pulse_3 = {
 	events = {
-		AI_Invest.2
 	}
 	random_events = {
 		250 = consort_events.1
@@ -2835,7 +2868,6 @@ on_four_year_pulse_3 = {
 
 on_four_year_pulse_4 = {
 	events = {
-		AI_Invest.3
 	}
 	if = {
 		limit = { tag = AAA }
@@ -2855,7 +2887,6 @@ on_five_year_pulse = {
 		}
 	}
 	events = {
-		AI_Invest.4
 		Plague_Spawner.5
 		flavor_spa.8002
 		#POP_Census.117 # World education system
@@ -3577,6 +3608,7 @@ on_company_chartered = {
 
 # ROOT = Overlord, FROM = Minor
 on_dependency_gained = {
+	#log = "[Root.GetName] gained rule over [From.GetName] who is now their dependency"
 	if = {
 		limit = {
 			FROM = { is_subject_other_than_tributary_trigger = yes }
@@ -3607,7 +3639,6 @@ on_dependency_gained = {
 						}
 					}
 					is_subject_of_type = vassal
-					
 				}
 			}
 			ROOT = {
@@ -3623,13 +3654,14 @@ on_dependency_gained = {
 	}
 	FROM = {
 		subject_transition_effect = yes
+		#log = "[This.GetName] had subject_transition_effect that can affect color:on_dependency_gained"
 		set_key = { lhs = Integration_Progress value = 0 }
 		set_key = { lhs = Remaining_Years value = 0 }
 	}
 	FROM = { 
 		if = { limit = { OR = { is_subject_of_type = personal_union is_subject_of_type = personal_union_limited } }
 			every_subject_country = { limit = { OR = { is_subject_of_type = permanent_union is_subject_of_type = permanent_union_limited } }
-				grant_independence = yes ROOT = { create_subject = { subject_type = permanent_union_limited 	subject = PREV  } }
+				grant_independence_effect = yes ROOT = { create_subject = { subject_type = permanent_union_limited 	subject = PREV  } }
 			}
 			every_country = { #vanilla bug - not sure if it needs to be two sided tbh
 				limit = {
@@ -3644,6 +3676,16 @@ on_dependency_gained = {
 			}
 		}
 	}
+	FROM = {
+		if = {
+			limit = {
+				subject_with_overlord_color_trigger = yes
+			}
+			change_country_color = { country = overlord }
+			#log = "[This.GetName] had color changed to match their overlord:on_dependency_gained"
+			set_country_flag = has_overriden_color_flag
+		}
+	}
 	# FROM = {
 	# 	country_event = {  id = flavor_pol.504 days = 3 }
 	# }
@@ -3652,7 +3694,10 @@ on_dependency_gained = {
 }
 
 # ROOT = Overlord, FROM = Minor
+# is not triggered from "grant_independence = yes" effect
+# is not triggered from "free_vassal = yes" effect
 on_dependency_lost = {
+	#log = "[Root.GetName] lost rule over [From.GetName] who used to be their dependency"
 	set_country_flag = tf_recalculate_communication_efficiency
 	overlord = { set_country_flag = tf_recalculate_communication_efficiency }
 	FROM = { 
@@ -3667,10 +3712,47 @@ on_dependency_lost = {
 		set_key = { lhs = Remaining_Years value = 0 }
 		vassal_type_tracking_effect = yes 
 	}
+	FROM = {
+		if = {
+			limit = {
+				has_country_flag = has_overriden_color_flag
+			}
+			restore_country_color = yes	
+			#log = "[This.GetName] had color restored:on_dependency_lost"
+			clr_country_flag = has_overriden_color_flag
+		}
+		every_subject_country = {
+			if = {
+				limit = {
+					has_country_flag = has_overriden_color_flag
+				}
+				restore_country_color = yes	
+				#log = "[This.GetName] had color restored:on_dependency_lost"
+				clr_country_flag = has_overriden_color_flag
+			}
+			if = {
+				limit = {
+					subject_with_overlord_color_trigger = yes
+				}
+				change_country_color = { country = overlord }
+				#log = "[This.GetName] had color changed to match their overlord:on_dependency_lost"
+				set_country_flag = has_overriden_color_flag
+			}
+		}
+	}
 }
 
 # ROOT = New vassal, FROM = Overlord
 on_create_vassal = {
+	#log = "[From.GetName] created [Root.GetName] as a vassal:on_create_vassal"
+	if = {
+		limit = {
+			subject_with_overlord_color_trigger = yes
+		}
+		change_country_color = { country = overlord }
+		#log = "[This.GetName] had color changed to match their overlord:on_create_vassal"
+		set_country_flag = has_overriden_color_flag
+	}
 	FROM = {
 		country_event = {
 			id = mec_vassals.5
@@ -3755,6 +3837,7 @@ on_country_released = {
 	}
 	set_key = { lhs = Vassal_Type value = 0 }
 	set_key = { lhs = Integration_Progress value = 0 }
+	#log = "[From.GetName] released [This.GetName]"
 }
 
 # ROOT = province, FROM = country
@@ -4094,7 +4177,6 @@ on_scorch_earth  = { #ROOT - scorching country, FROM - scorched province
 }
 
 on_war_ended = { #ROOT - Winer FROM - Loser
-	
 }
 
 on_alliance_broken = { #ROOT - Original alliance creator, FROM - Alliance accepter

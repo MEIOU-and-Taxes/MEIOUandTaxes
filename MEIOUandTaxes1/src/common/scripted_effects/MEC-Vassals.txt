@@ -129,10 +129,46 @@ temporary_union_break_effect = { #grants independence to those tags under a temp
 						set_ruler_culture = PREV
 						set_ruler_religion = PREV
 					}
+					dependency_lost_color_effect = yes
 				}
 			}
 		}
 	}
+}
+
+dependency_lost_color_effect = {
+	if = {
+		limit = {
+			has_country_flag = has_overriden_color_flag
+			NOT = { subject_with_overlord_color_trigger = yes }
+		}
+		restore_country_color = yes	
+		#log = "country had color restored:dependency_lost_color_effect"
+		clr_country_flag = has_overriden_color_flag
+	}
+	every_subject_country = {
+		if = {
+			limit = {
+				has_country_flag = has_overriden_color_flag
+			}
+			restore_country_color = yes
+			#log = "their subject had color restored:dependency_lost_color_effect"
+			clr_country_flag = has_overriden_color_flag
+		}
+		if = {
+			limit = {
+				subject_with_overlord_color_trigger = yes
+			}
+			change_country_color = { country = overlord }
+			#log = "their subject had color changed to match their overlord:dependency_lost_color_effect"
+			set_country_flag = has_overriden_color_flag
+		}
+	}
+}
+
+grant_independence_effect = {
+	grant_independence = yes
+	dependency_lost_color_effect = yes
 }
 
 vassal_type_tracking_effect = {
@@ -349,6 +385,8 @@ decentral_collapse_check = {
 	
 
 subject_transition_effect = { #TODO: check FROM in section sending notification to overlord, as it displays overlord name
+	set_country_flag = country_color_to_be_processed
+	overlord = { set_country_flag = country_color_to_be_processed }
 	if = {
 		limit = {
 			is_subject = yes
@@ -594,6 +632,15 @@ subject_transition_effect = { #TODO: check FROM in section sending notification 
 		}
 	}
 	vassal_type_tracking_effect = yes
+	hidden_effect = {
+		every_country = {
+			limit = {
+				has_country_flag = country_color_to_be_processed
+			}
+			dependency_lost_color_effect = yes
+			clr_country_flag = country_color_to_be_processed
+		}
+	}
 }
 
 

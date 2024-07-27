@@ -4,7 +4,7 @@ def generate_sprite_types(folder_name):
     # Template for the spriteTypes structure
     template = '''spriteType = {{
     name = "GFX_{name}"
-    texturefile = "gfx//texticons//decisions//{folder_name}//{name}{ext}"
+    texturefile = "gfx/texticons/decisions/{folder_name}/{name}{ext}"
 }}\n'''
     # Directory where the script is located
     directory = os.path.dirname(os.path.realpath(__file__))

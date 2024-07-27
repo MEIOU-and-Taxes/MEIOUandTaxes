@@ -384,24 +384,40 @@ def graphCL_Spend(t, plt):
         plt.plot(itr, Prod, label="Prod")
         # plt.plot(itr, Manpower, label="Manpower")
 
-def graphCommerce_GV(t, plt):
+def graphCommerce_Size(t, plt):
         "Commercial Size"
-        Genoa = get_data(t, 'Genoa commercial size')
-        Venice = get_data(t, 'Venice commercial size')
-        Paris = get_data(t, 'Paris commercial size')
-        London = get_data(t, 'London commercial size')
-        Lübeck = get_data(t, 'Lübeck commercial size')
-        Konstantinople = get_data(t, 'Konstantinople commercial size')
-        AlQahira = get_data(t, 'Al Qahira commercial size')
-        itr = range(1, len(Genoa) + 1)
+        GenoaSize = get_data(t, 'Genoa commercial size:')
+        VeniceSize = get_data(t, 'Venice commercial size:')
+        ParisSize = get_data(t, 'Paris commercial size:')
+        LondonSize = get_data(t, 'London commercial size:')
+        KonstantinopleSize = get_data(t, 'Konstantinople commercial size:')
+        AlQahiraSize = get_data(t, 'Al Qahira commercial size:')
+        itr = range(1, len(GenoaSize) + 1)
 
-        plt.plot(itr, Genoa, label="Genoa")
-        plt.plot(itr, Venice, label="Venice")
-        plt.plot(itr, Paris, label="Paris")
-        plt.plot(itr, London, label="London")
-        plt.plot(itr, Lübeck, label="Lübeck")
-        plt.plot(itr, Konstantinople, label="Konstantinople")
-        plt.plot(itr, AlQahira, label="AlQahira")
+        plt.plot(itr, GenoaSize, label="Genoa Size")
+        plt.plot(itr, VeniceSize, label="Venecia Size")
+        plt.plot(itr, ParisSize, label="Paris Size")
+        plt.plot(itr, LondonSize, label="London Size")
+        plt.plot(itr, KonstantinopleSize, label="Konstantinople Size")
+        plt.plot(itr, AlQahiraSize, label="Al Qahira Size")
+
+def graphCommerce_Output(t, plt):
+        "Commercial Output"
+        GenoaOutput = get_data(t, 'Genoa commercial output:')
+        VeniceOutput = get_data(t, 'Venice commercial output:')
+        ParisOutput = get_data(t, 'Paris commercial output:')
+        LondonOutput = get_data(t, 'London commercial output:')
+        KonstantinopleOutput = get_data(t, 'Konstantinople commercial output:')
+        AlQahiraOutput = get_data(t, 'Al Qahira commercial output:')
+        itr = range(1, len(GenoaOutput) + 1)
+
+        plt.plot(itr, GenoaOutput, label="Genoa Output")
+        plt.plot(itr, VeniceOutput, label="Venecia Output")
+        plt.plot(itr, ParisOutput, label="Paris Output")
+        plt.plot(itr, LondonOutput, label="London Output")
+        plt.plot(itr, KonstantinopleOutput, label="Konstantinople Output")
+        plt.plot(itr, AlQahiraOutput, label="Al Qahira Output")
+
 
 def graphFiber_Diff(t, plt):
         "Fiber (Supply - Demand)"
@@ -1092,6 +1108,20 @@ def graphGrowth_Rates_All(t, plt):
         plt.plot(itr, CL_gr, label="Clergy")
         plt.yaxis.set_major_formatter(formatter)
 
+def graphGrowth_Rates_BG(t, plt):
+        "Yearly Growth Rates (Burghers)"
+        formatter = FuncFormatter(to_percent)
+
+        BG = get_data(t, 'Burghers Pop Total')
+
+        BG_gr = [y / x - 1 for x, y in zip(BG[:-1], BG[1:])]
+
+
+        itr = range(1, len(BG_gr) + 1)
+
+        plt.plot(itr, BG_gr, label="Burghers")
+        plt.yaxis.set_major_formatter(formatter)
+
 def graphGrowth_Rates_Elite(t, plt):
         "Yearly Growth Rates (Elites)"
         formatter = FuncFormatter(to_percent)
@@ -1144,12 +1174,12 @@ def graphGrowth_Rates_Urban(t, plt):
 def graphTotal_Pop_All(t, plt):
         "Total Population (All Classes)"
         #Class = get_data(t, 'Class Pop Total')
-        SF = get_data(t, 'Peasant Pop Total')
-        NM = get_data(t, 'Nomads Pop Total')
-        RE = get_data(t, 'Residents Pop Total')
-        NO = get_data(t, 'Nobles Pop Total')
-        BG = get_data(t, 'Burghers Pop Total')
-        CL = get_data(t, 'Clergy Pop Total')
+        SF = get_data(t, 'Peasant Pop Total')*100
+        NM = get_data(t, 'Nomads Pop Total')*100
+        RE = get_data(t, 'Residents Pop Total')*100
+        NO = get_data(t, 'Nobles Pop Total')*100
+        BG = get_data(t, 'Burghers Pop Total')*100
+        CL = get_data(t, 'Clergy Pop Total')*100
         # BU = get_data(t, 'Literati Pop Total')
         itr = range(1, len(SF) + 1)
 
@@ -1165,9 +1195,9 @@ def graphTotal_Pop_All(t, plt):
 def graphTotal_Pop_Elite(t, plt):
         "Total Population (Elites)"
         #Class = get_data(t, 'Class Pop Total')
-        NO = get_data(t, 'Nobles Pop Total')
-        BG = get_data(t, 'Burghers Pop Total')
-        CL = get_data(t, 'Clergy Pop Total')
+        NO = get_data(t, 'Nobles Pop Total')*100
+        BG = get_data(t, 'Burghers Pop Total')*100
+        CL = get_data(t, 'Clergy Pop Total')*100
         itr = range(1, len(NO) + 1)
 
         #plt.plot(itr, Class, label="Total")
@@ -1178,7 +1208,7 @@ def graphTotal_Pop_Elite(t, plt):
 def graphTotal_Pop_Nomad(t, plt):
         "Total Population (Nomads)"
         #Class = get_data(t, 'Class Pop Total')
-        NM = get_data(t, 'Nomads Pop Total')
+        NM = get_data(t, 'Nomads Pop Total')*100
         itr = range(1, len(NM) + 1)
 
         #plt.plot(itr, Class, label="Total")
@@ -1187,7 +1217,7 @@ def graphTotal_Pop_Nomad(t, plt):
 def graphTotal_Pop_Peasant(t, plt):
         "Total Population (Peasants)"
         #Class = get_data(t, 'Class Pop Total')
-        SF = get_data(t, 'Peasant Pop Total')
+        SF = get_data(t, 'Peasant Pop Total')*100
         itr = range(1, len(SF) + 1)
 
         #plt.plot(itr, Class, label="Total")
@@ -1196,15 +1226,25 @@ def graphTotal_Pop_Peasant(t, plt):
 def graphTotal_Pop_Urban(t, plt):
         "Total Population (Urbans)"
         #Class = get_data(t, 'Class Pop Total')
-        RE = get_data(t, 'Residents Pop Total')
+        RE = get_data(t, 'Residents Pop Total')*100
         itr = range(1, len(RE) + 1)
 
         #plt.plot(itr, Class, label="Total")
         plt.plot(itr, RE, label="Residents")
 
+def graphTotal_Pop_Burgher(t, plt):
+        "Total Population (Burgher)"
+        #Class = get_data(t, 'Class Pop Total')
+        BG = get_data(t, 'Burghers Pop Total')*100
+        itr = range(1, len(BG) + 1)
+
+        #plt.plot(itr, Class, label="Total")
+        plt.plot(itr, BG, label="Burgher")
+
+
 def graphTotal_World(t, plt):
         "Total Population (World)"
-        Class = get_data(t, 'Class Pop Total')
+        Class = get_data(t, 'Class Pop Total')*100
 
         itr = range(1, len(Class) + 1)
 

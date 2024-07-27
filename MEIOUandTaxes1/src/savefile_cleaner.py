@@ -136,13 +136,13 @@ try:
             break
         else:
             try:  # Try to create destination file
-                with open(inp, "w") as f:
+                with open(inp, "w",encoding="iso-8859-1") as f:
                     out = inp
                 break
             except Exception:
                 print("Could not access location or invalid filename.")
 
-    with open(file, "r") as f:
+    with open(file, "r",encoding="iso-8859-1") as f:
         WS = str.maketrans('\n\t\r','   ')
         R_WS = re.compile(r"(?<=[={}]) +| +(?= )| +(?=[={} ])")
         R_NUM = re.compile(r" \b\S+=0\.000|(?<=[={}]) +| +(?= )| +(?=[={} ])")
@@ -169,7 +169,7 @@ try:
         print(f"Backing up '{file}' as '{backup}'")
         os.replace(file, backup)
 
-    with open(out, "w") as o:
+    with open(out, "w",encoding="iso-8859-1") as o:
         print(f"Writing to '{out}'...", end="")
         o.write(''.join(text))
         print("  Done!\n")

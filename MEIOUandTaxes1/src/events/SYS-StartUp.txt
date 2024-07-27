@@ -1561,6 +1561,17 @@ country_event = {
 			country_event = {
 				id = POP_Stockpile.002
 			}
+
+            # Burgher promotion / Demotion 
+            if = {
+                limit = {
+                    check_key = { lhs = iter value = 15 }
+                }
+                country_event = {
+                    id = POP_Growth.004
+                }
+            }
+
             if = { # Give simulation countries some money
                 limit = {
                     NOT = { check_key = { lhs = iter value = 15 } }
@@ -1653,49 +1664,43 @@ country_event = {
 						is_key_equal = { lhs = iter value = 1000 }
 					}
                 }
-                Dev_Set = { inp = Dev_Notables type = base_tax }
-                Dev_Set = { inp = Dev_Urban type = base_production }
-                Dev_Set = { inp = Dev_Rural type = base_manpower }
+                # Update development values in provinces
+                Dev_Set = { inp = Dev_Notables  type = base_tax }
+                Dev_Set = { inp = Dev_Urban     type = base_production }
+                Dev_Set = { inp = Dev_Rural     type = base_manpower }
                 country_event = {
-                    id = POP_MP.001
+                    id = POP_MP.001 # calculate fithing age men
                 }
 				every_country = {
                     limit = {
                         isValidCountry = yes
                     }
-					set_country_flag = tf_recalculate_communication_efficiency
+					CE_Main = yes # Update CE values
                 }
-                country_event = {
-                    id = phlopsi_ce_main.3
-                }
-				country_event = { id = POP_Census.0093 } # Calc of the tax system
+
+				country_event = { id = POP_Census.0093 } # Calc admin efficiency tax costs for the tax system
 				every_country = {
                     limit = {
                         isValidCountry = yes
                     }
-					Tax_Update = yes
+					Tax_Update = yes # update taxes cost per province
                 }
                 country_event = {
-                    id = AI_Tax.003
-                }
-				every_country = {
-                    limit = {
-                        isValidCountry = yes
-                    }
-                    StartUp_InitArmy = yes
-                    StartUp_InitNavy = yes
+                    id = AI_Tax.003 # tax delegator for AI in SIM
                 }
                 
-				if = { # Give simulation countries some money
+				if = { # Give simulation countries some money and troops
 					limit = {
 						is_key_equal = { lhs = iter value = 5 }
 					}
-					every_country = {
-						limit = {
-							isValidCountry = yes
-						}
-						add_years_of_income = 2.5
-					}
+                    every_country = {
+                        limit = {
+                            isValidCountry = yes
+                        }
+                        StartUp_InitArmy = yes # Spawn in army and navies and gives some recruitment cost in treasury
+                        StartUp_InitNavy = yes
+ 						add_years_of_income = 2.5
+                   }
 				}
 				else_if = {
 					limit = {
@@ -1752,8 +1757,8 @@ country_event = {
 					clr_global_flag = POP_Sim20
 				}
 			}
-
-            regiongroup = { # Set local autonomy after iteration
+            # Update local autonomy after iteration
+            regiongroup = { 
                 region = {
                     limit = {
                         isValidEmpty = yes
@@ -3609,10 +3614,6 @@ country_event = {
             }
             
             add_country_modifier = {
-                name = Exec_Auth
-                duration = -1
-            }
-            add_country_modifier = {
                 name = Pol_UI
                 duration = -1
             }
@@ -3653,6 +3654,7 @@ country_event = {
                             NOT = { has_reform = free_city } 			#key = 11
                             NOT = { has_reform = trading_city }			#key = 2
                             NOT = { has_reform = colonial_government }	#key = 6	
+                            NOT = { has_reform = Pol_French_Feudalism }	#key = 12	
                         }
                         OR = {
                             is_key_equal = { lhs = Pol_Privileges value = 1 }
