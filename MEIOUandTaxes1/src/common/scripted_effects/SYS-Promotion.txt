@@ -382,7 +382,103 @@ Promotion_NODemotion = {
 		change_key = { lhs = NO_Demoted which = Tmp_0 }
 	}
 }
-
+#Promotion_NMDemotion = {
+#	if = {
+#		limit = {
+#			check_key = { lhs = NM_Total which = Ideal_NomadSize } #if Nomads Size 
+#		}
+#		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
+#
+#		# Get Difference between Total and BurgherSize
+#		set_key = { lhs = Tmp_4 which = Ideal_NomadSize }
+#		subtract_key = { lhs = Tmp_4 which = NM_Total }
+#
+#		# new formula needed
+#		# Get SF LifeC fulfilment modifier: ((-RE_FillLifeC * 0.9 + 0.9) / -RE_FillLifeC) * 0.01
+#		set_key = { lhs = Tmp_5 which = SF_FillLifeC }
+#		multiply_key = { lhs = Tmp_5 value = -1 }
+#		multiply_key = { lhs = Tmp_5 value = 0.9 }
+#		change_key = { lhs = Tmp_5 value = 0.9 }
+#		set_key = { lhs = Tmp_6 which = SF_FillLifeC }
+#		multiply_key = { lhs = Tmp_6 value = -1 }
+#		divide_key = { lhs = Tmp_5 which = Tmp_6 }
+#		multiply_key = { lhs = Tmp_5 value = 0.01 }
+#
+#		# Upper lower case handling: [-0.01,0.01]
+#		if = {
+#			limit = {
+#				check_key = { lhs = Tmp_5 value = 0.01 }
+#			}
+#			set_key = { lhs = Tmp_5 value = 0.01 }
+#		}
+#		else_if = {
+#			limit = {
+#				NOT = { check_key = { lhs = Tmp_5 value = -0.01 } }
+#			}
+#			set_key = { lhs = Tmp_5 value = -0.01 }
+#		}
+#		
+#		# new formula needed
+#		# Get SF Comfort fulfilment modifier: ((-RE_FillComfort * 2 + 1.0) / -RE_FillComfort) * 0.01
+#		set_key = { lhs = Tmp_6 which = SF_FillComfort }
+#		multiply_key = { lhs = Tmp_6 value = -1 }
+#		multiply_key = { lhs = Tmp_6 value = 2 }
+#		change_key = { lhs = Tmp_6 value = 1.0 }
+#		set_key = { lhs = Public_Tmp0 which = SF_FillComfort }
+#		multiply_key = { lhs = Public_Tmp0 value = -1 }
+#		divide_key = { lhs = Tmp_6 which = Public_Tmp0 }
+#		multiply_key = { lhs = Tmp_6 value = 0.01 }
+#
+#		# Upper lower case handling: [-0.01,0.02]
+#		if = {
+#			limit = {
+#				check_key = { lhs = Tmp_6 value = 0.02 }
+#			}
+#			set_key = { lhs = Tmp_6 value = 0.02 }
+#		}
+#		else_if = {
+#			limit = {
+#				NOT = { check_key = { lhs = Tmp_6 value = -0.01 } }
+#			}
+#			set_key = { lhs = Tmp_6 value = -0.01 }
+#		}
+#				
+#		## Get Yearly Change
+#		change_key = { lhs = Tmp_3 which = Tmp_5 } # RE LifeC Fulfill modifier
+#		change_key = { lhs = Tmp_3 which = Tmp_6 } # RE Comfort Fulfill modifier
+#
+#		# ensure rate of changecan never be below 0%
+#		if = {
+#			limit = {
+#				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+#			}
+#			set_key = { lhs = Tmp_3 value = 0 }
+#		}
+#
+#		multiply_key = { lhs = Tmp_3 which = Modi_NomadPromoteSpeed }
+#
+#		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result = Rate(Tmp3) * DifferenceToIdealPop (Tmp4)
+#
+#		# safety check to ensure no wrong direction effect
+#		if = {
+#			limit = {
+#				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
+#			}
+#			set_key = { lhs = Tmp_3 value = 0 }
+#		}
+#
+#		# safety check to ensure promotion cannot exceed available source
+#		if = {
+#			limit = {
+#				check_key = { lhs = Tmp_3 which = NM_Total }
+#			}
+#			set_key = { lhs = Tmp_3 which = NM_Total  }
+#		}
+#		
+#		set_key = { lhs = RE_PromotedBG which = Tmp_3 }
+#		set_key = { lhs = BG_Promoted which = Tmp_3 }
+#	}
+#}
 # Tmp_0, 1, 2 and 3 are used for commerce data, Tmp 7-9 used for Lower Pop Ratio's
 # Tmp_0 which = Prod_S0Size <-- Commerce Size <--- Commented out below for performance, uncomment if needed
 # Tmp_1 which = Prod_S0ProfitPerc <-- Commerce Profit <--- Commented out below for performance, uncomment if needed
@@ -552,9 +648,9 @@ Promotion_BGPromotion = {
 		# Hyper promotion prevention here:
 		else_if = {
 			limit = {
-				check_key = { lhs=Tmp_3 which=Tmp_4 }
+				check_key = { lhs = Tmp_3 which = Tmp_4 }
 			}
-			set_key = {lhs=Tmp_3 which = Tmp_4 }
+			set_key = {lhs = Tmp_3 which = Tmp_4 }
 		}
 
 
@@ -645,13 +741,13 @@ Promotion_BGDemotion = {
 		}
 
 		# Ensure no hyper demotion happens - Limit it to always 10% of current pops:
-		set_key = { lhs=Tmp_4 which = BG_Total }
-		multiply_key = { lhs=Tmp_4 value = 0.1 }
+		set_key = { lhs = Tmp_4 which = BG_Total }
+		multiply_key = { lhs = Tmp_4 value = 0.1 }
 		if = {
 			limit = {
-				check_key = { lhs=Tmp_3 which=Tmp_4 }
+				check_key = { lhs = Tmp_3 which = Tmp_4 }
 			}
-			set_key = {lhs=Tmp_3 which = Tmp_4 }
+			set_key = {lhs = Tmp_3 which = Tmp_4 }
 		}
 
 
