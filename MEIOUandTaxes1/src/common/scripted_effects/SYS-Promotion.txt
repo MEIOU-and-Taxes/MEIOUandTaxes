@@ -32,6 +32,10 @@ Promotion_Calc = {
 	#Promotion_CLPromotion = yes
 	#Promotion_CLDemotion = yes
 
+	## Calc Nomad Promotion into Peasants
+	Promotion_GetNomadRestingPoint = yes
+	Promotion_NMPromotion = yes
+
 	Promotion_Handle = yes # execute handling of promotion, moving pops around, storing values
 
 	Promotion_ResetTmp = yes # Reset Tmp Values
@@ -382,103 +386,53 @@ Promotion_NODemotion = {
 		change_key = { lhs = NO_Demoted which = Tmp_0 }
 	}
 }
-#Promotion_NMDemotion = {
-#	if = {
-#		limit = {
-#			check_key = { lhs = NM_Total which = Ideal_NomadSize } #if Nomads Size 
-#		}
-#		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
-#
-#		# Get Difference between Total and BurgherSize
-#		set_key = { lhs = Tmp_4 which = Ideal_NomadSize }
-#		subtract_key = { lhs = Tmp_4 which = NM_Total }
-#
-#		# new formula needed
-#		# Get SF LifeC fulfilment modifier: ((-RE_FillLifeC * 0.9 + 0.9) / -RE_FillLifeC) * 0.01
-#		set_key = { lhs = Tmp_5 which = SF_FillLifeC }
-#		multiply_key = { lhs = Tmp_5 value = -1 }
-#		multiply_key = { lhs = Tmp_5 value = 0.9 }
-#		change_key = { lhs = Tmp_5 value = 0.9 }
-#		set_key = { lhs = Tmp_6 which = SF_FillLifeC }
-#		multiply_key = { lhs = Tmp_6 value = -1 }
-#		divide_key = { lhs = Tmp_5 which = Tmp_6 }
-#		multiply_key = { lhs = Tmp_5 value = 0.01 }
-#
-#		# Upper lower case handling: [-0.01,0.01]
-#		if = {
-#			limit = {
-#				check_key = { lhs = Tmp_5 value = 0.01 }
-#			}
-#			set_key = { lhs = Tmp_5 value = 0.01 }
-#		}
-#		else_if = {
-#			limit = {
-#				NOT = { check_key = { lhs = Tmp_5 value = -0.01 } }
-#			}
-#			set_key = { lhs = Tmp_5 value = -0.01 }
-#		}
-#		
-#		# new formula needed
-#		# Get SF Comfort fulfilment modifier: ((-RE_FillComfort * 2 + 1.0) / -RE_FillComfort) * 0.01
-#		set_key = { lhs = Tmp_6 which = SF_FillComfort }
-#		multiply_key = { lhs = Tmp_6 value = -1 }
-#		multiply_key = { lhs = Tmp_6 value = 2 }
-#		change_key = { lhs = Tmp_6 value = 1.0 }
-#		set_key = { lhs = Public_Tmp0 which = SF_FillComfort }
-#		multiply_key = { lhs = Public_Tmp0 value = -1 }
-#		divide_key = { lhs = Tmp_6 which = Public_Tmp0 }
-#		multiply_key = { lhs = Tmp_6 value = 0.01 }
-#
-#		# Upper lower case handling: [-0.01,0.02]
-#		if = {
-#			limit = {
-#				check_key = { lhs = Tmp_6 value = 0.02 }
-#			}
-#			set_key = { lhs = Tmp_6 value = 0.02 }
-#		}
-#		else_if = {
-#			limit = {
-#				NOT = { check_key = { lhs = Tmp_6 value = -0.01 } }
-#			}
-#			set_key = { lhs = Tmp_6 value = -0.01 }
-#		}
-#				
-#		## Get Yearly Change
-#		change_key = { lhs = Tmp_3 which = Tmp_5 } # RE LifeC Fulfill modifier
-#		change_key = { lhs = Tmp_3 which = Tmp_6 } # RE Comfort Fulfill modifier
-#
-#		# ensure rate of changecan never be below 0%
-#		if = {
-#			limit = {
-#				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
-#			}
-#			set_key = { lhs = Tmp_3 value = 0 }
-#		}
-#
-#		multiply_key = { lhs = Tmp_3 which = Modi_NomadPromoteSpeed }
-#
-#		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result = Rate(Tmp3) * DifferenceToIdealPop (Tmp4)
-#
-#		# safety check to ensure no wrong direction effect
-#		if = {
-#			limit = {
-#				NOT = { check_key = { lhs = Tmp_3 value = 0 } }
-#			}
-#			set_key = { lhs = Tmp_3 value = 0 }
-#		}
-#
-#		# safety check to ensure promotion cannot exceed available source
-#		if = {
-#			limit = {
-#				check_key = { lhs = Tmp_3 which = NM_Total }
-#			}
-#			set_key = { lhs = Tmp_3 which = NM_Total  }
-#		}
-#		
-#		set_key = { lhs = RE_PromotedBG which = Tmp_3 }
-#		set_key = { lhs = BG_Promoted which = Tmp_3 }
-#	}
-#}
+Promotion_GetNomadRestingPoint = { 
+	if = {
+		limit = {
+			check_key = { lhs = NM_Total value = 0.001 } # make sure Nomads are around 
+		}
+		set_key = { lhs = Tmp_1 value = 100 }
+		set_key = { lhs = Tmp_2 which = Prov_BUPow } 
+		subtract_key = { lhs = Tmp_1 which = Tmp_2 } # e.g. 100 - 15 = 85 
+		multiply_key = { lhs = Tmp_1 value = 0.01 } #  e.g 85 x 0.01 = 0.85
+		multiply_key = { lhs = Tmp_1 which = NM_Total }
+		set_key = { lhs = Ideal_NomadSize which = Tmp_1 }
+	}
+}
+Promotion_NMPromotion = {
+	if = {
+		limit = { 
+			check_key = { lhs = NM_Total which = Ideal_NomadSize } #if Nomads Size -> 100k >= 80k
+		}
+		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
+
+		# Get Difference between Total and BurgherSize
+		set_key = { lhs = Tmp_4 which = Ideal_NomadSize } # -> 80k
+		subtract_key = { lhs = Tmp_4 which = NM_Total } # -> 80k - 100k = -20k
+		multiply_key = { lhs = Tmp_4 value = -1 } # -> -20k * -1 = 20k
+
+		#Needs new variable Modi_NomadPromoteSpeed which could be used for Russia or CNs national ideas 
+		#multiply_key = { lhs = Tmp_3 which = Modi_NomadPromoteSpeed }
+		multiply_key = { lhs = Tmp_3 which = Tmp_4 } # Get end result = Rate(Tmp3) * DifferenceToIdealPop (Tmp4) -> 20k x 0,02 = 400
+
+		# safety check to ensure no wrong direction effect
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Tmp_3 value = 0 } } # 400 not smaller than 0, therefore ok
+			}
+			set_key = { lhs = Tmp_3 value = 0 }
+		}
+
+		# safety check to ensure promotion cannot exceed available source
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_3 which = NM_Total }
+			}
+			set_key = { lhs = Tmp_3 which = NM_Total  }
+		}
+		set_key = { lhs = NM_PromotedSF which = Tmp_3 }
+	}
+}
 # Tmp_0, 1, 2 and 3 are used for commerce data, Tmp 7-9 used for Lower Pop Ratio's
 # Tmp_0 which = Prod_S0Size <-- Commerce Size <--- Commented out below for performance, uncomment if needed
 # Tmp_1 which = Prod_S0ProfitPerc <-- Commerce Profit <--- Commented out below for performance, uncomment if needed
@@ -790,7 +744,7 @@ Promotion_Handle = {
 
 	# Handle Peasantry
 	set_key = { lhs = SF_Promoted which = SF_PromotedNO }
-	change_key = { lhs = SF_Promoted which = SF_PromotedCL }
+	change_key = { lhs = SF_Promoted which = SF_PromotedCL }	
 
 	set_key = { lhs = SF_Demoted which = NO_DemotedSF }
 	change_key = { lhs = SF_Demoted which = CL_DemotedSF }
@@ -815,6 +769,12 @@ Promotion_Handle = {
 	subtract_key = { lhs = SF_Total which = SF_PromotedRE }
 	change_key = { lhs = RE_In which = SF_PromotedRE }
 	subtract_key = { lhs = SF_Out which = SF_PromotedRE }
+
+	# Handle Nomad->Peasant Promotion
+	change_key = { lhs = SF_Total which = NM_PromotedSF }
+	subtract_key = { lhs = NM_Total which = NM_PromotedSF }
+	change_key = { lhs = SF_In which = NM_PromotedSF }
+	subtract_key = { lhs = NM_Out which = NM_PromotedSF }
 
 	# Handle Nomads
 	set_key = { lhs = NM_Promoted which = NM_PromotedNO }
@@ -1008,4 +968,5 @@ Promotion_ResetTmp = {
 	set_key = { lhs = CL_DemotedSF	value = 0 }
 	set_key = { lhs = CL_DemotedNM	value = 0 }
 	set_key = { lhs = CL_DemotedRE	value = 0 }
+	set_key = { lhs = NM_PromotedSF	value = 0 }
 }
