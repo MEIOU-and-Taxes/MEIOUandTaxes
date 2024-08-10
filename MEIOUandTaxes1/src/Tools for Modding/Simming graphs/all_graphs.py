@@ -14,7 +14,7 @@ def graphPrices_Log(t, plt):
     fiber = get_data(t, 'Global Fiber Price')
     fuel = get_data(t, 'Global Fuel Price')
     raw = get_data(t, 'Global Raw Material Price')
-    delicacies = get_data(t, 'Global Delicacies Price')
+    timber = get_data(t, 'Global Timber Price')
     exotic = get_data(t, 'Global Exotics Price')
     consumer = get_data(t, 'Global Consumer Product Price')
     military = get_data(t, 'Global Military Product Price')
@@ -29,7 +29,7 @@ def graphPrices_Log(t, plt):
     plt.plot(itr, fiber, 'tab:green', label="Fiber")
     plt.plot(itr, fuel, 'tab:red', label="Fuel")
     plt.plot(itr, raw, 'tab:purple', label="Raw")
-    plt.plot(itr, delicacies, label="Delicacies")
+    plt.plot(itr, timber, label="Timber")
     plt.plot(itr, exotic, 'tab:brown', label="Exotic")
     plt.plot(itr, consumer, 'tab:pink', label="Consumer")
     plt.plot(itr, military, 'tab:gray', label="Military")
@@ -46,7 +46,7 @@ def graphPrices(t, plt):
     fiber = get_data(t, 'Global Fiber Price')
     fuel = get_data(t, 'Global Fuel Price')
     raw = get_data(t, 'Global Raw Material Price')
-    delicacies = get_data(t, 'Global Delicacies Price')
+    timber = get_data(t, 'Global Timber Price')
     exotic = get_data(t, 'Global Exotics Price')
     consumer = get_data(t, 'Global Consumer Product Price')
     military = get_data(t, 'Global Military Product Price')
@@ -61,7 +61,7 @@ def graphPrices(t, plt):
     plt.plot(itr, fiber, label="Fiber")
     plt.plot(itr, fuel, label="Fuel")
     plt.plot(itr, raw, label="Raw")
-    plt.plot(itr, delicacies, label="Delicacies")
+    plt.plot(itr, timber, label="Timber")
     plt.plot(itr, exotic, label="Exotics")
     plt.plot(itr, consumer, label="Consumer")
     plt.plot(itr, military, label="Military")
@@ -85,7 +85,7 @@ def graphProduction(t, plt):
     fuel2 = get_data(t, 'Fuel DirectBuy')
     fuela = fuel + fuel2
     raw = get_data(t, 'Raw Material Production')
-    delicacies = get_data(t, 'Delicacies Production')
+    timber = get_data(t, 'Timber Production')
     exotic = get_data(t, 'Exotics Production')
     consumer = get_data(t, 'Consumer Product Production')
     military = get_data(t, 'Military Product Production')
@@ -100,7 +100,7 @@ def graphProduction(t, plt):
     plt.plot(itr, fibera, label="Fiber")
     plt.plot(itr, fuela, label="Fuel")
     plt.plot(itr, raw, label="Raw")
-    plt.plot(itr, delicacies, label="Delicacies")
+    plt.plot(itr, timber, label="Timber")
     plt.plot(itr, exotic, label="Exotics")
     plt.plot(itr, consumer, label="Consumer")
     plt.plot(itr, military, label="Military")
@@ -426,7 +426,7 @@ def graphFiber_Diff(t, plt):
         fiber = get_data(t, 'Africa Fiber R Supply')
         fuel = get_data(t, 'India Fiber R Supply')
         raw = get_data(t, 'SEA Fiber R Supply')
-        delicacies = get_data(t, 'Asia Fiber R Supply')
+        timber = get_data(t, 'Asia Fiber R Supply')
         exotic = get_data(t, 'CA Fiber R Supply')
         consumer = get_data(t, 'SA Fiber R Supply')
         military = get_data(t, 'NA Fiber R Supply')
@@ -435,7 +435,7 @@ def graphFiber_Diff(t, plt):
         fiber2 = get_data(t, 'Africa Fiber R Demand')
         fuel2 = get_data(t, 'India Fiber R Demand')
         raw2 = get_data(t, 'SEA Fiber R Demand')
-        delicacies2 = get_data(t, 'Asia Fiber R Demand')
+        timber2 = get_data(t, 'Asia Fiber R Demand')
         exotic2 = get_data(t, 'CA Fiber R Demand')
         consumer2 = get_data(t, 'SA Fiber R Demand')
         #military2 = get_data(t, 'NA Fiber R Demand')
@@ -445,7 +445,7 @@ def graphFiber_Diff(t, plt):
         fiber = [fiber[i]-fiber2[i] for i in range(len(fiber))]
         fuel = [fuel[i]-fuel2[i] for i in range(len(fuel))]
         raw = [raw[i]-raw2[i] for i in range(len(raw))]
-        delicacies = [delicacies[i]-delicacies2[i] for i in range(len(delicacies))]
+        timber = [timber[i]-timber2[i] for i in range(len(timber))]
         exotic = [exotic[i]-exotic2[i] for i in range(len(exotic))]
         consumer = [consumer[i]-consumer2[i] for i in range(len(consumer))]
         # military = [military[i]-military2[i] for i in range(len(military))]
@@ -455,7 +455,7 @@ def graphFiber_Diff(t, plt):
         plt.plot(itr, fiber, label="Africa")
         plt.plot(itr, fuel, label="India")
         plt.plot(itr, raw, label="Southeast Asia")
-        plt.plot(itr, delicacies, label="Asia + Japan")
+        plt.plot(itr, timber, label="Asia + Japan")
         plt.plot(itr, exotic, label="Central Asia")
         plt.plot(itr, consumer, label="South America")
         #plt.plot(itr, military, label="North America")
@@ -527,7 +527,7 @@ def graphFood_Diff(t, plt):
         fiber = get_data(t, 'Africa Food R Supply')
         fuel = get_data(t, 'India Food R Supply')
         raw = get_data(t, 'SEA Food R Supply')
-        delicacies = get_data(t, 'Asia Food R Supply')
+        timber = get_data(t, 'Asia Food R Supply')
         exotic = get_data(t, 'CA Food R Supply')
         consumer = get_data(t, 'SA Food R Supply')
         military = get_data(t, 'NA Food R Supply')
@@ -536,7 +536,7 @@ def graphFood_Diff(t, plt):
         fiber2 = get_data(t, 'Africa Food R Demand')
         fuel2 = get_data(t, 'India Food R Demand')
         raw2 = get_data(t, 'SEA Food R Demand')
-        delicacies2 = get_data(t, 'Asia Food R Demand')
+        timber2 = get_data(t, 'Asia Food R Demand')
         exotic2 = get_data(t, 'CA Food R Demand')
         consumer2 = get_data(t, 'SA Food R Demand')
         military2 = get_data(t, 'NA Food R Demand')
@@ -546,7 +546,7 @@ def graphFood_Diff(t, plt):
         fiber = [fiber[i]-fiber2[i] for i in range(len(fiber))]
         fuel = [fuel[i]-fuel2[i] for i in range(len(fuel))]
         raw = [raw[i]-raw2[i] for i in range(len(raw))]
-        delicacies = [delicacies[i]-delicacies2[i] for i in range(len(delicacies))]
+        timber = [timber[i]-timber2[i] for i in range(len(timber))]
         exotic = [exotic[i]-exotic2[i] for i in range(len(exotic))]
         consumer = [consumer[i]-consumer2[i] for i in range(len(consumer))]
         military = [military[i]-military2[i] for i in range(len(military))]
@@ -556,7 +556,7 @@ def graphFood_Diff(t, plt):
         plt.plot(itr, fiber, label="Africa")
         plt.plot(itr, fuel, label="India")
         plt.plot(itr, raw, label="Southeast Asia")
-        plt.plot(itr, delicacies, label="Asia + Japan")
+        plt.plot(itr, timber, label="Asia + Japan")
         plt.plot(itr, exotic, label="Central Asia")
         plt.plot(itr, consumer, label="South America")
         plt.plot(itr, military, label="North America")
@@ -857,7 +857,7 @@ def graphNon_High_Demand(t, plt):
         fiber = get_data(t, 'Fiber Demand')
         fuel = get_data(t, 'Fuel Demand')
         raw = get_data(t, 'Raw Material Demand')
-        delicacies = get_data(t, 'Delicacies Demand')
+        timber = get_data(t, 'Timber Demand')
         exotic = get_data(t, 'Exotics Demand')
         consumer = get_data(t, 'Consumer Product Demand')
         military = get_data(t, 'Military Product Demand')
@@ -872,7 +872,7 @@ def graphNon_High_Demand(t, plt):
         plt.plot(itr, fiber, label="Fiber")
         plt.plot(itr, fuel, label="Fuel")
         plt.plot(itr, raw, label="Raw")
-        plt.plot(itr, delicacies, label="Delicacies")
+        plt.plot(itr, timber, label="Timber")
         plt.plot(itr, exotic, label="Exotic")
         plt.plot(itr, consumer, label="Consumer")
         plt.plot(itr, military, label="Military")
@@ -908,7 +908,7 @@ def graphNon_High_Price(t, plt):
         fiber = get_data(t, 'Global Fiber Price')
         fuel = get_data(t, 'Global Fuel Price')
         raw = get_data(t, 'Global Raw Material Price')
-        delicacies = get_data(t, 'Global Delicacies Price')
+        timber = get_data(t, 'Global Timber Price')
         exotic = get_data(t, 'Global Exotics Price')
         consumer = get_data(t, 'Global Consumer Product Price')
         military = get_data(t, 'Global Military Product Price')
@@ -923,7 +923,7 @@ def graphNon_High_Price(t, plt):
         plt.plot(itr, fiber, label="Fiber")
         plt.plot(itr, fuel, label="Fuel")
         plt.plot(itr, raw, label="Raw")
-        #plt.plot(itr, delicacies, label="Delicacies")
+        #plt.plot(itr, timber, label="Timber")
         #plt.plot(itr, exotic, label="Exotics")
         plt.plot(itr, consumer, label="Consumer")
         plt.plot(itr, military, label="Military")
@@ -947,7 +947,7 @@ def graphNon_High_Prod(t, plt):
         fuel2 = get_data(t, 'Fuel DirectBuy')
         fuela = fuel + fuel2
         raw = get_data(t, 'Raw Material Production')
-        delicacies = get_data(t, 'Delicacies Production')
+        timber = get_data(t, 'Timber Production')
         exotic = get_data(t, 'Exotics Production')
         consumer = get_data(t, 'Consumer Product Production')
         military = get_data(t, 'Military Product Production')
@@ -962,7 +962,7 @@ def graphNon_High_Prod(t, plt):
         plt.plot(itr, fibera, label="Fiber")
         plt.plot(itr, fuela, label="Fuel")
         plt.plot(itr, raw, label="Raw")
-        plt.plot(itr, delicacies, label="Delicacies")
+        plt.plot(itr, timber, label="Timber")
         plt.plot(itr, exotic, label="Exotics")
         plt.plot(itr, consumer, label="Consumer")
         plt.plot(itr, military, label="Military")
@@ -1275,7 +1275,7 @@ def graphPrice_Cairo(t, plt):
         food4 = get_data(t, 'Cairo Fuel Price')
         food5 = get_data(t, 'Cairo Raw Material Price')
         food6 = get_data(t, 'Cairo Exotics Price')
-        food7 = get_data(t, 'Cairo Delicacies Price')
+        food7 = get_data(t, 'Cairo Timber Price')
         food8 = get_data(t, 'Cairo Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1285,7 +1285,7 @@ def graphPrice_Cairo(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Cuzco(t, plt):
@@ -1296,7 +1296,7 @@ def graphPrice_Cuzco(t, plt):
         food4 = get_data(t, 'Cusco Fuel Price')
         food5 = get_data(t, 'Cusco Raw Material Price')
         food6 = get_data(t, 'Cusco Exotics Price')
-        food7 = get_data(t, 'Cusco Delicacies Price')
+        food7 = get_data(t, 'Cusco Timber Price')
         food8 = get_data(t, 'Cusco Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1306,7 +1306,7 @@ def graphPrice_Cuzco(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Delhi(t, plt):
@@ -1317,7 +1317,7 @@ def graphPrice_Delhi(t, plt):
         food4 = get_data(t, 'Delhi Fuel Price')
         food5 = get_data(t, 'Delhi Raw Material Price')
         food6 = get_data(t, 'Delhi Exotics Price')
-        food7 = get_data(t, 'Delhi Delicacies Price')
+        food7 = get_data(t, 'Delhi Timber Price')
         food8 = get_data(t, 'Delhi Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1327,7 +1327,7 @@ def graphPrice_Delhi(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Goa(t, plt):
@@ -1338,7 +1338,7 @@ def graphPrice_Goa(t, plt):
         food4 = get_data(t, 'Gao Fuel Price')
         food5 = get_data(t, 'Gao Raw Material Price')
         food6 = get_data(t, 'Gao Exotics Price')
-        food7 = get_data(t, 'Gao Delicacies Price')
+        food7 = get_data(t, 'Gao Timber Price')
         food8 = get_data(t, 'Gao Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1348,33 +1348,33 @@ def graphPrice_Goa(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
-def graphPrice_Delicacies(t, plt):
-        "Price points of Delicacies"
-        Delicacies1 = get_data(t, 'Paris Delicacies Price')
-        Delicacies2 = get_data(t, 'Moscow Delicacies Price')
-        Delicacies3 = get_data(t, 'Cairo Delicacies Price')
-        Delicacies4 = get_data(t, 'Gao Delicacies Price')
-        Delicacies5 = get_data(t, 'Mogadishu Delicacies Price')
-        Delicacies6 = get_data(t, 'Delhi Delicacies Price')
-        Delicacies7 = get_data(t, 'Malacca Delicacies Price')
-        Delicacies8 = get_data(t, 'Nanking Delicacies Price')
-        Delicacies9 = get_data(t, 'Mexico Delicacies Price')
-        Delicacies10 = get_data(t, 'Cusco Delicacies Price')
-        itr = range(1, len(Delicacies1) + 1)
+def graphPrice_Timber(t, plt):
+        "Price points of Timber"
+        Timber1 = get_data(t, 'Paris Timber Price')
+        Timber2 = get_data(t, 'Moscow Timber Price')
+        Timber3 = get_data(t, 'Cairo Timber Price')
+        Timber4 = get_data(t, 'Gao Timber Price')
+        Timber5 = get_data(t, 'Mogadishu Timber Price')
+        Timber6 = get_data(t, 'Delhi Timber Price')
+        Timber7 = get_data(t, 'Malacca Timber Price')
+        Timber8 = get_data(t, 'Nanking Timber Price')
+        Timber9 = get_data(t, 'Mexico Timber Price')
+        Timber10 = get_data(t, 'Cusco Timber Price')
+        itr = range(1, len(Timber1) + 1)
 
-        plt.plot(itr, Delicacies1, label="Paris")
-        plt.plot(itr, Delicacies2, label="Moscow")
-        plt.plot(itr, Delicacies3, label="Cairo")
-        plt.plot(itr, Delicacies4, label="Goa")
-        plt.plot(itr, Delicacies5, label="Mogadishu")
-        plt.plot(itr, Delicacies6, label="Delhi")
-        plt.plot(itr, Delicacies7, label="Malacca")
-        plt.plot(itr, Delicacies8, label="Nanking")
-        plt.plot(itr, Delicacies9, label="Mexico")
-        plt.plot(itr, Delicacies10, label="Cuzco")
+        plt.plot(itr, Timber1, label="Paris")
+        plt.plot(itr, Timber2, label="Moscow")
+        plt.plot(itr, Timber3, label="Cairo")
+        plt.plot(itr, Timber4, label="Goa")
+        plt.plot(itr, Timber5, label="Mogadishu")
+        plt.plot(itr, Timber6, label="Delhi")
+        plt.plot(itr, Timber7, label="Malacca")
+        plt.plot(itr, Timber8, label="Nanking")
+        plt.plot(itr, Timber9, label="Mexico")
+        plt.plot(itr, Timber10, label="Cuzco")
 
 def graphPrice_Exotics(t, plt):
         "Price points of Exotics"
@@ -1559,7 +1559,7 @@ def graphPrice_Malacca(t, plt):
         food4 = get_data(t, 'Malacca Fuel Price')
         food5 = get_data(t, 'Malacca Raw Material Price')
         food6 = get_data(t, 'Malacca Exotics Price')
-        food7 = get_data(t, 'Malacca Delicacies Price')
+        food7 = get_data(t, 'Malacca Timber Price')
         food8 = get_data(t, 'Malacca Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1569,7 +1569,7 @@ def graphPrice_Malacca(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Mexico(t, plt):
@@ -1580,7 +1580,7 @@ def graphPrice_Mexico(t, plt):
         food4 = get_data(t, 'Mexico Fuel Price')
         food5 = get_data(t, 'Mexico Raw Material Price')
         food6 = get_data(t, 'Mexico Exotics Price')
-        food7 = get_data(t, 'Mexico Delicacies Price')
+        food7 = get_data(t, 'Mexico Timber Price')
         food8 = get_data(t, 'Mexico Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1590,7 +1590,7 @@ def graphPrice_Mexico(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Mogadishu(t, plt):
@@ -1601,7 +1601,7 @@ def graphPrice_Mogadishu(t, plt):
         food4 = get_data(t, 'Mogadishu Fuel Price')
         food5 = get_data(t, 'Mogadishu Raw Material Price')
         food6 = get_data(t, 'Mogadishu Exotics Price')
-        food7 = get_data(t, 'Mogadishu Delicacies Price')
+        food7 = get_data(t, 'Mogadishu Timber Price')
         food8 = get_data(t, 'Mogadishu Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1611,7 +1611,7 @@ def graphPrice_Mogadishu(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Moscow(t, plt):
@@ -1622,7 +1622,7 @@ def graphPrice_Moscow(t, plt):
         food4 = get_data(t, 'Moscow Fuel Price')
         food5 = get_data(t, 'Moscow Raw Material Price')
         food6 = get_data(t, 'Moscow Exotics Price')
-        food7 = get_data(t, 'Moscow Delicacies Price')
+        food7 = get_data(t, 'Moscow Timber Price')
         food8 = get_data(t, 'Moscow Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1632,7 +1632,7 @@ def graphPrice_Moscow(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Nanking(t, plt):
@@ -1643,7 +1643,7 @@ def graphPrice_Nanking(t, plt):
         food4 = get_data(t, 'Nanking Fuel Price')
         food5 = get_data(t, 'Nanking Raw Material Price')
         food6 = get_data(t, 'Nanking Exotics Price')
-        food7 = get_data(t, 'Nanking Delicacies Price')
+        food7 = get_data(t, 'Nanking Timber Price')
         food8 = get_data(t, 'Nanking Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1653,7 +1653,7 @@ def graphPrice_Nanking(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphPrice_Paris(t, plt):
@@ -1664,7 +1664,7 @@ def graphPrice_Paris(t, plt):
         food4 = get_data(t, 'Paris Fuel Price')
         food5 = get_data(t, 'Paris Raw Material Price')
         food6 = get_data(t, 'Paris Exotics Price')
-        food7 = get_data(t, 'Paris Delicacies Price')
+        food7 = get_data(t, 'Paris Timber Price')
         food8 = get_data(t, 'Paris Naval Product Price')
         itr = range(1, len(food1) + 1)
 
@@ -1674,7 +1674,7 @@ def graphPrice_Paris(t, plt):
         plt.plot(itr, food4, label="Fuel")
         plt.plot(itr, food5, label="Raw")
         plt.plot(itr, food6, label="Exotics")
-        plt.plot(itr, food7, label="Delicacies")
+        plt.plot(itr, food7, label="Timber")
         plt.plot(itr, food8, label="Naval")
 
 def graphProd_Diff(t, plt):
@@ -1684,7 +1684,7 @@ def graphProd_Diff(t, plt):
         fiber = get_data(t, 'Fiber Production')
         fuel = get_data(t, 'Fuel Production')
         raw = get_data(t, 'Raw Material Production')
-        delicacies = get_data(t, 'Delicacies Production')
+        timber = get_data(t, 'Timber Production')
         exotic = get_data(t, 'Exotics Production')
         consumer = get_data(t, 'Consumer Product Production')
         military = get_data(t, 'Military Product Production')
@@ -1697,7 +1697,7 @@ def graphProd_Diff(t, plt):
         fiber2 = get_data(t, 'Fiber Demand')
         fuel2 = get_data(t, 'Fuel Demand')
         raw2 = get_data(t, 'Raw Material Demand')
-        delicacies2 = get_data(t, 'Delicacies Demand')
+        timber2 = get_data(t, 'Timber Demand')
         exotic2 = get_data(t, 'Exotics Demand')
         consumer2 = get_data(t, 'Consumer Product Demand')
         military2 = get_data(t, 'Military Product Demand')
@@ -1723,7 +1723,7 @@ def graphProd_Diff(t, plt):
         fiber = [fiber[i]-fiber2[i] for i in range(len(fiber))]
         fuel = [fuel[i]-fuel2[i] for i in range(len(fuel))]
         raw = [raw[i]-raw2[i] for i in range(len(raw))]
-        delicacies = [delicacies[i]-delicacies2[i] for i in range(len(delicacies))]
+        timber = [timber[i]-timber2[i] for i in range(len(timber))]
         exotic = [exotic[i]-exotic2[i] for i in range(len(exotic))]
         consumer = [consumer[i]-consumer2[i] for i in range(len(consumer))]
         military = [military[i]-military2[i] for i in range(len(military))]
@@ -1737,7 +1737,7 @@ def graphProd_Diff(t, plt):
         plt.plot(itr, fiber, label="Fiber")
         plt.plot(itr, fuel, label="Fuel")
         plt.plot(itr, raw, label="Raw")
-        plt.plot(itr, delicacies, label="Delicacies")
+        plt.plot(itr, timber, label="Timber")
         plt.plot(itr, exotic, label="Exotics")
         plt.plot(itr, consumer, label="Consumer")
         plt.plot(itr, military, label="Military")
@@ -1753,7 +1753,7 @@ def graphProd_Diff_Foodless(t, plt):
         fiber = get_data(t, 'Fiber Production')
         fuel = get_data(t, 'Fuel Production')
         raw = get_data(t, 'Raw Material Production')
-        delicacies = get_data(t, 'Delicacies Production')
+        timber = get_data(t, 'Timber Production')
         exotic = get_data(t, 'Exotics Production')
         consumer = get_data(t, 'Consumer Product Production')
         military = get_data(t, 'Military Product Production')
@@ -1766,7 +1766,7 @@ def graphProd_Diff_Foodless(t, plt):
         fiber2 = get_data(t, 'Fiber Demand')
         fuel2 = get_data(t, 'Fuel Demand')
         raw2 = get_data(t, 'Raw Material Demand')
-        delicacies2 = get_data(t, 'Delicacies Demand')
+        timber = get_data(t, 'Timber Demand')
         exotic2 = get_data(t, 'Exotics Demand')
         consumer2 = get_data(t, 'Consumer Product Demand')
         military2 = get_data(t, 'Military Product Demand')
@@ -1792,7 +1792,7 @@ def graphProd_Diff_Foodless(t, plt):
         fiber = [fiber[i]-fiber2[i] for i in range(len(fiber))]
         fuel = [fuel[i]-fuel2[i] for i in range(len(fuel))]
         raw = [raw[i]-raw2[i] for i in range(len(raw))]
-        delicacies = [delicacies[i]-delicacies2[i] for i in range(len(delicacies))]
+        timber = [timber[i]-timber2[i] for i in range(len(timber))]
         exotic = [exotic[i]-exotic2[i] for i in range(len(exotic))]
         consumer = [consumer[i]-consumer2[i] for i in range(len(consumer))]
         military = [military[i]-military2[i] for i in range(len(military))]
@@ -1806,7 +1806,7 @@ def graphProd_Diff_Foodless(t, plt):
         plt.plot(itr, fiber, label="Fiber")
         plt.plot(itr, fuel, label="Fuel")
         plt.plot(itr, raw, label="Raw")
-        plt.plot(itr, delicacies, label="Delicacies")
+        plt.plot(itr, timber, label="Timber")
         plt.plot(itr, exotic, label="Exotics")
         plt.plot(itr, consumer, label="Consumer")
         plt.plot(itr, military, label="Military")
