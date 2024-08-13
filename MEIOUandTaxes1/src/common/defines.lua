@@ -51,9 +51,9 @@ NDiplomacy = {
 	UNCONDITIONAL_SURRENDER_MONTHS = 1,  -- Months before unconditional surrender starts having an effect on Call for Peace. Set to negative values to disable feature.
 	SHAREMAP_PRESTIGE_TRANSFER_LOSE = -15,				-- Prestige transferred for the Request to Share Maps diplomatic action.
 	SHAREMAP_PRESTIGE_TRANSFER_GAIN = 10,				-- Prestige transferred for the Request to Share Maps diplomatic action.
-	TRADE_LEAGUE_MIN_PRESTIGE_OLD_LEADER = -50,		-- Minimum required prestige to stay leader of a Trade League.
-	TRADE_LEAGUE_MIN_PRESTIGE_NEW_LEADER = 20,		-- Minimum required prestige to become the new leader of a Trade League when the old one is resigned.
-	TRADE_LEAGUE_BREAK_OPINION = -50,				-- AI will leave a Trade League if their opinion of you falls below this value.
+	TRADE_LEAGUE_MIN_PRESTIGE_OLD_LEADER = -25,		-- Minimum required prestige to stay leader of a Trade League.
+	TRADE_LEAGUE_MIN_PRESTIGE_NEW_LEADER = 5,		-- Minimum required prestige to become the new leader of a Trade League when the old one is resigned.
+	TRADE_LEAGUE_BREAK_OPINION = 25,				-- AI will leave a Trade League if their opinion of you falls below this value.
 
 	PRESS_SAILORS_FRACTION = 0.2,
 
