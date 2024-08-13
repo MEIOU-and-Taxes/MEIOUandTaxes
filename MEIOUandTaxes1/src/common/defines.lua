@@ -742,9 +742,9 @@ NCountry = {
 	PS_BUY_ADMIRAL = 30,
 	PS_BUY_CONQUISTADOR = 30,
 	PS_BUY_EXPLORER = 30,
-	PS_ASSAULT = 5,
-	PS_ARTILLERY_BARRAGE = 30,
-	PS_NAVAL_BARRAGE = 30,
+	PS_ASSAULT = 0,
+	PS_ARTILLERY_BARRAGE = 0,
+	PS_NAVAL_BARRAGE = 0,
 	PS_ADD_TRIBAL_LAND = 100,
 	PS_ADD_TRIBAL_LAND_EXTRA_COST_PER_PROVINCE = 10,
 	PS_FORCE_MARCH = 2,
@@ -769,7 +769,7 @@ NCountry = {
 	PS_CHANGE_CULTURE_OVERSEAS_RELIGION_MOD = -0.5,  -- Modifier how much cheaper it is to change culture in overseas province if same religion
 	PS_HARSH_TREATMENT_COST = 75,  -- Max cost for harsh treatment (scales to revolt size)
 	PS_HARSH_TREATMENT_REDUCE = 25,  
-	PS_GARRISON_SORTIES = 5,  
+	PS_GARRISON_SORTIES = 0,  
 	PS_REDUCE_WAREXHAUSTION = 9999,  
 	PS_FACTION_BOOST = 9999,  
 	PS_RAISE_TARIFFS = 25,  
@@ -1280,7 +1280,7 @@ NMilitary = {
 	EXPLORER_LEADER_POWER = 0.8,					-- Used for conquistadors & explorers (affects total pips)
 	BASE_MP_TO_MANPOWER = 0.00,  -- 0 men per manpower     ### DO MODIFIED FROM .5
 	SIEGE_ATTRITION = 2,  
-	SIEGE_DISEASE_IMPACT = 0.0,  
+	SIEGE_DISEASE_IMPACT = 0.05,  
 	ARMY_ATTRITION_AT_COAST = 1,					-- How many percent attrition units take while loaded onto ships along the coast
 	ARMY_ATTRITION_AT_SEA = 10,						-- How many percent attrition units take while loaded onto ships traveling open sea
 	NATIVE_FEROCITY_IMPACT = 0.05,					-- how many percentage each ferocity gives in combat bonus
@@ -1296,12 +1296,12 @@ NMilitary = {
 	LEADER_MAINTENANCE_COST = 1,					-- how much mil power each leader costs.
 	GARRISON_SIZE = 1000, 							-- GARRISON_SIZE
 	SIEGE_FORCE_NEEDED_MULTIPLIER = 2,  
-	MAX_BREACH = 3,
+	MAX_BREACH = 5,
 	SIEGE_GARRISON_SURRENDER = 100,					-- A siege ends when there is less than 100 defenders left.
 	ASSAULT_WIDTH_LIMIT = 5,						-- how many times the garrison size that can effectively assault at the same time.
-	ASSAULT_ATTACKER_LOSS = 1.0, 					-- MDEF_ASSAULT_ATTACKER_LOSS = 10,
+	ASSAULT_ATTACKER_LOSS = 0.8, 					-- MDEF_ASSAULT_ATTACKER_LOSS = 10,
 	ASSAULT_DEFENDER_LOSS = 0.05, 					-- _MDEF_ASSAULT_DEFENDER_LOSS = 10,
-	ASSAULT_DICE_MODIFIER = 5, 						-- _MDEF_ASSAULT_DICE_MODIFIER_
+	ASSAULT_DICE_MODIFIER = 8, 						-- _MDEF_ASSAULT_DICE_MODIFIER_
 	INF_REGIMENT_MANPOWER_COST = 1.0, 				-- 1 = 1000 men in cost.
 	CAV_REGIMENT_MANPOWER_COST = 1.0, 				-- 1 = 1000 men in cost.
 	ART_REGIMENT_MANPOWER_COST = 1.0, 				-- 1 = 1000 men in cost.
