@@ -43,59 +43,6 @@ country_event = {
 							}
 							clr_province_flag = no_horses_present
 						}
-						if = {
-							limit = {
-								NOT = { has_province_flag = Exchange_Complete }
-							}
-							if = {
-								limit = {
-									NOT = { check_key = { lhs = Land_WheatAvailability value = 100 } }
-								}
-								change_key = { lhs = Land_WheatAvailability value = 2.5 }
-							}
-							if = {
-								limit = {
-									NOT = { check_key = { lhs = Land_RiceAvailability value = 100 } }
-								}
-								change_key = { lhs = Land_RiceAvailability value = 2.5 }
-							}
-							if = {
-								limit = {
-									NOT = { check_key = { lhs = Land_MilletAvailability value = 100 } }
-								}
-								change_key = { lhs = Land_MilletAvailability value = 2.5 }
-							}
-							if = {
-								limit = {
-									NOT = { check_key = { lhs = Land_BarleyAvailability value = 100 } }
-								}
-								change_key = { lhs = Land_BarleyAvailability value = 2.5 }
-							}
-							if = {
-								limit = {
-									NOT = { check_key = { lhs = Land_MaizeAvailability value = 100 } }
-								}
-								change_key = { lhs = Land_MaizeAvailability value = 2.5 }
-							}
-							if = {
-								limit = {
-									NOT = { check_key = { lhs = Land_PotatoAvailability value = 100 } }
-								}
-								change_key = { lhs = Land_PotatoAvailability value = 0.5 }
-							}
-							Land_CalcCrops = yes
-							if = {
-								limit = {
-									check_key = { lhs = Land_WheatAvailability value = 100 }
-									check_key = { lhs = Land_RiceAvailability value = 100 }
-									check_key = { lhs = Land_MilletAvailability value = 100 }
-									check_key = { lhs = Land_BarleyAvailability value = 100 }
-									check_key = { lhs = Land_MaizeAvailability value = 100 }
-									check_key = { lhs = Land_PotatoAvailability value = 100 }
-								}
-								set_province_flag = Exchange_Complete
-							}
-						}
 					}
 					set_key = { lhs = Infra_Income value = 0 }
 					set_key = { lhs = Infra_Spend value = 0 }
@@ -4788,4 +4735,172 @@ country_event = {
 	after = {
 		set_global_flag = DATA_COLLECTION_CD
 	}
+}
+country_event = {
+    id = POP_Census.114
+    title = no_localisation
+    desc = no_localisation
+	picture = MEIOU_AND_TAXES_eventPicture
+
+    hidden = yes
+
+    is_triggered_only = yes
+
+    immediate = {
+		hidden_effect = {
+			every_owned_province = {
+				if = {
+					limit = {
+						Columbian_Exchange = 100
+					}
+					if = {
+						limit = {
+							NOT = { has_province_flag = Exchange_Complete }
+						}
+						if = {
+							limit = {
+								NOT = { check_key = { lhs = Land_WheatAvailability value = 100 } }
+							}				
+							set_key = { lhs = Tmp_0 value = 0.3 } ## Base Progression / Balancing Factor 
+							## 0.3 represents about 110 years for adaption at 60 peasant freedom and 120% maximum suitability
+							set_key = { lhs = Tmp_1 which = SF_Freedom } # 0-100
+							multiply_key = { lhs = Tmp_1 which = Land_WheatSuitability } # Goes up from 0 to X, depending on Availability
+							subtract_key = { lhs = Tmp_1 which = NM_Ratio } # 0-100
+							multiply_key = { lhs = Tmp_1 which = 0.01 }
+							change_key = { lhs = Tmp_1 value = 1 }
+							multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+							
+							change_key = { lhs = Land_WheatAvailability which = Tmp_1 }
+							if = { # security measure to prevent adaption over 100%
+								limit = {
+									check_key = { lhs = Land_WheatAvailability value = 100 }
+								}
+								set_key = { lhs = Land_WheatAvailability value = 100 }
+							}
+						}
+						if = {
+							limit = {
+								NOT = { check_key = { lhs = Land_RiceAvailability value = 100 } }
+							}
+							set_key = { lhs = Tmp_0 value = 0.3 } ## Base Progression / Balancing Factor 
+							
+							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							multiply_key = { lhs = Tmp_1 which = Land_WheatSuitability } # Goes up from 0 to X, depending on Availability
+							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
+							multiply_key = { lhs = Tmp_1 which = 0.01 }
+							change_key = { lhs = Tmp_1 value = 1 }
+							multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+							
+							change_key = { lhs = Land_RiceAvailability which = Tmp_1 }
+							if = { # security measure to prevent adaption over 100%
+								limit = {
+									check_key = { lhs = Land_RiceAvailability value = 100 }
+								}
+								set_key = { lhs = Land_RiceAvailability value = 100 }
+							}
+						}
+						if = {
+							limit = {
+								NOT = { check_key = { lhs = Land_MilletAvailability value = 100 } }
+							}
+							set_key = { lhs = Tmp_0 value = 0.3 } ## Base Progression / Balancing Factor 
+							
+							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							multiply_key = { lhs = Tmp_1 which = Land_MilletSuitability } # Goes up from 0 to X, depending on Availability
+							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
+							multiply_key = { lhs = Tmp_1 which = 0.01 }
+							change_key = { lhs = Tmp_1 value = 1 }
+							multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+							
+							change_key = { lhs = Land_MilletAvailability which = Tmp_1 }
+							if = { # security measure to prevent adaption over 100%
+								limit = {
+									check_key = { lhs = Land_MilletAvailability value = 100 }
+								}
+								set_key = { lhs = Land_MilletAvailability value = 100 }
+							}
+						}
+						if = {
+							limit = {
+								NOT = { check_key = { lhs = Land_BarleyAvailability value = 100 } }
+							}
+							set_key = { lhs = Tmp_0 value = 0.3 } ## Base Progression / Balancing Factor 
+							
+							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							multiply_key = { lhs = Tmp_1 which = Land_BarleySuitability } # Goes up from 0 to X, depending on Availability
+							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
+							multiply_key = { lhs = Tmp_1 which = 0.01 }
+							change_key = { lhs = Tmp_1 value = 1 }
+							multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+							
+							change_key = { lhs = Land_BarleyAvailability which = Tmp_1 }
+							if = { # security measure to prevent adaption over 100%
+								limit = {
+									check_key = { lhs = Land_BarleyAvailability value = 100 }
+								}
+								set_key = { lhs = Land_BarleyAvailability value = 100 }
+							}
+						}
+						if = {
+							limit = {
+								NOT = { check_key = { lhs = Land_MaizeAvailability value = 100 } }
+							}
+							set_key = { lhs = Tmp_0 value = 0.3 } ## Base Progression / Balancing Factor 
+							
+							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							multiply_key = { lhs = Tmp_1 which = Land_MaizeSuitability } # Goes up from 0 to X, depending on Availability
+							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
+							multiply_key = { lhs = Tmp_1 which = 0.01 }
+							change_key = { lhs = Tmp_1 value = 1 }
+							multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+							
+							change_key = { lhs = Land_MaizeAvailability which = Tmp_1 }
+							if = { # security measure to prevent adaption over 100%
+								limit = {
+									check_key = { lhs = Land_MaizeAvailability value = 100 }
+								}
+								set_key = { lhs = Land_MaizeAvailability value = 100 }
+							}
+						}
+						if = {
+							limit = {
+								NOT = { check_key = { lhs = Land_PotatoAvailability value = 100 } }
+							}
+							set_key = { lhs = Tmp_0 value = 0.15 } ## Base Progression / Balancing Factor 
+							# As it was a nightshade plant it spread slower or with more opposition
+							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							multiply_key = { lhs = Tmp_1 which = Land_PotatoSuitability } # Goes up from 0 to X, depending on Availability
+							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
+							multiply_key = { lhs = Tmp_1 which = 0.01 }
+							change_key = { lhs = Tmp_1 value = 1 }
+							multiply_key = { lhs = Tmp_1 which = Tmp_0 }
+							
+							change_key = { lhs = Land_PotatoAvailability which = Tmp_1 }
+							if = { # security measure to prevent adaption over 100%
+								limit = {
+									check_key = { lhs = Land_PotatoAvailability value = 100 }
+								}
+								set_key = { lhs = Land_PotatoAvailability value = 100 }
+							}
+						}
+						Land_CalcCrops = yes
+						if = {
+							limit = {
+								check_key = { lhs = Land_WheatAvailability value = 100 }
+								check_key = { lhs = Land_RiceAvailability value = 100 }
+								check_key = { lhs = Land_MilletAvailability value = 100 }
+								check_key = { lhs = Land_BarleyAvailability value = 100 }
+								check_key = { lhs = Land_MaizeAvailability value = 100 }
+								check_key = { lhs = Land_PotatoAvailability value = 100 }
+							}
+							set_province_flag = Exchange_Complete
+						}
+					}
+				}		
+			}
+		}
+    }
+    option = {
+		name = no_localisation
+    }
 }
