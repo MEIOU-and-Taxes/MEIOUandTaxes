@@ -1,5 +1,7 @@
 namespace = POP_Vassal_Siphon
 
+#Note by Mepper: key and key systems were used interchangeably, so I made it all use keys for now
+
 country_event = {
 	id = POP_Vassal_Siphon.001
 	title = "POP_Vassal_Siphon.001.t"
@@ -21,23 +23,23 @@ country_event = {
 				}
 				if = {
 					limit = {
-						check_variable = { which = French_SubsidyIncome value = 0.001 }
+						check_key = { lhs = French_SubsidyIncome value = 0.001 }
 					}
-					set_variable = { which = French_SubsidyIncomeSave which = French_SubsidyIncome } # Used to ensure there isnt exponential growth in income
+					set_key = { lhs = French_SubsidyIncomeSave which = French_SubsidyIncome } # Used to ensure there isnt exponential growth in income
 					divide_key = { lhs = French_SubsidyIncomeSave value = 12 } # Used in monthly form
 				}
-				set_variable = { which = French_SubsidyIncome value = 0 } # Wipe out any old income, old income is stored now in French_SubsidyIncomeSave
+				set_key = { lhs = French_SubsidyIncome value = 0 } # Wipe out any old income, old income is stored now in French_SubsidyIncomeSave
 				if = {
 					limit = {
-						check_variable = { which = French_Subsidy value = 0.001 }
+						check_key = { lhs = French_Subsidy value = 0.001 }
 					}
-					set_variable = { which = French_SubsidySave which = French_Subsidy } # Used to ensure there isnt exponential growth in income
+					set_key = { lhs = French_SubsidySave which = French_Subsidy } # Used to ensure there isnt exponential growth in income
 				}
 			}
 			else = {
-				set_variable = { which = French_SubsidyMultiplier value = 0 }
-				set_variable = { which = French_Subsidy value = 0 }
-				set_variable = { which = French_SubsidyIncome value = 0 }
+				set_key = { lhs = French_SubsidyMultiplier value = 0 }
+				set_key = { lhs = French_Subsidy value = 0 }
+				set_key = { lhs = French_SubsidyIncome value = 0 }
 				clr_country_flag = dont_subsidise_colonies
 			}
 		}
@@ -57,12 +59,12 @@ country_event = {
 				}
 				if = { # If there is an existing subsidy to distribute, then its time to send it to the colonies
 					limit = {
-						check_variable = { which = French_Subsidy value = 0.001 }
+						check_key = { lhs = French_Subsidy value = 0.001 }
 					}
-					set_variable = { which = French_SubsidyOutput which = French_Subsidy }
-					set_variable = { which = French_Subsidy value = 0 }
+					set_key = { lhs = French_SubsidyOutput which = French_Subsidy }
+					set_key = { lhs = French_Subsidy value = 0 }
 						
-					set_variable = { which = French_WeightCur value = 0 }
+					set_key = { lhs = French_WeightCur value = 0 }
 					#calculate how to distribute French_SubsidyOutput between CNs
 					#distribution is based on monthly income, with bigger income CNs getting less subsidies (no checks for balance)
 					every_subject_country = {
@@ -75,30 +77,30 @@ country_event = {
 						}
 						
 						export_to_key = {
-							lhs = French_WeightCur
+							which = French_WeightCur
 							value = monthly_income
 						}
 						if = {
 							limit = {
-								check_variable = { which = French_SubsidyIncomeSave value = 0.001 }
+								check_key = { lhs = French_SubsidyIncomeSave value = 0.001 }
 							}
 							subtract_key = { lhs = French_WeightCur which = French_SubsidyIncomeSave } # Used to ensure there isnt exponential growth in income (monthly income of the CN - monthly subsidies pool from previous iteration)
-							set_variable = { which = French_SubsidyIncomeSave value = 0 } # Used to ensure there isnt exponential growth in income
+							set_key = { lhs = French_SubsidyIncomeSave value = 0 } # Used to ensure there isnt exponential growth in income
 						}
 						if = {
 							limit = {
-								NOT = { check_variable = { which = French_WeightCur value = 0.1 } } #if monthly income of the CN < monthly subsidies pool from previous iteration
+								NOT = { check_key = { lhs = French_WeightCur value = 0.1 } } #if monthly income of the CN < monthly subsidies pool from previous iteration
 							}
-							set_variable = { which = French_WeightCur value = 0.1 } # Prevent negative incomes from contributing
+							set_key = { lhs = French_WeightCur value = 0.1 } # Prevent negative incomes from contributing
 						}
 						PREV = { change_key = { lhs = French_WeightCur which = PREV } } #summing (monthly income of the CN - monthly subsidies pool from previous iteration) values on the overlord level
 					}
 					
 					# Inversely weigh each province income, using French_WeightTotal / French_WeightCur. More of a contribution means less weight
 					# for example, (250 / 33 = 15), while (250 / 2 = 250 )
-					set_variable = { which = French_WeightTotal which = French_WeightCur } # Use the tally as a total income to distribute
-					set_variable = { which = French_WeightCur value = 0 }
-					set_variable = { which = French_WeightHighest value = 0 }
+					set_key = { lhs = French_WeightTotal which = French_WeightCur } # Use the tally as a total income to distribute
+					set_key = { lhs = French_WeightCur value = 0 }
+					set_key = { lhs = French_WeightHighest value = 0 }
 					
 					every_subject_country = {
 						limit = {
@@ -109,28 +111,28 @@ country_event = {
 							}
 						}
 						# Grab country level vars
-						set_variable = { which = French_WeightTotal which = PREV }
-						set_variable = { which = French_WeightHighest which = PREV }
+						set_key = { lhs = French_WeightTotal which = PREV }
+						set_key = { lhs = French_WeightHighest which = PREV }
 						
 						divide_key = { lhs = French_WeightTotal which = French_WeightCur }
 						
-						set_variable = { which = French_WeightCur which = French_WeightTotal }
-						set_variable = { which = French_WeightTotal value = 0 }
+						set_key = { lhs = French_WeightCur which = French_WeightTotal }
+						set_key = { lhs = French_WeightTotal value = 0 }
 						
 						if = { # Store the highest income for the next step
 							limit = {
-								check_variable = { which = French_WeightCur which = French_WeightHighest }
+								check_key = { lhs = French_WeightCur which = French_WeightHighest }
 							}
-							set_variable = { which = French_WeightHighest which = French_WeightCur }
-							PREV = { set_variable = { which = French_WeightHighest which = PREV } }
+							set_key = { lhs = French_WeightHighest which = French_WeightCur }
+							PREV = { set_key = { lhs = French_WeightHighest which = PREV } }
 						}
-						set_variable = { which = French_WeightHighest value = 0 }
+						set_key = { lhs = French_WeightHighest value = 0 }
 						
 						PREV = { change_key = { lhs = French_WeightCur which = PREV } }
 					}
 					
-					set_variable = { which = French_WeightTotal which = French_WeightCur } # Use the tally as a total weight to distribute
-					set_variable = { which = French_WeightCur value = 0 }
+					set_key = { lhs = French_WeightTotal which = French_WeightCur } # Use the tally as a total weight to distribute
+					set_key = { lhs = French_WeightCur value = 0 }
 					
 					# Run another pass, and ensure no nation is weighed higher than 12x the highest nation
 					every_subject_country = {
@@ -141,28 +143,28 @@ country_event = {
 							}
 						}
 						# Grab country level vars
-						set_variable = { which = French_WeightHighest which = PREV }
+						set_key = { lhs = French_WeightHighest which = PREV }
 						
 						multiply_key = { lhs = French_WeightHighest value = 0.083 }
 						
 						if = {
 							limit = {
-								check_variable = { which = French_WeightHighest which = French_WeightCur }
+								check_key = { lhs = French_WeightHighest which = French_WeightCur }
 							}
-							set_variable = { which = French_WeightCur which = French_WeightHighest }
+							set_key = { lhs = French_WeightCur which = French_WeightHighest }
 						}
-						set_variable = { which = French_WeightHighest value = 0 }
+						set_key = { lhs = French_WeightHighest value = 0 }
 						
 						PREV = { change_key = { lhs = French_WeightCur which = PREV } }
 					}
 					
-					set_variable = { which = French_WeightTotal which = French_WeightCur } # Use the tally as a total weight to distribute
-					set_variable = { which = French_WeightCur value = 0 }
-					set_variable = { which = French_WeightHighest value = 0 }
+					set_key = { lhs = French_WeightTotal which = French_WeightCur } # Use the tally as a total weight to distribute
+					set_key = { lhs = French_WeightCur value = 0 }
+					set_key = { lhs = French_WeightHighest value = 0 }
 					
 					if = {
 						limit = {
-							check_variable = { which = French_WeightTotal value = 0.001 }
+							check_key = { lhs = French_WeightTotal value = 0.001 }
 						}
 						every_subject_country = {
 							limit = {
@@ -173,9 +175,9 @@ country_event = {
 								}
 							}
 							# Grab country level vars
-							set_variable = { which = French_WeightTotal which = PREV }
-							set_variable = { which = French_SubsidyOutput which = PREV }
-							set_variable = { which = French_SubsidyIncome which = French_SubsidyOutput } # French_SubsidyIncome is the final variable
+							set_key = { lhs = French_WeightTotal which = PREV }
+							set_key = { lhs = French_SubsidyOutput which = PREV }
+							set_key = { lhs = French_SubsidyIncome which = French_SubsidyOutput } # French_SubsidyIncome is the final key
 							
 							# Use a 100% scale instead of a 0-1% scale, less chance of overflow or DBZ
 							multiply_key = { lhs = French_WeightCur value = 100 }
@@ -186,20 +188,20 @@ country_event = {
 							multiply_key = { lhs = French_SubsidyIncome value = 0.01 } # Rescale subsidy income back down from the 100% scale.
 							
 							# When trickle down is implemented
-							#set_variable = { which = French_SubsidySF which = French_SubsidyIncome }
+							#set_key = { lhs = French_SubsidySF which = French_SubsidyIncome }
 							#multiply_key = { lhs = French_SubsidySF value = 0.3 }
 							#multiply_key = { lhs = French_SubsidyIncome value = 0.7 }
 							
 							#change_key = { lhs = SF_NatTrickleDown which = French_SubsidySF }
 							
 							# Cleanup
-							set_variable = { which = French_Tmp4 value = 0 }
-							set_variable = { which = French_WeightCur value = 0 }
-							set_variable = { which = French_SubsidyOutput value = 0 }
-							set_variable = { which = French_WeightTotal value = 0 }
-							set_variable = { which = French_SubsidySF value = 0 }
+							set_key = { lhs = French_Tmp4 value = 0 }
+							set_key = { lhs = French_WeightCur value = 0 }
+							set_key = { lhs = French_SubsidyOutput value = 0 }
+							set_key = { lhs = French_WeightTotal value = 0 }
+							set_key = { lhs = French_SubsidySF value = 0 }
 						}
-						set_variable = { which = French_WeightTotal value = 0 }
+						set_key = { lhs = French_WeightTotal value = 0 }
 					}
 					else = {
 						every_subject_country = {
@@ -210,16 +212,16 @@ country_event = {
 									tag = FRA
 								}
 							}
-							set_variable = { which = French_WeightCur value = 0 }
+							set_key = { lhs = French_WeightCur value = 0 }
 						}
 					}
-					set_variable = { which = French_SubsidyOutput value = 0 }
+					set_key = { lhs = French_SubsidyOutput value = 0 }
 				}
-				set_variable = { which = French_Subsidy value = 0 }
-				set_variable = { which = French_SubsidyDisp value = 0 }
+				set_key = { lhs = French_Subsidy value = 0 }
+				set_key = { lhs = French_SubsidyDisp value = 0 }
 
 				export_to_key = {
-					lhs = French_Subsidy
+					which = French_Subsidy
 					value = monthly_income
 				}
 				
@@ -227,30 +229,30 @@ country_event = {
 				multiply_key = { lhs = French_Subsidy value = 6 } # Half year of income				
 				if = {
 					limit = {
-						check_variable = { which = French_SubsidySave value = 0.001 }
+						check_key = { lhs = French_SubsidySave value = 0.001 }
 					}
 					change_key = { lhs = French_Subsidy which = French_SubsidySave } # Used to ensure there isnt exponential growth in income
-					set_variable = { which = French_SubsidySave value = 0 } # Used to ensure there isnt exponential growth in income
+					set_key = { lhs = French_SubsidySave value = 0 } # Used to ensure there isnt exponential growth in income
 				}
 				
 				if = {
 					limit = {
-						check_variable = { which = French_SubsidyMultiplier value = 0.001 }
+						check_key = { lhs = French_SubsidyMultiplier value = 0.001 }
 					}
 					multiply_key = { lhs = French_Subsidy which = French_SubsidyMultiplier }
 				
-					set_variable = { which = French_SubsidyDisp which = French_Subsidy }
+					set_key = { lhs = French_SubsidyDisp which = French_Subsidy }
 				}
 				else_if = {
 					limit = {
 						has_country_flag = dont_subsidise_dukes
 					}
-					set_variable = { which = French_Subsidy value = 0 }
-					set_variable = { which = French_SubsidyDisp value = 0 }
+					set_key = { lhs = French_Subsidy value = 0 }
+					set_key = { lhs = French_SubsidyDisp value = 0 }
 				}
 				else = {
-					set_variable = { which = French_Subsidy value = 0 }
-					set_variable = { which = French_SubsidyDisp value = 0 }
+					set_key = { lhs = French_Subsidy value = 0 }
+					set_key = { lhs = French_SubsidyDisp value = 0 }
 					country_event = {
 						id = POP_Vassal_Siphon.002
 						days = 10
@@ -260,19 +262,19 @@ country_event = {
 			}
 			# Otherwise, dump any subsidy back into the treasury
 			else = {
-				set_variable = { which = French_SubsidyMultiplier value = 0 }
+				set_key = { lhs = French_SubsidyMultiplier value = 0 }
 				if = {
 					limit = {
-						check_variable = { which = French_Subsidy value = 0.001 }
+						check_key = { lhs = French_Subsidy value = 0.001 }
 					}
-					set_variable = { which = French_Tmp4 which = French_Subsidy }
+					set_key = { lhs = French_Tmp4 which = French_Subsidy }
 					POP_GetDucat = {
 						type = which
 						inp = French_Tmp4
 					}
-					set_variable = { which = French_Subsidy value = 0 }
-					set_variable = { which = French_SubsidyDisp value = 0 }
-					set_variable = { which = French_Tmp4 value = 0 }
+					set_key = { lhs = French_Subsidy value = 0 }
+					set_key = { lhs = French_SubsidyDisp value = 0 }
+					set_key = { lhs = French_Tmp4 value = 0 }
 				}
 				#clr_country_flag = dont_subsidise_dukes
 			}
@@ -281,7 +283,7 @@ country_event = {
 			limit = {
 				isValidCountry = yes
 			}
-			set_variable = { which = French_Tmp4 which = French_SubsidyIncome }
+			set_key = { lhs = French_Tmp4 which = French_SubsidyIncome }
 			POP_SetMod = { varname = French_Tmp4 modname = ColonialIncome type = country value = 1638.4 }
 			POP_SetMod = { varname = French_Tmp4 modname = ColonialIncome type = country value = 819.2 }
 			POP_SetMod = { varname = French_Tmp4 modname = ColonialIncome type = country value = 409.6 }
@@ -298,9 +300,9 @@ country_event = {
 			POP_SetMod = { varname = French_Tmp4 modname = ColonialIncome type = country value = 0.2 }
 			POP_SetMod = { varname = French_Tmp4 modname = ColonialIncome type = country value = 0.1 }
 			
-			set_variable = { which = French_SubsidySave value = 0 }
-			set_variable = { which = French_SubsidyIncomeSave value = 0 }
-			set_variable = { which = French_Tmp4 value = 0 }
+			set_key = { lhs = French_SubsidySave value = 0 }
+			set_key = { lhs = French_SubsidyIncomeSave value = 0 }
+			set_key = { lhs = French_Tmp4 value = 0 }
 		}
 	}
 	
@@ -318,7 +320,7 @@ country_event = {
 	
 	immediate = {
 		hidden_effect = {
-			set_variable = { which = French_SubsidyMultiplier value = 0.05 }
+			set_key = { lhs = French_SubsidyMultiplier value = 0.05 }
 		}
 	}
 	
@@ -332,7 +334,7 @@ country_event = {
 	option = {
 		name = POP_Vassal_Siphon.002.b
 		hidden_effect = {
-			set_variable = { which = French_SubsidyMultiplier value = 0 }
+			set_key = { lhs = French_SubsidyMultiplier value = 0 }
 			set_country_flag = dont_subsidise_dukes
 		}
 	}
