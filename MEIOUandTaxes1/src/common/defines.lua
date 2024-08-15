@@ -1414,7 +1414,7 @@ NMilitary = {
 	CAV_LOOT = 0,  -- How many ducats/month will a single full strength cavalry regiment loot?
 	ART_LOOT = 0,  -- How many ducats/month will a single full strength artillery regiment loot?
 	-- Suppression values are multiplied by the static modifier friendly_regiments
-	MAX_REBEL_SUPPRESSION = 5.0;				-- Maximum amount of rebel suppression by troops in a province
+	MAX_REBEL_SUPPRESSION = 10.0;				-- Maximum amount of rebel suppression by troops in a province
 	INF_SUPPRESSION = 0.3,						-- The amount of reduction to unrest for each friendly infantry regiment in a province
 	CAV_SUPPRESSION = 0.4,						-- The amount of reduction to unrest for each friendly cavalry regiment in a province
 	ART_SUPPRESSION = 0.05,						-- The amount of reduction to unrest for each friendly artillery regiment in a province
