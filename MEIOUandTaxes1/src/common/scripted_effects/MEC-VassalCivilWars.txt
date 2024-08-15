@@ -1,0 +1,264 @@
+setup_vassal_civil_war_with_estate = {
+	if = {
+		limit = {
+			num_of_cities = 4
+		}
+		hidden_effect = {
+			[[elite]
+				setup_vassal_civil_war = {
+					orig_scope = $orig_scope$
+					elite = $elite$
+					rebel_tag = $rebel_tag$
+				}
+			]
+		}
+	}
+	else = {
+		Stab_Subtract4 = yes
+		add_war_exhaustion = 7.5
+		add_prestige = -50
+		spawn_rebels = {
+			type = pretender_rebels
+			size = 4
+			win = yes		#Make them immediatelly have control of the province they spawn in
+		}
+		every_owned_province = {
+			add_devastation = 15
+		}
+		[[elite]
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=$elite$ Amount=-60 }
+		]
+		hidden_effect = {
+			Rights_ReformReset = yes
+		}
+	}
+}
+
+setup_vassal_civil_war = {
+	if = {
+		limit = {
+			num_of_cities = 4
+		}
+
+		### Setup general flags and keys
+		set_country_flag = ongoing_civil_war
+		set_country_flag = civil_war_orig_tag
+		set_country_flag = civil_war_$elite$_rebels
+		set_country_flag = PriorityTag
+	
+		#log = "[GetYear]: [This.GetName] entered Civil War"
+		set_key = { lhs = cw_total_control_abs which = Dev_Total }	
+
+		set_key = { lhs = $elite$_MPCur value = 0 }
+		set_key = { lhs = Public_Tmp0 value = -1 }
+		every_owned_province = {
+			limit = {
+				NOT = { is_capital = yes }
+				any_neighbor_province = {
+					owned_by = $orig_scope$
+				}
+			}
+			#log = "[GetYear]: [This.GetCapitalName] Has [GV_NO_MPCur] manpower"
+			set_key = { lhs = Public_Tmp0 which = $elite$_MPCur }
+			#log = "[GetYear]: Province Manpower TEMP0 [GV_Public_Tmp0]"
+			#log = "[GetYear]: Province Manpower TEMP1 [GV_Public_Tmp1]"
+
+			PREV = { 
+				change_key = { lhs = $elite$_MPCur which = PREV }
+				#log = "[GetYear]: Public TEMP0 [GV_Public_Tmp0]"
+				set_variable = { which = temp0 value = 0 }
+				set_variable = { which = temp1 value = 0 }
+				set_var_from_key = { var = temp0 key = Public_Tmp0 }
+				
+				set_key = { lhs = Public_Tmp0 which = PREV }
+				set_var_from_key = { var = temp1 key = Public_Tmp0 }
+				#log = "[GetYear]: TEMP0 [temp0.GetValue]"
+				#log = "[GetYear]: TEMP1 [temp1.GetValue]"
+
+				if = {
+					limit = {
+						check_variable = { which = temp0 which = temp1 }
+					}
+
+					set_key_from_var = { key = Public_Tmp0 var = temp0 }
+				}
+			}
+		}
+
+		#log = "[GetYear]: Max Manpower [GV_NO_MPCur]"
+		#log = "[GetYear]: Max Province Manpower [GV_Public_Tmp0]"
+
+		every_owned_province = {
+			limit = { 
+				is_key_equal = { lhs = Public_Tmp0 which = PREV } 
+			}
+			
+			save_global_event_target_as = cw_rebellion_center
+			#log = "[GetYear]: [This.GetCapitalName] Rebellion Center with [GV_NO_MPCur] manpower"
+			#log = "[GetYear]: Max Province Manpower 2 [GV_Public_Tmp0]"
+		}
+
+		# log = "================================================================="
+
+
+		set_key = { lhs = cw_rebellion_strength_percentage which = Prov_$elite$Pow }
+		divide_key = { lhs = cw_rebellion_strength_percentage value = 100 } # transform to scale of [0-1]
+
+		# input modifier for strength
+		multiply_key = { lhs = cw_rebellion_strength_percentage value = 1 }
+
+		# balance limiter - max amount of dev to break away
+		if = {
+			limit = { 
+				check_key = { lhs = cw_rebellion_strength_percentage value = 0.9 } # `CIVIL_WAR_MAX_STRENGTH_PERC~value`
+			}
+			set_key = { lhs = cw_rebellion_strength_percentage value = 0.9 } # `CIVIL_WAR_MAX_STRENGTH_PERC~value`
+		}
+		
+
+		set_key = { lhs = Public_Tmp1 value = 100 }
+		subtract_key = { lhs = Public_Tmp1 which = Prov_$elite$Loy }
+		multiply_key = { lhs = Public_Tmp1 value = 0.01 } # transform to scale of [0-1]
+
+		multiply_key = { lhs = cw_rebellion_strength_percentage which = Public_Tmp1 }
+		multiply_key = { lhs = cw_rebellion_strength_percentage which = Modi_CivilWarStrength }
+
+		set_variable = { which = temp2 value = 0 }
+		set_var_from_key = { var = temp2 key = $elite$_MPCur }
+		set_variable = { which = temp3 value = 0 }
+		set_var_from_key = { var = temp3 key = cw_rebellion_strength_percentage }
+
+		multiply_variable = {            
+			which = temp2
+			which = temp3
+		}
+		set_key_from_var = { key = Public_Tmp2 var = temp2 }
+
+		# log = "[GetYear]: rebellion strength precentage [temp3.GetValue]"
+		# log = "[GetYear]: rebellion strength [This.temp2.GetValue]"
+		# log = "================================================================="
+
+		event_target:cw_rebellion_center = {
+			set_province_flag = rebellion_center
+		}
+			
+		set_key = { lhs = Public_Tmp3 which = Public_Tmp2 }
+		set_key = { lhs = Public_Tmp4 value = 0 }
+		while = {
+			limit = { 
+				check_key = { lhs = Public_Tmp2 value = 0.01 }
+			}
+
+			random_owned_province = {
+				limit = {
+					owned_by = $orig_scope$
+					NOT = { has_province_flag = assigned_rebellion }
+					NOT = { has_province_flag = rebellion_center }
+					NOT = { is_capital = yes }
+				}
+				
+				set_province_flag = assigned_rebellion
+
+				add_core =  $rebel_tag$
+				add_devastation = 100
+
+				set_key = { lhs = Public_Tmp3 which = $elite$_MPCur }
+				set_key = { lhs = Public_Tmp4 which = Dev_Total }
+
+				PREV = { 
+					set_key = { lhs = Public_Tmp3 which = PREV } 
+					change_key = { lhs = Public_Tmp4 which = PREV } 
+					subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
+					# log = "[GetYear]: [This.GetCapitalName] Subtract Manpower [This.GV_Public_Tmp3]"
+					# log = "[GetYear]: [This.GV_Public_Tmp2] Strength Left"
+					# log = "[GetYear]: Rebellion Dev Total [This.GV_Public_Tmp4]"
+					# log = "================================================================="
+				}			
+			}
+		}
+
+		every_owned_province = {
+			limit = {
+				OR = {
+					has_province_flag = rebellion_center
+					has_province_flag = assigned_rebellion
+				}
+			}
+			add_core = $rebel_tag$
+		}
+		### Release and setup rebel tag
+		$rebel_tag$ = { #done early to get a proper ruler name
+			change_primary_culture = ROOT
+		}
+		
+		release = $rebel_tag$
+		if = {
+			limit = {
+				has_country_flag = TR_ChangeGovCivilWar
+			}
+			$rebel_tag$ = {
+				Pol_ChangeGovClans = { Identity=1 Leadership=1 Tradition=1 }
+				#Log = "[GetYear]: [Root.GetName] was released as a rebel tag to fight for Clan based government."
+			}
+		}
+		$rebel_tag$ = {
+			set_country_flag = ongoing_civil_war
+			set_country_flag = civil_war_rebel_tag
+			set_country_flag = PriorityTag
+			change_religion = $orig_scope$
+			civil_war_start_internal_cohesion_loyalty = {
+				elite = $elite$
+			}
+			civil_war_transfer_desired_reform_keys = {
+				scp1 = $rebel_tag$
+				scp2 = $orig_scope$
+			}
+			Rights_ResetDesiredReforms = yes
+			country_event = {
+				id = Init.2
+			}
+			declare_war_with_cb = {
+				who = $orig_scope$
+				casus_belli = cb_civil_war
+			}
+			transfer_army_tradition = {
+				scp1 = $orig_scope$
+			}
+			
+			#convert_ruler_to_general = yes
+			if = {
+				limit = {
+					capital_scope = {
+						has_owner_accepted_culture = no
+					}
+				}
+				add_accepted_culture = capital
+			}
+			add_adm_power = 200
+			add_dip_power = 200
+			add_mil_power = 200
+		}
+
+		# recalc stats of origin tag
+		country_event = { id = civil_wars.300 }
+
+		### Calc control %
+
+		#Store total value for later comparison
+		set_key = { lhs = cw_control_perc value = 1 }
+		subtract_key = { lhs = cw_control_perc which = cw_rebellion_strength_percentage }
+
+		set_key = { lhs = cw_current_control_abs which = Dev_Total }
+		
+
+		$rebel_tag$ = {
+			set_key = { lhs = cw_rebellion_strength_percentage which = $orig_scope$ }
+			set_key = { lhs = cw_control_perc which = cw_rebellion_strength_percentage }
+
+			set_key = { lhs = cw_current_control_abs which = Dev_Total }
+			set_key = { lhs = cw_total_control_abs which = $orig_scope$ }
+		}
+
+		country_event = { id = civil_wars.203 days = 1 } #look for outside help for rebels
+	}
+}

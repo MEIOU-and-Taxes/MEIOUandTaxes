@@ -1294,10 +1294,16 @@ country_event = {
 				}
 			}
 		}
+		war_with = ENG 
 		#had_country_flag = { flag = king_jean_released days = 3650 }
 	}
 	mean_time_to_happen = {
 		years = 1
+
+		modifier = {
+			factor = 0.25
+			has_global_flag = treaty_of_troyes
+		}
 	}
 	option = {
 		name = "flavor_hyw.101.a"
@@ -1632,55 +1638,80 @@ country_event = {
 				dynasty = ROOT
 			}
 		}
+		france_superregion = {
+			limit = {
+				owned_by = ROOT
+			}
+			add_province_modifier = {
+				name = french_resistance
+				duration = -1
+			}
+		}
 		set_country_flag = plantagenet_french_regent
 		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Stays in London but send a faimly member to rule in his name:flavor_hyw.201"
 	}
 	# A French prince can become the focal point for French rebellion
 	# A bit like House of Braganza in Portugal
-	# option = {
-	# 	name = "flavor_hyw.201.c"
-	# 	ai_chance = {
-	# 		factor = 5
-	# 	}
-	# 	hidden_effect = {
-	# 		REB = {
-	# 			set_variable = {
-	# 				which = french_rebellion_desire
-	# 				value = 5
-	# 			}
-	# 		}
-	# 		country_event = {
-	# 			id = flavor_hyw.202
-	# 			days = 20
-	# 			tooltip = "flavor_hyw.202.d"
-	# 		}
-	# 	}
-	# 	if = {
-	# 		limit = {
-	# 			DAU = {
-	# 				exists = yes
-	# 			}
-	# 		}
-	# 		DAU = {
-	# 			set_country_flag = french_pretender
-	# 		}
-	# 	}
-	# 	else_if = {
-	# 		limit = {
-	# 			any_subject_country = {
-	# 				culture_group = langue_d_oil
-	# 			}
-	# 		}
-	# 		random_subject_country = {
-	# 			limit = {
-	# 				culture_group = langue_d_oil
-	# 			}
-	# 			set_country_flag = french_pretender
-	# 		}
-	# 	}
-	# 	log = "FE-TempHYW:[GetYear]:[Root.GetName]:Rejected the choice to become French:flavor_hyw.201"
-	# 	set_country_flag = king_of_isles
-	# }
+	option = {
+		name = "flavor_hyw.201.c"
+		ai_chance = {
+			factor = 5
+		}
+		hidden_effect = {
+			REB = {
+				set_variable = {
+					which = french_rebellion_desire
+					value = 5
+				}
+			}
+			country_event = {
+				id = flavor_hyw.202
+				days = 20
+				tooltip = "flavor_hyw.202.d"
+			}
+		}
+		if = {
+			limit = {
+				DAU = {
+					exists = yes
+				}
+			}
+			DAU = {
+				set_country_flag = french_pretender
+			}
+		}
+		else_if = {
+			limit = {
+				any_subject_country = {
+					culture_group = langue_d_oil
+				}
+			}
+			random_subject_country = {
+				limit = {
+					culture_group = langue_d_oil
+				}
+				set_country_flag = french_pretender
+			}
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Rejected the choice to become French:flavor_hyw.201"
+		set_country_flag = king_of_isles
+		france_superregion = {
+			limit = {
+				owned_by = ROOT
+			}
+			add_province_modifier = {
+				name = uef_estates_general_1
+				duration = -1
+			}
+		}
+	}
+	after = {
+		set_country_flag = uef_estates_general
+		add_country_modifier = {
+			name = french_rebellion_desire_modifier
+			duration = -1
+		}
+	}
 }
 
 #How do we deal with Northern France, Is it a English Possession or a French one?
@@ -2496,6 +2527,7 @@ country_event = {
 		}
 	}
 }
+
 
 #John of Gaunt couldn't enforce the claim
 country_event = {
@@ -4213,4 +4245,219 @@ country_event = {
 	}
 }
 
-#Treaty of Tours
+#French resurgence under Charles VII
+country_event = {
+	id = flavor_hyw.1500
+	title = flavor_hyw.1500.t
+	desc = "flavor_hyw.1500.d"
+	picture = REFORM_eventPicture
+
+	major = yes
+	fire_only_once = yes
+
+	trigger = {
+		tag = FRA
+		has_global_flag = treaty_of_troyes
+		has_global_flag = hundred_years_war
+		NOT = { has_country_flag = charles_vii }
+	}
+
+	mean_time_to_happen = {
+		years = 15
+
+		modifier = {
+			factor = 0.2
+			war_with = ENG
+		}
+
+		modifier = {
+			factor = 0.8
+			check_key = { lhs = Prov_NOPow value = 85 }
+		}
+
+		modifier = {
+			factor = 0.8
+			check_key = { lhs = Prov_NOPow value = 65 }
+		}
+
+		modifier = {
+			factor = 0.8
+			check_key = { lhs = Prov_NOPow value = 50 }
+		}
+
+		modifier = {
+			factor = 0.5
+			ai = yes
+		}
+
+		modifier = {
+			factor = 0.8
+			stability = -1
+		}
+
+		modifier = {
+			factor = 0.8
+			stability = -2
+		}
+
+		modifier = {
+			factor = 0.8
+			stability = -3
+		}
+	}
+
+	immediate = {
+		FRA = {
+			Stab_Add1 = yes
+			add_war_exhaustion = -5
+			set_country_flag = charles_vii
+			add_country_modifier = {
+				name = french_last_stand_1
+				duration = -1
+			}
+		}
+	}
+
+	option = {
+		name = flavor_hyw.1500.a
+		custom_tooltip = french_resurgence_tt
+		hidden_effect = {
+			country_event = {
+				id = flavor_hyw.1501
+				days = 15
+			}
+		}
+	}
+}
+
+#Compagnie d'ordonnance, first standing army by Europeans
+country_event = {
+	id = flavor_hyw.1501
+	title = flavor_hyw.1501.t
+	desc = "flavor_hyw.1501.d"
+	picture = REFORM_eventPicture
+
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_hyw.1501.a
+		custom_tooltip = french_military_reform_tt
+		hidden_effect = {
+			FRA = {
+				if = {
+					limit = {
+						Privilege_HasGreater = { Privilege=NOServiceE Lvl=4 }
+					}
+					Privilege_NOServiceE4Apply = yes
+				}
+
+				if = {
+					limit = { Privilege_HasGreater = { Privilege=NOAutonomy Lvl=4 } }
+					Privilege_NOAutonomy4Apply = yes
+				}
+
+				if = {
+					limit = {
+						NOT = { Rights_NOSer3HasGreater = yes }
+					}
+					Rights_NOSer3Apply = yes
+				}
+
+				if = {
+					limit = {
+						NOT = { Rights_BUSer3HasGreater = yes }
+					}
+					Rights_BUSer3Apply = yes
+				}
+
+				country_event = {
+					id = flavor_hyw.1501
+					days = 30
+				}
+			}
+		}
+	}
+}
+
+# The Birth of a Permanent Taxation System, used the vanilla desc and title
+country_event = {
+	id = flavor_hyw.1501
+	title = "flavor_fra.EVTNAME9100"
+	desc = "flavor_fra.EVTDESC9100"
+	picture = ECONOMY_eventPicture
+
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_fra.EVTOPTA9100"
+		custom_tooltip = french_economic_reform_tt
+		hidden_effect = {
+			FRA = {
+				Privilege_NOTaxELower = yes
+
+				if = {
+					limit = {
+						NOT = { Rights_BUTax2HasGreater = yes }
+					}
+					Rights_BUTax2Apply = yes
+				}
+
+				if = {
+					limit = {
+						NOT = { Rights_NOGov3HasGreater = yes }
+					}
+					Rights_NOGov3Apply = yes
+				}
+
+				if = {
+					limit = {
+						NOT = { Rights_BUTax2HasGreater = yes }
+					}
+					Rights_BUTax2Apply = yes
+				}
+
+				#Increase unrest but increase state reach
+				every_core_province = {
+					limit = {
+						region = france_region
+					}
+					add_province_modifier = {
+						name = permanent_tax_system
+						duration = 3650
+					}
+				}
+			}
+		}
+	}
+}
+
+#Balance out the powerful reforms with which France gets when they are beaten down by England
+#Gets triggered when France completes their conquest and kicks out England from France.
+country_event = {
+	id = flavor_hyw.1550
+	title = "flavor_hyw.1501.t"
+	desc = "flavor_hyw.1501.d"
+	picture = ECONOMY_eventPicture
+
+	is_triggered_only = yes
+
+
+	#Appease nobles when we won
+	option = {
+		name = flavor_hyw.1501.a
+		if = {
+			limit = {
+				Rights_BUSer3HasGreater = yes
+			}
+			Rights_BUSer4Apply = yes
+		}
+
+		if = {
+			limit = {
+				Rights_BUTax2HasGreater = yes
+			}
+			Rights_BUTax1Apply = yes
+		}
+	}
+
+}

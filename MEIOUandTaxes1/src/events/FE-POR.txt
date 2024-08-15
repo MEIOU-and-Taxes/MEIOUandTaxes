@@ -1526,3 +1526,233 @@ country_event = {
 		log = "FE-POR:[GetYear]:[Root.GetName]:rejected returning King Sebastian:hee_POR.2"
 	}
 }
+
+
+country_event = {
+	id = flavor_por.5000
+	title = "flavor_por.5000.n"
+	desc = "flavor_por.5000.t"
+	picture = IBERIAN_WEDDING_eventPicture
+	fire_only_once = yes
+
+	trigger = {
+		tag = POR
+		LNC = {
+			has_country_flag = "lancaster_claims_castile_throne"
+			is_subject_of = ENG
+		}
+		ENG = {
+			alliance_with = ROOT
+			dynasty = "Plantagenet"
+		}
+	}
+
+	mean_time_to_happen = {
+		months = 12
+	}
+
+	option = {#Support English invasion of Castile
+		name = "flavor_por.5000.a"
+		ai_chance = {
+			factor = 95
+		}
+
+		if = {
+			limit = {
+				has_heir_flag = heir_beatriz
+			}
+			custom_tooltip = tooltip_flavor_por.5000.tt
+			set_country_flag = edward_york_proposal
+		}
+	}
+
+	option = {#We are too weak
+		name = "flavor_por.1004.b"
+		ai_chance = {
+			factor = 5
+		}
+		add_prestige = -10
+		break_alliance = ENG
+	}
+}
+
+#Beatriz of Portugal 1373
+country_event = {
+	id = flavor_por.5001
+	title = "flavor_por.5001.n"
+	desc = "flavor_por.5001.t"
+	picture = IBERIAN_WEDDING_eventPicture
+	fire_only_once = yes
+
+	trigger = {
+		tag = POR
+		has_heir = no
+		NOT = { is_year = 1411 }
+		is_year = 1373
+	}
+
+	mean_time_to_happen = {
+		months = 6
+	}
+
+	option = {#Name my daughter as heir
+		name = "flavor_por.5001.a"
+		ai_chance = {
+			factor = 100
+		}
+		define_heir = {
+			name = "Beatriz"
+			monarch_name = "Beatriz I"
+			birth_date = 1373.2.7
+			hidden = yes
+		}
+		set_heir_flag = heir_beatriz
+		if = {
+			limit = {
+				has_consort = no
+			}
+			define_consort = {
+				country_of_origin = CAS
+				name = "Leonor Teles"
+				dynasty = "Meneses"
+				age = 22
+			}
+		}
+		set_country_flag = por_beatriz
+	}
+
+	option = {#Perhaps I could still have a son of my own
+		name = "flavor_por.5001.b"
+		add_legitimacy = -20
+	}
+}
+
+#Portugal was forced to break alliance with England and realigns with Avignon 
+country_event = {
+	id = flavor_por.5002
+	title = "flavor_por.5002.n"
+	desc = "flavor_por.5002.t"
+	picture = IBERIAN_WEDDING_eventPicture
+	
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = {
+			has_country_flag = promised_to_castilian_sons
+		}
+	}
+
+	immediate = {
+		clr_country_flag = edward_york_proposal
+		if = {
+			limit = {
+				alliance_with = ENG
+			}
+			break_alliance = ENG
+		}
+	}
+
+	option = {#Marry her to the widowed Castilian King, but it wouldn't lead to the annexation.
+		name = "flavor_por.5002.a"
+		ai_chance = {
+			factor = 100
+		}
+
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 } 
+		Stab_Subtract50Percent = yes
+		set_country_flag = beatriz_castilian_husband
+	}
+
+	option = {#I will remain a loyal ally to the English
+		name = "flavor_por.5002.b"
+		add_legitimacy = -20
+	}
+}
+
+#Succession event for Beatriz
+country_event = {
+	id = flavor_por.5002
+	title = "flavor_por.5002.n"
+	desc = "flavor_por.5002.t"
+	picture = IBERIAN_WEDDING_eventPicture
+	
+	is_triggered_only = yes
+
+	trigger = {
+		tag = POR
+		has_country_flag = por_beatriz
+		OR = {
+			AND = {
+				has_regency = yes
+				has_heir_flag = heir_beatriz
+			}
+			AND = {
+				is_female = yes
+				has_ruler_flag = heir_beatriz
+			}
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			clr_country_flag = por_beatriz
+		}
+	}
+
+	option = {#Edward of Norwich was proposed by Richard II
+		name = "flavor_por.5002.a"
+		trigger = {
+			has_country_flag = edward_york_proposal
+		}
+		ai_chance = {
+			factor = 0
+		}
+		define_ruler = {
+			name = "Edward"
+			dynasty = "Plantagnet"
+			female = yes
+		}
+
+		define_consort = {
+			name = "Beatriz"
+			dynasty = "Borgonha"
+			birth_date = 1373.2.7
+			culture = root
+			country_of_origin = POR
+			female = yes
+		}
+		clr_country_flag = edward_york_proposal
+		set_country_flag = accepts_english_king
+	}
+
+	option = {#Enrique II of Castile
+		name = "flavor_por.5002.a"
+		trigger = {
+			OR = {
+				has_country_flag = beatriz_castilian_husband
+				has_country_flag = promised_to_castilian_sons
+			}
+		}
+		ai_chance = {
+			factor = 95
+		}
+		CAS = {
+			create_subject = {
+				subject_type = temporary_union
+				subject = POR
+			}
+		}
+		set_country_flag = accepts_spanish_king
+	}
+
+	option = {#She will rule alone
+		name = "flavor_por.5002.b"
+		ai_chance = {
+			factor = 5
+		}
+		add_legitimacy = -50
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 } 
+		Stab_Subtract3 = yes
+		Stab_Subtract3 = yes
+	}
+}

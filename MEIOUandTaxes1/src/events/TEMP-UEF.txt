@@ -1,0 +1,930 @@
+# Rebellion desire decay event
+country_event = {
+	id = flavor_uef.99
+	title = "flavor_uef.99.title"
+	desc = "flavor_uef.99.desc"
+	picture = CIVIL_WAR_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.99.a"
+		
+		subtract_variable = {
+			which = french_rebellion_desire
+			value = 1
+		}
+		
+		country_event = { id = flavor_uef.99 days = 3650 }
+	}
+}
+
+# Check rebellion desire event (for testing and debugging)
+country_event = {
+	id = flavor_uef.0
+	title = "flavor_uef.0.title"
+	desc = {
+		trigger = { check_variable = { which = french_rebellion_desire value = 0.001 } }
+		desc = "flavor_uef.0.desca"
+	}
+	desc = {
+		trigger = { NOT = { check_variable = { which = french_rebellion_desire value = 0.001 } } }
+		desc = "flavor_uef.0.descb"
+	}
+	picture = CIVIL_WAR_eventPicture
+	is_triggered_only = yes
+	option = {
+		name = "flavor_uef.0.a"
+	}
+}
+
+# Demand taxes calculation event
+country_event = {
+	id = flavor_uef.2
+	title = "flavor_uef.2.title"
+	desc = "flavor_uef.2.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+	hidden = yes
+
+	option = {
+		name = flavor_uef.2.a # Accept
+		ai_chance = {
+			factor = 80
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 10
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 12
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 14
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 16
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 18
+					}
+				}
+			}
+		}
+		FROM = {
+			country_event = { id = flavor_uef.3 }
+		}
+	}
+	option = {
+		name = flavor_uef.3.b # Reject
+		ai_chance = {
+			factor = 20
+		}
+		FROM = {
+			country_event = { id = flavor_uef.4 }
+		}
+	}
+}
+# Estates-General accepts tax demand
+country_event = {
+	id = flavor_uef.3
+	title = "flavor_uef.3.title"
+	desc = "flavor_uef.3.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.3.a # Good.
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						has_country_flag = uef_estates_general
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_1
+						}
+					}
+					AND = {
+						has_country_flag = king_of_isles
+						FRA = {
+							is_subject_of = ROOT
+							any_owned_province = {
+								has_province_modifier = uef_estates_general_1
+							}
+						}
+					}
+				}
+			}
+			add_treasury = 100
+		}
+		else_if = {
+			limit = {
+				OR = {
+					AND = {
+						has_country_flag = uef_estates_general
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_2
+						}
+					}
+					AND = {
+						has_country_flag = king_of_isles
+						FRA = {
+							is_subject_of = ROOT
+							any_owned_province = {
+								has_province_modifier = uef_estates_general_2
+							}
+						}
+					}
+				}
+			}
+			add_treasury = 150
+		}
+		else_if = {
+			limit = {
+				OR = {
+					AND = {
+						has_country_flag = uef_estates_general
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_3
+						}
+					}
+					AND = {
+						has_country_flag = king_of_isles
+						FRA = {
+							is_subject_of = ROOT
+							any_owned_province = {
+								has_province_modifier = uef_estates_general_3
+							}
+						}
+					}
+				}
+			}
+			add_treasury = 200
+		}
+		else = {
+			add_treasury = 100
+		}
+	}
+}
+# Estates-General rejects tax demand
+country_event = {
+	id = flavor_uef.4
+	title = "flavor_uef.4.title"
+	desc = "flavor_uef.4.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.4.a # Those pesky peasants...
+		add_prestige = -5
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 5
+				}
+			}
+		}
+	}
+}
+# New Bishoprics 1559
+country_event = {
+	id = flavor_uef.5
+	title = "flavor_uef.5.title"
+	desc = "flavor_uef.5.desc"
+	picture = RELIGION_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		has_global_flag = french_rebellion_start
+		OR = {
+			AND = {
+				has_global_flag = hundred_years_war_ENG_win
+				FRA = {
+					is_subject_of = ROOT
+					any_owned_province = {
+						OR = {
+							religion = protestant
+							religion = reformed
+						}
+					}
+				}
+			}
+			AND = {
+				has_country_flag = uef_estates_general
+				any_owned_province = {
+					OR = {
+						has_province_modifier = uef_estates_general_1
+						has_province_modifier = uef_estates_general_2
+						has_province_modifier = uef_estates_general_3
+						has_province_modifier = french_resistance
+					}
+					OR = {
+						religion = protestant
+						religion = reformed
+					}
+				}
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 5
+	}
+	option = {
+		name = flavor_uef.5.a # Introduce the new bishoprics to fight more effectively against heresy
+		ai_chance = {
+			factor = 75
+		}
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			add_country_modifier = {
+				name = uef_new_bishoprics
+				duration = -1
+			}
+			every_owned_province = {
+				limit = {
+					superregion = france_superregion
+				}
+				add_nationalism = 5
+			}
+		}
+		else = {
+			FRA = {
+				add_country_modifier = {
+					name = uef_new_bishoprics
+					duration = -1
+				}
+				every_owned_province = {
+					add_nationalism =  15
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+	}
+	option = {
+		name = flavor_uef.5.b # We don't need a new system
+		ai_chance = {
+			factor = 25
+		}
+	}
+}
+
+# Compromise of Nobles 1566
+country_event = {
+	id = flavor_uef.6
+	title = "flavor_uef.6.title"
+	desc = "flavor_uef.6.desc"
+	picture = COURT_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		has_global_flag = uef_rebellion_start
+		OR = {
+			has_country_flag = uef_inquisition
+			has_country_modifier = uef_new_bishoprics
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = flavor_uef.6.a # Agree to compromise
+		ai_chance = { factor = 60 }
+		
+		remove_country_modifier = uef_new_bishoprics
+		clr_country_flag = uef_inquisition
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			set_variable = {
+				which = inquisition
+				value = 0
+			}
+		}
+		else = {
+			set_variable = {
+				which = inquisition
+				value = 0
+			}
+			uef = {
+				set_variable = {
+					which = inquisition
+					value = 0
+				}
+			}
+		}
+		
+		hidden_effect = {
+			REB = {
+				subtract_variable = {
+					which = french_rebellion_desire
+					value = 3
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_uef.6.b # Reject the petition
+		ai_chance = { factor = 40 }
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			every_owned_province = {
+				limit = {
+					superregion = france_superregion
+				}
+				add_unrest = 2
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 3
+				}
+			}
+		}
+	}
+}
+
+# Province incorporated in the Estates-General
+country_event = {
+	id = flavor_uef.7
+	title = "flavor_uef.7.title"
+	desc = "flavor_uef.7.desc"
+	picture = CONQUEST_eventPicture
+	
+	# Event fires if uef or BUR obtains new provinces in the Low Countries and adds estates general to those provinces
+	trigger = {
+		any_owned_province = {
+			OR = {
+				has_province_modifier = uef_estates_general_1
+				has_province_modifier = uef_estates_general_2
+				has_province_modifier = uef_estates_general_3
+			}
+		}
+		any_owned_province = {
+			superregion = france_superregion
+			is_core = ROOT
+			NOT = {
+				OR = {
+					has_province_modifier = uef_estates_general_1
+					has_province_modifier = uef_estates_general_2
+					has_province_modifier = uef_estates_general_3
+				}
+			}
+		}
+	}
+	
+	mean_time_to_happen = {
+		years = 5
+	}
+	
+	option = {
+		name = "flavor_uef.7.a"
+		every_owned_province = {
+			limit = {
+				superregion = france_superregion
+				is_core = ROOT
+				NOT = {
+					OR = {
+						has_province_modifier = uef_estates_general_1
+						has_province_modifier = uef_estates_general_2
+						has_province_modifier = uef_estates_general_3
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT = {
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_1
+						}
+					}
+				}
+				add_province_modifier = {
+					name = uef_estates_general_1
+					duration = -1
+				}
+			}
+			else_if = {
+				limit = {
+					ROOT = {
+						any_owned_province = {
+							has_province_modifier = uef_estates_general_2
+						}
+					}
+				}
+				add_province_modifier = {
+					name = uef_estates_general_2
+					duration = -1
+				}
+			}
+			else = {
+				add_province_modifier = {
+					name = uef_estates_general_3
+					duration = -1
+				}
+			}
+		}
+	}
+}
+
+# Demand joining war calculation event
+country_event = {
+	id = flavor_uef.9
+	title = "flavor_uef.9.title"
+	desc = "flavor_uef.9.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.9.a # Accept
+		ai_chance = {
+			factor = 80
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 10
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 12
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 14
+					}
+				}
+			}
+			modifier = {
+				factor = 0.5
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 16
+					}
+				}
+			}
+			modifier = {
+				factor = 0
+				REB = {
+					check_variable = {
+						which = french_rebellion_desire
+						value = 18
+					}
+				}
+			}
+		}
+		FROM = {
+			country_event = { id = flavor_uef.10 }
+		}
+	}
+	option = {
+		name = flavor_uef.9.b # Reject
+		ai_chance = {
+			factor = 20
+		}
+		FROM = {
+			country_event = { id = flavor_uef.11 }
+		}
+	}
+}
+# Estates-General accepts join war demand
+country_event = {
+	id = flavor_uef.10
+	title = "flavor_uef.10.title"
+	desc = "flavor_uef.10.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.10.a # Good.
+		join_all_offensive_wars_of = ENG
+	}
+}
+# Estates-General rejects join war demand
+country_event = {
+	id = flavor_uef.11
+	title = "flavor_uef.11.title"
+	desc = "flavor_uef.11.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes
+
+	option = {
+		name = flavor_uef.11.a # Those pesky peasants...
+		add_prestige = -5
+		
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 1
+				}
+			}
+		}
+	}
+}
+# Breakup disaster events
+# On start
+country_event = {
+	id = flavor_uef.100
+	title = "flavor_uef.100.title"
+	desc = "flavor_uef.100.desc"
+	picture = RELIGIOUS_TURMOIL_eventPicture
+
+	is_triggered_only = yes
+	
+	immediate = {
+		set_global_flag = uef_breakup_starts
+		# Spawn the rebels, hit 1 stab.
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			Stab_Subtract1 = yes
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = protestant_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = protestant_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = reformed_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = reformed_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 0 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = catholic_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+			random_owned_province = {
+				limit = {
+					superregion = france_superregion
+					MN_CheckProp = { religion = 0 type = TotP prop = 20 }
+					controlled_by = ROOT
+				}
+				spawn_rebels = {
+					type = catholic_rebels
+					size = 4
+					unrest = 10
+					win = yes
+				}
+			}
+		}
+		else = {
+			Stab_Subtract1 = yes
+			FRA = {
+				random_owned_province = {
+					limit = {
+						superregion = france_superregion
+						MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+						controlled_by = uef
+					}
+					spawn_rebels = {
+						type = protestant_rebels
+						size = 4
+						unrest = 10
+						win = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						superregion = france_superregion
+						MN_CheckProp = { religion = 2 type = TotP prop = 20 }
+						controlled_by = uef
+					}
+					spawn_rebels = {
+						type = protestant_rebels
+						size = 3
+						unrest = 10
+						win = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						superregion = france_superregion
+						MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+						controlled_by = uef
+					}
+					spawn_rebels = {
+						type = reformed_rebels
+						size = 4
+						unrest = 10
+						win = yes
+					}
+				}
+				random_owned_province = {
+					limit = {
+						superregion = france_superregion
+						MN_CheckProp = { religion = 3 type = TotP prop = 20 }
+						controlled_by = uef
+					}
+					spawn_rebels = {
+						type = reformed_rebels
+						size = 3
+						unrest = 10
+						win = yes
+					}
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_uef.100.a" # Compromise with the rebels
+		ai_chance = {
+			factor = 25
+		}
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			disband_rebels = protestant_rebels
+			disband_rebels = reformed_rebels
+		}
+		else = {
+			FRA = {
+				disband_rebels = protestant_rebels
+				disband_rebels = reformed_rebels
+			}
+		}
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			every_owned_province = {
+				limit = {
+					superregion = france_superregion
+				}
+				add_province_modifier = {
+					name = uef_religious_compromise
+					duration = 18250 # 50 years
+				}
+			}
+		}
+		else = {
+			uef = {
+				every_owned_province = {
+					add_province_modifier = {
+						name = uef_religious_compromise
+						duration = 18250 # 50 years
+					}
+				}
+			}
+		}
+		country_event = { id = flavor_uef.199 days = 5 }
+	}
+	option = {
+		name = "flavor_uef.100.b" # Suppress the rebels
+		ai_chance = {
+			factor = 75
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 3
+				}
+			}
+		}
+	}
+}
+
+# Tenth Penny
+country_event = {
+	id = flavor_uef.101
+	title = "flavor_uef.101.title"
+	desc = "flavor_uef.101.desc"
+	picture = ECONOMY_eventPicture
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	
+	option = {
+		name = flavor_uef.101.a # Demand the Tenth Penny
+		ai_chance = {
+			factor = 25
+		}
+		add_treasury = 500
+		Stab_Subtract3 = yes		
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 8
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_uef.101.b # Let�s not burden the people with additional taxes
+		ai_chance = {
+			factor = 75
+		}
+		add_legitimacy = 10
+	}
+}
+
+# Council of Troubles
+country_event = {
+	id = flavor_uef.102
+	title = "flavor_uef.102.title"
+	desc = "flavor_uef.102.desc"
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	
+	option = {
+		name = flavor_uef.102.a # Set it up and execute the leaders of the revolt
+		ai_chance = {
+			factor = 25
+		}
+		Stab_Subtract6 = yes
+		if = {
+			limit = {
+				has_country_flag = uef_estates_general
+			}
+			every_owned_province = {
+				limit = {
+					superregion = france_superregion
+				}
+				add_unrest = -10
+			}
+		}
+		else = {
+			uef = {
+				every_owned_province = {
+					add_unrest = -10
+				}
+			}
+		}
+		custom_tooltip = flavor_uef_danger_tooltip
+		hidden_effect = {
+			REB = {
+				change_variable = {
+					which = french_rebellion_desire
+					value = 5
+				}
+			}
+		}
+	}
+	option = {
+		name = flavor_uef.102.b # Don't set it up
+		ai_chance = {
+			factor = 75
+		}
+		add_legitimacy = 10
+	}
+}
+# Disaster end
+country_event = {
+	id = flavor_uef.199
+	title = "flavor_uef.199.title"
+	desc = "flavor_uef.199.desc"
+	picture = COURT_eventPicture
+
+	is_triggered_only = yes
+	
+	option = {
+		name = flavor_uef.199.a # Finally
+		Stab_Add2 = yes
+	}
+}
+# Information on the new mechanics
+country_event = {
+	id = flavor_uef.200
+	title = "flavor_uef.200.title"
+	desc = "flavor_uef.200.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.200.a"
+	}
+}
+# Centralisation information
+country_event = {
+	id = flavor_uef.201
+	title = "flavor_uef.201.title"
+	desc = "flavor_uef.201.desc"
+	picture = BURGUNDY_COURT_eventPicture
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_uef.201.a"
+	}
+}
