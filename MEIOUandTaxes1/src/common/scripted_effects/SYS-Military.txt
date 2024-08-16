@@ -453,6 +453,9 @@ Mil_DoBudgetBU = {
 			}
 			set_key = { lhs = Tmp_0 value = 0.001 }
 		}
+		else = {			#Try to prevent negative values
+			set_key = { lhs = Tmp_0 value = 0 }
+		}
 		PREV = { change_key = { lhs = Tmp_0 which = PREV } } # Store total sum in owner
 
 		### Also, we're going to figure out potential MP costs
@@ -505,26 +508,31 @@ Mil_DoBudgetBU = {
 	}
 	# Distribute Budget over provinces
 	every_owned_province = {
-		if = {
-			limit = {
-				owner = { has_country_flag = Mil_BUScale }
-			}
-			set_key = { lhs = Mil_BUScaleMult which = PREV }
-			multiply_key = { lhs = Mil_StateSpendMulti which = Mil_BUScaleMult }
-			multiply_key = { lhs = Mil_StateSpendMulti value = 0.01 }
-			set_key = { lhs = BU_MilBudget which = Mil_StateSpendMulti }
-			set_key = { lhs = Mil_StateSpendMulti which = Mil_BUScaleMult }
-		}
-		else = {
-			set_key = { lhs = Mil_StateSpendMulti which = PREV }
-		}
+		# if = {
+		# 	limit = {
+		# 		owner = { has_country_flag = Mil_BUScale }
+		# 	}
+		# 	set_key = { lhs = Mil_BUScaleMult which = PREV }
+		# 	multiply_key = { lhs = Mil_StateSpendMulti which = Mil_BUScaleMult }
+		# 	multiply_key = { lhs = Mil_StateSpendMulti value = 0.01 }
+		# 	set_key = { lhs = BU_MilBudget which = Mil_StateSpendMulti }
+		# 	set_key = { lhs = Mil_StateSpendMulti which = Mil_BUScaleMult }
+		# }
+		# else = {
+		set_key = { lhs = Mil_StateSpendMulti which = PREV }
+		# }
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_0 value = 0.001 }
 			}
 			set_key = { lhs = Tmp_1 which = PREV }
-			divide_key = { lhs = Tmp_0 which = Tmp_1 }
 			set_key = { lhs = BU_MilBudget which = PREV }
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_1 value = 0.001 }
+				}
+				divide_key = { lhs = Tmp_0 which = Tmp_1 }
+			}
 			multiply_key = { lhs = BU_MilBudget which = Tmp_0 }
 		}
 		# Universally apply this visibility
