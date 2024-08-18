@@ -7946,7 +7946,69 @@ Modi_TaxCountry = {
 	set_key = { lhs = Modi_TaxPropAcademicCost value = 1 }
 	set_key = { lhs = Modi_TaxPropCommercialCost value = 1 }
 
-	set_key = { lhs = Modi_TaxAI_RatioSpendingMulti value = 1 } # This is a multiplier, which is applied on the fractional part of AI mana spending (applied before the hardcaps)
+	set_key = { lhs = Modi_TaxAI_ADM_RatioSpendingMulti value = 1 } # Multiplier upon fraction of yearly mana generation to spend on tax of this mana type
+	set_key = { lhs = Modi_TaxAI_DIP_RatioSpendingMulti value = 1 } # Multiplier upon fraction of yearly mana generation to spend on tax of this mana type
+	set_key = { lhs = Modi_TaxAI_MIL_RatioSpendingMulti value = 1 } # Multiplier upon fraction of yearly mana generation to spend on tax of this mana type
+
+	if = {
+		limit = {
+			personality = ai_militarist ### VANILLA AI STANCE
+			is_free_or_tributary_trigger = yes
+		}
+		change_key = { lhs = Modi_TaxAI_ADM_RatioSpendingMulti value = 0.05 }
+		change_key = { lhs = Modi_TaxAI_MIL_RatioSpendingMulti value = 0.15 }
+	}
+
+	# Increase fraction by 5% for free militarist nations (or colonial/rebellious subjects) as long as they earn enough points
+	if = {
+		limit = {
+			OR = {
+				ruler_has_personality = conqueror_personality
+				ruler_has_personality = martial_educator_personality
+				ruler_has_personality = tough_soldier_personality
+			}
+			is_free_or_tributary_trigger = yes
+		}
+			change_key = { lhs = Modi_TaxAI_MIL_RatioSpendingMulti value = 0.075 }
+	}
+
+	if = {
+		limit = {
+			OR = {
+				is_colonial_nation = yes
+				is_subject_of_type = rebellious_decentralized_vassal
+			}
+		}
+		change_key = { lhs = Modi_TaxAI_ADM_RatioSpendingMulti value = 0.025 }
+		change_key = { lhs = Modi_TaxAI_DIP_RatioSpendingMulti value = 0.025 }
+		change_key = { lhs = Modi_TaxAI_MIL_RatioSpendingMulti value = 0.100 }		
+	}
+
+	# Increase fraction by 5% when being at war
+	if = {
+		limit = {
+			is_at_war = yes
+		}
+		change_key = { lhs = Modi_TaxAI_ADM_RatioSpendingMulti value = 0.05 }
+		change_key = { lhs = Modi_TaxAI_DIP_RatioSpendingMulti value = 0.05 }
+		change_key = { lhs = Modi_TaxAI_MIL_RatioSpendingMulti value = 0.05 }
+	}
+
+	# Increase if you perceive threats
+	if = {
+		limit = {
+			any_neighbor_country = {
+				PREV = {
+					ai_attitude = {
+						who = PREV
+						attitude = attitude_threatened
+					}
+
+				}
+			}
+		}
+		change_key = { lhs = Modi_TaxAI_MIL_RatioSpendingMulti value = 0.1 }
+	}
 
 	if = {
 		limit = {
@@ -8555,10 +8617,10 @@ Effect_CloseProd = {
 
 Pol_ChangeGovMonarchy = {
 	change_government = monarchy
-	add_government_reform = Pol_Succession$Succession$
+	[[Succession] add_government_reform = Pol_Succession$Succession$ ]
 	Pol_FamilyInit = yes
 	Pol_SetGovernmentHelper1 = yes
-	add_government_reform = Pol_Assembly$Assembly$
+	[[Assembly] add_government_reform = Pol_Assembly$Assembly$ ]
 	Pol_SetGovernmentHelper2 = yes
 	add_government_reform = Pol_Privileges1
 	[[SpecialArrangement] 
@@ -8567,26 +8629,26 @@ Pol_ChangeGovMonarchy = {
 	]
 }
 Pol_ChangeGovRepublic = {
-	change_government = republic
-	add_government_reform = Pol_Mandate$Mandate$
-	add_government_reform = Pol_Stylings$Stylings$
-	add_government_reform = Pol_ExtraPowers$ExtraPowers$
-	add_government_reform = Pol_Assembly$Assembly$
-	add_government_reform = Pol_TermOfOffice$TermOfOffice$
-	Pol_SetGovernmentHelper1 = yes ## Nobility
-	Pol_SetGovernmentHelper2 = yes ## Core
-	add_government_reform = Pol_Privileges1
-	[[SpecialArrangement] 
-		add_government_reform = $SpecialArrangement$
-		remove_government_reform = Pol_Privileges1
-	]
+    change_government = republic
+    [[Mandate] add_government_reform = Pol_Mandate$Mandate$ ]
+    [[Stylings] add_government_reform = Pol_Stylings$Stylings$ ]
+    [[ExtraPowers] add_government_reform = Pol_ExtraPowers$ExtraPowers$ ]
+    [[Assembly] add_government_reform = Pol_Assembly$Assembly$ ]
+    [[TermOfOffice] add_government_reform = Pol_TermOfOffice$TermOfOffice$ ]
+    Pol_SetGovernmentHelper1 = yes ## Nobility
+    Pol_SetGovernmentHelper2 = yes ## Core
+    add_government_reform = Pol_Privileges1
+    [[SpecialArrangement] 
+        add_government_reform = $SpecialArrangement$
+        remove_government_reform = Pol_Privileges1
+    ]
 }
 Pol_ChangeGovTheocracy = {
 	change_government = theocracy
-	add_government_reform = Pol_Organisation$Organisation$
-	add_government_reform = Pol_Mediumship$Mediumship$
+	[[Organisation] add_government_reform = Pol_Organisation$Organisation$ ]
+	[[Mediumship] add_government_reform = Pol_Mediumship$Mediumship$ ]
 	Pol_SetGovernmentHelper1 = yes ## Nobility
-	add_government_reform = Pol_Assembly$Assembly$
+	[[Assembly] add_government_reform = Pol_Assembly$Assembly$ ]
 	Pol_SetGovernmentHelper2 = yes ## Core
 	add_government_reform = Pol_Privileges1
 	[[SpecialArrangement] 
@@ -8596,9 +8658,9 @@ Pol_ChangeGovTheocracy = {
 }
 Pol_ChangeGovClans = {
 	change_government = tribal
-	add_government_reform = Pol_Identity$Identity$
-	add_government_reform = Pol_Leadership$Leadership$
-	add_government_reform = Pol_Tradition$Tradition$
+	[[Identity] add_government_reform = Pol_Identity$Identity$ ]
+	[[Leadership] add_government_reform = Pol_Leadership$Leadership$ ]
+	[[Tradition] add_government_reform = Pol_Tradition$Tradition$ ]
 	Pol_SetGovernmentHelper1 = yes ## Nobility
 	Pol_SetGovernmentHelper2 = yes ## Core
 	add_government_reform = Pol_Privileges1
