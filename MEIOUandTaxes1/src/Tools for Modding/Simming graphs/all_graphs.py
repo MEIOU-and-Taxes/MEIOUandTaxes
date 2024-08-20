@@ -1766,7 +1766,7 @@ def graphProd_Diff_Foodless(t, plt):
         fiber2 = get_data(t, 'Fiber Demand')
         fuel2 = get_data(t, 'Fuel Demand')
         raw2 = get_data(t, 'Raw Material Demand')
-        timber = get_data(t, 'Timber Demand')
+        timber2 = get_data(t, 'Timber2 Demand')
         exotic2 = get_data(t, 'Exotics Demand')
         consumer2 = get_data(t, 'Consumer Product Demand')
         military2 = get_data(t, 'Military Product Demand')
