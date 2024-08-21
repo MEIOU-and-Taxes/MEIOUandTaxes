@@ -3869,10 +3869,10 @@ TN_SetTradeIncome = {
 
 					set_key = { lhs = Stat_Inp which = TN_SectorTV }
 					multiply_key = { lhs = Stat_Inp which = TN_ProvSply51 }
-                    multiply_key = { lhs = Stat_Inp value = 1.0 } # Modify in constants.txt `TRADE_POWER_VALUE_MULTIPLIER~value`
+                    multiply_key = { lhs = Stat_Inp value = 1.33 } # Modify in constants.txt `TRADE_POWER_VALUE_GLOBAL_MULTIPLIER~value`
 
                     # Vanilla trade value money fraction of magic money
-                    multiply_key = { lhs = Stat_Inp value = 0.5 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_POPS~value`
+                    multiply_key = { lhs = Stat_Inp value = 0.38 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_VANILLA_TRADE~value`
 			
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 819.2 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 409.6 }
@@ -3891,10 +3891,17 @@ TN_SetTradeIncome = {
 			
                     # Calc fraction of magic money used to give directly to pops
 					set_key = { lhs = Public_Tmp1 value = 1 }
-					subtract_key = { lhs = Public_Tmp1 value = 0.5 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_POPS~value`
+					subtract_key = { lhs = Public_Tmp1 value = 0.38 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_VANILLA_TRADE~value`
                     multiply_key = { lhs = Public_Tmp1 which = TN_SectorTV }
 					multiply_key = { lhs = Public_Tmp1 which = TN_ProvSply51 }
-                    change_key = { lhs = BG_Wealth which = Public_Tmp1 }
+
+                    set_key = { lhs = RE_IncomeTradeValue which = Public_Tmp1 }
+                    set_key = { lhs = NO_IncomeTradeValue which = Public_Tmp1 }
+                    set_key = { lhs = BG_IncomeTradeValue which = Public_Tmp1 }
+
+                    multiply_key = { lhs = BG_IncomeTradeValue value = 0.60 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_BG~value`
+                    multiply_key = { lhs = RE_IncomeTradeValue value = 0.25 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_RE~value`
+                    multiply_key = { lhs = NO_IncomeTradeValue value = 0.15 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_NO~value`
 
 					set_key = { lhs = Public_Tmp1 value = 0 }
 					set_key = { lhs = TN_SectorTV value = 0 }
@@ -4184,28 +4191,17 @@ TN_DoIncomeSpending = {
 
 # Summarize various variables into total class and slot incomes
 TN_SetIncome = {
-    # There's a small amount of innate wealth for each classes
-    TN_SetIncomeInnate = yes
+    # Wage
+    set_key = { lhs = SF_Income which = SF_IncomeProd }
+    set_key = { lhs = NM_Income which = NM_IncomeProd }
+    set_key = { lhs = RE_Income which = RE_IncomeProd }
+    set_key = { lhs = NO_Income which = NO_IncomeProd }
+    set_key = { lhs = BG_Income which = BG_IncomeProd }
+    set_key = { lhs = CL_Income which = CL_IncomeProd }
 
-    # Class Income
-    set_key = { lhs = SF_Income which = SF_IncomeInnate }
-    set_key = { lhs = NM_Income which = NM_IncomeInnate }
-    set_key = { lhs = RE_Income which = RE_IncomeInnate }
-    set_key = { lhs = NO_Income which = NO_IncomeInnate }
-    set_key = { lhs = BG_Income which = BG_IncomeInnate }
-    set_key = { lhs = CL_Income which = CL_IncomeInnate }
-	
 	# Literati
     set_key = { lhs = LT_Income which = LT_IncomeProd }
     change_key = { lhs = RE_Income which = LT_Income } # Literati are Residents
-
-    # Wage
-    change_key = { lhs = SF_Income which = SF_IncomeProd }
-    change_key = { lhs = NM_Income which = NM_IncomeProd }
-    change_key = { lhs = RE_Income which = RE_IncomeProd }
-    change_key = { lhs = NO_Income which = NO_IncomeProd }
-    change_key = { lhs = BG_Income which = BG_IncomeProd }
-    change_key = { lhs = CL_Income which = CL_IncomeProd }
 
     # Property
     change_key = { lhs = SF_Income which = SF_IncomePrp }
@@ -4215,7 +4211,15 @@ TN_SetIncome = {
     change_key = { lhs = BG_Income which = BG_IncomePrp }
     change_key = { lhs = CL_Income which = CL_IncomePrp }
 
-    # Dole
+    # Trade Magic Money
+    change_key = { lhs = SF_Income which = SF_IncomeTradeValue }
+    change_key = { lhs = NM_Income which = NM_IncomeTradeValue }
+    change_key = { lhs = RE_Income which = RE_IncomeTradeValue }
+    change_key = { lhs = NO_Income which = NO_IncomeTradeValue }
+    change_key = { lhs = BG_Income which = BG_IncomeTradeValue }
+    change_key = { lhs = CL_Income which = CL_IncomeTradeValue }
+
+    # State Grain Dole
     change_key = { lhs = SF_Income which = SF_IncomeDole }
     change_key = { lhs = NM_Income which = NM_IncomeDole }
     change_key = { lhs = RE_Income which = RE_IncomeDole }
@@ -4223,7 +4227,7 @@ TN_SetIncome = {
     change_key = { lhs = BG_Income which = BG_IncomeDole }
     change_key = { lhs = CL_Income which = CL_IncomeDole }
 
-    # Dole
+    # Taxes performed on other classes
     change_key = { lhs = SF_Income which = SF_IncomeTax }
     change_key = { lhs = NM_Income which = NM_IncomeTax }
     change_key = { lhs = RE_Income which = RE_IncomeTax }
