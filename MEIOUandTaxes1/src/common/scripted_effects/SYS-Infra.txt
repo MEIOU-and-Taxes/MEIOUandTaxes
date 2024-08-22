@@ -2495,7 +2495,8 @@ Infra_GetAppealInfra = {
 
 				## Multiply pre cost appeal by a modifier based on how much a city is over it's amenities limit
 				# Formula: (Residents / Cap)
-				multiply_key = { lhs = Public_Tmp1 value = 1.8 } # use this to balance the effect vs. the cap -> 1.5 = at the cap you get 50% more appeal
+				# use this to balance the effect vs. the cap -> 1.5 = at the cap you get 50% more appeal
+				multiply_key = { lhs = Public_Tmp1 value = 1.8 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_OVER_AMENITIES_LIMIT~value`
 				if = {
 					limit = {
 						check_key = { lhs = Public_Tmp0 value = 0.001 }
@@ -2506,6 +2507,7 @@ Infra_GetAppealInfra = {
 					set_key = { lhs = Public_Tmp1 value = 0 }
 				}
 
+				# Maximum x3 appeal, min x 0.75
 				if = {
 					limit = {
 						check_key = { lhs = Public_Tmp0 value = 3 }
@@ -2527,7 +2529,8 @@ Infra_GetAppealInfra = {
 		[[paths]
 		if = {
 			limit = { always = $paths$ check_key = { lhs = TN_Pass value = 1 } } 
-			multiply_key = { lhs = $return$ value = 1.333 } # ancient paths are desired to have Pathing
+			# ancient paths are desired to have Pathing
+			multiply_key = { lhs = $return$ value = 1.5 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_ANCIENT_PATHS~value`
 		}
 		]
 
@@ -2558,14 +2561,7 @@ Infra_GetAppealInfra = {
 
 		# Appeal / Total Costs per unit
         divide_key = { lhs = $return$ which = Tmp_9 }
-		
-		# Get infrastructure unit goal - current amount of units
-        set_key = { lhs = Tmp_9 which = Infra_$type$Goal }
-        subtract_key = { lhs = Tmp_9 which = Infra_$type$Size }
-
-		# Appeal / Required Units to Upgrade
-        divide_key = { lhs = $return$ which = Tmp_9 }
-		
+				
 		# Get Rank of current unit + 1
 		set_key = { lhs = Tmp_9 which = Infra_$type$ }
 		change_key = { lhs = Tmp_9 value = 1 }
@@ -2573,7 +2569,7 @@ Infra_GetAppealInfra = {
 		# Appeal / Rank+1
 		divide_key = { lhs = $return$ which = Tmp_9 }
 
-		[[urban] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK FULFILLED ATLEAST 50% 
+		[[urban] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
 			if = {
 				limit = { always = $urban$ }
 
@@ -2591,7 +2587,9 @@ Infra_GetAppealInfra = {
 				}
 
 				if = {
-					limit = { NOT = { check_key = { lhs = Public_Tmp1 value = 0.75 } } }
+					limit = { 
+						NOT = { check_key = { lhs = Public_Tmp1 value = 0.9 } } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_AMENITIES_UPGRADE_MAX_RATIO~value`
+					}
 
 					set_key = { lhs = $return$ value = -1 }
 				}

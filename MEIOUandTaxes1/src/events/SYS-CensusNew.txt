@@ -4242,21 +4242,12 @@ country_event = {
 					limit = {
 						isValidProv = yes
 						
-						check_key = { lhs = Infra_Wealth value = 80 } # Only build if province has 75 wealth
-						check_key = { lhs = Infra_Fill value = 99 } # only build if current infrastructure is nearly fully sustained in terms of goods and labour
+						# Only build if province has wealth
+						check_key = { lhs = Infra_Wealth value = 80 }  # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_REQUIRED_INFRA_FUND_MIN~value`
+						# only build if current infrastructure is nearly fully sustained in terms of goods and labour
+						check_key = { lhs = Infra_Fill value = 99 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_REQUIRED_INFRA_FULLFILLMENT~value`
 
-						OR = {
-							NOT = { has_province_flag = Infra_S0 }
-							NOT = { has_province_flag = Infra_S1 }
-							NOT = { has_province_flag = Infra_S2 }
-							NOT = { has_province_flag = Infra_S3 }
-							NOT = { has_province_flag = Infra_S4 }
-							NOT = { has_province_flag = Infra_S5 }
-							NOT = { has_province_flag = Infra_S6 }
-							NOT = { has_province_flag = Infra_S7 }
-							NOT = { has_province_flag = Infra_S8 }
-							NOT = { has_province_flag = Infra_S9 }
-						}
+						Infra_CanConstruct = yes
 
 						NOT = {
 							AND = {
@@ -4273,15 +4264,17 @@ country_event = {
 							}
 						}
 					}
+
+					### USE THIS FACTOR OF THE INFRASTRUCTURE WEALTH TO BUILD STUFF ###
 					set_key = { lhs = Tmp_0 which = Infra_Wealth }
-					divide_key = { lhs = Tmp_0 value = 6 }
+					multiply_key = { lhs = Tmp_0 value = 0.167 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_INFRA_WEALTH_FRACTION~value`
 
 
 					#########################################################
 					## CALCULATE APPEAL FOR DIFFERENT INFRASTRUCTURE TYPES ##
 					#########################################################
-					set_key = { lhs = Tmp_1 value = 0.01 } # Initial Appeal cutoff
-					set_key = { lhs = Tmp_2 value = 0 } # Tmp_2 used to store type of infrastructure
+					set_key = { lhs = Tmp_1 value = 0.01 } # Initial Appeal cutoff & later overwritten by current highest appeal
+					set_key = { lhs = Tmp_2 value = 0 } # Tmp_2 used to store type of infrastructure with current highest appeal
 					# Tmp_3 used to get different types of appeal
 
 					# Pathing
@@ -4298,14 +4291,11 @@ country_event = {
 					# Harbourage and Amenities only if there is enough resident population
 					if = {
 						limit = {
-							OR = {
-								check_key = { lhs = RE_Total value = 2 }
-								has_global_flag = POP_Sim
-							}
+							check_key = { lhs = RE_Total value = 1.5 }
 						}
 						if = { 
 							limit = { Infra_CanHarbourage = yes	}
-							Infra_GetAppealInfra = { type = Harbourage weightNO = 0.25 weightBG = 2 weightCL = 0.25 return = Tmp_3 } # Get Harbourage appeal
+							Infra_GetAppealInfra = { type = Harbourage weightNO = 0.25 weightBG = 2 weightCL = 0.25 urban = yes return = Tmp_3 } # Get Harbourage appeal
 							if = { 
 								limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If harbourage appeal > Current Highest
 								set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to harbourage appeal
@@ -4315,7 +4305,7 @@ country_event = {
 						
 						if = { 
 							limit = { Infra_CanAmenities = yes }
-							Infra_GetAppealInfra = { type = Amenities weightNO = 0.5 weightBG = 8 weightCL = 0.6 urban = yes return = Tmp_3 } # Get amenities appeal
+							Infra_GetAppealInfra = { type = Amenities weightNO = 0.5 weightBG = 4 weightCL = 0.6 urban = yes return = Tmp_3 } # Get amenities appeal
 							if = { limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If amenities appeal > Current Highest
 								set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to amenities appeal
 								set_key = { lhs = Tmp_2 value = 3 } # set current desired build type to amenities (id = 3)
@@ -4326,7 +4316,7 @@ country_event = {
 					if = { 
 						limit = { Infra_CanIrrigation = yes	}
 						# Irrigation
-						Infra_GetAppealInfra = { type = Irrigation weightNO = 2.5 weightBG = 0.2 weightCL = 0.75 rural = yes nomad = yes return = Tmp_3 } # Get Irrigation appeal
+						Infra_GetAppealInfra = { type = Irrigation weightNO = 2.5 weightBG = 0.1 weightCL = 0.75 rural = yes nomad = yes return = Tmp_3 } # Get Irrigation appeal
 						if = { limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If Irrigation appeal > Current Highest
 							set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to Irrigation appeal
 							set_key = { lhs = Tmp_2 value = 4 } # set current desired build type to Irrigation (id = 4)
@@ -4340,7 +4330,8 @@ country_event = {
 
 					if = { 
 						limit = { Infra_CanGarrison = yes }
-						Infra_GetAppealInfra = { type = Garrison weightNO = 0.6 weightBG = 0.25 weightCL = 0.25 nomad = yes return = Tmp_3 }
+						Infra_GetAppealInfra = { type = Garrison weightNO = 1.5 weightBG = 0.5 weightCL = 0.25 nomad = yes return = Tmp_3 
+						}
 						if = { limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If Garrison appeal > Current Highest
 							set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to Garrison appeal
 							set_key = { lhs = Tmp_2 value = 6 }  # set current desired build type to Garrison (id = 4)
@@ -4350,6 +4341,8 @@ country_event = {
 					##################################################
 					## Check whether or not you can build something ##
 					##################################################
+					set_key = { lhs = Construct_Parallel value = 2.0 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_UNITS_PER_BUILD_ORDER~value`
+
 					if = {
 						limit = {
 							check_key = { lhs = Tmp_2 value = 1 } # Any infrastructure type was selected
@@ -4357,77 +4350,66 @@ country_event = {
 						if = {
 							limit = { is_key_equal = { lhs = Tmp_2 value = 1 } } # Pathing selected
 
-							if = {
-								limit = { check_key = { lhs = Tmp_0 which = Infra_PathingSizeCost1 } } # Infrastructure Wealth > Upgrade costs
+							set_key = { lhs = Tmp_1 which = Infra_PathingSizeCost1 }
+							multiply_key = { lhs = Tmp_1 which = Construct_Parallel }
 
-								set_key = { lhs = Construct_Parallel value = 2 }
+							if = {
+								limit = { check_key = { lhs = Tmp_0 which = Tmp_1 } } # Infrastructure Wealth > Upgrade costs
+
 								Infra_StartProject = { id = 8 height = Construct_Parallel width = Construct_Parallel }
-								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Pathing, cost was [GV_Infra_PathingSizeCost1] per unit"
+								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Pathing, cost was [GV_Tmp_1] per unit"
 							}
 						}
 						else_if = {
 							limit = {
-								is_key_equal = { lhs = Tmp_2 value = 2 }
+								is_key_equal = { lhs = Tmp_2 value = 2 } # Harbourage Selected
 							}
+
+							set_key = { lhs = Tmp_1 which = Infra_HarbourageSizeCost1 }
+							multiply_key = { lhs = Tmp_1 which = Construct_Parallel }
+
 							if = {
 								limit = {
-									check_key = { lhs = Tmp_0 which = Infra_HarbourageSizeCost1 }
-								}
-								if = {
-									limit = {
-										check_key = { lhs = Tmp_0 value = 22 }
-									}
-									set_key = { lhs = Construct_Parallel value = 2 }
-								}
-								else = {
-									set_key = { lhs = Construct_Parallel value = 1 }
+									check_key = { lhs = Tmp_0 which = Tmp_1 }
 								}
 								
 								Infra_StartProject = { id = 9 height = Construct_Parallel width = Construct_Parallel }
-								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Harbourage, cost was [GV_Infra_HarbourageSizeCost1] per unit"
+								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Harbourage, cost was [GV_Tmp_1] per unit"
 							}
 						}
 						else_if = {
 							limit = {
-								is_key_equal = { lhs = Tmp_2 value = 3 }
+								is_key_equal = { lhs = Tmp_2 value = 3 } # Amenities Selected
 							}
+
+							set_key = { lhs = Tmp_1 which = Infra_AmenitiesSizeCost1 }
+							multiply_key = { lhs = Tmp_1 which = Construct_Parallel }
+							
 							if = {
 								limit = {
-									check_key = { lhs = Tmp_0 which = Infra_AmenitiesSizeCost1 }
+									check_key = { lhs = Tmp_0 which = Tmp_1 }
 								}
-								if = {
-									limit = {
-										check_key = { lhs = Tmp_0 value = 22 }
-									}
-									set_key = { lhs = Construct_Parallel value = 2 }
-								}
-								else = {
-									set_key = { lhs = Construct_Parallel value = 1 }
-								}
+
 								#log = "[This.GetName] wants to start Amenities"
 								Infra_StartProject = { id = 10 height = Construct_Parallel width = Construct_Parallel }
-								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Amenities, cost was [GV_Infra_AmenitiesSizeCost1] per unit"
+								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Amenities, cost was [GV_Tmp_1] per unit"
 							}
 						}
 						else_if = {
 							limit = {
-								is_key_equal = { lhs = Tmp_2 value = 4 }
+								is_key_equal = { lhs = Tmp_2 value = 4 } # Irrigation Selected
 							}
+
+							set_key = { lhs = Tmp_1 which = Infra_IrrigationSizeCost1 }
+							multiply_key = { lhs = Tmp_1 which = Construct_Parallel }
+
 							if = {
 								limit = {
-									check_key = { lhs = Tmp_0 which = Infra_IrrigationSizeCost1 }
+									check_key = { lhs = Tmp_0 which = Tmp_1 }
 								}
-								if = {
-									limit = {
-										check_key = { lhs = Tmp_0 value = 22 }
-									}
-									set_key = { lhs = Construct_Parallel value = 2 }
-								}
-								else = {
-									set_key = { lhs = Construct_Parallel value = 1 }
-								}
+
 								Infra_StartProject = { id = 11 height = Construct_Parallel width = Construct_Parallel }
-								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Irrigation, cost was [GV_Infra_IrrigationSizeCost1] per unit"
+								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Irrigation, cost was [GV_Tmp_1] per unit"
 							}
 						}
 						#else_if = {
@@ -4445,25 +4427,20 @@ country_event = {
 						#}
 						else_if = {
 							limit = {
-								is_key_equal = { lhs = Tmp_2 value = 6 }
+								is_key_equal = { lhs = Tmp_2 value = 6 } # Garrison Selected
 							}
+
+							set_key = { lhs = Tmp_1 which = Infra_GarrisonSizeCost1 }
+							multiply_key = { lhs = Tmp_1 which = Construct_Parallel }
+
 							if = {
 								limit = {
-									check_key = { lhs = Tmp_0 which = Infra_GarrisonSizeCost1 }
-								}
-								if = {
-									limit = {
-										check_key = { lhs = Tmp_0 value = 22 }
-									}
-									set_key = { lhs = Construct_Parallel value = 2 }
-								}
-								else = {
-									set_key = { lhs = Construct_Parallel value = 1 }
+									check_key = { lhs = Tmp_0 which = Tmp_1 }
 								}
 
 								Infra_StartProject = { id = 14 height = Construct_Parallel width = Construct_Parallel }
 
-								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Garrison, cost was [GV_Infra_GarrisonSizeCost1] per unit"
+								#_#_log = "Infrastructure:[GetYear]:[This.Owner.GetName]:[This.GetName]:local elites build [GV_Construct_Parallel] units of Garrison, cost was [GV_Tmp_1] per unit"
 							}
 						}
 					}
