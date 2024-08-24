@@ -2160,84 +2160,101 @@ Infra_SetSpendInfra = {
     }
 }
 
+# Checks Infrastructure and Goods Fulfillments
 Infra_CheckInfra = {
+    # Check if the infrastructure of the specified type exists (size >= 1)
     if = {
         limit = {
             check_key = { lhs = Infra_$type$Size value = 1 }
         }
-        multiply_key = { lhs = Infra_$type$Decay value = 0.95 }
 
-		if = {
-			limit = {
-				OR = {
-					has_province_flag = Infra_$type$100
-					[[StateFunded] always = $StateFunded$ ]
-				}
-			}
-			set_key = { lhs = Tmp_1 value = 100 }
-		}
-		else_if = {
-			limit = {
-				has_province_flag = Infra_$type$50
-			}
-			set_key = { lhs = Tmp_1 value = 100 }
-			change_key = { lhs = Tmp_1 which = Infra_Fill }
-			multiply_key = { lhs = Tmp_1 value = 0.5 } #divide_key = { lhs = Tmp_1 value = 2 }			
-		}
-		else_if = {
-			limit = {
-				OR = {
-					has_province_flag = Infra_$type$25
-					AND = {
-					   always = $StateBased$
-					   NOT = { has_global_flag = POP_Sim }
-					   owner = { ai = yes }
-					}
-				}
-			}
-			set_key = { lhs = Tmp_1 which = Infra_Fill }
-			multiply_key = { lhs = Tmp_1 value = 0.75 }
-			change_key = { lhs = Tmp_1 value = 25 }
-		}
-		else = {
-			set_key = { lhs = Tmp_1 which = Infra_Fill }
-		}
+        # Apply a decay multiplier to the infrastructure
+        multiply_key = { lhs = Infra_$type$Decay value = 0.95 } # Decay the infrastructure slightly over time
 
+        # Determine how the infrastructure is funded
+        if = {
+            limit = {
+                OR = {
+                    has_province_flag = Infra_$type$100 # Fully funded by the province
+                    [[StateFunded] always = $StateFunded$ ] # State-funded infrastructure
+                }
+            }
+            set_key = { lhs = Tmp_1 value = 100 } # Full maintenance resources are available
+        }
+        else_if = {
+            limit = {
+                has_province_flag = Infra_$type$50 # Partially (50%) funded infrastructure
+            }
+            set_key = { lhs = Tmp_1 value = 100 } # Start with full resources
+            change_key = { lhs = Tmp_1 which = Infra_Fill } # Adjust based on actual fill level
+            multiply_key = { lhs = Tmp_1 value = 0.5 } # Half the resources are available
+        }
+        else_if = {
+            limit = {
+                OR = {
+                    has_province_flag = Infra_$type$25 # Partially (25%) funded infrastructure
+                    AND = {
+                       always = $StateBased$ # State-based infrastructure with specific conditions
+                       NOT = { has_global_flag = POP_Sim }
+                       owner = { ai = yes } # Owned by AI
+                    }
+                }
+            }
+            set_key = { lhs = Tmp_1 which = Infra_Fill } # Set based on fill level
+            multiply_key = { lhs = Tmp_1 value = 0.75 } # 75% of resources are available
+            change_key = { lhs = Tmp_1 value = 25 } # Adjust final value to 25
+        }
+        else = {
+            set_key = { lhs = Tmp_1 which = Infra_Fill } # Use the fill level as-is if none of the above conditions apply
+        }
+
+        # Initialize Tmp_0 to 0 for calculating total resources available
         set_key = { lhs = Tmp_0 value = 0 }
 
+        # Add up resources available from different goods and labor types
         [[prod1] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod1$ }]
         [[prod2] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod2$ }]
         [[prod3] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod3$ }]
         [[labor] change_key = { lhs = Tmp_0 which = Prod_Fill$labor$ }]
 
+        # Multiply the total resources by the adjusted maintenance factor (Tmp_1)
         multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+
+        # If the total resources are above a small threshold, apply further scaling
         if = {
             limit = {
-                check_key = { lhs = Tmp_0 value = 0.001 }
+                check_key = { lhs = Tmp_0 value = 0.001 } # Ensure resources are non-negligible
             }
-        	divide_key = { lhs = Tmp_0 value = -$num$00000 }
-		}
-        change_key = { lhs = Tmp_0 value = 0.1 }
+            divide_key = { lhs = Tmp_0 value = -$num$00000 } # Scale down by a factor based on num parameter
+        }
 
+        # Apply a small adjustment to the resources
+        change_key = { lhs = Tmp_0 value = 0.1 } # Adjust for minor fluctuations
+
+        # Adjust the decay of the infrastructure based on available resources
         change_key = { lhs = Infra_$type$Decay which = Tmp_0 }
 
+        # Check if the decay has reached a critical level (>= 1)
         if = {
             limit = {
                 check_key = { lhs = Infra_$type$Decay value = 1 }
             }
-			random = {
-				chance = 50
-				set_key = { lhs = Infra_$type$Decay value = 0 }
-				subtract_key = { lhs = Infra_$type$Size value = 1 }
-	
-				Infra_SetRankInfra = { type = $type$ }
-			}
+            # 50% chance to downgrade the infrastructure if it's decayed too much
+            random = {
+                chance = 50
+                set_key = { lhs = Infra_$type$Decay value = 0 } # Reset decay to 0
+                subtract_key = { lhs = Infra_$type$Size value = 1 } # Reduce the size of the infrastructure by 1
+
+                Infra_SetRankInfra = { type = $type$ } # Adjust the rank of the infrastructure accordingly
+            }
         }
 
+        # Reset temporary variables for the next operation
         set_key = { lhs = Tmp_0 value = 0 }
         set_key = { lhs = Tmp_1 value = 0 }
     }
     else = {
+        # If the infrastructure size is < 1, set the decay to 0 (no decay)
         set_key = { lhs = Infra_$type$Decay value = 0 }
     }
 }
