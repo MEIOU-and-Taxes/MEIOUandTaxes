@@ -1931,46 +1931,67 @@ Infra_DoShare = { # calculate share of each player in %
 }
 
 Infra_SetFillInfra = {
-    set_key = { lhs = Tmp_0 value = 0 }
+    set_key = { lhs = Tmp_0 value = 0 } # Reset Total Maintenance Costs
 
+	## Sum up total maintenance costs
+	# Get maintenance cost for good Raw
+    set_key = { lhs = Tmp_1 which = Infra_6 }
+    multiply_key = { lhs = Tmp_1 which = TN_ProvPrc6 }
+    change_key = { lhs = Tmp_0 which = Tmp_1 }
+	
+	# Get maintenance cost for good Timber
+    set_key = { lhs = Tmp_1 which = Infra_10 }
+    multiply_key = { lhs = Tmp_1 which = TN_ProvPrc10 }
+    change_key = { lhs = Tmp_0 which = Tmp_1 }
+
+	# Get maintenance cost for good Military
     set_key = { lhs = Tmp_1 which = Infra_22 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc22 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for good Naval
     set_key = { lhs = Tmp_1 which = Infra_23 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc23 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
-    set_key = { lhs = Tmp_1 which = Infra_24 }
+	# Get maintenance cost for good Industrial
+	set_key = { lhs = Tmp_1 which = Infra_24 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc24 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for good Knowledge
     set_key = { lhs = Tmp_1 which = Infra_41 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc41 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for rural labour
     set_key = { lhs = Tmp_1 which = Infra_R }
     multiply_key = { lhs = Tmp_1 which = Class_PR }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for good Urban Labour
     set_key = { lhs = Tmp_1 which = Infra_UL }
     multiply_key = { lhs = Tmp_1 which = Class_PUL }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Infrastructure Wealth
     set_key = { lhs = Tmp_1 which = Infra_Wealth }
     multiply_key = { lhs = Tmp_1 value = 0.2 }
 
     if = {
         limit = {
-            check_key = { lhs = Tmp_1 which = Tmp_0 }
+            check_key = { lhs = Tmp_1 which = Tmp_0 } # If 20% of infra wealth > Total Maintenance Costs
         }
-        set_key = { lhs = Infra_Fill value = 100 }
+        set_key = { lhs = Infra_Fill value = 100 } # Set Infra Fill to 100
     }
     else = {
+		# Calculate fraction that can be paid by budget / total costs
         set_key = { lhs = Infra_Fill which = Tmp_1 }
-        multiply_key = { lhs = Infra_Fill value = 100 }
         divide_key = { lhs = Infra_Fill which = Tmp_0 }
 
+		# Multiply actually paid maintenance costs by fulfillment
+        multiply_key = { lhs = Infra_6 which = Infra_Fill }
+        multiply_key = { lhs = Infra_10 which = Infra_Fill }
         multiply_key = { lhs = Infra_22 which = Infra_Fill }
         multiply_key = { lhs = Infra_23 which = Infra_Fill }
         multiply_key = { lhs = Infra_24 which = Infra_Fill }
@@ -1978,12 +1999,9 @@ Infra_SetFillInfra = {
         multiply_key = { lhs = Infra_R which = Infra_Fill }
         multiply_key = { lhs = Infra_UL which = Infra_Fill }
 
-		multiply_key = { lhs = Infra_22 value = 0.01 }
-		multiply_key = { lhs = Infra_23 value = 0.01 }
-		multiply_key = { lhs = Infra_24 value = 0.01 }
-		multiply_key = { lhs = Infra_41 value = 0.01 }
-		multiply_key = { lhs = Infra_R value = 0.01 }
-		multiply_key = { lhs = Infra_UL value = 0.01 }
+		# Revert Infra Fill to 0-100 scaling
+        multiply_key = { lhs = Infra_Fill value = 100 }
+
     }
 
     set_key = { lhs = Tmp_0 value = 0 }
