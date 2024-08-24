@@ -1048,20 +1048,20 @@ TN_SumSector = {
 			}
 			
 			# Set stockpile size + goods decay system
-            # Minimum stockpile size is 4 times the current Demand or Supply, whichever is highest.
-            TN_SumSectorHelper2 = { prod = 1 }
-            TN_SumSectorHelper2 = { prod = 2 }
-            TN_SumSectorHelper2 = { prod = 4 }
-            TN_SumSectorHelper2 = { prod = 5 }
-            TN_SumSectorHelper2 = { prod = 6 }
-            TN_SumSectorHelper2 = { prod = 9 }
-            TN_SumSectorHelper2 = { prod = 10 }
-            TN_SumSectorHelper2 = { prod = 21 }
-            TN_SumSectorHelper2 = { prod = 22 }
-            TN_SumSectorHelper2 = { prod = 23 }
-            TN_SumSectorHelper2 = { prod = 24 }
-            TN_SumSectorHelper2 = { prod = 25 }
-            TN_SumSectorHelper2 = { prod = 41 }
+            # Minimum stockpile size is a below defined multipler times the current Demand or Supply, whichever is highest.
+            TN_SumSectorHelper2 = { prod = 1  limit_multiplier = 3.00 }
+            TN_SumSectorHelper2 = { prod = 2  limit_multiplier = 3.00 }
+            TN_SumSectorHelper2 = { prod = 4  limit_multiplier = 3.00 }
+            TN_SumSectorHelper2 = { prod = 5  limit_multiplier = 3.00 }
+            TN_SumSectorHelper2 = { prod = 6  limit_multiplier = 3.00 }
+            TN_SumSectorHelper2 = { prod = 9  limit_multiplier = 4.50 }
+            TN_SumSectorHelper2 = { prod = 10 limit_multiplier = 3.00 }
+            TN_SumSectorHelper2 = { prod = 21 limit_multiplier = 3.25 }
+            TN_SumSectorHelper2 = { prod = 22 limit_multiplier = 3.25 }
+            TN_SumSectorHelper2 = { prod = 23 limit_multiplier = 3.25 }
+            TN_SumSectorHelper2 = { prod = 24 limit_multiplier = 3.25 }
+            TN_SumSectorHelper2 = { prod = 25 limit_multiplier = 4.50 }
+            TN_SumSectorHelper2 = { prod = 41 limit_multiplier = 3.25 }
 
             # Store stockpile before Trade
             set_key = { lhs = TN_SectorStockpileDelta1 which = TN_SectorStockpile1 }
@@ -3884,7 +3884,10 @@ TN_SetTradeIncome = {
 
 					set_key = { lhs = Stat_Inp which = TN_SectorTV }
 					multiply_key = { lhs = Stat_Inp which = TN_ProvSply51 }
-                    multiply_key = { lhs = Stat_Inp value = 1.0 } # Modify in constants.txt `TRADE_POWER_VALUE_MULTIPLIER~value`
+                    multiply_key = { lhs = Stat_Inp value = 1.33 } # Modify in constants.txt `TRADE_POWER_VALUE_GLOBAL_MULTIPLIER~value`
+
+                    # Vanilla trade value money fraction of magic money
+                    multiply_key = { lhs = Stat_Inp value = 0.38 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_VANILLA_TRADE~value`
 			
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 819.2 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 409.6 }
@@ -3900,10 +3903,23 @@ TN_SetTradeIncome = {
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 0.4 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 0.2 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 0.1 }
+			
+                    # Calc fraction of magic money used to give directly to pops
+					set_key = { lhs = Public_Tmp1 value = 1 }
+					subtract_key = { lhs = Public_Tmp1 value = 0.38 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_VANILLA_TRADE~value`
+                    multiply_key = { lhs = Public_Tmp1 which = TN_SectorTV }
+					multiply_key = { lhs = Public_Tmp1 which = TN_ProvSply51 }
 
-					set_key = { lhs = Stat_Inp value = 0 }
-					
+                    set_key = { lhs = RE_IncomeTradeValue which = Public_Tmp1 }
+                    set_key = { lhs = NO_IncomeTradeValue which = Public_Tmp1 }
+                    set_key = { lhs = BG_IncomeTradeValue which = Public_Tmp1 }
+
+                    multiply_key = { lhs = BG_IncomeTradeValue value = 0.60 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_BG~value`
+                    multiply_key = { lhs = RE_IncomeTradeValue value = 0.30 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_RE~value`
+                    multiply_key = { lhs = NO_IncomeTradeValue value = 0.10 } # Modify in constants.txt `TRADE_POWER_VALUE_FRACTION_DIRECTLY_TO_NO~value`
+
 					set_key = { lhs = Public_Tmp1 value = 0 }
+					set_key = { lhs = TN_SectorTV value = 0 }
 
 					if = {
 						limit = {
@@ -3939,7 +3955,7 @@ TN_SumSectorHelper2 = {
         set_key = { lhs = Public_Tmp2 which = TN_SectorSply$prod$ } # if supply > demand
     }
 
-    multiply_key = { lhs = Public_Tmp2 value = 4 }
+    multiply_key = { lhs = Public_Tmp2 value = $limit_multiplier$ }
     
     if = {
         limit = {
@@ -4190,28 +4206,17 @@ TN_DoIncomeSpending = {
 
 # Summarize various variables into total class and slot incomes
 TN_SetIncome = {
-    # There's a small amount of innate wealth for each classes
-    TN_SetIncomeInnate = yes
+    # Wage
+    set_key = { lhs = SF_Income which = SF_IncomeProd }
+    set_key = { lhs = NM_Income which = NM_IncomeProd }
+    set_key = { lhs = RE_Income which = RE_IncomeProd }
+    set_key = { lhs = NO_Income which = NO_IncomeProd }
+    set_key = { lhs = BG_Income which = BG_IncomeProd }
+    set_key = { lhs = CL_Income which = CL_IncomeProd }
 
-    # Class Income
-    set_key = { lhs = SF_Income which = SF_IncomeInnate }
-    set_key = { lhs = NM_Income which = NM_IncomeInnate }
-    set_key = { lhs = RE_Income which = RE_IncomeInnate }
-    set_key = { lhs = NO_Income which = NO_IncomeInnate }
-    set_key = { lhs = BG_Income which = BG_IncomeInnate }
-    set_key = { lhs = CL_Income which = CL_IncomeInnate }
-	
 	# Literati
     set_key = { lhs = LT_Income which = LT_IncomeProd }
     change_key = { lhs = RE_Income which = LT_Income } # Literati are Residents
-
-    # Wage
-    change_key = { lhs = SF_Income which = SF_IncomeProd }
-    change_key = { lhs = NM_Income which = NM_IncomeProd }
-    change_key = { lhs = RE_Income which = RE_IncomeProd }
-    change_key = { lhs = NO_Income which = NO_IncomeProd }
-    change_key = { lhs = BG_Income which = BG_IncomeProd }
-    change_key = { lhs = CL_Income which = CL_IncomeProd }
 
     # Property
     change_key = { lhs = SF_Income which = SF_IncomePrp }
@@ -4221,7 +4226,15 @@ TN_SetIncome = {
     change_key = { lhs = BG_Income which = BG_IncomePrp }
     change_key = { lhs = CL_Income which = CL_IncomePrp }
 
-    # Dole
+    # Trade Magic Money
+    change_key = { lhs = SF_Income which = SF_IncomeTradeValue }
+    change_key = { lhs = NM_Income which = NM_IncomeTradeValue }
+    change_key = { lhs = RE_Income which = RE_IncomeTradeValue }
+    change_key = { lhs = NO_Income which = NO_IncomeTradeValue }
+    change_key = { lhs = BG_Income which = BG_IncomeTradeValue }
+    change_key = { lhs = CL_Income which = CL_IncomeTradeValue }
+
+    # State Grain Dole
     change_key = { lhs = SF_Income which = SF_IncomeDole }
     change_key = { lhs = NM_Income which = NM_IncomeDole }
     change_key = { lhs = RE_Income which = RE_IncomeDole }
@@ -4229,7 +4242,7 @@ TN_SetIncome = {
     change_key = { lhs = BG_Income which = BG_IncomeDole }
     change_key = { lhs = CL_Income which = CL_IncomeDole }
 
-    # Dole
+    # Taxes performed on other classes
     change_key = { lhs = SF_Income which = SF_IncomeTax }
     change_key = { lhs = NM_Income which = NM_IncomeTax }
     change_key = { lhs = RE_Income which = RE_IncomeTax }
@@ -4769,12 +4782,12 @@ TN_SetIncomeInnateHelper = {
 # val2 = innate income per 1k pops before threshhold
 # Threshhold = pops in k below which higher innate income is applied
 TN_SetIncomeInnate = {
-    TN_SetIncomeInnateHelperMain = { class = SF Proportional=yes val = 0.006 val2 = 0.08 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NM Proportional=yes val = 0.007 val2 = 0.08 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = RE Proportional=yes val = 0.008 val2 = 0.5 Threshold = 3 }
-    TN_SetIncomeInnateHelperMain = { class = NO Proportional=yes val = 0.012 val2 = 0.8 Threshold = 0.5 }
-    TN_SetIncomeInnateHelperMain = { class = BG Fixed=yes val = 0.5 }
-    set_key = { lhs = CL_IncomeInnate value = 0 }
+    #TN_SetIncomeInnateHelperMain = { class = SF Proportional=yes val = 0.004 val2 = 0.08 Threshold = 3.0 }
+    #TN_SetIncomeInnateHelperMain = { class = NM Proportional=yes val = 0.004 val2 = 0.08 Threshold = 3.0 }
+    #TN_SetIncomeInnateHelperMain = { class = RE Proportional=yes val = 0.006 val2 = 0.50 Threshold = 1.5 }
+    #TN_SetIncomeInnateHelperMain = { class = NO Proportional=yes val = 0.014 val2 = 0.80 Threshold = 0.5 }
+    #TN_SetIncomeInnateHelperMain = { class = BG Proportional=yes val = 0.012 val2 = 0.50 Threshold = 0.5 }
+    #TN_SetIncomeInnateHelperMain = { class = CL Proportional=yes val = 0.010 val2 = 0.50 Threshold = 0.5 }
 }
 
 TN_GetWealthPC = {

@@ -112,7 +112,7 @@ def graphProduction(t, plt):
 def graphBG_Income(t, plt):
         "Burgher Income"
         Total = get_data(t, 'Burgher Income Total')
-        Innate = get_data(t, 'Burgher Income Innate')
+        TradeValue = get_data(t, 'Burgher Income Trade Value')
         Tax = get_data(t, 'Burgher Income Tax')
         Property = get_data(t, 'Burgher Income Property')
         Prod = get_data(t, 'Burgher Income Prod')
@@ -122,7 +122,7 @@ def graphBG_Income(t, plt):
         itr = range(1, len(Total) + 1)
 
         plt.plot(itr, Total, label="Total")
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Tax, label="Tax")
         plt.plot(itr, Property, label="Property")
         plt.plot(itr, Prod, label="Prod")
@@ -349,7 +349,7 @@ def graphClass_Wealth(t, plt):
 def graphCL_Income(t, plt):
         "Clergy Income"
         Total = get_data(t, 'Clergy Income Total')
-        Innate = get_data(t, 'Clergy Income Innate')
+        TradeValue = get_data(t, 'Clergy Income Trade Value')
         Tax = get_data(t, 'Clergy Income Tax')
         Property = get_data(t, 'Clergy Income Property')
         Prod = get_data(t, 'Clergy Income Prod')
@@ -359,7 +359,7 @@ def graphCL_Income(t, plt):
         itr = range(1, len(Total) + 1)
 
         plt.plot(itr, Total, label="Total")
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Tax, label="Tax")
         plt.plot(itr, Property, label="Property")
         plt.plot(itr, Prod, label="Prod")
@@ -817,14 +817,14 @@ def graphLabor_Wages(t, plt):
 def graphNM_Income(t, plt):
         "Nomads Income"
         Total = get_data(t, 'Nomad Income Total')
-        Innate = get_data(t, 'Nomad Income Innate')
+        TradeValue = get_data(t, 'Nomad Income Trade Value')
         Tax = get_data(t, 'Nomad Income Tax')
         Property = get_data(t, 'Nomad Income Property')
         Prod = get_data(t, 'Nomad Income Prod')
         itr = range(1, len(Total) + 1)
 
         plt.plot(itr, Total, label="Total")
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Tax, label="Tax")
         plt.plot(itr, Property, label="Property")
         plt.plot(itr, Prod, label="Prod")
@@ -832,7 +832,7 @@ def graphNM_Income(t, plt):
 def graphNO_Income(t, plt):
         "Nobles Income"
         Total = get_data(t, 'Noble Income Total')
-        Innate = get_data(t, 'Noble Income Innate')
+        TradeValue = get_data(t, 'Noble Income Trade Value')
         Tax = get_data(t, 'Noble Income Tax')
         Property = get_data(t, 'Noble Income Property')
         Prod = get_data(t, 'Noble Income Prod')
@@ -842,7 +842,7 @@ def graphNO_Income(t, plt):
         itr = range(1, len(Total) + 1)
 
         plt.plot(itr, Total, label="Total")
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Tax, label="Tax")
         plt.plot(itr, Property, label="Property")
         plt.plot(itr, Prod, label="Prod")
@@ -1766,7 +1766,7 @@ def graphProd_Diff_Foodless(t, plt):
         fiber2 = get_data(t, 'Fiber Demand')
         fuel2 = get_data(t, 'Fuel Demand')
         raw2 = get_data(t, 'Raw Material Demand')
-        timber2 = get_data(t, 'Timber2 Demand')
+        timber2 = get_data(t, 'Timber Demand')
         exotic2 = get_data(t, 'Exotics Demand')
         consumer2 = get_data(t, 'Consumer Product Demand')
         military2 = get_data(t, 'Military Product Demand')
@@ -1850,14 +1850,14 @@ def graphRaw(t, plt):
 def graphRE_Income(t, plt):
         "Resident Income"
         Total = get_data(t, 'Resident Income Total')
-        Innate = get_data(t, 'Resident Income Innate')
+        TradeValue = get_data(t, 'Resident Income Trade Value')
         Tax = get_data(t, 'Resident Income Tax')
         Property = get_data(t, 'Resident Income Property')
         Prod = get_data(t, 'Resident Income Prod')
         itr = range(1, len(Total) + 1)
 
         plt.plot(itr, Total, label="Total")
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Tax, label="Tax")
         plt.plot(itr, Property, label="Property")
         plt.plot(itr, Prod, label="Prod")
@@ -1880,14 +1880,14 @@ def graphSalt(t, plt):
 def graphSF_Income(t, plt):
         "Peasant Income"
         Total = get_data(t, 'Peasant Income Total')
-        Innate = get_data(t, 'Peasant Income Innate')
+        TradeValue = get_data(t, 'Peasant Income Trade Value')
         Tax = get_data(t, 'Peasant Income Tax')
         Property = get_data(t, 'Peasant Income Property')
         Prod = get_data(t, 'Peasant Income Prod')
         itr = range(1, len(Total) + 1)
 
         plt.plot(itr, Total, label="Total")
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Tax, label="Tax")
         plt.plot(itr, Property, label="Property")
         plt.plot(itr, Prod, label="Prod")
@@ -2021,7 +2021,7 @@ def graphWealth(t, plt):
 
 def graphWealth_Change(t, plt):
         "Wealth Change"
-        Innate = get_data(t, 'WealthChange Innate')
+        TradeValue = get_data(t, 'WealthChange Trade Value')
         Gold = get_data(t, 'WealthChange Gold')
         Property = get_data(t, 'WealthChange Property')
         Wages = get_data(t, 'WealthChange Wages')
@@ -2029,9 +2029,9 @@ def graphWealth_Change(t, plt):
         Manpower = get_data(t, 'WealthChange Manpower')
         StateInc = get_data(t, 'WealthChange StateInc')
         ExtraTax = get_data(t, 'WealthChange ExtraTax')
-        itr = range(1, len(Innate) + 1)
+        itr = range(1, len(TradeValue) + 1)
 
-        plt.plot(itr, Innate, label="Innate")
+        plt.plot(itr, TradeValue, label="Trade Value")
         plt.plot(itr, Gold, label="Gold")
         plt.plot(itr, Property, label="BU Property")
         plt.plot(itr, Wages, label="Wages")
