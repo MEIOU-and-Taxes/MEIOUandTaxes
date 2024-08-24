@@ -1976,7 +1976,7 @@ Infra_SetFillInfra = {
 
 	# Infrastructure Wealth
     set_key = { lhs = Tmp_1 which = Infra_Wealth }
-    multiply_key = { lhs = Tmp_1 value = 0.2 }
+    multiply_key = { lhs = Tmp_1 value = 0.2 } # Adjust only in constants.txt `INFRA_MAINTENANCE_BUDGET_FRACTION~value`
 
     if = {
         limit = {
@@ -2160,7 +2160,25 @@ Infra_SetSpendInfra = {
     }
 }
 
-# Checks Infrastructure and Goods Fulfillments
+# Infra_CheckInfra Function
+#
+# This function checks the condition and resource fulfillment for various types of infrastructure
+# and applies decay based on available resources and funding. It can potentially downgrade the 
+# infrastructure if it has decayed too much.
+#
+# Inputs:
+# - type: Specifies the type of infrastructure (e.g., Pathing, Harbourage, Amenities).
+# - prod1, prod2, prod3: Represents the IDs of the goods or resources required for the maintenance 
+#   of the infrastructure. These are used to calculate the total resources available.
+# - labor: Specifies the type of labor required for maintaining the infrastructure. It is linked 
+#   to a specific labor class (e.g., R for Rural Labor, UL for Urban Labor).
+# - mising_prod_adjust: Adds a fixed value to the total resource pool to account for any shortfall 
+#   in production or missing resources. It helps prevent premature decay due to minor resource shortages.
+# - decay_balance_factor: A balance factor applied during resource calculation to adjust the impact of resource 
+#   fulfillment on decay (e.g., num = 3.0, 2.8). The higher the more decay happens.
+# - StateBased: A boolean (yes/no) that indicates whether the infrastructure is state-based and 
+#   subject to specific funding conditions. If yes, the infrastructure might have different decay 
+#   and maintenance behavior, especially when controlled by AI.
 Infra_CheckInfra = {
     # Check if the infrastructure of the specified type exists (size >= 1)
     if = {
@@ -2216,6 +2234,8 @@ Infra_CheckInfra = {
         [[prod2] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod2$ }]
         [[prod3] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod3$ }]
         [[labor] change_key = { lhs = Tmp_0 which = Prod_Fill$labor$ }]
+		# This settings ensures the calculation uses the same base, even if one infrastructure uses less good types
+		[[mising_prod_adjust] change_key = { lhs = Tmp_0 value = $mising_prod_adjust$ }]
 
         # Multiply the total resources by the adjusted maintenance factor (Tmp_1)
         multiply_key = { lhs = Tmp_0 which = Tmp_1 }
@@ -2225,11 +2245,12 @@ Infra_CheckInfra = {
             limit = {
                 check_key = { lhs = Tmp_0 value = 0.001 } # Ensure resources are non-negligible
             }
-            divide_key = { lhs = Tmp_0 value = -$num$00000 } # Scale down by a factor based on num parameter
+            divide_key = { lhs = Tmp_0 value = -$decay_balance_factor$ } # Apply balance parameter
+            divide_key = { lhs = Tmp_0 value = 100000 } # Scale down by a factor based on num parameter
         }
 
-        # Apply a small adjustment to the resources
-        change_key = { lhs = Tmp_0 value = 0.1 } # Adjust for minor fluctuations
+        # Apply a small base decay offset if fulfillment is high enough
+        change_key = { lhs = Tmp_0 value = 0.1 }
 
         # Adjust the decay of the infrastructure based on available resources
         change_key = { lhs = Infra_$type$Decay which = Tmp_0 }
@@ -2248,6 +2269,12 @@ Infra_CheckInfra = {
                 Infra_SetRankInfra = { type = $type$ } # Adjust the rank of the infrastructure accordingly
             }
         }
+		else_if = { # Decay shall not go below 0
+			limit = {
+				NOT = { check_key = { lhs = Infra_$type$Decay value = 0 } }
+			}
+			set_key = { lhs = Infra_$type$Decay value = 0 }
+		}
 
         # Reset temporary variables for the next operation
         set_key = { lhs = Tmp_0 value = 0 }
