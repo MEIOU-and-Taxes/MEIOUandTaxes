@@ -2560,7 +2560,16 @@ Compute_Commercial_Risk = {
 
 Set_Offer_And_Bid = {
     set_key = { lhs = Tmp_1 which = TN_SectorStockpile$prod$ }
-    divide_key = { lhs = Tmp_1 which = TN_SectorDmnd$prod$ }  # divide by 0.001 is totally fine    
+	if = { 
+		limit = { 
+			is_key_equal = { lhs = TN_SectorDmnd$prod$ value = 0 }
+		}
+		divide_key = { lhs = Tmp_1 value = 0.001 }
+	}
+	else = {
+		divide_key = { lhs = Tmp_1 which = TN_SectorDmnd$prod$ }  # divide by 0.001 is totally fine <- no its not, new condition above
+	}
+    
     if = {
         limit = { 
             OR = {
@@ -2753,8 +2762,13 @@ TN_SetMilFills = {
         else = {
             subtract_key = { lhs = $var$ which = Nat_Stockpile$prod$ } # Give them everything we have
             # Calculate how much it was fullfiled.
-            divide_key = { lhs = $var$ which = Tmp_1 } 
-            set_key = { lhs = Tmp_0 value = 1 }
+			if = {
+				limit = { 
+					NOT = { is_key_equal = { lhs = Tmp_1 value = 0 } }
+				}
+			    divide_key = { lhs = $var$ which = Tmp_1 } 
+            }
+			set_key = { lhs = Tmp_0 value = 1 }
             subtract_key = { lhs = Tmp_0 which = Tmp_1 } # How much it was filled
             multiply_key = { lhs = Mil_Fill$prod$ which = Tmp_0 }  # How much it filled of what remained to be filled
             owner = {
@@ -2940,7 +2954,8 @@ Nat_Stockpile_Take = {
         limit = {
             check_key = { lhs = TN_SectorStockpileOffer$prod$ value = 0.001 } # Anything left to sell?
             owner = { check_key = { lhs = Nat_Capital$prod$ value = 0.001 } } # how much money the state is putting into buying goods
-        }
+			NOT = { is_key_equal = { lhs = TN_ProvPrc$prod$ value = 0 } } # shouldnt occur, but who knows
+		}
         set_key = { lhs = Nat_Capital$prod$ which = owner }
         set_key = { lhs = Tmp_0 which = Nat_Capital$prod$ }
         set_key = { lhs = Tmp_1 which = TN_ProvPrc$prod$ }
@@ -5116,6 +5131,7 @@ TN_UpdateSubsistence = {
     if = {
         limit = {
             check_key = { lhs = TN_Subsistence value = 0.001 }
+			check_key = { lhs = TN_SectorSply51 value = 0.001 } # shouldnt occur
         }
         set_key = { lhs = Tmp_1 which = TN_SectorSply51 }
         change_key = { lhs = Tmp_1 value = 1 }
