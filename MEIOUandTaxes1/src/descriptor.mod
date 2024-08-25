@@ -1,5 +1,5 @@
 name="MEIOU and Taxes v3.0"
-path="mod/MEIOUandTaxes1"
+path="mod/MEIOUandTaxes1/build"
 replace_path="common/achievements"
 replace_path="common/advisortypes"
 replace_path="common/ages"
