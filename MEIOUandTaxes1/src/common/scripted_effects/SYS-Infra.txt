@@ -1953,46 +1953,67 @@ Infra_DoShare = { # calculate share of each player in %
 }
 
 Infra_SetFillInfra = {
-    set_key = { lhs = Tmp_0 value = 0 }
+    set_key = { lhs = Tmp_0 value = 0 } # Reset Total Maintenance Costs
 
+	## Sum up total maintenance costs
+	# Get maintenance cost for good Raw
+    set_key = { lhs = Tmp_1 which = Infra_6 }
+    multiply_key = { lhs = Tmp_1 which = TN_ProvPrc6 }
+    change_key = { lhs = Tmp_0 which = Tmp_1 }
+	
+	# Get maintenance cost for good Timber
+    set_key = { lhs = Tmp_1 which = Infra_10 }
+    multiply_key = { lhs = Tmp_1 which = TN_ProvPrc10 }
+    change_key = { lhs = Tmp_0 which = Tmp_1 }
+
+	# Get maintenance cost for good Military
     set_key = { lhs = Tmp_1 which = Infra_22 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc22 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for good Naval
     set_key = { lhs = Tmp_1 which = Infra_23 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc23 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
-    set_key = { lhs = Tmp_1 which = Infra_24 }
+	# Get maintenance cost for good Industrial
+	set_key = { lhs = Tmp_1 which = Infra_24 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc24 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for good Knowledge
     set_key = { lhs = Tmp_1 which = Infra_41 }
     multiply_key = { lhs = Tmp_1 which = TN_ProvPrc41 }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for rural labour
     set_key = { lhs = Tmp_1 which = Infra_R }
     multiply_key = { lhs = Tmp_1 which = Class_PR }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Get maintenance cost for good Urban Labour
     set_key = { lhs = Tmp_1 which = Infra_UL }
     multiply_key = { lhs = Tmp_1 which = Class_PUL }
     change_key = { lhs = Tmp_0 which = Tmp_1 }
 
+	# Infrastructure Wealth
     set_key = { lhs = Tmp_1 which = Infra_Wealth }
-    multiply_key = { lhs = Tmp_1 value = 0.2 }
+    multiply_key = { lhs = Tmp_1 value = 0.2 } # Adjust only in constants.txt `INFRA_MAINTENANCE_BUDGET_FRACTION~value`
 
     if = {
         limit = {
-            check_key = { lhs = Tmp_1 which = Tmp_0 }
+            check_key = { lhs = Tmp_1 which = Tmp_0 } # If 20% of infra wealth > Total Maintenance Costs
         }
-        set_key = { lhs = Infra_Fill value = 100 }
+        set_key = { lhs = Infra_Fill value = 100 } # Set Infra Fill to 100
     }
     else = {
+		# Calculate fraction that can be paid by budget / total costs
         set_key = { lhs = Infra_Fill which = Tmp_1 }
-        multiply_key = { lhs = Infra_Fill value = 100 }
         divide_key = { lhs = Infra_Fill which = Tmp_0 }
 
+		# Multiply actually paid maintenance costs by fulfillment
+        multiply_key = { lhs = Infra_6 which = Infra_Fill }
+        multiply_key = { lhs = Infra_10 which = Infra_Fill }
         multiply_key = { lhs = Infra_22 which = Infra_Fill }
         multiply_key = { lhs = Infra_23 which = Infra_Fill }
         multiply_key = { lhs = Infra_24 which = Infra_Fill }
@@ -2000,12 +2021,9 @@ Infra_SetFillInfra = {
         multiply_key = { lhs = Infra_R which = Infra_Fill }
         multiply_key = { lhs = Infra_UL which = Infra_Fill }
 
-		multiply_key = { lhs = Infra_22 value = 0.01 }
-		multiply_key = { lhs = Infra_23 value = 0.01 }
-		multiply_key = { lhs = Infra_24 value = 0.01 }
-		multiply_key = { lhs = Infra_41 value = 0.01 }
-		multiply_key = { lhs = Infra_R value = 0.01 }
-		multiply_key = { lhs = Infra_UL value = 0.01 }
+		# Revert Infra Fill to 0-100 scaling
+        multiply_key = { lhs = Infra_Fill value = 100 }
+
     }
 
     set_key = { lhs = Tmp_0 value = 0 }
@@ -2164,84 +2182,128 @@ Infra_SetSpendInfra = {
     }
 }
 
+# Infra_CheckInfra Function
+#
+# This function checks the condition and resource fulfillment for various types of infrastructure
+# and applies decay based on available resources and funding. It can potentially downgrade the 
+# infrastructure if it has decayed too much.
+#
+# Inputs:
+# - type: Specifies the type of infrastructure (e.g., Pathing, Harbourage, Amenities).
+# - prod1, prod2, prod3: Represents the IDs of the goods or resources required for the maintenance 
+#   of the infrastructure. These are used to calculate the total resources available.
+# - labor: Specifies the type of labor required for maintaining the infrastructure. It is linked 
+#   to a specific labor class (e.g., R for Rural Labor, UL for Urban Labor).
+# - mising_prod_adjust: Adds a fixed value to the total resource pool to account for any shortfall 
+#   in production or missing resources. It helps prevent premature decay due to minor resource shortages.
+# - decay_balance_factor: A balance factor applied during resource calculation to adjust the impact of resource 
+#   fulfillment on decay (e.g., num = 3.0, 2.8). The higher the more decay happens.
+# - StateBased: A boolean (yes/no) that indicates whether the infrastructure is state-based and 
+#   subject to specific funding conditions. If yes, the infrastructure might have different decay 
+#   and maintenance behavior, especially when controlled by AI.
 Infra_CheckInfra = {
+    # Check if the infrastructure of the specified type exists (size >= 1)
     if = {
         limit = {
             check_key = { lhs = Infra_$type$Size value = 1 }
         }
-        multiply_key = { lhs = Infra_$type$Decay value = 0.95 }
 
-		if = {
-			limit = {
-				OR = {
-					has_province_flag = Infra_$type$100
-					[[StateFunded] always = $StateFunded$ ]
-				}
-			}
-			set_key = { lhs = Tmp_1 value = 100 }
-		}
-		else_if = {
-			limit = {
-				has_province_flag = Infra_$type$50
-			}
-			set_key = { lhs = Tmp_1 value = 100 }
-			change_key = { lhs = Tmp_1 which = Infra_Fill }
-			multiply_key = { lhs = Tmp_1 value = 0.5 } #divide_key = { lhs = Tmp_1 value = 2 }			
-		}
-		else_if = {
-			limit = {
-				OR = {
-					has_province_flag = Infra_$type$25
-					AND = {
-					   always = $StateBased$
-					   NOT = { has_global_flag = POP_Sim }
-					   owner = { ai = yes }
-					}
-				}
-			}
-			set_key = { lhs = Tmp_1 which = Infra_Fill }
-			multiply_key = { lhs = Tmp_1 value = 0.75 }
-			change_key = { lhs = Tmp_1 value = 25 }
-		}
-		else = {
-			set_key = { lhs = Tmp_1 which = Infra_Fill }
-		}
+        # Apply a decay multiplier to the infrastructure
+        multiply_key = { lhs = Infra_$type$Decay value = 0.95 } # Decay the infrastructure slightly over time
 
+        # Determine how the infrastructure is funded
+        if = {
+            limit = {
+                OR = {
+                    has_province_flag = Infra_$type$100 # Fully funded by the province
+                    [[StateFunded] always = $StateFunded$ ] # State-funded infrastructure
+                }
+            }
+            set_key = { lhs = Tmp_1 value = 100 } # Full maintenance resources are available
+        }
+        else_if = {
+            limit = {
+                has_province_flag = Infra_$type$50 # Partially (50%) funded infrastructure
+            }
+            set_key = { lhs = Tmp_1 value = 100 } # Start with full resources
+            change_key = { lhs = Tmp_1 which = Infra_Fill } # Adjust based on actual fill level
+            multiply_key = { lhs = Tmp_1 value = 0.5 } # Half the resources are available
+        }
+        else_if = {
+            limit = {
+                OR = {
+                    has_province_flag = Infra_$type$25 # Partially (25%) funded infrastructure
+                    AND = {
+                       always = $StateBased$ # State-based infrastructure with specific conditions
+                       NOT = { has_global_flag = POP_Sim }
+                       owner = { ai = yes } # Owned by AI
+                    }
+                }
+            }
+            set_key = { lhs = Tmp_1 which = Infra_Fill } # Set based on fill level
+            multiply_key = { lhs = Tmp_1 value = 0.75 } # 75% of resources are available
+            change_key = { lhs = Tmp_1 value = 25 } # Adjust final value to 25
+        }
+        else = {
+            set_key = { lhs = Tmp_1 which = Infra_Fill } # Use the fill level as-is if none of the above conditions apply
+        }
+
+        # Initialize Tmp_0 to 0 for calculating total resources available
         set_key = { lhs = Tmp_0 value = 0 }
 
+        # Add up resources available from different goods and labor types
         [[prod1] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod1$ }]
         [[prod2] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod2$ }]
         [[prod3] change_key = { lhs = Tmp_0 which = TN_ProvFill$prod3$ }]
         [[labor] change_key = { lhs = Tmp_0 which = Prod_Fill$labor$ }]
+		# This settings ensures the calculation uses the same base, even if one infrastructure uses less good types
+		[[mising_prod_adjust] change_key = { lhs = Tmp_0 value = $mising_prod_adjust$ }]
 
+        # Multiply the total resources by the adjusted maintenance factor (Tmp_1)
         multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+
+        # If the total resources are above a small threshold, apply further scaling
         if = {
             limit = {
-                check_key = { lhs = Tmp_0 value = 0.001 }
+                check_key = { lhs = Tmp_0 value = 0.001 } # Ensure resources are non-negligible
             }
-        	divide_key = { lhs = Tmp_0 value = -$num$00000 }
-		}
+            divide_key = { lhs = Tmp_0 value = -$decay_balance_factor$ } # Apply balance parameter
+            divide_key = { lhs = Tmp_0 value = 100000 } # Scale down by a factor based on num parameter
+        }
+
+        # Apply a small base decay offset if fulfillment is high enough
         change_key = { lhs = Tmp_0 value = 0.1 }
 
+        # Adjust the decay of the infrastructure based on available resources
         change_key = { lhs = Infra_$type$Decay which = Tmp_0 }
 
+        # Check if the decay has reached a critical level (>= 1)
         if = {
             limit = {
                 check_key = { lhs = Infra_$type$Decay value = 1 }
             }
-			random = {
-				chance = 50
-				set_key = { lhs = Infra_$type$Decay value = 0 }
-				subtract_key = { lhs = Infra_$type$Size value = 1 }
-	
-				Infra_SetRankInfra = { type = $type$ }
-			}
-        }
+            # 50% chance to downgrade the infrastructure if it's decayed too much
+            random = {
+                chance = 50
+                set_key = { lhs = Infra_$type$Decay value = 0 } # Reset decay to 0
+                subtract_key = { lhs = Infra_$type$Size value = 1 } # Reduce the size of the infrastructure by 1
 
+                Infra_SetRankInfra = { type = $type$ } # Adjust the rank of the infrastructure accordingly
+            }
+        }
+		else_if = { # Decay shall not go below 0
+			limit = {
+				NOT = { check_key = { lhs = Infra_$type$Decay value = 0 } }
+			}
+			set_key = { lhs = Infra_$type$Decay value = 0 }
+		}
+
+        # Reset temporary variables for the next operation
         set_key = { lhs = Tmp_0 value = 0 }
         set_key = { lhs = Tmp_1 value = 0 }
     }
     else = {
+        # If the infrastructure size is < 1, set the decay to 0 (no decay)
         set_key = { lhs = Infra_$type$Decay value = 0 }
     }
 }
@@ -2517,7 +2579,8 @@ Infra_GetAppealInfra = {
 
 				## Multiply pre cost appeal by a modifier based on how much a city is over it's amenities limit
 				# Formula: (Residents / Cap)
-				multiply_key = { lhs = Public_Tmp1 value = 1.8 } # use this to balance the effect vs. the cap -> 1.5 = at the cap you get 50% more appeal
+				# use this to balance the effect vs. the cap -> 1.5 = at the cap you get 50% more appeal
+				multiply_key = { lhs = Public_Tmp1 value = 1.8 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_OVER_AMENITIES_LIMIT~value`
 				if = {
 					limit = {
 						check_key = { lhs = Public_Tmp0 value = 0.001 }
@@ -2528,6 +2591,7 @@ Infra_GetAppealInfra = {
 					set_key = { lhs = Public_Tmp1 value = 0 }
 				}
 
+				# Maximum x3 appeal, min x 0.75
 				if = {
 					limit = {
 						check_key = { lhs = Public_Tmp0 value = 3 }
@@ -2549,7 +2613,8 @@ Infra_GetAppealInfra = {
 		[[paths]
 		if = {
 			limit = { always = $paths$ check_key = { lhs = TN_Pass value = 1 } } 
-			multiply_key = { lhs = $return$ value = 1.333 } # ancient paths are desired to have Pathing
+			# ancient paths are desired to have Pathing
+			multiply_key = { lhs = $return$ value = 1.5 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_ANCIENT_PATHS~value`
 		}
 		]
 
@@ -2580,14 +2645,7 @@ Infra_GetAppealInfra = {
 
 		# Appeal / Total Costs per unit
         divide_key = { lhs = $return$ which = Tmp_9 }
-		
-		# Get infrastructure unit goal - current amount of units
-        set_key = { lhs = Tmp_9 which = Infra_$type$Goal }
-        subtract_key = { lhs = Tmp_9 which = Infra_$type$Size }
-
-		# Appeal / Required Units to Upgrade
-        divide_key = { lhs = $return$ which = Tmp_9 }
-		
+				
 		# Get Rank of current unit + 1
 		set_key = { lhs = Tmp_9 which = Infra_$type$ }
 		change_key = { lhs = Tmp_9 value = 1 }
@@ -2595,7 +2653,7 @@ Infra_GetAppealInfra = {
 		# Appeal / Rank+1
 		divide_key = { lhs = $return$ which = Tmp_9 }
 
-		[[urban] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK FULFILLED ATLEAST 50% 
+		[[urban] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
 			if = {
 				limit = { always = $urban$ }
 
@@ -2613,7 +2671,9 @@ Infra_GetAppealInfra = {
 				}
 
 				if = {
-					limit = { NOT = { check_key = { lhs = Public_Tmp1 value = 0.75 } } }
+					limit = { 
+						NOT = { check_key = { lhs = Public_Tmp1 value = 0.9 } } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_AMENITIES_UPGRADE_MAX_RATIO~value`
+					}
 
 					set_key = { lhs = $return$ value = -1 }
 				}
