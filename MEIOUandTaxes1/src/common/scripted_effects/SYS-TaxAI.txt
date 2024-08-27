@@ -475,7 +475,10 @@ Tax_CalcWeight = {
 	[[ScalarFixed] multiply_key = { lhs = Tax_Cost$TaxName$HighAI value = $ScalarFixed$ } ]
 	if = {
 		limit = {
-			check_key = { lhs = Tax_Cost$TaxName$HighAI value = 5000 }
+			OR = {
+				NOT = { check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0 } }
+				check_key = { lhs = Tax_Cost$TaxName$HighAI value = 5000 }
+			}
 		}
 		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 5000 } # NO CRAZY VALUES
 	}
@@ -491,18 +494,15 @@ Tax_CalcWeight = {
 	}
 	if = { ### OVERFLOW
 		limit = {
-			OR = {
-				check_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
-				NOT = { check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0 } }
-			}
+			check_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
 		}
 		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
 	}
 	else_if = {
 		limit = {
-			NOT = { check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.01 } }
+			NOT = { check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.001 } }
 		}
-		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.01 }
+		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.001 }
 	}
 }
 Tax_GetPre = {
@@ -676,6 +676,7 @@ Tax_GetShareForTax = {
 	if = {
 		limit = {
 			check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.001 }
+			NOT = { check_key = { lhs = Tax_Cost$TaxName$Rate value = 500 } } #Don't assign taxes if too costly
 		}
 		set_key = { lhs = Tax_Cost$TaxName$Rate which = Tax_Cost$TaxName$HighAI }
 		divide_key = { lhs = Tax_Cost$TaxName$Rate which = Tax_CostScore$Type$ }
