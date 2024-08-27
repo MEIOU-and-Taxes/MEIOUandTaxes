@@ -73,12 +73,12 @@ NDiplomacy = {
 	DAYS_TO_DECLARE_WAR = 32,  -- Days from start of game before you can DOW anyone
 
 	INCREASE_TRUST_COST = 10,						-- Cost in favors to increase trust
-	INCREASE_TRUST_AMOUNT = 5,						-- Amount of trust per increase
+	INCREASE_TRUST_AMOUNT = 2.5,						-- Amount of trust per increase
 	MIN_FAVOURS_FOR_ADDING_TRUST = 100,
 	PREPARE_FOR_WAR_COST = 5,  -- Cost in favors to ask AI to prepare for war
 	PREPARE_FOR_WAR_MONTHS = 12,					-- Number of months AI will prepare for war
-	CALL_TO_ARMS_COST = 10,							-- Cost in favors to call ally to arms when you're not promising them territory
-	FAVORS_LAND_DIVIDER = 2,						-- How many favors do you get for giving other countries land? (divider on development)
+	CALL_TO_ARMS_COST = 25,							-- Cost in favors to call ally to arms when you're not promising them territory
+	FAVORS_LAND_DIVIDER = 3.5,						-- How many favors do you get for giving other countries land? (divider on development)
 	DISHONOR_CALL_TRUST_CALLER = 20,				-- How much trust is lost from dishonoring a call to arms (with caller)
 	DISHONOR_CALL_TRUST = 5,						-- How much trust is lost from dishonoring a call to arms (with everyone else)
 	EXCOMMUNICATE_TRUST = 10,
@@ -94,7 +94,7 @@ NDiplomacy = {
 	TRUST_PENALTY_FOR_NO_LAND = 20,					-- Trust penalty for not being given as much land as they expected in peace deal (scales with how much they actually got relative to participation)
 	TRUST_PENALTY_FOR_SEPARATE_PEACE = 20,  -- Trust penalty for signing a separate peace
 
-	OFFENSIVE_WAR_COOLDOWN = 10,					-- Years between when you can call a country into an offensive war on your behalf
+	OFFENSIVE_WAR_COOLDOWN = 20,					-- Years between when you can call a country into an offensive war on your behalf
 	MAX_CLIENT_STATES = 10,							-- Max client states for one country
 
 	ALLOW_LEADER_DEMAND_TOGGLE = 1,  -- Whether or not player is allowed to set if warleader can negotiate for them
@@ -1761,7 +1761,7 @@ NAI = {
 	MAX_BUILDING_COST_INCOME_MONTHS = 100, -- AI will not save up for a building that costs more than their monthly income * this, if there are cheaper alternatives
 	PURSUE_DISTANCE = 70, -- AI will not pursue armies retreating to a province further away than this.
 	-- Rosth: "distance" refers to the distance between a province in which the stack is currently in and the province to which the enemy stack is retreating. For the reference, 100 is about the distance from Paris to Guiana/Vales/Westfalen. 70 is about the distance from Paris to Haut-Poetou/Milieu/Limburg. This is meant to stop the AI from chasing around retreating stacks while wasting time and suffering attrition and make it spend that time to actually siege provinces.	
-	CALL_IN_ALLIES_POWER_RATIO = 4.0, -- AI will only call in allies in an offensive war if their military power ratio to the enemy is less than this
+	CALL_IN_ALLIES_POWER_RATIO = 2.0, -- AI will only call in allies in an offensive war if their military power ratio to the enemy is less than this
 	POWERFUL_ALLY_PENALTY = 50,	-- Penalty on alliance for them already having a powerful ally if much stronger
 	RIVAL_ALLIANCE_PENALTY = 50, -- Penalty on alliance chance for being allied to rivals
 	ENEMY_ALLIANCE_PENALTY = 25, -- Penalty on alliance chance for being allied to enemies
