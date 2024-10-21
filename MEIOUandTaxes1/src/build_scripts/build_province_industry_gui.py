@@ -9,7 +9,7 @@ def getTextbox ( name, subname ):
 		}}
 		''')
 
-def getSlotDefinitions( category_name, prod, slot, prevs ):
+def getSlotDefinitions( category_name, frame_number, prod, slot, prevs ):
 	name = f'provinceview_tab3_{category_name}{len(prevs)}_{slot}'
 
 
@@ -44,7 +44,7 @@ def getSlotDefinitions( category_name, prod, slot, prevs ):
 			potential = {{}}
 			trigger = {{}}
 			effect = {{}}
-			frame = {{ number = 1 trigger = {{ owner = {{ has_country_flag = selected_tab3 }} }} }}
+			frame = {{ number = {frame_number} trigger = {{ owner = {{ has_country_flag = selected_tab3 }} }} }}
 		}}
 		'''
 
@@ -233,10 +233,10 @@ def write( dest ):
 
 	data = ''
 	prevs = []
-	for category in categories:
+	for idx, category in enumerate( categories ):
 		for prod in category[ 'prods' ]:
 			for i in range( 0, min( len( prevs )+1, 16 ) ):
-				data += getSlotDefinitions( category[ 'name' ], prod, i, prevs )
+				data += getSlotDefinitions( category[ 'name' ], idx+1, prod, i, prevs )
 			data += '\n'
 			prevs.append( prod )
 
