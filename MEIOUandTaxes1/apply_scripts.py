@@ -1,11 +1,13 @@
-import os, sys, re, glob, shutil, time, argparse, multiprocessing
+import os, sys, re, glob, shutil, time, argparse, multiprocessing, runpy
 
 __all__ = [ 'compile' ]
 
-py_block = re.compile('\#.*\".*?\".*')
+py_block = re.compile('\\#.*\".*?\".*')
 py_string = re.compile('\".*?\"')
 py_string2 = re.compile('#.*')
-py_string3 = re.compile('(\[\[[\w&$]*\]|\^\^[\w&$]*\^|[\>\<\!\=]+|[\{\}\]^])')
+py_string3 = re.compile('(\\[\\[[\\w&$]*\\]|\\^\\^[\\w&$]*\\^|[\\>\\<\\!\\=]+|[\\{\\}\\]^])')
+
+script_build_path = 'build_workspace'
 
 def parse_block(block):
 	block = py_block.sub('', block)
@@ -16,7 +18,7 @@ def parse_block(block):
 	block = block.strip()
 
 	if block:
-		block = re.split('\s+', block)
+		block = re.split('\\s+', block)
 
 		if strings:
 			i = 0
@@ -249,7 +251,11 @@ def compile_file(path, compress):
 			file = apply_script_to_decision(file, scripts, check)
 		else:
 			file = apply_script(file, scripts, check)
-	buildpath = os.path.join( 'build', os.path.relpath( path, 'src' ) )
+	if path.startswith( script_build_path + os.sep ):
+		relpath = os.path.relpath( path, script_build_path )
+	else:
+		relpath = os.path.relpath( path, 'src' )
+	buildpath = os.path.join( 'build', relpath )
 	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
 	with open(buildpath, 'w', encoding='ISO-8859-1') as f:
 		if compress:
@@ -263,10 +269,9 @@ def compile_and_save_uncompressed(path):
 def compile_and_save_compressed(path):
 	compile_file(path, True)
 
-def link_file ( filepath ):
-	buildpath = os.path.join( 'build', os.path.relpath( filepath, 'src' ) )
-	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
-	os.link( filepath, buildpath )
+def link_file ( filepath, destpath ):
+	os.makedirs( os.path.dirname( destpath ), exist_ok=True )
+	os.link( filepath, destpath )
 
 def compile(compress=False, parse_init=True):
 	start = time.time()
@@ -327,8 +332,8 @@ def compile(compress=False, parse_init=True):
 			[ 'events', '00-POP_Init-2.txt' ]
 		])
 
-	parse[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in parse ]
-	link[:] = [ os.path.join( 'src', *p ) if type( p ) is list else os.path.join( 'src', p ) for p in link ]
+	parse = [ os.path.join( *p ) if type( p ) is list else p for p in parse ]
+	link = [ os.path.join( *p ) if type( p ) is list else p for p in link ]
 
 	def check_path_link ( path ):
 		for p in link:
@@ -337,31 +342,56 @@ def compile(compress=False, parse_init=True):
 		return False
 
 	def check_path_parse ( path ):
-		return path.endswith( '.txt' ) and not check_path_link( path )
-
-	print( 'Reading file tree...' )
-
-	paths = []
-	for p in parse:
-		paths.extend( [ path for path in glob.glob( os.path.join( p, '**' ), recursive=True ) if check_path_parse( path ) ] )
+		for p in parse:
+			if path.startswith( p ):
+				return not check_path_link( path )
+		return False
 
 	print( 'Clearing build directory...' )
 	if ( os.path.exists( 'build' ) ):
 		shutil.rmtree( 'build' )
+	if os.path.exists( script_build_path ):
+		shutil.rmtree( script_build_path )
+
+	print( 'Running build scripts...' )
+	for script in glob.glob( os.path.join( 'src', 'build_scripts', '*.py' ) ):
+		runpy.run_path( script, { "outdir": script_build_path }, '__build__' )
+
+	print( 'Reading file tree...' )
+
+	parsepaths = []
+	linkpaths = []
+
+	files = glob.glob( os.path.join( 'src', '**' ), recursive=True )
+	if not script_build_path.startswith( 'src' ):
+		files += glob.glob( os.path.join( script_build_path, '**' ), recursive=True )
+	for path in files:
+		if os.path.isfile( path ):
+			if path.startswith( os.path.join( script_build_path + os.sep ) ):
+				relpath = os.path.relpath( path, script_build_path )
+			else:
+				relpath = os.path.relpath( path, 'src' )
+			if check_path_parse( relpath ):
+				if relpath.endswith( '.txt' ):
+					parsepaths.append( path )
+				else:
+					linkpaths.append( path )
+			elif check_path_link( relpath ):
+				linkpaths.append( path )
 
 	if 'fork' in multiprocessing.get_all_start_methods():
 		multiprocessing.set_start_method('fork')
 		print( 'Loading scripts...' )
 		load_scripts()
 
-	file_count = len(paths)
+	file_count = len(parsepaths)
 	print(f"Compiling {file_count} files...")
 	print(f'0% done', end='')
 	with multiprocessing.Pool() as pool:
 		if compress:
-			compiled_files_it = pool.imap_unordered(compile_and_save_compressed, paths, max(1, round(file_count/1000)))
+			compiled_files_it = pool.imap_unordered(compile_and_save_compressed, parsepaths, max(1, round(file_count/1000)))
 		else:
-			compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, paths, max(1, round(file_count/1000)))
+			compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, parsepaths, max(1, round(file_count/1000)))
 		for i in range(file_count):
 			next(compiled_files_it)
 			progress = 100*(i+1)/file_count
@@ -369,17 +399,13 @@ def compile(compress=False, parse_init=True):
 			print(f'\r{progress:.1f}% done', end='')
 
 	print("\nLinking static files...")
-	for path in parse:
-		for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
-			if ( os.path.isfile( filepath ) and not filepath.endswith( '.txt' ) ):
-				link_file( filepath )
-	for path in link:
-		if os.path.isdir( path ):
-			for filepath in glob.glob( os.path.join( path, '**' ), recursive=True ):
-				if ( os.path.isfile( filepath ) ):
-					link_file( filepath )
+	for path in linkpaths:
+		if path.startswith( script_build_path ):
+			destpath = os.path.relpath( path, script_build_path )
 		else:
-			link_file( path )
+			destpath = os.path.relpath( path, 'src' )
+		destpath = os.path.join( 'build', destpath )
+		link_file( path, destpath )
 
 	end = time.time()
 	print((end - start))
