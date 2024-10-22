@@ -10,6 +10,6 @@ def write( dest ):
 			'''))
 
 if __name__ == '__main__':
-	write( '.' )
+	write( 'out' )
 elif __name__ == '__build__':
 	write( outdir )
