@@ -1,4 +1,4 @@
-name="MEIOU and Taxes v3.0"
+name="MEIOU and Taxes v3.0 - Traveler Edition"
 path="mod/MEIOUandTaxes1/build"
 replace_path="common/achievements"
 replace_path="common/advisortypes"
@@ -117,4 +117,3 @@ tags={
 picture="thumbnail.png"
 version="v3.0"
 supported_version="v1.37.*.*"
-remote_file_id="2630437525"
