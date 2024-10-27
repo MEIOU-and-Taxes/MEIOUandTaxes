@@ -1,4 +1,4 @@
-import os, sys, re, glob, shutil, time, argparse, multiprocessing, runpy
+import os, sys, re, glob, shutil, time, multiprocessing, runpy
 
 __all__ = [ 'compile' ]
 
@@ -227,17 +227,22 @@ def apply_script_to_decision(file, scripts, check):
 
 scripts = dict()
 def load_scripts():
-	for path in glob.glob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
+	for path in glob.iglob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
 		parsed = parse_file(path)
 		for script in parsed:
 			scripts[script[0]] = script[2]
-	for path in glob.glob(os.path.join('src', 'common', 'scripted_triggers', '*.txt')):
+	for path in glob.iglob(os.path.join('src', 'common', 'scripted_triggers', '*.txt')):
 		parsed = parse_file(path)
 		for script in parsed:
 			if len(script[2]) > 1 and type(script[2]) == type(list()) and not path.endswith( '00-triggers.txt' ):
 				scripts[script[0]] = [['AND', '=', script[2]]]
 			else:
 				scripts[script[0]] = script[2]
+	#highly cursed, johan smite me
+	for path in glob.iglob(os.path.join('src', 'customizable_localization', '*.script')):
+		parsed = parse_file(path)
+		for script in parsed:
+			scripts[script[0]] = script[2]
 
 decisionpath = os.path.join( 'src', 'decisions' )
 def compile_file(path, compress):
