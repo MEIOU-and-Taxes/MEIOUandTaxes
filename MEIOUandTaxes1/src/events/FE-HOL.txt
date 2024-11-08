@@ -180,32 +180,65 @@ country_event = {
 		government = monarchy
 		NOT = { has_reform = Pol_Succession4 }
 		has_reform = Pol_Assembly1
-		adm_tech = 40
+		OR = {
+			AND = {
+				tag = HOL
+				adm_tech= 40
+			}
+            AND = {
+				tag = NED
+				adm_tech= 30
+			}			
+		}
 	}
 	mean_time_to_happen = {
-		years = 8
+		years = 2
 	}
-	option = {
+	option = { #Confederacy with traces of monarchism
 		name = "flavor_hol.EVTOPTA3502"
 		ai_chance = {
-			factor = 100
+			factor = 85
 		}
-		Pol_ChangeGovMonarchy = { Succession=4 Assembly=2 } 
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+		Pol_ChangeGovRepublic = { Mandate=3 Stylings=2 ExtraPowers=1 Assembly=3 TermOfOffice=1 } 
 		add_government_reform = Pol_Nobility1
 	}
-	option = {
+	option = { #Confederacy on republican model
 		name = "flavor_hol.EVTOPTB3502"
 		ai_chance = {
-			factor = 0
+			factor = 10
+			modifier = {
+				factor = 0.1
+				is_at_war = yes
+		    }
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=20 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
 		Pol_ChangeGovRepublic = { Mandate=3 Stylings=1 ExtraPowers=1 Assembly=3 TermOfOffice=5 } 
 		add_government_reform = Pol_Nobility1
+		random_owned_province = {
+			limit = {
+				is_capital = no
+				culture = dutch
+			}
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 3
+			}
+		}
 	}
-	option = {
+	option = { #Centralized monarchy
 		name = "flavor_hol.EVTOPTC3502"
 		ai_chance = {
-			factor = 0
+			factor = 5
+			modifier = {
+				factor = 0.1
+				is_at_war = yes
+		    }
 		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-20 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=20 }
 		Pol_ChangeGovMonarchy = { Succession=1 Assembly=2 } 
 		add_government_reform = Pol_Nobility3
 		if = {
@@ -214,6 +247,16 @@ country_event = {
 				NOT = { has_country_modifier = title_6 }
 			}
 			change_title_5 = yes
+		}
+		random_owned_province = {
+			limit = {
+				is_capital = no
+				culture = dutch
+			}
+			spawn_rebels = {
+				type = militia_rebels
+				size = 3
+			}
 		}
 	}
 }
@@ -1644,9 +1687,13 @@ country_event = {
 	desc = flavor_hol.25.d
 	picture = ARTWORK_eventPicture
 	fire_only_once = yes
-	is_triggered_only = yes
+	major = yes
 	trigger = {
-		tag = NED
+		OR = {
+			tag = NED
+			tag = EBU
+		}
+		is_at_war = no
 		any_owned_province = {
 			is_part_of_hre = yes
 			OR = {
@@ -1655,9 +1702,60 @@ country_event = {
 			}
 		}
 	}
+
+	mean_time_to_happen = {
+		years = 5
+	}
+
 	option = {
 		name = "OPT.SOBEIT"
+		ai_chance = {
+			factor = 90
+			modifier = {
+				factor = 0
+				alliance_with = emperor
+			}
+		}
 		leave_the_hre = yes
+		add_prestige = 25
+		emperor = {
+			add_opinion = {
+				who = ROOT
+				modifier = opinion_left_empire
+			}
+		}
+		ROOT = {
+			add_opinion = {
+				who = emperor
+				modifier = opinion_left_empire
+			}
+		}
+		hidden_effect = {
+			set_country_flag = left_the_empire
+		}
+	}
+	option = {
+		name = "OPT.HELLNO"
+		ai_chance = {
+			factor = 10
+			modifier = {
+				factor = 10
+				alliance_with = emperor
+			}
+		}
+		add_prestige = -25
+		emperor = {
+			add_opinion = {
+				who = ROOT
+				modifier = stayed_in_the_empire
+			}
+		}
+		ROOT = {
+			add_opinion = {
+				who = emperor
+				modifier = stayed_in_the_empire
+			}
+		}
 	}
 }
 

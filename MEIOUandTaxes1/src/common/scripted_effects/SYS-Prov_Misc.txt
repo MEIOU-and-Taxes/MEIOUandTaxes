@@ -794,6 +794,10 @@ Prov_DoPowNO = {
 	if = {
 		limit = {
 			check_key = { lhs = NO_Wealth value = 1.001 }
+			OR = {
+				NOT = { is_key_equal = { lhs = Tax_Tmp6 value = 0 } }
+				NOT = { is_key_equal = { lhs = Tax_Tmp7 value = 0 } }
+			}
 		}
 		change_key = { lhs = Prov_NOPowRest which = NO_Wealth }
 		subtract_key = { lhs = Prov_NOPowRest value = 1 }
@@ -924,6 +928,10 @@ Prov_DoPowBG = {
 	if = {
 		limit = {
 			check_key = { lhs = BG_Wealth value = 1.001 }
+			OR = {
+				NOT = { is_key_equal = { lhs = Tax_Tmp6 value = 0 } }
+				NOT = { is_key_equal = { lhs = Tax_Tmp7 value = 0 } }
+			}
 		}
 		change_key = { lhs = Prov_BGPowRest which = BG_Wealth }
 		subtract_key = { lhs = Prov_BGPowRest value = 1 }
@@ -2604,8 +2612,6 @@ Prov_DoTaxNO = {
 			}
 			Tax_CalcSlot = { GoodID=6 TaxType=GameNO } # Tax the slot
 			Tax_CalcSlot = { GoodID=21 TaxType=GameNO } # Tax the slot
-			Tax_CalcSlot = { GoodID=22 TaxType=GameNO } # Tax the slot
-			Tax_CalcSlot = { GoodID=23 TaxType=GameNO } # Tax the slot
 		}
 		Tax_ResetTax = yes
 	}
@@ -3146,9 +3152,9 @@ Prov_DoTaxCL = {
 		# Calc tax rate
 		### Pious (extra rate)
 		### Base
-		set_key = { lhs = Tax_TmpBase value = 0.05 } # 0.03% of Wealth
+		set_key = { lhs = Tax_TmpBase value = 0.25 } # 0.25% of Wealth
 		multiply_key = { lhs = Tax_TmpBase which = Tmp_3 } ## Semi-exponential clergy power
-		change_key = { lhs = Tax_TmpBase value = 0.05 } # 0.03% of Wealth
+		change_key = { lhs = Tax_TmpBase value = 0.25 } # 0.25% of Wealth
 		if = {
 			limit = {
 				check_key = { lhs = Prov_TRPow value = 0.001 }
@@ -3158,29 +3164,30 @@ Prov_DoTaxCL = {
 		}
 		Tax_CalcClass = { Class=BG TaxBase=Wealth Burgher=yes TaxType=DonationsCL Flow=yes }
 		
-		multiply_key = { lhs = Tax_TmpBase value = 0.5 } # 0.01% of Wealth
+		multiply_key = { lhs = Tax_TmpBase value = 0.4 } # 0.1% of Wealth
 		Tax_CalcClass = { Class=NO TaxBase=Wealth TaxType=DonationsCL Flow=yes }
 
 		Tax_ResetTax = yes
 		
+		## CHARITY FOR PEASANTS
 		if = {
 			limit = {
 				check_key = { lhs = SF_Total value = 0.5 }
 			}
 			if = {
 				limit = {
-					owner = { # Charity dues exempt clergy
-						Rights_CLObl3Has = yes
+					owner = {
+						Rights_CLObl3Has = yes  # Clergy is taxpayer --> less charity
 					}
 				}
 				if = {
 					limit = {
 						check_key = { lhs = SF_Total value = 10 }
 					}
-					set_key = { lhs = Tax_TmpBase value = 0.5 } # 0.4% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.3 } # 0.3% of Wealth
 				}
 				else = {
-					set_key = { lhs = Tax_TmpBase value = 0.25 } # 0.1% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.075 } # 0.1% of Wealth
 				}
 			}
 			else = {
@@ -3188,42 +3195,33 @@ Prov_DoTaxCL = {
 					limit = {
 						check_key = { lhs = SF_Total value = 10 }
 					}
-					set_key = { lhs = Tax_TmpBase value = 0.8 } # 0.4% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.45 } # 0.45% of Wealth
 				}
 				else = {
-					set_key = { lhs = Tax_TmpBase value = 0.4 } # 0.1% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.1 } # 0.1% of Wealth
 				}
 			}
-			if = {
-				limit = {
-					owner = { # Charity dues exempt clergy
-						Rights_CLObl3Has = yes
-					}
-				}
-				set_key = { lhs = Tax_TmpBase value = 0.5 } # 0.75% of Wealth
-			}
-			else = {
-				set_key = { lhs = Tax_TmpBase value = 0.8 } # 0.75% of Wealth
-			}
+
 			Tax_CalcClass = { Class=CL TaxBase=Wealth TaxType=CharitySF Flow=yes }
 			Tax_ResetTax = yes
 		}
 		
+		## CHARITY FOR RESIDENTS
 		if = {
 			limit = {
 				check_key = { lhs = RE_Total value = 0.5 }
 			}
 			if = {
 				limit = {
-					owner = { # Charity dues exempt clergy
-						Rights_CLObl3Has = yes
+					owner = {
+						Rights_CLObl3Has = yes # Clergy is taxpayer --> less charity
 					}
 				}
 				if = {
 					limit = {
 						check_key = { lhs = RE_Total value = 10 }
 					}
-					set_key = { lhs = Tax_TmpBase value = 0.35 } # 0.4% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.35 } # 0.35% of Wealth
 				}
 				else = {
 					set_key = { lhs = Tax_TmpBase value = 0.1 } # 0.1% of Wealth
@@ -3234,10 +3232,10 @@ Prov_DoTaxCL = {
 					limit = {
 						check_key = { lhs = RE_Total value = 10 }
 					}
-					set_key = { lhs = Tax_TmpBase value = 0.6 } # 0.4% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.7 } # 0.6% of Wealth
 				}
 				else = {
-					set_key = { lhs = Tax_TmpBase value = 0.15 } # 0.1% of Wealth
+					set_key = { lhs = Tax_TmpBase value = 0.4 } # 0.3% of Wealth
 				}
 			}
 			Tax_CalcClass = { Class=CL TaxBase=Wealth TaxType=CharityRE Flow=yes }
@@ -4177,8 +4175,8 @@ Prov_Unfree = {
 	}
 	
 	# Cutoff after 1 decimal for display
-	multiply_key = { lhs = SF_Freedom value = 0.001 }
-	multiply_key = { lhs = SF_Freedom value = 1000 }
+	multiply_key = { lhs = SF_Freedom value = 0.01 }
+	multiply_key = { lhs = SF_Freedom value = 100 }
 	set_key = { lhs = Tmp_0 value = 0 }
 	set_key = { lhs = Tmp_1 value = 0 }
 	set_key = { lhs = Tmp_2 value = 0 }
