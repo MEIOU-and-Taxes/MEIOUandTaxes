@@ -54,4 +54,14 @@ Changes by Mepper where the Traveler differs from base M&T:
 - Long Distance Trade can be stopped by a Naval Blockade of the Capital TN which initiates the Trade
 - Rename countries to local names (partially implemented only)
 - Update .mod files; Make Traveler name show in Launcher; prevent confuse
-- Looting is worse than on main M&T, loots and destroys more
+- Looting is more potent than on main M&T, loots and destroys more
+- Base demand of pops for salt is 25% more than in base M&T
+- There was a 15% startup wealth buff in both main and Traveler, removed it for Traveler
+- Includes more flavor work by Piterdaw and falanxidaobojue than base M&T
+- Manchu nations can form Qing when they claim the Mandate of Heaven
+- Army rebel suppression at max is better than on main (-10 instead of -5)
+- Tribal levies are less efficient
+- AE and core cost have been reduced to account for the extra provinces
+- AI will more often want to loot heavier
+- AI is at base more aggressive
+- Make Chinese Subtags not ally eachother when China Broke
