@@ -29,3 +29,29 @@ This mod has been formed by the merger of two major EUIII mods: MEIOU created in
 - New Disease system modelling different strains and spread models
 - Revamped and Reworked Colonial System
 - A unique musical score composed by ciadude2.
+
+
+The Traveller: 
+
+Source to be found here: https://github.com/MEIOU-and-Taxes/MEIOUandTaxes/tree/traveller
+The Traveler is a submod for MEIOU and Taxes v3.0, originally created by FireKahuna, revived and now maintained by Micha "Mepper" Helder. 
+
+Original Traveler by FireKahuna:
+An expansive map mod for MEIOU and Taxes v3.0, focusing on Anatolia, the Balkans, the North and South Caucasus, Eastern Europe, Scandinavia, the Levant, Iran, Siberia, Manchuria, Mongolia, Korea, Japan, Arabia, North Africa and the Greater Steppe with new tags, provinces, trade nodes, mechanics and more.
+
+Restore Rome in all its glory with an expanded Anatolia and Greece setup, reworked provinces, cultures and improved missions, or establish a new Roman state under Trebizond with a new detailed province setup for the Pontus. New wastelands across Eastern Anatolia provides more strategic gameplay, and a strong border for any future Anatolian state, accompanying the many additions to the Eastern Balkans and refined Serbian setup.
+
+Play through the collapse of the Yuan as a breakaway Mongol state under the Northern Yuan system, attempt to establish a new state in Manchuria as a commission of the Ming, or restore the ancient borders of Goguryeo as Korea. An extensive cultural overall, complete map rework and new mechanics provide the framework for representing the Northern Yuan era for the Mongols, and the rise of the Jurcen clans.
+
+Save Alania from destruction, restoring the ancient borders and driving the hordes from an ancient land. Or unite Circassia as one of the 12 tribes, creating a powerful state to challenge dominion of the area. Over a dozen new tags, tens of provinces and new wastelands provide a completely new experience for both sides of the Caucasus.
+
+All work on the map done by FireKahuna where different from base M&T
+
+Changes by Mepper where the Traveler differs from base M&T: 
+
+- Integrated Submod: Dynamic Province Names for MEIOU and Taxes, which adds a bunch of extra dynamic province names for Dutch and minor Dutch Cultures (researched by yours truly), Polish (researched by Mati) and Welsh (by jackb0nes13)
+- Trade Centers can not Trade if they are occupied (they can be trade with but they act on their own)
+- Long Distance Trade can be stopped by a Naval Blockade of the Capital TN which initiates the Trade
+- Rename countries to local names (partially implemented only)
+- Update .mod files; Make Traveler name show in Launcher; prevent confuse
+- Looting is worse than on main M&T, loots and destroys more
