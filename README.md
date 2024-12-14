@@ -50,7 +50,7 @@ All work on the map done by FireKahuna where different from base M&T
 Changes by Mepper where the Traveler differs from base M&T: 
 
 - Integrated Submod: Dynamic Province Names for MEIOU and Taxes, which adds a bunch of extra dynamic province names for Dutch and minor Dutch Cultures (researched by yours truly), Polish (researched by Mati) and Welsh (by jackb0nes13 and Benfras)
-- Trade Centers can not Trade if they are occupied (they can be trade with but they act on their own)
+- Trade Centers cannot Trade if they are occupied (they can be traded with but they can't act on their own)
 - Long Distance Trade can be stopped by a Naval Blockade of the Capital TN which initiates the Trade
 - Rename countries to local names (partially implemented only)
 - Update .mod files; Make Traveler name show in Launcher; prevent confuse
