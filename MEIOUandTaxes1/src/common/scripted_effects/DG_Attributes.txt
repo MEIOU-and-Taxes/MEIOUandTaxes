@@ -84,8 +84,11 @@ DG_Extract_Tolerance = {
 				 who = owner
 			}
 		}
-		else_if = {
-			limit = { is_key_equal = { lhs = MN_S$slot$ value = 32 } }
+		else_if = {		#don't convert jews and zoroastrians
+			limit = { 
+				check_key = { lhs = MN_S$slot$ value = 30 }
+				NOT = { check_key = { lhs = MN_S$slot$ value = 34 } }
+			}
 			set_key = { lhs = MN_S$slot$Tolerance value = 0 }
 			#export_to_key = {
 			#	 lhs = MN_S$slot$Tolerance
@@ -515,7 +518,7 @@ MN_GetInfrast_Helper = {
 		if = {
 			limit = {
 				check_key = { lhs = MN_S$slot$ value = 1 }
-				NOT = { check_key = { lhs = MN_S$slot$ value = 18 } }
+				NOT = { check_key = { lhs = MN_S$slot$ value = 13 } }
 				OR = {
 					continent = europe
 					superregion = anatolia_superregion
@@ -525,11 +528,11 @@ MN_GetInfrast_Helper = {
 			}
 			change_key = { lhs = MN_S$slot$ENT value = 25 }
 		}
-		#Muslims in MENA and central Asia
+		#Muslims/Gnostics/Druze in MENA and central Asia
 		else_if = {
 			limit = {
-				check_key = { lhs = MN_S$slot$ value = 18 }
-				NOT = { check_key = { lhs = MN_S$slot$ value = 27 } }
+				check_key = { lhs = MN_S$slot$ value = 14 }
+				NOT = { check_key = { lhs = MN_S$slot$ value = 21 } }
 				OR = {
 					continent = mena
 					continent = central_asia
@@ -540,8 +543,8 @@ MN_GetInfrast_Helper = {
 		#Taoic in East Indies superregion and central Asia
 		else_if = {
 			limit = {
-				check_key = { lhs = MN_S$slot$ value = 27 }
-				NOT = { check_key = { lhs = MN_S$slot$ value = 32 } }
+				check_key = { lhs = MN_S$slot$ value = 21 }
+				NOT = { check_key = { lhs = MN_S$slot$ value = 26 } }
 				OR = {
 					superregion = east_indies_superregion
 					continent = asia
@@ -553,8 +556,8 @@ MN_GetInfrast_Helper = {
 		#Dharmic in India and central Asia
 		else_if = {
 			limit = {
-				check_key = { lhs = MN_S$slot$ value = 32 }
-				NOT = { check_key = { lhs = MN_S$slot$ value = 36 } }
+				check_key = { lhs = MN_S$slot$ value = 26 }
+				NOT = { check_key = { lhs = MN_S$slot$ value = 30 } }
 				OR = {
 					superregion = southeast_asia_superregion
 					continent = indian_continent
@@ -565,7 +568,7 @@ MN_GetInfrast_Helper = {
 		#Zoroastrian in Persia
 		else_if = {
 			limit = {
-				check_key = { lhs = MN_S$slot$ value = 36 }
+				check_key = { lhs = MN_S$slot$ value = 30 }
 				NOT = { check_key = { lhs = MN_S$slot$ value = 32 } }
 				superregion = persia_superregion
 			}
@@ -575,7 +578,7 @@ MN_GetInfrast_Helper = {
 		else_if = {
 			limit = {
 				check_key = { lhs = MN_S$slot$ value = 32 }
-				NOT = { check_key = { lhs = MN_S$slot$ value = 40 } }
+				NOT = { check_key = { lhs = MN_S$slot$ value = 34 } }
 			}
 			if = {
 				limit = {
@@ -702,7 +705,17 @@ MN_RlgShift_Helper = {
 			if = {
 				limit = { owner = { religion = baltic_pagan } } # special case for baltic pagans
 				if = {
-					limit = { owner = { overlord = { religion = catholic } } }
+					limit = { 
+						owner = {
+							OR = {
+								overlord = { 
+									religion = catholic 
+								}
+								secondary_religion = catholic
+							} 
+							
+						} 
+					}
 					set_key = { lhs = DG_Tmp1 value = 0.005 } # 0.5% if overlord of owner is catholic
 				}
 				else = {
@@ -842,12 +855,21 @@ MN_RlgShift_Helper = {
 		}
 		else_if = {
 			limit = {
-				is_key_equal = { lhs = MN_S$slot$ value = 9 } # Orthodox slot special cases
+				is_key_equal = { lhs = MN_S$slot$ value = 8 } # Orthodox slot special cases
 			}
 			if = {
 				limit = { owner = { religion = baltic_pagan } }
 				if = {
-					limit = { OR = { owner = { overlord = { religion = orthodox } secondary_religion = orthodox } } }
+					limit = { 
+						OR = { 
+							owner = { 
+								overlord = { 
+									religion = orthodox 
+								} 
+								secondary_religion = orthodox 
+							} 
+						}
+					}
 					set_key = { lhs = DG_Tmp1 value = 0.005 } # 0.5% of pops converted to orthodox if overlord is orthodox or secondary religion is orthodox
 				}
 				else = {
@@ -873,7 +895,7 @@ MN_RlgShift_Helper = {
 			else_if = {
 				limit = {
 					owner = { religion_group = mesoamerican_pagan }
-					is_key_equal = { lhs = MN_S$slot$ value = 41 } # Slot is not Cocijo
+					is_key_equal = { lhs = MN_S$slot$ value = 35 } # Slot is not Cocijo
 				}
 				multiply_key = { lhs = DG_Tmp1 value = 0 } # BALANCE Factor <- use this to increase or decrease overall speed of passive conversion
 			}
@@ -882,17 +904,14 @@ MN_RlgShift_Helper = {
 			}
 		}
 		else_if = {
-			limit = { owner = { is_key_equal = { lhs = aspect_25 value = 3 } } } #Selective Tolerance
+			limit = { owner = { is_key_equal = { lhs = aspect_25 value = 3 } } } #Selective Tolerance - Children of the book don't shift
 			if = {
 				limit = {
 					owner = { OR = { religion_group = christian religion_group = muslim religion_group = jewish_group } }
-					OR = {
-						NOT = { check_key = { lhs = MN_S$slot$ value = 27 } }
-						AND = {
-							NOT = { check_key = { lhs = MN_S$slot$ value = 32 } }
-							NOT = { check_key = { lhs = MN_S$slot$ value = 40 } }
-						}
-					}
+					check_key = { lhs = MN_S$slot$ value = 21 }
+					NOT = { is_key_equal = { lhs = MN_S$slot$ value = 32 } }
+					NOT = { is_key_equal = { lhs = MN_S$slot$ value = 33 } }
+					
 				}
 				multiply_key = { lhs = DG_Tmp1 value = 0 } # BALANCE Factor <- use this to increase or decrease overall speed of passive conversion
 			}
@@ -905,7 +924,7 @@ MN_RlgShift_Helper = {
 			if = {
 				limit = {
 					owner = { OR = { religion_group = christian religion_group = muslim religion_group = buddhism religion_group = dharmic  religion_group = zro_group religion_group = jewish_group } }
-					check_key = { lhs = MN_S$slot$ value = 40 }
+					check_key = { lhs = MN_S$slot$ value = 34 }		#Just convert the pagans
 				}
 				multiply_key = { lhs = DG_Tmp1 value = 10 } # BALANCE Factor <- use this to increase or decrease overall speed of passive conversion
 			}
