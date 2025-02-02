@@ -42,10 +42,10 @@ province_event = {
 	}
 	
 	mean_time_to_happen = {
-		years = 20
+		years = 30
 		
 		modifier = {
-			factor = 0.50
+			factor = 0.30
 			owner = { capital_scope = { is_part_of_hre = yes } }
 		}
 		modifier = {
@@ -89,7 +89,7 @@ province_event = {
 			owner = { reform_desire = 2.00 }
 		}
 		modifier = {
-			factor = 0.90
+			factor = 0.70
 			owner = {
 				is_elector = yes
 			}
@@ -170,6 +170,7 @@ province_event = {
 	
 	immediate = {
 		enable_religion = protestant
+		set_province_flag = reformation_origins
 		hidden_effect = {
 			set_global_flag = DG_Lutheran_Spawn
 			random_list = {
@@ -291,6 +292,14 @@ province_event = {
 		trigger = { NOT = { owned_by = PAP } }
 		ai_chance = {
 			factor = 40
+			modifier = {
+			    AND = { is_elector = yes government = theocracy }
+				factor = 0.1
+			}
+			modifier = {
+			    AND = { is_elector = yes government = monarchy }
+				factor = 3.0
+			}
 			modifier = {
 				owner = { capital_distance = { who = PAP distance = 260 } }
 				factor = 2
@@ -575,12 +584,7 @@ province_event = {
 				factor = 2
 			}
 			modifier = {
-				owner = { 
-					OR = {
-						is_elector = yes
-						is_emperor = yes
-					}
-				}
+				owner = { is_emperor = yes }
 				factor = 2
 			}
 			modifier = {
@@ -684,6 +688,50 @@ province_event = {
 			owner = {
 				country_event = { id = DG_Protestant.002 }
 			}
+			owner = {
+				if = {
+					limit = {
+						is_elector = yes
+						is_emperor = no
+					}
+					capital_scope = {
+						save_global_event_target_as = reformation_origins_disputation
+						province_event = { id = DG_Protestant.060 days = 730 random = 90 }
+					}
+				}
+				else_if = {
+					limit = {
+						any_country = {
+							is_elector = yes
+							is_emperor = no
+							culture_group = ROOT
+						}
+					}
+					random_country = {
+						limit = {
+							is_elector = yes
+							is_emperor = no
+							culture_group = ROOT
+						}
+						capital_scope = {
+							save_global_event_target_as = reformation_origins_disputation
+							province_event = { id = DG_Protestant.060 days = 730 random = 90 }
+						}
+					}
+				}
+				else = {
+					random_country = {
+						limit = {
+							is_elector = yes
+							is_emperor = no
+						}
+						capital_scope = {
+							save_global_event_target_as = reformation_origins_disputation
+							province_event = { id = DG_Protestant.060 days = 730 random = 90 }
+						}
+					}
+				}
+			}
 #			owner = {
 #				random_neighbor_country = {
 #					limit = { western_christian = yes NOT = { has_country_flag = DG_Lutheran_Spread } }
@@ -698,9 +746,6 @@ province_event = {
 #					country_event = { id = DG_Protestant.003 days = 180 random = 15 }
 #				}
 #			}
-			3723 = {
-				province_event = { id = DG_Protestant.004 days = 1825 random = 120 }
-			}
 		}
 	}
 }
@@ -822,7 +867,7 @@ country_event = {
 			}
 			modifier = {
 			    AND = { is_elector = yes government = monarchy }
-				factor = 2.5
+				factor = 3.0
 			}
 			modifier = {
 				is_papal_controller = yes
@@ -1281,25 +1326,38 @@ country_event = {
 	}
 }
 
-#004 - Diet of Worms
-province_event = {
+#004 - The [Elector]'s Duty (1521, Saxony)
+country_event = {
 	id = DG_Protestant.004
-	title = "AI_Event"
-	desc = "AI_Event"
+	title = "DG_Protestant.004.title"
+	desc = "DG_Protestant.004.desc"
 	picture = all_church_state
+	major = yes
 
-	hidden = yes
-	is_triggered_only = yes
+	is_triggered_only = yes #from DG_Protestant.060
+	
+	immediate = {
+		if = {
+			limit = {
+				is_elector = yes
+				government = monarchy
+				religion = protestant
+			}
+			set_country_flag = luther_protection
+		}
+	}
 
 	option = { 
-		name = "AI_Event"
-		save_global_event_target_as = worms_diet_site
+		name = "DG_Protestant.004.a"
+		3723 = { save_global_event_target_as = worms_diet_site }
 		set_global_flag = DG_Diet_of_Worms
-		PAP = {
-			export_to_variable = { which = worms_diet_year value = trigger_value:is_year }
-		}
-		emperor = {
-			country_event = { id = DG_Protestant.005 days = 1825 random = 120 }
+		hidden_effect = {
+			PAP = {
+				export_to_variable = { which = worms_diet_year value = trigger_value:is_year }
+			}
+			emperor = {
+				country_event = { id = DG_Protestant.005 days = 400 random = 40 }
+			}
 		}
 	}
 }
@@ -1311,7 +1369,7 @@ country_event = {
 	picture = protestant_diet
 	
 	major = yes
-	is_triggered_only = yes
+	is_triggered_only = yes #from DG_Protestant.004
 	
 	immediate = {
 		hidden_effect = {
@@ -1396,6 +1454,67 @@ country_event = {
 					}
 				}
 				add_opinion = { who = ROOT modifier = mistreated_coreligionists_pious }
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					any_country = { has_country_flag = luther_protection }
+				}
+				random_country = {
+					limit = {
+						has_country_flag = luther_protection
+					}
+					country_event = { id = DG_Protestant.063 days = 40 random = 5 } #Mysterious Disappearance
+				}
+			}
+			else_if = {
+				limit = {
+					any_country = { 
+						is_elector = yes
+						government = monarchy
+						religion = protestant
+					}
+				}
+				random_country = { #Elector
+					limit = {
+						is_elector = yes
+						government = monarchy
+						religion = protestant
+					}
+					set_country_flag = luther_protection
+					country_event = { id = DG_Protestant.063 days = 40 random = 5 } #Mysterious Disappearance
+				}
+			}
+			else_if = {
+				limit = {
+					any_country = { 
+						is_part_of_hre = yes
+						num_of_cities = 5
+						government = monarchy
+						religion = protestant
+					}
+				}
+				random_country = { #Large nation in the Empire
+					limit = {
+						is_part_of_hre = yes
+						num_of_cities = 5
+						government = monarchy
+						religion = protestant
+					}
+					set_country_flag = luther_protection
+					country_event = { id = DG_Protestant.063 days = 40 random = 5 } #Mysterious Disappearance
+				}
+			}
+			else = {
+				random_country = { #Other HRE member
+					limit = {
+						is_part_of_hre = yes
+						religion = protestant
+					}
+					set_country_flag = luther_protection
+					country_event = { id = DG_Protestant.063 days = 40 random = 5 } #Mysterious Disappearance
+				}
 			}
 		}
 	}
@@ -6878,13 +6997,17 @@ country_event = { #50 - Knights Revolt (1522)
 	major = yes
 	
 	trigger = {
-		has_global_flag = DG_Diet_of_Worms
+		has_global_flag = reformation_luther_wartburg
 		NOT = { has_global_flag = DG_Second_Diet_of_Speyer }
 		government = theocracy
 		religion = catholic
 		any_neighbor_country = {
 			religion = protestant
 		}
+	}
+	
+	mean_time_to_happen = {
+		months = 18
 	}
 	
 	immediate = {
@@ -7033,6 +7156,7 @@ country_event = { #53 - Admonition to Peace (news)
 	title = DG_Protestant.052.title
 	desc = DG_Protestant.052.desc
 	picture = catholic_monks_preaching
+	goto = peasant_war_origin
 	
 	is_triggered_only = yes #from DG_Protestant.052
 	
@@ -7044,6 +7168,9 @@ country_event = { #53 - Admonition to Peace (news)
 				limit = { has_disaster = peasant_war }
 				end_disaster = peasant_war
 			}
+		}
+		FROM = {
+			capital_scope = { save_event_target_as = peasant_war_origin }
 		}
 	}
 	
@@ -7062,11 +7189,329 @@ country_event = { #53 - Admonition to Peace (news)
 	}
 }
 
+province_event = { #60 - The [Leipzig] Disputation (July 1519, Leipzig)
+	id = DG_Protestant.060
+	title = DG_Protestant.060.title
+	desc = DG_Protestant.060.desc
+	picture = protestant_disputation
+	is_triggered_only = yes #from DG_Protestant.001
+	
+	immediate = {
+		set_global_flag = reformation_leipzig_disputation
+		hidden_effect = {
+			owner = {
+				every_country = {
+					limit = {
+						ai = no
+						western_christian = yes
+						NOT = { tag = ROOT }
+					}
+					country_event = { id = DG_Protestant.061 days = 7 }
+				}
+			}
+		}
+		if = {
+			limit = { any_owned_province = { check_key = { lhs = TN_ProvSply41 value = 2 } } }
+			custom_tooltip = dg_reformation.006.university
+		}
+	}
+	
+	option = {
+		name = DG_Protestant.060.a
+		trigger = { NOT = { owner = { OR = { papal_trigger = yes is_papal_controller = yes } } } }
+		hidden_effect = {
+			set_key = { lhs = Heresy_Scalar value = 0 }
+			random_list = {
+				40 = { set_key = { lhs = Heresy_Scalar value = 0.50 } }
+				30 = { set_key = { lhs = Heresy_Scalar value = 0.40 } }
+				20 = { set_key = { lhs = Heresy_Scalar value = 0.30 } }
+				10 = { set_key = { lhs = Heresy_Scalar value = 0.20 } }
+				1 = { set_key = { lhs = Heresy_Scalar value = 0.10 } }
+			}
+			if = {
+				limit = {
+					check_key = { lhs = Heresy_Scalar value = 0.05 }
+				}
+				MN_HeresySpread = { typefrom = value from = 1 to = 2 incr = Heresy_Scalar typeIncr = which }
+				MN_Attribute_Reset = { reltype = value religion = 2 typeEffect = ENT typeStrength = value strength = 100 }
+			}
+			set_key = { lhs = Heresy_Scalar value = 0 }
+		}
+	}
+	option = {
+		name = DG_Protestant.060.b
+		trigger = { owner = { OR = { papal_trigger = yes is_papal_controller = yes } } }
+		owner = { add_adm_power = -10 }
+	}
+	after = {
+		owner = {
+			every_country = {
+				limit = {
+					OR = {
+						religion = catholic
+						religion = protestant
+					}
+					NOT = { tag = PAP }
+				}
+				country_event = { id = DG_Protestant.062 days = 250 random = 25 }
+			}
+			country_event = { id = DG_Protestant.004 days = 400 random = 40 }
+		}
+	}
+}
+
+country_event = { #61 - The [Leipzig] Disputation (news)
+	id = DG_Protestant.061
+	title = DG_Protestant.060.title
+	desc = DG_Protestant.060.desc
+	picture = protestant_disputation
+	is_triggered_only = yes
+	goto = leipzig_dispuation_origin
+	
+	immediate = {
+		if = {
+			limit = { any_owned_province = { has_province_flag = debate_verdict } }
+			custom_tooltip = dg_reformation.006.university
+		}
+		FROM = {
+			save_event_target_as = leipzig_dispuation_origin
+		}
+	}
+	
+	option = {
+		name = DG_Protestant.060.a
+		trigger = { papal_trigger = no is_papal_controller = no }
+	}
+	option = {
+		name = DG_Protestant.060.b
+		trigger = { OR = { papal_trigger = yes is_papal_controller = yes } }
+		add_adm_power = -10
+	}
+}
+
+country_event = { #62 - Exsurge Domine (June 1520)
+	id = DG_Protestant.062
+	title = DG_Protestant.062.title
+	desc = DG_Protestant.062.desc
+	picture = catholic_excommunication
+	is_triggered_only = yes #from DG_Protestant.060
+	
+	immediate = {
+		set_country_flag = exsurge_domine
+		if = {
+			limit = { any_owned_province = { has_province_flag = reformation_origins } }
+			custom_tooltip = dg_reformation.007.luther
+		}
+	}
+	
+	option = {
+		name = DG_Protestant.062.b #Keep an eye on the situation
+		ai_chance = {
+			factor = 50
+			modifier = {
+				government = is_papal_controller = yes
+				factor = 0.1
+			}
+			modifier = {
+				government = theocracy
+				factor = 0.1
+			}
+		}
+		if = {
+			limit = {
+				any_owned_province = {
+					MN_CheckRelSlot = { Type = value Religion = 2 }
+				}
+			}
+			every_owned_province = {
+				limit = {
+					MN_CheckRelSlot = { Type = value Religion = 2 }
+				}
+				add_unrest = 10
+			}
+		}
+	}
+	option = {
+		name = DG_Protestant.062.a #Enforce the law
+		trigger = {
+			any_owned_province = { MN_CheckRelSlot = { Type = value Religion = 2 } }
+		}	
+		ai_chance = {
+			factor = 50
+			modifier = {
+				government = republic
+				factor = 0.5
+			}
+			modifier = {
+				AND = {
+					is_elector = yes
+					government = monarchy
+				}
+				factor = 0.5
+			}
+			modifier = {
+				event_target:reformation_origins = { culture_group = ROOT }
+				factor = 0.5
+			}
+		}
+		remove_country_modifier = religious_tolerance
+		add_country_modifier = { name = religious_intolerance duration = 500 }
+		if = {
+			limit = { NOT = { tag = PAP } }
+			PAP = { add_opinion = { who = ROOT modifier = obeyed_religious_leader } }
+		}
+		add_mil_power = -20
+		every_owned_province = {
+			limit = {
+				MN_CheckRelSlot = { Type = value Religion = 2 }
+			}
+			add_unrest = 5
+		}
+	}
+}
+
+country_event = { #63 - Mysterious Disappearance (May 1521, Saxony)
+	id = DG_Protestant.063
+	title = DG_Protestant.063.title
+	desc = DG_Protestant.063.desc
+	picture = protestant_submission
+	
+	is_triggered_only = yes #from DG_Protestant.005
+	
+	immediate = {
+		custom_tooltip = DG_Protestant.063.abductor
+		set_global_flag = reformation_luther_wartburg
+		set_country_flag = hiding_luther
+		clr_country_flag = luther_protection
+	}
+	
+	option = {
+		name = DG_Protestant.063.a
+		add_mil_power = -10
+		add_dip_power = -10
+	}
+	
+	after = {
+		every_country = {
+			limit = {
+				ai = no
+				western_christian = yes
+				NOT = { tag = ROOT }
+			}
+			country_event = { id = DG_Protestant.064 days = 7 }
+		}
+	}
+}
+
+country_event = { #64 - Mysterious Disappearance (news)
+	id = DG_Protestant.064
+	title = DG_Protestant.063.title
+	desc = DG_Protestant.063.desc
+	picture = protestant_submission
+	goto = abductor_origin
+	
+	is_triggered_only = yes #from DG_Protestant.063
+	
+	immediate = {
+		if = {
+			limit = { is_emperor = yes }
+			custom_tooltip = DG_Protestant.063.emperor
+		}
+		else = {
+			custom_tooltip = DG_Protestant.063.other
+		}
+		FROM = {
+			capital_scope = { save_event_target_as = abductor_origin }
+		}
+	}
+	
+	option = {
+		name = DG_Protestant.063.a
+		if = {
+			limit = {
+				OR  = {
+					is_emperor = yes
+					is_papal_controller = yes
+					tag = PAP
+				}
+			}
+			add_prestige = -10
+		}
+	}
+}
+
+country_event = { #65 - Reformer's Return (1522)
+	id = DG_Protestant.065
+	title = DG_Protestant.065.title
+	desc = DG_Protestant.065.desc
+	picture = protestant_preacher
+	fire_only_once = yes
+	
+	trigger = {
+		has_country_flag = hiding_luther
+		religion = protestant
+	}
+	
+	mean_time_to_happen = {
+		months = 18
+	}
+	
+	immediate = {
+		set_global_flag = reformation_luther_returned
+		clr_country_flag = hiding_luther
+		set_country_flag = luther_advisor
+	}
+	
+	option = {
+		name = DG_Protestant.065.a #Ask him to set up a [Saxon] Church
+		Stab_Add50Percent = yes
+		define_advisor = {
+			name = "Martin Luther"
+			religion = protestant
+			type = theologian_CL
+			skill = 3
+			discount = yes
+		}
+	}
+	
+	after = {
+		every_country = {
+			limit = {
+				ai = no
+				western_christian = yes
+				NOT = { tag = ROOT }
+			}
+			country_event = { id = DG_Protestant.066 days = 7 }
+		}
+	}
+}
+
+country_event = { #66 - Reformer's Return (news)
+	id = DG_Protestant.066
+	title = DG_Protestant.065.title
+	desc = DG_Protestant.066.desc
+	picture = protestant_preacher
+	goto = reformer_seat
+	
+	is_triggered_only = yes #from DG_Protestant.065
+	
+	immediate = {
+		FROM = {
+			capital_scope = { save_event_target_as = reformer_seat }
+		}
+	}
+	
+	option = {
+		name = DG_Protestant.066.a
+	}
+}
+
 country_event = { #99 - Ninety-Five Theses (news)
 	id = DG_Protestant.099
 	title = DG_Protestant.099.title
 	desc = DG_Protestant.099.desc
 	picture = protestant_reformation
+	goto = reformation_origins_archbishop
 	
 	is_triggered_only = yes #By DG_Protestant.001
 	
