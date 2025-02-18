@@ -182,8 +182,8 @@ categories = [
 	}
 ]
 
-def getTextbox ( name, subname ):
-	return textwrap.dedent( f'''\
+def getTextbox (name, subname):
+	return textwrap.dedent(f'''\
 		custom_text_box = {{
 			name = {name}_{subname}
 			tooltip = {name}_{subname}_tt
@@ -191,7 +191,7 @@ def getTextbox ( name, subname ):
 		}}
 		''')
 
-def getSlotDefinitions( category_name, frame_number, prod, slot, prevs ):
+def getSlotDefinitions(category_name, frame_number, prod, slot, prevs):
 	name = f'provinceview_tab3_{category_name}{len(prevs)}_{slot}'
 
 
@@ -230,47 +230,49 @@ def getSlotDefinitions( category_name, frame_number, prod, slot, prevs ):
 		}}
 		'''
 
-	data = textwrap.dedent( data )
-	data += getTextbox( name, 'title' )
-	for i in range( 1, 5 ):
-		data += getTextbox( name, f'text_{i}' )
+	data = textwrap.dedent(data)
+	for i in range(1, 2):
+		data += getTextbox(name, f'text_{i}')
 	return data
 
-def readTemplate ( path ):
-	with open( path, 'r' ) as f:
-		return string.Template( f.read( ) )
+def readTemplate (path):
+	with open(path, 'r') as f:
+		return string.Template(f.read())
 
-def writeFile ( path, data ):
-	os.makedirs( os.path.dirname( path ), exist_ok=True )
-	with open( path, 'w' ) as f:
-		f.write( data )
+def writeFile (path, data):
+	os.makedirs(os.path.dirname(path), exist_ok=True)
+	with open(path, 'w') as f:
+		f.write(data)
 
-def write( dest ):
-	filename = os.path.basename( __file__ )
+def write(dest):
+    filename = os.path.basename(__file__)
 
-	provinceViewTemplate = readTemplate( os.path.join( os.path.dirname( __file__ ), 'build_province_industry_gui', 'provinceview.gui.template' ) )
+    provinceViewTemplate = readTemplate(os.path.join(os.path.dirname(__file__), 'build_province_industry_gui', 'provinceview.gui.template'))
 
-	customGuiData = ''
-	provinceViewData = ''
-	prevs = []
-	for idx, category in enumerate( categories ):
-		for prod in category[ 'prods' ]:
-			for slot in range( 0, min( len( prevs )+1, 16 ) ):
-				customGuiData += getSlotDefinitions( category[ 'name' ], idx+1, prod, slot, prevs )
-				provinceViewData += provinceViewTemplate.safe_substitute({
-					'category': category[ 'name' ],
-					'idx': len( prevs ),
-					'slot': slot,
-					'xpos': 17 + ( 131 * ( slot % 4 ) ),
-					'ypos': 523 + ( 51 * math.floor( slot / 4 ) )
-				})
-			customGuiData += '\n'
-			prevs.append( prod )
+    customGuiData = ''
+    provinceViewData = ''
+    prevs = []
+    prod_counter = 1  # Initialize prod_counter here
 
-	writeFile( os.path.join( dest, 'common', 'custom_gui', 'province_industry.txt' ), customGuiData )
-	writeFile( os.path.join( dest, 'snippets', 'interface', 'provinceview.gui' ), provinceViewData )
+    for idx, category in enumerate(categories):
+        for prod in category['prods']:
+            for slot in range(0, min(len(prevs) + 1, 16)):
+                customGuiData += getSlotDefinitions(category['name'], prod_counter, prod, slot, prevs)  # Changed idx + 1 to prod_counter
+                provinceViewData += provinceViewTemplate.safe_substitute({
+                    'category': category['name'],
+                    'idx': len(prevs),
+                    'slot': slot,
+					'xpos': 17 + (159 * ( slot % 4)),
+                    'ypos': 523 + (51 * math.floor(slot / 4))
+                })
+            customGuiData += '\n'
+            prevs.append(prod)
+            prod_counter += 1  # Increment prod_counter for each prod
+
+    writeFile(os.path.join(dest, 'common', 'custom_gui', 'province_industry.txt'), customGuiData)
+    writeFile(os.path.join(dest, 'snippets', 'interface', 'provinceview.gui'), provinceViewData)
 
 if __name__ == '__main__':
-	write( 'out' )
+	write('out')
 elif __name__ == '__build__':
-	write( outdir )
+	write(outdir)
