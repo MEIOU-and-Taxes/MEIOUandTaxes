@@ -659,8 +659,8 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
 				#[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
-					limit = { has_global_flag = POP_Sim }
-					multiply_key = { lhs = Tmp_2 value = 1 } #temporary back to normal growth
+					limit = { has_global_flag = POP_Sim10 }
+					multiply_key = { lhs = Tmp_2 value = 1.5} #back to full speed for 100 ITs
 				}
 				change_key = { lhs = Building_$type$Up which = Tmp_2 }
                 
@@ -686,17 +686,8 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
 				#[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
-					limit = { has_global_flag = POP_Sim }
-					multiply_key = { lhs = Tmp_2 value = 0.333 } #slower decline
-				}
-				if = {
-					limit = {
-						has_global_flag = POP_Sim20 
-						NOT = { 
-							check_key = { lhs = Prod_S$slot$Size value = 5 }
-						}
-					}
-					multiply_key = { lhs = Tmp_2 value = 0 } # stop decline for industries below 5
+					limit = { has_global_flag = POP_Sim10 }
+					multiply_key = { lhs = Tmp_2 value = 0.5 } #1/3 for the first 100 ITs
 				}
 				subtract_key = { lhs = Building_$type$Down which = Tmp_2 } # Building_$type$Down represents an abstract value for shrinkage desire.
 			}
@@ -1139,7 +1130,16 @@ Infra_DoSizeHelper1 = { # expansion or shrinkage
             has_province_flag = Prod_S$slot$
             has_province_flag = Prod_S$slot$DmndB$type$
         }
-        change_key = { lhs = Prod_S$slot$Size which = Prod_S$slot$Change }      
+		if = {
+			limit = { 
+				NOT = { has_global_flag = POP_Sim10 }
+				NOT = { check_key = { lhs = Prod_S$slot$Size value = 5 } }
+				}
+			set_key = { lhs = Prod_S$slot$Size value = 5 } #keeping industries artificially at min5 for first 100 ITs
+		}
+		else = {
+			change_key = { lhs = Prod_S$slot$Size which = Prod_S$slot$Change }
+		}			
     }
 }
 
