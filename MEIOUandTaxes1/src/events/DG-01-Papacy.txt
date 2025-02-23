@@ -185,22 +185,27 @@ country_event = {
 	#hidden = yes
 	
 	trigger = {
-		NOT = { has_global_flag = DG_Western_Schism_Start }
-		NOT = { has_country_flag = Conclave_Underway }
-		NOT = { has_regency = yes }
 		OR = {
 			AND = {
-				tag = PAP
-				religion = catholic
-				has_global_flag = DG_Live_Pope_in_Rome
-				#had_global_flag = { flag = DG_Live_Pope_in_Rome days = 1095 } #Ahistorical, but prevents players from reporting bugs
+				NOT = { has_global_flag = DG_Western_Schism_Start }
+				NOT = { has_country_flag = Conclave_Underway }
+				NOT = { has_regency = yes }
+				OR = {
+					AND = {
+						tag = PAP
+						religion = catholic
+						has_global_flag = DG_Live_Pope_in_Rome
+						#had_global_flag = { flag = DG_Live_Pope_in_Rome days = 1095 } #Ahistorical, but prevents players from reporting bugs
+					}
+					AND = {
+						tag = AVI
+						religion = avignonist
+						has_global_flag = DG_Live_Pope_in_Avignon
+						#had_global_flag = { flag = DG_Live_Pope_in_Avignon days = 1095 } #Ahistorical, but prevents players from reporting bugs
+					}
+				}
 			}
-			AND = {
-				tag = AVI
-				religion = avignonist
-				has_global_flag = DG_Live_Pope_in_Avignon
-				#had_global_flag = { flag = DG_Live_Pope_in_Avignon days = 1095 } #Ahistorical, but prevents players from reporting bugs
-			}
+			has_country_flag = Brute_Force_Papal_Election
 		}
 	}
 	
@@ -216,6 +221,7 @@ country_event = {
 			clr_country_flag = Corrupt_Pope
 			clr_country_flag = accepted_graft
 			clr_country_flag = refused_graft
+			clr_country_flag = Brute_Force_Papal_Election
 			papal_corruption_se = yes
 			if = {
 				limit = { tag = PAP }
@@ -662,11 +668,11 @@ country_event = {
 	option = {
 		name = "opt_failsafe_report"
 		trigger = {
-			NOT = {
-				has_saved_global_event_target = preferiti_1
-				has_saved_global_event_target = preferiti_2
-				has_saved_global_event_target = preferiti_3
-				has_saved_global_event_target = preferiti_4
+			AND = {
+				NOT = { has_saved_global_event_target = preferiti_1 }
+				NOT = { has_saved_global_event_target = preferiti_2 }
+				NOT = { has_saved_global_event_target = preferiti_3 }
+				NOT = { has_saved_global_event_target = preferiti_4 }
 			}
 		}
 		hidden_effect = {
@@ -675,12 +681,14 @@ country_event = {
 					religion = avignonist
 				}
 				AVI = {
-					country_event = { id = DG_Papacy.101 days = 1 }
+					set_country_flag = Brute_Force_Papal_Election
+					country_event = { id = DG_Papacy.101 days = 15 }
 				}
 			}
 			else = {
 				PAP = {
-					country_event = { id = DG_Papacy.101 days = 1 }
+					set_country_flag = Brute_Force_Papal_Election
+					country_event = { id = DG_Papacy.101 days = 15 }
 				}
 			}
 		}
@@ -983,11 +991,11 @@ country_event = {
 	option = {
 		name = "opt_failsafe_report"
 		trigger = {
-			NOT = {
-				has_saved_global_event_target = preferiti_1
-				has_saved_global_event_target = preferiti_2
-				has_saved_global_event_target = preferiti_3
-				has_saved_global_event_target = preferiti_4
+			AND = {
+				NOT = { has_saved_global_event_target = preferiti_1 }
+				NOT = { has_saved_global_event_target = preferiti_2 }
+				NOT = { has_saved_global_event_target = preferiti_3 }
+				NOT = { has_saved_global_event_target = preferiti_4 }
 			}
 		}
 		hidden_effect = {
@@ -996,12 +1004,14 @@ country_event = {
 					religion = avignonist
 				}
 				AVI = {
-					country_event = { id = DG_Papacy.101 days = 1 }
+					set_country_flag = Brute_Force_Papal_Election
+					country_event = { id = DG_Papacy.101 days = 15 }
 				}
 			}
 			else = {
 				PAP = {
-					country_event = { id = DG_Papacy.101 days = 1 }
+					set_country_flag = Brute_Force_Papal_Election
+					country_event = { id = DG_Papacy.101 days = 15 }
 				}
 			}
 		}
@@ -3333,9 +3343,14 @@ country_event = {
 	option = {
 		name = "DG_Papacy.208.opta"
 		trigger = {
-			NOT = { historical_friend_with = FROM }
-			NOT = { alliance_with = FROM }
-			NOT = { overlord_of = PAP }
+			OR = {
+				AND = {
+					NOT = { historical_friend_with = FROM }
+					NOT = { alliance_with = FROM }
+					NOT = { overlord_of = PAP }
+				}
+				ai = no
+			}
 		}
 		ai_chance = {
 			factor = 60
@@ -3392,10 +3407,15 @@ country_event = {
 	option = {
 		name = "DG_Papacy.208.optb"
 		trigger = {
-			NOT = { is_rival = FROM }
-			NOT = { war_with = FROM }
-			is_emperor = no
-			NOT = { overlord_of = AVI }
+			OR = {
+				AND = {
+					NOT = { is_rival = FROM }
+					NOT = { war_with = FROM }
+					is_emperor = no
+					NOT = { overlord_of = AVI }
+				}
+				ai = no
+			}	
 		}
 		ai_chance = {
 			factor = 40
@@ -5738,7 +5758,6 @@ country_event = {
 			}
 			remove_country_modifier = casted_vote_ballot_3
 		}
-		custom_tooltip = tooltip_flavor_pol.3021.a
 	}
 	option = {
 		name = "DG_Papacy.269.optd"
@@ -5747,7 +5766,6 @@ country_event = {
 				has_country_modifier = casted_vote_ballot_4
 			}
 			remove_country_modifier = casted_vote_ballot_4
-			custom_tooltip = tooltip_flavor_pol.3021.a
 		}
 	}
 	option = {
@@ -5996,7 +6014,7 @@ country_event = {
 	}
 	option = {
 		name = "DG_Papacy.901.opta"
-		add_reform_desire = 0.00002
+		add_reform_desire = 0.00001
 		add_papal_influence = 2
 	}
 	option = {
@@ -6015,15 +6033,19 @@ country_event = {
 	title = "DG_Papacy.902.title"
 	desc = "DG_Papacy.902.desc"
 	picture = RELIGION_eventPicture
+	goto = simony_province
 	
 	is_triggered_only = yes
 	
 	trigger = {
-		religion = catholic
-		NOT = { has_global_flag = DG_Counter_Reformation }
+		catholic_trigger = yes
+		#NOT = { has_global_flag = DG_Counter_Reformation }
 		NOT = { tag = PAP }
-		NOT = {
-			has_global_flag = pap_disables_simony_flag
+		NOT = { is_key_equal = { lhs = aspect_14 value = 1 } }
+		NOT = { has_global_flag = pap_disables_simony_flag }
+		any_owned_province = {
+			check_key = { lhs = NO_Wealth value = 250 }
+			religion = catholic
 		}
 	}
 	
@@ -6031,6 +6053,19 @@ country_event = {
 		days = 1
 		
 	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = NO_Wealth value = 250 }
+			        religion = catholic
+				}
+				save_event_target_as = simony_province
+			}
+		}
+	}
+	
 	option = {
 		name = "DG_Papacy.902.opta"
 		ai_chance = {
@@ -6040,15 +6075,22 @@ country_event = {
 				has_global_flag = borgia_pope_global
 			}
 		}
-		add_years_of_income = 0.2
+		add_treasury = 10
+		add_corruption = 5
 		add_reform_desire = 0.00002
+		hidden_effect = {
+     		event_target:simony_province = {
+	    		Public_ChangeClassWealthVal = { class=NO type=value inp=-10 }
+		    }
+		}
 	}
 	option = {
 		name = "DG_Papacy.902.optb"
 		ai_chance = {
 			factor = 10
 		}
-		add_papal_influence = 10
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-5 }
+		add_papal_influence = 5
 		add_devotion = 1
 		add_reform_desire = -0.00002
 	}
@@ -6064,14 +6106,13 @@ country_event = {
 	is_triggered_only = yes
 	
 	trigger = {
-		religion = catholic
-		NOT = { has_global_flag = DG_Counter_Reformation }
+		catholic_trigger = yes
+		#NOT = { has_global_flag = DG_Counter_Reformation }
 		NOT = { tag = PAP }
-		is_year = 1480
+		is_year = 1470
 		ruler_age = 45
-		NOT = {
-			has_global_flag = pap_disables_indulgences_flag
-		}
+		NOT = { has_global_flag = pap_disables_indulgences_flag }
+		NOT = { is_key_equal = { lhs = aspect_07 value = 3 } }
 		is_excommunicated = no
 		NOT = { has_country_modifier = papal_indulgence }
 		NOT = {
@@ -6103,7 +6144,7 @@ country_event = {
 			add_curia_treasury_medium_effect = yes
 		}
 		add_papal_influence = 10
-		add_reform_desire = 0.00002
+		add_reform_desire = 0.00001
 	}
 	option = {
 		name = "DG_Papacy.903.optb"
@@ -6171,7 +6212,7 @@ country_event = {
 		ai_chance = {
 			factor = 10
 		}
-		add_reform_desire = 0.00002
+		add_reform_desire = 0.00001
 		add_papal_influence = 2
 	}
 	option = {
@@ -6212,7 +6253,7 @@ country_event = {
 	}
 	option = {
 		name = "DG_Papacy.905.opta"
-		add_reform_desire = 0.00002
+		add_reform_desire = 0.00001
 		add_papal_influence = 2
 	}
 	option = {
@@ -6237,9 +6278,10 @@ province_event = {
 	is_triggered_only = yes #on_actions on_yearly_pulse_2
 	
 	trigger = {
-	    NOT = { has_global_flag = DG_Counter_Reformation }
+	    #NOT = { has_global_flag = DG_Counter_Reformation }
 		owner = {
 		    catholic_trigger = yes
+			NOT = { is_key_equal = { lhs = aspect_16 value = 3 } }
 		    NOT = { tag = PAP }
 			NOT = { tag = AVI }
 		}
@@ -6262,28 +6304,30 @@ province_event = {
 			factor = 70
 			modifier = {
 			    factor = 0.5
-				has_country_flag = humanism
+				owner = { 
+					has_country_flag = humanism
+				}
 			}
 		}
-		owner = { add_reform_desire = 0.00002 }
+		owner = { add_reform_desire = 0.00001 }
 		if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 80 } } }
-			add_province_modifier = { name = absentee_bishop duration = 2000 }
+			add_province_modifier = { name = absentee_bishop duration = 4000 }
 		}
 		else_if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 60 } } }
-			add_province_modifier = { name = absentee_bishop duration = 1600 }
+			add_province_modifier = { name = absentee_bishop duration = 2000 }
 		}
 		else_if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 40 } } }
-			add_province_modifier = { name = absentee_bishop duration = 1200 }
+			add_province_modifier = { name = absentee_bishop duration = 1600 }
 		}
 		else_if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 20 } } }
-			add_province_modifier = { name = absentee_bishop duration = 800 }
+			add_province_modifier = { name = absentee_bishop duration = 1200 }
 		}
 		else = {
-			add_province_modifier = { name = absentee_bishop duration = 400 }
+			add_province_modifier = { name = absentee_bishop duration = 800 }
 		}
 	}
 	option = {
@@ -6292,11 +6336,17 @@ province_event = {
 		    factor = 30
 			modifier = {
 			    factor = 0.5
-				NOT = { treasury = 20 }
+				NOT = { 
+					owner = {
+						treasury = 20 
+					}
+				}
 			}
 			modifier = {
 			    factor = 0.5
-				num_of_loans = 1
+				owner = {
+					num_of_loans = 1
+				}
 			}
 		}
 		owner = {
@@ -6360,10 +6410,12 @@ province_event = {
 			factor = 70
 			modifier = {
 			    factor = 0.5
-				has_country_flag = humanism
+				owner = {
+					has_country_flag = humanism
+				}
 			}
 		}
-		owner = { add_reform_desire = 0.00002 }
+		owner = { add_reform_desire = 0.00001 }
 		if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 80 } } }
 			add_province_modifier = { name = religious_scandal_province duration = 2000 }
@@ -6411,9 +6463,10 @@ province_event = {
 	is_triggered_only = yes #on_actions on_yearly_pulse_2
 	
 	trigger = {
-	    NOT = { has_global_flag = DG_Counter_Reformation }
+	    #NOT = { has_global_flag = DG_Counter_Reformation }
 		owner = {
 		    catholic_trigger = yes
+			NOT = { is_key_equal = { lhs = aspect_07 value = 3 } }
 		    NOT = { tag = PAP }
 			NOT = { tag = AVI }
 		}
@@ -6424,30 +6477,28 @@ province_event = {
 		NOT = { has_province_modifier = absentee_bishop }
 		NOT = { has_province_modifier = indulgence_peddler }
 		NOT = { has_province_modifier = religious_scandal_province }
-		NOT = {
-			has_global_flag = pap_disables_indulgences_flag
-		}
+		NOT = { has_global_flag = pap_disables_indulgences_flag }
 	}
     
 	immediate = {
 	    if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 80 } } }
-			add_province_modifier = { name = indulgence_peddler duration = 1000 }
+			add_province_modifier = { name = indulgence_peddler duration = 2000 }
 		}
 		else_if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 60 } } }
-			add_province_modifier = { name = indulgence_peddler duration = 800 }
+			add_province_modifier = { name = indulgence_peddler duration = 1500 }
 		}
 		else_if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 40 } } }
-			add_province_modifier = { name = indulgence_peddler duration = 600 }
+			add_province_modifier = { name = indulgence_peddler duration = 1000 }
 		}
 		else_if = {
 			limit = { owner = { check_key = { lhs = Prov_CLPow value = 20 } } }
-			add_province_modifier = { name = indulgence_peddler duration = 400 }
+			add_province_modifier = { name = indulgence_peddler duration = 800 }
 		}
 		else = {
-			add_province_modifier = { name = indulgence_peddler duration = 200 }
+			add_province_modifier = { name = indulgence_peddler duration = 400 }
 		}
 	}
 	
@@ -6457,13 +6508,12 @@ province_event = {
 		    factor = 50
 			modifier = {
 			    factor = 2
-				has_country_flag = renaissance
+				owner = {
+					has_country_flag = renaissance
+				}
 			}
 		}
-		owner = { add_reform_desire = 0.00002 }
-		owner = {
-		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=2.5 }
-		}
+		owner = { add_reform_desire = 0.00001 }
 	}
 	option = {
 		name = DG_Papacy.908.optc #Condemn the practice
@@ -6471,7 +6521,9 @@ province_event = {
 			factor = 50
 			modifier = {
 			    factor = 2
-				has_country_flag = humanism
+				owner = {
+					has_country_flag = humanism
+				}
 			}
 		}
 		owner = { add_reform_desire = -0.00002 }
