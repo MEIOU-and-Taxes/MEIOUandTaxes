@@ -294,7 +294,7 @@ def compile(compress=False, parse_init=True):
 		[ 'common', 'country_colors' ],
 		[ 'common', 'country_tags' ],
 		[ 'common', 'cultures' ],
-		[ 'common', 'custom_gui'],
+		[ 'common', 'custom_gui' ],
 		[ 'common', 'event_modifiers' ],
 		[ 'common', 'opinion_modifiers' ],
 		[ 'common', 'province_names' ],
