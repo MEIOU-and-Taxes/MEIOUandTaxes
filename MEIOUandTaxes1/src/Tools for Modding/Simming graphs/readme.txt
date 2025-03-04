@@ -6,11 +6,11 @@ MT_grapher is a python script to graph various data about M&T, specifically data
 	
 	3. Move MT_grapher.py, all_graphs.py and graph_pages.csv to the folder Your Documents/Paradox Interactive/Europa Universalis IV/logs
 	
-	4. Start a game of M&T 3.0 as Mapuche (South African native), you can change tag with the console to continue a regular game with logging
+	4. Enable logging in the startup event or make a runfile to set the global flag LogGraphing
 	
 	5. When you want to see the logs, double-click on MT_grapher.py
 	
-Eu4 will delete game.log every time you close the game. The grapher gives you a handy backup tool to preserve past game.logs, simply click on 'Backup game.log' after closing the game. The grapher will include these log backups when you view graphs. At the end of your campaign, don't forget to delete all the backed-up game.logs in the log folder! Right now there is only one continuous backup, multiple campaigns are not yet supported.
+Eu4 will delete game.log every time you close the game. The grapher gives you a handy backup tool to preserve past game.logs, simply click on 'Backup game.log' after closing the game. The grapher will include these log backups when you view graphs. At the end of your campaign, don't forget to delete all the backed-up game.logs in the log folder! Right now there is only one continuous backup, multiple campaigns are not yet supported. But you can save those logs in another folder of course.
 
 To add a new graph:
 
