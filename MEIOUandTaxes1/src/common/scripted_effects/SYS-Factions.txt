@@ -361,9 +361,20 @@ FC_SumBoosts = {
 # Tmp_3 - The sum of all relative powers after boosts
 FC_ApplyInfluence = {
 	# Add calculated boosts (or losses)
-	set_key = { lhs = Tmp_0 which = FC_$FAC$Boost }		
-	divide_key = { lhs = Tmp_0 which = Tmp_3 } # divide relative share by sum
-	multiply_key = { lhs = Tmp_0 value = 100 }
+	set_key = { lhs = Tmp_0 which = FC_$FAC$Boost }
+	if = {
+		limit = {
+			check_key = { lhs = Tmp_0 value = 0.001 }
+			check_key = { lhs = Tmp_3 value = 0.001 }
+			
+		}
+		divide_key = { lhs = Tmp_0 which = Tmp_3 } # divide relative share by sum
+		multiply_key = { lhs = Tmp_0 value = 100 }
+	}
+	else = {
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+
 	
 	if = { # Apply if influence between 0 - 100
 		limit = {
@@ -441,8 +452,17 @@ FC_CalcBoosts = {
 	change_key = { lhs = FC_$FAC$Boost which = Tmp_3 } # add tick to boost
 	
 	### calculate losses for other factions
-	set_key = { lhs = Tmp_3 which = FC_$FAC$Boost } 
-	divide_key = { lhs = Tmp_3 which = Tmp_4 } # divide by amount of factions for the calculation (set by FC_Check)
+	set_key = { lhs = Tmp_3 which = FC_$FAC$Boost }
+	if = {
+		limit = { 
+			check_key = { lhs = Tmp_3 value = 0.001 }
+			check_key = { lhs = Tmp_4 value = 0.001 }
+		}
+		divide_key = { lhs = Tmp_3 which = Tmp_4 } # divide by amount of factions for the calculation (set by FC_Check)
+	}
+	else = {
+		set_key = { lhs = Tmp_3 value = 0 }
+	}
 
 	# If faction active calculate boost effect on it
 	if = {
