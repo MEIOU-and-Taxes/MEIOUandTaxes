@@ -1318,8 +1318,8 @@ NMilitary = {
 
 	-- Breakthrough: An experimental feature that when you defeat an enemy regiment with artillery behind it,
 	-- there's a chance that you pull their artillery into the front row.
-	INFANTRY_BREAKTHROUGH = 0.0,					-- Between 0 and 1
-	CAVALRY_BREAKTHROUGH = 0.0,						-- Between 0 and 1
+	INFANTRY_BREAKTHROUGH = 0.1,					-- Between 0 and 1
+	CAVALRY_BREAKTHROUGH = 0.2,						-- Between 0 and 1
 
 	INFANTRY_SPEED = 0.5,  -- _MDEF_INFANTRY_SPEED = 10,
 	CAVALRY_SPEED = 0.5,  -- _MDEF_CAVALRY_SPEED = 10,
