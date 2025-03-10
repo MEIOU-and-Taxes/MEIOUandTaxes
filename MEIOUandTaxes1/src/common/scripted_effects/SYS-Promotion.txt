@@ -397,12 +397,42 @@ Promotion_GetNomadRestingPoint = {
 		limit = {
 			check_key = { lhs = NM_Total value = 0.001 } # make sure Nomads are around 
 		}
-		set_key = { lhs = Tmp_1 value = 100 }
-		set_key = { lhs = Tmp_2 which = Prov_BUPow } 
-		subtract_key = { lhs = Tmp_1 which = Tmp_2 } # e.g. 100 - 15 = 85 
-		multiply_key = { lhs = Tmp_1 value = 0.01 } #  e.g 85 x 0.01 = 0.85
-		multiply_key = { lhs = Tmp_1 which = NM_Total }
-		set_key = { lhs = Ideal_NomadSize which = Tmp_1 }
+		if = {
+			limit = {
+				OR = {
+					owner = {
+						OR = {
+							is_colonial_nation = yes
+							is_former_colonial_nation = yes
+							has_country_flag = changed_from_colonial_nation
+						}
+					}
+					AND = {
+						OR = {
+							continent = south_america
+							continent = north_america
+						}
+						owner = {
+							capital_scope = {
+								NOT = {
+									continent = south_america
+									continent = north_america
+								}
+							}
+						}
+					}
+				}
+			}
+			set_key = { lhs = Ideal_NomadSize value = 0 }
+		}
+		else = {
+			set_key = { lhs = Tmp_1 value = 100 }
+			set_key = { lhs = Tmp_2 which = Prov_BUPow } 
+			subtract_key = { lhs = Tmp_1 which = Tmp_2 } # e.g. 100 - 15 = 85 
+			multiply_key = { lhs = Tmp_1 value = 0.01 } #  e.g 85 x 0.01 = 0.85
+			multiply_key = { lhs = Tmp_1 which = NM_Total }
+			set_key = { lhs = Ideal_NomadSize which = Tmp_1 }
+		}
 	}
 }
 Promotion_NMPromotion = {
