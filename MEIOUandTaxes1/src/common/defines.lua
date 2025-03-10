@@ -229,11 +229,11 @@ NDiplomacy = {
 	AE_SAME_RELIGION_GROUP = 0.1,  
 	AE_DIFFERENT_RELIGION = -0.5,  
 	AE_HRE_INTERNAL = 0.75,  
-	AE_ATTACKER_DEVELOPMENT = 0.003,  -- +50% cap (at 1000 development)
-	AE_DEFENDER_DEVELOPMENT = 0.003,  -- -50% cap (at 1000 development)
+	AE_ATTACKER_DEVELOPMENT = 0.004,  -- +50% cap (at 1000 development)
+	AE_DEFENDER_DEVELOPMENT = 0.004,  -- -50% cap (at 1000 development)
 	AE_DISTANCE_BASE = 0.75,  -- previously 0.73
 	AE_SAME_OVERLORD = 0.5,  
-	AE_PROVINCE_CAP = 12,  -- Province development above this will not count for AE (also used for warscore cost cap)
+	AE_PROVINCE_CAP = 18,  -- Province development above this will not count for AE (also used for warscore cost cap)
 	AE_THREATEN_WAR = 0.8,  
 	AE_PRIMITIVES = -0.75, -- less AE from primitives
 
@@ -319,7 +319,7 @@ NDiplomacy = {
 	MAX_WARSCORE = 100,
 
 	MAX_PEACE_TREATY_PRESTIGE = 100,  
-	MAX_PEACE_TREATY_AE = 200,  
+	MAX_PEACE_TREATY_AE = 150,  
 
 	PEACE_COST_DEMAND_NON_OCCUPIED_PROVINCE_MULT = 1.2,  
 	PEACE_COST_DEMAND_CAPITAL_MULT = 1.2,  
@@ -331,8 +331,8 @@ NDiplomacy = {
 	PO_SPREAD_REVOLUTION_MAX_POWER_GAIN = 999,		-- Total maximum power gain in each ability from spread the revolution
 	MAX_ANNEX_SIZE = 10000, 						-- _DDEF_MAX_ANNEX_SIZE_ (Max number of provinces that can be annexed at once)
 
-	ALLY_PEACE_COST_MULT = 2,						-- Taking things from allies that are not fully called into the war costs this much more
-	ALLY_AE_MULT = 1.5,								-- Taking things from allies that are not fully called into the war generates this much more AE
+	ALLY_PEACE_COST_MULT = 1.5,						-- Taking things from allies that are not fully called into the war costs this much more
+	ALLY_AE_MULT = 1.25,								-- Taking things from allies that are not fully called into the war generates this much more AE
 
 	DEFENDER_AE_MULT = 0.75, 					-- _DDEF_DEFENDER_AE_MULT_ (Infamy multiplied by this for defenders in peace treaties, unless the CB is "mutual" )
 	PO_REVOKE_REFORM_PRESTIGE = 10, 				-- _DDEF_PO_REVOKE_REFORM_PRESTIGE_
@@ -437,8 +437,8 @@ NDiplomacy = {
 	AUTODIPLO_TARGET_SUBJECTS_HOPELESS_LIMIT = -200,
 	AUTODIPLO_TARGET_SUBJECTS_IMPROVECAP = 160,
 
-	AUTODIPLO_TARGET_COALITION_HOPELESS_LIMIT = -150,
-	AUTODIPLO_TARGET_COALITION_IMPROVECAP = 10,
+	AUTODIPLO_TARGET_COALITION_HOPELESS_LIMIT = -125,
+	AUTODIPLO_TARGET_COALITION_IMPROVECAP = 50,
 	AUTODIPLO_TARGET_COALITION_START_TO_IGNORE_AE_ABOVE_THIS = -25,
 	AUTODIPLO_TARGET_COALITION_START_TO_IGNORE_AE_ABOVE_THIS_SCORE_MULTIPLIER = 10,
 	AUTODIPLO_TARGET_COALITION_HIGHEST_PRIORITY_AE = 50,
@@ -453,7 +453,7 @@ NDiplomacy = {
 
 	KNOWLEDGE_SHARING_INSTITUTION_GROWTH_MONTHLY = 0.10,  
 	KNOWLEDGE_SHARING_DURATION_YEARS = 10,  
-	KNOWLEDGE_SHARING_COST_PERCENT_MONTHLY = 10.0,  
+	KNOWLEDGE_SHARING_COST_PERCENT_MONTHLY = 5.0,  
 	SCORNFUL_INSULT_PRESTIGE_COST = 5.0,
 	
 	CHANGE_COLONIAL_TYPE_COST = 1000,
