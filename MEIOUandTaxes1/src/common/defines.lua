@@ -1242,10 +1242,10 @@ NMilitary = {
 	DEVELOPMENT_FOR_BLOCKADE_COST = 0.5,
 	COAST_RAID_RANGE = 2,							-- default coastal raid range
 
-	ARMY_DRILL_YEARLY_DECAY = -1.5,  -- Loss from not Drilling
+	ARMY_DRILL_YEARLY_DECAY = -1,  -- Loss from not Drilling
 	ARMY_DRILL_YEARLY_GAIN = 10.0,					-- Gain from Drilling
 	ARMY_DRILL_MAX = 100.0,
-	ARMY_DRILL_MAX_MORALE = 0.5,
+	ARMY_DRILL_MAX_MORALE = 0.8,
 	ARMY_DRILL_SKILL_MONTHS = 120,					-- The average number of months until you get a skill increase if drilling 100% of forcelimit. Set to 0 to disable.
 
 	MAX_SAILOR_LACK_ATTRITION = 1,
