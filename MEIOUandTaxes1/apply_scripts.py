@@ -269,7 +269,6 @@ def link_file ( filepath ):
 	os.link( filepath, buildpath )
 
 def compile(compress=False, parse_init=True, debug=False):
-	USE_MULTIPROCESSING = not debug
 	start = time.time()
 
 	# files/paths to run through parsing
@@ -350,15 +349,17 @@ def compile(compress=False, parse_init=True, debug=False):
 	if ( os.path.exists( 'build' ) ):
 		shutil.rmtree( 'build' )
 
-	if USE_MULTIPROCESSING and 'fork' in multiprocessing.get_all_start_methods():
+	if not debug and 'fork' in multiprocessing.get_all_start_methods():
 		multiprocessing.set_start_method('fork')
 		print( 'Loading scripts...' )
 		load_scripts()
 
 	file_count = len(paths)
 	print(f"Compiling {file_count} files...")
+	if debug:
+		print(f"DEBUG: Compiling sequentially (slower)")
 	print(f'0% done', end='')
-	if USE_MULTIPROCESSING:
+	if not debug:
 		with multiprocessing.Pool() as pool:
 			if compress:
 				compiled_files_it = pool.imap_unordered(compile_and_save_compressed, paths, max(1, round(file_count/1000)))
