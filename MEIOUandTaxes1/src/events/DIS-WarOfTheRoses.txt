@@ -14,10 +14,16 @@ country_event = {
 	    set_global_flag = had_war_of_the_roses
 		set_country_flag = war_of_the_roses
 		set_global_flag = war_of_the_roses
-		Public_ChangePowerbrokerLoyaltyTooltipProv  = { Powerbroker=NO Amount=-40 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-40 }
 		Stab_Subtract2 = yes
 
 		hidden_effect = {
+			if = {
+				limit = {
+					tag = UEF
+				}
+				set_country_flag = was_uef
+			}
 			if = {
 				limit = {
 					owns = 3323
@@ -959,7 +965,6 @@ country_event = {
 	title = war_of_the_roses.100.t
 	desc = war_of_the_roses.100.d
 	picture = WAR_OF_THE_ROSES_eventPicture
-	major = yes
 	is_triggered_only = yes #from "on_end" in disaster
 
 	immediate = {
@@ -991,11 +996,37 @@ country_event = {
 				}
 				country_event = {
 					id = war_of_the_roses.104 #Relations Deteriorate with England
-					days = 1
+					days = 10
 				}
 			}
 			clr_country_flag = supports_house_of_york
 			clr_country_flag = supports_house_of_lancaster
+		}
+	}
+	after = {
+		if = {
+			limit = {
+				dynasty = "Lancaster"
+			}
+			country_event = {
+				id = war_of_the_roses.101 #Lancaster win
+				days = 2
+			}
+		}
+		else_if = {
+			limit = {
+				dynasty = "York"
+			}
+			country_event = {
+				id = war_of_the_roses.102 #York win
+				days = 2
+			}
+		}
+		else = {
+			country_event = {
+				id = war_of_the_roses.106 #House of X ends the War of the Roses
+				days = 2
+			}
 		}
 	}
 }
@@ -1011,22 +1042,11 @@ country_event = {
 	is_triggered_only = yes
 	fire_only_once = yes
 
-	trigger = {
-		OR  = {
-			tag = ENG
-			tag = LNC
-		}
-		has_disaster = war_of_the_roses
-		has_country_flag = supports_house_of_york
-		dynasty = "Lancaster"
-	}
-
 	immediate = {
 		hidden_effect = {
 			set_country_flag = had_war_of_the_roses
 			clr_global_flag = war_of_the_roses
 		}
-		end_disaster = war_of_the_roses
 	}
 
 	option = {
@@ -1034,6 +1054,7 @@ country_event = {
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:rebelling House of Lancaster won the War of The Roses:war_of_the_roses.101"
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:end of War of the Roses:war_of_the_roses.101"
 		Stab_Add50Percent = yes
+		WarOfTheRoses_Cleanup = yes
 		add_prestige = -10
 		hidden_effect = {
 			every_country = {
@@ -1105,26 +1126,18 @@ country_event = {
 	major = yes
 	is_triggered_only = yes
 	fire_only_once = yes
-	trigger = {
-		OR  = {
-			tag = ENG
-			tag = YOR
-		}
-		has_disaster = war_of_the_roses
-		has_country_flag = supports_house_of_lancaster
-		dynasty = "York"
-	}
+
 	immediate = {
 		hidden_effect = {
 			set_country_flag = had_war_of_the_roses
 			clr_global_flag = war_of_the_roses
 		}
-		end_disaster = war_of_the_roses
 	}
 	option = {
 		name = war_of_the_roses.102.a
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:rebelling House of York won the War of The Roses:war_of_the_roses.102"
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:end of War of the Roses:war_of_the_roses.102"
+		WarOfTheRoses_Cleanup = yes
 		Stab_Add50Percent = yes
 		add_prestige = -10
 		hidden_effect = {
@@ -1226,7 +1239,7 @@ country_event = {
 		name = war_of_the_roses.104.a
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:worsened relation with [From.GetName]:war_of_the_roses.104"
 		trigger = {
-				has_country_flag = support_for_war_of_the_roses
+			has_country_flag = support_for_war_of_the_roses
 		}
 		FROM = {
 			add_opinion = {
@@ -1271,16 +1284,6 @@ country_event = {
 	is_triggered_only = yes
 	fire_only_once = yes
 
-	trigger = {
-		OR  = {
-			tag = ENG
-			tag = YOR
-		}
-		has_disaster = war_of_the_roses
-		NOT = { dynasty = York }
-		NOT = { dynasty = Lancaster }
-	}
-
 	immediate = {
 		hidden_effect = {
 			clr_country_flag = supports_house_of_lancaster
@@ -1297,13 +1300,13 @@ country_event = {
 			set_country_flag = had_war_of_the_roses
 			clr_global_flag = war_of_the_roses
 		}
-		end_disaster = war_of_the_roses
 	}
 	option = {
 		name = war_of_the_roses.106.a
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:other dynasty (Root.Monarch.Dynastyt.GetName) got the throne:war_of_the_roses.106"
 		log = "FE-war_of_the_roses:[GetYear]:[Root.GetName]:end of War of the Roses:war_of_the_roses.106"
 		Stab_Subtract1 = yes
+		WarOfTheRoses_Cleanup = yes
 		if = {
 			limit = {
 				owns = 245
