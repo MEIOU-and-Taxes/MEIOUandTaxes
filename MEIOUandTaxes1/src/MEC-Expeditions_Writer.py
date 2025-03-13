@@ -2579,7 +2579,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
             loc.write(
                 f' MEC_Expeditions.{str(expedition_total_failure_start_number + index).zfill(3)}.title: "Expedition to {expedition.localized_name} Lost at Sea"\n')
             loc.write(
-                f' MEC_Expeditions.{str(expedition_total_failure_start_number + index).zfill(3)}.desc: "A prominent trader has been spreading word that we since we haven\'t heard back from our expedition to {expedition.localized_name} for so long that we can only assume it has failed '
+                f' MEC_Expeditions.{str(expedition_total_failure_start_number + index).zfill(3)}.desc: "A prominent trader has been spreading word that since we haven\'t heard back from our expedition to {expedition.localized_name} for so long that we can only assume it has failed '
                 f'completely."\n')
 
         # Write the Expedition Failure section header
