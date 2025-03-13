@@ -690,6 +690,7 @@ country_decisions = {
 
 	# Decision to highlight all expedition provinces and toggle other expedition decisions
 	MEC_Expeditions_Decision = {
+        major = yes
 		potential = { # Always visible for players
 			ai = no
 		}
@@ -726,6 +727,7 @@ decisions_frame_bottom = """\
 
 decision_toggle_expeditions = """\
 	MEC_Expeditions_Decision_toggle_expeditions = {
+        major = yes
 		potential = {
 			has_country_flag = MEC_Expeditions_Show_Decisions
 			OR = {
@@ -760,6 +762,7 @@ decision_toggle_expeditions = """\
 
 decision_toggle_always_fight = """\
 	MEC_Expeditions_Decision_toggle_always_fight = {
+        major = yes
 		potential = {
 			has_country_flag = MEC_Expeditions_Show_Decisions
 		}
@@ -2275,7 +2278,7 @@ with open(Path('decisions/MEC-Expeditions_decisions.txt'), 'w', encoding='cp1252
 
     # Decisions for each expedition to highlight their provinces
     for index, expedition in enumerate(expeditions_list):
-        decisions.write(f"\tMEC_Expeditions_Decision_{expedition.name} = {{\n\t\tpotential = {{\n\t\t\thas_country_flag = MEC_Expeditions_Show_Decisions\n\t\t}}\n")
+        decisions.write(f"\tMEC_Expeditions_Decision_{expedition.name} = {{\n\t\tmajor = yes\n\t\tpotential = {{\n\t\t\thas_country_flag = MEC_Expeditions_Show_Decisions\n\t\t}}\n")
         decisions.write(f"\t\tprovinces_to_highlight = {{\n\t\t\tprovince_group = expedition_provs.{expedition.name}\n\t\t}}\n")
         decisions.write("\t\tallow = {\n\t\t\talways = yes\n\t\t}\n")
         decisions.write(f"\t\teffect = {{\n\t\t\tcountry_event = {{\n\t\t\t\tid = MEC_Expeditions.{str(expedition_decision_events_start_number + index).zfill(3)}\n\t\t\t}}\n\t\t}}\n")
@@ -2363,7 +2366,6 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
         # Write the decision localizations
         # Main decision localization
         loc.write(' # Expedition Decision\n')
-        loc.write(' MEC_Expeditions_Decision_title: "Expeditions Unlock Tooltip & Decisions Toggle"\n')
         loc.write(' MEC_Expeditions_Decision_desc: "[Root.MEC_Expeditions_Decision_tradenode]"\n')
         loc.write(' MEC_Expeditions_Decision_Effect: "Toggle showing decisions for every expedition which allow province highlighting of only their provinces and tell when each trade node unlocks that expedition."\n')
         loc.write(' MEC_Expeditions_Decision_Highlight_All: "Click to highlight all provinces that are targeted by any expedition."\n')
@@ -2379,7 +2381,6 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
             loc.write('"\n')
         # Expedition specific decision localizations
         for expedition in expeditions_list:
-            loc.write(f' MEC_Expeditions_Decision_{expedition.name}_title: "Expedition to {expedition.localized_name} Info"\n')
             loc.write(f' MEC_Expeditions_Decision_{expedition.name}_desc: "This expedition can be unlocked by countries with capitals in the following trade nodes at the corresponding §Ydiplomatic technology§! levels:')
             current_level = 0
             for (location, level) in expedition.node_tech_reqs:
@@ -2392,13 +2393,11 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
         loc.write('\n')
 
         # Pause Expeditions Toggle Decision Localizations
-        loc.write(' MEC_Expeditions_Decision_toggle_expeditions_title: "Expedition Events Toggle"\n')
         loc.write(' MEC_Expeditions_Decision_toggle_expeditions_desc: "Enable or disable your country getting the event for sending expeditions."\n')
         loc.write(' MEC_Expeditions_Decision_toggle_expeditions_stop: "Stop getting the event for sending expeditions."\n')
         loc.write(' MEC_Expeditions_Decision_toggle_expeditions_restart: "Restart getting the event for sending expeditions."\n')
 
         # Always Fight Expeditions Toggle Decision Localizations
-        loc.write(' MEC_Expeditions_Decision_toggle_always_fight_title: "Expedition Landing Toggle"\n')
         loc.write(' MEC_Expeditions_Decision_toggle_always_fight_desc: "Set response to expeditions landing in your provinces."\n')
         loc.write(' MEC_Expeditions_Decision_toggle_always_fight_no: "Have a choice in responding to expeditions. Expedition landing event will show."\n')
         loc.write(' MEC_Expeditions_Decision_toggle_always_fight_yes: "Always fight off expeditions. Expedition landing event will be skipped."\n')
