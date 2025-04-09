@@ -116,6 +116,6 @@ tags={
 }
 picture="thumbnail.png"
 version="v3.0"
-supported_version="1.36.*.*"
+supported_version="v1.37.*.*"
 path="mod/MEIOUandTaxes1/build"
 remote_file_id="2630437525"

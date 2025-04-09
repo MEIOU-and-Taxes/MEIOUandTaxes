@@ -8,10 +8,10 @@ Growth_GetBirthProv = {
     # There is a exception handling for urban birthing
     Growth_GetBirth = { class = SF rBirth = 1.00 rDeath = 1.05 rural = yes }
     Growth_GetBirth = { class = NM rBirth = 1.00 rDeath = 1.25 rural = yes }
-    Growth_GetBirth = { class = RE rBirth = 1.00 rDeath = 1.25 urban = yes }
-    Growth_GetBirth = { class = NO rBirth = 0.90 rDeath = 1.50 }
-    Growth_GetBirth = { class = BG rBirth = 0.95 rDeath = 1.50 }
-    Growth_GetBirth = { class = CL rBirth = 0.90 rDeath = 1.50 }
+    Growth_GetBirth = { class = RE rBirth = 0.80 rDeath = 1.25 urban = yes }
+    Growth_GetBirth = { class = NO rBirth = 0.80 rDeath = 1.50 }
+    Growth_GetBirth = { class = BG rBirth = 0.80 rDeath = 1.50 }
+    Growth_GetBirth = { class = CL rBirth = 0.80 rDeath = 1.50 }
 
     # Set how many literates there are
     # 1% of resident population
@@ -55,7 +55,7 @@ Growth_GetBirth = {
         # CASE $class$ LifeC Fulfilment >= Growth_PointNeutralFill%
 		if = {
 			limit = {
-				check_key = { lhs = $class$_FillLifeC value = 0.75 } # `Growth_PointNeutralFill~value`
+				check_key = { lhs = $class$_FillLifeC value = 0.85 } # `Growth_PointNeutralFill~value`
 			}
             # Tmp_0 = LifeCFullfilment - Growth_PointNeutralFill
             # Tmp_1 = LifeCFullfilment
@@ -67,7 +67,7 @@ Growth_GetBirth = {
                 set_key = { lhs = Tmp_0 value = 2.33 } # `Growth_PointMaxFulfill~value`
             }
 			set_key = { lhs = Tmp_1 which = Tmp_0 }
-			subtract_key = { lhs = Tmp_0 value = 0.75 } # `Growth_PointNeutralFill~value`
+			subtract_key = { lhs = Tmp_0 value = 0.85 } # `Growth_PointNeutralFill~value`
 			
 			# Birth Rate formula:
 			#  (LifeCFulfillment - Growth_PointNeutralFill) * Growth_MultPositiveFill
@@ -190,7 +190,7 @@ Growth_GetBirth = {
 			
             # Birth rate formula: LifeCFulfillment * 0.782 + 0.414
             set_key = { lhs = Growth_Birth which = $class$_FillLifeC }
-			multiply_key = { lhs = Growth_Birth value = 0.782 } # `Growth_MultNegativeFill~value`
+			multiply_key = { lhs = Growth_Birth value = 0.689 } # `Growth_MultNegativeFill~value`
 			change_key = { lhs = Growth_Birth value = 0.414 }   # `Growth_BaseNegativeFill~value`
 			
 			set_key = { lhs = Growth_Death value = $rDeath$ }
@@ -720,8 +720,15 @@ Growth_DoMove_DistributeMigration = {
 				# total outward migration
                 set_key = { lhs = Public_Tmp9 which = Tmp_$tmp$ } # Result of local migration calc
 				multiply_key = { lhs = Public_Tmp9 which = Public_Tmp4 }
-                divide_key = { lhs = Public_Tmp9 which = Public_Tmp2 }
-
+				if = {
+					limit = { 
+						check_key = { lhs = Public_Tmp9 value = 0.001 }
+					}
+					divide_key = { lhs = Public_Tmp9 which = Public_Tmp2 }
+				}
+				else = {
+					set_key = { lhs = Public_Tmp9 value = 0 }
+				}
                 change_key = { lhs = $class$_Out which = Public_Tmp9 }
             }
         }
@@ -799,6 +806,7 @@ Growth_SetPressure = {
                 Infra_GetAmenities_Cap = { return = Tmp_0 }
 
                 set_key = { lhs = Tmp_1 which = $class$_Total }
+				change_key = { lhs = Tmp_1 value = 0.001 } # In case we have 0 residents, if that is somehow possible)
                 divide_key = { lhs = Tmp_1 which = Tmp_0 }
 
                 if = {
@@ -869,7 +877,7 @@ Growth_ZoneHelper = {
         limit = {
             isValidProv = yes
             [[flag] has_province_flag = $flag$ ]
-            [[HRE] is_part_of_hre = yes
+            [[HRE] is_part_of_hre = $HRE$
             OR = {
                 culture_group = low_germanic
                 culture_group = high_germanic

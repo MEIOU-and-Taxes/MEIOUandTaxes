@@ -51,9 +51,9 @@ NDiplomacy = {
 	UNCONDITIONAL_SURRENDER_MONTHS = 1,  -- Months before unconditional surrender starts having an effect on Call for Peace. Set to negative values to disable feature.
 	SHAREMAP_PRESTIGE_TRANSFER_LOSE = -15,				-- Prestige transferred for the Request to Share Maps diplomatic action.
 	SHAREMAP_PRESTIGE_TRANSFER_GAIN = 10,				-- Prestige transferred for the Request to Share Maps diplomatic action.
-	TRADE_LEAGUE_MIN_PRESTIGE_OLD_LEADER = -50,		-- Minimum required prestige to stay leader of a Trade League.
-	TRADE_LEAGUE_MIN_PRESTIGE_NEW_LEADER = 20,		-- Minimum required prestige to become the new leader of a Trade League when the old one is resigned.
-	TRADE_LEAGUE_BREAK_OPINION = -50,				-- AI will leave a Trade League if their opinion of you falls below this value.
+	TRADE_LEAGUE_MIN_PRESTIGE_OLD_LEADER = -25,		-- Minimum required prestige to stay leader of a Trade League.
+	TRADE_LEAGUE_MIN_PRESTIGE_NEW_LEADER = 5,		-- Minimum required prestige to become the new leader of a Trade League when the old one is resigned.
+	TRADE_LEAGUE_BREAK_OPINION = 25,				-- AI will leave a Trade League if their opinion of you falls below this value.
 
 	PRESS_SAILORS_FRACTION = 0.2,
 
@@ -73,12 +73,12 @@ NDiplomacy = {
 	DAYS_TO_DECLARE_WAR = 32,  -- Days from start of game before you can DOW anyone
 
 	INCREASE_TRUST_COST = 10,						-- Cost in favors to increase trust
-	INCREASE_TRUST_AMOUNT = 5,						-- Amount of trust per increase
+	INCREASE_TRUST_AMOUNT = 2.5,						-- Amount of trust per increase
 	MIN_FAVOURS_FOR_ADDING_TRUST = 100,
 	PREPARE_FOR_WAR_COST = 5,  -- Cost in favors to ask AI to prepare for war
 	PREPARE_FOR_WAR_MONTHS = 12,					-- Number of months AI will prepare for war
-	CALL_TO_ARMS_COST = 10,							-- Cost in favors to call ally to arms when you're not promising them territory
-	FAVORS_LAND_DIVIDER = 2,						-- How many favors do you get for giving other countries land? (divider on development)
+	CALL_TO_ARMS_COST = 25,							-- Cost in favors to call ally to arms when you're not promising them territory
+	FAVORS_LAND_DIVIDER = 3.5,						-- How many favors do you get for giving other countries land? (divider on development)
 	DISHONOR_CALL_TRUST_CALLER = 20,				-- How much trust is lost from dishonoring a call to arms (with caller)
 	DISHONOR_CALL_TRUST = 5,						-- How much trust is lost from dishonoring a call to arms (with everyone else)
 	EXCOMMUNICATE_TRUST = 10,
@@ -94,7 +94,7 @@ NDiplomacy = {
 	TRUST_PENALTY_FOR_NO_LAND = 20,					-- Trust penalty for not being given as much land as they expected in peace deal (scales with how much they actually got relative to participation)
 	TRUST_PENALTY_FOR_SEPARATE_PEACE = 20,  -- Trust penalty for signing a separate peace
 
-	OFFENSIVE_WAR_COOLDOWN = 10,					-- Years between when you can call a country into an offensive war on your behalf
+	OFFENSIVE_WAR_COOLDOWN = 20,					-- Years between when you can call a country into an offensive war on your behalf
 	MAX_CLIENT_STATES = 10,							-- Max client states for one country
 
 	ALLOW_LEADER_DEMAND_TOGGLE = 1,  -- Whether or not player is allowed to set if warleader can negotiate for them
@@ -557,7 +557,7 @@ NCountry = {
 	INSTITUTION_CAP_IMP_DEVELOPMENT = 10,  
 	INSTITUTION_BASE_IMP_DEVELOPMENT = 30,  
 
-	EMBRACE_INSTITUTION_COST = 2.5,  -- 2.5 per development (autonomy modified)
+	EMBRACE_INSTITUTION_COST = 1.25,  -- 2.5 per development (autonomy modified)
 	MAXIMUM_CONDOTTIERI = 0,  -- FROM 20 => meant to disable condotierri -- Base number of units you can rent out
 	CORRUPTION_COST = 0.03,  -- cost for monthly combat per development
 	STATE_MAINTENANCE_DEV_FACTOR = 0.01,  -- per dev
@@ -742,9 +742,9 @@ NCountry = {
 	PS_BUY_ADMIRAL = 30,
 	PS_BUY_CONQUISTADOR = 30,
 	PS_BUY_EXPLORER = 30,
-	PS_ASSAULT = 5,
-	PS_ARTILLERY_BARRAGE = 30,
-	PS_NAVAL_BARRAGE = 30,
+	PS_ASSAULT = 0,
+	PS_ARTILLERY_BARRAGE = 999,
+	PS_NAVAL_BARRAGE = 999,
 	PS_ADD_TRIBAL_LAND = 100,
 	PS_ADD_TRIBAL_LAND_EXTRA_COST_PER_PROVINCE = 10,
 	PS_FORCE_MARCH = 2,
@@ -752,7 +752,7 @@ NCountry = {
 	PS_DEMAND_NON_WARGOAL_PEACE = 2.5,
 	PS_DEMAND_NON_WARGOAL_PEACE_PRIMITIVES = 0,
 	PS_MAKE_PROVINCE_CORE = 5,  
-	PS_REDUCE_INFLATION = 35,
+	PS_REDUCE_INFLATION = 99999, -- Disabled done through policy
 	PS_PROMOTE_MERCANTILISM = 9999,  
 	PS_MOVE_CAPITAL = 200,  
 	PS_MOVE_CAPITAL_EXTRA = 20,						-- Per 100 country development.
@@ -769,7 +769,7 @@ NCountry = {
 	PS_CHANGE_CULTURE_OVERSEAS_RELIGION_MOD = -0.5,  -- Modifier how much cheaper it is to change culture in overseas province if same religion
 	PS_HARSH_TREATMENT_COST = 75,  -- Max cost for harsh treatment (scales to revolt size)
 	PS_HARSH_TREATMENT_REDUCE = 25,  
-	PS_GARRISON_SORTIES = 5,  
+	PS_GARRISON_SORTIES = 0,  
 	PS_REDUCE_WAREXHAUSTION = 9999,  
 	PS_FACTION_BOOST = 9999,  
 	PS_RAISE_TARIFFS = 25,  
@@ -785,7 +785,7 @@ NCountry = {
 	PS_REMOVE_ACCEPTED_CULTURE = 0,  
 	PS_REMOVE_ACCEPTED_CULTURE_UNREST_DURATION = 0,  
 	PS_STRENGTHEN_GOVERNMENT = 9999,  
-	PS_ESTABLISH_SIBERIAN_FRONTIER = 25,  
+	PS_ESTABLISH_SIBERIAN_FRONTIER = 0,  
 
 
 	STRENGTHEN_GOVERNMENT_LEGITIMACY = 10,
@@ -864,7 +864,7 @@ NCountry = {
 	COLONIAL_CLAIM_BONUS = 2,  
 	COLONIAL_CLAIM_VIOLATION = -5,  
 	COLONY_VIOLAION_PAPAL_INFLUENCE_COST  = -10,
-	COLONIAL_NATION_GROWTH_IMPACT = 0.5,  -- colonies of colonial nations grow slower if desired.
+	COLONIAL_NATION_GROWTH_IMPACT = 1,  -- colonies of colonial nations grow slower if desired.
 	OVEREXTENSION_FACTOR = 0.5,  
 	OVEREXTENSION_OVERSEAS_FACTOR = 0.5,  -- Modifier to overextension from overseas provinces
 	MISSIONARY_PROGRESS_ON_CHANCE = 0.5,  -- How many % the progress will boost on daily lucky-roll.
@@ -1189,7 +1189,7 @@ NEconomy = {
 	MISSIONARY_TIME_DISTANCE = 0.5,  
 	TRADE_WIND_STRENGTH = 0.5,						-- _EDEF_TRADE_WIND_STRENGTH_
 	MERCHANT_COMPETE_PERCENT_OWNED_BASE = 0.25,		-- _EDEF_MERCHANT_COMPETE_PERCENT_OWNED_BASE_
-	TRADED_FRACTION_FOR_BONUS = 2.00,  -- 200% required trade control of a trade good makes it impossible to obtain the "Trading in <trade good>" bonus.
+	TRADED_FRACTION_FOR_BONUS = 9999.00,  -- 99999% required trade control of a trade good makes it impossible to obtain the "Trading in <trade good>" bonus.
 	OPEN_SEA_MODIFIER = 1.7,						-- _EDEF_OPEN_SEA_MODIFIER_
 	COASTAL_MODIFIER = 0.7,  -- _EDEF_COASTAL_MODIFIER_
 	TRADE_CAPITAL_POWER = 0.5,  
@@ -1280,7 +1280,7 @@ NMilitary = {
 	EXPLORER_LEADER_POWER = 0.8,					-- Used for conquistadors & explorers (affects total pips)
 	BASE_MP_TO_MANPOWER = 0.00,  -- 0 men per manpower     ### DO MODIFIED FROM .5
 	SIEGE_ATTRITION = 2,  
-	SIEGE_DISEASE_IMPACT = 0.0,  
+	SIEGE_DISEASE_IMPACT = 0.05,  
 	ARMY_ATTRITION_AT_COAST = 1,					-- How many percent attrition units take while loaded onto ships along the coast
 	ARMY_ATTRITION_AT_SEA = 10,						-- How many percent attrition units take while loaded onto ships traveling open sea
 	NATIVE_FEROCITY_IMPACT = 0.05,					-- how many percentage each ferocity gives in combat bonus
@@ -1296,12 +1296,12 @@ NMilitary = {
 	LEADER_MAINTENANCE_COST = 1,					-- how much mil power each leader costs.
 	GARRISON_SIZE = 1000, 							-- GARRISON_SIZE
 	SIEGE_FORCE_NEEDED_MULTIPLIER = 2,  
-	MAX_BREACH = 3,
+	MAX_BREACH = 5,
 	SIEGE_GARRISON_SURRENDER = 100,					-- A siege ends when there is less than 100 defenders left.
 	ASSAULT_WIDTH_LIMIT = 5,						-- how many times the garrison size that can effectively assault at the same time.
-	ASSAULT_ATTACKER_LOSS = 1.0, 					-- MDEF_ASSAULT_ATTACKER_LOSS = 10,
+	ASSAULT_ATTACKER_LOSS = 0.8, 					-- MDEF_ASSAULT_ATTACKER_LOSS = 10,
 	ASSAULT_DEFENDER_LOSS = 0.05, 					-- _MDEF_ASSAULT_DEFENDER_LOSS = 10,
-	ASSAULT_DICE_MODIFIER = 5, 						-- _MDEF_ASSAULT_DICE_MODIFIER_
+	ASSAULT_DICE_MODIFIER = 8, 						-- _MDEF_ASSAULT_DICE_MODIFIER_
 	INF_REGIMENT_MANPOWER_COST = 1.0, 				-- 1 = 1000 men in cost.
 	CAV_REGIMENT_MANPOWER_COST = 1.0, 				-- 1 = 1000 men in cost.
 	ART_REGIMENT_MANPOWER_COST = 1.0, 				-- 1 = 1000 men in cost.
@@ -1415,9 +1415,9 @@ NMilitary = {
 	ART_LOOT = 0,  -- How many ducats/month will a single full strength artillery regiment loot?
 	-- Suppression values are multiplied by the static modifier friendly_regiments
 	MAX_REBEL_SUPPRESSION = 5.0;				-- Maximum amount of rebel suppression by troops in a province
-	INF_SUPPRESSION = 0.25,						-- The amount of reduction to unrest for each friendly infantry regiment in a province
-	CAV_SUPPRESSION = 0.25,						-- The amount of reduction to unrest for each friendly cavalry regiment in a province
-	ART_SUPPRESSION = 0.25,						-- The amount of reduction to unrest for each friendly artillery regiment in a province
+	INF_SUPPRESSION = 0.3,						-- The amount of reduction to unrest for each friendly infantry regiment in a province
+	CAV_SUPPRESSION = 0.4,						-- The amount of reduction to unrest for each friendly cavalry regiment in a province
+	ART_SUPPRESSION = 0.05,						-- The amount of reduction to unrest for each friendly artillery regiment in a province
 
 	FORT_FLIPPING_TIME = 30,					-- Number of days it takes an influencing fort to revert the control of a province if left unhindered.
 	STACKWIPE_MANPOWER_RETURN_FRACTION = 0.5,	-- Fraction of manpower that returns to pool when a stack is wiped.
@@ -1608,6 +1608,11 @@ NMilitary = {
 	SIEGE_BONUS_FOOD_SHORTAGE = 2,
 	SIEGE_BONUS_WATER_SHORTAGE = 3,
 	SIEGE_BONUS_DEFENDERS_DESERT = 2,
+
+	MINIMUM_DRILL_DECAY_MODIFIER = 0, -- Change this to a negative value so values below -100% drill decay will actually give drill
+	MINIMUM_MERCENARY_HIRE_PRICE = 0.1, -- Lower cap for mercenary cost modifier, change it to 0 for free mercs
+
+	OPEN_SEA_PATHFIND_PENALTY = 3,
 },
 
 NAI = {
@@ -1675,7 +1680,7 @@ NAI = {
 
 	HRE_DESIRE_DISMANTLED = -1000,
 	HRE_DESIRE_ALREADY_MEMBER = -1000,
-	HRE_DESIRE_GOVERNMENT_RANK_LOSS = -50,
+	HRE_DESIRE_GOVERNMENT_RANK_LOSS = 0,
 	HRE_DESIRE_IN_LINE_TO_SUCCEED = 100,
 	HRE_DESIRE_TOO_HOLY = -150,
 	HRE_DESIRE_DOESNT_WANT_TO_SUBMIT = -300,
@@ -1756,7 +1761,7 @@ NAI = {
 	MAX_BUILDING_COST_INCOME_MONTHS = 100, -- AI will not save up for a building that costs more than their monthly income * this, if there are cheaper alternatives
 	PURSUE_DISTANCE = 70, -- AI will not pursue armies retreating to a province further away than this.
 	-- Rosth: "distance" refers to the distance between a province in which the stack is currently in and the province to which the enemy stack is retreating. For the reference, 100 is about the distance from Paris to Guiana/Vales/Westfalen. 70 is about the distance from Paris to Haut-Poetou/Milieu/Limburg. This is meant to stop the AI from chasing around retreating stacks while wasting time and suffering attrition and make it spend that time to actually siege provinces.	
-	CALL_IN_ALLIES_POWER_RATIO = 4.0, -- AI will only call in allies in an offensive war if their military power ratio to the enemy is less than this
+	CALL_IN_ALLIES_POWER_RATIO = 2.0, -- AI will only call in allies in an offensive war if their military power ratio to the enemy is less than this
 	POWERFUL_ALLY_PENALTY = 50,	-- Penalty on alliance for them already having a powerful ally if much stronger
 	RIVAL_ALLIANCE_PENALTY = 50, -- Penalty on alliance chance for being allied to rivals
 	ENEMY_ALLIANCE_PENALTY = 25, -- Penalty on alliance chance for being allied to enemies
@@ -2188,6 +2193,8 @@ NAI = {
 	FIRE_PIP_MULT = 3,  -- This means having one of each fire pip applies a modifier of 17/13 to the fire phase estimate, as desired (since it's equivalent to +1 dice modifier)
 	SHOCK_PIP_MULT = 3,  -- Ditto
 	MORALE_PIP_MULT = 2,  -- Morale pips are counted in both phases, but only applies to morale damage, which we guesstimate to be worth twice as much as casualties (=2/3, or ~1.32/2, of total)
+
+	MIN_DAYS_AFTER_TRUCE_ENDS = 5, -- How long AI needs to wait after a truce ends to declare a war, some time needed for the player to take any action since AI can do it immediately
 },
 
 NAIEconomy = {

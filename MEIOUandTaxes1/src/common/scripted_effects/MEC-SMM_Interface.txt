@@ -1,0 +1,73 @@
+#This effect sets the scope based on player setting
+smm_interface_setscope = { #scope
+	AAA = {
+		set_variable = { which = smm_scope_playerset value = $scope$ }
+	}
+}
+
+
+#Call this effect to recalc the map without providing a predefined scope. Will use the last scope set by smm_interface_setcope instead. If the player has not set a scope yet, default to Old World
+smm_interface_setmap_noscope = { #type #scale #colors #res #rev #legend
+	AAA = {
+		set_variable = { which = smm_type value = $type$ }
+		if = {
+			limit = {
+				AND = {
+					check_variable = { which = smm_scope_playerset value = 1 } #there is a scope for value = 0 aswell, but if we check for 0 it will evaluate as true if the player has not set a scope yet (wtf paradox). the value 0 scope will not be an option anyway though, so it sorta doesn't matter
+					NOT = { check_variable = { which = smm_scope_playerset value = 33 } } 
+				}
+			}
+			set_variable = { which = smm_scope which = smm_scope_playerset }
+		}
+		else = {
+			set_variable = { which = smm_scope value = 16 }
+		}
+		set_variable = { which = smm_scale value = $scale$ }
+		set_variable = { which = smm_colors value = $colors$ }
+		set_variable = { which = smm_res value = $res$ }
+		if = {
+			limit = {
+				always = $rev$
+			}
+			set_country_flag = smm_rev
+		}
+		else = {
+			clr_country_flag = smm_rev
+		}
+	}
+	smm_recalc_mapmode = yes
+	if = {
+		limit = { 
+			always = $legend$
+		}
+		country_event = { id = smm.999 }  
+	}
+}
+
+
+#Call this effect to recalc the map using a provided scope. Used for certain mapmodes that should always use a predefined scope independent of player setting
+smm_interface_setmap = { #type #scope #scale #colors #res #rev #legend
+	AAA = {
+		set_variable = { which = smm_type value = $type$ }
+		set_variable = { which = smm_scope value = $scope$ }
+		set_variable = { which = smm_scale value = $scale$ }
+		set_variable = { which = smm_colors value = $colors$ }
+		set_variable = { which = smm_res value = $res$ }
+		if = {
+			limit = {
+				always = $rev$
+			}
+			set_country_flag = smm_rev
+		}
+		else = {
+			clr_country_flag = smm_rev
+		}
+	}
+	smm_recalc_mapmode = yes
+	if = {
+		limit = { 
+			always = $legend$
+		}
+		country_event = { id = smm.999 }  
+	}
+}

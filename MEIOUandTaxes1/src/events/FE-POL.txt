@@ -853,7 +853,7 @@ country_event = {
 		ai_chance = { factor = 10 }
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Mazovia became independent:flavor_pol.506"
 		MAZ = { 
-			grant_independence = yes 
+			grant_independence_effect = yes 
 		}
 		if = { 
 			limit = {
@@ -909,7 +909,7 @@ country_event = {
 		custom_tooltip = custom.option.flavor_pol.506.b
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Mazovia became independent, no provinces ceded:flavor_pol.506"
 		MAZ = { 
-			grant_independence = yes 
+			grant_independence_effect = yes 
 			set_country_flag = pol_meh_rights
 		}
 		hidden_effect = {
@@ -945,7 +945,7 @@ country_event = {
 		custom_tooltip = custom.option.flavor_pol.506.a
 		log = "FE-POL:[GetYear]:[Root.GetName]:Death of Kazimierz III, Mazovia became independent:flavor_pol.507"
 		MAZ = { 
-			grant_independence = yes 
+			grant_independence_effect = yes 
 		}
 		if = {
 			limit = { ai = yes }
@@ -1868,7 +1868,7 @@ country_event = {
 			LIT = {
 				exile_heir_as = heir_move_to_poland
 				exile_ruler_as = { name = ruler_move_to_poland }
-				grant_independence = yes
+				grant_independence_effect = yes
 			}
 			set_ruler = ruler_move_to_poland
 			set_ruler_flag = elected_ruler
@@ -2018,6 +2018,7 @@ country_event = {
 				exile_heir_as = heir_move_to_poland
 				exile_ruler_as = { name = ruler_move_to_poland }
 				grant_independence = yes
+				grant_independence_effect = yes
 			}
 			set_ruler = ruler_move_to_poland
 			set_heir = heir_move_to_poland
@@ -2038,6 +2039,7 @@ country_event = {
 				add_queen_personality = generous_personality
 				clr_country_flag = jadwiga_marriage
 			}
+			
 			if = {
 				limit = {
 					religion = catholic
@@ -3470,6 +3472,9 @@ country_event = {
  	}
 	option = { #Regular election
 		name = "flavor_pol.610.a"
+		trigger = {
+		    NOT = { has_country_modifier = vivente_rege_election }
+		}
 		add_legitimacy = 10
  		NO_FactionBoost = yes
 		hidden_effect = {
@@ -3482,24 +3487,17 @@ country_event = {
 	option = { #Vivente rege election
 		name = "flavor_pol.610.b"
 		trigger = {
-		    has_heir = yes
-			has_female_heir = no
-			OR = {
-			    has_reform = Pol_Structure4
-				has_reform = Pol_Structure5
-			}
+		    has_country_modifier = vivente_rege_election
 		}
 		
-		add_legitimacy = 10
-		add_heir_claim = 20
-		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-10 }
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -10 }
+		add_legitimacy = 5
 		
 		hidden_effect = {
 			change_variable = {
 				which = vivente_rege
 				value = 1
 			}
+			remove_country_modifier = vivente_rege_election
 		}
 		
 		custom_tooltip = flavor_pol.610.tooltip.b
@@ -3507,12 +3505,14 @@ country_event = {
 	option = { #End of Elective Monarchy
 		name = "flavor_pol.610.c"
 		trigger = {
-		    has_heir = yes
-			has_female_heir = no
-			has_reform = Pol_Structure5
+			OR = {
+			    has_reform = Pol_Structure4
+				has_reform = Pol_Structure5
+			}
+			has_country_modifier = vivente_rege_election
 			check_variable = {
 			    which = vivente_rege
-			    value = 2
+			    value = 3
 		    }
 		}
 		
@@ -3559,8 +3559,29 @@ country_event = {
 				which = vivente_rege
 				value = 0
 			}
+			remove_country_modifier = vivente_rege_election
 		}
         custom_tooltip = flavor_pol.610.tooltip.c        	
+	}
+}
+
+### VIVENTE REGE ELECTION OF X
+country_event = {
+	id = flavor_pol.611
+	title = "flavor_pol.611.title"
+	desc = "flavor_pol.611.desc"
+	picture = LIBERUM_VETO_eventPicture
+	
+	is_triggered_only = yes #from hold_vivente_rege_election decision
+	
+	option = {
+		name = "flavor_pol.611.a"
+		Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-15 }
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -15 }
+		add_country_modifier = { 
+		     name = vivente_rege_election
+			 duration = -1
+		}
 	}
 }
 
@@ -4282,6 +4303,12 @@ country_event = {
 					}
 				}
 			}
+			if = {
+			    limit = { 
+				    WRM = { is_subject_of = ROOT }
+				}
+				WRM = { set_country_flag = teutonic_vassal }
+			}
 		}
 	}
 	
@@ -4396,6 +4423,12 @@ country_event = {
 						}
 					}
 				}
+			}
+			if = {
+			    limit = { 
+				    WRM = { is_subject_of = ROOT }
+				}
+				WRM = { set_country_flag = teutonic_vassal }
 			}
 		}
 	}
@@ -4525,6 +4558,18 @@ country_event = {
 	
 	mean_time_to_happen = {
 		years = 20
+		modifier = { 
+			factor = 0.5
+			is_year = 1440
+		}
+		modifier = { 
+			factor = 0.5
+			is_year = 1450
+		}
+		modifier = { 
+			factor = 0.5
+			is_year = 1460
+		}
 	}
 	
 	option = {
@@ -4715,6 +4760,7 @@ country_event = {
 	trigger = {
 		tag = PRU
 		is_subject_other_than_tributary_trigger = yes
+		has_regency = no
 		has_country_flag = teuton_secularization
 		NOT = { has_ruler_flag = potential_duke_of_prussia }
 		NOT = { ruler_age = 35 }
@@ -4863,7 +4909,10 @@ country_event = {
 	option = {
 		name = "flavor_teu.9.a"
 		ai_chance = { factor = 99 }
-		create_union = FROM
+		create_subject = {
+           subject_type = personal_union_limited
+           subject = FROM
+        }
         random_known_country = {
 		    limit = {
 			    has_country_flag = overlord_of_prussia
@@ -4988,11 +5037,11 @@ province_event = {
 		change_culture = ukrainian
 		if = {
 		    limit = { religion = sunni }
-		    MN_RlgChange = { from = 19 to = 9 }
+		    MN_RlgChange = { from = 15 to = 8 }
 		}
-		if = {
+		else_if = {
 		    limit = { religion = catholic }
-		    MN_RlgChange = { from = 1 to = 9 }
+		    MN_RlgChange = { from = 1 to = 8 }
 		}
 		log = "FE-POL:[GetYear]:[Root.Owner.GetName]:[This.GetName] converted to Cossack culture:flavor_pol.735"
 	}
@@ -5825,7 +5874,7 @@ country_event = {
 		has_reform = Pol_Succession4
 		faction_influence = {
             faction = FC_NO
-            influence = 50
+            influence = 40
         }
 		is_at_war = yes
 		OR = {
@@ -5869,15 +5918,13 @@ country_event = {
 		ai_chance = {
 			factor = 75
 		}
-		add_treasury = 100
-		Privilege_NOServiceERaise = yes
-		hidden_effect = {
-		    every_owned_province = {
-			    limit = { has_province_flag = war_taxes }
-				Public_ChangeClassWealthVal = { class= NO type = value inp=-20 }
-			    clr_province_flag = war_taxes
-			}
-		}	
+		add_treasury = 200
+		Privilege_NOServiceERaise = { costs = yes }
+	    every_owned_province = {
+			limit = { has_province_flag = war_taxes }
+			Public_ChangeClassWealthVal = { class= NO type = value inp=-40 }
+			clr_province_flag = war_taxes
+		}
 	}
 	option = {
 		name = "flavor_pol.EVTOPTB3467" # Refuse to sign it and defy the Magnates
@@ -5916,6 +5963,7 @@ country_event = {
 			}
 			tag = PLC
 		}
+		NOT = { adm_tech = 40 }
 		NOT = { Rights_NOTen3Has = yes }
 		has_reform = Pol_Succession4
 		faction_influence = {
@@ -6361,6 +6409,12 @@ country_event = {
 				which = vivente_rege
 				value = 0
 			}
+			if = {
+     	    	limit = {
+	        		has_country_modifier = vivente_rege_election
+         		}
+	        	remove_country_modifier = vivente_rege_election
+        	}
 		}
 		custom_tooltip = flavor_pol.610.tooltip.c
 	}
@@ -7049,6 +7103,26 @@ country_event = {
 	}
 }
 
+#GOLDEN AGE OF WINGED HUSSARS
+country_event = {
+	id = flavor_pol.2
+	title = "flavor_pol.2.title"
+	desc = "flavor_pol.2.desc"
+	picture = HUSSARS_eventPicture
+	
+	is_triggered_only = yes
+	fire_only_once = yes
+	major = yes
+		
+	option = {
+		name = "flavor_pol.2.a"
+        add_country_modifier = { 
+		     name = "polish_hussars"
+			 duration = -1
+		}	
+	}
+}
+
 ### LITHUANIAN CIVIL WAR ###
 
 ###TRAKAI GOES TO WAR
@@ -7095,6 +7169,7 @@ country_event = {
         name = "flavor_pol.724.a" 
 	    LIT = { country_event = { id = flavor_pol.727 days = 10 } }
 		grant_independence = yes
+		grant_independence_effect = yes
 	} 	
 	
 	option = { #Ask Teutons for Help
@@ -7811,7 +7886,7 @@ country_event = {
 	}
 	
 	option = {
-        name = "flavor_pol.767.a"
+        name = "OPT.SOBEIT"
 		add_legitimacy = 10
 		hidden_effect = {
 		    break_union = LIT

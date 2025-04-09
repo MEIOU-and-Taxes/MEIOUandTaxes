@@ -394,6 +394,7 @@ country_event = {
 				isValidEmpty = yes # Every province not yet calculated and no wasteland
             }
 			Land_CalcInitialVars = yes # Set monthly min/max temperature data for crop calculations (out of data map)
+			Land_WinterSummerFactor = yes # Set factor used for Demand manipulation for based on extremity of winter
 			Land_CalcCrops = yes # Calc Crop output, suitability, labor cost etc. - Full calculation iteration for crops
             
             set_key = { lhs = Land_Size which = Land_PSize }
@@ -1167,46 +1168,46 @@ country_event = {
                 isValidEmpty = yes
             }
            
-           # Disabled for now.
-           
-           #set_key = { lhs = SF_Lit value = 0.1 }
-           #set_key = { lhs = RE_Lit value = 0.3 }
-           #set_key = { lhs = NO_Lit value = 0.4 }
-           #set_key = { lhs = BG_Lit value = 0.5 }
-           #set_key = { lhs = CL_Lit value = 0.85 }
-           #
-           #set_key = { lhs = SF_Edu which = SF_Lit }
-           #set_key = { lhs = RE_Edu which = RE_Lit }
-           #set_key = { lhs = NO_Edu which = NO_Lit }
-           #set_key = { lhs = BG_Edu which = BG_Lit }
-           #set_key = { lhs = CL_Edu which = CL_Lit }
-           #
-           #multiply_key = { lhs = SF_Edu which = SF_Total }
-           #multiply_key = { lhs = RE_Edu which = RE_Total }
-           #multiply_key = { lhs = NO_Edu which = NO_Total }
-           #multiply_key = { lhs = BG_Edu which = BG_Total }
-           #multiply_key = { lhs = CL_Edu which = CL_Total }
-           set_key = { lhs = Tmp_1 value = 0.3 }
-           set_key = { lhs = Tmp_0 which = Tmp_1 }           
-           multiply_key = { lhs = Tmp_0 which = RE_Total }
-
-            Edu_DoProv = yes
+            # Disabled for now.
             
-            if = {
-				limit = {
-					check_key = { lhs = Tmp_0 value = 0.001 }
-				}
-				set_key = { lhs = LT_Total which = Tmp_0 }
-				divide_key = { lhs = LT_Total value = 20 }
-            
-				set_key = { lhs = LT_Ratio which = LT_Total }
-				multiply_key = { lhs = LT_Ratio value = 100 }
-				divide_key = { lhs = LT_Ratio which = RE_Total }
-			}
-			else = {
-				set_key = { lhs = LT_Total value = 0 }
-				set_key = { lhs = LT_Ratio value = 0 }
-			}
+            #set_key = { lhs = SF_Lit value = 0.1 }
+            #set_key = { lhs = RE_Lit value = 0.3 }
+            #set_key = { lhs = NO_Lit value = 0.4 }
+            #set_key = { lhs = BG_Lit value = 0.5 }
+            #set_key = { lhs = CL_Lit value = 0.85 }
+            #
+            #set_key = { lhs = SF_Edu which = SF_Lit }
+            #set_key = { lhs = RE_Edu which = RE_Lit }
+            #set_key = { lhs = NO_Edu which = NO_Lit }
+            #set_key = { lhs = BG_Edu which = BG_Lit }
+            #set_key = { lhs = CL_Edu which = CL_Lit }
+            #
+            #multiply_key = { lhs = SF_Edu which = SF_Total }
+            #multiply_key = { lhs = RE_Edu which = RE_Total }
+            #multiply_key = { lhs = NO_Edu which = NO_Total }
+            #multiply_key = { lhs = BG_Edu which = BG_Total }
+            #multiply_key = { lhs = CL_Edu which = CL_Total }
+            #set_key = { lhs = Tmp_1 value = 0.3 }
+            #set_key = { lhs = Tmp_0 which = Tmp_1 }           
+            #multiply_key = { lhs = Tmp_0 which = RE_Total }
+            #
+            #Edu_DoProv = yes
+            #
+            #if = {
+			#	limit = {
+			#		check_key = { lhs = Tmp_0 value = 0.001 }
+			#	}
+			#	set_key = { lhs = LT_Total which = Tmp_0 }
+			#	divide_key = { lhs = LT_Total value = 20 }
+            #
+			#	set_key = { lhs = LT_Ratio which = LT_Total }
+			#	multiply_key = { lhs = LT_Ratio value = 100 }
+			#	divide_key = { lhs = LT_Ratio which = RE_Total }
+			#}
+			#else = {
+			#	set_key = { lhs = LT_Total value = 0 }
+			#	set_key = { lhs = LT_Ratio value = 0 }
+			#}
 			
             ##Use this one if you want to actually develop education
             
@@ -1561,6 +1562,17 @@ country_event = {
 			country_event = {
 				id = POP_Stockpile.002
 			}
+
+            # Burgher promotion / Demotion 
+            if = {
+                limit = {
+                    check_key = { lhs = iter value = 15 }
+                }
+                country_event = {
+                    id = POP_Growth.004
+                }
+            }
+
             if = { # Give simulation countries some money
                 limit = {
                     NOT = { check_key = { lhs = iter value = 15 } }
@@ -1653,49 +1665,43 @@ country_event = {
 						is_key_equal = { lhs = iter value = 1000 }
 					}
                 }
-                Dev_Set = { inp = Dev_Notables type = base_tax }
-                Dev_Set = { inp = Dev_Urban type = base_production }
-                Dev_Set = { inp = Dev_Rural type = base_manpower }
+                # Update development values in provinces
+                Dev_Set = { inp = Dev_Notables  type = base_tax }
+                Dev_Set = { inp = Dev_Urban     type = base_production }
+                Dev_Set = { inp = Dev_Rural     type = base_manpower }
                 country_event = {
-                    id = POP_MP.001
+                    id = POP_MP.001 # calculate fithing age men
                 }
 				every_country = {
                     limit = {
                         isValidCountry = yes
                     }
-					set_country_flag = tf_recalculate_communication_efficiency
+					CE_Main = yes # Update CE values
                 }
-                country_event = {
-                    id = phlopsi_ce_main.3
-                }
-				country_event = { id = POP_Census.0093 } # Calc of the tax system
+
+				country_event = { id = POP_Census.0093 } # Calc admin efficiency tax costs for the tax system
 				every_country = {
                     limit = {
                         isValidCountry = yes
                     }
-					Tax_Update = yes
+					Tax_Update = yes # update taxes cost per province
                 }
                 country_event = {
-                    id = AI_Tax.003
-                }
-				every_country = {
-                    limit = {
-                        isValidCountry = yes
-                    }
-                    StartUp_InitArmy = yes
-                    StartUp_InitNavy = yes
+                    id = AI_Tax.003 # tax delegator for AI in SIM
                 }
                 
-				if = { # Give simulation countries some money
+				if = { # Give simulation countries some money and troops
 					limit = {
 						is_key_equal = { lhs = iter value = 5 }
 					}
-					every_country = {
-						limit = {
-							isValidCountry = yes
-						}
-						add_years_of_income = 2.5
-					}
+                    every_country = {
+                        limit = {
+                            isValidCountry = yes
+                        }
+                        StartUp_InitArmy = yes # Spawn in army and navies and gives some recruitment cost in treasury
+                        StartUp_InitNavy = yes
+ 						add_years_of_income = 2.5
+                   }
 				}
 				else_if = {
 					limit = {
@@ -1752,8 +1758,8 @@ country_event = {
 					clr_global_flag = POP_Sim20
 				}
 			}
-
-            regiongroup = { # Set local autonomy after iteration
+            # Update local autonomy after iteration
+            regiongroup = { 
                 region = {
                     limit = {
                         isValidEmpty = yes
@@ -3608,10 +3614,6 @@ country_event = {
                 add_treasury = 500
             }
             
-            add_country_modifier = {
-                name = Exec_Auth
-                duration = -1
-            }
             add_country_modifier = {
                 name = Pol_UI
                 duration = -1

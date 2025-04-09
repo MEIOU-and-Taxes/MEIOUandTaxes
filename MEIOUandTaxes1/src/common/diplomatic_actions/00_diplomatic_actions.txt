@@ -622,11 +622,13 @@ declarewar = {
             ###########################
             ## Estimate Navy Strength #
             ###########################
-            country_event = { id = AI_War.01 days = 1}
+            country_event = { id = AI_War.01 days = 1 }
 
             ###########################
             #### Handle subject CTA ###
             ###########################
+
+            ## Vassal CTA Attacker Country
 			if = {
 				limit = { 
 					OR = {
@@ -642,12 +644,13 @@ declarewar = {
                     limit = {
                         ai = yes
                     }
-                    country_event = { id = mec_vassals.6 }
+                    country_event = { id = mec_vassals.6 days = 7 random = 30 }
                 }
                 else = {
-                    country_event = { id = mec_vassals.6 days = 11 }
+                    country_event = { id = mec_vassals.6 days = 7 random = 30 }
                 }
 			}
+            # Vassal CTA all allys of attacker coutnry
 			every_ally = {
 				limit = {
                     OR = {
@@ -671,12 +674,13 @@ declarewar = {
                     limit = {
                         ai = yes
                     }
-                    country_event = { id = mec_vassals.6 days = 1 random = 4 }
+                    country_event = { id = mec_vassals.6 days = 7 random = 30 }
                 }
                 else = {
-                    country_event = { id = mec_vassals.6 days = 11 }
+                    country_event = { id = mec_vassals.6 days = 7 random = 30 }
                 }
 			}
+            # Vassal CTA of all attacker country subjects
 			every_subject_country = {
 				limit = {
 					OR = {
@@ -692,13 +696,14 @@ declarewar = {
                     limit = {
                         ai = yes
                     }
-                    country_event = { id = mec_vassals.6 days = 1 random = 4 }
+                    country_event = { id = mec_vassals.6 days = 7 random = 30 }
                 }
                 else = {
-                    country_event = { id = mec_vassals.6 days = 11 }
+                    country_event = { id = mec_vassals.6 days = 7 random = 30 }
                 }
 			}
 
+            ## VASSAL CTA for defender country, its ally's and subject
 			FROM = {
 				if = {
 					limit = { 
@@ -717,10 +722,10 @@ declarewar = {
                         limit = {
                             ai = yes
                         }
-                        country_event = { id = mec_vassals.6 days = 6 }
+                        country_event = { id = mec_vassals.6 days = 7 random = 30 }
                     }
                     else = {
-                        country_event = { id = mec_vassals.6 days = 14 }
+                        country_event = { id = mec_vassals.6 days = 7 random = 30 }
                     }	
 				}
 				every_ally = {
@@ -738,10 +743,10 @@ declarewar = {
                         limit = {
                             ai = yes
                         }
-                        country_event = { id = mec_vassals.6 days = 6 random = 4 }
+                        country_event = { id = mec_vassals.6 days = 7 random = 30 }
                     }
                     else = {
-                        country_event = { id = mec_vassals.6 days = 14 }
+                        country_event = { id = mec_vassals.6 days = 7 random = 30 }
                     }	
 				}
 				every_subject_country = {
@@ -759,10 +764,10 @@ declarewar = {
                         limit = {
                             ai = yes
                         }
-                        country_event = { id = mec_vassals.6 days = 6 random = 4 }
+                        country_event = { id = mec_vassals.6 days = 7 random = 30 }
                     }
                     else = {
-                        country_event = { id = mec_vassals.6 days = 14 }
+                        country_event = { id = mec_vassals.6 days = 7 random = 30 }
                     }	
 				}
 			}
@@ -1093,6 +1098,27 @@ support_independence_action = {
             FROM = { is_neighbor_of = ROOT }
         }
     }
+    condition = { #there was too much supporting independence across the map by countries having no beef with the disloyal subjects overlord
+        tooltip = SUPPORTINDEPENDENCENOINTEREST
+        potential = {
+            always = yes
+            #ai = yes #This can be made AI-only provision if limiting the player too much
+        }
+        allow = {
+            OR = {
+                is_neighbor_of = FROM
+                overlord = {
+                    is_neighbor_of = FROM
+                }
+                overlord = {
+                    is_enemy = FROM
+                }
+                overlord = {
+                    is_rival = FROM
+                }
+            }
+        }
+    }
 }
 
 allianceaction = {
@@ -1188,7 +1214,7 @@ allianceaction = {
             FROM = {
 				has_opinion = {
 					who = ROOT
-					value = 80
+					value = 65
 				}
 			}
 		}
@@ -5714,4 +5740,25 @@ trade_favors_for_sailors = {
             always = no
         }
 	}
+}
+
+trade_favors_for_heir = {
+    condition = {
+        tooltip = CAPETIAN_HEIR_NOPE
+        potential = {
+            FROM = {
+                capetian_dynasty_trigger = yes
+                has_reform = salic_law_reform
+            }
+            ROOT = {
+                NOT = {
+                    capetian_dynasty_trigger = yes
+                }
+            }
+            
+        }
+        allow = {
+            always = no
+        }
+    }
 }

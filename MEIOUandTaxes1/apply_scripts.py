@@ -268,7 +268,7 @@ def link_file ( filepath ):
 	os.makedirs( os.path.dirname( buildpath ), exist_ok=True )
 	os.link( filepath, buildpath )
 
-def compile(compress=False, parse_init=True):
+def compile(compress=False, parse_init=True, debug=False):
 	start = time.time()
 
 	# files/paths to run through parsing
@@ -316,7 +316,8 @@ def compile(compress=False, parse_init=True):
 		'descriptor.mod',
 		'thumbnail.png',
 		'meiou.txt',
-		'checksum_manifest.txt'
+		'checksum_manifest.txt',
+		'savefile_cleaner.py'
 	]
 
 	if not parse_init:
@@ -348,21 +349,33 @@ def compile(compress=False, parse_init=True):
 	if ( os.path.exists( 'build' ) ):
 		shutil.rmtree( 'build' )
 
-	if 'fork' in multiprocessing.get_all_start_methods():
+	if not debug and 'fork' in multiprocessing.get_all_start_methods():
 		multiprocessing.set_start_method('fork')
 		print( 'Loading scripts...' )
 		load_scripts()
 
 	file_count = len(paths)
 	print(f"Compiling {file_count} files...")
+	if debug:
+		print(f"DEBUG: Compiling sequentially (slower)")
 	print(f'0% done', end='')
-	with multiprocessing.Pool() as pool:
-		if compress:
-			compiled_files_it = pool.imap_unordered(compile_and_save_compressed, paths, max(1, round(file_count/1000)))
-		else:
-			compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, paths, max(1, round(file_count/1000)))
-		for i in range(file_count):
-			next(compiled_files_it)
+	if not debug:
+		with multiprocessing.Pool() as pool:
+			if compress:
+				compiled_files_it = pool.imap_unordered(compile_and_save_compressed, paths, max(1, round(file_count/1000)))
+			else:
+				compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, paths, max(1, round(file_count/1000)))
+			for i in range(file_count):
+				next(compiled_files_it)
+				progress = 100*(i+1)/file_count
+				sys.stdout.write('\x1b[2k') # clear line
+				print(f'\r{progress:.1f}% done', end='')
+	else:
+		for i, f in enumerate(paths):
+			if compress:
+				compile_and_save_compressed(f)
+			else:
+				compile_and_save_uncompressed(f)
 			progress = 100*(i+1)/file_count
 			sys.stdout.write('\x1b[2k') # clear line
 			print(f'\r{progress:.1f}% done', end='')

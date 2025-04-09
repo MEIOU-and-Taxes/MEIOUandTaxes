@@ -159,7 +159,7 @@ country_event = { # Dissolution of the Realm, insp Serbia c. 1371
 				}
 			}
 			log = "MEC-Vassals:[GetYear]:[Root.GetName]:granted independence to its decentralized vassal, [This.GetName]:mec_vassals.2"
-			grant_independence = yes
+			grant_independence_effect = yes
 			hidden_effect = {
 				every_owned_province = {
 					limit = {
@@ -258,7 +258,7 @@ country_event = { # Dissolution of the Realm, insp Serbia c. 1371
 				}
 			}
 			hidden_effect = {
-				grant_independence = yes
+				grant_independence_effect = yes
 			}
 			country_event = {
 				id = mec_vassals.3
@@ -485,6 +485,7 @@ country_event = { # Releasing $Tag$
 		trigger = {
 			subject_centralisation_trigger = no
 			government = monarchy
+			absolutism = 10
 		}
 		log = "MEC-Vassals:[GetYear]:[Root.GetName]:created an appanage from [From.GetName]:mec_vassals.5"
 		create_subject = {
@@ -505,6 +506,7 @@ country_event = { # Releasing $Tag$
 		name = mec_vassals.5.b
 		trigger = {
 			subject_centralisation_trigger = no
+			absolutism = 10
 		}
 		log = "MEC-Vassals:[GetYear]:[Root.GetName]:created feudatory from [From.GetName]:mec_vassals.5"
 		FROM = { hidden_effect = { set_key = { lhs = Vassal_Type value = 10 } } }
@@ -563,6 +565,20 @@ country_event = { # Releasing $Tag$
 	
 	after = {
 		FROM = {
+			if = {
+				limit = {
+					NOT = {
+						religion = ROOT
+					}
+				}
+				change_religion = ROOT
+			}
+			if = {
+				limit = {
+					NOT = { has_country_flag = POP_Init }
+				}
+				country_event = { id = Init.1 }
+			}
 			subject_transition_effect = yes
 			vassal_type_tracking_effect = yes
 		}
@@ -580,13 +596,13 @@ country_event = { # Feudatories and Appanages chose whether to fight, I hated wr
 
 	immediate = {
 		hidden_effect = {
-			save_global_event_target_as = subject_cta_overlord
+			save_event_target_as = subject_cta_overlord
 			
 			set_key = { lhs = Diplo_Tmp0 value = 0 }
 
 			Get_Country_Of_Type = { 
 				inp = Diplo_Tmp0 
-				mode = save_global_event_target_as 
+				mode = save_event_target_as 
 				loop = every_subject_country
 				autonomous_vassals = yes
 			}
@@ -634,7 +650,7 @@ country_event = { # Feudatories and Appanages chose whether to fight, I hated wr
 						}
 						Save_AI_Reasons_ToScope = { scp = event_target:subject_cta_subject }
 					}
-				}				
+				}
 
 				if = {
 					limit = { check_key = { lhs = AI_Reasons_Outcome value = 0.001 } }
@@ -801,7 +817,7 @@ country_event = { # Feudatories and Appanages chose whether to fight, I hated wr
 		}
 	}
 	after = {
-		Clean_Countries_Of_Type = { gbl_event_target = yes }
+		Clean_Countries_Of_Type = yes
 		clr_country_flag = subject_cta_attacker
 		clr_country_flag = subject_cta_defender
 		Clr_AI_Reasons = yes
@@ -1229,13 +1245,11 @@ country_event = {
 			}
 			modifier = {
 				NOT = {
-					OR = {
-						advisor = statesman_BG 
-						advisor = statesman_BU 
-						advisor = statesman_CL 
-						advisor = statesman_NO 
-						advisor = statesman_TR
-					}
+					advisor = statesman_BG 
+					advisor = statesman_BU 
+					advisor = statesman_CL 
+					advisor = statesman_NO 
+					advisor = statesman_TR
 				}
 				factor = 0.5
 			}
@@ -1245,13 +1259,11 @@ country_event = {
 				limit = {
 					OR = {
 						DIP = 4
-						OR = {
-							advisor = statesman_BG
-							advisor = statesman_BU
-							advisor = statesman_CL
-							advisor = statesman_NO
-							advisor = statesman_TR
-						}
+						advisor = statesman_BG
+						advisor = statesman_BU
+						advisor = statesman_CL
+						advisor = statesman_NO
+						advisor = statesman_TR
 					}
 				}
 				random_list = {
@@ -1301,20 +1313,18 @@ country_event = {
 			}
 			modifier = {
 				NOT = {
-					OR = {
-						advisor = statesman_BG 
-						advisor = statesman_BU 
-						advisor = statesman_CL 
-						advisor = statesman_NO 
-						advisor = statesman_TR
-					}
+					advisor = statesman_BG 
+					advisor = statesman_BU 
+					advisor = statesman_CL 
+					advisor = statesman_NO 
+					advisor = statesman_TR
 				}
 				factor = 1.5
 			}
 		}
 		event_target:dep_petitioner = { country_event = { id = mec_vassals.36 } }
 		event_target:dep_overlord = { country_event = { id = mec_vassals.37 } }
-	}	
+	}
 }
 
 country_event = {
@@ -1346,6 +1356,7 @@ country_event = {
 					is_non_sovereign_subject_trigger = yes
 				}
 				free_vassal = ROOT
+				dependency_lost_color_effect = yes
 				overlord = {
 					create_vassal = ROOT
 				}
@@ -1406,7 +1417,7 @@ country_event = {
 		event_target:dep_suzerain = { country_event = { id = mec_vassals.31 } }
 	}
 	option = {
-		name = "mec_vassals.29.opta" #Offer gold
+		name = "mec_vassals.29.optb" #Offer gold
 		ai_chance = {
 			factor = 50
 			modifier = {
@@ -1446,7 +1457,7 @@ country_event = {
 		event_target:dep_suzerain = { country_event = { id = mec_vassals.33 } }
 	}
 	option = {
-		name = "mec_vassals.29.optb" #Accept it
+		name = OPT.ACCEPT3
 		ai_chance = {
 			factor = 25
 			modifier = {
@@ -1582,6 +1593,7 @@ country_event = {
 					is_non_sovereign_subject_trigger = yes
 				}
 				free_vassal = ROOT
+				dependency_lost_color_effect = yes
 				overlord = {
 					create_vassal = ROOT
 				}
@@ -1769,6 +1781,7 @@ country_event = {
 				free_vassal = ROOT
 			}
 		}
+		dependency_lost_color_effect = yes
 	}
 }
 
@@ -2002,6 +2015,7 @@ country_event = {
 				free_vassal = ROOT
 			}
 		}
+		dependency_lost_color_effect = yes
 	}
 }
 

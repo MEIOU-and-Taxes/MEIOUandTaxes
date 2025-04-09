@@ -164,6 +164,52 @@ Land_CalcInitialVars = {
 	change_key = { lhs = Land_TempDecMin which = Land_DailyTempMin }
 	change_key = { lhs = Land_TempDecMax which = Land_DailyTempMax }
 }
+Land_WinterSummerHelper = {
+	if = { # if Freeze
+		limit = { 
+			NOT = { check_key = { lhs = Land_Temp$Month$ value = $Freeze$ } }
+		}
+		change_key = { lhs = LHMA value = 0.1 }
+	}
+	else_if = { #if Cold
+		limit = { 
+			NOT = { check_key = { lhs = Land_Temp$Month$ value = $Cold$ } }
+		}
+		change_key = { lhs = LHMA value = 0.05 }
+	}
+	else_if = { #if Norm
+		limit = { 
+			NOT = { check_key = { lhs = Land_Temp$Month$ value = $Norm$ } }
+		}
+		change_key = { lhs = LHMA value = 0.025 }
+	}
+	else_if = { #if Warm
+		limit = { 
+			NOT = { check_key = { lhs = Land_Temp$Month$ value = $Warm$ } }
+		}
+		subtract_key = { lhs = LHMA value = 0.05 }
+	}
+	else = { 	#must be hot
+		subtract_key = { lhs = LHMA value = 0.05 }
+	}
+}
+Land_WinterSummerFactor = {
+    set_key = { lhs = LHMA value = 1 }
+
+	Land_WinterSummerHelper = { Month=Jan Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Feb Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Mar Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Apr Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=May Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Jun Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Jul Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Aug Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Sep Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Oct Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Nov Freeze=0 Cold=10 Norm=15 Warm=20 }
+	Land_WinterSummerHelper = { Month=Dec Freeze=0 Cold=10 Norm=15 Warm=20 }
+	
+}
 Land_GrowingDegreeDaysHelper = {
 	if = { # Within min and max
 		limit = { NOT = { check_key = { lhs = Land_Temp$Month$Min value = 0 } } }
@@ -515,9 +561,9 @@ Land_CalcCrops = {
     set_key = { lhs = Land_PotatoLabourT which = Land_PotatoLabour }
     set_key = { lhs = Land_MaizeLabourT which = Land_MaizeLabour }
 	
-    multiply_key = { lhs = Land_Wheat value = 2 } # 2 base, 0.0825
+    multiply_key = { lhs = Land_Wheat value = 2.6 } # 2.6 base, 0.0825
     multiply_key = { lhs = Land_Wheat value = 0.01 }
-    multiply_key = { lhs = Land_Barley value = 1.5 } # 1.5 base, 0.0825
+    multiply_key = { lhs = Land_Barley value = 2.1 } # 2.1 base, 0.0825
     multiply_key = { lhs = Land_Barley value = 0.01 }
 	if = {
 		limit = {
@@ -527,26 +573,26 @@ Land_CalcCrops = {
 				region = papua_region
 			}
 		}
-		multiply_key = { lhs = Land_Rice value = 3 } # 3 base
+		multiply_key = { lhs = Land_Rice value = 3.9 } # 3.9 base
 	}
 	else_if = {
 		limit = {
 			continent = indian_continent
 		}
-		multiply_key = { lhs = Land_Rice value = 3.6 } # 3.6 base
+		multiply_key = { lhs = Land_Rice value = 4.5 } # 4.5 base
 	}
 	else = {
-		multiply_key = { lhs = Land_Rice value = 4 } # 4 base
+		multiply_key = { lhs = Land_Rice value = 5.0 } # 5.0 base
 	}
 	multiply_key = { lhs = Land_Rice value = 0.01 }
 	
-    multiply_key = { lhs = Land_Millet value = 1.6 }  # 1.6 base
+    multiply_key = { lhs = Land_Millet value = 2.1 }  # 2.1 base
     multiply_key = { lhs = Land_Millet value = 0.01 }
 	
-    multiply_key = { lhs = Land_Potato value = 2.5 } # 2.5 base
+    multiply_key = { lhs = Land_Potato value = 3.3 } # 3.3 base
     multiply_key = { lhs = Land_Potato value = 0.01 }
 	
-    multiply_key = { lhs = Land_Maize value = 3 } # 3 base
+    multiply_key = { lhs = Land_Maize value = 3.9 } # 3.9 base
     multiply_key = { lhs = Land_Maize value = 0.01 }
 	
     set_key = { lhs = Land_WheatTotal which = Land_Wheat }
@@ -596,9 +642,9 @@ Land_CalcCrops = {
     multiply_key = { lhs = Land_PotatoLabour which = Land_Potato }
     multiply_key = { lhs = Land_MaizeLabour which = Land_Maize }
 	
-    multiply_key = { lhs = Land_Wheat value = 2 } # 2 base, 0.0825
+    multiply_key = { lhs = Land_Wheat value = 2.6 } # 2.6 base, 0.0825
     multiply_key = { lhs = Land_Wheat value = 0.01 }
-    multiply_key = { lhs = Land_Barley value = 1.5 } # 1.5 base, 0.0825
+    multiply_key = { lhs = Land_Barley value = 2.0 } # 2.0 base, 0.0825
     multiply_key = { lhs = Land_Barley value = 0.01 }
 	if = {
 		limit = {
@@ -608,26 +654,26 @@ Land_CalcCrops = {
 				region = papua_region
 			}
 		}
-		multiply_key = { lhs = Land_Rice value = 3 } # 3 base
+		multiply_key = { lhs = Land_Rice value = 4.0 } # 4.0 base
 	}
 	else_if = {
 		limit = {
 			continent = indian_continent
 		}
-		multiply_key = { lhs = Land_Rice value = 3.6 } # 3.6 base
+		multiply_key = { lhs = Land_Rice value = 4.5 } # 4.5 base
 	}
 	else = {
-		multiply_key = { lhs = Land_Rice value = 4 } # 4 base
+		multiply_key = { lhs = Land_Rice value = 5.0 } # 5.0 base
 	}
 	multiply_key = { lhs = Land_Rice value = 0.01 }
 	
-    multiply_key = { lhs = Land_Millet value = 1.6 }  # 1.6 base
+    multiply_key = { lhs = Land_Millet value = 2.1 }  # 2.1 base
     multiply_key = { lhs = Land_Millet value = 0.01 }
 	
-    multiply_key = { lhs = Land_Potato value = 2.5 } # 2.5 base
+    multiply_key = { lhs = Land_Potato value = 3.3 } # 3.3 base
     multiply_key = { lhs = Land_Potato value = 0.01 }
 	
-    multiply_key = { lhs = Land_Maize value = 3 } # 3 base
+    multiply_key = { lhs = Land_Maize value = 3.9 } # 3.9 base
     multiply_key = { lhs = Land_Maize value = 0.01 }
 	
     set_key = { lhs = Land_CropOutput value = 0 }
