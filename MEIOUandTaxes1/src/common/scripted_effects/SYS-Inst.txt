@@ -1,0 +1,131 @@
+Inst_DoInstitution = {
+	every_province = {
+		limit = {
+			isValidProv = yes
+		}
+		clr_province_flag = Inst_Progress_$name$_6.4
+		clr_province_flag = Inst_Progress_$name$_3.2
+		clr_province_flag = Inst_Progress_$name$_1.6
+		clr_province_flag = Inst_Progress_$name$_0.8
+		clr_province_flag = Inst_Progress_$name$_0.4
+		clr_province_flag = Inst_Progress_$name$_0.2
+		clr_province_flag = Inst_Progress_$name$_0.1
+	}
+
+	if = {
+		limit = { 
+			Inst_Can_$name$ = yes
+		}
+	
+		[[pre] 
+		every_country = {
+			limit = {
+				isValidCountry = yes
+				NOT = { has_institution = $pre$ }
+			}
+			#Inst_DoFlagCheckAll = yes
+			Inst_DoInstitution_Pre_$pre$ = yes 
+		}
+		]
+
+		if = {
+			limit = {
+				Inst_Can_$name$_Spawn = yes
+			}
+			
+			every_country = {
+				limit = {
+					isValidCountry = yes
+					Inst_Can_$name$_Country = yes
+				}
+				every_owned_province = {
+					limit = {
+						NOT = {	$name$ = 100 }
+						Inst_Can_$name$_Prov = yes
+					}
+					Inst_Get_$name$ = { return = Tmp_0 }
+
+					multiply_key = { lhs = Tmp_0 value = 5 }
+
+					if = { limit = { check_key = { lhs = Tmp_0 value = 6.4 } } subtract_key = { lhs = Tmp_0 value = 6.4 } set_province_flag = Inst_Progress_$name$_6.4 }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 3.2 } } subtract_key = { lhs = Tmp_0 value = 3.2 } set_province_flag = Inst_Progress_$name$_3.2 }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 1.6 } } subtract_key = { lhs = Tmp_0 value = 1.6 } set_province_flag = Inst_Progress_$name$_1.6 }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 0.8 } } subtract_key = { lhs = Tmp_0 value = 0.8 } set_province_flag = Inst_Progress_$name$_0.8 }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 0.4 } } subtract_key = { lhs = Tmp_0 value = 0.4 } set_province_flag = Inst_Progress_$name$_0.4 }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 0.2 } } subtract_key = { lhs = Tmp_0 value = 0.2 } set_province_flag = Inst_Progress_$name$_0.2 }
+					if = { limit = { check_key = { lhs = Tmp_0 value = 0.1 } } subtract_key = { lhs = Tmp_0 value = 0.1 } set_province_flag = Inst_Progress_$name$_0.1 }
+
+					set_key = { lhs = Tmp_0 value = 0 }
+				}
+			}
+		}
+	}
+}
+
+Inst_DoInstitution_Pre_Global_Trade = {
+	set_key = { lhs = Tmp_0 value = 0 }
+	save_event_target_as = ProvOwner
+
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = europe			  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = oceania		  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = south_america	  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = north_america	  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = southeast_asia	  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = indian_continent }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = asia			  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = central_asia	  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = north_asia		  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = africa			  }
+	Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = { cont = mena			  }
+
+	if = { # have trade posts on this amount of continents
+		limit = { check_key = { lhs = Tmp_0 value = 4 } } # `GLOBAL_TRADE_REQUIRED_CONTINENTS~value`
+
+		set_country_flag = Global_Trade_CanSpawnCountry
+	}
+	set_key = { lhs = Tmp_0 value = 0 }
+}
+
+Inst_DoInstitution_Pre_GlobalTrade_ContinentCheck = {
+	if = {
+		limit = {
+			any_province = {
+				OR = {
+					owned_by = event_target:ProvOwner
+					owner = { is_colonial_nation_of = event_target:ProvOwner }
+				}
+				has_local_modifier_value = { which = trade_value value = 0.5 } # `GLOBAL_TRADE_REQUIRED_TRADE_VALUE~value`
+				continent = $cont$
+			}
+		}
+		change_key = { lhs = Tmp_0 value = 1 }
+	}
+}
+
+Inst_DoInstitution_Pre_Nationalism = {
+	if = {
+		limit = { check_key = { lhs = percentage_own_culture_group value = 75 } } # `NATIONALISM_REQUIRED_CULTURE_GROUP_POP_SHARE~value`
+
+		set_country_flag = Nationalism_CanSpawnCountry
+	}
+}
+
+## These flags are needed for scripted effects inside the institution definition
+#Inst_DoFlagCheckAll = {
+#	Inst_DoFlagCheck = { name = Legalism }
+#	Inst_DoFlagCheck = { name = Meritocracy_Inst }
+#	Inst_DoFlagCheck = { name = Banking }
+#	Inst_DoFlagCheck = { name = Columbian_Exchange }
+#	Inst_DoFlagCheck = { name = Casual_Literacy }
+#	Inst_DoFlagCheck = { name = Global_Trade }
+#	Inst_DoFlagCheck = { name = Academia }
+#	Inst_DoFlagCheck = { name = Scientific_Method }
+#	Inst_DoFlagCheck = { name = Nationalism }
+#	Inst_DoFlagCheck = { name = Industrialisation }	
+#}
+#Inst_DoFlagCheck = {
+#	if = {
+#		limit = { has_institution = $name$ }
+#		set_country_flag = Inst_Embraced_$name$
+#	}
+#}

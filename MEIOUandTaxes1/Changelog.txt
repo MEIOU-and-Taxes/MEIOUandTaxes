@@ -3240,6 +3240,7 @@
 ###################
 
 ### System Changes
+	- Update M&T to latest EU4 version (1.36.2 as of writing this changelog)
 	- Added 39 new nodes in a massive node expansion, equalizing node counts, distances and improving scoping
 		- New links between India, Aden and Malacca, creating a more direct path for trade
 		- Reduction in direct links around the Atlantic, with links in North America merged into Eastern Seaboard
@@ -3256,7 +3257,21 @@
 		- The Initial sim has new logic to better apply balancing throughout the process to stabilise class wealth around the world and reduce edge cases
 		- Allow more Elite demand for comfort/luxury to reduce 500% fulfil scenarios
 	- Added support and display of 'CE from Regional Centers', allowing easy visualisation in CE modifiers of the benefit of Regional Centers
-
+	- Use normal EU4 method of evaluating CBs (so no more few times per year checks for all CBs but instant gain/loss of them
+	- Remove manual tax buildings from macro builder
+	- Limit autoinvestor to provinces with at least 2.5 State Reach, for both AI and player
+	- Industry Expansion heuristic changes:
+		- We completely revamped the industry expansion (/shrinkage) heuristic used by industries intrinsic expansion, because the old heuristic created unrealistic and usually wrong and slow expansions due to a mixture of bugs and bad design. The goal of a new heuristic was to simplify the players (and industries) understanding of when it will expand down to a very simple metric (profit).
+		- The new heuristic is more aligned with the intuitive market understanding. Industries expand based on marginal cost aka profit or rather the margins of profit. As a rule of thumb that means that industries above 4% profit margin expand, between 4 and 0 % stay the same, and below 0% profit margin (loss) shrink.
+		- Additionally there are some other factors influencing the desire to expand or shrink. First one being the industries throughput. Throughput is a metric of production in an optimal scenario and the actual production. If throughput gets low (usually this means missing input goods or labor) industries will want to expand less even if operating at a profit with the effect getting exponentially stronger the lower throughput gets.
+		- Secondly industries will expand slower if the usage of their respective ressource size is drawing to be maxed out.
+		- Besides those main determining factors the heuristic is influenced by certain API effects like important harbors etc.
+	- Changes to State / Player Investements:
+		- In order to make state investment more realistic and less overpowered compared to naturally occurring growth, we wanted to change the way on where, when and why to invest somewhere. This is done to make state investment less of a no brainer just dumping money in every single province and making it more integrated with other systems. It works now in the following way:
+		- State investment takes money out of the states treasury. Then something new happens. Depending on the provinces corruption a certain amount of money is not actually getting invested, but siphoned away by the elites/bureaucrats into corruption so their own pockets. Therefore you really need to check where to invest based on provincial corruption and most likely keep money into the treasury at high corruption periods.
+		- After the corruption step the remaining money is put into an investment pool which is per property type (visible in the property modifier).
+		- Lastly the money is actually getting invested by demanding goods from the market to build up the property (before investment just nullified maintenance costs, which lead to buildup due to higher profits). The speed of investment is different though. It depends on the state reach in the province. The higher the state reach the faster money is actually getting invested. If state reach is zero, the state has no way to invest and the money is NOT getting invested.
+		
 ### Optimisation
 	- Neutral to positive performance impact from the trade rework
 	- Optimisations to Trade to reduce the code size and impact of the script to accomodate the trade rework
@@ -3265,16 +3280,641 @@
 	- Reduce the code size of the Census script, and move critical yearly code into its own smaller file to optimise perf
 	- Fire province looting events and code instantly vs over random events within 3 days, to remove event calls from the stack and for fast trigger checks
 	- Optimised the advisor system using new on-actions
+	- Add daily tick optimisations
+	- Optimize Theodosian Walls Canon checks
+	- Remove property Maintenance buildings for the AI to save performance
+
+### AI
+	- Changed cutoffs for AI desires in interactions for loyalty and made them customizable per Elite. The following values were the cutoffs before: high loy desire <40 loy, med <55, low <70, none >=70
+		- New Noble/Tribal desire cutoffs: High <55, Med <65, low <70, none >=70
+		- New Burgher/Clergy desire cutoffs: High <45, Med <55, low <65, none >=65
+		--> Higher desire to increase loyalty hard or softblocks reforming for the AI and loyalty costing interactions
+	- Changed cutoffs for AI desires to decrease power of elites to make them invest less resources decreasing clergy or burgher power and focus on nobles.
+	- Changed cutoffs for AI desires to make AI prioritize decreasing corruption of laws way earlier --> should prevent state reach spam without state privilege reforms
+	- Differentiated the cutoffs for not making law reforms:
+		- for nobility reforms:  
+			- Rural Governance and Tenacy Reforms only to be changed not having med or high desire to increase noble loyalty
+			- Noble Service and Noble Obligation can be changed already at medium desire for loyalty (>= 55 loyalty)
+		- for BU Reforms: made it so that AI doesnt attempt BU reforms if desire for noble loyalty increase is high
+		- for BG reforms: make BGCommerce only require reform desire not loyalty as it does give loyalty not cost
+	- Taught AI which privileges it needs for which exact rights reform so that it doesnt waste resources reducing privileges to 0 before doing rights reforms
+	- Tried to teach AI to use demote greater nobility when it only needs to reduce power to do a reform and all other requirements are fulfilled (not perfect yet, but should help them reform)
+	- Adjusted lots of AI chances to use various privileges to encourage AI to do BU privilege when they need to decrease corruption and have high state reach
 
 ### Balance
 	- Removed the random stab hits from advisor deaths
 	- Apply CE bonuses from Capitols before Regional Capitols
-	- Fix Somalia area issues
 	- Reduced centralization requirements for castillian missions to allow for earlier formation of spain
+	- Rebalance army professionalism, now purely gained from Reforming Ideas, increasing drilling effectiveness which has been made much better. 
+	- Don't allow England to form Great Britain if they already formed the Anglo-French Union
+	- Raise Anatolia power threshold for the Mamluks
+	- Nerf Republican re-elections a lot, also disable one-year term
+	- Countries that have embraced Commercialization will now spread it in Tradenodes where they either have a Merchant or 10% of Trade Power
+	- Reduced centralization requirements and rebalanced timing of Spains formation
+	- Add requirement to embrace Commercialisation to getting heavies from Naval idea group
+	- Make harbourage infra reduce Commerce cost
+	- Limit the effect of China's early-game heavy ships on Sector score
+	- Rebalance sector score 
+		-Buff Merchant number effect to 0.5
+		-Make negative Global Trade Power and Trade efficiency hurt sector score
+		-Make the effects of Trade Efficiency and Global Trade Power quadratic
+		-Make better commerce levels way better for Sector Score, only give nothing below Commerce Rights 5 
+	- Change Required/New Capital province for forming Armenia to Hayastan
+	- Fixes and updates to AI capital city move events
+	- Make inventing Casual Literacy both easier and faster
+	- Stop boosting industrial output in colonies by 10x
+	- Make inventing Commercialisation a bit easier; Trade value minimum 3 now, divider 4
+
+### Flavour
+    - Ported around 100 various flavour events from the vanilla EU4, adjusting them to M&T 3.0
+	- Partial rework of early game Polish and Hungarian succesion events
+	- Added an event chain related to civil strifes in Lithuania
+	- Added new mission trees for Poland and Lithuania
+	
+### DG
+    - Ported humanist events from Dei Gratia, adjusting them to M&T 3.0
+	- Partially ported Catholic events from Dei Gratia, adjusting them to M&T 3.0
+	- Ported Hussite Wars event chain, adjusting it to M&T 3.0
+	- Give the Roman and Avignon Papacies cores on eachothers capitals to make sure they always have a CB on the other
+	- Also give them a truce between when the Schism happens
+	- Fix East Africa religions summing to more than 100%
+
+## History
+	- Made Pate Ibadi
+	- Make Transsylvania start as a Division of Hungary
+	- Remove Centralism from Madagascar
+	- Add TradePosts for Ragusa
+	- Add beer to Plzensko province
+	- Changes to Somalia setup
+	- Fix Champa not having cores on a few provs
+	- Remove starting Catholic Archbishopric modifiers from Gharnata province
+
+### National Ideas
+	- Khmer Ideas
+	- Generic Italian City State Ideas
+	- Lao Ideas
+	- Shan Ideas
+	- Lan Na Ideas
 
 ### Fixes
 	- Fix a source of error spam
 	- Nerfs the size of Eastern Orthodox minorities in East Africa superregion
+	- Splits Athabascan group in two (North and South)
+	- Tweaks the paths around Chalchuchuecan
+	- Fixed improper port location in West Africa
+	- Renames two Sumatran island provinces for accuracy
+	- Fixed East African minorities summing to more than 100%
+	- Fix Somalia area issues
+	- Fix Byzantine mission checking for Traveler provinces
+	- Fix inpossibility of forming the Jagiellon Empire due to it checking for some wrong regions 
+	- Remove check for non-existing province from Mongol Empire decision
+	- Fix Prov 533 being in 2 Expedition Groups
+	- Fix flagships being bricked and unbuildable
+	- Fix 3 provinces in West-Africa being uncolonizable
+	- Fix Extra Units being build double; fix to display of units built amount
+	- Fix issue where reducing burgher gov reform level from 7 or 6 would cause it to jump straight to 4
+	- Don't send ask for HRE Defence aid to Princes at war with the Emperor
 
 ### Submodding
 	- Fixed public function to change infrastructure levels
+	- Adds a check on "jesuit_activity" modifier for Jesuits to convert Western Christian heretics
+	- Ported "Flavour Events Revisited" submod into the main mod, including rework of many russian, French, Austrian, Hungarian, Polish, Teutonic, Scandinavian, Iberian, English, Italian and other flavour events.
+
+### Localization
+	- Add quite some localization for cultures that were missing their localization
+	- Fix Starobdub and Arabia names not overwriting Vanilla
+	- Karelian culture local name tweak on suggestion of Cuarah from community
+	- Correct the maximum amount of Industry slots per province in the localization (16)
+	- Implement suggestions for Persian Culture changes by Zaleesh
+	- Correct names of Sumatran islands
+	- Localize BUG tag (Buganda), also a lot of other nations there
+	- Comment back in tooltip explaining Clan Marriage gives Clans some power
+	- Fix backtick instead of apostrophe for Sa'ud dynasty
+
+### Map
+	- Modify adjacencies for 4040 to represent San Juan de Ulua (Venice-like)
+
+### UI
+	- Fix bug where French Revolution would cover the Warscore overview (Sam)
+	- Restoration of fancy HRE User Interface (+ League War Interface)
+
+#########################
+##### Open Alpha 25 #####
+#########################
+
+### Systems
+	- Reenabled Burgher Promotion System with new implementation based on current burgers * LabourDmnd/Supply as base
+		- Burghers will now be able to promote if needed based on labour supply.
+		- Additionally there are global and local modifiers on ideal burgher size based on Laws, Natural Locations, CoT Level etc.
+		- The speed of promotion / demotion depends on factors like burgher fulfillment values and commercial throughput and distance to ideal limit.
+		- Natural location will have a minimum desired amount of burghers allowing to grow burghers in new natural location from scratch.
+		- Elites no longer are capable of migrating which should fix the elites emigrating into being peasants.
+
+### Content
+	- Small adjustments to the Austrian mission tree.
+	- Fix to Hungarian and French mission tree dependencies.
+
+### Balancing
+	- Increased effect of protecting peasantry interaction to +2.0 Peasant Freedom - Noble Power per year.
+	- Increased effect of overlooking tenant abuse interaction to -2.0 Peasant Freedom * Noble Power per year.
+	- Adjusted income/expenses calculations for commerce to alleviate issues with sudden size reductions.
+	- Removed urban labor demand from commercial industry.
+	- Decreased alliance slots from international importance accross the board;
+	- Increased base diplomatic range by 25 for better early game Balance.
+	- Disallow alliances if relations are below +75.
+	- Entirely rebalanced ship goods base cost and progression for cost to be more in the range of vanilla at game start but with a progression over time.
+	- Requirement of embracing Columbian Exchange for taking colonialism idea set.
+	- Added small amount of luxery output to houseware and textile industries.
+	- Roughly quadrupled luxery industries inputs whilst doubling output.
+	- Rebalanced Steel Industry to be mostly about armaments production and increase inputs.
+	- Reduce max number of accepted cultures from diplomatic technology.
+	- Increase penalty on number of accepted cultures from high absolutism.
+
+### AI
+	- Increased alliance threshold of minimum military strength to ally from 0.075 to 0.25 of sender country.
+	- Increase AI interest in doing guarantees to offset less overall alliance slots.
+	- Reduce AI desire to use building budget on capitols and fix some triggers on when capitol building is allowed.
+	- Remove AI limitation of enacting government reforms only if at low corruption.
+	- Allow for enactment of multiple government reforms in one AI tick.
+
+### Map Setup
+	- Added luxury clothing industry to various southern and eastern english cities to represent their importance in the european luxury production system.
+	- Rewamped and rebalancing of Ostsiedlung setup to achieve more historical outcomes.
+	- Fixes Leibzsch and North Thryding winter.
+	- Fixes a graphic glitch on the Hawaii to California trade route.
+### DG
+	- Changed set_papal_controller to transfer_papal_controller to ensure only older cardinals get elected to papacy.
+	- Adds basis for Muslim church aspects.
+	- In the event of genesis of the Schism, added the two main ways to end the Schism.
+
+### Fixes
+	- Fixes the formation of the Mongol Empire being blocked by a non-existing province being required for non Mongol nations.
+	- Minor rework of nobility events.
+	- Fixes position issues (including red pin) in South East Asia.
+	- Fixes a localisation issue due to a global_event_target not changing.
+	- Fixes Catholic events checking num_of_cardinals, treasury, num_of_loans on the wrong scope.
+	- Fixes E-RandomEvents using the wrong public function on the country scope.
+	- Fixes FE-SPA.txt using the wrong public function on the country scope.
+	- Fixes FE-ARA.txt using the wrong public function on the country scope.
+	- Fixes setup_civil_war not correctly spawning rebels.
+	- Fixes bug preventing commercialization from being invented until a province had 5+ trade value (supposed to be 3+).
+	- Fixed peasant protection / exploitation modifiers not working due to wrong scaling when calculating power.
+	- Fixed legend in property modifier layer 2 being misplaced in the next line leading to broken display.
+	- Fixed ancient bug causing tooltip display issues in Linux.
+
+#########################
+##### Open Alpha 26 #####
+#########################
+
+### Compatiblility
+	- Update M&T to the latest EU4 version (1.37.2 as of writing this changelog)
+	- Not compatible with saves from Alpha 25
+
+### Balancing
+	- Halved burgher labour supplied by burgher pop, lowering wealth/pop.
+	- Allowed burgher pop to promote/demote in SIM.
+	- Allow Burgher promotion at 10/year starting from 0 as stopgap
+	- Move Expansion ideas from Adm 34 to Adm 30
+	- Reduce requirement to abolish Nominal Realm from 80 to 60 average state reach
+	- Reduce required continents to spawn Global Trade from 5 to 4
+	- Update on_new_monarch advisor alignment event: For new Advisor Alignment: lose stab but also lose corruption (scaled based on gov type); For keep alignment: gain some corruption
+	- Make textile industry require 10% less fiber
+	- Some rebalancing in Luxury industries: Nerf Silk, Buff Chinaware (this restores: Chinaware > Silk > Carpet > Luxury Cloth
+
+### Ideas
+	- 5 new National Idea sets sets for the New World, courtesy of thecheez's Traveler fork, modified a bit by Mepper
+
+### Quality of Life
+	- Add current value of the relation with faction to the relation change tooltip
+	- Add display of ruler/institutional authority and its sources to "Assess Bureaucracy and Stability" screen
+
+### Interface 
+	- Fix HRE interface when not having Emperor DLC
+	- Fixed gap for DGprotestant
+	- Fixed missing .gfx code for utility decisions
+	- added icon for "Clean up Mission trees"
+	- added icon for control kurdish subject desc
+	- Revamped celestial dragon icon to use vanilla
+	- Added assassinate icon
+	- added icon for formable Ilkhanate
+	- added plauge death tracker with top priority in decisions menu (Did not test)
+	- added generic icon for claiming rum sultanate
+	- resolved compression error for bg UIs
+
+### Flavour Events
+    - Allow the "Fall of Novgorod" event to fire for the player as well
+	- England and France are now locked into HYW with unique cb for both side. English CB requires them winning more battles and the French requires them to recovering their lost land from English. Upon reaching 65 warscore requirement, they can enforce a Treaty. Those are the all available treaties: 
+		- Treaty of Brétigny Eng: If the English holds on to their gain and keep Aquitaine from French occupation and ransom Jean II, they get their OTL spoils of war.
+		- Treaty of Brétigny Fra: If France successfully turns the tide of war, then they get to return to status quo.
+		- Treaty of Rouen - This is a subsequent treaty for England should they won Treaty of Brétigny. They will be able to take Normandy, Alencon and Anjou. 
+		- Treaty of Bruges - This is a counter treaty for the French. This treaty can be activated after Treaty of Brétigny or Treaty of Rouen is signed. Effectively this reduce English Aquitaine to the Boreadux and Labourd and all normandy. Once France reconvers Alencon and Anjou, they will be greeted with events to restore those royal dukedoms if they no longer exists. Failure to do so will incur nobility wraths.
+		- Treaty of Troyes - This is another OTL treaty. This can be activated after Treaty of Rouen or Treaty of Bruges. This is the penultimate treaty for English victory. This treaty will trigger some powerful reforms inline with Charles VII's reforms for the French resurgence. 
+		- Treaty of Arras - This is another OTL treaty. This can be activated after Treaty of Troyes. If Burgundy has got an alliance with England, this will nullify it and cede Picardy and Artois to them. France gets to recover Northern France.
+		- Treaty of Picquigny - This is the French victory treaty. They will boot out English from France forever and should France occupied Calais, they can also get it too.
+		- Treaty of Orlean - This is English victory treaty. They have three options here depends on the circumstances of their victory. 
+			- If they are allied to Burgundians, they can offer some land to Burgundy, atm Champagne, Picardy, Artois, Bourbon, Lyonnais, Provence.
+			- If they are not allied, there will be no land for them to cede.
+		- NO other CBs should be available to them as this would be hard to track and difficult for one side to win
+		
+	- Rework HYW post war possibilities
+		- English player gets some new events regarding their new success
+			- Which city is their new realm's capital? London or Paris? AI heavily in favour of Paris ofc.
+			- What are the legal position for English holdings in France now that they are also King of France? Series of events forcing English player to confirm if their newly conquered territories are in fact French.... Calais, Normandy, Aquitaine and so on.
+			- Who should rule from where? Given the logistic challenge, would they naturally return to their French roots and disgard their English subjects? Send an uncle to rule France in their name? or just plainly doesn't care about these foreigners and keep Englishness?
+		- Anglois culture can only happen if Plantagenet King stays in Paris and return to their French roots.
+
+	- Lancaster setup
+		- Lancaster is a playable tag. More rework will follow for WotR and the overthrow of Richard II.
+
+	- Misc
+		- If French player don't try to ransom their King, they too will suffer consequences
+		- However, if the English player are too greedy in wanting Normandy and Aquitaine in one go, they will allow the French to unit behind the Dauphin Charles and fight back.
+		- Jean II also will most likely die by 1364 so his value will diminish if kept too long
+		- France no longer can form AFU as this is a bit weird. AFU is solely designed for English victory not really useful for French domination of Isles
+
+	- HYW Events expansion
+		- War of two Peters
+			- French can send Betrand to Spain to help Trastamara and if Trastamara won, Charles V gets a better general back.
+			- In turn, Pedro of Castile can call in the Black Prince to help too by promising to cover the wages for english troops. 
+			- Upon a battle victory with decent warscore, Pedro will break his word to write off his promise. Black Prince will return home empty handed and drown in debts.
+			- Black Prince was forced to tax heavily his Gascon subjects to maintain his position. However, this heavy headniess caused Gascon lords to lodge a complaint to Charles V who was no longer their Feudal lord as per treaty of Brétigny.
+			- However, as part of the original promise, Pedro gave his two daughters as hostage to the English for payment guarantee. John of Gaunt and Edmund of Langley married both daughters and thus a possible English claim to Castilian throne.
+			- Both Aragon and Portugal can claim Castilian throne should they wish from events. 
+				- Portugal indeed did so in our timeline leading to Fernandine Wars.
+				- Granting them a restore union cb
+				
+		- Reintroduce and expand on Armagnac–Burgundian Civil War
+			- Mad king event
+			- Bal des Ardents
+				- Serious loss of Prestige and legitimacy
+			- Orlean purchase of Luxemburg - which can be lost again if he is assassinated.
+			- Both sides fighting for the control of regency. Ultimately resulting in Duke of Burgundy assassinating his cousin, Duke of Orlean.
+			- Both sides can also raid French treasury to enrich themselves. (WIP)
+			
+		- Breton changes
+			- A special Breton war cb created that will stop AI white peacing in some circumstances
+			- If English Brétigny Treaty is enforced and Montfort won, they will have to cede Brest to the English
+				- As a result, Breton barons resents English presence in the duchy.
+				- Breton Duke can now offer his service to French king in exchange to get Brest back
+				- However, should the relationship with French ever turn south, Breton can then offer Saint-Malo or Brest back to English and get an alliance.
+			- Blois victory will make them an appanage of France.
+			- Noteable Breton m,ilitary leader Oliver Clisson who later became Constable of France
+			
+		- Low countries changes
+			- Ghent revolt against Flemish count whose son-in-law was Duke of Burgundy
+			- Ghent revolt caused great uneasiness across Western Europe.
+			
+			
+		- French turmoil in 1357
+			- Summon Estate General after the disastrous Battle of Poitiers.
+				- Estate General demands some reforms and release Charles the Bad
+				- The leader of Estate general entices people to murder two advisors
+				- These murders caused uproar among nobility
+				- Jacqueries in Northern France because they were taxed heavily for war efforts
+				- Upon clearing Jacqueries, France will lower its nobility service and tax obligations whilst also get Level 2 Bureau Direct Tax reform and Nobility Service Reform
+				
+		- Peasants revolt
+			- A mad priest roaming the countryside
+			- Wat Tyler emerges and reduce welfare
+			- If London gets occupied, remove Knight order presence and add devatation
+			- Also killed some Flenmish merchants, caused Flemish count to be unhappy
+			- Rebels demands some redical reforms or English player can bid his time
+			- Bidding time can disband all rebels but English nobility are fearful of heavy tax burdens and allowed them some relief
+			- Also cracked down on Lollard if they exists
+
+	- Italian related events
+		- Valentina Visconti
+			- She was the consort of Duke of Orlean. In her marriage contract, it was stipulated that should Visconti male line went extinct, her desendent shall inherit Duchy of Milan. When Louis XII as Duke of Orlean inherited the throne, he claimed the duchy as a Frenhc possession.
+			- Ambroise Repulic is still highly likely to reject Orlean claim.
+				- Very small chance for Milan to choose otherwise. France can expect greater possibilities if they are allied to Milan
+		- Jeanne I of Naples
+			- Fixed incorrect heir setup at the start of the game. Changed it to her husband
+			- Her husband died before her. She being childless and disliked her Durazzo cousins, named Duke of Anjou as heir. However, Charles of Durazzo backed a different Pope during schism and usurped her throne.
+			- Naples will have a choice to choose between Louis and Charles. Choose Louis will make Naples to become a union of Anjou and swpan rebels. Choose Charles will only lose Provence.
+
+### Map Setup
+	- Fix province 3695 (Betokuag) being in the wrong trade node
+	- Split Andaman and Nicobar into their own area
+	- Move Chagos from Mascarenes to Indian Ocean Islands area
+	- Move Chagos into Konkan node, update all province groups
+	- Move Turkana into Sidamo area, update province groups
+	- Remove Chiveve from Zambezi river
+	- Remove port and harbour features from inland province 2885 Ijebu
+	- Move Kranska into Adriatic/Venice node to make Lower Danube inland node
+	- Remove scattered pixels from Moroccan wasteland in British Columbia
+	- Give Candia the offshore island just north of it
+	- Fix city name for 659 Bangka
+	- Remove one province river from Sahelian province
+	- Give Allgau correct river
+	- Rename Moroccan wastelands so they aren't named after a Canadian First Nations
+	- Move Saharan wasteland border to allow colour fill in
+	- Add 5235 to Polynesia charter
+	- Correct Sahra ad Dahna text position
+	- Correct a couple unit positions
+	- Rename duplicate Mapungubwe to Tswana
+	- Rename duplicate Xoconochco to Retalhuleu
+	- Change Bone color to be more clear against uncolonized
+	- Remove Zambezi river modifier from Chiveve, add it to Namacurra and Quelimance
+	- Add this river (Cuacua) to the rivers.bmp file
+	- Shift the border of the Bay of Maputo sea tile a bit north
+	- Remove harbour infra from rural Mozambique coast provinces
+
+### Custom Mapmodes
+	- Fix several broken mapmodes:
+		- State Reach
+		- Harborage Rank
+		- Pathing Rank
+	- Fix description localization for urban and rural throughput mapmodes
+	- Fix localization for some mapmode value scales
+	- Added/fixed all religions in total pop special map mode
+	- Fix broken Back button on Custom - Set Type - Religion map mode event
+	- Rename "absolute" map mode value scales to "centered" map mode value scales
+	- Move Communication Efficiency mapmode from Other to Political
+	- Add Amenities Surplus mapmode
+	- Add Current Farmland/Forestry/Mine/Fishery mapmodes
+	- Add Maximum Farmland/Forestry/Mine/Fishery mapmodes
+	- Add delicacy mapmodes
+	- Add various mapmode presets:
+		- Population:
+			- Amenities Surplus
+		- Economy:
+			- Current Farmland
+			- Potential Farmland/Forestry/Mine/Fishery
+		- Political:
+			- Communication Efficiency
+			- State Reach
+			- Bureau Corruption
+		- Other:
+			- River Sections
+			- Ancient Passes
+
+### Misc
+	- Add priority of moving towards capital (should_take_capital = yes) to all pretender rebels spawned via events
+	- Allow building Panama Canal when having Embraced Industrialisation Institution
+	- Make released Crusader Kingdom overlord culture and adapt their Reforms and Make Crusader nation provinces go their primary culture instead of Frankish
+	- Always give Persia tag Persian ideas and Persian culture group culture
+	- Make Frisian Ruler at game-start 60 years of age instead of 160
+	- Limit frequency of The Bishop's Mistress event to once per ruler
+	- Make Irish minors form Brythonia instead of Great Britain by mission
+	- Rename Taxes in macrobuilder to Investments
+
+### Fixes
+	- Fix the Autoinvestor for the player
+	- Fix error with Hussite holy wars having no name displayed
+	- Fix france's ruler being replaced when it sponsors the Avignon pope
+	- Fix overlord's ruler being replaced instead of the pope's after a papal conclave elects a corrupt or secular pope if the pope is a vassal
+	- Fix error causing the Grant of Brandenburg's final fallback event to fail to find a candidate country
+	- Fix bug that could cause Culture Conversion progress to reset to zero without changing culture; credits here to cementius and Zaleesh who fixed it for the Fantasy Scenarios Reborn submod
+	- Fix Musket or Bow event firing over and over
+	- Fix and tweak quite a bit of Serbia related localisation
+	- Tweak Expedition received localisation to be more clear
+	- Textile and Industrial weren't allowed to close at all over 2k residents. Just allow it to close. (This caused the zero textile size bug)
+	- Allow commerce to close under size 1 instead of 0.5. It can't do its thing under size 1, yet only closed at size 0.5, making a lot of provs have between 0.5 and 1 commerce size that did nothing
+	- Stop Castille from having its Civil War twice (at game start, causing all the events to also fire twice)
+	- Fix Zoroastrian events checking for Mayan instead of Zoroastrian
+	- Fix culture conversion from British cultures to Anglois for UEF
+	- Fix broken special characters in Teutonic Order country file
+	- Historical relations tweaks as suggested by @Weyland
+		- Adding mainly Hansa relations, neutral relations between MAM - VEN/GEN
+		- Also add a Hansa Tradepost in Pskov
+		- GEN - KNP friends
+		- GEN - BYZ friends
+		- HOL/NED - DEN, RIG, DNZ Friends
+	- Make players actually require BUStructe1 for Noble Obligations 3 as was always intended
+
+#########################
+##### Open Alpha 27 #####
+#########################
+
+### Fix Vanilla triggers for subjects being broken
+- We cannot overstate the importance of this fix, affected and possibly broken were:
+	- Constantinople block
+	- Lots of flavour
+	- AI send expeditions chance modifiers
+	- Possibly invention of Nationalism Institution
+	- Pretty much all mission trees
+	- Music, as in which music is playing when
+	- Forming a bunch of nations
+	- Building Monuments and Canals in subjects
+	- Possibly the triggering of the Western Schism
+	- Provincial Communication Efficiency display
+	- And likely more things that we didn't even know
+
+### System changes
+- Allow global trading of Major and Dominant Centers of Trade via Sea also for all non-Tributary Subjects 
+	- This is the system were you don't need a full link of Trade Centers to trade globally, but it used to only work for your own provinces, notably not for colonies
+- Add custom overland colonization bonus that replaces siberian frontier mechanics there and gives high growth speed for overland colonization
+- Rework of Peasant Freedom by Rights and Interactions to achieve more engaging gameplay around peasant freedom:	
+	- Tenacy Right Level 1: Yearly change -0.15
+	- Tenacy Right Level 2: Yearly change -0.1
+	- Tenacy Right Level 3: No Change
+	- Tenacy Right Level 4: Yearly change +0.15
+
+	- Interactions:
+		- Protect Serfs: +1.5 - Noble Power per year for 10 years (minimum change of 5 in total if noble power is 100 => Equals 50 years of natural change)
+		- Abuse Serfs: -0.75 * Noble Power per year for 10 years (maximum change of -7.5 in total if noble power is 100 => equals 75 years of natural change)
+		- Higher effect on noble loyalty and welfare from interactions to make abusing lower class at gain of noble loyalty a viable strategy
+	- Add new spread mechanism for crops after unlocking columbian exchange
+		- spread is now alot slower (10 years so far, 100 years or more now)
+		- spread depends on the following factors:
+			- peasant freedom, the higher the faster the adaption, near impossible below 50 peasant freedom
+			- tribal ratio, lower ratio, higher adaption
+			- suitability of crop, higher suitability means faster adaption
+			- crop type, potatos spread slow, maize spreads fast
+- Changed how wealth is introduced into the system.
+	- Removed UBI / Innate Income from god. Pops no longer get a small wealth injection each year.
+	- Buffed bullion output from precious metal mines by 5x
+	- Moved over 50% of vanilla trade to wealth distributed to Burghers and to a lesser extend nobles and residents as income.
+
+### AI
+- Rework / rebalance AI behavior on how to spend mana on taxes in the attempt to make AI more competitive and troop counts less swingy
+	- Higher lower cap (20), Lower higher cap (40) of spending
+	- More spending when feeling threatened by any neighorr, being militarist AI, having conqueror or similar ruler personalities or being a rebeliious subject on (mil) mana spending
+	- Less spending if treasury is already insanely big (China fix / if treasury > 10000)
+- Fixed problems and wrong design in State AI Builder:
+	- State AI no longer builds capitols instead of amenities when trying to build up its cities units at a time
+	- State AI should now attempt to build up big cities + capital (even if it has not enough money for a rank) 2 units at a time
+	- State AI should now attempt to build up non big cities (even if it has not enough money for a rank) 1 unit at a time
+	- State AI should now again be able to properly evaluate CE value of harbourage + pathing
+	- State AI should no longer build capitols spending amenities money on it, but using the CE part of the budget (way less)
+- Fixes and balancing to how classes / provinces decide to build up their own infrastructure
+- Prevent AI being able to use edicts (again!) to not let it waste its mana...
+
+### Flavor
+- Rebalance likelyhood of Bohemia loosing brandenburg to trigger the brandenburg event chain faster and more frequently
+- Gave Netherlands filled out idea groups that fit when they spawn from the rebellion event
+- 'Constitutionalism and General Estates' event should now provide historically accurate government reform for The Netherlands.
+- New dynasty and ship names for Poland and Polish-Lithuanian Commonwealth.
+- Some changes to Danish, Cossack and Lithuanian monarch names.
+- Some fixes and balancing of various flavour events e.g.: 'Stockholm Bloodbath', 'Second Peace of Thorn', 'Crisis of the Confedaracy', 'Death of Duke of Burgundy', 'Succession in the Duchy of Prussia'.
+- Some fixes and balancing of various flavour events related to Catholicism.
+- Balance changes and fixes to the 'Hussite Wars' event chain.
+- Minor improvements to the 'Time of Troubles' disaster.
+- Re-added some vanilla informative events about instititution invention.
+- Re-added old DG 'Peasant War' and 'Knights War' event chains related to the beginnings of reformation.
+- Added 'Vivente Rege' election system for Poland and Polish-Lithuanian Commonwealth. 
+- Added new missions to Polish mission tree.
+- New mission tree for Russia.
+- Increased probability of various flavour events.
+- Add new Ideas for Novgorod
+
+### Balance
+
+- France can now not magic new rulers if non_tributary subject 
+	- De facto this means that when they fall under a PU, they can't just magic a new heir out of thin heir, breaking the PU
+- Block non-capetians from placing heir on French throne when Salic Law is active
+	- The Diplo action is OP in any case, and blocking the player from trying something that is obviously not supposed to be allowed
+- Give tribal nations under Religious Leadership elections on ruler death
+- Change alliance relations requirement from +80 to +65, update tooltip
+- Allow UEF (Union of England and France) formation for England after taking over FRA when it wins the HYW
+	- Always make Anglois Primary Culture of UEF
+- Remove DIP cost from establishing siberian / colonial frontiers
+- Rebalancing of non primary culture effects to make the effect of holding non primary land more impactful and noticable
+- Military and Siege Changes:
+	- Removed mana costs for actions like sortiers, assaults and barrages requiring now just the proper amount of cannons / ships.
+	- Increased maximum breaches in forts from 3 to 5 during to fasten up sieges by having enough artillery.
+	- Assault Changes to make assaults more viable strategy that can be used to widdle down / break forts like historically:
+		- Increased maximum assault width from 5 to 8.
+		- Decreased attacker loss during assaults from 1.0 to 0.8.
+	- Reintroduced disease outbreaks during sieges with a 5% kill rate if it happens via dice roll.
+- Trade League Adjustments:
+	- AI will leave Trade Leagues if opinion drops below 35.
+	- New Trade League leader only requires +5 prestige to take over if the previous leader resigns (previously +20).
+- Differentiate between different type of regiments for rebel suppression. Previously 0.25 per regiment, now:
+	- 0.4 by cavalry
+	- 0.3 by infantry
+	- 0.05 by artillery
+- Ideal Burgher Size is now limited to not be larger than total amount of residents of a city. So at max burghers can be 50% of a city
+- Increased Clergy charity to lower classes and Elite donations to the clergy.
+- Improved Sericulture to be more profitable than cotton. 
+- Calling an ally into arms i now not for free and costs 25 favours not 10 --> defensives wars are free. This makes alliances way more about defense then offense
+- Decreased favors one gets from giving an ally land by about 40 % relative to dev given
+- Halfed the amount of trust you get for trading 10 favors
+- doubled the amount of time you need to wait before calling a country to an offensive war again from 10 to 20
+- Many many industry input/output changes based on profitability spreadsheet.
+- Some balancing on reformation spread.
+- Minor changes to initial setup of Eastern Europe. Buffed starting positions of Lithuania and Novgorod.
+
+### Localization 
+
+- Add capitalization to Zaporizhzhia area name
+- Fix adjective localization for England ruling France
+- Fix adjectives for Rhodes
+- Reword Capitol Infra Global CE Reduction -> Improvement (hopefully prevents some player confusion)
+
+### Fixes
+
+- Fixed Raw and Timber costs for infrastructure maintenance not being accounted for infrastructure maintenance fulfillment
+- Fixed calculation for infrastructure decay not using the same base for urban/rural infrastructure leading to more decay in urban infrastructure and less interest of classes to build urban infrastructure
+- Fix ENG not being able in some cases to win HYW, decision was checking for a wrong treaty, causing it to not work
+- Fix the Return of Jean "le Bon" de Valois by negatiating his return with the English
+- Make End of Jacquerie and Scottish Support events fire_only_once
+- Prevent a rare case where Hungary can become a PU under its own subjects
+	- It was possible that Hungary could with this event become a PU under Croatia, which was a PU under HUN, so yeah don't want that
+- For HRE League War treaties, limit affected with notification and opinion to countries to Western Christians
+	- Instead of EVERY country with another religion in the entire world -_-
+- Fix Inti religious Minority on Jarbah 2528 instead of Jewish (will only take effect after new sim)
+- Fix "Religious Framework of the Realm" being broken
+	- This is a Clergy interaction that shows the religious makeup of your realm, didn't work at all but should be fully functional again.
+- Fix Support Independence diplomatic action block not doing what it says in the tooltip: "To support independence you must be enemy, rival or neighbour of the rebellious nation overlord. Alternatively, you may be a neighbor of rebellious nation."
+- Fix Tengri Pagans in Finland; Make them Ukkousko (Fix by Slendermang)
+- Fix Fastbuilder always adding one extra unit every time it was used
+- Lots of fixes in calculations, preventing divide by zero's
+	- potentially slightly buffing Ghazi Troops for Ottomans from this, because some calculation now works properly 
+- Fix Timur getting no FL / troops any more due to Persia adoption event giving enlistment. Now it only gives volunteers and happens not quite so fast (from 4 -> 10 years MTTH).
+- Fix Passive tolerance and missionary scripts still working on the old religious IDs
+- Fix issue where Noble support interactions were incorrectly basing their impact on burgher power instead of noble power
+
+#########################
+##### Open Alpha 28 #####
+#########################
+
+### Expanding Skill of Industries and its effects
+- Skill no longer increases output of industries, instead decreases labor usage of that industry
+- Skill no longer capped at 100
+- Introduction of modifiers that affect skill of each industry
+	- most industries have 2 or 3 skills that influence its skill cap
+	- introducing a skill cap that is calculated for each industry in each province
+	- skill can be different between each province
+- Adding skill effects to Institutions, Technologies, Ideas and many more things
+- New industries always start at 100% skill
+- Skill growth depends on the maximum skill cap, growth starts fast and slows down when getting close to cap
+
+### Colonization
+- certain regions get exploitation modifiers to represent their historical "use"
+- make nomads unwanted in colonial provinces, if owned by a non american country
+
+### League Wars tweaks
+# Aimed at making the 1st and 2nd war more relevant and increase player agency in the 30 Years War gameplay
+- Getting 50% of the Prince's votes for a single option in the League Wars will now end the League Wars once and for all (so no more guaranteed 3 Wars)
+- Reduce impact of amount of League Wars on the Prince's voting behavior (aka less likely that all AI will vote religious peace in later wars)
+- Introduce War Exhaustion as a factor for AIs to be more likely to vote for religious peace. 10 and 20 WE are the thresholds for them to be more likely to vote for peace. 
+- 3rd League War had a timer of 50 years after the second to fire, reduce this to 10 years. 
+
+### General
+- New river sections for Benue, Senegal and Gambia river
+- Changes to Niger river section
+- More Cossack flavor
+- More Reformation-related flavor
+- Revive half-ported succession crisis disaster
+- Add support for DLC 122 Chinese and DLC 123 French music packs (adapt the Vanilla triggers for when which song plays)
+- Colonial cultures are now a thing again for the most common colonizers. More to be added later.
+- Add decision to form Ruthenia for Ruthenian culture group, aka don't make Kyiv form Russia.
+
+### Ideas
+	- Added a new idea set for the Mon culture, courtesy of Avalon
+
+### Balance
+- Kotoko Startup massively improved
+- Naval material supply from timber industry reduced by 60%
+- All Ressource sizes increase with technology
+	- Extraction increases more than Farmland from new technologies
+- Nerf Vengeful trait of rulers
+- Crop Adaption after columbian exchange is faster. Alot faster for Maize, minor adaption speed buff to potato (still slow!)
+- Make Obsidian great again, attempts at fixing american economy
+- Lowered institution invention difficulty
+- Upped neutral growth life fulfil to 85, nerfed urban natural growth.
+- Made Inflation much more impactful, inflation reduction is done through policy.
+- Rebalance Estate Infra build priorities
+- Slight adjustment of the conditions for the Peasant War to helpfully prevent AI from perma-fighting peasants
+- Changes to Terrain in regards to Core Creation Costs, Nationalism and Culture Conversion
+
+### Fixes
+- Fix old oversight in timber taxation
+- Some spelling fixes, whenever someone finds one 
+- fixing divide by zero errors where they can be identified
+- bandaid fix to limit feudatory exploits
+- Releasing subject after appanage reverts to crown failsafes (prevent no religion)
+- Major fixes/tweaks to entrenchment and passive conversion (credits to @muh_europa for pointing these out)
+- Fix some errors in Manpower, Slots and Minority Conversion scripts. The errors are real and have been there for a long time, thanks to an anonymous reporter they are now fixed.
+- Fix some errors from province flags on Trade mapmode whilst maintaining full functionality, if you can identify more, please reach out
+- Many misc error fixes
+- Fix a permanent Province modifier being added without duration
+- Fix overlapping French missions
+- Try to fix Ottomans almost always choosing to expand in Anatolia instead of going for the Christians
+- Fixed issues with Vassal CTA if it happened in parallel in multiple countries and if subject of subject was supposed to be called
+
+### Localization
+- Improve unresolved bids explanation in tooltip
+- Fix quite some small localization issues
+
+### Misc tweaks
+- Dutch Republic now gives Aristocratic Republic government reform
+- Add debug_mode to parser and inform user when its active
+- Make Oman start with Trade and Naval, Yemen with Trade Aristocracy, remove historic rivalry with MAM
+- Make Zanzibar and Mombasa always start with trade ideas
+- Attempt to make it completely impossible to 'Trade in Special Mapmode x'
+- Make Silesia and Bohemia friendly towards Poland, to make sure they dont break Treaty of Visegrad
+- Make Institutions spread as well via trade if own nation has the institution, not just other tradepartners
+- Make France always accept ransom for their starting king. Bandaid fix until we have a better solution for renegociation
+
+### Special Mapmodes
+- Integrate @molkemon's Special Mapmode interface submod in the main mod
+- Make special mapmodes also work on uncolonized provinces (mainly for seeing rivers, deposits, etc.)
+
+#########################
+##### Open Alpha 29 #####
+#########################
+
+### League Wars
+- Make the requirements for a permanent peace in the League Wars more stringent: 75% in the 1st war, 66% in the 2nd war, 50% in the 3rd war. If no vote reaches this threshold after 3 wars, the Empire will enact a Permanent Religious Peace. 

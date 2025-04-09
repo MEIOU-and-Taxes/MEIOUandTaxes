@@ -1,0 +1,1062 @@
+namespace = flavor_nap
+
+### THE BARONIAL REVOLTS ###
+
+country_event = {
+	id = flavor_nap.1
+	title = flavor_nap.1.t
+	desc = flavor_nap.1.d
+	picture = ANGRY_MOB_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	major = yes
+
+	trigger = {
+		OR = {
+			tag = KNP
+			tag = NAP
+		}
+		NOT = {	is_year = 1495 }
+		capetian_dynasty_trigger = no
+		NOT = {	legitimacy = 90	}
+		is_lesser_in_union = no
+		is_female = no
+		government = monarchy
+		has_regency = no
+		FRA = {
+			exists = yes
+			has_regency = no
+			is_lesser_in_union = no
+		}
+	}
+
+	option = {
+		ai_chance = {
+			factor = 90
+		}
+		name = flavor_nap.1.a
+		log = "FE-NAP:[GetYear]:[Root.GetName]:refused to abdicate during The Baronial Revolts:flavor_nap.1"
+
+		#harm relations with nobles
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+		#spawn rebels trying to install representative of one of the French dynasties
+		random_owned_province = {
+			limit = {
+				is_in_capital_area = yes
+				controlled_by = ROOT
+				NOT = { is_capital = yes }
+				development = 10 #it affects stack size
+			}
+			random_list = {
+				25 = {
+					spawn_rebels = {
+						type = pretender_rebels
+						size = 1.5
+						leader_dynasty = "d'Anjou"
+						should_take_capital = yes
+					}
+					log = "FE-NAP:[GetYear]:[Root.GetName]:The Baronial Revolts spawned d'Anjou pretender rebels:flavor_nap.1"
+				}
+				25 = {
+					spawn_rebels = {
+						type = pretender_rebels
+						size = 1.5
+						leader_dynasty = "d'Armagnac"
+						should_take_capital = yes
+					}
+					log = "FE-NAP:[GetYear]:[Root.GetName]:The Baronial Revolts spawned d'Armagnac pretender rebels:flavor_nap.1"
+				}
+				25 = {
+					spawn_rebels = {
+						type = pretender_rebels
+						size = 1.5
+						leader_dynasty = "de Valois"
+						should_take_capital = yes
+					}
+					log = "FE-NAP:[GetYear]:[Root.GetName]:The Baronial Revolts spawned de Valois pretender rebels:flavor_nap.1"
+				}
+				25 = {
+					spawn_rebels = {
+						type = pretender_rebels
+						size = 1.5
+						leader_dynasty = "de Bourbon"
+						should_take_capital = yes
+					}
+					log = "FE-NAP:[GetYear]:[Root.GetName]:The Baronial Revolts spawned de Bourbon pretender rebels:flavor_nap.1"
+				}
+			}
+		}
+		#FRA = { #commented out, France was not an active participant in this feud
+		#	add_opinion = {
+		#		who = root
+		#		modifier = nap_french_spurned
+		#	}
+		#}
+	}
+	option = {
+		name = flavor_nap.1.b
+		ai_chance = {
+			factor = 10
+		}
+		FRA = {
+			country_event = {
+				id = flavor_nap.2
+				tooltip = flavor_nap.1.2
+				days = 1
+			}
+		}
+	}
+}
+
+# THE ABDICATION OF X #
+
+country_event = {
+	id = flavor_nap.2
+	title = flavor_nap.2.t
+	desc = flavor_nap.2.d
+	picture = COURT_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	option = {
+		name = flavor_nap.2.a
+		ai_chance = {
+			factor = 100
+		}
+		random_list = {
+			25 = {
+				FROM = {
+					remove_heir = {}
+					define_ruler = {
+						dynasty = "d'Anjou"
+						religion = ROOT
+						culture = ROOT
+						min_age = 20
+						max_age = 30
+						claim = 80
+					}
+				}
+			}
+			25 = {
+				FROM = {
+					remove_heir = {}
+					define_ruler = {
+						dynasty = "d'Armagnac"
+						religion = ROOT
+						culture = ROOT
+						min_age = 20
+						max_age = 30
+						claim = 60
+					}
+				}
+			}
+			25 = {
+				FROM = {
+					remove_heir = {}
+					define_ruler = {
+						dynasty = "de Valois"
+						religion = ROOT
+						culture = ROOT
+						min_age = 20
+						max_age = 30
+						claim = 60
+					}
+				}
+			}
+			25 = {
+				FROM = {
+					remove_heir = {}
+					define_ruler = {
+						dynasty = "de Bourbon"
+						religion = ROOT
+						culture = ROOT
+						min_age = 20
+						max_age = 30
+						claim = 60
+					}
+				}
+			}
+		}
+		FROM = { hidden_effect = { set_key = { lhs = Vassal_Type value = 10 } } }
+		log = "FE-NAP:[GetYear]:[From.GetName]:abdicated during The Baronial Revolts in favor of [From.Monarch.Dynasty.GetName:flavor_nap.1"
+		log = "FE-NAP:[GetYear]:[From.GetName]:became French feudatory:flavor_nap.1"
+		create_subject = {
+			subject_type = daimyo_vassal
+			subject = FROM
+		}
+		FROM = {
+			if = {
+				limit = {
+					Rights_NOGov6HasGreater = no
+					NOT = { has_country_modifier = NO_Serfs_S }
+					NOT = { has_country_modifier = NO_Serfs_M }
+					NOT = { has_country_modifier = NO_Serfs_L }
+					NOT = { has_country_modifier = NO_ProtectSerfs_S }
+					NOT = { has_country_modifier = NO_ProtectSerfs_M }
+					NOT = { has_country_modifier = NO_ProtectSerfs_L }
+				}
+				NO_Serfs = yes
+				custom_tooltip = NO_Serfs_effect
+			}
+			if = {
+				limit = {
+					has_dlc = "Rights of Man"
+					government = monarchy
+					is_lesser_in_union = no
+					has_consort = no
+					has_regency = no
+					OR = {
+						has_reform = Pol_Family1
+						#is_key_equal = { lhs = Pol_Family value = 0 }
+						has_reform = Pol_Family4
+						#is_key_equal = { lhs = Pol_Family value = 3 }
+					}
+					NOT = { has_country_modifier = NO_RoyalConsort_S }
+					NOT = { has_country_modifier = NO_RoyalConsort_M }
+					NOT = { has_country_modifier = NO_RoyalConsort_L }
+				}
+				NO_RoyalConsort = yes
+				custom_tooltip = NO_RoyalConsort_effect
+			}
+			if = {
+				limit = {
+					Rights_NOGov5HasGreater = no
+					NOT = { has_country_modifier = NO_Concessions_S }
+					NOT = { has_country_modifier = NO_Concessions_M }
+					NOT = { has_country_modifier = NO_Concessions_L }	
+				}
+				NO_Concessions = yes
+				custom_tooltip = NO_Concessions_effect
+			}
+			Stab_Subtract2 = yes
+			remove_country_modifier = Reform_CD
+		
+			add_country_modifier = {
+				name = Reform_CD
+				duration = 5438 #15 years of reform blockage
+			}
+		}
+		add_prestige = 10
+	}
+	option = {
+		name = OPT.REFUSE
+		ai_chance = {
+			factor = 0
+		}
+		add_prestige = -10
+	}
+}
+
+### RENAISSANCE IN NAPLES ###
+
+country_event = {
+	id = flavor_nap.3
+	title = flavor_nap.3.t
+	desc = flavor_nap.3.d
+	picture = IMPORTANT_STATUE_eventPicture
+	fire_only_once = yes
+	major = yes
+	trigger = {
+		adm_tech = 25
+		owns = 2531 #Naples
+		2531 = {
+		    OR = {
+			    has_province_modifier = LN_Major
+		        has_province_modifier = LN_Important
+			}
+		}
+		stability = 1
+		is_at_war = no
+	}
+	mean_time_to_happen = {
+		months = 12
+	}
+	option = {
+		name = flavor_nap.3.a
+		add_prestige = 10
+		add_country_modifier = {
+			name = "nap_renaissance_culture"
+			duration = 7300
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 10
+				NOT = { prestige = 0 }
+			}
+		}
+	}
+	option = {
+		name = flavor_nap.3.b
+		add_legitimacy = 10
+		add_country_modifier = {
+			name = "nap_renaissance_glory"
+			duration = 7300
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 10
+				NOT = { legitimacy_equivalent = 70 }
+			}
+		}
+	}
+}
+country_event = {			#Commented out because there is no effect set
+ 	id = flavor_nap.4
+ 	title = flavor_nap.4.t
+ 	desc = flavor_nap.4.d
+ 	picture = IMPORTANT_STATUE_eventPicture
+ 	fire_only_once = yes
+ 	trigger = {
+ 		OR = {
+ 			tag = KNP
+ 			tag = NAP
+		}
+ 		is_year = 1600
+		NOT = {
+ 			is_year = 1650
+ 		}
+ 		stability = 3
+ 		is_at_war = no
+ 		always = no
+ 	}
+ 	mean_time_to_happen = {
+ 		months = 4
+ 	}
+ 	option = {
+ 		name = flavor_nap.4.a
+ 		2531 = {}
+ 	}
+}
+
+### MASANIELLO'S REVOLT ###
+
+country_event = { 
+	id = flavor_nap.5
+	title = flavor_nap.5.t
+	desc = flavor_nap.5.d
+	picture = ANGRY_MOB_eventPicture
+	fire_only_once = yes
+	major = yes
+
+	trigger = {
+		owns = 2531 #Naples
+		NOT = { Rights_NOTen4Has = yes }
+		is_year = 1640
+		NOT = { adm_tech = 46 }
+		OR = {
+			NOT = { stability = 1 }
+			war_exhaustion = 5
+			inflation = 5
+			NOT = { legitimacy = 90 }
+			num_of_loans = 3
+		}
+	}
+	mean_time_to_happen = {
+		months = 4
+	}
+
+	option = {
+		name = flavor_nap.5.a
+		ai_chance = {
+			factor = 10
+		}
+		Stab_Subtract1 = yes
+		2531 = { #Naples
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1.5
+				#leader = "Masaniello" #mob_rebels do not use generals
+			}
+		}
+		random_owned_province = {
+			limit = {
+				NOT = {	province_id = 2531 }
+				is_in_capital_area = yes
+				controlled_by = ROOT
+				NOT = { development = 10 }
+			}
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1.5
+			}
+		}
+	}
+	option = {
+		name = flavor_nap.5.b
+		ai_chance = {
+			factor = 90
+		}
+		add_legitimacy = -25
+		add_prestige = -5
+		2531 = {
+			spawn_rebels = {
+				type = mob_rebels
+				size = 1
+			}
+		}
+	}
+}
+
+### PEDRO ALVAREZ DE TOLEDO ###
+
+country_event = { 
+	id = flavor_nap.6
+	title = flavor_nap.6.t
+	desc = flavor_nap.6.d
+	picture = ADVISOR_eventPicture
+	fire_only_once = yes
+	trigger = {
+	    OR = {
+		    tag = NAP
+			tag = KNP
+		}
+		OR = {
+		    AND = {
+		        is_subject_of = CAS
+				CAS = { dip_tech = 32 }
+			}
+			AND = {
+		        is_subject_of = SPA
+				SPA = { dip_tech = 32 }
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 15
+	}
+	option = {
+		name = flavor_nap.6.a
+		add_adm_power = 25
+		add_dip_power = 25
+		define_advisor = {
+			type = high_judge_BU
+			name = "Pedro Alvarez de Toledo"
+			culture = castillian
+			skill = 3
+			discount = yes
+		}
+		add_country_modifier = {
+			name = hee_pedro_alvarez
+			duration = 7300
+		}
+	}
+	option = {
+		name = flavor_nap.6.b
+		add_mil_power = 50
+		define_advisor = {
+			type = army_organiser_BU
+			name = "Pedro Alvarez de Toledo"
+			culture = castillian
+			skill = 3
+			discount = yes
+		}
+	}
+}
+
+### THE CONSTRUCTION PROJECTS OF PEDRO ALVAREZ DE TOLEDO ###
+
+country_event = {
+	id = flavor_nap.7
+	title = flavor_nap.7.t
+	desc = flavor_nap.7.d
+	picture = GREAT_BUILDING_eventPicture
+	fire_only_once = yes
+	trigger = {
+		tag = NAP
+		owns_core_province = 2531
+		has_country_modifier = hee_pedro_alvarez
+	}
+	mean_time_to_happen = {
+		years = 5
+	}
+	option = {
+		name = flavor_nap.7.a
+		2531 = {
+			add_province_modifier = {
+				name = hee_de_toledo_naples
+				duration = 3650
+			}
+			add_province_modifier = {
+				name = urban_development_efforts
+				duration = 1850
+			}
+			custom_tooltip = urban_development_efforts_tt
+		}
+	}
+	option = {
+		name = flavor_nap.7.b
+		2531 = {
+			add_province_modifier = {
+				name = hee_de_toledo_naples
+				duration = 3650
+			}
+			add_province_modifier = {
+				name = military_development_efforts
+				duration = 1850
+			}
+			custom_tooltip = military_development_efforts_tt
+		}
+	}
+}
+
+# THE FLOOD OF BONES #
+
+country_event = {
+	id = flavor_nap.8
+	title = flavor_nap.8.t
+	desc = flavor_nap.8.d
+	picture = BIG_BOOK_eventPicture
+	fire_only_once = yes
+	trigger = {
+		is_year = 1750
+		owns_core_province = 2531
+	}
+	mean_time_to_happen = {
+		years = 45
+	}
+	option = {
+		name = flavor_nap.8.a
+		2531 = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=5 }
+		}
+		add_prestige = 5
+	}
+}
+
+### OSPEDALE DI SAN GENNARO DEI POVIERI ###
+
+country_event = {
+	id = flavor_nap.9
+	title = flavor_nap.9.t
+	desc = flavor_nap.9.d
+	picture = GREAT_BUILDING_eventPicture
+	fire_only_once = yes
+	trigger = {
+		adm_tech = 45
+		owns_core_province = 2531
+		is_at_war = no
+	}
+	mean_time_to_happen = {
+		years = 35
+		modifier = {
+			factor = 0.8
+			OR = {
+				has_idea_group = scholastic_ideas
+				#has_idea_group = ceremony_ideas
+				has_idea_group = civic_religion_ideas
+				#has_idea_group = scholasticism_ideas
+				has_idea_group = humanist_ideas
+			}
+		}
+	}
+	option = {
+		name = flavor_nap.9.a
+		add_treasury = -50
+		2531 = {
+			Public_ChangeClassWealthVal = { class= CL type = value inp=25 }
+			Public_ChangeClassWealthVal = { class= BG type = value inp=25 }
+		}
+		2531 = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=5 }
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=5 }
+
+			add_province_modifier = {
+				name = hee_gennaro_poveri
+				duration = -1
+			}
+			custom_tooltip = ImproveLocalWelfare05
+		}
+	}
+	option = {
+		name = flavor_nap.9.b
+		2531 = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=-5 }
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=-5 }
+		}
+	}
+}
+
+### OSPEDALE L'ALBERGO REALE DEI POVERI ###
+
+country_event = {
+	id = flavor_nap.10
+	title = flavor_nap.10.t
+	desc = flavor_nap.10.d
+	picture = GREAT_BUILDING_eventPicture
+	fire_only_once = yes
+	trigger = {
+		adm_tech = 55
+		owns_core_province = 2531
+	}
+	mean_time_to_happen = {
+		years = 20
+	}
+	option = {
+		name = flavor_nap.10.a
+		add_treasury = -100
+		2531 = {
+			Public_ChangeClassWealthVal = { class= CL type = value inp=50 }
+			Public_ChangeClassWealthVal = { class= BG type = value inp=50 }
+		}
+		2531 = {
+		    Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=10 }
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=10 }
+			add_province_modifier = {
+				name = hee_albergo_reale
+				duration = -1
+			}
+			custom_tooltip = ImproveLocalWelfare05
+		}
+	}
+	option = {
+		name = flavor_nap.10.b
+		2531 = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=-10 }
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=-10 }
+		}
+	}
+}
+
+# FRANCESCO SOLIMENA #
+
+country_event = {
+	id = flavor_nap.11
+	title = flavor_nap.11.t
+	desc = flavor_nap.11.d
+	picture = IMPORTANT_STATUE_eventPicture
+	fire_only_once = yes
+	trigger = {
+		is_year = 1670
+		NOT = { is_year = 1750 }
+		owns_core_province = 2531
+	}
+	mean_time_to_happen = {
+		years = 40
+	}
+	option = {
+		name = flavor_nap.11.a
+		add_prestige = 10
+		Stab_Add50Percent = yes
+	}
+}
+
+#Death of Naples' heir.
+country_event = {
+	id = flavor_nap.101
+	title = flavor_nap.101.t
+	desc = flavor_nap.101.d
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	#hidden = yes
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			tag = KNP
+			tag = NAP
+		}
+		heir_age = 42
+		has_ruler = "Jeanne"
+		dynasty = "d'Anjou"
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		
+		modifier = {
+			factor = 0.8
+			NOT = { stability = 0 }
+		}
+	}
+	
+	immediate = {
+		kill_heir = { allow_new_heir = no }	
+	}
+	
+	option = {
+		hidden_effect = {
+			country_event = {
+				id = flavor_nap.102
+				days = 300
+			}
+		}
+		name = flavor_nap.101.a
+	}
+}
+
+#Joana's second husband and co-ruler dies forcing Naples to choose between Louis of Anjou(a Valois prince) or Joana's cousin as heir.
+country_event = {
+	id = flavor_nap.102
+	title = flavor_nap.102.t
+	desc = flavor_nap.102.d
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	#hidden = yes
+	#fire_only_once = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = flavor_nap.102.a
+		ai_chance = { factor = 100 }
+		if = {
+			limit = {
+				NOT = { exists = ANJ }
+				exists = FRA
+				FRA = {
+					is_subject = no
+					capetian_dynasty_trigger = yes
+				}
+			}
+			FRA = {
+				set_country_flag = naple_inheritance
+			}
+			define_heir = {
+				name = "Louis"
+				dynasty = "de Valois"
+				birth_date = 1339.7.23
+				claim = 100
+			}
+			set_heir_flag = valois_naples
+		}
+		else_if = {
+			limit = {
+				exists = ANJ
+				ANJ = {
+					NOT = { is_subject_of = ENG }
+				}
+				FRA = {
+					is_subject = no
+					overlord_of = ANJ
+					capetian_dynasty_trigger = yes
+				}
+			}
+			ANJ = {
+				set_country_flag = naple_inheritance
+			}
+			define_heir = {
+				name = "Louis"
+				dynasty = "de Valois"
+				birth_date = 1339.7.23
+				claim = 100
+			}
+			set_heir_flag = valois_naples
+		}
+	}
+	
+	option = {
+		name = flavor_nap.102.b
+		ai_chance = { factor = 0 }
+		define_heir = {
+			name = "Charles"
+			birth_date = 1345.1.1
+			dynasty = "d'Anjou"
+			claim = 100
+		}
+		PRO = {
+			add_liberty_desire = 100
+		}
+	}
+}
+
+country_event = {
+	id = flavor_nap.103
+	title = flavor_nap.103.t
+	desc = flavor_nap.103.d
+	picture = Jeanne_Anjou_Event_Picture
+	
+	#hidden = yes
+	fire_only_once = yes
+	is_triggered_only = yes
+	major = yes
+	
+	immediate = {
+		if = {
+			limit = {
+				senior_union_with = PRO
+				exists = ANJ
+				ANJ = {
+					NOT = {
+						is_subject_of = ENG
+					}
+					capetian_dynasty_trigger = yes
+				}
+				FRA = {
+					is_subject = no
+				}
+			}
+			ANJ = {
+				inherit = PRO	
+			}
+			if = {
+				limit = {
+					OR = {
+						PRO = {
+							owns_core_province = 102
+						}
+						NIC = {
+							AND = {
+								owns = 102
+								OR = {
+									is_subject_of = ROOT
+									is_subject_of = PRO
+								}
+							}	
+						}
+					}
+
+				}
+				102 = {
+					add_core = SAV
+					cede_province = SAV	
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				senior_union_with = PRO
+				NOT = { exists = ANJ }
+				exists = FRA
+				FRA = {
+					is_subject = no
+					capetian_dynasty_trigger = yes
+				}
+			}
+			FRA = {
+				inherit = PRO	
+			}
+			if = {
+				limit = {
+					OR = {
+						ROOT = {
+							owns = 102
+						}
+						PRO = {
+							owns = 102
+						}
+						NIC = {
+							AND = {
+								owns = 102
+								OR = {
+									is_subject_of = ROOT
+									is_subject_of = PRO
+								}
+							}
+							
+						}
+					}
+
+				}
+				102 = {
+					add_core = SAV
+					cede_province = SAV	
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { exists = PRO }
+				exists = ANJ
+				ANJ = {
+					NOT = {
+						is_subject_of = ENG
+					}
+					capetian_dynasty_trigger = yes
+				}
+				FRA = {
+					is_subject = no
+					exists = yes
+				}
+			}
+			provence_area = {
+				limit = { owned_by = ROOT }
+				add_core = ANJ
+				cede_province = ANJ	
+			}
+			if = {
+				limit = {
+					OR = {
+						ROOT = {
+							owns = 102
+						}
+						NIC = {
+							AND = {
+								is_subject_of = ROOT
+								owns = 102
+							}
+						}
+					}
+				}
+				102 = {
+					add_core = SAV
+					cede_province = SAV	
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = { exists = PRO }
+				NOT = { exists = ANJ }
+				exists = FRA
+				FRA = {
+					is_subject = no
+					capetian_dynasty_trigger = yes
+				}
+			}
+			provence_area = {
+				limit = { owned_by = ROOT }
+				add_core = FRA
+				cede_province = FRA	
+			}
+			if = {
+				limit = {
+					OR = {
+						NIC = {
+							is_subject_of = ROOT
+						}
+						ROOT = {
+							owns = 102
+						}
+					}
+					
+				}
+				102 = {
+					add_core = SAV
+					cede_province = SAV	
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = flavor_nap.103.a
+		ai_chance = { factor = 5 }
+		random_owned_province = {
+			limit = {
+				region = naples_region 
+				NOT = { units_in_province = 1 }
+			}
+			spawn_rebels = {
+				type = pretender_rebels
+				size = 3
+				leader = "Charles d'Anjou"
+				should_take_capital = yes
+			}
+		}
+	}
+	
+	option = {
+		name = flavor_nap.103.b
+		ai_chance = { factor = 95 }
+		define_ruler = {
+			name = "Charles"
+			age = 37
+			#birth_date = 1345.1.1
+			dynasty = "d'Anjou"
+			claim = 100
+		}
+		
+		ANJ = {
+			if = {
+				limit = {
+					exists = NAP
+					exists = ANJ
+					NOT = { is_subject_of = ENG }
+					capetian_dynasty_trigger = yes
+					FRA = {
+						is_subject = no
+					}
+				}
+				country_event = {
+					id = flavor_nap.104
+					days = 20
+				}
+			}
+			else_if = {
+				limit = {
+					exists = KNP
+					exists = ANJ
+					NOT = { is_subject_of = ENG }
+					capetian_dynasty_trigger = yes
+					FRA = {
+						is_subject = no
+					}
+				}
+				country_event = {
+					id = flavor_nap.104
+					days = 20
+				}
+			}
+		}
+		FRA = {
+			if = {
+				limit = {
+					exists = NAP
+					NOT = { exists = ANJ }
+					NOT = { is_subject_of = ENG }
+				}
+				country_event = {
+					id = flavor_nap.104
+					days = 20
+				}
+			}
+			else_if = {
+				limit = {
+					exists = KNP
+					NOT = { exists = ANJ }
+					NOT = { is_subject_of = ENG }
+				}
+				country_event = {
+					id = flavor_nap.104
+					days = 20
+				}
+			}
+		}
+	}
+}
+
+#Notify France/Anjou
+country_event = {
+	id = flavor_nap.104
+	title = flavor_nap.104.t
+	desc = flavor_nap.104.d
+	picture = DEATH_OF_HEIR_eventPicture
+	
+	#hidden = yes
+	#fire_only_once = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = flavor_nap.104.a
+		ai_chance = { factor = 100 }
+		if = {
+			limit = {
+				exists = NAP
+				NOT = { is_subject_of = ENG }
+			}
+			add_casus_belli = {
+				type = cb_restore_personal_union
+				months = 6000
+				target = NAP
+			}
+		}
+		else_if = {
+			limit = {
+				exists = KNP
+				NOT = { is_subject_of = ENG }
+			}
+			add_casus_belli = {
+				type = cb_restore_personal_union
+				months = 6000
+				target = KNP
+			}
+		}
+
+		set_country_flag = claim_naples
+	}
+	
+	option = {
+		name = flavor_nap.104.b
+		ai_chance = { factor = 0 }
+	}
+}

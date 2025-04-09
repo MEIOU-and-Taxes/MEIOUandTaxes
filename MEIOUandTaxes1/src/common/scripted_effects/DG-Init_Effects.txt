@@ -1,0 +1,624 @@
+#Sets minoritiesin new provinces
+#Example:
+#	MN_StartUpProv = {
+#		rural0 = 0.70 urban0 = 0.85 notables0 = 0.99
+#		religion1 = 67 rural1 = 0.20 urban1 = 0.10 notables1 = 0.01
+#		religion2 = 3  rural2 = 0.10 urban2 = 0.05 notables2 = 0.00
+#	} 
+MN_StartUpProv = {
+	export_to_key = {
+		lhs = MN_S0
+		value = religion
+	}
+	set_key = { lhs = MN_S0Rural value = $rural0$ }
+	set_key = { lhs = MN_S0Urban value = $urban0$ }
+	set_key = { lhs = MN_S0Notables value = $notables0$ }
+
+[[religion1]
+	set_key = { lhs = MN_S1 value = $religion1$ }
+	set_key = { lhs = MN_S1Rural value = $rural1$ }
+	set_key = { lhs = MN_S1Urban value = $urban1$ }
+	set_key = { lhs = MN_S1Notables value = $notables1$ }
+]
+[[religion2]
+	set_key = { lhs = MN_S2 value = $religion2$ }
+	set_key = { lhs = MN_S2Rural value = $rural2$ }
+	set_key = { lhs = MN_S2Urban value = $urban2$ }
+	set_key = { lhs = MN_S2Notables value = $notables2$ }
+]
+[[religion3]
+	set_key = { lhs = MN_S3 value = $religion3$ }
+	set_key = { lhs = MN_S3Rural value = $rural3$ }
+	set_key = { lhs = MN_S3Urban value = $urban3$ }
+	set_key = { lhs = MN_S3Notables value = $notables3$ }
+]
+[[religion4]
+	set_key = { lhs = MN_S4 value = $religion4$ }
+	set_key = { lhs = MN_S4Rural value = $rural4$ }
+	set_key = { lhs = MN_S4Urban value = $urban4$ }
+	set_key = { lhs = MN_S4Notables value = $notables4$ }
+]
+[[religion5]
+	set_key = { lhs = MN_S5 value = $religion5$ }
+	set_key = { lhs = MN_S5Rural value = $rural5$ }
+	set_key = { lhs = MN_S5Urban value = $urban5$ }
+	set_key = { lhs = MN_S5Notables value = $notables5$ }
+]
+}
+
+MN_StartUp = {
+	every_province = {
+		limit = {
+			isValidEmpty = yes
+		}
+		MN_StartUpProv = {
+			rural0 = 1 urban0 = 1 notables0 = 1
+		}
+	}
+}
+
+MN_PostStartUp = {
+	#MN_Regularize = { type = Rural }
+	#MN_Regularize = { type = Urban }
+	#MN_Regularize = { type = Notables }
+	MN_GetSlotInit = yes
+	MN_GetInfrast = yes
+	if = {
+		limit = { check_key = { lhs = MN_S1 value = 1 } }
+		MN_RlgShift = yes
+	}
+}
+#Use : MN_GetSlotInit = yes
+MN_GetSlotInitHelper = {
+	if = {
+		limit = {
+			check_key = { lhs = MN_S$slot$ value = 1 }
+		}
+		set_key = { lhs = MN_S$slot$RurN which = MN_S$slot$Rural }
+		set_key = { lhs = MN_S$slot$UrbN which = MN_S$slot$Urban }
+		set_key = { lhs = MN_S$slot$NotN which = MN_S$slot$Notables }
+		multiply_key = { lhs = MN_S$slot$RurN which = Class_Rural }
+		multiply_key = { lhs = MN_S$slot$UrbN which = Class_Urban }
+		multiply_key = { lhs = MN_S$slot$NotN which = Class_Notables }
+		
+		set_key = { lhs = MN_S$slot$RurP which = MN_S$slot$Rural }
+		set_key = { lhs = MN_S$slot$UrbP which = MN_S$slot$Urban }
+		set_key = { lhs = MN_S$slot$NotP which = MN_S$slot$Notables }
+		multiply_key = { lhs = MN_S$slot$RurP value = 100 }
+		multiply_key = { lhs = MN_S$slot$UrbP value = 100 }
+		multiply_key = { lhs = MN_S$slot$NotP value = 100 }
+		
+		set_key = { lhs = MN_S$slot$TotN which = MN_S$slot$RurN }
+		change_key = { lhs = MN_S$slot$TotN which = MN_S$slot$UrbN }
+		change_key = { lhs = MN_S$slot$TotN which = MN_S$slot$NotN }
+		
+		if = {
+			limit = {
+				check_key = { lhs = MN_S$slot$TotN value = 0.001 }
+				check_key = { lhs = Class_Total value = 0.001 }
+			}
+			set_key = { lhs = MN_S$slot$TotP which = MN_S$slot$TotN }
+			divide_key = { lhs = MN_S$slot$TotP which = Class_Total }
+			multiply_key = { lhs = MN_S$slot$TotP value = 100 }
+		}
+		else = {
+			set_key = { lhs = MN_S$slot$TotP value = 0 }
+		}
+	}
+	# CleanSlot will handle this
+}
+
+MN_GetSlotInit = {
+	MN_GetSlotInitHelper = { slot = 0 }
+	MN_GetSlotInitHelper = { slot = 1 }
+	MN_GetSlotInitHelper = { slot = 2 }
+	MN_GetSlotInitHelper = { slot = 3 }
+	MN_GetSlotInitHelper = { slot = 4 }
+	MN_GetSlotInitHelper = { slot = 5 }
+}
+
+MN_CleanStartup = {
+	set_key = { lhs = MN_S0 value = 0 }
+	set_key = { lhs = MN_S0Rural value = 0 }
+	set_key = { lhs = MN_S0RurN value = 0 }
+	set_key = { lhs = MN_S0RurP value = 0 }
+	set_key = { lhs = MN_S0Urban value = 0 }
+	set_key = { lhs = MN_S0UrbN value = 0 }
+	set_key = { lhs = MN_S0UrbP value = 0 }
+	set_key = { lhs = MN_S0Notables value = 0 }
+	set_key = { lhs = MN_S0NotN value = 0 }
+	set_key = { lhs = MN_S0NotP value = 0 }
+	set_key = { lhs = MN_S0INF value = 0 }
+	set_key = { lhs = MN_S0ENT value = 0 }
+	set_key = { lhs = MN_S0Preach value = 0 }
+	set_key = { lhs = MN_S0Inquis value = 0 }
+	set_key = { lhs = MN_S0Tolerance value = 0 }
+	set_key = { lhs = MN_S0Bastion value = 0 }
+	set_key = { lhs = MN_S0MStrength value = 0 }
+	set_key = { lhs = MN_S0_Var value = 0 }
+	set_key = { lhs = MN_S1 value = 0 }
+	set_key = { lhs = MN_S1Rural value = 0 }
+	set_key = { lhs = MN_S1RurN value = 0 }
+	set_key = { lhs = MN_S1RurP value = 0 }
+	set_key = { lhs = MN_S1Urban value = 0 }
+	set_key = { lhs = MN_S1UrbN value = 0 }
+	set_key = { lhs = MN_S1UrbP value = 0 }
+	set_key = { lhs = MN_S1Notables value = 0 }
+	set_key = { lhs = MN_S1NotN value = 0 }
+	set_key = { lhs = MN_S1NotP value = 0 }
+	set_key = { lhs = MN_S1INF value = 0 }
+	set_key = { lhs = MN_S1ENT value = 0 }
+	set_key = { lhs = MN_S1Preach value = 0 }
+	set_key = { lhs = MN_S1Inquis value = 0 }
+	set_key = { lhs = MN_S1Tolerance value = 0 }
+	set_key = { lhs = MN_S1Bastion value = 0 }
+	set_key = { lhs = MN_S1MStrength value = 0 }
+	set_key = { lhs = MN_S1_Var value = 0 }
+	set_key = { lhs = MN_S2 value = 0 }
+	set_key = { lhs = MN_S2Rural value = 0 }
+	set_key = { lhs = MN_S2RurN value = 0 }
+	set_key = { lhs = MN_S2RurP value = 0 }
+	set_key = { lhs = MN_S2Urban value = 0 }
+	set_key = { lhs = MN_S2UrbN value = 0 }
+	set_key = { lhs = MN_S2UrbP value = 0 }
+	set_key = { lhs = MN_S2Notables value = 0 }
+	set_key = { lhs = MN_S2NotN value = 0 }
+	set_key = { lhs = MN_S2NotP value = 0 }
+	set_key = { lhs = MN_S2INF value = 0 }
+	set_key = { lhs = MN_S2ENT value = 0 }
+	set_key = { lhs = MN_S2Preach value = 0 }
+	set_key = { lhs = MN_S2Inquis value = 0 }
+	set_key = { lhs = MN_S2Tolerance value = 0 }
+	set_key = { lhs = MN_S2Bastion value = 0 }
+	set_key = { lhs = MN_S2MStrength value = 0 }
+	set_key = { lhs = MN_S2_Var value = 0 }
+	set_key = { lhs = MN_S3 value = 0 }
+	set_key = { lhs = MN_S3Rural value = 0 }
+	set_key = { lhs = MN_S3RurN value = 0 }
+	set_key = { lhs = MN_S3RurP value = 0 }
+	set_key = { lhs = MN_S3Urban value = 0 }
+	set_key = { lhs = MN_S3UrbN value = 0 }
+	set_key = { lhs = MN_S3UrbP value = 0 }
+	set_key = { lhs = MN_S3Notables value = 0 }
+	set_key = { lhs = MN_S3NotN value = 0 }
+	set_key = { lhs = MN_S3NotP value = 0 }
+	set_key = { lhs = MN_S3INF value = 0 }
+	set_key = { lhs = MN_S3ENT value = 0 }
+	set_key = { lhs = MN_S3Preach value = 0 }
+	set_key = { lhs = MN_S3Inquis value = 0 }
+	set_key = { lhs = MN_S3Tolerance value = 0 }
+	set_key = { lhs = MN_S3Bastion value = 0 }
+	set_key = { lhs = MN_S3MStrength value = 0 }
+	set_key = { lhs = MN_S3_Var value = 0 }
+	set_key = { lhs = MN_S4 value = 0 }
+	set_key = { lhs = MN_S4Rural value = 0 }
+	set_key = { lhs = MN_S4RurN value = 0 }
+	set_key = { lhs = MN_S4RurP value = 0 }
+	set_key = { lhs = MN_S4Urban value = 0 }
+	set_key = { lhs = MN_S4UrbN value = 0 }
+	set_key = { lhs = MN_S4UrbP value = 0 }
+	set_key = { lhs = MN_S4Notables value = 0 }
+	set_key = { lhs = MN_S4NotN value = 0 }
+	set_key = { lhs = MN_S4NotP value = 0 }
+	set_key = { lhs = MN_S4INF value = 0 }
+	set_key = { lhs = MN_S4ENT value = 0 }
+	set_key = { lhs = MN_S4Preach value = 0 }
+	set_key = { lhs = MN_S4Inquis value = 0 }
+	set_key = { lhs = MN_S4Tolerance value = 0 }
+	set_key = { lhs = MN_S4Bastion value = 0 }
+	set_key = { lhs = MN_S4MStrength value = 0 }
+	set_key = { lhs = MN_S4_Var value = 0 }
+	set_key = { lhs = MN_S5 value = 0 }
+	set_key = { lhs = MN_S5Rural value = 0 }
+	set_key = { lhs = MN_S5RurN value = 0 }
+	set_key = { lhs = MN_S5RurP value = 0 }
+	set_key = { lhs = MN_S5Urban value = 0 }
+	set_key = { lhs = MN_S5UrbN value = 0 }
+	set_key = { lhs = MN_S5UrbP value = 0 }
+	set_key = { lhs = MN_S5Notables value = 0 }
+	set_key = { lhs = MN_S5NotN value = 0 }
+	set_key = { lhs = MN_S5NotP value = 0 }
+	set_key = { lhs = MN_S5INF value = 0 }
+	set_key = { lhs = MN_S5ENT value = 0 }
+	set_key = { lhs = MN_S5Preach value = 0 }
+	set_key = { lhs = MN_S5Inquis value = 0 }
+	set_key = { lhs = MN_S5Tolerance value = 0 }
+	set_key = { lhs = MN_S5Bastion value = 0 }
+	set_key = { lhs = MN_S5MStrength value = 0 }
+	set_key = { lhs = MN_S5_Var value = 0 }
+}
+
+#Every five years, entrenchment shifts upwards or downwards
+MN_Entrenchment_Shift_Helper = {
+	#Sets base shift based on tolerance
+	DG_Extract_Tolerance = { slot = $slot$ }
+	
+	#The closer to zero, the more entrenchement
+	if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 90 } }
+		set_key = { lhs = DG_Tmp2 value = -4.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 80 } }
+		set_key = { lhs = DG_Tmp2 value = -3.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 70 } }
+		set_key = { lhs = DG_Tmp2 value = -2.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 60 } }
+		set_key = { lhs = DG_Tmp2 value = -1.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 50 } }
+		set_key = { lhs = DG_Tmp2 value = 0.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 40 } }
+		set_key = { lhs = DG_Tmp2 value = 1.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 30 } }
+		set_key = { lhs = DG_Tmp2 value = 2.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 20 } }
+		set_key = { lhs = DG_Tmp2 value = 3.0 }
+	}
+	else_if = {
+		limit = { check_key   = { lhs = MN_S$slot$TotP value = 10 } }
+		set_key = { lhs = DG_Tmp2 value = 4.0 }
+	}
+	else = {
+		set_key = { lhs = DG_Tmp2 value = 5.0 }
+	}
+	
+	#Some terrains help entrenchment
+	if = {
+		limit = { mountains_trigger = yes }
+		change_key = { lhs = DG_Tmp2 value = 1.0 }
+	}
+	else_if = {
+		limit = { jungle_trigger = yes }
+		change_key = { lhs = DG_Tmp2 value = 0.5 }
+	}
+	else_if = {
+		limit = { highlands_trigger = yes }
+		change_key = { lhs = DG_Tmp2 value = 0.1 }
+	}
+	else_if = {
+		limit = { forest_trigger = yes }
+		change_key = { lhs = DG_Tmp2 value = 0.1 }
+	}
+	
+	#Impact of tolerance
+	set_key      = { lhs = DG_Tmp3 which = MN_S$slot$Tolerance }
+	multiply_key = { lhs = DG_Tmp3 value = -0.5 }
+	change_key   = { lhs = DG_Tmp2 which = DG_Tmp3 }
+
+	#Special cases
+	if = { #Western Christian
+		limit = { NOT = { check_key = { lhs = MN_S$slot$ value = 9 } } }
+		if = {
+			limit = { is_key_equal = { lhs = MN_S$slot$ value = 1 } }
+			if = {
+				limit = { has_global_flag = DG_Counter_Reformation }
+				if = {
+					limit = { superregion = france_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.10 }
+				}
+				else_if = {
+					limit = { region = south_england_region }
+					change_key = { lhs = DG_Tmp2 value = -0.20 }
+				}
+				else_if = {
+					limit = { region = north_england_region }
+					change_key = { lhs = DG_Tmp2 value = -0.20 }
+				}
+				else_if = {
+					limit = { region = ireland_region }
+					change_key = { lhs = DG_Tmp2 value = -0.05 }
+				}
+				else_if = {
+					limit = { region = scotland_region }
+					change_key = { lhs = DG_Tmp2 value = -0.20 }
+				}
+				else_if = {
+					limit = { superregion = italy_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.01 }
+				}
+				else_if = {
+					limit = { superregion = iberia_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.01 }
+				}
+				else_if = {
+					limit = { superregion = germany_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.30 }
+				}
+				else_if = {
+					limit = { superregion = greater_austrian_circle_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.05 }
+				}
+				else_if = {
+					limit = { superregion = balkan_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.25 }
+				}
+				else_if = {
+					limit = { region = prussia_region }
+					change_key = { lhs = DG_Tmp2 value = -0.30 }
+				}
+				else_if = {
+					limit = { superregion = commonwealth_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.05 }
+				}
+				else_if = {
+					limit = { superregion = scandinavian_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.30 }
+				}
+			}
+			else_if = {
+				limit = { owner = { reform_desire = 100 } }
+				if = {
+					limit = { superregion = france_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.075 }
+				}
+				else_if = {
+					limit = { region = south_england_region }
+					change_key = { lhs = DG_Tmp2 value = -0.15 }
+				}
+				else_if = {
+					limit = { region = north_england_region }
+					change_key = { lhs = DG_Tmp2 value = -0.15 }
+				}
+				else_if = {
+					limit = { region = ireland_region }
+					change_key = { lhs = DG_Tmp2 value = -0.025 }
+				}
+				else_if = {
+					limit = { region = scotland_region }
+					change_key = { lhs = DG_Tmp2 value = -0.15 }
+				}
+				else_if = {
+					limit = { superregion = italy_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.01 }
+				}
+				else_if = {
+					limit = { superregion = iberia_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.01 }
+				}
+				else_if = {
+					limit = { superregion = germany_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.25 }
+				}
+				else_if = {
+					limit = { superregion = greater_austrian_circle_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.025 }
+				}
+				else_if = {
+					limit = { superregion = balkan_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.20 }
+				}
+				else_if = {
+					limit = { region = prussia_region }
+					change_key = { lhs = DG_Tmp2 value = -0.25 }
+				}
+				else_if = {
+					limit = { superregion = commonwealth_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.05 }
+				}
+				else_if = {
+					limit = { superregion = scandinavian_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.25 }
+				}
+			}
+			else_if = {
+				limit = { owner = { reform_desire = 50 } }
+				if = {
+					limit = { superregion = france_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.05 }
+				}
+				else_if = {
+					limit = { region = south_england_region }
+					change_key = { lhs = DG_Tmp2 value = -0.10 }
+				}
+				else_if = {
+					limit = { region = north_england_region }
+					change_key = { lhs = DG_Tmp2 value = -0.10 }
+				}
+				else_if = {
+					limit = { region = ireland_region }
+					change_key = { lhs = DG_Tmp2 value = -0.025 }
+				}
+				else_if = {
+					limit = { region = scotland_region }
+					change_key = { lhs = DG_Tmp2 value = -0.10 }
+				}
+				else_if = {
+					limit = { superregion = italy_superregion }
+					#change_key = { lhs = DG_Tmp2 value = -0.01 }
+				}
+				else_if = {
+					limit = { superregion = iberia_superregion }
+					#change_key = { lhs = DG_Tmp2 value = -0.01 }
+				}
+				else_if = {
+					limit = { superregion = germany_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.15 }
+				}
+				else_if = {
+					limit = { superregion = greater_austrian_circle_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.025 }
+				}
+				else_if = {
+					limit = { superregion = balkan_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.125 }
+				}
+				else_if = {
+					limit = { region = prussia_region }
+					change_key = { lhs = DG_Tmp2 value = -0.15 }
+				}
+				else_if = {
+					limit = { superregion = commonwealth_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.025 }
+				}
+				else_if = {
+					limit = { superregion = scandinavian_superregion }
+					change_key = { lhs = DG_Tmp2 value = -0.15 }
+				}
+			}
+		}
+		else_if = {
+			limit = { is_key_equal = { lhs = MN_S$slot$ value = 2 } religion_years = { protestant = 100 } }
+			if = {
+				limit = { superregion = france_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.05 }
+			}
+			else_if = {
+				limit = { region = south_england_region }
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+			else_if = {
+				limit = { region = north_england_region }
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+			else_if = {
+				limit = { region = ireland_region }
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+			else_if = {
+				limit = { region = scotland_region }
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+			else_if = {
+				limit = { superregion = italy_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+			else_if = {
+				limit = { superregion = iberia_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+			else_if = {
+				limit = { superregion = germany_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.015 }
+			}
+			else_if = {
+				limit = { superregion = greater_austrian_circle_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.05 }
+			}
+			else_if = {
+				limit = { superregion = balkan_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.05 }
+			}
+			else_if = {
+				limit = { region = prussia_region }
+				change_key = { lhs = DG_Tmp2 value = -0.01 }
+			}
+			else_if = {
+				limit = { superregion = commonwealth_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.05 }
+			}
+			else_if = {
+				limit = { superregion = scandinavian_superregion }
+				change_key = { lhs = DG_Tmp2 value = -0.01 }
+			}
+		}
+		else_if = {
+			limit = { is_key_equal = { lhs = MN_S$slot$ value = 3 } religion_years = { reformed = 100 } }
+			if = {
+				limit = { region = low_countries_region }
+				change_key = { lhs = DG_Tmp2 value = -0.01 }
+			}
+			else_if = {
+				limit = { region = switzerland_region }
+				change_key = { lhs = DG_Tmp2 value = -0.01 }
+			}
+			else_if = {
+				limit = { region = south_england_region }
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+			else_if = {
+				limit = { region = north_england_region }
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+			else_if = {
+				limit = { region = scotland_region }
+				change_key = { lhs = DG_Tmp2 value = -0.01 }
+			}
+			else_if = {
+				limit = { region = prussia_region }
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+			else = {
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+		}
+		else_if = {
+			limit = { is_key_equal = { lhs = MN_S$slot$ value = 4 } religion_years = { hussite = 100 } }
+			if = {
+				limit = { has_global_flag = DG_Lutheran_Spawn }
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+			else = {
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+		}
+		else_if = {
+			limit = { is_key_equal = { lhs = MN_S$slot$ value = 5 } religion_years = { hussite = 100 } }
+			if = {
+				limit = { has_global_flag = DG_Calvinist_Spawn }
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+			else = {
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+		}
+		else_if = {
+			limit = { is_key_equal = { lhs = MN_S$slot$ value = 6 } religion_years = { lollard = 100 } }
+			if = {
+				limit = { has_global_flag = DG_Lutheran_Spawn }
+				change_key = { lhs = DG_Tmp2 value = -0.10 }
+			}
+			else = {
+				change_key = { lhs = DG_Tmp2 value = -0.025 }
+			}
+		}
+	}
+	else_if = { #Pagans
+		limit = { check_key = { lhs = MN_S$slot$ value = 40 } }
+		if = {
+			limit = { owner = { OR = { religion_group = christian religion_group = muslim } } }
+			change_key = { lhs = DG_Tmp2 value = -2.5 }
+		}
+	}
+	
+	#Shifts entrenchment
+	change_key   = { lhs = MN_S$slot$ENT which = DG_Tmp2 }
+	
+	#Entrenchment should be between 0.01 and 100
+	if = {
+		limit = { NOT = { check_key = { lhs = MN_S$slot$ENT value = 0.01 } } }
+		set_key = { lhs = MN_S$slot$ENT value = 0.01 }
+	}
+	else_if = {
+		limit = { check_key = { lhs = MN_S$slot$ENT value = 100 } }
+		set_key = { lhs = MN_S$slot$ENT value = 100 }
+	}
+	
+	set_key      = { lhs = DG_Tmp1 value = 0 }
+	set_key      = { lhs = DG_Tmp2 value = 0 }
+	set_key      = { lhs = DG_Tmp3 value = 0 }
+}
+
+MN_Entrenchment_Shift = {
+	export_to_key = { lhs = DG_Tmp1 value = religion who = owner }
+	
+	MN_Entrenchment_Shift_Helper = { slot = 0 }
+	MN_Entrenchment_Shift_Helper = { slot = 1 }
+	MN_Entrenchment_Shift_Helper = { slot = 2 }
+	MN_Entrenchment_Shift_Helper = { slot = 3 }
+	MN_Entrenchment_Shift_Helper = { slot = 4 }
+	MN_Entrenchment_Shift_Helper = { slot = 5 }
+	
+	set_key = { lhs = DG_Tmp1 value = 0 }
+}

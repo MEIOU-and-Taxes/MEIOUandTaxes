@@ -1,0 +1,672 @@
+# Decisions related to Seventeen Provinces and the States-General
+# Author: Ekinda
+
+country_decisions = {
+# Creation of SVP
+	svp_creation = {
+		major = yes
+		potential = {
+			is_year = 1362
+			OR = {
+				has_country_flag = bur_inheritor
+				any_subject_country = {
+					capital_scope = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+					}
+				}
+			}
+			NOT = { tag = BUR }
+			NOT = { exists = SVP }
+			NOT = { exists = NED }
+			NOT = { has_country_flag = svp_estates_general }
+			NOT = { culture_group = low_frankish }
+			NOT = {
+				capital_scope = {
+					region = low_countries_region
+					region = belgii_region
+					province_id = 94	#Luxembourg
+				}
+			}
+		}
+		allow = {
+			check_variable = { which = "Demesne_in_the_Netherlands" value = 17 } #17 provinces needed
+			NOT = { check_variable = { which = "Cores_on_the_Netherlands" value = 8 } } #At least 10 of them should be of a subject
+			92 = { country_or_vassal_holds = ROOT } #Brussels
+		}
+		effect = {
+			set_global_flag = dutch_rebellion_start
+			REB = {
+				set_variable = { which = dutch_rebellion_desire value = 10 }
+				country_event = { id = flavor_svp.99 days = 3650 }
+			}
+			# If BUR is your subject and it has at least one province in the area, make BUR SVP.
+			if = {
+				limit = {
+					BUR = {
+						is_subject_of = ROOT
+						any_owned_province = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+						}
+					}
+				}
+				BUR = { 
+					log = "FE-FormingNewNations:[GetYear]:[This.GetName]:formed [SVP.GetName] via decision:svp_creation"
+					ChangeTagEffect = { scope=SVP } 
+				}
+			}
+			# Else if there is a subject country with capital in Low Countries/Belgium, make a random subject country with capital in LC/B into SVP.
+			else_if = {
+				limit = {
+					any_subject_country = {
+						capital_scope = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+						}
+					}
+				}
+				random_subject_country = {
+					limit = {
+						capital_scope = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+						}
+					}
+					log = "FE-FormingNewNations:[GetYear]:[This.GetName]:formed [SVP.GetName] via decision:svp_creation"
+					ChangeTagEffect = { scope=SVP }
+				}
+			}
+			else = {
+				hidden_effect = {
+					SVP = {
+						Reset_Religion_to_Capital = yes
+						clr_country_flag = POP_Init
+					}
+				}
+			}
+			# SVP CREATED. MAKE IT A REBELLIOUS VASSAL
+			create_subject = {
+				subject_type = rebellious_decentralized_vassal
+				who = SVP
+			}
+			
+			#SVP created, give government type:
+			SVP = {
+				Pol_ChangeGovMonarchy = { Succession=1 Assembly=2 } 
+				add_government_reform = Pol_Nobility1
+			}
+						
+			# MOVE TO PROVINCE EXCHANGES
+			
+			# Every subject country gives SVP the LC/Bel provinces
+			every_subject_country = {
+				limit = {
+					NOT = { tag = SVP }
+				}
+				every_owned_province = {
+					limit = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+					}
+					add_core = SVP
+					cede_province = SVP
+				}
+			}
+			# Inheritor gives SVP its provinces
+			every_owned_province = {
+				limit = {
+					OR = {
+						region = low_countries_region
+						region = belgii_region
+					}
+				}
+				add_core = SVP
+				cede_province = SVP
+			}
+			# SVP gives Inheritor provinces outside of its defined area
+			SVP = {
+				every_owned_province = {
+					limit = {
+						NOT = {
+							OR = {
+								region = low_countries_region
+								region = belgii_region
+							}
+						}
+					}
+					add_core = ROOT
+					cede_province = ROOT
+				}
+			}
+			# Fix for Flanders or Hainaut staying outside
+			SVP = {
+				inherit = FLA
+				inherit = HAI
+			}
+			# PROVINCE EXCHANGE OVER
+			# DECREASE AUTONOMY
+			SVP = {
+				every_owned_province = {
+					set_local_autonomy = 50
+				}
+			}
+			# ADD ACCEPTED CULTURES
+			SVP = {
+				change_primary_culture = brabantian
+				add_accepted_culture = flemish
+				add_accepted_culture = dutch
+				add_accepted_culture = wallonian
+			}
+			# CHANGE IDEAS
+			SVP = {
+				swap_national_ideas_effect = yes
+			}
+			# GIVE SVP ESTATE GENERAL MODIFIERS and reduced liberty desire modifier
+			SVP = {
+				every_owned_province = {
+					add_province_modifier = {
+						name = estates_general_1
+						duration = -1
+					}
+				}
+			}
+			# Remove cores/claims outside low countries, give claim to low countries
+			SVP = {
+				every_core_province = {
+					limit = {
+						NOT = { region = low_countries_region }
+						NOT = { region = belgii_region }
+					}
+					remove_core = SVP
+					remove_claim = SVP
+				}
+			}
+			low_countries_region = {
+				limit = {
+					NOT = { owned_by = SVP }
+				}
+				add_permanent_claim = SVP
+			}
+			belgii_region = {
+				limit = {
+					NOT = { owned_by = SVP }
+				}
+				add_permanent_claim = SVP
+			}
+			# If ROOT is emperor, put SVP in the HRE
+			if = {
+				limit = { is_emperor = yes }
+				SVP = { join_the_hre = yes }
+			}
+			# ROOT gets flag and modifier
+			set_country_flag = svp_creator
+			add_country_modifier = {
+				name = svp_centralized_recently
+				duration = 18250
+			}
+			add_country_modifier = {
+				name = svp_demanded_tax_recently
+				duration = 1825
+			}
+			add_country_modifier = {
+				name = svp_demanded_manpower_recently
+				duration = 3650
+			}
+			# Run the information event
+			hidden_effect = {
+				country_event = {
+					id = flavor_svp.200
+					days = 10
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+# SVP information decision
+	svp_information = {
+		potential = {
+			ai = no
+			OR = {
+				AND = {
+					has_country_flag = svp_creator
+					SVP = { is_subject_of = ROOT }
+				}
+				AND = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						OR = {
+							has_province_modifier = estates_general_1
+							has_province_modifier = estates_general_2
+							has_province_modifier = estates_general_3
+						}
+					}
+				}
+			}
+		}
+		allow = {
+			always = yes
+		}
+		effect = {
+			country_event = {
+				id = flavor_svp.200
+			}
+		}
+		ai_will_do = {
+			factor = 0
+		}
+	}
+# Demand taxes from the Estates-General
+	svp_demand_taxes = {
+		potential = {
+			OR = {
+				AND = {
+					has_country_flag = svp_creator
+					SVP = { is_subject_of = ROOT }
+				}
+				AND = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						OR = {
+							has_province_modifier = estates_general_1
+							has_province_modifier = estates_general_2
+							has_province_modifier = estates_general_3
+						}
+					}
+				}
+			}
+			NOT = { tag = SVP }
+		}
+		allow = {
+			NOT = { has_country_modifier = svp_demanded_tax_recently } # You can demand every 5 years
+		}
+		effect = {
+			log = "FE-SVP:[GetYear]:[Root.GetName]:requested additional taxes from Estates General:svp_demand_taxes"
+			add_country_modifier = {
+				name = svp_demanded_tax_recently
+				duration = 1825
+			}
+			hidden_effect = {
+				AAA = {
+					country_event = { id = flavor_svp.2 } # The calculation event
+				}
+				REB = {
+					change_variable = {
+						which = dutch_rebellion_desire
+						value = 1
+					}
+				}
+			}
+			log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:svp_demand_taxes"
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+	
+# Demand manpower from the Estates-General
+	svp_demand_manpower = {
+		potential = {
+			OR = {
+				AND = {
+					has_country_flag = svp_creator
+					SVP = { is_subject_of = ROOT }
+				}
+				AND = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						OR = {
+							has_province_modifier = estates_general_1
+							has_province_modifier = estates_general_2
+							has_province_modifier = estates_general_3
+						}
+					}
+				}
+			}
+			NOT = { tag = SVP }
+		}
+		allow = {
+			NOT = { has_country_modifier = svp_demanded_manpower_recently } # You can demand every 10 years
+		}
+		effect = {
+			log = "FE-SVP:[GetYear]:[Root.GetName]:requested additional manpower from Estates General:svp_demand_manpower"
+			hidden_effect = {
+				add_country_modifier = {
+					name = svp_demanded_manpower_recently
+					duration = 3650
+				}
+				AAA = {
+					country_event = { id = flavor_svp.9 } # The calculation event
+				}
+				REB = {
+					change_variable = {
+						which = dutch_rebellion_desire
+						value = 1
+					}
+				}
+			}
+			log = "FE-SVP:[GetYear]:[Root.GetName]:dutch_rebellion_desire is [REB.dutch_rebellion_desire.GetValue]:svp_demand_manpower"
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+		
+# Increase centralization efforts
+	svp_increase_centralization = {
+		potential = {
+			OR = {
+				AND = {
+					has_country_flag = svp_creator
+					SVP = {
+						is_subject_of = ROOT
+						any_owned_province = {
+							OR = {
+								has_province_modifier = estates_general_1
+								has_province_modifier = estates_general_2
+							}
+						}
+					}
+				}
+				AND = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						OR = {
+							has_province_modifier = estates_general_1
+							has_province_modifier = estates_general_2
+						}
+					}
+				}
+			}
+			NOT = { tag = SVP }
+		}
+		allow = {
+			NOT = { has_country_modifier = svp_centralized_recently } # You can demand every 50 years = 18250 days
+			is_at_war = no
+			stability = 1
+		}
+		effect = {
+			Stab_Subtract1 = yes
+			hidden_effect = {
+				add_country_modifier = {
+					name = svp_centralized_recently
+					duration = 18250
+				}
+			}
+			if = {
+				limit = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						has_province_modifier = estates_general_1
+					}
+				}
+				every_owned_province = {
+					limit = {
+						has_province_modifier = estates_general_1
+					}
+					remove_province_modifier = estates_general_1
+					add_province_modifier = {
+						name = estates_general_2
+						duration = -1
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						has_province_modifier = estates_general_2
+					}
+				}
+				every_owned_province = {
+					limit = {
+						has_province_modifier = estates_general_2
+					}
+					remove_province_modifier = estates_general_2
+					add_province_modifier = {
+						name = estates_general_3
+						duration = -1
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_country_flag = svp_creator
+					SVP = {
+						any_owned_province = {
+							has_province_modifier = estates_general_1
+						}
+					}
+				}
+				SVP = {
+					every_owned_province = {
+						limit = {
+							has_province_modifier = estates_general_1
+						}
+						remove_province_modifier = estates_general_1
+						add_province_modifier = {
+							name = estates_general_2
+							duration = -1
+						}
+					}
+				}
+			}
+			else = {
+				SVP = {
+					every_owned_province = {
+						limit = {
+							has_province_modifier = estates_general_2
+						}
+						remove_province_modifier = estates_general_2
+						add_province_modifier = {
+							name = estates_general_3
+							duration = -1
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				REB = {
+					change_variable = {
+						which = dutch_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+	}
+# Create inquisition in low countries
+	svp_create_inquisition = {
+		potential = {
+			OR = {
+				AND = {
+					has_country_flag = svp_creator
+					SVP = {
+						is_subject_of = ROOT
+						any_owned_province = {
+							OR = {
+								religion = protestant
+								religion = reformed
+							}
+						}
+					}
+				}
+				AND = {
+					has_country_flag = svp_estates_general
+					any_owned_province = {
+						OR = {
+							has_province_modifier = estates_general_1
+							has_province_modifier = estates_general_2
+							has_province_modifier = estates_general_3
+						}
+						OR = {
+							religion = protestant
+							religion = reformed
+						}
+					}
+				}
+			}
+			NOT = { tag = SVP }
+			NOT = { has_country_flag = svp_inquisition }
+		}
+		allow = {
+			is_at_war = no
+			treasury = 100
+		}
+		effect = {
+			set_country_flag = svp_inquisition
+			add_treasury = -100
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_flag = svp_estates_general
+					}
+					change_variable = {
+						which = inquisition
+						value = 2
+					}
+				}
+				else = {
+					change_variable = {
+						which = inquisition
+						value = 1
+					}
+					SVP = {
+						change_variable = {
+							which = inquisition
+							value = 2
+						}
+					}
+				}
+				REB = {
+					change_variable = {
+						which = dutch_rebellion_desire
+						value = 3
+					}
+				}
+			}
+		}
+	}
+	
+# Cancel the inquisition
+	svp_cancel_inquisition = {
+		potential = {
+			has_country_flag = svp_inquisition
+		}
+		allow = {
+			is_at_war = no
+			had_country_flag = {
+				flag = svp_inquisition
+				days = 3650
+			}
+		}
+		effect = {
+			hidden_effect = {
+				if = {
+					limit = {
+						has_country_flag = svp_estates_general
+					}
+					set_variable = {
+						which = inquisition
+						value = 0
+					}
+				}
+				else = {
+					set_variable = {
+						which = inquisition
+						value = 0
+					}
+					SVP = {
+						set_variable = {
+							which = inquisition
+							value = 0
+						}
+					}
+				}
+			}
+			hidden_effect = {
+				clr_country_flag = svp_inquisition
+				REB = {
+					subtract_variable = {
+						which = dutch_rebellion_desire
+						value = 2
+					}
+				}
+			}
+		}
+	}
+
+# Creation and destruction of local estate modifiers
+	svp_abrogate_local_estates = {
+		potential = {
+			ai = no
+			any_owned_province = {
+				has_province_flag = svp_local_privileges
+			}
+		}
+		allow = {
+			is_at_war = no
+			dip_power = 25
+			mil_power = 25
+			adm_power = 25
+			absolutism = 45
+			#num_of_owned_provinces_with = {
+			#	value = 10
+			#	OR = {
+			#		region = belgii_region
+			#		region = low_countries_region
+			#	}
+			#}
+		}
+		provinces_to_highlight = {
+			country_or_subject_holds = ROOT
+			has_province_flag = svp_local_privileges
+		}
+		effect = {
+			country_event = {
+				id = flavor_svp.519
+			}
+		}
+		ai_will_do = {
+			factor = 1
+		}
+		ai_importance = 100
+	}
+	
+	svp_turn_ned = {
+		potential = {
+			tag = SVP
+			NOT = { exists = NED }
+			ai = yes
+			is_free_or_tributary_trigger = yes
+		}
+		allow = {
+			always = yes
+		}
+		effect = {
+			ChangeTagEffect = { scope=NED }
+			log = "FE-FormingNewNations:[GetYear]:[Root.GetName]:formed [NED.GetName] via decision:svp_turn_ned"
+			clr_global_flag = dutch_rebellion_start
+			set_global_flag = dutch_rebellion_end
+		}
+		ai_will_do = {
+			factor = 1
+		}
+		ai_importance = 1000
+	}
+}

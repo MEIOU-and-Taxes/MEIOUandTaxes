@@ -1,0 +1,234 @@
+##############################################
+# We're an anarcho-syndicalist commune!
+##############################################
+militia_rebels = {
+	
+	color = { 249 249 91 }
+	area = nation 					# Stays within provinces of their culture
+	government = anti
+	defection = none				# Does not defect
+	independence = none				# Does not strive for independence
+	gfx_type = culture_province
+	
+	resilient = no
+	reinforcing = yes
+	general = yes
+	smart = yes
+	unit_transfer = no				# Units do not remain after enforcing demands.
+	will_relocate = yes				# Units will relocate if they have sieged all provinces nearby and has to move over sea.
+	
+	artillery = 0.0
+	infantry = 0.9
+	cavalry = 0.1
+	morale = 1.05
+	
+	# Possible handle actions
+	handle_action_negotiate = yes
+	handle_action_stability = no
+	handle_action_build_core = no
+	handle_action_send_missionary = yes
+	
+	# The rebel type with the highest modifier for this province gets picked
+	spawn_chance = { #putting stuff in here caused a bug for some entirely unknown reason
+		 factor = 1
+		 
+		modifier = {
+            factor = 0
+			OR = {
+				check_key = { lhs = Concern_WelfareTreat value = 0 }
+				nationalism = 5
+			}	
+			NOT = { owner = { has_country_modifier = China_PeasantUprising } }
+		}
+		modifier = {
+			factor = 0.1
+			has_owner_religion = no
+		}
+
+		modifier = {
+			factor = 3
+
+			has_owner_culture = yes
+		}
+		modifier = {
+			factor = 1.5
+			
+			has_owner_accepted_culture = yes
+		}
+
+		modifier = {
+            factor = 1.5
+
+			NOT = {
+				check_key = { lhs = Concern_WelfareTreat value = -2 }
+			}
+		}
+		modifier = {
+            factor = 1.5
+
+			NOT = {
+				check_key = { lhs = Concern_WelfareTreat value = -4 }
+			}
+		}
+		modifier = {
+            factor = 1.5
+
+			NOT = {
+				check_key = { lhs = Concern_WelfareTreat value = -6 }
+			}
+		}
+		modifier = {
+            factor = 1.5
+
+			NOT = {
+				check_key = { lhs = Concern_WelfareTreat value = -8 }
+			}
+		}
+		modifier = {
+            factor = 1.5
+
+			NOT = {
+				check_key = { lhs = Concern_WelfareTreat value = -10 }
+			}
+		}
+		modifier = {
+            factor = 1000
+			owner = {
+				has_country_modifier = China_PeasantUprising
+				NOT = { has_country_flag = China_Warlords }
+			}
+		}
+	}
+	
+	#This is checked for EACH province in the Area of Operations
+	movement_evaluation = {
+		factor = 1
+		modifier = {
+			factor = 0.1
+			units_in_province = 1
+		}
+        modifier = {
+			factor = 0.001
+			controlled_by = REB
+			has_siege = no
+		}
+		modifier = {
+			factor = 2
+			controlled_by = REB
+			has_siege = yes
+		}
+		modifier = {
+			factor = 2
+			has_rebel_faction = REB
+		}
+		modifier = {
+			factor = 3
+			fort_level = 1
+		}
+		modifier = {
+			factor = 1.5
+			unrest = 2
+		}
+		modifier = {
+			factor = 1.5
+			unrest = 4
+		}
+		modifier = {
+			factor = 1.5
+			unrest = 6
+		}
+		modifier = {
+			factor = 0
+			is_colony = yes
+		}
+		modifier = {
+			factor = 0
+			is_empty = yes
+		}
+	}
+	
+	# Province Scope
+	siege_won_trigger = {
+	}
+	siege_won_effect = {
+	}
+	
+	# Country scope
+	can_negotiate_trigger = {
+		always = yes
+	}
+	
+	# Country scope
+	can_enforce_trigger = {
+		always = yes
+	}
+	
+	# Localisation for their demands
+	demands_description = "militia_rebels_demand"
+	
+	# Country scope
+	demands_enforced_effect = { #likewise
+		remove_country_modifier = Reform_CD
+		
+		add_country_modifier = {
+			name = Reform_CD
+			duration = 3625
+		}
+		custom_tooltip = Rights_EveryProvince
+		custom_tooltip = SF_Freedom_25
+		hidden_effect = {
+			every_owned_province = {
+				limit = {
+					isValidProv = yes
+				}
+				change_key = { lhs = SF_Freedom value = 25 }
+				if = {
+					limit = {
+						check_key = { lhs = SF_Freedom value = 100.001 }
+					}
+					set_key = { lhs = SF_Freedom value = 100 }
+				}
+				else_if = {
+					limit = {
+						NOT = { check_key = { lhs = SF_Freedom value = 0 } }
+					}
+					set_key = { lhs = SF_Freedom value = 0 }
+				}
+			}
+		}
+		Public_ChangeConcernTooltipProv= { Concern=Welfare Amount=3 }
+		
+		if = {
+			limit = {
+				has_disaster = China_Collapse
+				has_country_flag = China_PeasantUprising
+			}
+			country_event = { id = ChinaCollapse.006 }
+		}
+		else = {
+			if = {
+				limit = {
+					Rights_NOTen1Has = yes
+				}
+				Rights_NOTen2Apply = yes
+				Stab_Subtract50Percent = yes
+			}
+			else_if = {
+				limit = {
+					Rights_NOTen2Has = yes
+				}
+				Rights_NOTen3Apply = yes
+				Stab_Subtract50Percent = yes
+			}
+			add_prestige = -25
+		}
+		add_prestige = -25
+		#re-calculate rights priorities calculation
+		if = {
+			limit = {
+				ai = yes
+			}
+			set_country_flag = AITax_Yearly # Refire Tax Calculation
+		}
+	}
+}

@@ -1,0 +1,109 @@
+Tariff_SetRate = {
+    save_event_target_as = Prov
+
+    set_key = { lhs = Tmp_0 value = 0 }
+    set_key = { lhs = Tmp_1 value = 0 }
+
+    owner = {
+        every_owned_province = {
+            limit = {
+                has_province_flag = TN_SectorPart
+				
+                check_key = { lhs = TN_ProvSply51 value = 0.001 }
+
+                same_trade_node_as = event_target:Prov
+            }
+            set_key = { lhs = Tmp_2 which = TN_ProvSply51 }
+
+            event_target:Prov = {
+                set_key = { lhs = Tmp_2 which = PREV }
+
+                change_key = { lhs = Tmp_0 which = Tmp_2 }
+            }
+
+            export_to_key = { lhs = Tmp_2 value = local_autonomy }
+            subtract_key = { lhs = Tmp_2 value = 100 }
+            divide_key = { lhs = Tmp_2 value = -100 }
+            multiply_key = { lhs = Tmp_2 which = Prov_BUPow }
+			multiply_key = { lhs = Tmp_2 value = 0.01 }
+    
+            multiply_key = { lhs = Tmp_2 which = TN_ProvSply51 }
+
+            event_target:Prov = {
+                set_key = { lhs = Tmp_2 which = PREV }
+
+                change_key = { lhs = Tmp_1 which = Tmp_2 }
+            }
+
+            set_key = { lhs = Tmp_2 value = 0 }
+        }
+    }
+
+    if = {
+        limit = {
+            check_key = { lhs = Tmp_0 value = 0.001 }
+			NOT = { is_key_equal = { lhs = Tmp_1 value = 0 } }
+        }
+        divide_key = { lhs = Tmp_1 which = Tmp_0 }
+    }
+
+    # Edit for new produce
+    Tariff_SetRateHelper = { prod = 1 }
+    Tariff_SetRateHelper = { prod = 2 }
+    Tariff_SetRateHelper = { prod = 4 }
+    Tariff_SetRateHelper = { prod = 5 }
+    Tariff_SetRateHelper = { prod = 6 }
+    Tariff_SetRateHelper = { prod = 9 }
+    Tariff_SetRateHelper = { prod = 10 }
+    Tariff_SetRateHelper = { prod = 21 }
+    Tariff_SetRateHelper = { prod = 22 }
+    Tariff_SetRateHelper = { prod = 23 }
+    Tariff_SetRateHelper = { prod = 24 }
+    Tariff_SetRateHelper = { prod = 25 }
+    Tariff_SetRateHelper = { prod = 41 }
+
+    set_key = { lhs = Tmp_0 value = 0 }
+    set_key = { lhs = Tmp_1 value = 0 }
+    set_key = { lhs = Tmp_2 value = 0 }
+}
+
+Tariff_SetRateHelper = {
+    set_key = { lhs = Tariff_Rate$prod$ which = owner }
+
+    if = {
+        limit = {
+            NOT = {
+                check_key = { lhs = Tmp_1 which = Tariff_Rate$prod$ }
+            }
+        }
+        set_key = { lhs = Tmp_2 which = Tariff_Rate$prod$ }
+        subtract_key = { lhs = Tmp_2 which = Tmp_1 }
+    }
+    else = {
+        set_key = { lhs = Tmp_2 value = 0 }
+    }
+
+    if = {
+        limit = {
+            owner = {
+                Privilege_HasBGSmuggling = yes
+            }
+        }
+        change_key = { lhs = Tmp_2 value = 0.1 }
+
+        if = {
+            limit = {
+                check_key = { lhs = Tmp_2 value = 1 }
+            }
+            set_key = { lhs = Tmp_2 value = 1 }
+        }
+    }
+
+    subtract_key = { lhs = Tmp_2 value = 1 }
+    multiply_key = { lhs = Tmp_2 value = -1 }
+
+    multiply_key = { lhs = Tariff_Rate$prod$ which = Tmp_2 }
+
+    # Tweak
+    multiply_key = { lhs = Tariff_Rate$prod$ value = 0.2 }
+}

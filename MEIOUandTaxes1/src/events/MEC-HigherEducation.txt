@@ -1,0 +1,114 @@
+namespace = higher_education_events
+
+#Selecting the candidate for opening higher learning slot. Fires for AAA tag to identify the province whose AI owner will decide wheather to pursue the higher learning. 
+country_event = {
+	id = higher_education_events.0
+	title = higher_education_events.0.t
+	desc = higher_education_events.0.d
+	picture = UNIVERSITY_eventPicture
+
+	is_triggered_only = yes
+    hidden = yes
+
+    option = {
+        name = "higher_education_events.0.a"
+		random_province = {
+            limit = {
+				Prod_Can_30 = yes
+				Prod_NotHasProd = { Prod = 30 }	
+				Legalism = 90
+				owner = { ai = yes }
+            }
+			province_event = { id = higher_education_events.1 }
+        }
+    }
+}
+
+#Deciding wheather to pursue the higher learning slot
+province_event = {
+	id = higher_education_events.1
+	title = higher_education_events.1.t
+	desc = higher_education_events.1.d
+	picture = UNIVERSITY_eventPicture
+
+	is_triggered_only = yes
+    
+	immediate = {
+		hidden_effect = {
+		  owner = { save_event_target_as = root_owner }
+		}
+	}
+	
+    option = {
+        name = "higher_education_events.1.a"
+		ai_chance = {
+			factor = 100 
+			modifier = {
+				factor = 3
+				Banking = 50
+			}
+			modifier = {
+				factor = 3
+				Casual_Literacy = 50
+			}
+			modifier = {
+				factor = 3
+				is_capital = yes
+			}
+			modifier = {
+				factor = 0.15
+				has_owner_accepted_culture = no
+			}
+			modifier = {
+				factor = 0.2
+				has_owner_religion	= no
+			}
+			modifier = {
+				factor = 0.7
+				has_owner_culture = no
+			}
+            modifier = {
+                factor = 0.7 #there is a university in an area
+                area_for_scope_province = {
+					type = any
+                    Prod_HasProd = { Prod = 30 }  
+                }
+            }
+            modifier = {
+                factor = 0.2 #there is a university in an area owned by this country
+                area_for_scope_province = {
+					type = any
+					owned_by = event_target:root_owner #owner of this province from which we started
+                    Prod_HasProd = { Prod = 30 }  
+                }
+            }
+			### Region is way to large and would make this even rarer.
+            #modifier = {
+            #    factor = 0.5 #there is a university in an region owned by this country
+            #    region_for_scope_province = {
+			# 	 type = any
+			#		owned_by = event_target:root_owner #owner of this province from which we started
+            #        Prod_HasProd = { Prod = 30 }  
+            #    }
+            #}
+		}
+
+		hidden_effect ={
+			Public_AddProduce = { prod = 30 size = 5 soph = 100 wealth = 0 }
+			Infra_AddPrp = { Type=Academic Amount=1 }
+		}
+		#log = "MEC_HigherEd:[GetYear];[This.aab.GetValue];[This.GetName];[This.Owner.GetName];[This.GetAreaName];opened Higher Learning"
+		owner = { add_treasury = -5 }
+    }
+	option = {
+		name = "higher_education_events.1.b"	
+		AAA={
+			country_event = { id = higher_education_events.0 }
+		}
+		#log = "MEC_HigherEd:[GetYear];[This.aab.GetValue];[This.GetName];[This.Owner.GetName];[This.GetAreaName];backed out from opening Higher Learning"
+
+		ai_chance = {
+			factor = 100
+		}
+	}
+}

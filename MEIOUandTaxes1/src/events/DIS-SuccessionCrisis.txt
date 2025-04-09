@@ -1,0 +1,1808 @@
+namespace = dg_succession
+
+### RIVAL CLAIMANT GAINS SUPPORT
+country_event = {
+	id = dg_succession.001
+	title = dg_succession.001.t
+	desc = dg_succession.001.d
+	picture = CIVIL_WAR_eventPicture
+	major = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = { has_country_modifier = obstacle_succession }
+			custom_tooltip = succession_problems_obstacle
+		}
+		if = {
+			limit = {
+				NOT = { has_country_modifier = obstacle_succession }
+				is_tribal = yes
+			}
+			custom_tooltip = succession_problems_tribal
+		}
+		if = {
+			limit = {
+				NOT = { has_country_modifier = obstacle_succession }
+				NOT = { is_tribal = yes }
+				religion_group = muslim
+			}
+			custom_tooltip = succession_problems_polygamy
+		}
+		hidden_effect = {
+			###Determines best country to flee to
+			every_neighbor_country = {
+				if = {
+					limit = { is_rival = ROOT }
+					change_variable = { which = exile_target value = 2 }
+				}
+				if = {
+					limit = { is_enemy = ROOT }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { OR = { religion = ROOT has_country_modifier = religious_tolerance } }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { is_at_war = yes }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { war_with = ROOT }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { is_bankrupt = yes }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { war_exhaustion = 8 }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { government = monarchy }
+					change_variable = { which = exile_target value = 2 }
+				}
+				if = {
+					limit = { truce_with = ROOT }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { marriage_with = ROOT }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { is_subject_other_than_tributary_trigger = yes }
+					change_variable = { which = exile_target value = -2 }
+				}
+				if = {
+					limit = {
+						OR = {
+							junior_union_with = ROOT
+							senior_union_with = ROOT
+						}
+					}
+					set_variable = { which = exile_target value = 0 }
+				}
+			}
+			random_neighbor_country = {
+				limit = {
+					all_neighbor_country = {
+						OR = {
+							NOT = { check_variable = { which = exile_target which = PREV } }
+							is_variable_equal = { which = exile_target which = PREV }
+						}
+					}
+				}
+				set_country_flag = exile_target
+			}
+			every_neighbor_country = { set_variable = { which = exile_target value = 0 } }
+			every_subject_country = { set_country_flag = existing_vassal }
+		}#End hidden effect
+	}
+	
+	option = {
+		name = dg_succession.001.a #Fight for our throne
+		ai_chance = { factor = 50 }
+		kill_leader = { type = general }
+		if = {
+			limit = { total_development = 100 }
+			random_owned_province = {
+				limit = { units_in_province = 1 controlled_by = owner has_siege = no }
+				kill_units = { who = ROOT type = infantry amount = 3 }
+				kill_units = { who = ROOT type = cavalry amount = 2 }
+			}
+		}
+		if = {
+			limit = { total_development = 160 }
+			random_owned_province = {
+				limit = { units_in_province = 1 controlled_by = owner has_siege = no }
+				kill_units = { who = ROOT type = infantry amount = 6 }
+				kill_units = { who = ROOT type = cavalry amount = 4 }
+			}
+		}
+		add_country_modifier = { name = suffered_succession_crisis duration = 3000 hidden = yes }
+	}
+	option = {
+		name = dg_succession.001.b #Flee into exile
+		ai_chance = {
+			factor = 30
+			modifier = {
+				ADM = 6
+				factor = 0.7
+			}
+			modifier = {
+				ADM = 5
+				factor = 0.7
+			}
+			modifier = {
+				ADM = 4
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { ADM = 3 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { ADM = 2 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { ADM = 1 }
+				factor = 1.4
+			}
+			modifier = {
+				DIP = 6
+				factor = 0.7
+			}
+			modifier = {
+				DIP = 5
+				factor = 0.7
+			}
+			modifier = {
+				DIP = 4
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { DIP = 3 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { DIP = 2 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { DIP = 1 }
+				factor = 1.4
+			}
+			modifier = {
+				MIL = 6
+				factor = 0.7
+			}
+			modifier = {
+				MIL = 5
+				factor = 0.7
+			}
+			modifier = {
+				MIL = 4
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { MIL = 3 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { MIL = 2 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { MIL = 1 }
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 1.4
+			}
+		}
+		if = {
+			limit = { has_country_flag = ruler_fled }
+			set_ruler = fled_ruler
+			set_country_flag = ruler_returned
+		}
+		else = {
+			set_country_flag = ruler_fled
+			exile_ruler_as = { name = fled_ruler }
+			define_ruler = {
+                dynasty = ROOT
+                claim = 30
+				regency = no
+            }
+			if = {
+			    limit = { has_heir = yes }
+			    kill_heir = { allow_new_heir = no }
+			}
+		}
+		if = {
+			limit = { has_country_flag = ruler_returned }
+			clr_country_flag = ruler_returned
+			clr_country_flag = ruler_fled
+		}
+		clr_country_flag = rival_claimnant
+		end_disaster = succession_crisis
+		disband_rebels = pretender_rebels
+		Stab_Subtract1 = yes
+		random_country = {
+			limit = { has_country_flag = exile_target }
+			country_event = { id = dg_succession.004 days = 90 }
+		}
+	}
+	option = {
+		name = dg_succession.001.e #Make him co-ruler
+		trigger = { NOT = { religion_group = muslim } }
+		ai_chance = { factor = 20 }
+		clr_country_flag = rival_claimnant
+		add_legitimacy = 10
+		add_prestige = -50
+		end_disaster = succession_crisis
+		disband_rebels = pretender_rebels
+		set_country_flag = co_rulers
+		random_list = {
+			25 = { change_adm = -2 set_country_flag = co_ruler_adm }
+			25 = { change_dip = -2 set_country_flag = co_ruler_dip }
+			25 = { change_mil = -2 set_country_flag = co_ruler_mil }
+			25 = { change_adm = -1 change_dip = -1 change_mil = -1 set_country_flag = co_ruler_all }
+		}
+		define_heir = {
+			age = 30
+			dynasty = ROOT
+			claim = 30
+		}
+	}
+	after = {
+	    hidden_effect = { #Cleaning up flags
+			every_neighbor_country = { clr_country_flag = exile_target }
+			every_subject_country = { clr_country_flag = existing_vassal }
+		}
+	}
+}
+
+### THRONE SECURED
+country_event = {
+	id = dg_succession.002
+	title = dg_succession.002.t
+	desc = dg_succession.002.d
+	picture = REFORM_eventPicture
+	major = yes
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		if = {
+			limit = { has_country_flag = rival_claimnant }
+			custom_tooltip = unfinished_succession_crisis
+		}
+		clr_country_flag = succession_crisis
+		disband_rebels = pretender_rebels
+		hidden_effect = {
+			###Determines best country to flee to
+			every_neighbor_country = {
+				if = {
+					limit = { is_rival = ROOT }
+					change_variable = { which = exile_target value = 2 }
+				}
+				if = {
+					limit = { is_enemy = ROOT }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { OR = { religion = ROOT has_country_modifier = religious_tolerance } }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { is_at_war = yes }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { war_with = ROOT }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { is_bankrupt = yes }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { war_exhaustion = 8 }
+					change_variable = { which = exile_target value = -1 }
+				}
+				if = {
+					limit = { government = monarchy }
+					change_variable = { which = exile_target value = 2 }
+				}
+				if = {
+					limit = { truce_with = ROOT }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { marriage_with = ROOT }
+					change_variable = { which = exile_target value = 1 }
+				}
+				if = {
+					limit = { is_subject_other_than_tributary_trigger = yes }
+					change_variable = { which = exile_target value = -2 }
+				}
+				if = {
+					limit = {
+						OR = {
+							junior_union_with = ROOT
+							senior_union_with = ROOT
+						}
+					}
+					set_variable = { which = exile_target value = 0 }
+				}
+			}
+			random_neighbor_country = {
+				limit = {
+					all_neighbor_country = {
+						OR = {
+							NOT = { check_variable = { which = exile_target which = PREV } }
+							is_variable_equal = { which = exile_target which = PREV }
+						}
+					}
+				}
+				set_country_flag = exile_target
+			}
+			every_neighbor_country = { set_variable = { which = exile_target value = 0 } }
+		}#End hidden effect
+		hidden_effect = { every_country = { clr_country_flag = pretender_support_root } }
+	}
+	
+	option = {
+		name = dg_succession.002.a
+		trigger = {
+			OR = {
+				has_new_dynasty = yes
+				NOT = { has_country_flag = rival_claimnant }
+			}
+		}
+		add_legitimacy = 10
+		clr_country_flag = rival_claimnant
+	}
+	option = {
+		name = dg_succession.002.b
+		trigger = {
+			NOT = { has_new_dynasty = yes }
+			has_country_flag = rival_claimnant
+		}
+		add_legitimacy = 5
+		clr_country_flag = rival_claimnant
+		random_country = {
+			limit = { has_country_flag = exile_target }
+			country_event = { id = dg_succession.004 days = 90 }
+		}
+	}
+	after = {
+	    hidden_effect = { #Cleaning up flags
+			every_neighbor_country = { clr_country_flag = exile_target }
+			every_subject_country = { clr_country_flag = existing_vassal }
+		}
+	}
+}
+
+### FOREIGN PRINCE SEEKS REFUGE IN OUR COURT
+country_event = {
+	id = dg_succession.004
+	title = dg_succession.004.t
+	desc = dg_succession.004.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dg_succession.004.a #Grant him asylum in $COUNTRY$
+		ai_chance = {
+			factor = 25
+			modifier = {
+				treasury = 100
+				factor = 1.2
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0.8
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 0.7
+			}
+		}
+		reverse_add_opinion = { who = FROM modifier = pretender_asylum }
+		add_prestige = 5
+		add_casus_belli = { type = cb_foreign_pretender months = 120 target = FROM }
+		if = {
+			limit = { 
+				FROM = { 
+					NOT = { 
+						has_country_modifier = suffered_succession_crisis 
+					}
+				}
+			}
+			FROM = {
+				add_country_modifier = { name = suffered_succession_crisis duration = 3000 hidden = yes }
+                set_country_flag = rival_claimnant
+			}
+		}
+	}
+	option = {
+		name = dg_succession.004.b #Return his head as a gift
+		ai_chance = {
+			factor = 25
+			modifier = {
+				treasury = 100
+				factor = 0.8
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 1.2
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 0
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 1.4
+			}
+		}
+		reverse_add_opinion = { who = FROM modifier = pretender_returned }
+		FROM = { country_event = { id = dg_succession.007 days = 90 } }
+	}
+	option = {
+		name = dg_succession.004.c #Keep him in chains for a fee
+		ai_chance = {
+			factor = 25
+			modifier = {
+				treasury = 100
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 1.4
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 2
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 0
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 1.2
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 0.8
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 1.2
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 1.2
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 1.2
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 1.2
+			}
+		}
+		FROM = { country_event = { id = dg_succession.008 days = 90 } }
+	}
+	option = {
+		name = dg_succession.004.e #Send him back at the head of an army
+		ai_chance = {
+			factor = 25
+			modifier = {
+				treasury = 100
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0.7
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 1.4
+			}
+		}
+		add_prestige = 5
+		set_country_flag = pretender_support_from
+		if = {
+			limit = { num_of_cities = 32 }
+			add_treasury = -100
+			hidden_effect = { change_variable = { which = pretender_support value = 4 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 16 }
+			add_treasury = -50
+			hidden_effect = { change_variable = { which = pretender_support value = 3 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 8 }
+			add_treasury = -25
+			hidden_effect = { change_variable = { which = pretender_support value = 2 } }
+		}
+		else = {
+			add_treasury = -10
+			hidden_effect = { FROM = { change_variable = { which = pretender_support value = 1 } } }
+		}
+		FROM = { country_event = { id = dg_succession.009 days = 90 } }
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+}
+
+### IN CHAOS THERE IS OPPORTUNITY
+country_event = {
+	id = dg_succession.005
+	title = dg_succession.005.t
+	desc = dg_succession.005.d
+	picture = MERCHANTS_TALKING_eventPicture
+	
+	trigger = {
+		any_country = { has_casus_belli = { type = cb_foreign_pretender target = ROOT } }
+		OR = {
+			has_spawned_rebels = pretender_rebels
+			num_of_rebel_controlled_provinces = 2
+			has_any_disaster = yes
+			has_regency = yes
+			war_exhaustion = 10
+			any_country = {
+				has_casus_belli = { type = cb_foreign_pretender target = ROOT }
+				war_with = ROOT
+			}
+		}
+	}
+	
+	mean_time_to_happen = { months = 3 }
+	
+	option = {
+		name = dg_succession.005.a #This could be bad
+		clr_country_flag = rival_claimnant
+		random_country = {
+			limit = { has_casus_belli = { type = cb_foreign_pretender target = ROOT } }
+			country_event = { id = dg_succession.006 days = 1 }
+		}
+	}
+}
+
+### STRIKING WHILE THE IRON IS HOT
+country_event = {
+	id = dg_succession.006
+	title = dg_succession.006.t
+	desc = dg_succession.006.d
+	picture = MERCHANTS_TALKING_eventPicture
+	
+	is_triggered_only = yes #from dg_succession.005
+	
+	option = {
+		name = dg_succession.006.a #Wish him success
+		ai_chance = { factor = 40 }
+		FROM = { country_event = { id = dg_succession.009 days = 90 } }
+		remove_casus_belli = { target = FROM type = cb_foreign_pretender }
+	}
+	option = {
+		name = dg_succession.006.b #Supply him with an army
+		ai_chance = {
+			factor = 30
+			modifier = {
+				num_of_loans = 1
+				factor = 0.5
+			}
+			modifier = {
+				num_of_loans = 2
+				factor = 0.5
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0
+			}
+		}
+		add_prestige = 5
+		set_country_flag = pretender_support_from
+		if = {
+			limit = { num_of_cities = 32 }
+			add_treasury = -100
+			hidden_effect = { change_variable = { which = pretender_support value = 4 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 16 }
+			add_treasury = -50
+			hidden_effect = { change_variable = { which = pretender_support value = 3 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 8 }
+			add_treasury = -25
+			hidden_effect = { change_variable = { which = pretender_support value = 2 } }
+		}
+		else = {
+			add_treasury = -10
+			hidden_effect = { FROM = { change_variable = { which = pretender_support value = 1 } } }
+		}
+		FROM = { country_event = { id = dg_succession.009 days = 90 } }
+		remove_casus_belli = { target = FROM type = cb_foreign_pretender }
+	}
+	option = {
+		name = dg_succession.006.c #Place him under arrest
+		ai_chance = { factor = 30 }
+		add_mil_power = -10
+		FROM = { country_event = { id = dg_succession.008 days = 90 } }
+		remove_casus_belli = { target = FROM type = cb_foreign_pretender }
+	}
+}
+
+### GRUESOME TROPHY
+country_event = {
+	id = dg_succession.007
+	title = dg_succession.007.t
+	desc = dg_succession.007.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes #from dg_succession.004
+	
+	immediate = {
+		custom_tooltip = ends_war_between_brothers
+	}
+	
+	option = {
+		name = dg_succession.007.a #Reward them for their foresight
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0.5
+			}
+			modifier = {
+				treasury = 50
+				factor = 1.4
+			}
+			modifier = {
+				treasury = 100
+				factor = 1.4
+			}
+			modifier = {
+				treasury = 200
+				factor = 1.4
+			}
+			modifier = {
+				treasury = 500
+				factor = 1.4
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0.5
+			}
+			modifier = {
+				num_of_loans = 1
+				factor = 1.4
+			}
+			modifier = {
+				num_of_loans = 2
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { has_country_flag = wishy_washy }
+				factor = 0.5
+			}
+		}
+		clr_country_flag = rival_claimnant
+		Stab_Add1 = yes
+		add_legitimacy = 25
+		if = {
+			limit = { num_of_cities = 64 }
+			add_treasury = -160
+			hidden_effect = { change_variable = { which = reward value = 160 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 32 }
+			add_treasury = -80
+			hidden_effect = { change_variable = { which = reward value = 80 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 16 }
+			add_treasury = -40
+			hidden_effect = { change_variable = { which = reward value = 40 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 8 }
+			add_treasury = -20
+			hidden_effect = { change_variable = { which = reward value = 20 } }
+		}
+		else = {
+			add_treasury = -10
+			hidden_effect = { change_variable = { which = reward value = 10 } }
+		}
+		FROM = { country_event = { id = dg_succession.010 days = 90 } }
+		hidden_effect = { FROM = { clr_country_flag = wishy_washy } }
+	}
+	
+	option = {
+		name = dg_succession.007.b #Give them our thanks and send them away
+		ai_chance = { factor = 50 }
+		Stab_Add1 = yes
+		add_legitimacy = 25
+		hidden_effect = { FROM = { clr_country_flag = wishy_washy } }
+	}
+}
+
+### PRETENDER IN CHAINS
+country_event = {
+	id = dg_succession.008
+	title = dg_succession.008.t
+	desc = dg_succession.008.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes #from dg_succession.004 or dg_succession.006
+	
+	option = {
+		name = dg_succession.008.a #Pay them off
+		ai_chance = {
+			factor = 50
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0.5
+			}
+			modifier = {
+				treasury = 50
+				factor = 1.4
+			}
+			modifier = {
+				treasury = 100
+				factor = 1.4
+			}
+			modifier = {
+				treasury = 200
+				factor = 1.4
+			}
+			modifier = {
+				treasury = 500
+				factor = 1.4
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0.5
+			}
+			modifier = {
+				num_of_loans = 1
+				factor = 1.4
+			}
+			modifier = {
+				num_of_loans = 2
+				factor = 1.4
+			}
+		}
+		if = {
+			limit = { num_of_cities = 64 }
+			add_treasury = -320
+			hidden_effect = { change_variable = { which = reward value = 320 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 32 }
+			add_treasury = -160
+			hidden_effect = { change_variable = { which = reward value = 160 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 16 }
+			add_treasury = -80
+			hidden_effect = { change_variable = { which = reward value = 80 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 8 }
+			add_treasury = -40
+			hidden_effect = { change_variable = { which = reward value = 40 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 4 }
+			add_treasury = -20
+			hidden_effect = { change_variable = { which = reward value = 20 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 2 }
+			add_treasury = -10
+			hidden_effect = { change_variable = { which = reward value = 10 } }
+		}
+		else = {
+			add_treasury = -5
+			hidden_effect = { change_variable = { which = reward value = 5 } }
+		}
+		FROM = { country_event = { id = dg_succession.011 days = 90 } }
+	}
+	option = {
+		name = dg_succession.008.b #Call their bluff
+		ai_chance = {
+			factor = 50
+		}
+		add_opinion = { who = FROM modifier = blackmailed }
+		FROM = { country_event = { id = dg_succession.012 days = 90 } }
+	}
+}
+country_event = { #09 - Pretender returns
+	
+	id = dg_succession.009
+	title = dg_succession.009.t
+	desc = dg_succession.009.d
+	picture = CIVIL_WAR_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = { #Checks to see an appropriate place for the rebellion to happen
+		hidden_effect = {
+			###Determines how appropriate provinces are for rebellions
+			every_owned_province = {
+				if = {
+					limit = { is_city = yes religion = ROOT }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes any_neighbor_province = { is_capital = yes } }
+					change_variable = { which = rebel_possibility value = 2 }
+				}
+				if = {
+					limit = { is_city = yes controlled_by = ROOT }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes has_siege = yes }
+					change_variable = { which = rebel_possibility value = -1 }
+				}
+				if = {
+					limit = { is_city = yes units_in_province = 1 }
+					change_variable = { which = rebel_possibility value = -2 }
+				}
+				if = {
+					limit = { is_city = yes unrest = 2 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes unrest = 4 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes unrest = 6 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes unrest = 8 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = {
+						is_city = yes
+						OR = {
+							has_province_modifier = minor_center_of_trade
+							has_province_modifier = important_center_of_trade
+							has_province_modifier = major_center_of_trade
+							has_province_modifier = dominant_center_of_trade
+						}
+					}
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes culture = ROOT }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes is_core = owner }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes likely_rebels = pretender_rebels }
+					change_variable = { which = rebel_possibility value = 2 }
+				}
+				if = {
+					limit = { is_city = yes any_neighbor_province = { NOT = { owned_by = ROOT }  } }
+					change_variable = { which = rebel_possibility value = -1 }
+				}
+				if = {
+					limit = { is_city = yes base_tax = 4 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes base_tax = 7 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+				if = {
+					limit = { is_city = yes base_tax = 10 }
+					change_variable = { which = rebel_possibility value = 1 }
+				}
+			}
+			capital_scope = {
+				change_variable = { which = rebel_possibility value = -2 }
+			}
+			###Chooses a stronghold
+			random_owned_province = {
+				limit = {
+					all_province = {
+						OR = {
+							NOT = { check_variable = { which = rebel_possibility which = PREV } }
+							is_variable_equal = { which = rebel_possibility which = PREV }
+						}
+					}
+				}
+				set_province_flag = rebel_stronghold
+			}
+			###Adds local support for invasion to foreign support so it shows up in event properly
+			change_variable = { which = pretender_support value = 1 }
+			if = {
+				limit = { num_of_cities = 10 }
+				change_variable = { which = pretender_support value = 1 }
+			}
+			if = {
+				limit = { num_of_cities = 20 } #Larger countries get larger revolts
+				change_variable = { which = pretender_support value = 1 }
+			}
+			if = {
+				limit = { num_of_cities = 30 } #Larger countries get larger revolts
+				change_variable = { which = pretender_support value = 1 }
+			}
+			if = {
+				limit = { num_of_cities = 40 } #Larger countries get larger revolts
+				change_variable = { which = pretender_support value = 1 }
+			}
+			if = {
+				limit = { num_of_cities = 50 } #Larger countries get larger revolts
+				change_variable = { which = pretender_support value = 1 }
+			}
+			###Resets everything
+			clr_country_flag = stronghold_chosen
+			every_owned_province = { set_variable = { which = rebel_possibility value = 0 } }
+			every_neighbor_country = { set_variable = { which = exile_target value = 0 } }
+		}#End hidden effect
+	}
+	
+	option = {
+		name = dg_succession.009.a #Fight for our throne
+		add_casus_belli = { type = cb_insult months = 120 target = FROM }
+		random_owned_province = {
+			limit = { has_province_flag = rebel_stronghold }
+			spawn_rebels = {
+				type = pretender_rebels
+				culture = ROOT
+				religion = ROOT
+				size = 1
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 2 } }
+			random_owned_province = {
+				limit = { has_province_flag = rebel_stronghold }
+				change_controller = REB
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 3 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 4 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 5 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 5 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 6 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 7 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 8 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 9 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		if = {
+			limit = { check_variable = { which = pretender_support value = 10 } }
+			random_owned_province = {
+				limit = {
+					any_neighbor_province = { owned_by = ROOT OR = { has_province_flag = rebel_stronghold has_province_flag = rebel_support } }
+					NOT = { has_province_flag = rebel_support }
+				}
+				spawn_rebels = {
+					type = pretender_rebels
+					culture = ROOT
+					religion = ROOT
+					size = 1
+				}
+				set_province_flag = rebel_support
+			}
+		}
+		hidden_effect = { #Cleaning up flags
+			every_owned_province = {
+				clr_province_flag = rebel_support
+				clr_province_flag = rebel_stronghold
+			}
+			set_variable = { which = pretender_support value = 0 }
+		}
+	}
+}
+
+country_event = { #10 - A princely sum
+	
+	id = dg_succession.010
+	title = dg_succession.010.t
+	desc = dg_succession.010.d
+	picture = CORRUPTION_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dg_succession.010.a #Excellent!
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 160 } }
+			}
+			add_treasury = 160
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 80 } }
+				NOT = { FROM = { check_variable = { which = reward value = 160 } } }
+			}
+			add_treasury = 80
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 40 } }
+				NOT = { FROM = { check_variable = { which = reward value = 80 } } }
+			}
+			add_treasury = 40
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 20 } }
+				NOT = { FROM = { check_variable = { which = reward value = 40 } } }
+			}
+			add_treasury = 20
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 10 } }
+				NOT = { FROM = { check_variable = { which = reward value = 20 } } }
+			}
+			add_treasury = 10
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 5 } }
+				NOT = { FROM = { check_variable = { which = reward value = 10 } } }
+			}
+			add_treasury = 5
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 2 } }
+				NOT = { FROM = { check_variable = { which = reward value = 5 } } }
+			}
+			add_treasury = 2
+		}
+		hidden_effect = { FROM = { set_variable = { which = reward value = 0 } } }
+		#custom_tooltip = ends_war_between_brothers #needs loc
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+}
+
+country_event = { #11 - Payment agreed upon
+	
+	id = dg_succession.011
+	title = dg_succession.011.t
+	desc = dg_succession.011.d
+	picture = CORRUPTION_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dg_succession.011.a #Excellent!
+		ai_chance = { factor = 90 }
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 320 } }
+			}
+			add_treasury = 320
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 160 } }
+				NOT = { FROM = { check_variable = { which = reward value = 320 } } }
+			}
+			add_treasury = 160
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 80 } }
+				NOT = { FROM = { check_variable = { which = reward value = 160 } } }
+			}
+			add_treasury = 80
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 40 } }
+				NOT = { FROM = { check_variable = { which = reward value = 80 } } }
+			}
+			add_treasury = 40
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 20 } }
+				NOT = { FROM = { check_variable = { which = reward value = 40 } } }
+			}
+			add_treasury = 20
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 10 } }
+				NOT = { FROM = { check_variable = { which = reward value = 20 } } }
+			}
+			add_treasury = 10
+		}
+		if = {
+			limit = {
+				FROM = { check_variable = { which = reward value = 5 } }
+				NOT = { FROM = { check_variable = { which = reward value = 10 } } }
+			}
+			add_treasury = 5
+		}
+		FROM = {
+			hidden_effect = { set_variable = { which = reward value = 0 } }
+			add_opinion = { who = ROOT modifier = pretender_kept }
+			Stab_Add1 = yes
+		}
+		custom_tooltip = ends_war_between_brothers
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+	option = {
+		name = dg_succession.011.b #Renege on our agreement and send him back with an army
+		ai_chance = { factor = 10 }
+		add_prestige = -5
+		hidden_effect = {
+			FROM = { set_variable = { which = reward value = 0 } }
+			set_variable = { which = pretender_support value = 1 }
+		}
+		reverse_add_opinion = { who = FROM modifier = oathbreaker }
+		FROM = { country_event = { id = dg_succession.009 days = 90 } }
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+}
+
+country_event = { #12 - Payment refused
+	
+	id = dg_succession.012
+	title = dg_succession.012.t
+	desc = dg_succession.012.d
+	picture = ACCUSATION_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dg_succession.004.a #Grant him asylum in $COUNTRY$
+		ai_chance = {
+			factor = 35
+			modifier = {
+				treasury = 50
+				factor = 1.2
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0.8
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.1 }
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.3 }
+				factor = 0.7
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.5 }
+				factor = 0.7
+			}
+		}
+		reverse_add_opinion = { who = FROM modifier = pretender_asylum }
+		add_prestige = 2.5 #Halves benefits
+		if = {
+			limit = { FROM = { government = monarchy } }
+			add_casus_belli = { type = cb_fabricated_claims months = 60 target = FROM }
+		}
+		if = {
+			limit = { FROM = { NOT = { government = monarchy } } }
+			add_casus_belli = { type = cb_vassalize_mission months = 60 target = FROM }
+		}
+		custom_tooltip = ends_war_between_brothers
+		FROM = {
+			add_country_modifier = { name = suffered_succession_crisis duration = 3000 hidden = yes }
+			#		set_country_flag = rival_claimnant
+		}
+	}
+	
+	option = {
+		name = dg_succession.004.b #Return his head as a gift
+		ai_chance = {
+			factor = 35
+			modifier = {
+				treasury = 50
+				factor = 0.8
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 1.2
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 0
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.1 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.3 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.5 }
+				factor = 1.4
+			}
+		}
+		reverse_add_opinion = { who = FROM modifier = pretender_returned }
+		hidden_effect = { set_country_flag = wishy_washy }
+		FROM = { country_event = { id = dg_succession.007 days = 90 } }
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+	option = {
+		name = dg_succession.004.e #Provide him with support to take back his crown
+		ai_chance = {
+			factor = 30
+			modifier = {
+				treasury = 50
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { treasury = 10 }
+				factor = 0.7
+			}
+			modifier = {
+				is_bankrupt = yes
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { war_with = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { overlord_of = ROOT }
+				factor = 2
+			}
+			modifier = {
+				FROM = { alliance_with = ROOT }
+				factor = 1.4
+			}
+			modifier = {
+				FROM = { marriage_with = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_rival = ROOT }
+				factor = 0.5
+			}
+			modifier = {
+				FROM = { is_enemy = ROOT }
+				factor = 0.7
+			}
+			modifier = {
+				war_exhaustion = 5
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 10
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 15
+				factor = 1.4
+			}
+			modifier = {
+				war_exhaustion = 20
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.1 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.3 }
+				factor = 1.4
+			}
+			modifier = {
+				NOT = { manpower_percentage = 0.5 }
+				factor = 1.4
+			}
+		}
+		set_country_flag = pretender_support_from
+		if = {
+			limit = { num_of_cities = 32 }
+			add_treasury = -40
+			add_manpower = -20
+			hidden_effect = { change_variable = { which = pretender_support value = 5 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 16 }
+			add_treasury = -20
+			add_manpower = -10
+			hidden_effect = { change_variable = { which = pretender_support value = 4 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 8 }
+			add_treasury = -10
+			add_manpower = -5
+			hidden_effect = { change_variable = { which = pretender_support value = 3 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 4 }
+			add_treasury = -5
+			add_manpower = -2
+			hidden_effect = { change_variable = { which = pretender_support value = 2 } }
+		}
+		else_if = {
+			limit = { num_of_cities = 2 }
+			add_treasury = -2
+			add_manpower = -1
+			hidden_effect = { change_variable = { which = pretender_support value = 1 } }
+		}
+		else = {
+			add_treasury = -1
+			#hidden_effect = { change_variable = { which = pretender_support value = 0 } }
+		}
+		FROM = { country_event = { id = dg_succession.009 days = 90 } }
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+}
+
+country_event = { #13 - A friend on the throne
+	
+	id = dg_succession.013
+	title = dg_succession.013.t
+	desc = dg_succession.013.d
+	picture = COURT_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dg_succession.013.a #The best outcome
+		reverse_add_opinion = { who = FROM modifier = pretender_won }
+		remove_historical_rival = FROM
+		FROM = { remove_historical_rival = FROM }
+		add_historical_friend = FROM
+		FROM = { add_historical_friend = ROOT }
+		if = {
+			limit = { FROM = { monthly_income = 80 } }
+			add_treasury = 320
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 40 } }
+			add_treasury = 160
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 20 } }
+			add_treasury = 80
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 10 } }
+			add_treasury = 40
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 5 } }
+			add_treasury = 20
+		}
+		else = {
+			add_treasury = 10
+		}
+		FROM = { clr_country_flag = rival_claimnant }
+	}
+}
+
+country_event = { #14 - Usurper's Victory
+	
+	id = dg_succession.014
+	title = dg_succession.014.t
+	desc = dg_succession.014.d
+	picture = BAD_WITH_MONARCH_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = dg_succession.014.a #The king is dead, long live the king
+		trigger = { NOT = { any_known_country = { has_country_flag = pretender_support_from } } }
+		ai_chance = { factor = 40 }
+		add_legitimacy = -5
+		disband_rebels = pretender_rebels
+		end_disaster = succession_crisis
+		clr_country_flag = rival_claimnant
+		hidden_effect = { every_country = { clr_country_flag = pretender_support_from } }
+	}
+	option = {
+		name = dg_succession.014.b #Reward those who helped me
+		trigger = { any_known_country = { has_country_flag = pretender_support_from } }
+		ai_chance = { factor = 40 }
+		if = {
+			limit = { FROM = { monthly_income = 80 } }
+			add_treasury = 320
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 40 } }
+			add_treasury = 160
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 20 } }
+			add_treasury = 80
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 10 } }
+			add_treasury = 40
+		}
+		else_if = {
+			limit = { FROM = { monthly_income = 5 } }
+			add_treasury = 20
+		}
+		else = {
+			add_treasury = 10
+		}
+		random_known_country = {
+			limit = { has_country_flag = pretender_support_from }
+			country_event = { id = dg_succession.013 days = 30 }
+		}
+		hidden_effect = { every_country = { clr_country_flag = pretender_support_from } }
+	}
+	option = {
+		name = dg_succession.014.c #No reward
+		trigger = { any_known_country = { has_country_flag = pretender_support_from } }
+		ai_chance = { factor = 20 }
+		add_prestige = -25
+		hidden_effect = { every_country = { clr_country_flag = pretender_support_from } }
+	}
+}

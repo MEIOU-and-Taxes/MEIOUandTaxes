@@ -1,0 +1,463 @@
+Prov_Init = {
+    set_key = { lhs = Prov_NOPow value = 50 }
+	if = {
+		limit = {
+			check_key = { lhs = Class_Urban value = 50.00 }
+			NOT = { continent = asia }
+			NOT = { superregion = japan_superregion }
+			NOT = { continent = north_america }
+			NOT = { continent = south_america }
+			NOT = { continent = mena }
+			NOT = { region = greece_region }
+		}
+		set_key = { lhs = Prov_BGPow value = 60 }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Class_Urban value = 30.00 }
+			NOT = { continent = asia }
+			NOT = { superregion = japan_superregion }
+			NOT = { continent = north_america }
+			NOT = { continent = south_america }
+			NOT = { continent = mena }
+			NOT = { region = greece_region }
+		}
+		set_key = { lhs = Prov_BGPow value = 50 }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Class_Urban value = 20.00 }
+			NOT = { continent = asia }
+			NOT = { superregion = japan_superregion }
+			NOT = { continent = north_america }
+			NOT = { continent = south_america }
+		}
+		set_key = { lhs = Prov_BGPow value = 40 }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Class_Urban value = 8.00 }
+			NOT = { continent = north_america }
+			NOT = { continent = south_america }
+		}
+		set_key = { lhs = Prov_BGPow value = 30 }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Class_Urban value = 1.00 }
+		}
+		set_key = { lhs = Prov_BGPow value = 20 }
+	}
+	else = {
+		set_key = { lhs = Prov_BGPow value = 10 }
+	}
+    set_key = { lhs = Prov_CLPow value = 50 }
+    set_key = { lhs = Prov_BUPow value = 0 }
+
+    set_key = { lhs = Prov_NOLoy value = 50 }
+    set_key = { lhs = Prov_BGLoy value = 50 }
+    set_key = { lhs = Prov_CLLoy value = 50 }
+    set_key = { lhs = Prov_TRLoy value = 50 }
+    set_key = { lhs = Prov_BULoy value = 30 }
+	
+    set_key = { lhs = BU_Wealth value = 0 }
+	if = {
+		limit = {
+			owned_by = CAS
+		}
+		set_key = { lhs = Prov_NOLoy value = 25 }
+		set_key = { lhs = Prov_BGLoy value = 35 }
+	}
+	else_if = {
+		limit = {
+			owned_by = FEZ
+		}
+		set_key = { lhs = Prov_NOLoy value = 30 }
+		set_key = { lhs = Prov_BGLoy value = 40 }
+		set_key = { lhs = Prov_TRLoy value = 30 }
+	}
+	else_if = {
+		limit = {
+			owned_by = CHU
+		}
+		set_key = { lhs = Prov_NOLoy value = 20 } 
+		set_key = { lhs = Prov_BGLoy value = 10 }
+		set_key = { lhs = Prov_TRLoy value = 20 }
+	}
+	else_if = {
+		limit = {
+			owned_by = BYZ
+		}
+		set_key = { lhs = Prov_NOLoy value = 40 }
+		set_key = { lhs = Prov_BGLoy value = 50 }
+	}
+	else_if = {
+		limit = {
+			owned_by = OTT
+		}
+		set_key = { lhs = Prov_NOLoy value = 60 }
+		set_key = { lhs = Prov_BGLoy value = 50 }
+	}
+}
+
+Prov_Main = {
+	Prov_TaxInit = yes # reset vars to 0
+	Prov_PowInit = yes # run some initial, universal calcs
+	Prov_Do = { estate = BU }
+	if = {
+		limit = {
+			check_key = { lhs = NO_Total value = 0.001 }
+			check_key = { lhs = SF_Total value = 1 }
+		}
+		Prov_NOPowerCalc = yes
+	}
+	else ={
+		set_key = { lhs = NO_RuralPowerScalar value = 0 }
+	}
+	Prov_DoClass = { class = NO estate = NO }
+	Prov_DoClass = { class = BG estate = BG }
+	Prov_DoClass = { class = CL estate = CL }
+	Prov_DoClass = { class = NO estate = TR }
+	Prov_Unfree = yes
+	Prov_Special = yes
+	Prov_TaxDo = yes
+	Prov_PowCleanup = yes
+}
+
+Prov_Do = { ## no class checks
+	if = {
+		limit = {
+			NOT = { has_global_flag = POP_Sim4 }
+		}
+		Prov_DoPow$estate$ = yes
+		Prov_DoLoy$estate$ = yes
+	}
+	Prov_DoTax$estate$ = yes
+}
+Prov_DoClass = { ## class checks (does it exist)
+	if = {
+		limit = {
+			check_key = { lhs = $class$_Total value = 0.001 }
+		}
+		if = {
+			limit = {
+				NOT = { has_global_flag = POP_Sim4 }
+			}
+			Prov_DoPow$estate$ = yes
+			Prov_DoLoy$estate$ = yes
+		}
+		Prov_DoTax$estate$ = yes
+	}
+	else = {
+		set_key = { lhs = Prov_$estate$Pow value = 0 }
+		set_key = { lhs = Prov_$estate$Loy value = 50 }
+	}
+}
+Pow_UI = {
+	set_province_flag = Pin_Show
+	set_province_flag = UI_Select
+	set_global_flag = UI_Select
+
+	if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 1 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeSet1
+		hidden_effect = {
+			every_neighbor_province = {
+				limit = {
+					owned_by = PREV
+					NOT = { has_province_flag = UI_Select }
+				}
+
+				set_province_flag = UI_Select
+				set_province_flag = Pin_Show
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 2 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeSet2
+		hidden_effect = {
+			area = {
+				limit = {
+					owned_by = PREV
+					NOT = { has_province_flag = UI_Select }
+				}
+
+				set_province_flag = UI_Select
+				set_province_flag = Pin_Show
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 3 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeSet3
+		hidden_effect = {
+			region = {
+				limit = {
+					owned_by = PREV
+					NOT = { has_province_flag = UI_Select }
+				}
+				
+				set_province_flag = UI_Select
+				set_province_flag = Pin_Show
+
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 4 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeSet4
+		hidden_effect = {
+			owner = {
+				every_owned_province = {
+					limit = {
+						NOT = { has_province_flag = UI_Select }
+						is_state = yes
+						is_state_core = owner
+					}
+
+					set_province_flag = UI_Select
+					set_province_flag = Pin_Show
+
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 5 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeSet5
+		hidden_effect = {
+			owner = {
+				every_owned_province = {
+					limit = {
+						NOT = {	has_province_flag = UI_Select }
+					}
+
+					set_province_flag = UI_Select
+					set_province_flag = Pin_Show
+
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 6 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeSet6
+		hidden_effect = {
+			every_trade_node_member_province = {
+				if = {
+					limit = {
+						isValidProv = yes
+						NOT = {	has_province_flag = UI_Select }
+						owned_by = PREV
+					}
+
+					set_province_flag = UI_Select
+					set_province_flag = Pin_Show
+				}
+			}
+		}
+	}
+	hidden_effect = {
+		province_event = {
+			id = SYS_Pin.006
+		}
+	}
+}
+Pow_UI_R = {
+	set_province_flag = Pin_Hide
+	clr_province_flag = UI_Select
+	
+	if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 1 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeRemove1
+		hidden_effect = {
+			every_neighbor_province = {
+				limit = {
+					owned_by = PREV
+					has_province_flag = UI_Select
+				}
+
+				set_province_flag = Pin_Hide
+				clr_province_flag = UI_Select
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 2 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeRemove2
+		hidden_effect = {
+			area = {
+				limit = {
+					owned_by = PREV
+					has_province_flag = UI_Select
+				}
+
+				set_province_flag = Pin_Hide
+				clr_province_flag = UI_Select
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 3 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeRemove3
+		hidden_effect = {
+			region = {
+				limit = {
+					owned_by = PREV
+					has_province_flag = UI_Select
+				}
+
+				set_province_flag = Pin_Hide
+				clr_province_flag = UI_Select
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 4 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeRemove4
+		hidden_effect = {
+			owner = {
+				every_owned_province = {
+					limit = {
+						has_province_flag = UI_Select
+					}
+
+					set_province_flag = Pin_Hide
+					clr_province_flag = UI_Select
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 5 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeRemove5
+		hidden_effect = {
+			owner = {
+				every_owned_province = {
+					limit = {
+						has_province_flag = UI_Select
+					}
+
+				set_province_flag = Pin_Hide
+				clr_province_flag = UI_Select
+
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner = {
+				is_key_equal = { lhs = UI_SelectScope value = 6 }
+			}
+		}
+		custom_tooltip = UI_SelectScopeRemove6
+		hidden_effect = {
+			every_trade_node_member_province = {
+				if = {
+					limit = {
+						isValidProv = yes
+						has_province_flag = UI_Select
+						owned_by = PREV
+					}
+
+					set_province_flag = Pin_Hide
+					clr_province_flag = UI_Select
+				}
+			}
+		}
+	}
+
+	hidden_effect = {
+		province_event = {
+			id = SYS_Pin.005
+		}
+	}
+}
+
+Prov_DispProfit = {
+	Prov_DispProfitSlot = { slot=S0 }
+	Prov_DispProfitSlot = { slot=S1 }
+	Prov_DispProfitSlot = { slot=S2 }
+	Prov_DispProfitSlot = { slot=S3 }
+	Prov_DispProfitSlot = { slot=S4 }
+	Prov_DispProfitSlot = { slot=S5 }
+	Prov_DispProfitSlot = { slot=S6 }
+	Prov_DispProfitSlot = { slot=S7 }
+	Prov_DispProfitSlot = { slot=S8 }
+	Prov_DispProfitSlot = { slot=S9 }
+	Prov_DispProfitSlot = { slot=S10 }
+	Prov_DispProfitSlot = { slot=S11 }
+	Prov_DispProfitSlot = { slot=S12 }
+	Prov_DispProfitSlot = { slot=S13 }
+	Prov_DispProfitSlot = { slot=S14 }
+	Prov_DispProfitSlot = { slot=S15 }
+}
+Prov_DispProfitSlot = {
+	set_key = { lhs = Prod_$slot$ProfitPerc which = Prod_$slot$Income }
+	
+	if = {
+		limit = {
+			is_key_equal = { lhs = Prod_$slot$Spend value = 0 }
+		}
+		set_key = { lhs = Prod_$slot$ProfitPerc value = 1 }
+	}
+	else = {
+		divide_key = { lhs = Prod_$slot$ProfitPerc which = Prod_$slot$Spend }
+	}
+	
+	subtract_key = { lhs = Prod_$slot$ProfitPerc value = 1 }
+	multiply_key = { lhs = Prod_$slot$ProfitPerc value = 100 }
+}
+
+Prov_UICooldown = {
+    add_province_modifier = { name = Pow_UICooldown duration = $Duration$ hidden = yes }    
+}
+Prov_UICooldownNational = {
+    add_country_modifier = { name = Pow_UICooldown duration = $Duration$ hidden = yes }    
+}

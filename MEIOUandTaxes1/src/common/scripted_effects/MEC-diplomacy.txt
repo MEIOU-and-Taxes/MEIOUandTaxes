@@ -1,0 +1,1114 @@
+#Country scopes unless otherwise stated
+
+######################################
+### Diplomacy Mechanics / Features ###
+######################################
+Diplomacy_Alliance_Limit = {
+	
+	# Current amount of allies - not including Dynastic allies
+	set_key = { lhs = Diplo_Tmp1 value = 0 }
+	every_ally = {
+		if = { 
+			limit = {
+				NOT = { dynasty = PREV }
+			}
+			PREV = { change_key = { lhs = Diplo_Tmp1 value = 1 } }
+		}
+	}
+	
+	# Calculate Alliance Limit: 
+	# If you modify an entry here, please remember to also make an entry in the customizable localization
+	if = { limit = { total_development = 2000 } 		set_key = { lhs = Diplo_Ally_Limit value = 5 } }
+	else_if = { limit = { total_development = 750 } 	set_key = { lhs = Diplo_Ally_Limit value = 4 } }
+	else_if = { limit = { total_development = 400 } 	set_key = { lhs = Diplo_Ally_Limit value = 3 } }
+	else_if = { limit = { total_development = 100 } 	set_key = { lhs = Diplo_Ally_Limit value = 2 } }
+	else_if = { limit = { total_development = 30 } 		set_key = { lhs = Diplo_Ally_Limit value = 2 } }
+	else_if = { limit = { total_development = 1 } 		set_key = { lhs = Diplo_Ally_Limit value = 1 } }
+
+	change_key = { lhs = Diplo_Ally_Limit which = Modi_Diplo_Ally_Limit }
+	
+	# Calc Possible Alliance Slots	
+	set_key = { lhs = Diplo_Tmp0 which = Diplo_Ally_Limit }
+	subtract_key = { lhs = Diplo_Tmp0 which = Diplo_Tmp1 }
+	set_key = { lhs = Diplo_Poss_Ally which = Diplo_Tmp0 }
+	
+	set_key = { lhs = Diplo_Tmp0 value = 0 }
+	set_key = { lhs = Diplo_Tmp1 value = 0 }
+	
+}
+
+Diplomacy_Diplomatic_Range = {
+	set_key = { lhs = Diplo_Tmp0 value = 100 } # `DEFINE_BASE_DIPLOMATIC_RANGE~value`
+	change_key = { lhs = Diplo_Tmp0 which = Modi_Diplo_Range_Add }
+
+	### Progressive Tech base modifier
+	export_to_key = {
+		lhs = Diplo_Tmp1
+		value = dip_tech
+	}
+	multiply_key = { lhs = Diplo_Tmp1 value = 3.5 }
+	change_key = { lhs = Diplo_Tmp0 which = Diplo_Tmp1 }
+
+	### Multiplier - Set in API
+	multiply_key = { lhs = Diplo_Tmp0 which = Modi_Diplo_Range_Multi }
+
+	### Final key
+	set_key = { lhs = Diplo_Range_Country which = Diplo_Tmp0 }
+}
+
+###########################################
+### Diplomacy General Purpose Functions ###
+###########################################
+
+add_mutual_opinion_modifier_effect = {
+	#log = "mutual opinion"
+	add_opinion = {
+		who = $scope_country$
+		modifier = $opinion_modifier$
+	}
+	reverse_add_opinion = {
+		who = $scope_country$
+		modifier = $opinion_modifier$
+	}
+}
+
+add_mutual_truce_effect = {
+	add_truce_with = $scope$
+	$scope$ = {
+		add_truce_with = PREV
+	}
+}
+
+
+Get_Country_Of_Type = {
+	$loop$ = {
+		limit = {
+			[[autonomous_vassals]
+				always = $autonomous_vassals$
+				OR = {
+					is_subject_of_type = appanage_subject
+					is_subject_of_type = daimyo_vassal
+					is_subject_of_type = personal_union_limited
+					is_subject_of_type = temporary_union_limited
+					is_subject_of_type = permanent_union_limited
+				}
+			]
+		}
+		if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 0 } } }
+			$mode$ = Diplo_Country_0
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 1 } } }
+			$mode$ = Diplo_Country_1
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 2 } } }
+			$mode$ = Diplo_Country_2
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 3 } } }
+			$mode$ = Diplo_Country_3
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 4 } } }
+			$mode$ = Diplo_Country_4
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 5 } } }
+			$mode$ = Diplo_Country_5
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 6 } } }
+			$mode$ = Diplo_Country_6
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 7 } } }
+			$mode$ = Diplo_Country_7
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 8 } } }
+			$mode$ = Diplo_Country_8
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+		else_if = { limit = { PREV = { is_key_equal = { lhs = $inp$ value = 9 } } }
+			$mode$ = Diplo_Country_9
+			PREV = { change_key = { lhs = $inp$ value = 1 } }
+		}
+	}
+}
+
+Clean_Countries_Of_Type = {
+	[[gbl_event_target]
+		if = { limit = { always = $gbl_event_target$ }
+			if = { limit = { has_saved_global_event_target = Diplo_Country_0 } 
+				clear_global_event_target = Diplo_Country_0
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_1 } 
+				clear_global_event_target = Diplo_Country_1
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_2 } 
+				clear_global_event_target = Diplo_Country_2
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_3 } 
+				clear_global_event_target = Diplo_Country_3
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_4 } 
+				clear_global_event_target = Diplo_Country_4
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_5 } 
+				clear_global_event_target = Diplo_Country_5
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_6 } 
+				clear_global_event_target = Diplo_Country_6
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_7 } 
+				clear_global_event_target = Diplo_Country_7
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_8 } 
+				clear_global_event_target = Diplo_Country_8
+			}
+			else_if = { limit = { has_saved_global_event_target = Diplo_Country_9 } 
+				clear_global_event_target = Diplo_Country_9
+			}
+		}
+	]
+	[[flag]
+		if = { limit = { always = $flag$ }
+			every_country = {
+				clr_country_flag = Diplo_Country_0
+				clr_country_flag = Diplo_Country_1
+				clr_country_flag = Diplo_Country_2
+				clr_country_flag = Diplo_Country_3
+				clr_country_flag = Diplo_Country_4
+				clr_country_flag = Diplo_Country_5
+				clr_country_flag = Diplo_Country_6
+				clr_country_flag = Diplo_Country_7
+				clr_country_flag = Diplo_Country_8
+				clr_country_flag = Diplo_Country_9	
+			}
+		}
+	]
+	set_key = { lhs = Diplo_Tmp0 value = 0 }
+}
+
+# Checked against the scope where its executed
+# $scope$ is the scope in which is searched -> needs to be compatible with "random_" and "every_"
+# $output_scope$ is the event_target which is evaluated by the effect
+# sorting = yes => strongest; no => weakest
+Get_Country_By_Key = {
+	random_$scope$ = {
+		limit = { 
+			[[exclude_scope] NOT = { tag = $exclude_scope$ } ]
+			[[exclude_scope2] NOT = { tag = $exclude_scope2$ } ]
+		}
+		set_key = { lhs = Diplo_Tmp0 which = $compare_key$ }
+		PREV = { 
+			set_key = { lhs = Diplo_Tmp0 which = PREV } 
+		}
+		save_event_target_as = $output_scope$
+	}
+	if = {
+		limit = {
+			NOT = { always = $sorting$ } # lowest variable value
+		}
+		every_$scope$ = {
+			limit = { 
+				[[exclude_scope] NOT = { tag = $exclude_scope$ } ]
+				[[exclude_scope2] NOT = { tag = $exclude_scope2$ } ]
+			}
+			set_key = { lhs = Diplo_Tmp0 which = $compare_key$ }
+
+			if = { limit = { 
+					NOT = { check_key = { lhs = Diplo_Tmp0 which = PREV } } 
+				}
+				
+				save_event_target_as = $output_scope$
+
+				PREV = { 
+					set_key = { lhs = Diplo_Tmp0 which = PREV } 
+				}
+			}
+		}
+	}
+ 	else_if = {
+		limit = {
+			always = $sorting$ # highest variable value		
+		}
+		every_$scope$ = {
+			limit = { 
+				[[exclude_scope] NOT = { tag = $exclude_scope$ } ]
+				[[exclude_scope2] NOT = { tag = $exclude_scope2$ } ]
+			}
+			set_key = { lhs = Diplo_Tmp0 which = $compare_key$ }
+
+			if = { limit = { 
+					check_key = { lhs = Diplo_Tmp0 which = PREV } 
+				}
+
+				save_event_target_as = $output_scope$
+
+				PREV = { 
+					set_key = { lhs = Diplo_Tmp0 which = PREV } 
+				}
+			}
+		}
+	}
+}
+
+##################################
+### Diplomatic action features ###
+##################################
+
+### Alliance negotiations
+Setup_Alliance_Negotiations = {
+	Setup_AI_Reasons_Modi = {
+		opinion_divisor = 4
+		opinion_restpoint = 50
+		scp1_diplo_rep_multi = 1.75
+		scp2_diplo_rep_multi = 1.75
+		border_distance_divisor = -8
+		attitude_friendly = 10
+		attitude_neutral = -5
+		attitude_hostile = -50
+		attitude_rivalry = -100
+		attitude_threatened = 15
+		attitude_defensive = 5
+		attitude_outraged = -50
+		mil_strength_divisor = 4
+		navy_strength_divisor = 4
+		econ_strength_divisor = 4
+		trust_multi = 2
+		scp1_prestige_multi = 0.75
+		scp2_prestige_multi = 0.75
+		bribe_divisor = 7.5
+	}
+}
+Recalculate_Alliance_Negotiations = {
+	Calculate_AI_Reasons = {
+		scp1 = event_target:alliance_negotiation_root
+		scp2 = event_target:alliance_negotiation_target
+		base = yes
+		base_val = -25
+		opinion = yes
+		border_distance = yes
+		ai_attitudes = yes
+		dif_army_strength = yes
+		dif_naval_strength = yes
+		dif_economic_strength = yes
+		trust = yes
+		dif_diplo_rep = yes
+		dif_prestige = yes
+		bribe = yes
+		bribe_key = Diplo_Bribe_Ducats
+	}
+}
+Clear_Alliance_Negotiations = {
+	clear_global_event_target = alliance_negotiation_target
+	clear_global_event_target = cancel_alliance_target
+	clr_global_flag = mec_diplomacy_alliance_negotiations
+}
+
+### Subject CTA
+Setup_Subject_Call_to_Arms = {
+	Setup_AI_Reasons_Modi = {
+		opinion_divisor = 4
+		opinion_restpoint = 0
+		scp1_diplo_rep_multi = 2 # inverted
+		scp1_prestige_multi = 0.2 # inverted
+		border_distance_divisor = -12
+		attitude_loyal = 10
+		attitude_disloyal = -40
+		attitude_rebellious = -1000
+		scp2_ld_divisor = -2.5
+		scp2_mp_perc_divisor = 3
+		scp2_mp_perc_restpoint = 50
+		scp2_WE_divisor = -1
+		scp2_rebels_val = -10
+	}
+}
+Recalculate_Subject_Call_to_Arms = {
+	Calculate_AI_Reasons = {
+		scp1 = $subject_cta_scp1$ #overlord
+		scp2 = $subject_cta_scp2$ #suject
+		base = yes
+		base_val = $base_val$ # -20 for appanages / feudatories, 0 for all other subjects
+		opinion = yes
+		scp1_diplo_rep = yes
+		border_distance = yes
+		ai_attitudes = yes
+		scp1_prestige = yes
+		scp2_LD = yes 
+		scp2_mp_percentage = yes
+		scp2_rebels = yes
+		scp2_war_exhaustion = yes
+		cta = yes
+		cta_attacker_reasons = -10
+		cta_defender_reasons = 10
+	}
+}
+
+Subject_Call_to_Arms_Execute = {
+	if = {
+		limit = { 
+			$scp_subject$ = { has_country_flag = subject_cta_positive }
+		}
+
+		if = {
+			limit = { # if is overlord is at offensive war, but subject isnt part of it
+				is_at_war = yes
+				is_in_war = { attackers = $scp_overlord$ }
+				
+				any_country = {
+					is_in_war = {
+						attackers = $scp_overlord$
+						defenders = THIS
+					}
+					NOT = {
+						is_in_war = {
+							defenders = THIS
+							participants = $scp_subject$
+						}
+					}
+				}
+			}
+			$scp_subject$ = { 
+				join_all_offensive_wars_of = $scp_overlord$ 
+
+				if = {
+					limit = { 
+						OR = {
+							is_subject_of_type = appanage_subject
+							is_subject_of_type = daimyo_vassal
+						}
+					}
+					add_opinion = { who = $scp_overlord$ modifier = called_subject_to_war_offense }
+					add_liberty_desire = 5
+				}			
+			}
+		}
+		if = {
+			limit = { # if is overlord is at defensive war, but subject isnt part of it
+				is_at_war = yes
+				is_in_war = { defenders = $scp_overlord$ }
+				
+				any_country = {
+					is_in_war = {
+						attackers = THIS
+						defenders = $scp_overlord$
+					}
+					NOT = {
+						is_in_war = {
+							defenders = $scp_subject$
+							participants = THIS
+						}
+					}
+				}
+			}
+			$scp_subject$ = { 
+				join_all_defensive_wars_of = $scp_overlord$ 
+
+				if = {
+					limit = { 
+						OR = {
+							is_subject_of_type = appanage_subject
+							is_subject_of_type = daimyo_vassal
+						}
+					}
+					add_opinion = { who = $scp_overlord$ modifier = called_subject_to_war_defense }
+					add_liberty_desire = 2.5
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $scp_subject$ = { has_country_flag = subject_cta_negative } }
+
+		add_opinion = { who = $scp_subject$ modifier = refused_call_to_arms_subject }
+		add_prestige = -5
+	}
+}
+
+
+################################
+### AI Acceptance Simulation ###
+################################
+
+## This function is a setup function to create a new feature with custom values for divsors features etc.
+# explanation on various modis in main calculation function below
+Setup_AI_Reasons_Modi = {
+	[[opinion_divisor]			set_key = { lhs = AI_Opinion_Divisor value = $opinion_divisor$  }				]
+	[[opinion_restpoint]		set_key = { lhs = AI_Opinion_RestPoint value = $opinion_restpoint$  }			]
+	[[scp1_diplo_rep_multi]		set_key = { lhs = AI_Scp1_Diplo_Rep_Multi value = $scp1_diplo_rep_multi$  }		]
+	[[scp2_diplo_rep_multi]		set_key = { lhs = AI_Scp2_Diplo_Rep_Multi value = $scp2_diplo_rep_multi$  }		]
+	[[border_distance_divisor]	set_key = { lhs = AI_Border_Distance_Divisor value = $border_distance_divisor$ }]
+	[[attitude_friendly]		set_key = { lhs = AI_Attitude_Friendly value = $attitude_friendly$ }			]
+	[[attitude_hostile]			set_key = { lhs = AI_Attitude_Hostile value = $attitude_hostile$ }				]
+	[[attitude_rivalry]			set_key = { lhs = AI_Attitude_Rivalry value = $attitude_rivalry$ }				]
+	[[attitude_neutral]			set_key = { lhs = AI_Attitude_Neutral value = $attitude_neutral$ }				]
+	[[attitude_defensive]		set_key = { lhs = AI_Attitude_Defensive value = $attitude_defensive$ }			]
+	[[attitude_threatened]		set_key = { lhs = AI_Attitude_Threatened value = $attitude_threatened$ }		]
+	[[attitude_outraged]		set_key = { lhs = AI_Attitude_Outraged value = $attitude_outraged$ }			]
+	[[attitude_loyal]			set_key = { lhs = AI_Attitude_Loyal value = $attitude_loyal$ }					]
+	[[attitude_disloyal] 		set_key = { lhs = AI_Attitude_Disloyal value = $attitude_disloyal$ }			]
+	[[attitude_rebellious] 		set_key = { lhs = AI_Attitude_Rebellious value = $attitude_rebellious$ }		]
+	[[mil_strength_divisor] 	set_key = { lhs = AI_Mil_Strength_Divisor value = $mil_strength_divisor$ }		]
+	[[navy_strength_divisor] 	set_key = { lhs = AI_Navy_Strength_Divisor value = $navy_strength_divisor$ }	]
+	[[econ_strength_divisor] 	set_key = { lhs = AI_Econ_Strength_Divisor value = $econ_strength_divisor$ }	]
+	[[trust_multi] 				set_key = { lhs = AI_Trust_Multi value = $trust_multi$ }						]
+	[[scp1_prestige_multi] 		set_key = { lhs = AI_Scp1_Prestige_Multi value = $scp1_prestige_multi$ }		]
+	[[scp2_prestige_multi] 		set_key = { lhs = AI_Scp2_Prestige_Multi value = $scp2_prestige_multi$ }		]
+	[[scp1_ld_divisor] 			set_key = { lhs = AI_Scp1_LD_Divisor value = $scp1_ld_divisor$ }				]
+	[[scp2_ld_divisor] 			set_key = { lhs = AI_Scp2_LD_Divisor value = $scp2_ld_divisor$ }				]
+	[[bribe_divisor] 			set_key = { lhs = AI_Bribe_Divisor value = $bribe_divisor$ }					]
+	[[scp1_WE_divisor] 			set_key = { lhs = AI_Scp1_WE_Divisor value = $scp1_WE_divisor$ }				]
+	[[scp2_WE_divisor] 			set_key = { lhs = AI_Scp2_WE_Divisor value = $scp2_WE_divisor$ }				]
+	[[scp1_rebels_val] 			set_key = { lhs = AI_Scp1_RebelsVal value = $scp1_rebels_val$ }						]
+	[[scp2_rebels_val] 			set_key = { lhs = AI_Scp2_RebelsVal value = $scp2_rebels_val$ }						]
+	[[scp1_mp_perc_restpoint]	set_key = { lhs = AI_Scp1_MP_Perc_RestPoint value = $scp1_mp_perc_restpoint$ }	]
+	[[scp1_mp_perc_divisor]		set_key = { lhs = AI_Scp1_MP_Perc_Divisor value = $scp1_mp_perc_divisor$ }		]
+	[[scp2_mp_perc_restpoint]	set_key = { lhs = AI_Scp2_MP_Perc_RestPoint value = $scp2_mp_perc_restpoint$ }	]
+	[[scp2_mp_perc_divisor]		set_key = { lhs = AI_Scp2_MP_Perc_Divisor value = $scp2_mp_perc_divisor$ }		]
+
+	set_country_flag = AI_Reasons_Setup
+}
+
+# $scp1$ = Main scope in which the calc is executed
+# $scp2$ = VS scope against which reasons are evaluated
+# scope inputs are always required
+# Activate AI reasons with input = yes (list below), inputs are conditional 
+# base = defined base opinion in $base_val$ (if base is used, $base_val$ is necessary input)
+# opinion = reasons based on formula: (opinion scop2 -> scp1 - opinion_restpoint) / opinion_divisor
+# scp1_diplo_rep/scp2_diplo_rep = reasons based on: diplorep * scp1_diplo_rep_multi 
+# border_distance = reasons based on border_distance / border_distance_divisor
+# ai_attitudes = reasons based on AI attitude scp2->scp1 (specific integer input for each attitude in setup function required) 
+# dif_army_strength = reasons based on difference in strength scp2->scp1 / mil_strength_divisor (strength = M&T ai heuristic)
+# dif_navy_strength = reasons based on difference in strength scp2->scp1 / navy_strength_divisor (strength = M&T ai heuristic)
+# dif_economic_strength = reasons based on difference in strength scp2->scp1 / econ_strength_divisor (strength = M&T ai heuristic)
+# trust = reasons based on trust scp2->scp1
+# scp1_prestige / scp2_prestige = reasons based on prestige of scope * scp_prestige_multi
+# bribe = set to yes if bribe mechanic is supposed to be used - takes base from $bribe_key$ / bribe_divisor, where bribe_key needs to be stored in scp1
+# dif_diplo_rep = reasons based on scp1_diplo_rep*scp1_diplo_rep_multi - scp2_diplorep*scp2_diplo_rep_multi
+# dif_prestige = reasons based on scp1_prestigep*scp1_prestige_multi - scp2_prestige*scp2_prestige_multi
+# scp1_LD / scp2_LD = reasons added if scp1 is subject based on LD / scp_ld_divisor
+# cta = specific for call to arm usage, flag based reasons 
+Calculate_AI_Reasons = {
+	[[base]if = {
+		limit = {
+			always = $base$
+		}
+		set_key = { lhs = AI_Reasons_0 value = $base_val$ }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_0 value = 0 }		
+	}]
+	
+	[[opinion]
+	if = {
+		limit = {
+			always = $opinion$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_1
+			value = opinion
+			who = $scp2$
+			with = $scp1$
+		}
+		subtract_key = { lhs = AI_Reasons_1 which = AI_Opinion_RestPoint }
+		if = { limit = { NOT = { check_key = { lhs = AI_Reasons_1 value = -200 } } }
+			set_key = { lhs = AI_Reasons_1 value = -200 }
+		}
+		divide_key = { lhs = AI_Reasons_1 which = AI_Opinion_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_1 value = 0 }
+	}
+	]
+
+	[[scp1_diplo_rep]
+	if = {
+		limit = {
+			always = $scp1_diplo_rep$
+		}
+
+		export_to_key = {
+			lhs = AI_Reasons_2
+			value = modifier:diplomatic_reputation
+			who = $scp1$
+		}
+		multiply_key = { lhs = AI_Reasons_2 which = AI_Scp1_Diplo_Rep_Multi }		
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_2 value = 0 }		
+	}
+	]
+
+	[[scp2_diplo_rep]
+	if = {
+		limit = {
+			always = $scp2_diplo_rep$
+		}
+
+		export_to_key = {
+			lhs = AI_Reasons_2
+			value = modifier:diplomatic_reputation
+			who = $scp2$
+		}
+		multiply_key = { lhs = AI_Reasons_3 which = AI_Scp2_Diplo_Rep_Multi }		
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_3 value = 0 }		
+	}
+	]
+
+	[[border_distance]
+	if = {
+		limit = {
+			always = $border_distance$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_4
+			value = border_distance
+			who = $scp1$
+			with = $scp2$
+		}
+		divide_key = { lhs = AI_Reasons_4 which = AI_Border_Distance_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_4 value = 0 }		
+	}
+	]
+
+	[[ai_attitudes]
+	if = {
+		limit = {
+			always = $ai_attitudes$
+		}
+		if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_friendly }	
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Friendly }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_hostile } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Hostile }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_rivalry } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Rivalry }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_neutral } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Neutral }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_defensive } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Defensive }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_threatened } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Threatened }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_outraged } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Outraged }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_loyal } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Loyal }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_disloyal } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Disloyal }
+		} else_if = { 
+			limit = { 
+				$scp2$ = { 
+					ai_attitude = { who = $scp1$ attitude = attitude_rebellious } 
+				} 
+			}
+			set_key = { lhs = AI_Reasons_5 which = AI_Attitude_Rebellious }
+		} 
+		else = {
+			set_key = { lhs = AI_Reasons_5 value = 0 }		
+		}
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_5 value = 0 }		
+	}
+	]
+
+	[[dif_army_strength]
+	if = {
+		limit = {
+			always = $dif_army_strength$
+		}
+		set_key = { lhs = AI_Reasons_6 which = Diplo_Mil_Strength }
+		$scp2$ = {
+			set_key = { lhs = AI_Reasons_6 which = Diplo_Mil_Strength }
+		}
+		subtract_key = { lhs = AI_Reasons_6 which = $scp2$ }
+		$scp2$ = {
+			set_key = { lhs = AI_Reasons_6 value = 0 }
+		}
+		divide_key = { lhs = AI_Reasons_6 which = AI_Mil_Strength_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_6 value = 0 }		
+	}
+	]
+
+	[[dif_naval_strength]
+	if = {
+		limit = {
+			always = $dif_naval_strength$
+		}
+		set_key = { lhs = AI_Reasons_7 which = Diplo_Navy_Strength }
+		$scp2$ = {
+			set_key = { lhs = AI_Reasons_7 which = Diplo_Navy_Strength }
+		}
+		subtract_key = { lhs = AI_Reasons_7 which = $scp2$ }
+		$scp2$ = {
+			set_key = { lhs = AI_Reasons_7 value = 0 }
+		}
+		divide_key = { lhs = AI_Reasons_7 which = AI_Navy_Strength_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_7 value = 0 }		
+	}
+	]
+
+	[[dif_economic_strength]
+	if = {
+		limit = {
+			always = $dif_economic_strength$
+		}
+		set_key = { lhs = AI_Reasons_8 which = Diplo_Econ_Strength }
+		$scp2$ = {
+			set_key = { lhs = AI_Reasons_8 which = Diplo_Econ_Strength }
+		}
+		subtract_key = { lhs = AI_Reasons_8 which = $scp2$ }
+		$scp2$ = {
+			set_key = { lhs = AI_Reasons_8 value = 0 }
+		}
+		divide_key = { lhs = AI_Reasons_8 which = AI_Econ_Strength_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_8 value = 0 }		
+	}
+	]
+
+	[[trust]
+	if = {
+		limit = {
+			always = $trust$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_9
+			value = trust
+			who = $scp2$
+			with = $scp1$
+		}
+		subtract_key = { lhs = AI_Reasons_9 value = 50 }
+		multiply_key = { lhs = AI_Reasons_9 which = AI_Trust_Multi }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_9 value = 0 }		
+	}
+	]
+
+	[[scp1_prestige]
+	if = {
+		limit = {
+			always = $scp1_prestige$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_10
+			value = prestige
+			who = $scp1$
+		}
+
+		multiply_key = { lhs = AI_Reasons_10 which = AI_Scp1_Prestige_Multi }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_10 value = 0 }		
+	}
+	]
+
+	[[scp2_prestige]
+	if = {
+		limit = {
+			always = $scp2_prestige$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_11
+			value = prestige
+			who = $scp2$
+		}
+
+		multiply_key = { lhs = AI_Reasons_11 which = AI_Scp2_Prestige_Multi }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_11 value = 0 }		
+	}
+	]
+	
+	[[bribe]
+	if = {
+		limit = {
+			always = $bribe$
+		}
+		set_key = { lhs = AI_Reasons_12 which = $bribe_key$ }
+		divide_key = { lhs = AI_Reasons_12 which = AI_Bribe_Divisor }
+	}
+	]
+
+	[[dif_diplo_rep]
+	if = {
+		limit = {
+			always = $dif_diplo_rep$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_13
+			value = modifier:diplomatic_reputation
+		}
+		multiply_key = { lhs = AI_Reasons_13 which = AI_Scp1_Diplo_Rep_Multi }
+		export_to_key = {
+			lhs = Diplo_Tmp0
+			value = modifier:diplomatic_reputation
+			who = $scp2$
+		}
+		multiply_key = { lhs = Diplo_Tmp0 which = AI_Scp2_Diplo_Rep_Multi }
+		subtract_key = { lhs = AI_Reasons_13 which = Diplo_Tmp0 }
+	}
+	]
+
+	[[dif_prestige]
+	if = {
+		limit = {
+			always = $dif_prestige$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_14
+			value = prestige
+		}
+		multiply_key = { lhs = AI_Reasons_14 which = AI_Scp1_Prestige_Multi }
+		export_to_key = {
+			lhs = Diplo_Tmp0
+			value = prestige
+			who = $scp2$
+		}
+		multiply_key = { lhs = Diplo_Tmp0 which = AI_Scp2_Prestige_Multi }
+		subtract_key = { lhs = AI_Reasons_14 which = Diplo_Tmp0 }
+	}
+	]
+
+	[[scp1_LD]
+	if = {
+		limit = {
+			always = $scp1_LD$
+		}
+		export_to_key = {
+			lhs = AI_Reasons_15
+			value = trigger_value:liberty_desire
+			who = $scp1$
+		}
+		divide_key = { lhs = AI_Reasons_15 which = AI_Scp1_LD_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_15 value = 0 }
+	}
+	]
+
+	[[scp2_LD]
+	if = {
+		limit = {
+			always = $scp2_LD$
+		}
+
+		export_to_key = {
+			lhs = AI_Reasons_16
+			value = trigger_value:liberty_desire
+			who = $scp2$
+		}
+		divide_key = { lhs = AI_Reasons_16 which = AI_Scp2_LD_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_16 value = 0 }
+	}
+	]
+
+	[[cta]
+	if = {
+		limit = {
+			always = $cta$
+		}
+		if = {
+			limit = { $scp2$ = { has_country_flag = subject_cta_attacker } }
+
+			set_key = { lhs = AI_Reasons_17 value = $cta_attacker_reasons$ }
+		}
+		else_if = {
+			limit = { $scp2$ = { has_country_flag = subject_cta_defender } }
+			set_key = { lhs = AI_Reasons_17 value = $cta_defender_reasons$ }
+
+		}
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_17 value = 0 }
+	}
+	]
+
+	[[scp1_war_exhaustion]
+	if = {
+		limit = {
+			always = $scp1_war_exhaustion$
+		}
+		export_to_key = { lhs = AI_Reasons_18 value = war_exhaustion }
+		divide_key = { lhs = AI_Reasons_18 which = AI_Scp1_WE_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_18 value = 0 }
+	}
+	]
+
+	[[scp2_war_exhaustion]
+	if = {
+		limit = {
+			always = $scp2_war_exhaustion$
+		}
+		export_to_key = { lhs = AI_Reasons_19 value = war_exhaustion }
+		divide_key = { lhs = AI_Reasons_19 which = AI_Scp2_WE_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_19 value = 0 }
+	}
+	]
+
+	[[scp1_rebels]
+	if = {
+		limit = {
+			always = $scp1_rebels$
+			OR = {
+				num_of_rebel_armies = 1
+				num_of_rebel_controlled_provinces = 1
+			}
+		}
+		set_key = { lhs = AI_Reasons_20 which = AI_Scp1_RebelsVal }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_20 value = 0 }
+	}
+	]
+
+	[[scp2_rebels]
+	if = {
+		limit = {
+			always = $scp2_rebels$
+			$scp2$ = {
+				OR = {
+					num_of_rebel_armies = 1
+					num_of_rebel_controlled_provinces = 1
+				}
+			}
+		}
+		set_key = { lhs = AI_Reasons_21 which = AI_Scp2_RebelsVal }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_21 value = 0 }
+	}
+	]
+
+	[[scp1_mp_percentage]
+	if = {
+		limit = {
+			always = $scp1_mp_percentage$
+		}
+		export_to_key = { lhs = AI_Reasons_22 value = trigger_value:manpower_percentage }
+		multiply_key = { lhs = AI_Reasons_22 value = 100 } # bring to scale [0,100]
+		subtract_key = { lhs = AI_Reasons_22 which = AI_Scp1_MP_Perc_RestPoint }
+		divide_key = { lhs = AI_Reasons_22 which = AI_Scp1_MP_Perc_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_22 value = 0 }
+	}
+	]
+
+	[[scp2_mp_percentage]
+	if = {
+		limit = {
+			always = $scp2_mp_percentage$
+		}
+		export_to_key = { 
+			lhs = AI_Reasons_23 
+			value = trigger_value:manpower_percentage 
+			who = $scp2$
+		}
+		multiply_key = { lhs = AI_Reasons_23 value = 100 } # bring to scale [0,100]
+		subtract_key = { lhs = AI_Reasons_23 which = AI_Scp2_MP_Perc_RestPoint }
+		divide_key = { lhs = AI_Reasons_23 which = AI_Scp2_MP_Perc_Divisor }
+	}
+	else = {
+		set_key = { lhs = AI_Reasons_23 value = 0 }
+	}
+	]
+
+	set_key = { lhs = AI_Reasons_Outcome 	which = AI_Reasons_0 } # Base
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_1 } # Opinion Scp 2 -> Scp1
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_2 } # Scp1 Diplo Rep
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_3 } # Scp2 Diplo Rep
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_4 } # Border Distance
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_5 } # Attitude Scp1 -> Scp1
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_6 } # Dif Army Strength
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_7 } # Dif Navy Strength
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_8 } # Dif Econ Strength
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_9 } # Trust Scp2 -> Scp1
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_10 }# Scp1 Prestige
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_11 }# Scp2 Prestige
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_12 }# Ducat Bribe
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_13 }# Dif Diplo Rep
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_14 }# Dif Prestige	
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_15 }# Scp1 Liberty desire	
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_16 }# Scp2 Liberty desire	
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_17 }# CTA additive reasons
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_18 }# Scp1 War Exhaustion
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_19 }# Scp2 War Exhaustion
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_20 }# Scp1 Rebels
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_21 }# Scp2 Rebels
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_22 }# Scp1 Manpower Percentage 
+	change_key = { lhs = AI_Reasons_Outcome which = AI_Reasons_23 }# Scp2 Manpower Percentage 
+}
+
+Save_AI_Reasons_ToScope = {
+	$scp$ = {
+		set_key = { lhs = AI_Reasons_0  	 which = PREV }
+		set_key = { lhs = AI_Reasons_1  	 which = PREV }
+		set_key = { lhs = AI_Reasons_2  	 which = PREV }
+		set_key = { lhs = AI_Reasons_3  	 which = PREV }
+		set_key = { lhs = AI_Reasons_4  	 which = PREV }
+		set_key = { lhs = AI_Reasons_5  	 which = PREV }
+		set_key = { lhs = AI_Reasons_6  	 which = PREV }
+		set_key = { lhs = AI_Reasons_7  	 which = PREV }
+		set_key = { lhs = AI_Reasons_8  	 which = PREV }
+		set_key = { lhs = AI_Reasons_9  	 which = PREV }
+		set_key = { lhs = AI_Reasons_10 	 which = PREV }
+		set_key = { lhs = AI_Reasons_11 	 which = PREV }
+		set_key = { lhs = AI_Reasons_12 	 which = PREV }
+		set_key = { lhs = AI_Reasons_13 	 which = PREV }
+		set_key = { lhs = AI_Reasons_14 	 which = PREV }
+		set_key = { lhs = AI_Reasons_15 	 which = PREV }
+		set_key = { lhs = AI_Reasons_16 	 which = PREV }
+		set_key = { lhs = AI_Reasons_17 	 which = PREV }
+		set_key = { lhs = AI_Reasons_18 	 which = PREV }
+		set_key = { lhs = AI_Reasons_19 	 which = PREV }
+		set_key = { lhs = AI_Reasons_20 	 which = PREV }
+		set_key = { lhs = AI_Reasons_21 	 which = PREV }
+		set_key = { lhs = AI_Reasons_22 	 which = PREV }
+		set_key = { lhs = AI_Reasons_23 	 which = PREV }
+		set_key = { lhs = AI_Reasons_24 	 which = PREV }
+		set_key = { lhs = AI_Reasons_25 	 which = PREV }
+		set_key = { lhs = Diplo_Bribe_Ducats which = PREV }
+		set_key = { lhs = AI_Reasons_Outcome which = PREV }
+	}
+}
+
+Clr_AI_Reasons = {
+	hidden_effect = {
+		set_key = { lhs = AI_Opinion_Divisor 			value = 0 }
+		set_key = { lhs = AI_Opinion_RestPoint 			value = 0 }
+		set_key = { lhs = AI_Scp1_Diplo_Rep_Multi		value = 0 }
+		set_key = { lhs = AI_Scp2_Diplo_Rep_Multi 		value = 0 }
+		set_key = { lhs = AI_Border_Distance_Divisor 	value = 0 }
+		set_key = { lhs = AI_Attitude_Friendly 			value = 0 }
+		set_key = { lhs = AI_Attitude_Hostile			value = 0 }
+		set_key = { lhs = AI_Mil_Strength_Divisor		value = 0 }
+		set_key = { lhs = AI_Navy_Strength_Divisor		value = 0 }
+		set_key = { lhs = AI_Econ_Strength_Divisor		value = 0 }
+		set_key = { lhs = AI_Trust_Multi 				value = 0 }
+		set_key = { lhs = AI_Scp1_Prestige_Multi		value = 0 }
+		set_key = { lhs = AI_Scp2_Prestige_Multi		value = 0 }
+		set_key = { lhs = AI_Bribe_Divisor			 	value = 0 }	
+		set_key = { lhs = AI_Attitude_Rivalry 			value = 0 }
+		set_key = { lhs = AI_Attitude_Neutral 			value = 0 }
+		set_key = { lhs = AI_Attitude_Defensive 		value = 0 }
+		set_key = { lhs = AI_Attitude_Threatened		value = 0 }
+		set_key = { lhs = AI_Attitude_Outraged 			value = 0 }
+		set_key = { lhs = AI_Attitude_Loyal				value = 0 }	
+		set_key = { lhs = AI_Attitude_Disloyal			value = 0 }
+		set_key = { lhs = AI_Attitude_Rebellious		value = 0 }
+		set_key = { lhs = AI_Scp1_LD_Divisor			value = 0 }
+		set_key = { lhs = AI_Scp2_LD_Divisor			value = 0 }
+		set_key = { lhs = AI_Scp1_WE_Divisor			value = 0 }
+		set_key = { lhs = AI_Scp2_WE_Divisor			value = 0 }
+		set_key = { lhs = AI_Scp1_RebelsVal				value = 0 }
+		set_key = { lhs = AI_Scp2_RebelsVal				value = 0 }
+		set_key = { lhs = AI_Scp1_MP_Perc_RestPoint		value = 0 }
+		set_key = { lhs = AI_Scp1_MP_Perc_Divisor		value = 0 }
+		set_key = { lhs = AI_Reasons_0  value = 0 }
+		set_key = { lhs = AI_Reasons_1  value = 0 }
+		set_key = { lhs = AI_Reasons_2  value = 0 }
+		set_key = { lhs = AI_Reasons_3  value = 0 }
+		set_key = { lhs = AI_Reasons_4  value = 0 }
+		set_key = { lhs = AI_Reasons_5  value = 0 }
+		set_key = { lhs = AI_Reasons_6  value = 0 }
+		set_key = { lhs = AI_Reasons_7  value = 0 }
+		set_key = { lhs = AI_Reasons_8  value = 0 }
+		set_key = { lhs = AI_Reasons_9  value = 0 }
+		set_key = { lhs = AI_Reasons_10 value = 0 }
+		set_key = { lhs = AI_Reasons_11 value = 0 }
+		set_key = { lhs = AI_Reasons_12 value = 0 }
+		set_key = { lhs = AI_Reasons_13 value = 0 }
+		set_key = { lhs = AI_Reasons_14 value = 0 }
+		set_key = { lhs = AI_Reasons_15 value = 0 }
+		set_key = { lhs = AI_Reasons_16 value = 0 }
+		set_key = { lhs = AI_Reasons_17 value = 0 }
+		set_key = { lhs = AI_Reasons_18 value = 0 }
+		set_key = { lhs = AI_Reasons_19 value = 0 }
+		set_key = { lhs = AI_Reasons_20 value = 0 }
+		set_key = { lhs = AI_Reasons_21 value = 0 }
+		set_key = { lhs = AI_Reasons_22 value = 0 }
+		set_key = { lhs = AI_Reasons_23 value = 0 }
+		set_key = { lhs = AI_Reasons_24 value = 0 }
+		set_key = { lhs = AI_Reasons_25 value = 0 }
+		set_key = { lhs = Diplo_Bribe_Ducats value = 0 }
+		set_key = { lhs = AI_Reasons_Outcome which = PREV }
+	}
+}
+
+# Failsafe: if it releases the nation and that nation has no religion, it gives the religion of the capital.
+Reset_Religion_to_Capital = {
+	hidden_effect = {
+		export_to_key = { lhs = DG_Tmp1 value = religion }
+		if = {
+			limit = { is_key_equal = { lhs = DG_Tmp1 value = -1 } }
+			capital_scope = { owner = { change_religion = PREV } }
+			force_converted = yes
+		}
+		set_key = { lhs = DG_Tmp1 value = 0 }
+	}
+}

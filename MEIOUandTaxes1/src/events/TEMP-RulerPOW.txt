@@ -1,0 +1,413 @@
+namespace = prisonner_of_war
+
+country_event = {
+	id = prisonner_of_war.100 #Ruler Dies in Prison
+	title = "prisonner_of_war.100.name" #"flavor_hyw.1300.t" , could be French HYW specific loc
+	desc = "prisonner_of_war.100.desc" #"flavor_hyw.1300.d" , could be French HYW specific loc
+	picture = CONQUEST_eventPicture
+	
+	trigger = {
+		is_year = 1359
+		has_country_flag = ruler_prisonner_of_war
+		has_regency = yes
+		had_country_flag = { flag = ruler_prisonner_of_war days = 1825 }
+		is_at_war = yes
+	}
+	
+	mean_time_to_happen = {
+		years = 10
+		
+		modifier = {
+			had_country_flag = { flag = ruler_prisonner_of_war days = 2160 }
+			factor = 0.8
+		}
+		modifier = {
+			had_country_flag = { flag = ruler_prisonner_of_war days = 2555 }
+			factor = 0.8
+		}
+		modifier = {
+			had_country_flag = { flag = ruler_prisonner_of_war days = 2920 }
+			factor = 0.8
+		}
+		modifier = {
+			had_country_flag = { flag = ruler_prisonner_of_war days = 3285 }
+			factor = 0.8
+		}
+		modifier = {
+			had_country_flag = { flag = ruler_prisonner_of_war days = 3650 }
+			factor = 0.5
+		}
+	}
+	
+	option = {
+		name = "prisonner_of_war.100.opta"
+		set_heir = heir_pow
+		clr_country_flag = ruler_prisonner_of_war
+		add_war_exhaustion = 10
+		set_variable = { which = the_heir_age value = 0 }
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Ruler ([Root.Monarch.GetName]) died in prison:prisonner_of_war.100"
+		add_prestige = -20 #TODO balancing
+		Stab_Subtract3 = yes #TODO balancing
+		#HYW specific flags to clear
+		if = {
+			limit = {
+				has_country_flag = jean_prisonner_of_war
+			}
+			clr_country_flag = negociating_release_jean
+			clr_country_flag = jean_prisonner_of_war
+			set_country_flag = king_jean_died_in_capativity
+		}
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.101 #The Return of the King (Hidden event)
+	title = "prisonner_of_war.101.name"
+	desc = "prisonner_of_war.101.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	hidden = yes
+	
+	trigger = {
+		has_country_flag = ruler_prisonner_of_war
+		NOT = { has_country_flag = ruler_prisonner_of_war_nav }
+		OR = {
+			is_at_war = no
+			AND = {
+				has_country_flag = jean_prisonner_of_war
+				NOT = { war_with = ENG }
+			}
+		}
+	}
+	
+	#mean_time_to_happen = { months = 12 }
+	
+	option = {
+		name = "prisonner_of_war.101.opta"
+		if = {
+			limit = {
+				has_regency = yes has_consort_regency = no
+			}
+			country_event = { id = prisonner_of_war.102 days = 0 }
+		}
+		else = {
+			country_event = { id = prisonner_of_war.103 days = 0 }
+		}
+		set_variable = { which = the_heir_age value = 0 }
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.102 #Return of the ruler (option with regency)
+	title = "prisonner_of_war.102.name"
+	desc = "prisonner_of_war.102.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "prisonner_of_war.102.opta"
+		set_country_flag = Ruler_ExileRestore
+		set_ruler = ruler_pow
+		set_heir = heir_pow
+		clr_country_flag = ruler_prisonner_of_war
+		hidden_effect = {
+			Ruler_Calc = yes
+		}
+		clr_country_flag = Ruler_ExileRestore
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Ruler ([Root.Monarch.GetName]) returned from prison:prisonner_of_war.102"
+
+		if = {
+			limit = {
+				tag = FRA
+				has_country_flag = king_jean_released
+			}
+			#country_event = { id = on_new_monarch.2 days = 1 } ##event doesn't exist
+			clr_country_flag = king_jean_released
+		}
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.103 #Return of the ruler (option with no regency), heir asked to step aside
+	title = "prisonner_of_war.103.name"
+	desc = "prisonner_of_war.103.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "prisonner_of_war.103.opta"
+		set_ruler = ruler_pow
+		clr_country_flag = ruler_prisonner_of_war
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Ruler ([Root.Monarch.GetName]) returned from prison:prisonner_of_war.103"
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Heir ([Root.Heir.GetName]) asked to step aside:prisonner_of_war.103"
+
+		if = {
+			limit = { government = monarchy }
+
+			if = {
+				limit = {
+					NOT = { has_heir = "Placeholder" }
+				}
+				random_list = { #50/50 chance of heir's decision
+					50 = { country_event = { id = prisonner_of_war.104 days = 0 } }
+					50 = { country_event = { id = prisonner_of_war.105 days = 0 } }
+				}
+			}
+			set_heir = heir_pow
+		}
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.104 #Heir has accepted to step aside
+	title = "prisonner_of_war.104.name"
+	desc = "prisonner_of_war.104.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "prisonner_of_war.104.opta"
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Heir ([Root.Heir.GetName]) accepted to step aside:prisonner_of_war.104"
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.105 #Heir has declined to step aside
+	title = "prisonner_of_war.105.name"
+	desc = "prisonner_of_war.105.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "prisonner_of_war.105.opta"
+		capital_scope = { spawn_rebels = { type = pretender_rebels size = 2 } } #TODO: heir should be the leader
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Heir ([Root.Heir.GetName]) refused to step aside:prisonner_of_war.105"
+		log = "FE-RulerPOW:[GetYear]:[Root.GetName]:Heir ([Root.Heir.GetName]) started rebellion:prisonner_of_war.105"
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.501 #Envoy from the Court of France
+	title = "prisonner_of_war.501.name"
+	desc = "prisonner_of_war.501.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "prisonner_of_war.501.opta" # Aquitaine
+		ai_chance = {
+			factor = 20
+			modifier = {
+				has_country_flag = france_rejects_london_treaty
+				factor = 0
+			}
+		}
+		FRA = { country_event = { id = prisonner_of_war.511 } }
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:asked for Aquitaine for releasing Jean II:prisonner_of_war.501"
+	}
+	option = {
+		name = "prisonner_of_war.501.optb" # Aquitaine and Normandie
+		ai_chance = {
+			factor = 80
+			modifier = {
+				has_country_flag = france_rejects_london_treaty
+				factor = 0
+			}
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:asked for Aquitaine and Normandy for releasing Jean II:prisonner_of_war.501"
+		FRA = { country_event = { id = prisonner_of_war.521 } }
+	}
+	option = {
+		name = "prisonner_of_war.501.optc" # No negociation
+		ai_chance = {
+			factor = 0
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:refused to negotiate releasing Jean II:prisonner_of_war.501"
+		FRA = { country_event = { id = prisonner_of_war.531 } }
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.511
+	title = "prisonner_of_war.511.name"
+	desc = "prisonner_of_war.511.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		clr_country_flag = negociating_release_jean
+	}
+	
+	option = {
+		name = "prisonner_of_war.511.opta"
+		ai_chance = {
+			factor = 90
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:ceded Aquitaine for releasing Jean II:prisonner_of_war.511"
+
+		set_country_flag = king_jean_released
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:before the event it was ruled by [Root.Monarch.GetName] [Root.Monarch.Dynasty.GetName]:prisonner_of_war.511"
+		set_ruler = ruler_fra_hyw_pow
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:after the event it was ruled by [Root.Monarch.GetName] [Root.Monarch.Dynasty.GetName]:prisonner_of_war.511"
+		set_heir = heir_fra_hyw_pow
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:after the event, heir was [Root.Heir.GetName] [Root.Heir.Dynasty.GetName]:prisonner_of_war.511"
+		set_consort = consort_fra_hyw_pow
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:after the event, consort was [Root.Consort.GetName] [Root.Consort.Dynasty.GetName]:prisonner_of_war.511"
+		clr_country_flag = ruler_prisonner_of_war
+		enforce_treaty_bretigny_eng = yes
+		##country_event = { id = on_new_monarch.2 days = 1 }
+		# Recovery of Morale and the State due to the Return of the King.
+		# add_absolutism = 5
+		add_war_exhaustion = -4
+		add_country_modifier = {
+			name = "Jean_ransom_fra"
+			duration = 5475
+		}
+		ENG = { 
+			if = {
+				limit = { war_with = BLO }
+				white_peace = BLO 
+			}
+			add_country_modifier = {
+				name = "Jean_ransom_eng"
+				duration = 5475
+			}
+		}
+		NAV = { 
+			if = {
+				limit = { war_with = BLO }
+				white_peace = BLO 
+			}
+		}
+
+		if = {
+			limit = { war_with = MNF }
+			white_peace = MNF 
+		}
+		remove_country_modifier = not_negotiating_with_english
+		remove_country_modifier = rejects_first_london_treaty
+		remove_country_modifier = rejects_first_london_treaty_2
+	}
+	option = {
+		name = "prisonner_of_war.501.optc" # No negociation
+		ai_chance = {
+			factor = 10
+		}
+		set_country_flag = france_rejects_condition
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:refused to cede Aquitaine for releasing Jean II:prisonner_of_war.511"
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.521
+	title = "prisonner_of_war.521.name"
+	desc = "prisonner_of_war.521.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		clr_country_flag = negociating_release_jean
+		log = "FE-TempHYW:[GetYear]:[FRA.GetName]:before the event it was ruled by [FRA.Monarch.GetName] [FRA.Monarch.Dynasty.GetName]:prisonner_of_war.521"
+	}
+	
+	option = {
+		name = "prisonner_of_war.521.opta"
+		ai_chance = {
+			factor = 100
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:ceded Aquitaine and Normandy for releasing Jean II:prisonner_of_war.521"
+		enforce_treaty_rouen = yes
+		enforce_treaty_bretigny_eng = yes
+		
+		set_country_flag = king_jean_released
+		set_ruler = ruler_fra_hyw_pow
+		set_heir = heir_fra_hyw_pow
+		set_consort = consort_fra_hyw_pow
+		clr_country_flag = ruler_prisonner_of_war
+
+		##country_event = { id = on_new_monarch.2 days = 1 }
+		# Recovery of Morale and the State due to the Return of the King.
+		# add_absolutism = 2.5
+		add_war_exhaustion = -2
+		add_country_modifier = {
+			name = "Jean_ransom_fra"
+			duration = 2555
+		}
+		ENG = { 
+			if = {
+				limit = { war_with = BLO }
+				white_peace = BLO 
+			}
+			white_peace = BLO 
+			add_country_modifier = {
+				name = "Jean_ransom_eng"
+				duration = 2555
+			}
+		}
+		NAV = { 
+			if = {
+				limit = { war_with = BLO }
+				white_peace = BLO 
+			}
+		}
+
+		if = {
+			limit = { war_with = MNF }
+			white_peace = MNF 
+		}
+		log = "FE-TempHYW:[GetYear]:[FRA.GetName]:after the event it was ruled by [FRA.Monarch.GetName] [FRA.Monarch.Dynasty.GetName]:prisonner_of_war.521"
+	}
+	option = {
+		name = "prisonner_of_war.501.optc" # No negociation
+		ai_chance = {
+			factor = 0
+		}
+		if = {
+			limit = {
+				NOT = { has_country_flag =  rejects_first_london_treaty } 
+			}
+
+			FRA = { country_event = { id = flavor_hyw.1004 days = 0 } }
+		}
+		else = {
+			add_war_exhaustion = -3
+			add_country_modifier = {
+				name = rejects_first_london_treaty_2
+				duration = 7300
+			}
+		}
+		set_country_flag = france_rejects_condition
+		ENG = {
+			set_country_flag = france_rejects_london_treaty
+		}
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:refused to cede Aquitaine and Normandy for releasing Jean II:prisonner_of_war.521"
+		log = "FE-TempHYW:[GetYear]:[FRA.GetName]:after the event it was ruled by [FRA.Monarch.GetName] [FRA.Monarch.Dynasty.GetName]:prisonner_of_war.521"
+	}
+}
+
+country_event = {
+	id = prisonner_of_war.531
+	title = "prisonner_of_war.531.name"
+	desc = "prisonner_of_war.531.desc"
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		clr_country_flag = negociating_release_jean
+	}
+	
+	option = {
+		name = "prisonner_of_war.531.opta" # No negociation
+		set_country_flag = eng_rejects_condition
+		FRA = { country_event = { id = flavor_hyw.1004 days = 0 } }
+	}
+}

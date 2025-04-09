@@ -1,0 +1,2175 @@
+#############################################
+# Austrian Consolidation of the Erblande	#
+#############################################
+
+namespace = flavor_hab
+
+### THE TYROLIAN HEIR DIES ###
+
+country_event = {
+	id = flavor_hab.1010
+	title = flavor_hab.1010.title
+	desc = flavor_hab.1010.desc
+	picture = DEATH_OF_HEIR_eventPicture
+	fire_only_once = yes
+	major = yes
+	
+	trigger = {
+		tag = TIR
+		is_subject_of_type_with_overlord = {
+			who = BAY
+			type = personal_union
+		}
+		has_consort_flag = MargareteTirolUnion
+		has_heir = no
+	}
+
+	mean_time_to_happen = {
+		months = 1
+	}
+	
+	option = {
+		#Give the Land to the Habsburgs
+		name = flavor_hab.1010.a
+		trigger = {
+			HAB = { dynasty = "von Habsburg" }
+		}
+		ai_chance = { factor = 90 }
+		log = "FE-HAB:[GetYear]:[Root.GetName]:Magarete of Tyrols heir died, Union with Austria:flavor_hab.1010"
+		
+		HAB = { create_union = TIR }
+		every_country = {
+			limit = {
+				dynasty = "von Wittelsbach"
+				NOT = { tag = TIR }
+			}
+			add_casus_belli = {
+				type = cb_restore_personal_union
+				target = TIR
+				months = 240
+			}
+		}
+		set_global_flag = habsburgs_in_tyrol
+	}
+	
+	option = {
+		#Keep the union with the Wittelsbachs of Bavaria
+		name = flavor_hab.1010.b
+		ai_chance = { factor = 10 }
+		log = "FE-HAB:[GetYear]:[Root.GetName]:decided to reject the Habsburgs and keep the Wittelsbachs:flavor_hab.1010"
+		if = {
+			limit = { HAB = { dynasty = "von Habsburg" } }
+			HAB = {
+				add_casus_belli = {
+					target = TIR
+					type = cb_restore_personal_union
+					months = 120
+				}
+			}
+		}
+	}
+}
+
+### THE LOSS OF THE AUSTRIAN HABSBURG FAMILY ###
+
+country_event = {
+	id = flavor_hab.1011
+	title = flavor_hab.1011.title
+	desc = flavor_hab.1011.desc
+	picture = KING_SICK_IN_BED_eventPicture
+	
+	major = yes
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			#You need to be part of the core Austrian Lands OR Tyrol that has Habsburg rulers through the Event
+			tag = HAB
+			tag = STY
+			AND = {
+				tag = TIR
+				has_global_flag = habsburgs_in_tyrol
+			}
+		}
+		is_at_war = no
+		OR = {
+			#One of the other core parts of Austria must be ruled by a Habsburg
+			AND = {
+				HAB = {
+					dynasty = "von Habsburg"
+					exists = yes
+				}
+				NOT = {
+					tag = HAB
+				}
+			}
+			AND = {
+				STY = {
+					dynasty = "von Habsburg"
+					exists = yes
+				}
+				NOT = {
+					tag = STY
+				}
+			}
+			AND = {
+				TIR = {
+					dynasty = "von Habsburg"
+					exists = yes
+				}
+				NOT = {
+					tag = TIR
+				}
+			}
+		}
+		NOT = {
+			dynasty = "von Habsburg"
+			has_country_flag = no_habsburgs
+			has_country_flag = habsburg_inheritance
+		}
+		OR = { 
+			is_vassal = no
+			vassal_of = HAB
+		}
+		government = monarchy
+	}
+	
+	option = {
+		#Give Austria back its lands
+		name = flavor_hab.1011.a
+		ai_chance = { factor = 1 }
+		#Inheritance by HAB is prioritised over STY and TIR, if HAB doesn't exist but STY does, then STY will inherit, if HAB and STY don't exist, TIR will inherit
+		log = "FE-HAB:[GetYear]:[Root.GetName]:decided to give back the lands to Habsburgs:flavor_hab.1011"
+
+		if = {
+			limit = {
+				exists = HAB
+				NOT = {	tag = HAB }
+				HAB = {
+					dynasty = "von Habsburg"
+				}
+			}
+			HAB = {
+				country_event = { id = flavor_hab.1012 }
+			}
+			log = "FE-HAB:[GetYear]:[Root.GetName]:inheriting country is Austria (HAB):flavor_hab.1011"
+		}
+		if = {
+			limit = {
+				exists = STY
+				NOT = {
+					exists = HAB
+					tag = STY
+				}
+				STY = {
+					dynasty = "von Habsburg"
+				}
+			}
+			set_country_flag = habsburg_going_to_be_inherited
+			STY = {
+				country_event = { id = flavor_hab.1012 }
+			}
+			log = "FE-HAB:[GetYear]:[Root.GetName]:inheriting country is Styria (STY):flavor_hab.1011"
+		}
+		if = {
+			limit = {
+				exists = TIR
+				NOT = {
+					exists = HAB
+					exists = STY
+					tag = TIR
+				}
+				TIR = {
+					dynasty = "von Habsburg"
+				}
+			}
+			TIR = {
+				country_event = { id = flavor_hab.1012 }
+			}
+		}
+		set_country_flag = habsburg_inheritance
+		log = "FE-HAB:[GetYear]:[Root.GetName]:inheriting country is Tirol (TIR):flavor_hab.1011"
+	}
+	
+	option = {
+		#Never!
+		name = flavor_hab.1011.b
+		ai_chance = { factor = 0 }
+		set_country_flag = no_habsburgs
+		log = "FE-HAB:[GetYear]:[Root.GetName]:decided not to give back the lands to Habsburgs:flavor_hab.1011"
+
+		if = {
+			limit = {
+				tag = TIR
+			}
+			clr_global_flag = habsburgs_in_tyrol
+		}
+		if = {
+			limit = {
+				exists = HAB
+				NOT = {	tag = HAB }
+				HAB = {
+					dynasty = "von Habsburg"
+				}
+			}
+			HAB = {
+				country_event = { id = flavor_hab.1013 }
+			}
+		}
+		if = {
+			limit = {
+				exists = STY
+				NOT = {	tag = STY }
+				STY = {
+					dynasty = "von Habsburg"
+				}
+			}
+			STY = {
+				country_event = { id = flavor_hab.1013 }
+			}
+		}
+		if = {
+			limit = {
+				exists = TIR
+				NOT = {	tag = TIR }
+				TIR = {
+					dynasty = "von Habsburg"
+				}
+			}
+			TIR = {
+				country_event = { id = flavor_hab.1013 }
+			}
+		}
+		set_country_flag = habsburg_inheritance
+	}
+}
+
+### RECLAIMED HABSBURG LAND ###
+
+country_event = {
+	id = flavor_hab.1012
+	title = flavor_hab.1012.title
+	desc = flavor_hab.1012.desc
+	picture = KING_SICK_IN_BED_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		#Good!
+		name = "flavor_hab.1012.a"
+		ai_chance = { factor = 1 }
+		inherit = FROM
+		log = "FE-HAB:[GetYear]:[Root.GetName]:accepted the inheritance:flavor_hab.1012"
+	}
+	
+	option = {
+		#What?! We don't want that!
+		name = "flavor_hab.1012.b"
+		ai_chance = { factor = 0 }
+		log = "FE-HAB:[GetYear]:[Root.GetName]:rejected the inheritance:flavor_hab.1012"
+	}
+}
+
+### NO HABSBURGS IN ###
+
+country_event = {
+	id = flavor_hab.1013
+	title = flavor_hab.1013.title
+	desc = flavor_hab.1013.desc
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		#What?! Bastards!
+		name = "flavor_hab.1013.a"
+		ai_chance = { factor = 1 }
+		#Give cores on all of FROMs land that is in the austrian region
+		FROM = {
+			every_core_province = {
+				limit = {
+					region = austrian_circle_region
+				}
+				add_core = HAB
+			}
+		}
+	}
+	
+	option = {
+		#We don't want that land anyway.
+		name = "flavor_hab.1013.b"
+		ai_chance = { factor = 0 }
+	}
+}
+
+### PRESSURE FROM VIENNA ###
+
+country_event = {
+	id = flavor_hab.1018
+	title = flavor_hab.1014.title
+	desc = flavor_hab.1014.desc
+	picture = KING_SICK_IN_BED_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		OR = {
+			#You need to be one of the core parts of Austria OR a Tyrol that has gotten Habsburgs per event
+			tag = HAB
+			tag = STY
+			AND = {
+				tag = TIR
+				has_global_flag = habsburgs_in_tyrol
+			}
+		}
+		dynasty = "von Habsburg"
+		is_at_war = no
+		OR = {
+			#Another of the core parts of Austria, OR a Tyrol that has gotten Habsburg per event, must have a Habsburg ruler
+			AND = {
+				HAB = {
+					dynasty = "von Habsburg"
+					exists = yes
+				}
+				NOT = {	tag = HAB }
+			}
+			AND = {
+				STY = {
+					dynasty = "von Habsburg"
+					exists = yes
+				}
+				NOT = {	tag = STY }
+			}
+			AND = {
+				TIR = {
+					dynasty = "von Habsburg"
+					exists = yes
+				}
+				NOT = {	tag = TIR }
+			}
+		}
+		NOT = {
+			has_country_flag = habsburg_inheritance
+			}
+	}
+	
+	immediate = {
+		log = "FE-HAB:[GetYear]:[Root.GetName]:Habsburg ruler has died, other branch might acquire the land:flavor_hab.1014"
+	}
+	
+	option = {
+		name = OPT.DAMN
+		ai_chance = { factor = 1 }
+		#25% chance for the other countries to inherit you
+		#Chance not set in stone
+		random_list = {
+			25 = {
+				if = {
+					limit = {
+						exists = HAB
+						NOT = {	tag = HAB }
+						HAB = {
+							dynasty = "von Habsburg"
+						}
+					}
+					HAB = {
+						country_event = { id = flavor_hab.1015 }
+					}
+				}
+				if = {
+					limit = {
+						exists = STY
+						NOT = {
+							exists = HAB
+							tag = STY
+						}
+						STY = {
+							dynasty = "von Habsburg"
+						}
+					}
+					set_country_flag = habsburg_going_to_be_inherited
+					STY = {
+						country_event = { id = flavor_hab.1015 }
+					}
+				}
+				if = {
+					limit = {
+						exists = TIR
+						NOT = {
+							exists = HAB
+							exists = STY
+							tag = TIR
+						}
+						TIR = {
+							dynasty = "von Habsburg"
+						}
+					}
+					TIR = {
+						country_event = { id = flavor_hab.1015 }
+					}
+				}
+				set_country_flag = habsburg_inheritance
+			}
+			75 = {
+				log = "FE-HAB:[GetYear]:[Root.GetName]:No aquisition of land by other Habsburg branch:flavor_hab.1014"
+			}
+		}
+	}
+}
+
+### UNIFICATION OF THE AUSTRIAN DOMAINS ###
+
+country_event = {
+	id = flavor_hab.1015
+	title = flavor_hab.1015.title
+	desc = flavor_hab.1015.desc
+	picture = KING_SICK_IN_BED_eventPicture
+	
+	major = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = {
+			clr_country_flag = habsburg_going_to_be_inherited
+		}
+	}
+	
+	option = {
+		name = OPT.GOOD2
+		ai_chance = { factor = 1 }
+		inherit = FROM
+		log = "FE-HAB:[GetYear]:[Root.GetName]:inherited land of [From.GetName]:flavor_hab.1015"
+	}
+	
+	option = {
+		#What?! We don't want that!
+		name = "flavor_hab.1015.b"
+		ai_chance = { factor = 0 }
+		log = "FE-HAB:[GetYear]:[Root.GetName]:declined land of [From.GetName]:flavor_hab.1015"
+
+	}
+}
+
+### PRESSURE FROM THE LOCAL NOBLES ###
+
+country_event = {
+	id = flavor_hab.1016
+	title = flavor_hab.1016.title
+	desc = flavor_hab.1016.desc
+	picture = COURT_eventPicture
+	
+	trigger = {
+		tag = TIR
+		has_global_flag = habsburgs_in_tyrol
+		dynasty = "von Habsburg"
+		is_at_war = yes
+		NOT = {	war_score = -49 }
+		num_of_loans = 2
+		NOT = { 
+		 has_country_flag = habsburg_inheritance
+		 }
+	}
+	
+	mean_time_to_happen = {
+		years = 100
+		modifier = {
+			factor = 0.75
+			emperor = {
+				dynasty = "von Habsburg"
+			}
+		}
+	}
+	
+	option = {
+		#Very well.
+		name = "flavor_hab.1016.a"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:accepted pressure of local nobles to give land to Habsburg:flavor_hab.1016"
+		ai_chance = { factor = 10 }
+		if = {
+			limit = {
+				exists = HAB
+				NOT = {	tag = HAB }
+				HAB = {
+					dynasty = "von Habsburg"
+				}
+			}
+			HAB = {
+				country_event = { id = flavor_hab.1017 }
+			}
+		}
+		if = {
+			limit = {
+				exists = STY
+				NOT = {
+					exists = HAB
+					tag = STY
+				}
+				STY = {
+					dynasty = "von Habsburg"
+				}
+			}
+			set_country_flag = habsburg_going_to_be_inherited
+			STY = {
+				country_event = { id = flavor_hab.1017 }
+			}
+		}
+		if = {
+			limit = {
+				exists = TIR
+				NOT = {
+					exists = HAB
+					exists = STY
+					tag = TIR
+				}
+				TIR = {
+					dynasty = "von Habsburg"
+				}
+			}
+			TIR = {
+				country_event = { id = flavor_hab.1017 }
+			}
+		}
+		set_country_flag = habsburg_inheritance
+	}
+	
+	option = {
+		#I will not be robbed of my lands!
+		name = "flavor_hab.1016.b"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:declined pressure of local nobles to give land to Habsburg:flavor_hab.1016"
+		ai_chance = { factor = 1 }
+		random_owned_province = {
+			limit = {
+				NOT = { is_core = ROOT }
+				NOT = { has_province_modifier = nobles_organizing }
+			}
+			add_province_modifier = {
+				name = "nobles_organizing"
+				duration = 1825
+			}
+			custom_tooltip = nobles_organizing_tt
+			add_unrest = 5
+		}
+		random_owned_province = {
+			limit = {
+				NOT = { is_core = ROOT }
+				NOT = { has_province_modifier = nobles_organizing }
+			}
+			add_province_modifier = {
+				name = "nobles_organizing"
+				duration = 1825
+			}
+			custom_tooltip = nobles_organizing_tt
+			add_unrest = 5
+		}
+		set_country_flag = habsburg_inheritance
+	}
+}
+
+### TRANSFERRED RULE FROM TYROL ###
+
+country_event = {
+	id = flavor_hab.1017
+	title = flavor_hab.1017.title
+	desc = flavor_hab.1017.desc
+	picture = CONQUEST_eventPicture
+	
+	is_triggered_only = yes
+	
+	immediate = {
+		FROM = {
+			clr_country_flag = habsburg_going_to_be_inherited
+		}
+	}
+	
+	option = {
+		name = OPT.GOOD
+		ai_chance = { factor = 1 }
+		inherit = FROM
+		log = "FE-HAB:[GetYear]:[Root.GetName]:accepted the inheritance:flavor_hab.1017"
+	}
+	
+	option = {
+		#What?! We don't want that!
+		name = "flavor_hab.1017.b"
+		ai_chance = { factor = 0 }
+		log = "FE-HAB:[GetYear]:[Root.GetName]:declined the inheritance:flavor_hab.1017"
+	}
+}
+
+### THE ROYAL LETTER OF BOHEMIA ###
+
+country_event = {
+	id = flavor_hab.3193
+	title = "flavor_hab.EVTNAME3193"
+	desc = "flavor_hab.EVTDESC3193"
+	picture = REFORM_eventPicture
+	major = yes
+	trigger = {
+		tag = HAB
+		is_emperor = yes
+		#is_year = 1600 #should not be time-specific
+		#NOT = { is_year = 1650 } #should not be time-specific
+		NOT = { has_country_flag = HAB_had_event_3193 }
+		NOT = {	has_country_flag = HAB_had_event_3194 }
+		is_religion_enabled = protestant
+		religion = catholic
+		BOH = {
+			exists = yes
+			religion = protestant
+			junior_union_with = HAB
+		}
+	}
+	mean_time_to_happen = {
+		years = 50
+		modifier = {
+			factor = 0.75
+			dynasty = "von Habsburg"
+		}
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3193
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3193"
+		set_country_flag = royal_letter_of_bohemia
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -20 }
+		BOH = {
+			add_opinion = {
+				who = ROOT
+				modifier = royal_letter_of_bohemia
+			}
+		}
+		log = "FE-HAB:[GetYear]:[Root.GetName]: gave religious freedom for protestants in Bohemia:flavor_hab.3193"
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3193"
+		set_country_flag = refused_royal_letter_of_bohemia
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 5 }
+		BOH = {
+			add_opinion = {
+				who = ROOT
+				modifier = refused_royal_letter_of_bohemia
+			}
+		}
+		log = "FE-HAB:[GetYear]:[Root.GetName]: refused religious freedom for protestants in Bohemia:flavor_hab.3193"
+	}
+}
+
+### THE DEFENESTRATION OF PRAGUE ###
+
+country_event = {
+	id = flavor_hab.3194
+	title = "flavor_hab.EVTNAME3194"
+	desc = "flavor_hab.EVTDESC3194"
+	picture = LIBERUM_VETO_eventPicture
+	major = yes
+	trigger = {
+		is_religion_enabled = protestant
+		tag = HAB 
+		is_emperor = yes
+		is_year = 1600
+		NOT = { is_year = 1650 }
+		NOT = {	has_country_flag = HAB_had_event_3194 }
+		NOT = {	has_country_flag = royal_letter_of_bohemia }
+		religion = catholic
+		
+		OR = {
+			AND = {
+				NOT = {	senior_union_with = BOH	}
+				268 = {
+					owned_by = ROOT
+					religion = protestant
+				}
+			}
+			BOH = {
+				exists = yes
+				religion = protestant
+				junior_union_with = HAB
+			}
+		}
+	}
+	mean_time_to_happen = {
+		years = 83
+		modifier = {
+			factor = 0.75
+			dynasty = "von Habsburg"
+		}
+		modifier = {
+			factor = 0.25
+			has_country_flag = refused_royal_letter_of_bohemia
+		}
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3194
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3194"
+		if = {
+			limit = {
+				senior_union_with = BOH
+			}
+			break_union = BOH
+			if = {
+			    limit = {
+				    any_country = {
+					    religion = protestant
+						dynasty = "von Wittelsbach"
+					}
+				}
+			    BOH = {
+				    define_ruler = {
+			            culture = hessian
+			            dynasty = "von Wittelsbach"
+			            claim = 25
+			            ADM = 3
+			            DIP = 3
+			            MIL = 3
+		            }
+					set_country_flag = wittelsbach_ruler
+				}
+			}
+			if = {
+			    limit = {
+				    any_country = {
+					    religion = protestant
+						dynasty = "von Wettin"
+					}
+					BOH = {
+					    NOT = {
+						    has_country_flag = wittelsbach_ruler
+						}
+					}
+				}
+			    BOH = {
+				    define_ruler = {
+			            culture = high_saxon 
+			            dynasty = "von Wettin"
+			            claim = 25
+			            ADM = 3
+			            DIP = 3
+			            MIL = 3
+		            }
+				}
+			}
+			add_casus_belli = {
+			    target = BOH
+			    type = cb_restore_personal_union
+			    months = 120
+		    }
+		}
+		if = {
+			limit = {
+				NOT = {
+					senior_union_with = BOH
+				}
+				268 = {
+					owned_by = ROOT
+					religion = protestant
+				}
+			}
+			268 = {
+				spawn_rebels = {
+				    type = nationalist_rebels
+				    size = 3
+			    }
+			}
+		}
+	}
+}
+
+### NOBLE REVOLT IN HUNGARY ###
+
+country_event = {
+	id = flavor_hab.3201
+	title = "flavor_hab.EVTNAME3201"
+	desc = "flavor_hab.EVTDESC3201"
+	picture = ANGRY_MOB_eventPicture
+	is_triggered_only = yes
+	major = yes
+	trigger = {
+		tag = HAB
+		OR = {
+		    truce_with = TUR
+			war_with = TUR
+			truce_with = OTT
+			war_with = OTT
+		}
+		NOT = { has_country_flag = HAB_had_event_3201 }
+		NOT = {	exists = HUN }
+		any_owned_province = {
+			OR = {
+				region = magyar_plains_region
+				region = north_carpathia_region
+			}
+		}
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3201
+		random_owned_province = {
+			limit = {
+				OR = {
+					region = magyar_plains_region
+					region = north_carpathia_region
+				}
+			}
+			set_province_flag = hungarian_revolt
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3201"
+		random_owned_province = {
+			limit = {
+				has_province_flag = hungarian_revolt
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -30 }
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 2
+			}
+			clr_province_flag = hungarian_revolt
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3201"
+		random_owned_province = {
+			limit = {
+				has_province_flag = hungarian_revolt
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
+			add_province_modifier = {
+				name = local_autonomy_modifier
+				duration = 3650
+			}
+			clr_province_flag = hungarian_revolt
+		}
+	}
+}
+
+### THE PURGE OF THE ARCHBISHOP OF SALZBURG ###
+
+country_event = {
+	id = flavor_hab.3203 #The Purge of the Archbishop of Salzburg
+	title = "flavor_hab.EVTNAME3203"
+	desc = "flavor_hab.EVTDESC3203"
+	picture = ANGRY_MOB_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+
+	trigger = {
+		tag = HAB
+		religion = catholic
+		owns = 76 #Salzburg
+		is_year = 1700
+		NOT = { is_year = 1800 }
+		NOT = {	has_country_flag = HAB_had_event_3203 }
+		NOT = {	exists = SLZ }
+		76 = {
+			religion = catholic
+		}
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3203
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3203"
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 5 }
+		add_country_modifier = {
+			name = "intolerant_society"
+			duration = 3650
+		}
+		76 = {
+		    add_devastation = 50
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3203"
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -20 }
+		add_country_modifier = {
+			name = "tolerant_society"
+			duration = 3650
+		}
+	}
+}
+
+### WENZEL ANTON KAUNITZ ###
+
+country_event = {
+	id = flavor_hab.3202
+	title = "flavor_hab.EVTNAME3206"
+	desc = "flavor_hab.EVTDESC3206"
+	picture = ADVISOR_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	trigger = {
+		tag = HAB
+		is_year = 1741
+		NOT = {	is_year = 1794 }
+		NOT = {	has_country_flag = HAB_had_event_3206 }
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3206
+	}
+	option = {
+		name = "EXCELLENTCMNISTER"
+		add_adm_power = 25
+		define_advisor = {
+			type = diplomat_NO
+			culture = "german_bohemian"
+			name = "Wenzel Anton Kaunitz"
+			skill = 2
+			discount = yes
+		}
+	}
+}
+
+### METTERNICH ###
+
+country_event = {
+	id = flavor_hab.3208
+	title = "flavor_hab.EVTNAME3208"
+	desc = "flavor_hab.EVTDESC3208"
+	picture = ADVISOR_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	trigger = {
+		tag = HAB
+		is_year = 1803
+		NOT = { is_year = 1859 }
+		NOT = { has_country_flag = HAB_had_event_3208 }
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3208
+	}
+	option = {
+		name = "EXCELLENTCMNISTER"
+		add_adm_power = 25
+		define_advisor = {
+			type = diplomat_NO
+			culture = "westphalian"
+			name = "Klemens von Metternich"
+			skill = 2
+			discount = yes
+		}
+	}
+}
+
+### THE PROTESTANT REBELLION IN HUNGARY ###
+
+country_event = {
+	id = flavor_hab.3099
+	title = "flavor_hab.EVTNAME3099"
+	desc = "flavor_hab.EVTDESC3099"
+	picture = ANGRY_MOB_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	major = yes
+	trigger = {
+		is_religion_enabled = protestant
+		tag = HAB
+		religion = catholic
+		OR = {
+		    truce_with = TUR
+		    war_with = TUR
+			truce_with = OTT
+		    war_with = OTT
+		}
+		NOT = {	has_country_flag = HAB_had_event_3099 }
+		NOT = {	exists = HUN }
+		any_owned_province = {
+			OR = {
+				region = magyar_plains_region
+				region = north_carpathia_region
+			}
+			religion = protestant
+		}
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		hidden_effect = {
+			set_country_flag = HAB_had_event_3099
+			random_owned_province = {
+				limit = {
+					OR = {
+						region = magyar_plains_region
+						region = north_carpathia_region
+					}
+					religion = protestant
+				}
+				set_province_flag = hungarian_revolt
+			}
+			random_owned_province = {
+				limit = {
+					OR = {
+						region = magyar_plains_region
+						region = north_carpathia_region
+					}
+					religion = protestant
+					NOT = {
+						has_province_flag = hungarian_revolt
+					}
+				}
+				set_province_flag = second_hungarian_revolt
+			}
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3099"
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 5 }
+		add_country_modifier = {
+			name = "intolerant_society"
+			duration = 3650
+		}
+		random_owned_province = {
+			limit = {
+				has_province_flag = hungarian_revolt
+				NOT = {	has_province_modifier = nobles_organizing }
+			}
+			spawn_rebels = {
+				    type = protestant_rebels
+				    size = 2
+			}
+			clr_province_flag = hungarian_revolt
+		}
+		random_owned_province = {
+			limit = {
+				has_province_flag = second_hungarian_revolt
+				NOT = {	has_province_modifier = nobles_organizing }
+			}
+			spawn_rebels = {
+				    type = protestant_rebels
+				    size = 2
+			}
+			clr_province_flag = second_hungarian_revolt
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3099"
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -20 }
+		add_country_modifier = {
+			name = "tolerant_society"
+			duration = 3650
+		}
+		random_owned_province = {
+			limit = {
+				has_province_flag = hungarian_revolt
+			}
+			add_province_modifier = {
+				name = local_autonomy_modifier
+				duration = 3650
+			}
+			clr_province_flag = hungarian_revolt
+		}
+		random_owned_province = {
+			limit = {
+				has_province_flag = second_hungarian_revolt
+			}
+			add_province_modifier = {
+				name = local_autonomy_modifier
+				duration = 3650
+			}
+			clr_province_flag = second_hungarian_revolt
+		}
+	}
+}
+
+### REICHSHOFRAT ###
+
+country_event = {
+	id = flavor_hab.3328
+	title = "flavor_hab.EVTNAME3328"
+	desc = "flavor_hab.EVTDESC3328"
+	picture = DEBATE_REPUBLICAN_eventPicture
+	trigger = {
+		tag = HAB
+		adm_tech = 28
+		NOT = {	adm_tech = 33 }
+		NOT = {	has_country_flag = HAB_had_event_3328 }
+	}
+	mean_time_to_happen = {
+		days = 1 
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_3328
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3328"
+		NO_FactionCrackdown = yes
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker= NO Amount= -20 }
+		add_country_modifier = {
+			name = reichshofrat
+			duration = 7300
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3328"
+        Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 5 }
+		NO_FactionBoost = yes
+	}
+}
+
+### THE CHASTENING OF HUNGARY ###
+
+country_event = {
+	id = flavor_hab.3332
+	title = "flavor_hab.EVTNAME3332"
+	desc = "flavor_hab.EVTDESC3332"
+	picture = DEBATE_REPUBLICAN_eventPicture
+	is_triggered_only = yes
+	major = yes
+	trigger = {
+		OR = {
+		    TUR = {
+			    is_great_power = yes
+			    dip_tech = 45
+                NOT = { alliance_with = ROOT }				
+			}
+			FRA = { 
+			    is_great_power = yes
+			    dip_tech = 45 
+				NOT = { alliance_with = ROOT }
+			}
+		}
+		NOT = { 
+		    dip_tech = 55 
+			adm_tech = 55
+		}
+		NOT = { has_country_flag = HAB_had_event_3332 }
+		NOT = { exists = HUN }
+		any_owned_province = {
+			OR = {
+				region = magyar_plains_region
+				region = north_carpathia_region
+			}
+		}
+		TUR = {
+			any_owned_province = {
+				OR = {
+					region = magyar_plains_region
+					region = north_carpathia_region
+				}
+			}
+		}
+		truce_with = TUR
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		hidden_effect = {
+			set_country_flag = HAB_had_event_3332
+			random_owned_province = {
+				limit = {
+					OR = {
+						region = magyar_plains_region
+						region = north_carpathia_region
+					}
+				}
+				set_province_flag = hungarian_revolt
+			}
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3332"
+		ai_chance = {
+			factor = 90
+		}
+		set_country_flag = suppressed_hungarians
+		random_owned_province = {
+			limit = {
+				has_province_flag = hungarian_revolt
+			}
+			spawn_rebels = {
+				    type = nationalist_rebels
+				    size = 2
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -30 }
+			clr_province_flag = hungarian_revolt
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3332"
+		ai_chance = {
+			factor = 10
+		}
+		random_owned_province = {
+			limit = {
+				has_province_flag = hungarian_revolt
+			}
+			add_province_modifier = {
+				name = local_autonomy_modifier
+				duration = 3650
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = 10 }
+			clr_province_flag = hungarian_revolt
+		}
+	}
+}
+
+### THE INSURRECTION OF DUKE IMRE THOKOLY ###
+
+country_event = {
+	id = flavor_hab.3333 #The Insurrection of Duke Imre Thokoly
+	title = "flavor_hab.EVTNAME3333"
+	desc = "flavor_hab.EVTDESC3333"
+	picture = MILITARY_CAMP_eventPicture
+	major = yes
+	trigger = {
+		tag = HAB
+		has_country_flag = suppressed_hungarians
+		NOT = {	has_country_flag = HAB_had_event_3333 }
+		NOT = {	exists = HUN }
+		any_owned_province = {
+			OR = {
+				region = magyar_plains_region
+				region = north_carpathia_region
+			}
+			OR = {
+				culture = hungarian
+			    culture = transylvanian
+			}
+		}
+        TUR = {
+		    is_neighbor_of = ROOT
+			is_great_power = yes
+			NOT = { alliance_with = ROOT }
+		}
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		hidden_effect = {
+			set_country_flag = HAB_had_event_3333
+		}
+		clr_country_flag = suppressed_hungarians
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA3333"
+		random_owned_province = {
+			limit = {
+				OR = {
+				    region = magyar_plains_region
+				    region = north_carpathia_region
+			    }
+				OR = {
+				    culture = hungarian
+					culture = transylvanian
+				}
+			}
+			spawn_rebels = {
+				    type = nationalist_rebels
+				    size = 3
+					leader = "Imre Thokoly"
+					friend = TUR
+			}
+		}
+		random_owned_province = {
+			limit = {
+				OR = {
+				    region = magyar_plains_region
+				    region = north_carpathia_region
+			    }
+				OR = {
+				    culture = hungarian
+					culture = transylvanian
+				}
+			}
+			spawn_rebels = {
+				    type = nationalist_rebels
+				    size = 2
+					friend = TUR
+			}
+		}
+		random_owned_province = {
+			limit = {
+				OR = {
+				    region = magyar_plains_region
+				    region = north_carpathia_region
+			    }
+				OR = {
+				    culture = hungarian
+					culture = transylvanian
+				}
+			}
+			spawn_rebels = {
+				    type = nationalist_rebels
+				    size = 2
+					friend = TUR
+			}
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB3333"
+		every_owned_province = {
+			limit = {
+				OR = {
+					region = magyar_plains_region
+					region = north_carpathia_region
+				}
+			}
+			add_province_modifier = {
+				name = local_autonomy_modifier
+				duration = 7300
+			}
+		}
+	}
+}
+
+### PRIVILEGIUM MAIUS ###
+
+country_event = {
+	id = flavor_hab.1
+	title = "flavor_hab.EVTNAME1"
+	desc = "flavor_hab.EVTDESC1"
+	picture = REFORM_eventPicture
+	fire_only_once = yes
+	major = yes
+	trigger = {
+		tag = HAB
+		is_emperor = yes
+		NOT = {	has_country_flag = austrian_archduchy }
+		OR = {
+			has_country_modifier = title_1
+			has_country_modifier = title_2
+			has_country_modifier = title_3
+			has_country_modifier = title_4
+		}
+	}
+	mean_time_to_happen = {
+		years = 4
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA1"
+		ai_chance = {
+			factor = 100
+		}
+		if = {
+			limit = {
+				NOT = {	has_country_modifier = title_4 }
+				NOT = {	has_country_modifier = title_5 }
+				NOT = {	has_country_modifier = title_6 }
+			}
+			change_title_4 = yes
+		}
+		set_country_flag = austrian_archduchy
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB1"
+		ai_chance = {
+			factor = 0
+		}
+		add_prestige = -10
+	}
+}
+
+### THE GOLDEN ROOF ###
+
+country_event = {
+	id = flavor_hab.2
+	title = "flavor_hab.EVTNAME2"
+	desc = "flavor_hab.EVTDESC2"
+	picture = UNIVERSITY_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	trigger = {
+		tag = HAB
+		is_emperor = yes
+		owns = 73 #Innsbruck
+		NOT = {	has_country_flag = HAB_had_event_2 }
+		adm_tech = 28
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_2
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA2"
+		add_years_of_income = -0.2
+		add_prestige = 10
+	}
+}
+
+### THE TRIUMPHAL PROCESSION ###
+
+country_event = {
+	id = flavor_hab.4
+	title = "flavor_hab.EVTNAME4"
+	desc = "flavor_hab.EVTDESC4"
+	picture = IMPORTANT_STATUE_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	trigger = {
+		tag = HAB
+		is_emperor = yes
+		NOT = {	has_country_flag = HAB_had_event_4 }
+		adm_tech = 30
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_4
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA4"
+		add_years_of_income = -0.2
+		add_country_modifier = {
+			name = the_triumphal_procession
+			duration = 9125
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB4"
+		add_prestige = -5
+	}
+}
+
+### THE METEORITE OF ENSISHEIM ###
+
+country_event = {
+	id = flavor_hab.6
+	title = "flavor_hab.EVTNAME6"
+	desc = "flavor_hab.EVTDESC6"
+	picture = COMET_SIGHTED_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	trigger = {
+		tag = HAB
+		owns = 1356
+		NOT = {	has_country_flag = HAB_had_event_6 }
+		is_year = 1493
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_6
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA6"
+		add_prestige = 5
+		1356 = {
+		    Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 10 }
+		}
+	}
+}
+
+### THE HABSBURG DYNASTY ###
+
+country_event = {
+	id = flavor_hab.7
+	title = "flavor_hab.EVTNAME7"
+	desc = "flavor_hab.EVTDESC7"
+	picture = COURT_eventPicture
+	major = yes
+	is_triggered_only = yes
+	trigger = {
+		tag = HAB
+		has_heir = no
+		AND = {
+			OR = {
+				is_subject = no
+				is_subject_of_type = tributary_state
+				is_subject_of_type = close_tributary_state
+			}
+		}
+		NOT = { dynasty = "von Habsburg" }
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+	    hidden_effect = {
+		    random_list = {
+			    90 = {
+				    set_country_flag = habsburg_male_heir
+			    }
+			    10 = {
+				    set_country_flag = habsburg_female_heir
+			    }
+		    }
+		    random_list = {
+			    35 = {
+				    set_country_flag = habsburg_adm_heir
+			    }
+			    35 = {
+				    set_country_flag = habsburg_dip_heir
+			    }
+		 	    30 = {
+				    set_country_flag = habsburg_mil_heir
+			    }
+		    }
+		}
+	}
+	option = {
+		name = "flavor_hab.EVTOPTA7"
+		add_legitimacy = 10
+	}
+	option = {
+		name = "flavor_hab.EVTOPTB7"
+		add_legitimacy = -50
+		log = "FE-HAB:[GetYear]:[Root.GetName]:found a Habsburg heir to take over from their dynasty (no heir):flavor_hab.7"
+		if = {
+			limit = {
+				has_country_flag = habsburg_male_heir
+			}
+			if = {
+				limit = {
+					has_country_flag = habsburg_adm_heir
+				}
+				define_heir = {
+					dynasty = "von Habsburg"
+					ADM = 4
+					claim = 80
+				}
+				clr_country_flag = habsburg_adm_heir
+			}
+			if = {
+				limit = {
+					has_country_flag = habsburg_dip_heir
+				}
+				define_heir = {
+					dynasty = "von Habsburg"
+					DIP = 4
+					claim = 80
+				}
+				clr_country_flag = habsburg_dip_heir
+			}
+			if = {
+				limit = {
+					has_country_flag = habsburg_mil_heir
+				}
+				define_heir = {
+					dynasty = "von Habsburg"
+					MIL = 4
+					claim = 80
+				}
+				clr_country_flag = habsburg_mil_heir
+			}
+			clr_country_flag = habsburg_male_heir
+		}
+		if = {
+			limit = {
+				has_country_flag = habsburg_female_heir
+			}
+			if = {
+				limit = {
+					has_country_flag = habsburg_adm_heir
+				}
+				define_heir = {
+					dynasty = "von Habsburg"
+					female = yes
+					ADM = 4
+					claim = 80
+				}
+				clr_country_flag = habsburg_adm_heir
+			}
+			if = {
+				limit = {
+					has_country_flag = habsburg_dip_heir
+				}
+				define_heir = {
+					dynasty = "von Habsburg"
+					female = yes
+					DIP = 4
+					claim = 80
+				}
+				clr_country_flag = habsburg_dip_heir
+			}
+			if = {
+				limit = {
+					has_country_flag = habsburg_mil_heir
+				}
+				define_heir = {
+					dynasty = "von Habsburg"
+					female = yes
+					MIL = 4
+					claim = 80
+				}
+				clr_country_flag = habsburg_mil_heir
+			}
+			clr_country_flag = habsburg_female_heir
+		}
+	}
+}
+
+### LUDWIG VAN BEETHOVEN ###
+
+country_event = {
+	id = flavor_hab.5190
+	title = "flavor_hab.EVTNAME5190"
+	desc = "flavor_hab.EVTDESC5190"
+	picture = THEATRE_eventPicture
+	is_triggered_only = yes #from on_five_year_pulse_2
+	major = yes
+	trigger = {
+		owns = 83 #Wien
+		is_year = 1790
+		NOT = { is_year = 1821 }
+		NOT = {	has_country_flag = HAB_had_event_5190 }
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_5190
+	}
+	option = {
+		name = "EXCELLENT"
+		add_prestige = 15
+		add_country_modifier = {
+			name = composer_boost
+			duration = 3650
+		}
+	}
+}
+
+### WOLFGANG AMADEUS MOZART ###
+
+country_event = {
+	id = flavor_hab.5191 #Wolfgang Amadeus Mozart
+	title = "flavor_hab.EVTNAME5191"
+	desc = "flavor_hab.EVTDESC5191"
+	picture = THEATRE_eventPicture
+	major = yes
+	trigger = {
+		owns = 83 #Wien
+		is_year = 1774
+		NOT = { is_year = 1791 }
+		NOT = { has_country_flag = HAB_had_event_5191 }
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_5191
+	}
+	option = {
+		name = "EXCELLENT"
+		add_prestige = 15
+		add_country_modifier = {
+			name = composer_boost
+			duration = 3650
+		}
+	}
+}
+
+### THE ITALIAN WARS (EMPEROR) ###
+
+country_event = {
+	id = flavor_hab.1007
+	title = "flavor_spa.EVTNAME1007"
+	desc = "flavor_spa.EVTDESC1007"
+	picture = MILITARY_CAMP_eventPicture
+	is_triggered_only = yes
+	major = yes
+	trigger = {
+		is_emperor = yes
+		NOT = {	has_country_flag = HAB_had_event_1007 }
+		NOT = { tag = FRA }
+		NOT = {	alliance_with = FRA }
+		NOT = {	is_subject_of = FRA	}
+		NOT = {	war_with = FRA }
+		italy_superregion = {
+			is_part_of_hre = yes
+		}
+		italy_superregion = {
+			owned_by = FRA
+		}
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	immediate = {
+		set_country_flag = HAB_had_event_1007
+	}
+	option = {
+		name = "flavor_spa.EVTOPTA1007"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:as HRE emperor, claimed all French land in Italy:flavor_hab.1007" 
+		ai_chance = {
+			factor = 90
+		}
+		FRA = {
+			add_opinion = {
+				who = ROOT
+				modifier = claimed_italy
+			}
+			every_owned_province = {
+				limit = {
+					superregion = italy_superregion
+				}
+				add_claim = ROOT
+			}
+			hidden_effect = {
+				country_event = {
+					id = flavor_hab.1008
+					days = 10
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_spa.EVTOPTB1007"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:as HRE emperor, have not claimed French land in Italy:flavor_hab.1007" 
+		ai_chance = {
+			factor = 10
+		}
+		add_prestige = -10
+	}
+}
+
+### THE ITALIAN WARS (FRANCE) ###
+
+country_event = {
+	id = flavor_hab.1008
+	title = "flavor_spa.EVTNAME1008"
+	desc = "flavor_spa.EVTDESC1008"
+	picture = LAND_MILITARY_eventPicture
+	is_triggered_only = yes #from flavor_hab.1007
+	major = yes
+	option = {
+		name = "flavor_spa.EVTOPTA1008"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:counter-claimed lands in Italy:flavor_hab.1008" 
+		log = "FE-HAB:[GetYear]:[Root.GetName]:escalated conflict in Italy:flavor_hab.1008" 
+		trigger = {
+			italy_superregion = {
+				owned_by = FROM
+			}
+		}
+		ai_chance = {
+			factor = 90
+		}
+		FROM = {
+			every_owned_province = {
+				limit = {
+					superregion = italy_superregion
+				}
+				add_claim = ROOT
+			}
+			hidden_effect = {
+				country_event = {
+					id = flavor_hab.1009
+					days = 10
+				}
+			}
+		}
+	}
+	option = {
+		name = "flavor_spa.EVTOPTB1008"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:have not counter-claimed lands in Italy:flavor_hab.1008" 
+		ai_chance = {
+			factor = 10
+		}
+		add_prestige = -10
+	}
+	option = {
+		name = "flavor_hab.EVTOPTC1008"
+		log = "FE-HAB:[GetYear]:[Root.GetName]:escalated conflict in Italy:flavor_hab.1008" 
+		trigger = {
+			NOT = {
+				italy_superregion = {
+					owned_by = FROM
+				}
+			}
+		}
+		ai_chance = {
+			factor = 90
+		}
+		add_prestige = 10
+		FROM = {
+			add_opinion = {
+				who = ROOT
+				modifier = claimed_italy
+			}
+		}
+	}
+}
+
+### THE ITALIAN WARS (EMPEROR AGAIN) ###
+
+country_event = {
+	id = flavor_hab.1009
+	title = "flavor_spa.EVTNAME1009"
+	desc = "flavor_spa.EVTDESC1009"
+	picture = MILITARY_CAMP_eventPicture
+	is_triggered_only = yes #from flavor_hab.1008
+	option = {
+		name = "flavor_spa.EVTOPTA1009"
+		add_opinion = {
+			who = FROM
+			modifier = claimed_italy
+		}
+	}
+}
+
+### THE REFORMS OF THE 1495 DIET OF WORMS ###
+
+country_event = {
+	id = hee_HAB.1
+	title = hee_HAB.1.t
+	desc = hee_HAB.1.d
+	picture = LIBERUM_VETO_eventPicture
+	fire_only_once = yes
+	major = yes
+	trigger = {
+		tag = HAB
+		is_emperor = yes
+		is_year = 1495
+		NOT = {	is_religion_enabled = protestant }
+		NOT = {	hre_reform_passed = reichsreform }
+		imperial_influence = 10
+	}
+	mean_time_to_happen = {
+		years = 1
+	}
+	option = {
+		name = hee_HAB.1.a
+		add_imperial_influence = 20
+		Stab_Subtract1 = yes
+		add_country_modifier = {
+			name = hee_diet_worms
+			duration = 7300
+		}
+	}
+	option = {
+		name = hee_HAB.1.b
+		add_imperial_influence = -20
+		every_country = {
+			limit = {
+				is_part_of_hre = yes
+			}
+			add_opinion = {
+				who = HAB
+				modifier = hee_diet_worms_opinion
+			}
+		}
+	}
+}
+
+### THE RISE OF THE OTTOMANS IN EUROPE ###
+
+country_event = {
+	id = hee_HAB.2
+	title = hee_HAB.2.t
+	desc = hee_HAB.2.d
+	picture = HORDE_ON_HORSEBACK_eventPicture
+	fire_only_once = yes
+	major = yes
+	trigger = {
+		OR = {
+			tag = HAB
+			is_emperor = yes
+			AND = {
+				is_great_power = yes
+				religion = catholic
+			}
+		}
+		TUR = {
+			religion = sunni #for a random chance of Turkey converted
+			NOT = { war_with = ROOT }
+			NOT = { alliance_with = ROOT }
+			OR = {
+				is_great_power = yes
+				army_strength = {
+					who = ROOT
+					value = 2
+				}
+			}
+		}
+		OR = {
+			any_owned_province = {
+				any_neighbor_province = {
+					owned_by = TUR
+					continent = europe
+				}
+			}
+			any_subject_country = {
+				any_owned_province = {
+					any_neighbor_province = {
+						owned_by = TUR
+						continent = europe
+					}
+				}
+			}
+		}
+	}
+	mean_time_to_happen = {
+		months = 6
+	}
+	option = {
+		name = hee_HAB.2.a
+		log = "FE-HAB:[GetYear]:[Root.GetName]:opposed rise of Ottomans in Europe:hee_HAB.2" 
+		ai_chance = {
+			factor = 100
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = 10 }
+		add_mil_power = 50
+		add_army_tradition = 5.0
+		reverse_add_opinion = {
+			who = TUR
+			modifier = hee_defense_of_christendom
+		}
+	}
+	option = {
+		name = hee_HAB.2.b
+		log = "FE-HAB:[GetYear]:[Root.GetName]:backed out of opposing rise of Ottomans in Europe:hee_HAB.2" 
+		ai_chance = {
+			factor = 0
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = CL Amount = -10 }
+		add_dip_power = 25
+	}
+}
+
+### THE AUSTRIAN BAROQUE ###
+
+country_event = {
+	id = hee_HAB.3
+	title = hee_HAB.3.t
+	desc = hee_HAB.3.d
+	picture = COURT_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	major = yes
+	trigger = {
+		tag = HAB
+		adm_tech = 45
+		NOT = {	adm_tech = 50 }
+		government = monarchy
+		num_of_cities = 10
+		legitimacy = 70
+		stability = 1
+	}
+	mean_time_to_happen = {
+		days = 1
+	}
+	option = {
+		name = hee_HAB.3.a
+		ai_chance = {
+			factor = 85
+		}
+		add_country_modifier = {
+			name = hee_austrian_baroque
+			duration = -1
+		}
+		custom_tooltip = hee_HAB.3.tt
+	}
+	option = {
+		name = hee_HAB.3.b
+		ai_chance = {
+			factor = 15
+		}
+		Stab_Add50Percent = yes
+		add_adm_power = 10
+		add_dip_power = 10
+	}
+}
+
+### AUSTRIA INTO THE FUTURE ###
+
+country_event = {
+	id = hee_HAB.4
+	title = hee_HAB.4.t
+	desc = hee_HAB.4.d
+	picture = COURT_eventPicture
+	fire_only_once = yes
+	trigger = {
+		has_country_modifier = hee_austrian_baroque
+		adm_tech = 52
+	}
+	mean_time_to_happen = {
+		years = 25
+#		modifier = {
+#			factor = 0.1
+#			has_disaster = aspiration_for_liberty
+#		}
+		modifier = {
+			factor = 0.3
+			adm_tech = 54
+		}
+	}
+	option = {
+		name = hee_HAB.4.a
+		remove_country_modifier = hee_austrian_baroque
+	}
+}
+
+### BUILD BEAUTIFUL PALACES ###
+
+country_event = {
+	id = hee_HAB.5
+	title = hee_HAB.5.t
+	desc = hee_HAB.5.d
+	picture = GREAT_BUILDING_eventPicture
+	trigger = {
+		tag = HAB
+		has_country_modifier = hee_austrian_baroque
+		NOT = {	has_country_modifier = hee_baroque_building_timer }
+	}
+	mean_time_to_happen = {
+		years = 7
+	}
+	option = {
+		name = hee_HAB.5.a
+		ai_chance = {
+			factor = 75
+			modifier = {
+				factor = 0
+				num_of_loans = 5
+			}
+		}
+		hidden_effect = {
+			add_country_modifier = {
+				name = hee_baroque_building_timer
+				duration = 365
+				hidden = yes
+			}
+		}
+		add_years_of_income = -0.2
+		random_owned_province = {
+		    limit = {
+			    culture = austrian
+				NOT = {	has_province_modifier = monumental_architecture }
+			}	
+            add_province_modifier = {
+				name = "monumental_architecture"
+				duration = 1825
+			} 		
+		}
+	}
+	option = {
+		name = hee_HAB.5.b
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 75
+				num_of_loans = 1
+			}
+		}
+		add_prestige = -5
+		add_adm_power = 25
+	}
+}
+
+### BUILD BEAUTIFUL MILITARY SCHOOLS ###
+
+country_event = {
+	id = hee_HAB.6
+	title = hee_HAB.6.t
+	desc = hee_HAB.6.d
+	picture = LAND_MILITARY_eventPicture
+	trigger = {
+		tag = HAB
+		has_country_modifier = hee_austrian_baroque
+		NOT = {	has_country_modifier = hee_baroque_building_timer }
+	}
+	mean_time_to_happen = {
+		years = 7
+	}
+	option = {
+		name = hee_HAB.6.a
+		ai_chance = {
+			factor = 75
+			modifier = {
+				factor = 0
+				num_of_loans = 5
+			}
+		}
+		hidden_effect = {
+			add_country_modifier = {
+				name = hee_baroque_building_timer
+				duration = 365
+				hidden = yes
+			}
+		}
+		add_years_of_income = -0.2
+		random_owned_province = {
+		    limit = {
+			    culture = austrian
+				NOT = {	has_province_modifier = monumental_architecture }
+			}	
+            add_province_modifier = {
+				name = "monumental_architecture"
+				duration = 1825
+			} 		
+		}
+	}
+	option = {
+		name = hee_HAB.6.b
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 75
+				num_of_loans = 1
+			}
+		}
+		add_prestige = -5
+		add_mil_power = 25
+	}
+}
+
+### BUILD BEAUTIFUL MANOFACTORIES ###
+
+country_event = {
+	id = hee_HAB.7
+	title = hee_HAB.7.t
+	desc = hee_HAB.7.d
+	picture = HARBOUR_eventPicture
+	trigger = {
+		tag = HAB
+		has_country_modifier = hee_austrian_baroque
+		NOT = {	has_country_modifier = hee_baroque_building_timer }
+	}
+	mean_time_to_happen = {
+		years = 7
+	}
+	option = {
+		name = hee_HAB.7.a
+		ai_chance = {
+			factor = 75
+			modifier = {
+				factor = 0
+				num_of_loans = 5
+			}
+		}
+		hidden_effect = {
+			add_country_modifier = {
+				name = hee_baroque_building_timer
+				duration = 365
+				hidden = yes
+			}
+		}
+		add_years_of_income = -0.2
+		random_owned_province = {
+		    limit = {
+			    culture = austrian
+				NOT = {	has_province_modifier = monumental_architecture }
+			}	
+            add_province_modifier = {
+				name = "monumental_architecture"
+				duration = 1825
+			} 		
+		}
+	}
+	option = {
+		name = hee_HAB.7.b
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 75
+				num_of_loans = 1
+			}
+		}
+		add_prestige = -5
+		add_dip_power = 25
+	}
+}

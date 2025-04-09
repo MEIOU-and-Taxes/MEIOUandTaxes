@@ -1,0 +1,623 @@
+# Simpler replicate of main census used by Main_Init on game startup or sim
+# Assigns influence based on raw power share
+FC_Init = {
+	set_key = { lhs = Tmp_1 value = 0 }
+	change_key = { lhs = Tmp_1 which = Prov_BUPow }
+	change_key = { lhs = Tmp_1 which = Prov_CLPow }
+	change_key = { lhs = Tmp_1 which = Prov_BGPow }
+	change_key = { lhs = Tmp_1 which = Prov_NOPow }
+	change_key = { lhs = Tmp_1 which = Prov_TRPow }
+
+	### Set existing influence values to 0
+    if = {
+        limit = {
+			faction_influence = { faction = FC_TR influence = 100 }
+        }
+		add_faction_influence = { faction = FC_TR influence = -100 }
+	}
+	else_if = {
+        limit = {
+			faction_influence = { faction = FC_NO influence = 100 }
+        }
+		add_faction_influence = { faction = FC_NO influence = -100 }
+	}
+	else_if = {
+        limit = {
+			faction_influence = { faction = FC_BG influence = 100 }
+        }
+		add_faction_influence = { faction = FC_BG influence = -100 }
+	}
+	else_if = {
+        limit = {
+			faction_influence = { faction = FC_CL influence = 100 }
+        }
+		add_faction_influence = { faction = FC_CL influence = -100 }
+	}
+	else_if = {
+        limit = {
+			faction_influence = { faction = FC_BU influence = 100 }
+        }
+		add_faction_influence = { faction = FC_BU influence = -100 }
+	}
+	FC_AllFactions = { effect =  InitInfluence }
+
+	set_key = { lhs = Tmp_1 value = 0 }
+}
+# Assigns influence based on raw power share based on key Tmp_0
+# Triggered by FC_Init
+FC_InitInfluence = {
+    if = {
+        limit = {
+			has_faction = FC_$FAC$
+            check_key = { lhs = Prov_$FAC$Pow value = 0.01 }
+            check_key = { lhs = Tmp_1 value = 0.01 }
+			NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+        }
+		set_key = { lhs = Tmp_0 which = Prov_$FAC$Pow }
+		divide_key = { lhs = Tmp_0 which = Tmp_1 }
+		multiply_key = { lhs = Tmp_0 value = 100 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 0.01 }
+			}
+			divide_key = { lhs = Tmp_0 which = Modi_FC$FAC$Inertia }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 64 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 64 }
+			subtract_key = { lhs = Tmp_0 value = 64 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 32 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 32 }
+			subtract_key = { lhs = Tmp_0 value = 32 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 16 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 16 }
+			subtract_key = { lhs = Tmp_0 value = 16 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 8 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 8 }
+			subtract_key = { lhs = Tmp_0 value = 8 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 4 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 4 }
+			subtract_key = { lhs = Tmp_0 value = 4 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 2 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 2 }
+			subtract_key = { lhs = Tmp_0 value = 2 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 1 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 1 }
+			subtract_key = { lhs = Tmp_0 value = 1 }
+		}
+		set_key = { lhs = Tmp_0 value = 0 }
+    }
+}
+
+# Main Census effect for recalculating faction influence
+# executed yearly by the pulse on january
+FC_Census = {
+	set_key = { lhs = Tmp_1 value = 0 }
+ 	set_key = { lhs = Tmp_2 value = 0 }
+ 	set_key = { lhs = Tmp_4 value = 0 }
+
+	## Calculate total power pool (modified by inertia set in SYS-API)
+	set_key = { lhs = Tmp_1 which = Prov_BUPow }
+	multiply_key = { lhs = Tmp_1 which = Modi_FCBUInertia }
+
+	set_key = { lhs = Tmp_2 which = Prov_CLPow }
+	multiply_key = { lhs = Tmp_2 which = Modi_FCCLInertia }
+	change_key = { lhs = Tmp_1 which = Tmp_2 }
+
+	set_key = { lhs = Tmp_2 which = Prov_BGPow }
+	multiply_key = { lhs = Tmp_2 which = Modi_FCBGInertia }
+	change_key = { lhs = Tmp_1 which = Tmp_2 }
+
+	set_key = { lhs = Tmp_2 which = Prov_NOPow }
+	multiply_key = { lhs = Tmp_2 which = Modi_FCNOInertia }
+	change_key = { lhs = Tmp_1 which = Tmp_2 }
+
+	set_key = { lhs = Tmp_2 which = Prov_TRPow }
+	multiply_key = { lhs = Tmp_2 which = Modi_FCTRInertia }
+	change_key = { lhs = Tmp_1 which = Tmp_2 }
+
+	set_key = { lhs = Tmp_2 value = 0 }
+
+	FC_AllFactions = { effect = Check } # Check how many factions exist
+	#FC_AllFactions = { effect = ModClearAll } # Clear existing influence modifiers
+	FC_AllFactions = { effect = Reset } # Reset existing flat influence
+	FC_AllFactions = { effect = CalcBoosts } # Calculate temporary faction boosts
+	FC_AllFactions = { effect = BaseMod } # Calculate base influence share of each faction
+
+	set_key = { lhs = Tmp_3 value = 0 }
+
+	FC_AllFactions = { effect = SumBoosts } # Summarize total pool after boosts
+	FC_AllFactions = { effect = ApplyInfluence } # Set influence values in vanilla interface
+
+	set_key = { lhs = Tmp_0 value = 0 }
+	set_key = { lhs = Tmp_1 value = 0 }
+	set_key = { lhs = Tmp_2 value = 0 }
+	set_key = { lhs = Tmp_3 value = 0 }
+	
+	set_key = { lhs = FC_NOBoost value = 0 }
+	set_key = { lhs = FC_BGBoost value = 0 }
+	set_key = { lhs = FC_BUBoost value = 0 }
+	set_key = { lhs = FC_CLBoost value = 0 }
+	set_key = { lhs = FC_TRBoost value = 0 }
+}
+
+
+# This effect executes other scripted effects for all factions
+# Inputs:
+# $effect$ - name of the scripted effect to be executed
+FC_AllFactions = {
+	FC_$effect$ = { FAC = NO }
+	FC_$effect$ = { FAC = BG }
+	FC_$effect$ = { FAC = CL }
+	FC_$effect$ = { FAC = TR }
+	FC_$effect$ = { FAC = BU }
+}
+
+# Sets vanilla faction influence to value of input key Tmp_0
+# Inputs: $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+FC_Set_Influence = {
+    if = {
+        limit = {
+			has_faction = FC_$FAC$
+            check_key = { lhs = Prov_$FAC$Pow value = 0.01 }
+            check_key = { lhs = Tmp_1 value = 0.01 }
+			NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+        }
+		#log = "Start Set Influence"
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 64 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 64 }
+			subtract_key = { lhs = Tmp_0 value = 64 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 32 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 32 }
+			subtract_key = { lhs = Tmp_0 value = 32 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 16 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 16 }
+			subtract_key = { lhs = Tmp_0 value = 16 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 8 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 8 }
+			subtract_key = { lhs = Tmp_0 value = 8 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 4 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 4 }
+			subtract_key = { lhs = Tmp_0 value = 4 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 2 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 2 }
+			subtract_key = { lhs = Tmp_0 value = 2 }
+		}
+		while = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 1 }
+				NOT = { faction_influence = { faction = FC_$FAC$ influence = 100 } }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = 1 }
+			subtract_key = { lhs = Tmp_0 value = 1 }
+		}
+		set_key = { lhs = Tmp_0 value = 0 }
+ 		#log = "End Set Influence"
+   }
+}
+
+# Sets vanilla faction influence to 0
+# Inputs: $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+FC_Reset = {
+	if = {
+		limit = {
+			has_faction = FC_$FAC$
+			faction_influence = { faction = FC_$FAC$ influence = 1 }
+		}
+		#log = "Start FC Reset"
+		if = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 64 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -64 }
+		}
+		while = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 32 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -32 }
+		}
+		while = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 16 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -16 }
+		}
+		while = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 8 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -8 }
+		}
+		while = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 4 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -4 }
+		}
+		while = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 2 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -2 }
+		}
+		while = {
+			limit = {
+				faction_influence = { faction = FC_$FAC$ influence = 1 }
+			}
+			add_faction_influence = { faction = FC_$FAC$ influence = -1 }
+		}
+		#log = "End FC Reset"
+	}
+}
+
+# Sets vanilla faction influence to value of input key Tmp_0
+# Inputs: $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+FC_Check = {
+	if = {
+		limit = {
+			has_faction = FC_$FAC$
+            check_key = { lhs = Prov_$FAC$Pow value = 0.001 }
+		}
+		change_key = { lhs = Tmp_4 value = 1 }
+	}
+}
+
+# This effect calculates each factions relative power based on Prov_$FAC$Power key and inertia
+# Afterwards it adds flat faction boosts
+# Inputs: 
+# $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+# Tmp_1 - needs to hold the value of the total power pool after intertia
+# Output: FC_$FAC$_Boost - key which specifies the relative influence with applied boosts
+FC_BaseMod = {
+	if = {
+		limit = {
+			has_faction = FC_$FAC$
+            check_key = { lhs = Tmp_1 value = 0.001 }
+            check_key = { lhs = Prov_$FAC$Pow value = 0.001 }
+		}
+		# Calculate Factions power share
+		set_key = { lhs = Tmp_0 which = Prov_$FAC$Pow } # take elites avg provincial power
+		multiply_key = { lhs = Tmp_0 which = Modi_FC$FAC$Inertia } # take inertia into account
+		divide_key = { lhs = Tmp_0 which = Tmp_1 } # Divide through total to normalize it
+		multiply_key = { lhs = Tmp_0 value = 100 }
+
+		change_key = { lhs = FC_$FAC$Boost which = Tmp_0 } # add boost to calculated share
+	}
+}
+
+# Creates new sum of total power after applying boosts
+# Inputs: $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+FC_SumBoosts = {
+	change_key = { lhs = Tmp_3 which = FC_$FAC$Boost }
+}
+
+# Set's vanilla influence display to the specified value in key Tmp_0
+# Inputs:
+# $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+# FC_$FAC$Boost - The relative power of the faction
+# Tmp_3 - The sum of all relative powers after boosts
+FC_ApplyInfluence = {
+	# Add calculated boosts (or losses)
+	set_key = { lhs = Tmp_0 which = FC_$FAC$Boost }
+	if = {
+		limit = {
+			check_key = { lhs = Tmp_0 value = 0.001 }
+			check_key = { lhs = Tmp_3 value = 0.001 }
+			
+		}
+		divide_key = { lhs = Tmp_0 which = Tmp_3 } # divide relative share by sum
+		multiply_key = { lhs = Tmp_0 value = 100 }
+	}
+	else = {
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+
+	
+	if = { # Apply if influence between 0 - 100
+		limit = {
+			NOT = { check_key = { lhs = Tmp_0 value = 100.001 } }
+			check_key = { lhs = Tmp_0 value = 0.001 }
+		}
+		set_key = { lhs = FC_$FAC$_Inf which = Tmp_0 } # store for display and UI key
+		FC_Set_Influence = { FAC = $FAC$ }
+	} 
+	else_if = { # hardcap to 100
+		limit = {
+			check_key = { lhs = Tmp_0 value = 100.001 }
+		}
+		set_key = { lhs = Tmp_0 value = 100 }
+		set_key = { lhs = FC_$FAC$_Inf which = Tmp_0 } # store for display and UI key
+		FC_Set_Influence = { FAC = $FAC$ }
+	} 
+	else = { # if below 0 - nothing to set
+		# This is the fallback
+		set_key = { lhs = FC_$FAC$_Inf value = 0 } # store for display and UI key
+	}
+}
+
+# Calculate the flat faction boosts for the specified faction and the assosiated effects on other factions
+# Inputs: 
+# $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+# Modi_FC$FAC$Boost - value set by various events, interactions etc.
+FC_CalcBoosts = {
+	# Setup Faction boost
+	set_key = { lhs = FC_$FAC$Boost which = Modi_FC$FAC$Boost } # add modi to boost
+
+	# calc yearly tick of modi key - +1 if negative modi, -1 if positive modi
+	if = {
+		limit = {
+			check_key = { lhs = Modi_FC$FAC$Boost value = 1.001 }
+		} 
+		subtract_key = { lhs = Modi_FC$FAC$Boost value = 1 }
+	}
+	else_if = {
+		limit = {
+			NOT = { check_key = { lhs = Modi_FC$FAC$Boost value = -1 } }
+		}
+		change_key = { lhs = Modi_FC$FAC$Boost value = 1 }
+	}
+	else = {
+		set_key = { lhs = Modi_FC$FAC$Boost value = 0 }
+	}
+
+	# Advisor Boost influence
+	if = {
+		limit = {
+			Advisor_HasFaction = { $FAC$ = yes Level = 1 }
+		}
+		change_key = { lhs = FC_$FAC$Boost value = 2.5 }
+	}
+	else_if = {
+		limit = {
+			Advisor_HasFaction = { $FAC$ = yes Level = 2 }
+		}
+		change_key = { lhs = FC_$FAC$Boost value = 5 }
+	}
+	else_if = {
+		limit = {
+			Advisor_HasFaction = { $FAC$ = yes Level = 3 }
+		}
+		change_key = { lhs = FC_$FAC$Boost value = 7.5 }
+	}
+
+	# Export faction influence ticking modifiers
+	export_to_key = {
+		lhs = Tmp_3
+		value = modifier:FC_$FAC$_influence
+	} 
+	multiply_key = { lhs = Tmp_3 value = 12 } # transform modifier into yearly value
+	change_key = { lhs = FC_$FAC$Boost which = Tmp_3 } # add tick to boost
+	
+	### calculate losses for other factions
+	set_key = { lhs = Tmp_3 which = FC_$FAC$Boost }
+	if = {
+		limit = { 
+			check_key = { lhs = Tmp_3 value = 0.001 }
+			check_key = { lhs = Tmp_4 value = 0.001 }
+		}
+		divide_key = { lhs = Tmp_3 which = Tmp_4 } # divide by amount of factions for the calculation (set by FC_Check)
+	}
+	else = {
+		set_key = { lhs = Tmp_3 value = 0 }
+	}
+
+	# If faction active calculate boost effect on it
+	if = {
+		limit = {
+			has_faction = FC_BG
+            check_key = { lhs = Prov_BGPow value = 0.001 }
+		}
+		subtract_key = { lhs = FC_BGBoost which = Tmp_3 }
+	}
+	else_if = {
+		limit = {
+			has_faction = FC_CL
+            check_key = { lhs = Prov_CLPow value = 0.001 }
+		}
+		subtract_key = { lhs = FC_CLBoost which = Tmp_3 }
+	}
+	else_if = {
+		limit = {
+			has_faction = FC_NO
+            check_key = { lhs = Prov_NOPow value = 0.001 }
+		}
+		subtract_key = { lhs = FC_NOBoost which = Tmp_3 }
+	}
+	else_if = {
+		limit = {
+			has_faction = FC_BU
+            check_key = { lhs = Prov_BUPow value = 0.001 }
+		}
+		subtract_key = { lhs = FC_BUBoost which = Tmp_3 }
+	}
+	else_if = {
+		limit = {
+			has_faction = FC_TR
+            check_key = { lhs = Prov_TRPow value = 0.001 }
+		}
+		subtract_key = { lhs = FC_TRBoost which = Tmp_3 }
+	}
+
+	# neutralize loss for the same faction
+	if = {
+		limit = {
+			has_faction = FC_$FAC$
+            check_key = { lhs = Prov_$FAC$Pow value = 0.001 }			
+		}
+		change_key = { lhs = FC_$FAC$Boost which = Tmp_3 } 	
+	}	
+}
+
+# Apply a faction boost - including a custom tooltip display for the player 
+# Inputs: 
+# $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+# $Value$ - specifies the size of the boost, for the tooltip to work needs to be in 5 steps till 50 and afterwards in 10 steps
+FC_Boost = {
+	custom_tooltip = $Faction$_FactionBoost_$Value$
+	hidden_effect = {
+		set_key = { lhs = Modi_FC$Faction$Boost value = $Value$ }
+		country_event = { id = PTM_Politics.001 }
+	}
+}
+
+# Clears all existing faction influence modifiers
+# Inputs: 
+# $FAC$ - specifies the faction on which to apply the effect (NO, BU, BG, CL, TR)
+#FC_ModClearAll = {
+#	FC_ModClear = { FAC = $FAC$ }
+#	FC_ModInertiaClear = { FAC = $FAC$ }
+#}
+#FC_ModClear = {
+#	trigger_switch = {
+#		on_trigger = has_country_modifier
+#		FC_$FAC$_100 = {
+#			remove_country_modifier = FC_$FAC$_100
+#		}
+#		FC_$FAC$_90 = {
+#			remove_country_modifier = FC_$FAC$_90
+#		}
+#		FC_$FAC$_80 = {
+#			remove_country_modifier = FC_$FAC$_80
+#		}
+#		FC_$FAC$_70 = {
+#			remove_country_modifier = FC_$FAC$_70
+#		}
+#		FC_$FAC$_60 = {
+#			remove_country_modifier = FC_$FAC$_60
+#		}
+#		FC_$FAC$_50 = {
+#			remove_country_modifier = FC_$FAC$_50
+#		}
+#		FC_$FAC$_45 = {
+#			remove_country_modifier = FC_$FAC$_45
+#		}
+#		FC_$FAC$_40 = {
+#			remove_country_modifier = FC_$FAC$_40
+#		}
+#		FC_$FAC$_35 = {
+#			remove_country_modifier = FC_$FAC$_35
+#		}
+#		FC_$FAC$_30 = {
+#			remove_country_modifier = FC_$FAC$_30
+#		}
+#		FC_$FAC$_25 = {
+#			remove_country_modifier = FC_$FAC$_25
+#		}
+#		FC_$FAC$_20 = {
+#			remove_country_modifier = FC_$FAC$_20
+#		}
+#		FC_$FAC$_15 = {
+#			remove_country_modifier = FC_$FAC$_15
+#		}
+#		FC_$FAC$_10 = {
+#			remove_country_modifier = FC_$FAC$_10
+#		}
+#		FC_$FAC$_7 = {
+#			remove_country_modifier = FC_$FAC$_7
+#		}
+#		FC_$FAC$_5 = {
+#			remove_country_modifier = FC_$FAC$_5
+#		}
+#		FC_$FAC$_3 = {
+#			remove_country_modifier = FC_$FAC$_3
+#		}
+#		FC_$FAC$_2 = {
+#			remove_country_modifier = FC_$FAC$_2
+#		}
+#		FC_$FAC$_1 = {
+#			remove_country_modifier = FC_$FAC$_1
+#		}
+#	}
+#}
+#FC_ModInertiaClear = {
+#	trigger_switch = {
+#		on_trigger = has_country_modifier
+#		FC_$FAC$In_100 = {
+#			remove_country_modifier = FC_$FAC$In_100
+#		}
+#		FC_$FAC$In_50 = {
+#			remove_country_modifier = FC_$FAC$In_50
+#		}
+#		FC_$FAC$In_25 = {
+#			remove_country_modifier = FC_$FAC$In_25
+#		}
+#		FC_$FAC$In_13 = {
+#			remove_country_modifier = FC_$FAC$In_13
+#		}
+#		FC_$FAC$In_6 = {
+#			remove_country_modifier = FC_$FAC$In_6
+#		}
+#		FC_$FAC$In_3 = {
+#			remove_country_modifier = FC_$FAC$In_3
+#		}
+#		FC_$FAC$In_2 = {
+#			remove_country_modifier = FC_$FAC$In_2
+#		}
+#		FC_$FAC$In_1 = {
+#			remove_country_modifier = FC_$FAC$In_1
+#		}
+#	}
+#}
