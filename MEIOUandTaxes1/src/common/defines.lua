@@ -557,7 +557,7 @@ NCountry = {
 	INSTITUTION_CAP_IMP_DEVELOPMENT = 10,  
 	INSTITUTION_BASE_IMP_DEVELOPMENT = 30,  
 
-	EMBRACE_INSTITUTION_COST = 2.5,  -- 2.5 per development (autonomy modified)
+	EMBRACE_INSTITUTION_COST = 1.25,  -- 2.5 per development (autonomy modified)
 	MAXIMUM_CONDOTTIERI = 0,  -- FROM 20 => meant to disable condotierri -- Base number of units you can rent out
 	CORRUPTION_COST = 0.03,  -- cost for monthly combat per development
 	STATE_MAINTENANCE_DEV_FACTOR = 0.01,  -- per dev
