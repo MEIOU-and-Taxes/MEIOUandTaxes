@@ -411,3 +411,48 @@ SetStateMaintOnProvChange = {
         }
     }
 }
+# This part calculates the State Properties in total and a total percentage of everything the country has.
+# It also calculates the State Property Capacity
+
+# This happens at the end of Census 017
+# This calculates on province level, which is then summed up to a country variable in SYS-Nat
+StatePropertyTotalCalc = {
+	set_key = { lhs = StatePropertyTotal value = 0 }
+	set_key = { lhs = PropertyTotal value = 0 }
+	#SumUp all BU properties
+	change_key = { lhs = StatePropertyTotal which = BU_Resources }
+	change_key = { lhs = StatePropertyTotal which = BU_Building }
+	#SumUp all properties from all provinces
+	change_key = { lhs = PropertyTotal which = Building_Total }	
+}
+#Goes through all important calculations for State Property
+StatePropertyEffect = {
+	StatePropertyCapacityCalc = yes
+	StatePropertyCapacityPerc = yes
+}
+
+## Calculates the theoretical softcap of StateProperty
+## Many things can influence the maximum capacity
+StatePropertyCapacityCalc = {
+	set_key = { lhs = StatePropertyCapacity value = 0 }
+	change_key = { lhs = StatePropertyCapacity value = 400 }
+		
+	change_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyFlat }
+	multiply_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyPerc }
+}
+
+##Calculates in % how much of your Capacity you use
+StatePropertyCapacityPerc = {
+	set_key = { lhs = StatePropertyPercCap value = 0 }
+	if = {
+		limit = {
+			check_key = { lhs = StatePropertyTotal value = 0.001 }
+			check_key = { lhs = StatePropertyCapacity value = 0.001 }
+		}
+		change_key = { lhs = StatePropertyPercCap which = StatePropertyTotal }
+		divide_key = { lhs = StatePropertyPercCap which = StatePropertyCapacity }
+	}
+	else = {
+		set_key = { lhs = StatePropertyPercCap value = 0 }
+	}
+}
