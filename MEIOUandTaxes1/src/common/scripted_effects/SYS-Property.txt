@@ -427,6 +427,7 @@ StatePropertyTotalCalc = {
 }
 #Goes through all important calculations for State Property
 StatePropertyEffect = {
+	StatePropertyTotalPercCalc = yes
 	StatePropertyCapacityCalc = yes
 	StatePropertyCapacityPerc = yes
 }
@@ -437,13 +438,30 @@ StatePropertyCapacityCalc = {
 	set_key = { lhs = StatePropertyCapacity value = 25 }
 	change_key = { lhs = StatePropertyCapacity value = 400 }
 		
-	#change_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyFlat }
-	#multiply_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyPerc }
+	change_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyFlat }
+	multiply_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyPerc }
 }
+
+## Calculates Percentage of state owned property of total
+StatePropertyTotalPercCalc = {
+	set_key = { lhs = StatePropertyPercTotal value = 0 }
+	
+	if = {
+		limit = {
+			check_key = { lhs = StatePropertyTotal value = 0.001 }
+		}
+		set_key = { lhs = StatePropertyPercTotal which = StatePropertyTotal }
+		divide_key = { lhs = StatePropertyPercTotal which = PropertyTotal }
+	}
+	else = {
+		set_key = { lhs = StatePropertyPercTotal value = 0 }
+	}
+}	
 
 ##Calculates in % how much of your Capacity you use
 StatePropertyCapacityPerc = {
 	set_key = { lhs = StatePropertyPercCap value = 0 }
+
 	if = {
 		limit = {
 			check_key = { lhs = StatePropertyTotal value = 0.001 }
@@ -451,6 +469,7 @@ StatePropertyCapacityPerc = {
 		}
 		change_key = { lhs = StatePropertyPercCap which = StatePropertyTotal }
 		divide_key = { lhs = StatePropertyPercCap which = StatePropertyCapacity }
+		multiply_key = { lhs = StatePropertyPercCap value = 100 }
 	}
 	else = {
 		set_key = { lhs = StatePropertyPercCap value = 0 }
