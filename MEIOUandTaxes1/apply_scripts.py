@@ -278,7 +278,7 @@ def link_file ( filepath, destpath ):
 	os.makedirs( os.path.dirname( destpath ), exist_ok=True )
 	os.link( filepath, destpath )
 
-def compile(compress=False, parse_init=True):
+def compile(compress=False, parse_init=True, debug=False):
 	start = time.time()
 
 	# files/paths to run through parsing
@@ -391,6 +391,8 @@ def compile(compress=False, parse_init=True):
 
 	file_count = len(parsepaths)
 	print(f"Compiling {file_count} files...")
+	if debug:
+		print(f"DEBUG: Compiling sequentially (slower)")
 	print(f'0% done', end='')
 	with multiprocessing.Pool() as pool:
 		if compress:

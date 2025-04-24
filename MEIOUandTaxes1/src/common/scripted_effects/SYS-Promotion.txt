@@ -128,7 +128,15 @@ Promotion_REPromotion = {
 		change_key = { lhs = Tmp_5 value = 90 }
 		set_key = { lhs = Tmp_6 which = RE_FillLifeC }
 		multiply_key = { lhs = Tmp_6 value = -1 }
-		divide_key = { lhs = Tmp_5 which = Tmp_6 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_5 value = 0.001 }
+			}
+			divide_key = { lhs = Tmp_5 which = Tmp_6 }
+		}
+		else = {
+			set_key = { lhs = Tmp_5 value = 0 }
+		}
 		multiply_key = { lhs = Tmp_5 value = 0.025 }
 
 		# Upper lower case handling: [-0.01,0.01]
@@ -341,6 +349,7 @@ Promotion_NODemotion = {
 	if = { # Check if NO_Total is at least this
 		limit = {
 			check_key = { lhs = NO_Total which = Ideal_NobleSize } # Nobles > Ideal Size
+			check_key = { lhs = NO_FillLifeC value = 0.001 }
 		}
 
 		set_key = { lhs = Tmp_0 value = 0.02 } # Base speed of change 1% of dif <- use this for balance
@@ -397,12 +406,42 @@ Promotion_GetNomadRestingPoint = {
 		limit = {
 			check_key = { lhs = NM_Total value = 0.001 } # make sure Nomads are around 
 		}
-		set_key = { lhs = Tmp_1 value = 100 }
-		set_key = { lhs = Tmp_2 which = Prov_BUPow } 
-		subtract_key = { lhs = Tmp_1 which = Tmp_2 } # e.g. 100 - 15 = 85 
-		multiply_key = { lhs = Tmp_1 value = 0.01 } #  e.g 85 x 0.01 = 0.85
-		multiply_key = { lhs = Tmp_1 which = NM_Total }
-		set_key = { lhs = Ideal_NomadSize which = Tmp_1 }
+		if = {
+			limit = {
+				OR = {
+					owner = {
+						OR = {
+							is_colonial_nation = yes
+							is_former_colonial_nation = yes
+							has_country_flag = changed_from_colonial_nation
+						}
+					}
+					AND = {
+						OR = {
+							continent = south_america
+							continent = north_america
+						}
+						owner = {
+							capital_scope = {
+								NOT = {
+									continent = south_america
+									continent = north_america
+								}
+							}
+						}
+					}
+				}
+			}
+			set_key = { lhs = Ideal_NomadSize value = 0 }
+		}
+		else = {
+			set_key = { lhs = Tmp_1 value = 100 }
+			set_key = { lhs = Tmp_2 which = Prov_BUPow } 
+			subtract_key = { lhs = Tmp_1 which = Tmp_2 } # e.g. 100 - 15 = 85 
+			multiply_key = { lhs = Tmp_1 value = 0.01 } #  e.g 85 x 0.01 = 0.85
+			multiply_key = { lhs = Tmp_1 which = NM_Total }
+			set_key = { lhs = Ideal_NomadSize which = Tmp_1 }
+		}
 	}
 }
 Promotion_NMPromotion = {
@@ -633,6 +672,7 @@ Promotion_BGDemotion = {
 	if = {
 		limit = {
 			check_key = { lhs = BG_Total which = Ideal_BurgherSize } # Burgher > IdealSize
+			check_key = { lhs = BG_FillLifeC value = 0.001 }
 		}
 		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
 

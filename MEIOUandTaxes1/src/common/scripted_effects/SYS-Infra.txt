@@ -558,6 +558,9 @@ Infra_SetMaintHelper = {
 				if = {
 					limit = {
 						check_key = { lhs = Tmp_1 value = 0.001 }
+						check_key = { lhs = Prod_S$slot$SizeCur value = 0.001 }
+						NOT = { is_key_equal = { lhs = Prod_S$slot$Size value = 0} }
+						
 					}
 					### Add a throughput factor
 					set_key = { lhs = Tmp_3 which = Prod_S$slot$SizeCur }
@@ -576,23 +579,22 @@ Infra_SetMaintHelper = {
 						set_key = { lhs = Tmp_3 value = 0 }	
 					}
 				}
-				else = { ### If industry is making losses, check if industry already developed full skill. If not make it decrease size slower based on lower skill
-					### Add a sophistication (skill) factor
-					set_key = { lhs = Tmp_4 which = Prod_S$slot$Soph }
-					multiply_key = { lhs = Tmp_4 value = 0.01 }
-
-					if = {
-						limit = { 
-							NOT = { check_key = { lhs = Tmp_4 value = 1 } } ### Skill Factor only applied if Skill < 100%
-						}
-						multiply_key = { lhs = Tmp_4 which = Tmp_4 } # Exponential effect of low skill
-
-						### Skill factor on perceived loss
-						### Skill * Skill * PM = Perceived Loss Margin
-						multiply_key = { lhs = Tmp_1 which = Tmp_4 }
-						set_key = { lhs = Tmp_4 value = 0 }
-					}
-				}
+				# As Skill is no handled differently and is much more dynamic, this is not purposeful anymore. 
+				#else = { ### If industry is making losses, check if industry already developed full skill. If not make it decrease size slower based on lower skill
+				#	### Add a sophistication (skill) factor
+				#	set_key = { lhs = Tmp_4 which = Prod_S$slot$Soph }
+				#	multiply_key = { lhs = Tmp_4 value = 0.01 }
+				#	if = {
+				#		limit = { 
+				#			NOT = { check_key = { lhs = Tmp_4 value = 1 } } ### Skill Factor only applied if Skill < 100%
+				#		}
+				#		multiply_key = { lhs = Tmp_4 which = Tmp_4 } # Exponential effect of low skill
+				#		### Skill factor on perceived loss
+				#		### Skill * Skill * PM = Perceived Loss Margin
+				#		multiply_key = { lhs = Tmp_1 which = Tmp_4 }
+				#		set_key = { lhs = Tmp_4 value = 0 }
+				#	}
+				#}
 
 			}
 
@@ -656,8 +658,8 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
 				#[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
-					limit = { has_global_flag = POP_Sim }
-					multiply_key = { lhs = Tmp_2 value = 0.666 }
+					limit = { has_global_flag = POP_Sim10 }
+					multiply_key = { lhs = Tmp_2 value = 1.5} #back to full speed for 100 ITs
 				}
 				change_key = { lhs = Building_$type$Up which = Tmp_2 }
                 
@@ -683,8 +685,8 @@ Infra_SetMaintHelper = {
 				set_key = { lhs = Tmp_2 which = Prod_S$slot$Change }
 				#[[IncomeMaint] multiply_key = { lhs = Tmp_2 value = 1.5 } ] ## fast change for commercial based prop
 				if = { # slower changes in sim
-					limit = { has_global_flag = POP_Sim }
-					multiply_key = { lhs = Tmp_2 value = 0.666 }
+					limit = { has_global_flag = POP_Sim10 }
+					multiply_key = { lhs = Tmp_2 value = 0.5 } #1/3 for the first 100 ITs
 				}
 				subtract_key = { lhs = Building_$type$Down which = Tmp_2 } # Building_$type$Down represents an abstract value for shrinkage desire.
 			}
@@ -911,9 +913,18 @@ Infra_SetMaint = {
 		# 1 - -------------
 		#         150      
 		set_key = { lhs = Tmp_3 which = Prov_BULoy }
-		divide_key = { lhs = Tmp_3 value = 150 } #`Industry_StateInvestment_Corruption_BULoy_Divisor~value`
-		multiply_key = { lhs = Tmp_3 value = -1 }
-		change_key = { lhs = Tmp_3 value = 1 }
+		if = {
+			limit = { 
+				check_key = { lhs = Tmp_3 value = 0.001 }
+			}
+			divide_key = { lhs = Tmp_3 value = 150 } #`Industry_StateInvestment_Corruption_BULoy_Divisor~value`
+			multiply_key = { lhs = Tmp_3 value = -1 }
+			change_key = { lhs = Tmp_3 value = 1 }
+		}
+		else = {
+			set_key = { lhs = Tmp_3 value = 1 }
+		}
+
 
 		set_key = { lhs = Building_$type$Wealth_Invested which = Building_$type$Wealth } # State investment
 		multiply_key = { lhs = Building_$type$Wealth_Invested which = Tmp_2 } # Apply State Investment Ability to get fraction that can be invested at a time
@@ -1118,13 +1129,13 @@ Infra_DoSizeHelper1 = { # expansion or shrinkage
             has_province_flag = Prod_S$slot$
             has_province_flag = Prod_S$slot$DmndB$type$
         }
-        change_key = { lhs = Prod_S$slot$Size which = Prod_S$slot$Change }      
+		change_key = { lhs = Prod_S$slot$Size which = Prod_S$slot$Change }		
     }
 }
 
 # Calculate Property size change.
 # (1)Building_$type$  	  = Current size of the property type
-# (1)Building_$type$Decay = There is an annual fixed decay of 2% per year.. This reduces size.
+# (1)Building_$type$Decay = There is an annual fixed decay of 1% per year.. This reduces size.
 # (2)Building_$type$Up    = represent how much industries expanded Property.
 # (3)Building_$type$Down  = represent how much industries shrinked within the Property.
 # New_Property_Size = (1)-(2)+(3)-(4)
@@ -1135,13 +1146,13 @@ Infra_DoSize = {
             check_key = { lhs = Building_$type$ value = 0.001 }
         }
                 
-        if = { # annual fixed decay of 2%
+        if = { # annual fixed decay of 1%
             limit = {
-				NOT = { has_global_flag = POP_Sim1 }
-                check_key = { lhs = Building_$type$ value = 0.001 }
+				NOT = { has_global_flag = POP_Sim4 }
+                check_key = { lhs = Building_$type$ value = 5 }
             }
             set_key = { lhs = Building_$type$Decay which = Building_$type$ }
-            multiply_key = { lhs = Building_$type$Decay value = 0.02 }
+            multiply_key = { lhs = Building_$type$Decay value = 0.01 }
         }
 
         subtract_key = { lhs = Building_$type$ which = Building_$type$Decay }
@@ -1824,7 +1835,8 @@ Infra_DoSpend = {
 Infra_DoDecay = { # add decay
 	if = {
 		limit = {
-			check_key = { lhs = Building_$type$ value = 0.001 }
+			check_key = { lhs = Building_$type$ value = 0.01 }
+			
 		}
 		multiply_key = { lhs = Building_$type$ShareSF value = 0.98 }
 		multiply_key = { lhs = Building_$type$ShareNM value = 0.98 }
@@ -2569,13 +2581,14 @@ Infra_GetAppealInfra = {
         Infra_GetAppealHelper = { class = BG weight = $weightBG$ return = $return$ [[rural] rural = $rural$ ] [[urban] urban = $urban$ ] [[nomad] nomad = $nomad$ ] }
         Infra_GetAppealHelper = { class = CL weight = $weightCL$ return = $return$ [[rural] rural = $rural$ ] [[urban] urban = $urban$ ] [[nomad] nomad = $nomad$ ] }
 
-		[[urban]
+		[[amenities] # amenities appeal
 			if = {
 				limit = {
-					always = $urban$
+					always = $amenities$
 				}
 				Infra_GetAmenities_Cap = { return = Public_Tmp0 } # Get amenities population capacity
 				set_key = { lhs = Public_Tmp1 which = RE_Total }
+				change_key = { lhs = Public_Tmp1 value = 5 } #make smaller resident pops look unsupported
 
 				## Multiply pre cost appeal by a modifier based on how much a city is over it's amenities limit
 				# Formula: (Residents / Cap)
@@ -2591,21 +2604,21 @@ Infra_GetAppealInfra = {
 					set_key = { lhs = Public_Tmp1 value = 0 }
 				}
 
-				# Maximum x3 appeal, min x 0.75
+				# Maximum x2.5 appeal, min x 0.75 (reduced to 2.5 by Corlis)
 				if = {
 					limit = {
-						check_key = { lhs = Public_Tmp0 value = 3 }
+						check_key = { lhs = Public_Tmp1 value = 2.5 }
 					}
-					set_key = { lhs = Public_Tmp0 value = 3 }
+					set_key = { lhs = Public_Tmp1 value = 2.5 }
 				}
 				else_if = {
 					limit = {
-						NOT = { check_key = { lhs = Public_Tmp0 value = 0.75 } }
+						NOT = { check_key = { lhs = Public_Tmp1 value = 0.75 } }
 					}
-					set_key = { lhs = Public_Tmp0 value = 0.75 }
+					set_key = { lhs = Public_Tmp1 value = 0.75 }
 				}
 
-				multiply_key = { lhs = $return$ which = Public_Tmp0 }
+				multiply_key = { lhs = $return$ which = Public_Tmp1 }
 				set_key = { lhs = Public_Tmp0 value = 0 }
 				set_key = { lhs = Public_Tmp1 value = 0 }
 			}
@@ -2653,13 +2666,16 @@ Infra_GetAppealInfra = {
 		# Appeal / Rank+1
 		divide_key = { lhs = $return$ which = Tmp_9 }
 
-		[[urban] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
+		[[amenities] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
 			if = {
-				limit = { always = $urban$ }
+				limit = { 
+					always = $amenities$
+				}
 
 				Infra_GetAmenities_Cap = { return = Public_Tmp0 } # Get amenities population capacity
 				set_key = { lhs = Public_Tmp1 which = RE_Total }
-
+				change_key = { lhs = Public_Tmp1 value = 5 } # make small resident pops look unsupported, to prevent edge cases
+				
 				if = {
 					limit = {
 						check_key = { lhs = Public_Tmp0 value = 0.001 }
@@ -2668,7 +2684,7 @@ Infra_GetAppealInfra = {
 				}
 				else = {
 					set_key = { lhs = Public_Tmp1 value = 0 }
-				}
+				} 
 
 				if = {
 					limit = { 
