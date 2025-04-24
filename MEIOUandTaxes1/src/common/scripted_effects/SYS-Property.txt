@@ -417,13 +417,41 @@ SetStateMaintOnProvChange = {
 # This happens at the end of Census 017
 # This calculates on province level, which is then summed up to a country variable in SYS-Nat
 StatePropertyTotalCalc = {
-	set_key = { lhs = StatePropertyTotal value = 0 }
 	set_key = { lhs = PropertyTotal value = 0 }
-	#SumUp all BU properties
+	#SumUp all properties from all provinces
+	change_key = { lhs = PropertyTotal which = Building_Total }
+	
+	### New Calc
+	### Each BU Property can be modified per province, how much impact on state property it has in total
+	set_key = { lhs = StatePropertyAgriculture which = BU_Agriculture }
+	multiply_key = { lhs = StatePropertyAgriculture which = Modi_StatePropertyAgriculture }
+	set_key = { lhs = StatePropertyForestry which = BU_Forestry }
+	multiply_key = { lhs = StatePropertyForestry which = Modi_StatePropertyForestry }
+	set_key = { lhs = StatePropertyExtraction which = BU_Extraction }
+	multiply_key = { lhs = StatePropertyExtraction which = Modi_StatePropertyExtraction }
+	set_key = { lhs = StatePropertyFishery which = BU_Fishery }
+	multiply_key = { lhs = StatePropertyFishery which = Modi_StatePropertyFishery }
+	set_key = { lhs = StatePropertyIndustrial which = BU_Industrial }
+	multiply_key = { lhs = StatePropertyIndustrial which = Modi_StatePropertyIndustrial }
+	set_key = { lhs = StatePropertyCommercial which = BU_Commercial }
+	multiply_key = { lhs = StatePropertyCommercial which = Modi_StatePropertyCommercial }
+	set_key = { lhs = StatePropertyAcademic which = BU_Academic }
+	multiply_key = { lhs = StatePropertyAcademic which = Modi_StatePropertyAcademic }
+	
+	### Adding the upper ones together to a total value
+	set_key = { lhs = StatePropertyTotalModified value = 0 }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyAgriculture }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyForestry }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyExtraction }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyFishery }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyIndustrial }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyCommercial }
+	change_key = { lhs = StatePropertyTotalModified which = StatePropertyAcademic }
+	
+	#SumUp all unmodified BU properties
+	set_key = { lhs = StatePropertyTotal value = 0 }
 	change_key = { lhs = StatePropertyTotal which = BU_Resources }
 	change_key = { lhs = StatePropertyTotal which = BU_Building }
-	#SumUp all properties from all provinces
-	change_key = { lhs = PropertyTotal which = Building_Total }	
 }
 #Goes through all important calculations for State Property
 StatePropertyEffect = {
@@ -465,10 +493,10 @@ StatePropertyCapacityPerc = {
 
 	if = {
 		limit = {
-			check_key = { lhs = StatePropertyTotal value = 0.001 }
+			check_key = { lhs = StatePropertyTotalModified value = 0.001 }
 			check_key = { lhs = StatePropertyCapacity value = 0.001 }
 		}
-		change_key = { lhs = StatePropertyPercCap which = StatePropertyTotal }
+		change_key = { lhs = StatePropertyPercCap which = StatePropertyTotalModified }
 		divide_key = { lhs = StatePropertyPercCap which = StatePropertyCapacity }
 		multiply_key = { lhs = StatePropertyPercCap value = 100 }
 	}
