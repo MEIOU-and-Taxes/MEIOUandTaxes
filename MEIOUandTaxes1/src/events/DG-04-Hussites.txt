@@ -1329,6 +1329,78 @@ country_event = {
 				    type = cb_disloyal_vassal
 				    months = 240
 			    }
+				reverse_add_opinion = {
+					who = PREV
+					modifier = changed_religion_fanatical
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = SIL }
+				any_owned_province = {
+					OR = {
+						area = lower_silesia_area
+						area = upper_silesia_area
+						province_id = 4002 #Jawor
+						province_id = 4003 #Glogow
+					}
+					religion = catholic
+				}
+			}
+			every_owned_province = {
+				limit = {
+					OR = {
+						area = lower_silesia_area
+						area = upper_silesia_area
+						province_id = 4002 #Jawor
+						province_id = 4003 #Glogow
+					}
+					religion = catholic
+				}
+				cede_province = SIL
+				add_core = SIL
+			}
+			SIL = {
+				change_religion = catholic
+				force_converted = yes
+				change_government = theocracy
+				define_ruler = {
+					name = "Konrad"
+					dynasty = "Piast"
+					age = 35
+				}
+				set_country_flag = catholic_silesia
+			}
+			reverse_add_opinion = {
+				who = SIL
+				modifier = changed_religion_fanatical
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = MRV }
+				any_owned_province = {
+					area = moravia_area
+					religion = catholic
+				}
+			}
+			every_owned_province = {
+				limit = {
+					area = moravia_area
+					religion = catholic
+				}
+				cede_province = MRV
+				add_core = MRV
+			}
+			MRV = {
+				change_religion = catholic
+				force_converted = yes
+				set_country_flag = catholic_moravia
+			}
+			reverse_add_opinion = {
+				who = MRV
+				modifier = changed_religion_fanatical
 			}
 		}
 		hidden_effect = {
@@ -1381,8 +1453,8 @@ country_event = {
 		kill_leader = { type = general }
 		random_owned_province = {
 			limit = { units_in_province = 1 controlled_by = owner has_siege = no }
-			kill_units = { who = ROOT type = infantry amount = 3 }
-			kill_units = { who = ROOT type = cavalry amount = 2 }
+			kill_units = { who = ROOT type = infantry amount = 5 }
+			kill_units = { who = ROOT type = cavalry amount = 5 }
 		}
 		if = {
 		    limit = {
@@ -1667,8 +1739,15 @@ province_event = {
 		religion = catholic
 		owner = { 
 		    any_neighbor_country = {
-			    religion = hussite
-				has_country_flag = hussite_wars_target
+				OR = {
+					AND = {
+						has_country_flag = hussite_wars_target
+						religion = hussite
+					}
+					has_country_flag = catholic_silesia
+					has_country_flag = catholic_moravia
+					has_country_flag = hussite_appanage
+				}
 			}
 			religion = catholic
 			num_of_cities = 5
@@ -1680,7 +1759,7 @@ province_event = {
 		any_neighbor_province = { MN_CheckRelSlot = { Type = value Religion = 4 } }
 	}
 	
-	mean_time_to_happen = { months = 48 }
+	mean_time_to_happen = { months = 36 }
 	
 	option = {
 		name = DG_Hussites.014.opta #Persecute them
@@ -2135,7 +2214,7 @@ country_event = {
 		has_regency = no
 		religion = hussite
 		NOT = { num_of_rebel_armies = 1 }
-		NOT = { religious_unity = 0.90 }
+		NOT = { religious_unity = 1.00 }
 		NOT = { stability = 3 }
 		any_owned_province = {
 			is_capital = no
@@ -2453,6 +2532,26 @@ country_event = {
 			        subject = PREV
 		        }
 			}
+		}
+		if = {
+			limit = { 
+				SIL = { 
+					exists = yes
+					has_country_flag = catholic_silesia
+					is_subject = no
+				}
+			}
+			inherit = SIL
+		}
+		if = {
+			limit = { 
+				MRV = { 
+					exists = yes
+					has_country_flag = catholic_moravia
+					is_subject = no
+				}
+			}
+			inherit = MRV
 		}
 	}
 	

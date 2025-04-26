@@ -1,0 +1,1137 @@
+###########################################################
+# Events for the Cossack Estate
+#
+# written by Henrik Lohmander
+#
+# rewritten for MEIOU&Taxes by Piterdaw
+###########################################################
+
+namespace = cossack_estate_events
+
+### COLONISATION OF THE STEPPES
+country_event = {
+	id = cossack_estate_events.1
+	title = cossack_estate_events.1.t
+	desc = cossack_estate_events.1.d
+	picture = COSSACK_ESTATE_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			culture_group = east_slavic
+			culture_group = west_slavic
+			culture_group = baltic
+		}
+		religion_group = christian
+		any_owned_province = {
+			OR = {
+				culture = ruthenian
+				culture = russian
+			}
+			any_neighbor_province = {
+				owned_by = ROOT
+				culture = ukrainian
+			}
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					OR = {
+						culture = ruthenian
+						culture = russian
+					}
+					any_neighbor_province = {
+						owned_by = ROOT
+						culture = ukrainian
+					}
+				}
+				save_event_target_as = serfs_fleeing_province
+			}
+			event_target:serfs_fleeing_province = {
+				random_neighbor_province = {
+					limit = { 
+						owned_by = ROOT 
+						culture = ukrainian
+					}
+					save_event_target_as = serfs_arriving_province
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = cossack_estate_events.1.a #These Serfs must be brought back.
+		goto = serfs_fleeing_province
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 90
+				}
+			}
+		}
+		event_target:serfs_fleeing_province = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+			Public_ChangePowNO = { inp = 20 type = value }
+		}
+		custom_tooltip = NO_pow_plus_20_tt
+		if = {
+			limit = {
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 1
+				}
+			}
+			add_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 5
+			}
+		}
+	}
+	option = {
+		name = cossack_estate_events.1.b #We cannot afford to anger the Cossacks.
+		goto = serfs_arriving_province
+		ai_chance = {
+			factor = 50
+		}
+		event_target:serfs_fleeing_province = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=-40 }
+		}
+		event_target:serfs_arriving_province = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=20 }
+		}
+	}
+}
+
+### COSSACK AGRESSION
+country_event = {
+	id = cossack_estate_events.2
+	title = cossack_estate_events.2.t
+	desc = {
+		trigger = { 
+			NOT = { government = tribal }
+		}
+		desc = cossack_estate_events.2.d
+	}
+	desc = {
+		trigger = {
+			government = tribal
+		}
+		desc = cossack_estate_events.2.d.tribes
+	}
+	picture = COSSACK_ESTATE_RAIDERS_eventPicture
+	goto = raided_province
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		num_of_cities = 6
+		NOT = { primary_culture = ukrainian }
+		any_known_country = {
+			OR = {
+				culture_group = east_slavic
+				culture_group = west_slavic
+				culture_group = baltic
+			}
+			religion_group = christian
+			is_free_or_tributary_trigger = yes
+			any_owned_province = {
+				culture = ukrainian
+				local_autonomy = 50
+			}
+		}
+		any_owned_province = {
+			OR = {
+				AND = {
+					check_key = { lhs = TR_Wealth value = 250 }
+					ROOT = { government = tribal }
+				}
+				AND = {
+					check_key = { lhs = BG_Wealth value = 500 }
+					ROOT = { NOT = { government = tribal } }
+				}
+			}
+			OR = {
+				any_neighbor_province = {
+					NOT = { owned_by = ROOT }
+					culture = ukrainian
+				}
+				AND = {
+					has_port = yes
+					OR = {
+						region = crimea_region
+						region = north_anatolia_region
+					}
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					OR = {
+						AND = {
+							check_key = { lhs = TR_Wealth value = 250 }
+							ROOT = { government = tribal }
+						}
+						AND = {
+							check_key = { lhs = BG_Wealth value = 500 }
+							ROOT = { NOT = { government = tribal } }
+						}
+					}
+					OR = {
+						any_neighbor_province = {
+							NOT = { owned_by = ROOT }
+							culture = ukrainian
+						}
+						AND = {
+							has_port = yes
+							OR = {
+								region = crimea_region
+								region = north_anatolia_region
+							}
+						}
+					}
+				}
+				save_event_target_as = raided_province
+			}
+			random_known_country = {
+				limit = {
+					OR = {
+						culture_group = east_slavic
+						culture_group = west_slavic
+						culture_group = baltic
+					}
+					religion_group = christian
+					is_free_or_tributary_trigger = yes
+					any_owned_province = {
+						culture = ukrainian
+					}
+				}
+				save_event_target_as = cossacks_here_target
+			}
+		}
+	}
+	
+	option = {
+		name = cossack_estate_events.2.a #Demand that the Cossacks be brought to Justice!
+		ai_chance = {
+			factor = 100
+		}
+		event_target:cossacks_here_target = {
+			country_event  = { id = cossack_estate_events.3 days = 7 }
+			random_owned_province = {
+				limit = { culture = ukrainian }
+				Public_ChangeClassWealthVal = { class=TR type=value inp=100 }
+			}
+		}
+		if = {
+			limit = {
+				event_target:cossacks_here_target = {
+					check_key = { lhs = TR_Wealth value = 250 }
+				}
+			}
+			event_target:raided_province = {
+				Public_ChangeClassWealthVal = { class=TR type=value inp=-100 }
+				add_devastation = 25
+			}
+		}
+		else_if = {
+			limit = {
+				event_target:cossacks_here_target = {
+					check_key = { lhs = BG_Wealth value = 250 }
+				}
+			}
+			event_target:raided_province = {
+				Public_ChangeClassWealthVal = { class=BG type=value inp=-100 }
+				add_devastation = 25
+			}
+		}
+	}
+	option = {
+		name = cossack_estate_events.2.b #We will just have to let this slide.
+		ai_chance = {
+			factor = 0
+		}
+		event_target:cossacks_here_target = {
+			random_owned_province = {
+				limit = { culture = ukrainian }
+				Public_ChangeClassWealthVal = { class=TR type=value inp=100 }
+			}
+		}
+		if = {
+			limit = {
+				government = tribal
+			}
+			event_target:raided_province = {
+				Public_ChangeClassWealthVal = { class=TR type=value inp=-100 }
+				add_devastation = 25
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-10 }
+		}
+		else_if = {
+			limit = {
+				NOT = { government = tribal }
+			}
+			event_target:raided_province = {
+				Public_ChangeClassWealthVal = { class=BG type=value inp=-100 }
+				add_devastation = 25
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+		}
+	}
+}
+
+### COSSACK AGRESSOR
+country_event = {
+	id = cossack_estate_events.3
+	title = cossack_estate_events.3.t
+	desc = cossack_estate_events.3.d
+	picture = COSSACK_ESTATE_RAIDERS_eventPicture
+	
+	is_triggered_only = yes #from cossack_estate_events.2
+	
+	option = {
+		name = cossack_estate_events.3.a #This matter is beyond our control!
+		ai_chance = {
+			factor = 75
+			modifier = {
+				factor = 0.5
+				FROM = {
+					army_strength = {
+						who = ROOT
+						value = 1.5
+					}
+				}
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 25 }
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { num_of_loans = 1 }
+			}
+		}
+		FROM = {
+			country_event  = { id = cossack_estate_events.4 days = 7 }
+		}
+		add_opinion = { who = FROM modifier = cossack_raids_opinion }
+		tooltip = {
+			reverse_add_casus_belli = {
+				type = cb_insult
+				target = FROM
+				months = 36
+			}
+		}
+	}
+	option = {
+		name = cossack_estate_events.3.b #Bring them to Justice!
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 0
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 90
+				}
+			}
+		}
+		add_treasury = -25
+		hidden_effect = {
+			every_owned_province = {
+				limit = {
+					culture = ukrainian
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=-20 }
+			}
+		}
+		custom_tooltip = TR_loy_minus_20_tt
+		FROM  = {
+			country_event  = { id = cossack_estate_events.5 days = 7 }
+		}
+		if = {
+			limit = {
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 1
+				}
+			}
+			add_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 5
+			}
+		}
+	}
+}
+
+### THE AGRESSOR RESPONSE A
+country_event = {
+	id = cossack_estate_events.4
+	title = cossack_estate_events.4.t
+	desc = cossack_estate_events.4.d
+	picture = COSSACK_ESTATE_RAIDERS_eventPicture
+	
+	is_triggered_only = yes #from cossack_estate_events.5
+	
+	option = {
+		name = cossack_estate_events.4.a #We care little for such excuses.
+		add_opinion = { who = FROM modifier = cossack_raids_opinion }
+		add_casus_belli = {
+		   target = FROM
+		   type = cb_insult
+		   months = 120
+		}
+	}
+}
+
+### THE AGRESSOR RESPONSE B
+country_event = {
+	id = cossack_estate_events.5
+	title = cossack_estate_events.5.t
+	desc = cossack_estate_events.5.d
+	picture = COSSACK_ESTATE_RAIDERS_eventPicture
+	
+	is_triggered_only = yes #from cossack_estate_events.5
+	
+	option = {
+		name = cossack_estate_events.5.a #If we could only believe that.
+		add_treasury = 25
+		add_prestige = 5
+	}
+}
+
+### GROWTH OF COSSACK POWER
+country_event = {
+	id = cossack_estate_events.6
+	title = cossack_estate_events.6.t
+	desc = cossack_estate_events.6.d
+	picture = COSSACK_ESTATE_eventPicture
+	goto = cossack_powerhouse
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			culture_group = east_slavic
+			culture_group = west_slavic
+			culture_group = baltic
+		}
+		religion_group = christian
+		any_owned_province = {
+			culture = ukrainian
+			local_autonomy = 50
+		}
+		NOT = { adm_tech = 50 }
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	immediate = {
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					culture = ukrainian
+					local_autonomy = 50
+				}
+				save_event_target_as = cossack_powerhouse
+			}
+		}
+	}
+	
+	option = {
+		name = cossack_estate_events.6.a #Ok
+		event_target:cossack_powerhouse = {
+			Public_ChangePowTR = { inp = 20 type = value }
+		}
+		custom_tooltip = TR_pow_plus_20_tt
+	}
+}
+
+### DECLINE OF COSSACK POWER
+country_event = {
+	id = cossack_estate_events.7
+	title = cossack_estate_events.7.t
+	desc = cossack_estate_events.7.d
+	picture = COSSACK_ESTATE_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			has_country_modifier = extended_cossack_registry
+			has_country_modifier = cossack_registry
+			AND = {
+				has_country_modifier = restricted_cossack_registry
+				adm_tech = 50
+			}
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	option = {
+		name = cossack_estate_events.7.a #Ok
+		if = {
+			limit = {
+				has_country_modifier = restricted_cossack_registry
+				NOT = { any_owned_province = { culture = ukrainian } }
+			}
+			remove_country_modifier = restricted_cossack_registry
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = cossack_registry
+				NOT = { any_owned_province = { culture = ukrainian } }
+			}
+			remove_country_modifier = cossack_registry
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = extended_cossack_registry
+				NOT = { any_owned_province = { culture = ukrainian } }
+			}
+			remove_country_modifier = extended_cossack_registry
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = restricted_cossack_registry
+				adm_tech = 50
+			}
+			remove_country_modifier = restricted_cossack_registry
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = cossack_registry
+			}
+			remove_country_modifier = cossack_registry
+			add_country_modifier = { name = restricted_cossack_registry duration = -1 }
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = extended_cossack_registry
+			}
+			remove_country_modifier = extended_cossack_registry
+			add_country_modifier = { name = cossack_registry duration = -1 }
+		}
+	}
+}
+
+### PETITION FOR PRIVILEGES
+country_event = {
+	id = cossack_estate_events.8
+	title = cossack_estate_events.8.t
+	desc = cossack_estate_events.8.d
+	picture = COSSACK_ESTATE_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			has_country_modifier = cossack_registry
+			has_country_modifier = restricted_cossack_registry
+		}
+		any_owned_province = {
+			culture = ukrainian
+			local_autonomy = 50
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	option = {
+		name = cossack_estate_events.8.a #We need more registered Cossacks!
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 50 }
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { num_of_loans = 1 }
+			}
+		}
+		add_treasury = -50
+		if = {
+			limit = {
+				has_country_modifier = restricted_cossack_registry
+			}
+			remove_country_modifier = restricted_cossack_registry
+			add_country_modifier = { name = cossack_registry duration = -1 }
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = cossack_registry
+			}
+			remove_country_modifier = cossack_registry
+			add_country_modifier = { name = extended_cossack_registry duration = -1 }
+		}
+		hidden_effect = {
+			random_owned_province = {
+				limit =  { 
+					culture = ukrainian 
+					check_key = { lhs = TR_Wealth value = 10 }
+				}
+				Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+			}
+			random_owned_province = {
+				limit =  { 
+					culture = ukrainian 
+					check_key = { lhs = TR_Wealth value = 10 }
+				}
+				Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+			}
+		}
+	}
+	option = {
+		name = cossack_estate_events.8.b #Let them tend to their Steppes.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0.1
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 90
+				}
+			}
+			modifier = {
+				factor = 0.1
+				is_at_war = yes
+			}
+		}
+		if = {
+			limit = {
+				any_owned_province = {
+					culture = ukrainian
+					is_core = ZAZ
+				}	
+			}
+			random_owned_province = {
+				limit = {
+					culture = ukrainian
+					is_core = ZAZ
+				}
+				spawn_rebels = {
+					type = nationalist_rebels
+					size = 3
+					win = yes
+				}
+			}
+		}
+		else = {
+			random_owned_province = {
+				limit = {
+					culture = ukrainian
+				}
+				spawn_rebels = {
+					type = cossack_rebels
+					size = 3
+					win = yes
+				}
+			}
+		}
+		hidden_effect = {
+			every_owned_province = {
+				limit = {
+					culture = ukrainian
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=-40 }
+			}
+		}
+		custom_tooltip = TR_loy_minus_40_tt
+		if = {
+			limit = {
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 1
+				}
+			}
+			add_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 7.5
+			}
+		}
+	}
+}
+
+### SUPPLIES FOR THE COSSACKS
+country_event = {
+	id = cossack_estate_events.9
+	title = cossack_estate_events.9.t
+	desc = cossack_estate_events.9.d
+	picture = COSSACK_ESTATE_eventPicture
+	goto = supply_target
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			culture_group = east_slavic
+			culture_group = west_slavic
+			culture_group = baltic
+		}
+		religion_group = christian
+		any_owned_province = {
+			culture = ukrainian
+			local_autonomy = 50
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	immediate = {
+		random_owned_province = {
+			limit = {
+				culture = ukrainian
+				local_autonomy = 50
+			}
+			save_event_target_as = supply_target
+		}
+	}
+	
+	option = {
+		name = cossack_estate_events.9.a #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 25 }
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { num_of_loans = 1 }
+			}
+		}
+		add_treasury = -25
+		event_target:supply_target = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=25 }
+			Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+		}
+	}
+	option = {
+		name = cossack_estate_events.9.b #
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0.1
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 90
+				}
+			}
+		}
+		event_target:supply_target = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=-25 }
+		}
+		if = {
+			limit = {
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 1
+				}
+			}
+			add_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 2.5
+			}
+		}
+	}
+}
+
+### GRAIN TRADE DISTURBANCES
+country_event = {
+	id = cossack_estate_events.10
+	title = cossack_estate_events.10.t
+	desc = cossack_estate_events.10.d
+	picture = COSSACK_ESTATE_RAIDERS_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			culture_group = east_slavic
+			culture_group = west_slavic
+			culture_group = baltic
+		}
+		religion_group = christian
+		any_owned_province = {
+			culture = ukrainian
+			local_autonomy = 50
+		}
+		any_owned_province = {
+			OR = {
+				culture = ukrainian
+				culture = russian
+				culture = ruthenian
+			}
+			OR = {
+				has_province_modifier = TN_Minor
+				has_province_modifier = TN_Important
+				has_province_modifier = TN_Major
+			}
+			check_key = { lhs = BG_Wealth value = 250 }
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	immediate = {
+		random_owned_province = {
+			limit = {
+				culture = ukrainian
+				local_autonomy = 50
+			}
+			save_event_target_as = stolen_grain_cossacks
+		}
+		random_owned_province = {
+			limit = {
+				OR = {
+					culture = ukrainian
+					culture = russian
+					culture = ruthenian
+				}
+				OR = {
+					has_province_modifier = TN_Minor
+					has_province_modifier = TN_Important
+					has_province_modifier = TN_Major
+				}
+				check_key = { lhs = BG_Wealth value = 250 }
+			}
+			save_event_target_as = stolen_grain_burghers
+		}
+	}
+	
+	option = {
+		name = cossack_estate_events.10.a #Support the $ESTATE_COSSACKS$.
+		goto = stolen_grain_cossacks
+		ai_chance = {
+			factor = 50
+		}
+		event_target:stolen_grain_cossacks = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=40 }
+			Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+		}
+		event_target:stolen_grain_burghers = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=-40 }
+			Public_ChangeClassWealthVal = { class=BG type=value inp=-25 }
+		}
+		add_country_modifier = { name = minor_trade_crisis duration = 730 }
+	}
+	option = {
+		name = cossack_estate_events.10.b #Supports the $ESTATE_BURGHERS$.
+		goto = stolen_grain_burghers
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0.1
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 90
+				}
+			}
+		}
+		event_target:stolen_grain_cossacks = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=-40 }
+			Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+		}
+		event_target:stolen_grain_burghers = {
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=40 }
+			Public_ChangeClassWealthVal = { class=BG type=value inp=-25 }
+		}
+		if = {
+			limit = {
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 1
+				}
+			}
+			add_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 2.5
+			}
+		}
+	}
+}
+
+### UNREST AMONG COSSACKS
+country_event = {
+	id = cossack_estate_events.12
+	title = cossack_estate_events.12.t
+	desc = cossack_estate_events.12.d
+	picture = COSSACK_ESTATE_UPSET_eventPicture
+	goto = unrest_province_1
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	
+	trigger = {
+		OR = {
+			culture_group = east_slavic
+			culture_group = west_slavic
+			culture_group = baltic
+		}
+		religion_group = christian
+		NOT = { adm_tech = 50 }
+		any_owned_province = {
+			culture = ukrainian
+			local_autonomy = 50
+		}
+		OR = {
+			has_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 50
+			}
+			AND = {
+				NOT = { has_country_modifier = extended_cossack_registry }
+				NOT = { has_country_modifier = cossack_registry }
+				NOT = { has_country_modifier = restricted_cossack_registry }
+			}
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { has_country_flag = pawluk_uprising }
+		NOT = { has_disaster = chmielnicki_uprising }
+	}
+	
+	immediate = {
+		random_owned_province = {
+			limit = {
+				culture = ukrainian
+				local_autonomy = 50
+			}
+			save_event_target_as = unrest_province_1
+		}
+		random_owned_province = {
+			limit = {
+				culture = ukrainian
+				local_autonomy = 50
+			}
+			save_event_target_as = unrest_province_2
+		}
+		random_owned_province = {
+			limit = {
+				culture = ukrainian
+				local_autonomy = 50
+			}
+			save_event_target_as = unrest_province_3
+		}
+	}
+
+	option = {
+		name = cossack_estate_events.12.a #
+		ai_chance = {
+			factor = 75
+		}
+		event_target:unrest_province_1 = {
+			add_local_autonomy = 25
+		}
+		event_target:unrest_province_2 = {
+			add_local_autonomy = 25
+		}
+		event_target:unrest_province_3 = {
+			add_local_autonomy = 25
+		}
+	}
+	option = {
+		name = cossack_estate_events.12.b #
+		ai_chance = {
+			factor = 25
+			modifier = {
+				factor = 0.1
+				is_at_war = yes
+			}
+			modifier = {
+				factor = 0.1
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 90
+				}
+			}
+		}
+		event_target:unrest_province_1 = {
+			spawn_rebels = {
+				type = cossack_rebels
+				size = 3
+				win = yes
+			}
+		}
+		if = {
+			limit = {
+				has_disaster_progress = {
+					disaster = chmielnicki_uprising
+					value = 1
+				}
+			}
+			add_disaster_progress = {
+				disaster = chmielnicki_uprising
+				value = 7.5
+			}
+		}
+	}
+}
+
+### THE COSSACK REGISTRY
+country_event = {
+	id = cossack_estate_events.16
+	title = cossack_estate_events.16.t
+	desc = cossack_estate_events.16.d
+	picture = COSSACK_ESTATE_eventPicture
+	
+	is_triggered_only = yes #on_thri_yearly_pulse on_actions
+	fire_only_once = yes
+	
+	trigger = {
+		OR = {
+			culture_group = east_slavic
+			culture_group = west_slavic
+			culture_group = baltic
+		}
+		religion_group = christian
+		is_free_or_tributary_trigger = yes
+		num_of_owned_provinces_with = {
+		    value = 5
+			culture = ukrainian
+		}
+		NOT = { primary_culture = ukrainian }
+		NOT = { adm_tech = 50 }
+	}
+	
+	option = {
+		name = cossack_estate_events.16.a #Establish Cossack Registry.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 1.5
+				OR = {
+					tag = POL
+					tag = PLC
+				}
+			}
+			modifier = {
+				factor = 0.1
+				OR = {
+					tag = RUS
+					tag = MOS
+				}
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { treasury = 50 }
+			}
+			modifier = {
+				factor = 0.1
+				NOT = { num_of_loans = 1 }
+			}
+		}
+		add_treasury = -50
+		add_mil_power = -50
+		add_country_modifier = {
+			name = cossack_registry
+			duration = -1
+		}
+		hidden_effect = {
+			random_owned_province = {
+				limit =  { 
+					culture = ukrainian 
+					check_key = { lhs = TR_Wealth value = 10 }
+				}
+				Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+			}
+			random_owned_province = {
+				limit =  { 
+					culture = ukrainian 
+					check_key = { lhs = TR_Wealth value = 10 }
+				}
+				Public_ChangeClassWealthVal = { class=TR type=value inp=25 }
+			}
+		}
+	}
+	option = {
+		name = cossack_estate_events.16.b #Let them tend to their Steppes.
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 0.1
+				OR = {
+					tag = POL
+					tag = PLC
+				}
+			}
+			modifier = {
+				factor = 1.5
+				OR = {
+					tag = RUS
+					tag = MOS
+				}
+			}
+			modifier = {
+				factor = 0.1
+				is_at_war = yes
+			}
+		}
+		if = {
+			limit = {
+				any_owned_province = {
+					culture = ukrainian
+					is_core = ZAZ
+				}	
+			}
+			random_owned_province = {
+				limit = {
+					culture = ukrainian
+					is_core = ZAZ
+				}
+				spawn_rebels = {
+					type = nationalist_rebels
+					size = 4
+					win = yes
+				}
+			}
+		}
+		else = {
+			random_owned_province = {
+				limit = {
+					culture = ukrainian
+				}
+				spawn_rebels = {
+					type = cossack_rebels
+					size = 4
+					win = yes
+				}
+			}
+		}
+		every_owned_province = {
+			limit = {
+				culture = ukrainian
+			}
+			add_province_modifier = {
+				name = cossack_unrest 
+				duration = 9125 #50 years
+			} 
+		}
+		hidden_effect = {
+			every_owned_province = {
+				limit = {
+					culture = ukrainian
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=TR Amount=-40 }
+			}
+		}
+		custom_tooltip = TR_loy_minus_40_tt
+	}
+}
