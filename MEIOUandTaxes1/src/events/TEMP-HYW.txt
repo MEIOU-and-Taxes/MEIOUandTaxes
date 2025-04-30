@@ -1268,33 +1268,38 @@ country_event = {
 	picture = LA_PUCELLE_eventPicture
 	major = yes
 	fire_only_once = yes
+
 	trigger = {
 		has_global_flag = hundred_years_war
-		tag = FRA
-		# controls = 186
 		OR = {
-			AND = {
-				ENG = {
-					check_variable = {
-						which = "Demesne_in_Aquitaine"
-						value = 10
-					}
-				}
-				ENG = {
-					check_variable = {
-						which = "Demesne_in_Normandie"
-						value = 3
-					}
-				}
-			}
-			ENG = {
-				check_variable = {
-					which = "Demesne_in_France"
-					value = 25
-				}
-			}
+			has_global_flag = treaty_of_troyes
+			is_year = 1430
 		}
-		war_with = ENG 
+		tag = FRA
+		war_with = ENG
+		# controls = 186
+		# OR = {
+		# 	AND = {
+		# 		ENG = {
+		# 			check_variable = {
+		# 				which = "Demesne_in_Aquitaine"
+		# 				value = 10
+		# 			}
+		# 		}
+		# 		ENG = {
+		# 			check_variable = {
+		# 				which = "Demesne_in_Normandie"
+		# 				value = 3
+		# 			}
+		# 		}
+		# 	}
+		# 	ENG = {
+		# 		check_variable = {
+		# 			which = "Demesne_in_France"
+		# 			value = 25
+		# 		}
+		# 	}
+		# }
 		#had_country_flag = { flag = king_jean_released days = 3650 }
 	}
 	mean_time_to_happen = {
@@ -1524,6 +1529,109 @@ country_event = {
 	}
 }
 
+#French notification of Jeanne's capture
+country_event = {
+	id = flavor_hyw.110
+	title = "flavor_hyw.110.t"
+	desc = "flavor_hyw.110.d"
+	picture = LA_PUCELLE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+
+	trigger = {
+		tag = ENG
+		has_global_flag = jeanne_d_arc
+		has_global_flag = hundred_years_war
+	}
+	option = {
+		name = "flavor_hyw.110.a"
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Jeanne is captured:flavor_hyw.110"
+		kill_leader = {
+			type = "Jeanne d'Arc"
+		}
+
+		remove_country_modifier = "godsent_jeanne_d_arc"
+		add_legitimacy = -10
+
+		hidden_effect = {
+			ENG = {
+				country_event = {
+					id = flavor_hyw.111
+					days = 5
+				}
+			}
+			country_event = {
+				id = flavor_hyw.1500
+				days = 365
+			}
+		}
+	}
+}
+
+#English notification of Jeanne's capture
+country_event = {
+	id = flavor_hyw.111
+	title = "flavor_hyw.111.t"
+	desc = "flavor_hyw.111.d"
+	picture = LA_PUCELLE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_hyw.111.a"
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Jeanne is captured:flavor_hyw.111"
+		add_legitimacy = 20
+		country_event = {
+			id = flavor_hyw.112
+			days = 365
+			tooltip = "flavor_hyw.112.d"
+		}
+	}
+}
+
+#Jeanne's trial and execution - English
+country_event = {
+	id = flavor_hyw.112
+	title = "flavor_hyw.112.t"
+	desc = "flavor_hyw.112.d"
+	picture = LA_PUCELLE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_hyw.112.a"
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Jeanne is burnt at Rouen:flavor_hyw.112"
+		add_legitimacy = 10
+		country_event = {
+			id = flavor_hyw.113
+			days = 365
+			tooltip = "flavor_hyw.113.tt"
+		}
+	}
+}
+
+#Jeanne's trial and execution - French
+country_event = {
+	id = flavor_hyw.113
+	title = "flavor_hyw.113.t"
+	desc = "flavor_hyw.113.d"
+	picture = LA_PUCELLE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	
+	option = {
+		name = "flavor_hyw.113.a"
+		log = "FE-TempHYW:[GetYear]:[Root.GetName]:Jeanne is burnt at Rouen:flavor_hyw.113"
+		add_country_modifier = {
+			name = french_last_stand
+			duration = -1
+		}
+
+		set_country_flag = "joan_of_arc_executed"
+	}
+}
+
+
 country_event = {
 	id = flavor_hyw.200
 	title = "flavor_hyw.200.t"
@@ -1599,10 +1707,14 @@ country_event = {
 				}
 			}
 		}
-		country_event = {
-			id = flavor_hyw.202
-			days = 20
-			tooltip = "flavor_hyw.202.d"
+		france_superregion = {
+			limit = {
+				owned_by = ENG
+			}
+			add_core = FRA
+			cede_province = FRA
+			remove_core = ENG
+			remove_claim = ENG
 		}
 		override_country_name = FRA_butENG
 		Effect_set_capital = { target = 183 }
@@ -1727,7 +1839,7 @@ country_event = {
 		ai_chance = {
 			factor = 90
 		}
-		rouen_group = {
+		east_france_region = {
 			limit = {
 				owned_by = ENG
 			}
@@ -1735,7 +1847,7 @@ country_event = {
 			remove_core = ENG
 			remove_claim = ENG
 		}
-		troyes_eng_group = {
+		ouest_france_region = {
 			limit = {
 				owned_by = ENG
 			}
@@ -1818,7 +1930,7 @@ country_event = {
 		ai_chance = {
 			factor = 90
 		}
-		bretigny_eng_group = {
+		languedoc_region = {
 			limit = {
 				owned_by = ENG
 			}
@@ -1827,7 +1939,7 @@ country_event = {
 			remove_claim = ENG
 		}
 
-		bretigny_fra_group = {
+		aquitaine_region = {
 			limit = {
 				owned_by = ENG
 			}
@@ -1959,7 +2071,8 @@ country_event = {
 		ai_chance = {
 			factor = 90
 		}
-		63 = {
+		france_superregion = {
+			add_core = FRA
 			cede_province = FRA
 			remove_core = ENG
 			remove_claim = ENG
@@ -3554,6 +3667,9 @@ country_event = {
 	title = "flavor_hyw.1100.t"
 	desc = "flavor_hyw.1100.d"
 	picture = CIVIL_WAR_eventPicture
+
+	fire_only_once = yes
+
 	trigger = {
 		tag = ENG
 		NOT = { is_year = 1381 }
@@ -3561,6 +3677,32 @@ country_event = {
 		NOT = { has_country_flag = peasant_revolt }
 		NOT = { has_country_flag = john_ball }
 	}
+
+	mean_time_to_happen = {
+		months = 72
+		modifier = {
+			factor = 0.5
+			NOT = { stability = 0 }
+		}
+		modifier = {
+			factor = 0.5
+			war_exhaustion = 12
+		}
+		modifier = {
+			factor = 0.5
+			num_of_loans = 2
+		}
+		modifier = {
+			factor = 0.5
+			has_global_flag = treaty_of_bruges
+		}
+		modifier = {
+			factor = 0.9
+			war_with = FRA
+		}
+	}
+
+
 	option = {
 		name = "flavor_hyw.1100.a"
 		set_country_flag = john_ball
@@ -3573,6 +3715,9 @@ country_event = {
 	title = "flavor_hyw.1101.t"
 	desc = "flavor_hyw.1101.d"
 	picture = CIVIL_WAR_eventPicture
+
+	fire_only_once = yes
+
 	trigger = {
 		tag = ENG
 		has_global_flag = hundred_years_war
@@ -3582,7 +3727,7 @@ country_event = {
 		has_regency = no
 	}
 	mean_time_to_happen = {
-		months = 500
+		months = 60
 		modifier = {
 			factor = 0.5
 			NOT = { stability = 0 }
@@ -3638,6 +3783,15 @@ country_event = {
 		}
 		set_country_flag = peasant_revolt
 	}
+
+	after = { 
+		hidden_effect = {
+			country_event = {
+				id = flavor_hyw.1102
+				days = 20
+			}
+		}
+	}
 }
 
 #For London
@@ -3646,6 +3800,9 @@ country_event = {
 	title = "flavor_hyw.1102.t"
 	desc = "flavor_hyw.1102.d"
 	picture = CIVIL_WAR_eventPicture
+
+	is_triggered_only = yes
+
 	trigger = {
 		tag = ENG
 		has_country_flag = peasant_revolt
@@ -3710,6 +3867,10 @@ country_event = {
 	desc = "flavor_hyw.1105.d"
 	picture = CIVIL_WAR_eventPicture
 	is_triggered_only = yes
+	immediate = {
+		disband_rebels = militia_rebels
+	}
+
 	option = {
 		name = "flavor_hyw.1105.a"
 		ai_chance = {
@@ -4144,9 +4305,6 @@ country_event = {
 				}
 				country_event = { id = Init.1 }
 			}
-			define_ruler = {
-				dynasty = FRA
-			}
 		}
 		create_subject = {
 			subject_type = appanage_subject
@@ -4154,7 +4312,14 @@ country_event = {
 		}
 		NRM = {
 			change_religion = event_target:NRM_overlord
-			set_dynasty = ROOT
+			hidden_effect = {
+				set_dynasty = ROOT
+			}
+			set_country_flag = title_3
+			add_country_modifier = {
+				name = title_3
+				duration = -1
+			}
 		}
 		if = {
 			limit = {
@@ -4235,7 +4400,14 @@ country_event = {
 		}
 		ANJ = {
 			change_religion = event_target:ANJ_overlord
-			set_dynasty = ROOT
+			hidden_effect = {
+				set_dynasty = ROOT
+			}
+			set_country_flag = title_3
+			add_country_modifier = {
+				name = title_3
+				duration = -1
+			}
 		}
 		if = {
 			limit = {
@@ -4253,6 +4425,81 @@ country_event = {
 		ai_chance = { factor = 0 }
 		Stab_Subtract2 = yes
 		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+	}
+}
+
+#Jean II died in captivity
+country_event = {
+	id = flavor_hyw.1305
+	title = flavor_hyw.1305.t
+	desc = "flavor_hyw.1305.d"
+	picture = REFORM_eventPicture
+	
+	fire_only_once = yes
+	
+	trigger = {
+		tag = ENG
+		FRA = {
+			has_country_flag = ruler_prisonner_of_war
+		}
+		is_year = 1364
+	}
+	
+	mean_time_to_happen = {
+		months = 3
+	}
+	
+	immediate = {
+		set_ruler = heir_fra_hyw_pow
+		clr_country_flag = ruler_prisonner_of_war
+	}
+	
+	option = { # Jean II died in captivity
+		name = flavor_hyw.1305.a
+		add_prestige = -30
+	}
+}
+
+
+#HYW France introduction
+country_event = {
+	id = flavor_hyw.10000
+	title = flavor_hyw.10000.t
+	desc = "flavor_hyw.10000.d"
+	picture = REFORM_eventPicture
+	
+	fire_only_once = yes	
+	is_triggered_only = yes
+
+	trigger = {
+		tag = FRA
+		not = { is_year = 1357 }
+	}
+	
+	option = {
+		name = flavor_hyw.10000.a
+		custom_tooltip = flavor_hyw.10000.tt
+	}
+}
+
+#HYW England introduction
+country_event = {
+	id = flavor_hyw.10001
+	title = flavor_hyw.10001.t
+	desc = "flavor_hyw.10001.d"
+	picture = REFORM_eventPicture
+	
+	fire_only_once = yes	
+	is_triggered_only = yes
+
+	trigger = {
+		tag = ENG
+		not = { is_year = 1357 }
+	}
+	
+	option = {
+		name = flavor_hyw.10001.a
+		custom_tooltip = flavor_hyw.10001.tt
 	}
 }
 
@@ -4322,10 +4569,6 @@ country_event = {
 			Stab_Add1 = yes
 			add_war_exhaustion = -5
 			set_country_flag = charles_vii
-			add_country_modifier = {
-				name = french_last_stand_1
-				duration = -1
-			}
 		}
 	}
 
@@ -4446,8 +4689,8 @@ country_event = {
 #Gets triggered when France completes their conquest and kicks out England from France.
 country_event = {
 	id = flavor_hyw.1550
-	title = "flavor_hyw.1501.t"
-	desc = "flavor_hyw.1501.d"
+	title = "flavor_hyw.1550.t"
+	desc = "flavor_hyw.1550.d"
 	picture = ECONOMY_eventPicture
 
 	is_triggered_only = yes
@@ -4455,20 +4698,8 @@ country_event = {
 
 	#Appease nobles when we won
 	option = {
-		name = flavor_hyw.1501.a
-		if = {
-			limit = {
-				Rights_BUSer3HasGreater = yes
-			}
-			Rights_BUSer4Apply = yes
-		}
-
-		if = {
-			limit = {
-				Rights_BUTax2HasGreater = yes
-			}
-			Rights_BUTax1Apply = yes
-		}
+		name = flavor_hyw.1550.a
+		Rights_BUSer4Apply = yes
 	}
 
 }
