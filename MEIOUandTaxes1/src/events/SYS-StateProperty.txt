@@ -1,15 +1,10 @@
 namespace = SYS_StateProperty
 
 ### Concept for Estates Acquiring State Property
-# If Capacity is got overshot, the first event will trigger to find a province
+# If Capacity is overburdened, the first event will trigger to find a province
 # which has large amounts of state property
 # Afterwards depending on who is most powerful in that province
 # that estate will try to buy the State Property for cash
-
-# 001 Locate province with large amounts of State Property
-# 002 Evaluate which estate should buy and check if it can buy, else set flag
-# 003 Event for Tag with choice to accept offer
-
 
 
 country_event = {
@@ -28,11 +23,14 @@ country_event = {
 		#calculate best province
 			random_owned_province = {
 				limit = {
-					check_key = { lhs = BU_Agriculture value = 5 }
+					check_key = { lhs = BU_Agriculture value = 15 }
 				}
 				save_event_target_as = StatePropertyBuyOut
 				
-				set_key = { lhs = BuyOutValue which = BU_Agriculture }
+				set_key = { lhs = BuyOutAmount which = BU_Agriculture }
+				multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				
+				set_key = { lhs = BuyOutValue which = BuyOutAmount }
 				multiply_key = { lhs = BuyOutValue value = 3 }
 				ROOT = { set_key = { lhs = BuyOutValue which = PREV } }
 			}
@@ -67,15 +65,15 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = NO_Wealth which = BuyOutValue }
+				check_key = { lhs = CL_Wealth which = BuyOutValue }
 			}
 		}
 #		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = NO_Agriculture which = BU_Agriculture }
+				change_key = { lhs = CL_Agriculture which = BU_Agriculture }
 				set_key = { lhs = BU_Agriculture value = 0 }
 				
-				subtract_key = { lhs = NO_Wealth which = BuyOutValue }
+				subtract_key = { lhs = CL_Wealth which = BuyOutValue }
 			}
 			set_var_from_key = { var = ducat_gain key = BuyOutValue }
 			old_scaled_ducat_gained_country = yes
@@ -91,15 +89,16 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = NO_Wealth which = BuyOutValue }
+				check_key = { lhs = BG_Wealth which = BuyOutValue }
+				#if chair 4+
 			}
 		}
 #		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = NO_Agriculture which = BU_Agriculture }
+				change_key = { lhs = BG_Agriculture which = BU_Agriculture }
 				set_key = { lhs = BU_Agriculture value = 0 }
 				
-				subtract_key = { lhs = NO_Wealth which = BuyOutValue }
+				subtract_key = { lhs = BG_Wealth which = BuyOutValue }
 			}
 			set_var_from_key = { var = ducat_gain key = BuyOutValue }
 			old_scaled_ducat_gained_country = yes
@@ -115,15 +114,19 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = NO_Wealth which = BuyOutValue }
+				check_key = { lhs = SF_Wealth which = BuyOutValue }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
 			}
 		}
 #		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = NO_Agriculture which = BU_Agriculture }
+				change_key = { lhs = SF_Agriculture which = BU_Agriculture }
 				set_key = { lhs = BU_Agriculture value = 0 }
 				
-				subtract_key = { lhs = NO_Wealth which = BuyOutValue }
+				subtract_key = { lhs = SF_Wealth which = BuyOutValue }
 			}
 			set_var_from_key = { var = ducat_gain key = BuyOutValue }
 			old_scaled_ducat_gained_country = yes
