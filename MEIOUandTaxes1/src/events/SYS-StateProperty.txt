@@ -1,10 +1,7 @@
 namespace = SYS_StateProperty
 
 ### Concept for Estates Acquiring State Property
-# If Capacity is overburdened, the first event will trigger to find a province
-# which has large amounts of state property
-# Afterwards depending on who is most powerful in that province
-# that estate will try to buy the State Property for cash
+# If Capacity is overburdened, prov will be found where we can sell to local powerbroker
 
 
 country_event = {
@@ -15,9 +12,9 @@ country_event = {
 	
 	is_triggered_only = yes
 	
-	#trigger = {
-	#	has_country_flag = StatePropertyBurden
-	#}
+	trigger = {
+		has_country_flag = StatePropertyBurden
+	}
 	
 	immediate = {
 		#calculate best province
@@ -44,19 +41,29 @@ country_event = {
 				check_key = { lhs = NO_Wealth which = BuyOutValue }
 			}
 		}
-#		hidden_effect = {
+		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = NO_Agriculture which = BU_Agriculture }
-				set_key = { lhs = BU_Agriculture value = 0 }
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				change_key = { lhs = Tmp_1 value = 1 } #make sure they offer nonzero
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
 				
-				subtract_key = { lhs = NO_Wealth which = BuyOutValue }
+				change_key = { lhs = NO_Agriculture which = BuyOutAmount }
+				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 			}
-			set_var_from_key = { var = ducat_gain key = BuyOutValue }
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
 			old_scaled_ducat_gained_country = yes
 
-#		}
+		}
 		ai_chance = {
 			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
 		}
 		
 	}
@@ -68,19 +75,29 @@ country_event = {
 				check_key = { lhs = CL_Wealth which = BuyOutValue }
 			}
 		}
-#		hidden_effect = {
+		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = CL_Agriculture which = BU_Agriculture }
-				set_key = { lhs = BU_Agriculture value = 0 }
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				change_key = { lhs = Tmp_2 value = 1 } #make sure they offer nonzero
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value
 				
-				subtract_key = { lhs = CL_Wealth which = BuyOutValue }
+				change_key = { lhs = CL_Agriculture which = BuyOutAmount }
+				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 			}
-			set_var_from_key = { var = ducat_gain key = BuyOutValue }
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
 			old_scaled_ducat_gained_country = yes
 
-#		}
+		}
 		ai_chance = {
 			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
 		}
 		
 	}
@@ -90,22 +107,32 @@ country_event = {
 		trigger = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = BG_Wealth which = BuyOutValue }
-				#if chair 4+
+				Rights_BGGov4HasGreater = yes
 			}
 		}
-#		hidden_effect = {
+		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = BG_Agriculture which = BU_Agriculture }
-				set_key = { lhs = BU_Agriculture value = 0 }
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				change_key = { lhs = Tmp_3 value = 1 } #make sure they offer nonzero
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
 				
-				subtract_key = { lhs = BG_Wealth which = BuyOutValue }
+				change_key = { lhs = BG_Agriculture which = BuyOutAmount }
+				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 			}
-			set_var_from_key = { var = ducat_gain key = BuyOutValue }
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
 			old_scaled_ducat_gained_country = yes
 
-#		}
+		}
 		ai_chance = {
 			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
 		}
 		
 	}
@@ -121,20 +148,39 @@ country_event = {
 				Rights_NOGov5Has = yes
 			}
 		}
-#		hidden_effect = {
+		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = SF_Agriculture which = BU_Agriculture }
-				set_key = { lhs = BU_Agriculture value = 0 }
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value
 				
-				subtract_key = { lhs = SF_Wealth which = BuyOutValue }
+				change_key = { lhs = SF_Agriculture which = BuyOutAmount }
+				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				
+				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
 			}
-			set_var_from_key = { var = ducat_gain key = BuyOutValue }
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
 			old_scaled_ducat_gained_country = yes
 
-#		}
+		}
 		ai_chance = {
 			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
 		}
 		
+	}
+	after = {
+		hidden_effect = {
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+		}
 	}
 }
