@@ -2,14 +2,14 @@ enforce_hyw_treaty_effect = { #Selection of next treaty in order of progression
 	if = {
 		limit = {
 			has_global_flag = hundred_years_war
-			AND = {
-				NOT = { has_global_flag = treaty_of_rouen }
-				NOT = { has_global_flag = treaty_of_arras }
-				NOT = { has_global_flag = treaty_of_bruges }
-				NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_picquigny }
-				NOT = { has_global_flag = treaty_of_orlean }
-				NOT = { has_global_flag = treaty_of_bretigny }
+			NOT = {
+				has_global_flag = treaty_of_rouen 
+				has_global_flag = treaty_of_arras 
+				has_global_flag = treaty_of_bruges 
+				has_global_flag = treaty_of_troyes 
+				has_global_flag = treaty_of_picquigny 
+				has_global_flag = treaty_of_orlean 
+				has_global_flag = treaty_of_bretigny 
 			}
 		}
 		log =  "FE-TempHYW:Treaty of Bretigny signed:enforce_hyw_treaty_effect"
@@ -29,7 +29,17 @@ enforce_hyw_treaty_effect = { #Selection of next treaty in order of progression
 	else_if = {
 		limit = {
 			has_global_flag = hundred_years_war
-			has_global_flag = treaty_of_bretigny
+			AND = {
+				has_global_flag = treaty_of_bretigny
+				NOT = { 
+					has_global_flag = treaty_of_rouen
+					has_global_flag = treaty_of_arras
+					has_global_flag = treaty_of_bruges
+					has_global_flag = treaty_of_troyes
+					has_global_flag = treaty_of_picquigny
+					has_global_flag = treaty_of_orlean 
+				}
+			}
 		}
 		if = {
 			limit = {
@@ -50,9 +60,18 @@ enforce_hyw_treaty_effect = { #Selection of next treaty in order of progression
 	else_if = {
 		limit = {
 			has_global_flag = hundred_years_war
-			OR = {
-				has_global_flag = treaty_of_bretigny
-				has_global_flag = treaty_of_rouen
+			AND = {
+				OR = {
+					has_global_flag = treaty_of_bretigny
+					has_global_flag = treaty_of_rouen
+				}
+				NOT = { 
+					has_global_flag = treaty_of_arras
+					has_global_flag = treaty_of_bruges
+					has_global_flag = treaty_of_troyes
+					has_global_flag = treaty_of_picquigny
+					has_global_flag = treaty_of_orlean
+				}
 			}
 		}
 
@@ -75,11 +94,11 @@ enforce_hyw_treaty_effect = { #Selection of next treaty in order of progression
 	else_if = {
 		limit = {
 			has_global_flag = hundred_years_war
-			OR = { 
-				NOT = { has_global_flag = treaty_of_arras }
-				NOT = { has_global_flag = treaty_of_orlean }
-				#NOT = { has_global_flag = treaty_of_troyes }
-				NOT = { has_global_flag = treaty_of_picquigny }
+			NOT = { 
+				has_global_flag = treaty_of_arras
+				has_global_flag = treaty_of_orlean
+				#has_global_flag = treaty_of_troyes
+				has_global_flag = treaty_of_picquigny
 			}
 		}
 
@@ -160,7 +179,7 @@ enforce_treaty_bretigny_eng = {
 }
 
 enforce_treaty_bretigny_fra = {
-	log =  "FE-TempHYW:French Treaty of Bretigny signed:enforce_treaty_bretigny_fra"
+	log =  "FE-TempHYW:Treaty of Bretigny signed:enforce_treaty_bretigny_fra"
 	bretigny_fra_group = {
 		limit = {
 			is_city = yes
@@ -174,13 +193,7 @@ enforce_treaty_bretigny_fra = {
 		add_core = FRA
 		cede_province = FRA
 	}
-	set_global_flag = treaty_of_arras
-
-	set_country_flag = king_jean_released
-	set_ruler = ruler_fra_hyw_pow
-	set_heir = heir_fra_hyw_pow
-	set_consort = consort_fra_hyw_pow
-	clr_country_flag = ruler_prisonner_of_war
+	clr_global_flag = treaty_of_bretigny
 }
 
 enforce_treaty_rouen = {
@@ -279,6 +292,28 @@ enforce_treaty_bruges = {
 		cede_province = FRA
 	}
 	
+	#TODO: clarify NRM name/status
+	if = {
+		limit = {
+			exists = NRM
+		}
+
+		NRM = {
+			define_ruler = {
+				dynasty = ROOT
+			}
+		}
+		log =  "FE-TempHYW:Alencon got ruler from French dynasty:enforce_treaty_bruges"
+
+		FRA = {
+			create_subject = {
+				subject_type = appanage_subject
+				subject = NRM
+			}
+		}
+		log =  "FE-TempHYW:Alencon became an appanage of France:enforce_treaty_bruges"
+	}
+
 	set_global_flag = treaty_of_bruges
 }
 
@@ -295,25 +330,8 @@ enforce_treaty_picquigny = {
 		}
 		add_core = FRA
 		cede_province = FRA
-		remove_core = ENG
 	}
 
-	if = {
-		limit = {
-			2514 = {
-				is_city = yes
-				OR = {
-					owned_by = ENG
-					owner = { is_subject_of = ENG }
-				}
-				is_core = ROOT
-			}
-		}
-		add_core = FRA
-		cede_province = FRA
-		remove_core = ENG
-	}
-		
 	if = {
 		limit = {
 			63 = { controlled_by = FRA }
@@ -321,25 +339,12 @@ enforce_treaty_picquigny = {
 		63 = { 
 			add_core = FRA
 			cede_province = FRA
-			remove_core = ENG
 		}
 		log =  "FE-TempHYW:Calais ceded to France:enforce_treaty_picquigny"
 	}
 	set_global_flag = treaty_of_picquigny
 	set_global_flag = hundred_years_war_FRA_win
 	clr_global_flag = hundred_years_war
-
-	if = {
-		limit = {
-			Rights_BUSer3HasGreater = yes
-		}
-		country_event = {
-			id = flavor_hyw.1550
-			days = 30
-		}
-	}
-	
-	remove_country_modifier = french_last_stand
 }
 
 enforce_treaty_troyes = {
@@ -441,10 +446,6 @@ enforce_treaty_orlean = {
 			id = flavor_hyw.200
 			days = 1 
 		} 
-	}
-
-	FRA = {
-		remove_country_modifier = french_last_stand
 	}
 }
 
