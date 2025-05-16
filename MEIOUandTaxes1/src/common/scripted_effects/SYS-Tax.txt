@@ -162,30 +162,33 @@ Tax_CalcCosts = {
 		}
 		set_key = { lhs = TaxMana_Tmp5 value = 0.01 }
 	}
+	#Scaler for Total Class, used in most Taxes
+	Tax_GetPopScalar = { return=Public_Tmp1 TotalVar=Class_Total MaxPop=800 ReductionPer=0.5 }
+	Tax_GetPopScalar = { return=Public_Tmp2 TotalVar=SF_Total MaxPop=600 ReductionPer=0.5 }
 
 	Tax_CalcCostTax = { TaxName=LevyDraft Balance=2 }
 	Tax_CalcCostTax = { TaxName=LevyVolunt Balance=2 }
-	Tax_CalcCostTax = { TaxName=LevyFeudal Balance=2 }
-	Tax_CalcCostTax = { TaxName=LevyNoble Balance=2 }
-	Tax_CalcCostTax = { TaxName=LevyUrban Balance=2 }
+	Tax_CalcCostTax = { TaxName=LevyFeudal Balance=5 }
+	Tax_CalcCostTax = { TaxName=LevyNoble Balance=4 }
+	Tax_CalcCostTax = { TaxName=LevyUrban Balance=8 }
 	Tax_CalcCostTax = { TaxName=LevyHorde Balance=4 }	#Make Horde Levies twice as expensive to not have Hordes dominate so much
 	
-	Tax_CalcCostTax = { TaxName=TaxLand Balance=0.8 }
-	Tax_CalcCostTax = { TaxName=TaxProp Balance=0.8 }
-	Tax_CalcCostTax = { TaxName=TaxFeudal Balance=0.8  }
-	Tax_CalcCostTax = { TaxName=TaxChattels Balance=0.8 }
-	Tax_CalcCostTax = { TaxName=TaxInherit Balance=0.8 }
-	Tax_CalcCostTax = { TaxName=TaxToll Balance=0.8 }
-	Tax_CalcCostTax = { TaxName=TaxPoll Balance=0.8  }
-	Tax_CalcCostTax = { TaxName=TaxNoble Balance=0.8  }
-	Tax_CalcCostTax = { TaxName=TaxCharter Balance=0.8  }
-	Tax_CalcCostTax = { TaxName=TaxTribute Balance=0.8  }
+	Tax_CalcCostTax = { TaxName=TaxLand Balance=0.1 }
+	Tax_CalcCostTax = { TaxName=TaxProp Balance=0.35 }
+	Tax_CalcCostTax = { TaxName=TaxFeudal Balance=2.4  }
+	Tax_CalcCostTax = { TaxName=TaxChattels Balance=0.25 }
+	Tax_CalcCostTax = { TaxName=TaxInherit Balance=0.2 }
+	Tax_CalcCostTax = { TaxName=TaxToll Balance=0.2 }
+	Tax_CalcCostTax = { TaxName=TaxPoll Balance=0.2 }
+	Tax_CalcCostTax = { TaxName=TaxNoble Balance=3.2  }
+	Tax_CalcCostTax = { TaxName=TaxCharter Balance=2.4  }
+	Tax_CalcCostTax = { TaxName=TaxTribute Balance=1.3  }
 
 	
-	Tax_CalcCostTax = { TaxName=TaxSalt Balance=0.8  }
-	Tax_CalcCostTax = { TaxName=TaxTimber Balance=0.8  }
-	Tax_CalcCostTax = { TaxName=TaxSubst Balance=0.8 }
-	Tax_CalcCostTax = { TaxName=TaxAlcohol Balance=0.8 }
+	Tax_CalcCostTax = { TaxName=TaxSalt Balance=3.5  }
+	Tax_CalcCostTax = { TaxName=TaxTimber Balance=0.15  }
+	Tax_CalcCostTax = { TaxName=TaxSubst Balance=1.3 }
+	Tax_CalcCostTax = { TaxName=TaxAlcohol Balance=2.5 }
 	
 	Tax_CalcCostTax = { TaxName=PropAgriculture }
 	Tax_CalcCostTax = { TaxName=PropExtraction }
@@ -194,6 +197,9 @@ Tax_CalcCosts = {
 	Tax_CalcCostTax = { TaxName=PropIndustrial }
 	Tax_CalcCostTax = { TaxName=PropAcademic }
 	Tax_CalcCostTax = { TaxName=PropCommercial }
+	
+	set_key = { lhs = Public_Tmp1 value = 0 }
+	set_key = { lhs = Public_Tmp2 value = 0 }
 }
 
 Tax_GetPopScalar = {
@@ -262,7 +268,6 @@ Tax_GetLoyDivider = {
 	multiply_key = { lhs = TaxMana_Tmp2 value = -0.01 }
 	change_key = { lhs = TaxMana_Tmp2 value = 1 }
 }
-
 Tax_CalcCostTax = {
 	if = {
 		limit = {
@@ -371,7 +376,7 @@ Tax_CostGet = {
 Tax_CostLevyDraftCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 1 }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=Class_Total MaxPop=800 ReductionPer=0.5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp1 } #Scale function, for performance
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.3 }
 
 	if = {
@@ -464,7 +469,7 @@ Tax_CostLevyDraftCalc = {
 Tax_CostLevyVoluntCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.1 }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=Class_Total MaxPop=800 ReductionPer=0.5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp1 }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 }
 
 	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
@@ -504,11 +509,10 @@ Tax_CostLevyVoluntCalc = {
 Tax_CostLevyFeudalCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.4 }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=SF_Total MaxPop=600 ReductionPer=0.5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp2 } #Scale function, for performance
 	multiply_key = { lhs = TaxMana_Tmp0 value = 1.2 }
 	multiply_key = { lhs = TaxMana_Tmp0 which = BU_PrpResources }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 2.6 } ### balancing
 	
 	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
 	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
@@ -658,7 +662,6 @@ Tax_CostLevyNobleCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.03 }
 	change_key = { lhs = TaxMana_Tmp0 which = Tax_NOMP }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 2.0 } ### balancing
 	if = {
 		limit = {
 			owner = {
@@ -704,7 +707,6 @@ Tax_CostLevyNobleCalc = {
 }
 Tax_CostLevyUrbanCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Tax_BGMP }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 4 } ### balancing
 	if = {
 		limit = {
 			owner = {
@@ -739,77 +741,15 @@ Tax_CostLevyUrbanCalc = {
 
 Tax_CostTaxChattelsCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=Class_Total MaxPop=800 ReductionPer=0.5 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.25 } #divide_key = { lhs = TaxMana_Tmp0 value = 4 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.2 } ### balancing
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficDir }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp1 }
 	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxChattelsCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxChattelsHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxChattelsHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxChattelsHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxChattels }
 }
 Tax_CostTaxPollCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=Class_Total MaxPop=800 ReductionPer=0.5 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.25 } #divide_key = { lhs = TaxMana_Tmp0 value = 4 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 2 } ### balancing
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficDir }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp1 }
 	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPollCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxPollHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxPollHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxPollHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxPoll }
 }
 Tax_CostTaxInheritCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = NO_Total }
@@ -818,151 +758,56 @@ Tax_CostTaxInheritCalc = {
 	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_ManaCostFromPop }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 15 }
 	change_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.25 } #divide_key = { lhs = TaxMana_Tmp0 value = 4 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.9 } ### balancing
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficDir }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
 	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxInheritCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxInheritHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxInheritHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxInheritHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxInherit }
 }
 Tax_CostTaxTollCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = TN_ProvSply51 }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 10 }
 	change_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.25 } #divide_key = { lhs = TaxMana_Tmp0 value = 4 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.0 } ### balancing
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficInd }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
 	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxTollCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxTollHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxTollHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxTollHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxToll }
 }
 Tax_CostTaxLandCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Building_Resources }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 2 }
 	change_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.25 } #divide_key = { lhs = TaxMana_Tmp0 value = 4 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.9 } ### balancing
-	if = {
-		limit = {
-			owner = {
-				Rights_NOGov1Has = yes
-			}
-		}
-		multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 }
-	}
-	else_if = {
-		limit = {
-			owner = {
-				Rights_NOGov2Has = yes
-			}
-		}
-		multiply_key = { lhs = TaxMana_Tmp0 value = 2 }
-	}
-	else_if = {
-		limit = {
-			owner = {
-				Rights_NOGov3Has = yes
-			}
-		}
-		multiply_key = { lhs = TaxMana_Tmp0 value = 1.5 }
-	}
-	else_if = {
-		limit = {
-			owner = {
-				Rights_NOGov4Has = yes
-			}
-		}
-		multiply_key = { lhs = TaxMana_Tmp0 value = 1.25 }
-	}
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficDir }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxLandCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxLandHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxLandHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxLandHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	# if = {
+		# limit = {
+			# owner = {
+				# Rights_NOGov1Has = yes
+			# }
+		# }
+		# multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 }
+	# }
+	# else_if = {
+		# limit = {
+			# owner = {
+				# Rights_NOGov2Has = yes
+			# }
+		# }
+		# multiply_key = { lhs = TaxMana_Tmp0 value = 2 }
+	# }
+	# else_if = {
+		# limit = {
+			# owner = {
+				# Rights_NOGov3Has = yes
+			# }
+		# }
+		# multiply_key = { lhs = TaxMana_Tmp0 value = 1.5 }
+	# }
+	# else_if = {
+		# limit = {
+			# owner = {
+				# Rights_NOGov4Has = yes
+			# }
+		# }
+		# multiply_key = { lhs = TaxMana_Tmp0 value = 1.25 }
+	# }
+	Tax_CostTaxCalcHelper = { Tax = TaxLand }
 }
 Tax_CostTaxPropCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Building_Building }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.45 } ### balancing
 	if = {
 		limit = {
 			owner = {
@@ -987,200 +832,41 @@ Tax_CostTaxPropCalc = {
 		}
 		multiply_key = { lhs = TaxMana_Tmp0 value = 1.25 }
 	}
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficDir }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxPropHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxPropHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxPropHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxProp }
 }
 Tax_CostTaxAlcoholCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.24 }
+	multiply_key = { lhs = TaxMana_Tmp0 value = 0.20 }
 	change_key = { lhs = TaxMana_Tmp0 which = TN_ProvSply1 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.666 } ### balancing
 	
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficInd }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxAlcoholCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxAlcoholHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxAlcoholHigh value = 2 }
-	multiply_key = { lhs = Tax_CostTaxAlcoholHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxAlcoholHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxAlcohol }
 }
 Tax_CostTaxSaltCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.1 }
-	change_key = { lhs = TaxMana_Tmp0 which = TN_ProvSply2 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.0 } ### balancing
+	change_key = { lhs = TaxMana_Tmp0 which = TN_ProvDmnd2 }
 	
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficInd }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxSaltCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxSaltHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxSaltHigh value = 4 }
-	multiply_key = { lhs = Tax_CostTaxSaltHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxSaltHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxSalt }
 }
 Tax_CostTaxTimberCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	change_key = { lhs = TaxMana_Tmp0 which = Building_Forestry }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.1 }
-	#multiply_key = { lhs = TaxMana_Tmp0 value = 1.1 } ### balancing
+	change_key = { lhs = TaxMana_Tmp0 which = TN_ProvSply10 }
 	
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficInd }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxTimberCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxTimberHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxTimberHigh value = 2 }
-	multiply_key = { lhs = Tax_CostTaxTimberHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxTimberHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxTimber }
 }
 Tax_CostTaxSubstCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.1 }
 	change_key = { lhs = TaxMana_Tmp0 which = TN_ProvDmnd9 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 0.8 } ### balancing
 	
-	if = {
-		limit = {
-			Rights_HasUnifiedTax = yes
-		}
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
-	}
-	else = {
-		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficInd }
-	}
-	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxSubstCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
-	set_key = { lhs = Tax_CostTaxSubstHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostTaxSubstHigh value = 2 }
-	multiply_key = { lhs = Tax_CostTaxSubstHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostTaxSubstHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+	Tax_CostTaxCalcHelper = { Tax = TaxSubst }
 }
 Tax_CostTaxFeudalCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = Land_PSize }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=SF_Total MaxPop=600 ReductionPer=0.5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp2 } #Scale function, for performance
 	multiply_key = { lhs = TaxMana_Tmp0 which = BU_PrpResources }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 3 } ### balancing
 	
 	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
 	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
@@ -1226,7 +912,6 @@ Tax_CostTaxNobleCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = NO_Wealth }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.1 }
 	change_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 4 } ### balancing
 
 	if = {
 		limit = {
@@ -1273,8 +958,7 @@ Tax_CostTaxNobleCalc = {
 Tax_CostTaxCharterCalc = {
 	set_key = { lhs = TaxMana_Tmp0 which = BG_Wealth }
 	multiply_key = { lhs = TaxMana_Tmp0 value = 0.1 }
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=RE_Total MaxPop=400 ReductionPer=0.5 }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 3 } ### balancing
+	change_key = { lhs = TaxMana_Tmp0 which = Prov_BGPow }
 
 	if = {
 		limit = {
@@ -1324,7 +1008,7 @@ Tax_CostTaxTributeCalc = {
 	set_key = { lhs = TaxMana_Tmp2 which = NO_Wealth }
 	multiply_key = { lhs = TaxMana_Tmp2 value = 0.08 }
 	change_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 } 
-	Tax_GetPopScalar = { return=TaxMana_Tmp0 TotalVar=Class_Total MaxPop=1000 ReductionPer=0.5 }
+	change_key = { lhs = TaxMana_Tmp0 which = Public_Tmp1 } #Scale function, for performance
 
 	set_key = { lhs = TaxMana_Tmp2 value = 100 }
 	subtract_key = { lhs = TaxMana_Tmp2 which = Prov_TRPow }
@@ -1340,7 +1024,6 @@ Tax_CostTaxTributeCalc = {
 	change_key = { lhs = TaxMana_Tmp2 value = 1 }
 	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
 
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.666 } ### balancing
 
 	if = {
 		limit = {
@@ -1391,333 +1074,25 @@ Tax_CostTaxTributeCalc = {
 	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropAgricultureCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Agriculture }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_AgricultureShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropAgricultureCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropAgricultureHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropAgricultureHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropAgricultureHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropAgricultureHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropExtractionCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Extraction }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.5 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_ExtractionShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropExtractionCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropExtractionHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropExtractionHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropExtractionHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropExtractionHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropForestryCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Forestry }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 1.5 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_ForestryShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropForestryCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropForestryHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropForestryHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropForestryHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropForestryHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropFisheryCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Fishery }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 3 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_FisheryShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropFisheryCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropFisheryHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropFisheryHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropFisheryHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropFisheryHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropIndustrialCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Industrial }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_IndustrialShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropIndustrialCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropIndustrialHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropIndustrialHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropIndustrialHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropIndustrialHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropAcademicCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Academic }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_AcademicShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropAcademicCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropAcademicHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropAcademicHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropAcademicHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropAcademicHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_CostPropCommercialCalc = {
-	set_key = { lhs = TaxMana_Tmp0 which = BU_Commercial }
-	multiply_key = { lhs = TaxMana_Tmp0 value = 5 } ### balancing
-	change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
-	
-	set_key = { lhs = TaxMana_Tmp2 which = Building_CommercialShareBU }
-	change_key = { lhs = TaxMana_Tmp2 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
-	
-	set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	change_key = { lhs = TaxMana_Tmp3 value = 1 }
-	multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
-	
-	set_key = { lhs = TaxMana_Tmp3 value = 100 }
-	subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
-	multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
-
-	set_key = { lhs = TaxMana_Tmp4 value = 1 }
-	subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
-
-	set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
-	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
-	change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
-	
-	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropCommercialCost }
-	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
-	
-	if = {
-		limit = {
-			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
-		}
-		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
-	}
 	set_key = { lhs = Tax_CostPropCommercialHigh value = 0.006 }
-	multiply_key = { lhs = Tax_CostPropCommercialHigh value = 20 }
-	multiply_key = { lhs = Tax_CostPropCommercialHigh which = TaxMana_Tmp0 }
-	divide_key = { lhs = Tax_CostPropCommercialHigh which = TaxMana_Tmp2 }
-
-	set_key = { lhs = TaxMana_Tmp0 value = 0 }
-	set_key = { lhs = TaxMana_Tmp1 value = 0 }
-	set_key = { lhs = TaxMana_Tmp2 value = 0 }
-	set_key = { lhs = TaxMana_Tmp3 value = 0 }
-	set_key = { lhs = TaxMana_Tmp4 value = 0 }
 }
 Tax_SetLevel = {
 	every_owned_province = {
@@ -1839,3 +1214,367 @@ Tax_TakeMana = {
 	set_key = { lhs = Scaling_DIP_a value = 0 }
 	set_key = { lhs = Scaling_MIL_a value = 0 }
 }
+
+Tax_CostTaxCalcHelper = {
+	if = {
+		limit = {
+			Rights_HasUnifiedTax = yes
+		}
+		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficUni }
+	}
+	else = {
+		set_key = { lhs = TaxMana_Tmp2 which = Admin_EfficDir }
+	}
+	multiply_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	
+	divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_$Tax$Cost }
+	multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		}
+		set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	}
+	set_key = { lhs = Tax_Cost$Tax$High value = 0.006 }
+	multiply_key = { lhs = Tax_Cost$Tax$High which = TaxMana_Tmp0 }
+	divide_key = { lhs = Tax_Cost$Tax$High which = TaxMana_Tmp2 }
+
+	set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	set_key = { lhs = TaxMana_Tmp4 value = 0 }
+}
+
+# Tax_CostPropAgricultureCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Agriculture }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_AgricultureShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropAgricultureCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropAgricultureHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropAgricultureHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropAgricultureHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropAgricultureHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
+# Tax_CostPropExtractionCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Extraction }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 1.5 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_ExtractionShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropExtractionCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropExtractionHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropExtractionHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropExtractionHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropExtractionHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
+# Tax_CostPropForestryCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Forestry }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 1.5 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_ForestryShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropForestryCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropForestryHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropForestryHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropForestryHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropForestryHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
+# Tax_CostPropFisheryCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Fishery }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 3 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_FisheryShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropFisheryCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropFisheryHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropFisheryHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropFisheryHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropFisheryHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
+# Tax_CostPropIndustrialCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Industrial }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_IndustrialShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropIndustrialCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropIndustrialHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropIndustrialHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropIndustrialHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropIndustrialHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
+# Tax_CostPropAcademicCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Academic }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 2.5 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_AcademicShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropAcademicCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropAcademicHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropAcademicHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropAcademicHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropAcademicHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
+# Tax_CostPropCommercialCalc = {
+	# set_key = { lhs = TaxMana_Tmp0 which = BU_Commercial }
+	# multiply_key = { lhs = TaxMana_Tmp0 value = 5 } ### balancing
+	# change_key = { lhs = TaxMana_Tmp0 value = 0.01 }
+	
+	# set_key = { lhs = TaxMana_Tmp2 which = Building_CommercialShareBU }
+	# change_key = { lhs = TaxMana_Tmp2 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp2 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# change_key = { lhs = TaxMana_Tmp3 value = 1 }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = TaxMana_Tmp3 }
+	
+	# set_key = { lhs = TaxMana_Tmp3 value = 100 }
+	# subtract_key = { lhs = TaxMana_Tmp3 which = Prov_BUPow }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.01 }
+	# multiply_key = { lhs = TaxMana_Tmp3 value = 0.5 }
+
+	# set_key = { lhs = TaxMana_Tmp4 value = 1 }
+	# subtract_key = { lhs = TaxMana_Tmp4 which = TaxMana_Tmp3 }
+
+	# set_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp5 }
+	# multiply_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp4 }
+	# change_key = { lhs = TaxMana_Tmp2 which = TaxMana_Tmp3 }
+	
+	# divide_key = { lhs = TaxMana_Tmp0 which = Tax_AdminEffic }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxPropCommercialCost }
+	# multiply_key = { lhs = TaxMana_Tmp0 which = Modi_TaxMana }
+	
+	# if = {
+		# limit = {
+			# NOT = { check_key = { lhs = TaxMana_Tmp2 value = 0.01 } }
+		# }
+		# set_key = { lhs = TaxMana_Tmp2 value = 0.01 }
+	# }
+	# set_key = { lhs = Tax_CostPropCommercialHigh value = 0.006 }
+	# multiply_key = { lhs = Tax_CostPropCommercialHigh value = 20 }
+	# multiply_key = { lhs = Tax_CostPropCommercialHigh which = TaxMana_Tmp0 }
+	# divide_key = { lhs = Tax_CostPropCommercialHigh which = TaxMana_Tmp2 }
+
+	# set_key = { lhs = TaxMana_Tmp0 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp1 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp2 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp3 value = 0 }
+	# set_key = { lhs = TaxMana_Tmp4 value = 0 }
+# }
