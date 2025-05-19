@@ -20,7 +20,8 @@ country_event = {
 		#find a province
 			random_owned_province = {
 				limit = {
-					check_key = { lhs = BU_Agriculture value = 15 }
+					check_key = { lhs = BU_Agriculture value = 10 }
+					check_key = { lhs = Building_AgricultureGross value = 0 }
 				}
 				save_event_target_as = StatePropertyBuyOut
 				
@@ -31,8 +32,29 @@ country_event = {
 				divide_key = { lhs = BuyOutValue which = Building_Agriculture } # divide profits with size of that property
 				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
 				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
 				
-				ROOT = { set_key = { lhs = BuyOutValue which = PREV } }
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				change_key = { lhs = Tmp_1 value = 1 } #make sure they offer nonzero
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				change_key = { lhs = Tmp_2 value = 1 } #make sure they offer nonzero
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				change_key = { lhs = Tmp_3 value = 1 } #make sure they offer nonzero
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value				
 			}
 			
 	}
@@ -41,17 +63,11 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = NO_Wealth which = BuyOutValue }
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
 			}
 		}
 		hidden_effect = {
-			event_target:StatePropertyBuyOut = {
-				set_key = { lhs = Tmp_1 value = 1 }
-				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
-				change_key = { lhs = Tmp_1 value = 1 } #make sure they offer nonzero
-				multiply_key = { lhs = Tmp_1 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
-				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
-				
+			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
 				
@@ -75,17 +91,11 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = CL_Wealth which = BuyOutValue }
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
 			}
 		}
 		hidden_effect = {
-			event_target:StatePropertyBuyOut = {
-				set_key = { lhs = Tmp_2 value = 1 }
-				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
-				change_key = { lhs = Tmp_2 value = 1 } #make sure they offer nonzero
-				multiply_key = { lhs = Tmp_2 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
-				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value
-				
+			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
 				
@@ -109,18 +119,12 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = BG_Wealth which = BuyOutValue }
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
 				Rights_BGGov4HasGreater = yes
 			}
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				set_key = { lhs = Tmp_3 value = 1 }
-				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
-				change_key = { lhs = Tmp_3 value = 1 } #make sure they offer nonzero
-				multiply_key = { lhs = Tmp_3 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
-				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
-				
 				change_key = { lhs = BG_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
 				
@@ -144,7 +148,7 @@ country_event = {
 		name = "no_localisation"
 		trigger = {
 			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = SF_Wealth which = BuyOutValue }
+				check_key = { lhs = SF_Wealth which = Tmp_4 }
 			}
 			OR = {
 				Rights_NOTen4Has = yes
@@ -153,9 +157,6 @@ country_event = {
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
-				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value
-				
 				change_key = { lhs = SF_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
 				
@@ -178,14 +179,14 @@ country_event = {
 		}
 		
 	}
-	#Commoners
+	#Nobody
 	option = {
 		name = "no_localisation"
 		trigger = {
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = Prov_BULoy value = 20 }
+				change_key = { lhs = Prov_BULoy value = 10 }
 			}
 
 		}
