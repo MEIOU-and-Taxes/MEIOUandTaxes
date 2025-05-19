@@ -1,4 +1,4 @@
-eng_miscellaneous_1 = {
+eng_slot_1 = {
 	slot = 1
 	generic = no
 	ai = yes
@@ -7,103 +7,129 @@ eng_miscellaneous_1 = {
 	}
 	has_country_shield = yes
 	
-	eng_medium_oxford = {
-		icon = mission_early_game_buildings
-		required_missions = { }
-		position = 3
-		provinces_to_highlight = {
-			province_id = 237		# Oxford
-		}
+	eng_raise_army = {
+		icon = mission_rb_unite_the_clans
+		required_missions = {  }
+		position = 1	
 		trigger = {
-			237 = {
-				owned_by = ROOT
-				HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b4=urban_infrastructure_5 b5=urban_infrastructure_6 }
-				hidden_trigger = { check_key = { lhs = TN_ProvSply41 value = 5 } }
-				custom_trigger_tooltip = { tooltip = oxford_university_knowout }
+			OR = {
+				army_professionalism = 0.1
+				army_size = 25
 			}
-		}
+		}	
 		effect = {
-			237 = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
-			}
+			add_mil_power = 50
 		}
 	}
-	eng_conquer_islands = {
-		icon = mission_unite_home_region
-		position = 4
-		required_missions = { eng_conquer_ireland }
+	eng_conquer_scotland = {
+		icon = mission_rb_conquer_scotland
+		required_missions = { eng_raise_army }
+		position = 2
 		provinces_to_highlight = {
 			OR = {
-				province_id = 369	#Orkney Islands/Orkneyjar
-				province_id = 1417	#Insse Gall
-				province_id = 1250	#Hjaltland
+				area = lowlands_area
+				area = north_lowlands_area
+				area = highlands_area
 			}
 			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			369 = { country_or_non_sovereign_subject_holds = ROOT } 	#Orkney Islands/Orkneyjar
-			1417 = { country_or_non_sovereign_subject_holds = ROOT } 	#Insse Gall
-			1250 = { country_or_non_sovereign_subject_holds = ROOT } 	#Hjaltland
-		}
-		effect = {
-			add_navy_tradition = 25
-		}
-	}
-	eng_conquer_iceland = {
-		icon = mission_alliances
-		position = 5
-		required_missions = { eng_conquer_islands }
-		provinces_to_highlight = {
-			area = subarctic_islands_area
-			NOT = {
+			OR = {
+				NOT = { exists = SCO }
+				SCO = { is_subject_of = ROOT }
+			}
+			lowlands_area = {
+				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
-		}
-		trigger = {
-			subarctic_islands_area = {
+			north_lowlands_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			highlands_area = {
 				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
 		}
 		effect = {
-			add_navy_tradition = 15
-		}
+			country_event = { id = flavor_eng.0002 } #Scottish Crown
+		} 
 	}
-}
-
-eng_miscellaneous_2 = {
-	slot = 5
-	generic = no
-	ai = yes
-	potential = {
-		has_country_flag = k_of_eng
-	}
-	has_country_shield = yes
-	
-	eng_medium_cambridge = {
-		icon = mission_early_game_buildings
-		required_missions = { }
+	eng_act_of_union = {
+		icon = mission_rule_britannia
+		required_missions = { eng_conquer_scotland }
 		position = 3
 		provinces_to_highlight = {
-			province_id = 1283		# Cambridge
+		}		
+		trigger = {
+			OR = {
+				NOT = { exists = SCO }
+				SCO = { is_subject_of = ROOT }
+			}
+			OR = {
+				absolutism = 60
+				adm_tech = 49
+			}
+			NOT = { tag = UEF }
+		}	
+		effect = {
+			country_event = { id = mission_event.011 }
+		}
+	}
+	eng_english_renaissance = {
+		icon = mission_english_renaissance
+		required_missions = { eng_house_divided }
+		position = 6
+		trigger = {  
+			OR = {
+				has_institution = Casual_Literacy
+				full_idea_group = culture_ideas
+			}
+			OR = {
+				has_country_flag = renaissance
+				has_country_flag = humanism
+			}
+		} 
+		effect = {
+			define_advisor = {
+			    type = artist_BG
+				culture = ROOT
+			    skill = 2
+			    discount = yes
+		    }
+		} 
+	}
+	eng_renovate_universities = {
+		icon = mission_rb_renovate_oxbridge
+		required_missions = { eng_english_renaissance }
+		position = 7
+		provinces_to_highlight = {
+			OR = {
+				province_id = 237
+				province_id = 1283
+			}
 		}
 		trigger = {
+			237 = {
+				owned_by = ROOT
+				hidden_trigger = { check_key = { lhs = TN_ProvSply41 value = 5 } }
+				custom_trigger_tooltip = { tooltip = oxford_university_knowout }
+			}
 			1283 = {
 				owned_by = ROOT
-				HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b4=urban_infrastructure_5 b5=urban_infrastructure_6 }
 				hidden_trigger = { check_key = { lhs = TN_ProvSply41 value = 5 } }
 				custom_trigger_tooltip = { tooltip = cambridge_university_knowout }
 			}
 		}
 		effect = {
-			1283 = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			add_country_modifier = {
+				name = eng_rb_university_institution
+				duration = 7300 #20 years
 			}
 		}
 	}
 }
-
-eng_miscellaneous_3 = {
+eng_slot_2 = {
 	slot = 2
 	generic = no
 	ai = yes
@@ -112,142 +138,163 @@ eng_miscellaneous_3 = {
 	}
 	has_country_shield = yes
 	
-	eng_mighty_army = {
-		icon = mission_assemble_an_army
-		position = 1
-		trigger = {
-			army_size_percentage = 1
-			manpower_percentage = 0.4
-			num_of_generals = 1
-		}
-		effect = {
-			add_army_tradition = 15
-				
-		}
-	}
-	
-	eng_mighty_navy = {
-		icon = mission_establish_high_seas_navy
+	eng_irish_conquest = {
+		icon = mission_rb_rule_britannia_irish_version
+		required_missions = { eng_raise_army }
 		position = 2
-		required_missions = { eng_mighty_army }
-		trigger = {
-			OR = {
-				navy_size_percentage = 0.8
-				num_of_light_ship = 15
-				navy_size = 25
-			}
-		}
-		effect = {
-			ireland_region = {
-				limit = {
-					NOT = { is_core = ROOT }
-					NOT = { owned_by = ROOT }
-				}
-				add_permanent_claim = ROOT
-			}
-		}
-	}
-	
-	eng_conquer_ireland = {
-		icon = mission_unite_home_region
-		position = 3
-		required_missions = { eng_mighty_navy }
 		provinces_to_highlight = {
 			region = ireland_region
 			NOT = { country_or_non_sovereign_subject_holds = ROOT }
-		}
-			trigger = {
-				ireland_region = {
-					type = all
-					country_or_non_sovereign_subject_holds = ROOT
-				}
+		}		
+		trigger = {
+			OR = {
+				NOT = { exists = IRE }
+				IRE = { is_subject_of = ROOT }
 			}
-			effect = {
-				lowlands_area = {
-					limit = {
-						NOT = { is_core = ROOT }
-						NOT = { owned_by = ROOT }
-				}
-				add_permanent_claim = ROOT
-				}
-				north_lowlands_area = {
-					limit = {
-						NOT = { is_core = ROOT }
-						NOT = { owned_by = ROOT }
-					}
-					add_permanent_claim = ROOT
-				}
-				highlands_area = {
-					limit = {
-						NOT = { is_core = ROOT }
-						NOT = { owned_by = ROOT }
-					}
-					add_permanent_claim = ROOT
-				}
-				if = {
-					limit = {
-						exists = SCO
-					}
-					add_casus_belli = {
-						target = SCO
-						type = cb_vassalize_mission
-					}
-				}
+			ireland_region = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
 			}
 		}
-
-	eng_conquer_scotland = {
-		icon = mission_build_up_to_force_limit
-		position = 4
-		required_missions = { eng_conquer_ireland }
+		effect = {
+			country_event = { id = flavor_eng.0003 } #Irish Crown
+			add_country_modifier = {
+				name = conquest_of_ireland
+				duration = 3650 #10 years
+			}
+		} 
+	}
+	eng_unify_the_isles = {
+		icon = mission_english_absolutism
+		required_missions = {
+			eng_conquer_scotland
+			eng_irish_conquest
+		}
+		position = 3
+		provinces_to_highlight = {
+			superregion = british_isles_superregion
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}		
+		trigger = {
+			british_isles_superregion = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			if = {
+				limit = {
+					SCO = { is_subject_of = ROOT }
+				}
+				SCO = { NOT = { liberty_desire = 10 } }
+			}
+			if = {
+				limit = {
+					IRE = { is_subject_of = ROOT }
+				}
+				IRE = { NOT = { liberty_desire = 10 } }
+			}
+		}
+		effect = {
+			add_country_modifier = {
+			    name = british_ambition
+			    duration = 7300 #20 years
+		    }
+		}
+	}
+	eng_develop_british_identity = {
+		icon = mission_rb_rein_in_the_highland_clans
+		required_missions = { 
+			eng_unify_the_isles 
+			eng_act_of_union
+		}
+		position = 4		
 		provinces_to_highlight = {
 			OR = {
-				area = north_lowlands_area
-				area = lowlands_area
-				area = highlands_area
+				culture = irish
+				culture = lowland_scottish
+				culture = highland_scottish
 			}
-			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			scotland_region = {
+			british_isles_superregion = {
 				type = all
-				OR = {
-					country_or_non_sovereign_subject_holds = ROOT
-					area = isles_area
+				owned_by = ROOT
+				is_core = ROOT
+			}
+			accepted_culture = irish
+			accepted_culture = lowland_scottish
+			accepted_culture = highland_scottish
+		}
+		effect = {
+			Stab_Add1 = yes	
+			add_country_modifier = {
+				name = eng_culture_mission
+				duration = 18250 #50 years
+			}
+		}
+	}
+	eng_monopolize_the_channel = {
+		icon = mission_control_the_channel
+		required_missions = { eng_house_divided }
+		position = 6				
+		trigger = {
+			num_of_light_ship = 25
+			236 = {
+				trade_share = {
+					country = ROOT
+					share = 50
+				}
+			}
+			any_known_country = {
+				is_colonial_nation_of = ROOT
+				capital_scope = {
+					OR = {
+						continent = north_america
+						continent = south_america
+					}
+				}
+			}
+		}	
+		effect = {
+			add_country_modifier = {
+				name = "eng_channel_dominance"
+				duration = 7300 #20 years
+			}
+		}
+	}
+	eng_early_industry = {
+		icon = mission_rb_prospect_for_coal
+		required_missions = { eng_monopolize_the_channel }
+		position = 7
+		provinces_to_highlight = {
+			superregion = british_isles_superregion
+		}
+		trigger = {
+			OR = {
+				has_institution = Industrialisation
+				full_idea_group = industrial_ideas
+			}
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 15
+				superregion = british_isles_superregion
+				hidden_trigger = { has_province_flag = Industry_14Present }
+				custom_trigger_tooltip = { tooltip = coal_present }
+			}
+		}		
+		effect = {
+			every_owned_province = {
+				limit = {
+					check_key = { lhs = Class_Urban value = 10 }
+					has_province_flag = Industry_14Present
+				}
+				add_province_modifier = {
+					name = eng_rb_coal_produced_mod
+					duration = 7300 #20 years
 				}
 			}
 		}
-		effect = {
-			add_army_tradition = 10
-			369 = { add_permanent_claim = ROOT }	#Orkney Islands/Orkneyjar
-			1417 = { add_permanent_claim = ROOT }	#Insse Gall
-			1250 = { add_permanent_claim = ROOT }	#Hjaltland
-		}
 	}
-	
-	
-	
-	eng_constitutional_monarchy = {
-		icon = mission_empire
-		position = 5
-		required_missions = { eng_conquer_scotland }
-		trigger = {
-			OR = {
-				constitutionalism_trigger = yes
-				adm_republic_trigger = yes
-			}
-			absolutism = 50
-			adm_tech = 49
-			NOT = { tag = UEF }
-		}
-		effect = {
-			country_event = { id = mission_event.011 }
-			hidden_effect = { complete_mission = eng_constitutional_monarchy }
-		}
-	}
-}
-
-eng_hyw_north = {
+}	
+eng_slot_3 = {
 	slot = 3
 	generic = no
 	ai = yes
@@ -256,63 +303,111 @@ eng_hyw_north = {
 	}
 	has_country_shield = yes
 	
-	eng_defend_montfort = {
-		icon = mission_alliances
+	eng_hundred_years_war = {
+		icon = mission_hundred_years_war
+		required_missions = {  }
 		position = 1
 		provinces_to_highlight = {
-			area = brittany_area
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
+			if = {
+				limit = { exists = FRA }
+				is_capital_of = FRA
+			}
+		}		
+		trigger = {
+			is_at_war = no
+			NOT = { exists = MNF }
+		}		
+		effect = {
+			add_war_exhaustion = -2
+		}
+	}
+	eng_end_the_french_conflict = {
+		icon = king_of_france
+		required_missions = { eng_hundred_years_war }
+		position = 2
+		provinces_to_highlight = {
+			if = {
+				limit = { exists = FRA }
+				is_capital_of = FRA
 			}
 		}
-		trigger = {
+		trigger = { 
+			NOT = { has_global_flag = hundred_years_war }
+		}	
+		effect = {
 			if = {
-				limit = { exists = BRI NOT = { overlord_of = BRI } }
-				BRI = {
-					owns = 1388
-					alliance_with = ROOT
+				limit = {
+					FRA = { is_subject_of = ROOT }
+				}
+				FRA = {
+					add_liberty_desire = -25
 				}
 			}
 			else_if = {
-				limit = { exists = MNF NOT = { overlord_of = MNF } }
-				MNF = {
-					owns = 1388
-					alliance_with = ROOT
+				limit = {
+					NOT = { exists = FRA }
 				}
+				add_adm_power = 100
 			}
 			else = {
-				brittany_area = {
-					type = all
-					country_or_non_sovereign_subject_holds = ROOT
-				}
+				Stab_Add50Percent = yes
+			}
+		}
+	}
+	eng_abolish_villeinage = {
+		icon = mission_peasantry
+		required_missions = { eng_end_the_french_conflict }
+		position = 3	
+		trigger = { 
+			custom_trigger_tooltip = {
+				tooltip = Rights_NOTen3HasGreater
+				Rights_NOTen3HasGreater = yes
 			}
 		}
 		effect = {
-			add_prestige = 10
+			add_country_modifier = {
+			    name = social_reforms
+			    duration = 7300 #20 years
+		    }
 		}
 	}
-	
-	eng_guillaume_heritage = {
-		icon = mission_unite_home_region
-		position = 2
-		required_missions = { eng_defend_montfort }
-		provinces_to_highlight = {
+	eng_house_divided = {
+		icon = mission_rb_scottish_conquer_london
+		required_missions = {  }
+		position = 5		
+		trigger = { 
 			OR = {
-				area = normandy_area
-				area = picardy_area
+				has_reform = Pol_Assembly2
+				has_reform = Pol_Assembly3
 			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
+			check_key = { lhs = Prov_NOLoy value = 50 }
+			check_key = { lhs = Prov_BGLoy value = 50 }
+			check_key = { lhs = Prov_CLLoy value = 50 }
+		}
+		effect = {
+			add_country_modifier = {
+				name = monarchy_stabilise_country_mod
+				duration = 3650 #10 years
 			}
 		}
+	}
+	eng_expand_navy = {
+		icon = mission_rb_grow_the_channel
+		required_missions = { eng_house_divided }
+		position = 6
+		provinces_to_highlight = {
+			country_or_non_sovereign_subject_holds = ROOT
+			continent = europe
+			has_port = yes
+			NOT = { HasBuildingOrBetter = { b1=harbour_infrastructure_2 b2=harbour_infrastructure_3 b3=harbour_infrastructure_4 b4=harbour_infrastructure_5 b5=harbour_infrastructure_6 b6=harbour_infrastructure_7 } }
+		}		
 		trigger = {
-			normandy_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			picardy_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+			navy_size = 80
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 8
+				continent = europe
+				has_port = yes
+				HasBuildingOrBetter = { b1=harbour_infrastructure_2 b2=harbour_infrastructure_3 b3=harbour_infrastructure_4 b4=harbour_infrastructure_5 b5=harbour_infrastructure_6 b6=harbour_infrastructure_7 }
 			}
 		}
 		effect = {
@@ -325,47 +420,52 @@ eng_hyw_north = {
 			}
 		}
 	}
-	
-	eng_vassalize_france = {
-		icon = mission_monarch_in_throne_room
-		position = 3
-		required_missions = { eng_guillaume_heritage }
+	eng_the_mediterranean_isles = {
+		icon = mission_rb_mediterranean_authority
+		required_missions = { eng_expand_navy }
+		position = 7
 		provinces_to_highlight = {
-			area = ile_de_france_area
+			OR = {
+				province_id = 1407
+				province_id = 2358
+				province_id = 126
+			}
 			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			ile_de_france_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
+			owns_or_non_sovereign_subject_of = 1407
+			owns_or_non_sovereign_subject_of = 2358
+			owns_or_non_sovereign_subject_of = 126
 		}
 		effect = {
-			add_army_tradition = 25
+			add_country_modifier = {
+			    name = mediterranean_ambition
+			    duration = 7300 #20 years
+		    }
 		}
 	}
-	
-	eng_subjugate_flanders = {
-		icon = mission_high_income
-		position = 4
-		required_missions = { eng_vassalize_france }
-		provinces_to_highlight = {
-			area = flanders_area
-			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+	eng_empire = {
+		icon = mission_rb_empire
+		required_missions = {
+			eng_early_industry
+			eng_the_mediterranean_isles
+			eng_renovate_universities
+			eng_the_redcoats
+			eng_support_gentry
 		}
+		position = 8	
 		trigger = {
-			flanders_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+			NOT = { great_power_rank = 2 }
+		}	
+		effect = {
+			add_country_modifier = {
+				name = monarchy_i_am_the_state_mod
+				duration = 18250 #50 years
 			}
 		}
-		effect = {
-			add_prestige = 15
-		}
 	}
-}
-
-eng_hyw_south = {
+}	
+eng_slot_4 = {
 	slot = 4
 	generic = no
 	ai = yes
@@ -374,51 +474,254 @@ eng_hyw_south = {
 	}
 	has_country_shield = yes
 	
-	eng_control_aquitaine = {
-		icon = mission_unite_home_region
-		required_missions = { eng_defend_montfort }
+	eng_english_superiority = {
+		icon = mission_the_french_menace
+		required_missions = { eng_hundred_years_war }
+		position = 2
+		provinces_to_highlight = { }		
+		trigger = { 
+			OR = {
+				NOT = { exists = FRA }
+				FRA = { is_subject_of = ROOT }
+			}
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+					value = 40
+					superregion = france_superregion
+			}
+		}
+		effect = {
+			add_country_modifier = {
+			    name = land_enthusiasm_mission
+			    duration = 7300 #20 years
+		    }
+		}
+	}
+	eng_royal_charter = {
+		icon = mission_rb_control_the_hansa
+		required_missions = { eng_end_the_french_conflict }
+		position = 3
+		trigger = {
+			custom_trigger_tooltip = {
+				tooltip = Rights_BGCom9HasGreater
+				Rights_BGCom9HasGreater = yes
+			}
+		} 
+		effect = {  
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = BG Amount = 20 }
+		}
+	}
+	eng_create_standing_army = {
+		icon = mission_plc_lifetime_of_war
+		required_missions = { eng_house_divided }
+		position = 6
+		trigger = {
+			custom_trigger_tooltip = {
+				tooltip = Rights_BUSer3HasGreater
+				Rights_BUSer3HasGreater = yes
+			}
+			num_of_units = 25
+			army_size_percentage = 0.8
+		}	
+		effect = {
+			add_country_modifier = {
+				name = monarchy_standing_army_mod
+				duration = 3650 #10 years
+			}
+		}
+	}
+	eng_the_redcoats = {
+		icon = mission_redcoats
+		required_missions = { eng_create_standing_army }
+		position = 7
+		trigger = {  
+			army_professionalism = 0.5
+			custom_trigger_tooltip = {
+				tooltip = Rights_NOSer5HasGreater
+				Rights_NOSer5HasGreater = yes
+			}
+		}	
+		effect = {
+			add_country_modifier = {
+				name = monarchy_modernise_the_army_mod
+				duration = 7300 #20 years
+			}
+		}
+	}
+}	
+eng_slot_5 = {
+	slot = 5
+	generic = no
+	ai = yes
+	potential = {
+		has_country_flag = k_of_eng
+	}
+	has_country_shield = yes
+	eng_royal_court = {
+		icon = mission_monarch_in_throne_room
+		required_missions = {  }
+		position = 1	
+		trigger = {
+			NOT = { Privilege_HasGreater = { Privilege=NOTitles Lvl = 2 } }
+			employed_advisor = { category = ADM }
+			employed_advisor = { category = DIP }
+			employed_advisor = { category = MIL }
+		}
+		effect = {
+			define_advisor = {
+				type = statesman_BU
+				culture = ROOT
+				discount = yes
+				skill = 2
+			}
+		}
+	}
+	eng_allies_on_the_mainland = {
+		icon = mission_diplomatic_relation
+		required_missions = { eng_royal_court }
 		position = 2
 		provinces_to_highlight = {
-			region = aquitaine_region
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
+			has_discovered = yes
+			is_capital = yes
+			continent = europe
+			NOT = { superregion = british_isles_superregion }
+			owner = {
+				is_free_or_tributary_trigger = yes
+				NOT = { alliance_with = ROOT }
+				NOT = { is_rival = ROOT }
+				NOT = { is_enemy = ROOT }
+				total_development = 200
 			}
-		}
+		}		
 		trigger = {
-			aquitaine_region = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+			num_of_allies = 2
+			calc_true_if = {
+				all_ally = {
+					capital_scope = {
+						continent = europe
+						NOT = { superregion = british_isles_superregion }
+					}
+					total_development = 200
+				}
+				amount = 2
 			}
-		}
+		}	
 		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
-			}
+			add_country_modifier = {
+			    name = monarchy_impress_diplomats_mod 
+			    duration = 3650 #10 years
+		    }
 		}
 	}
-	
-	eng_subjugate_anjou = {
-		icon = mission_conquer_50_development
-		required_missions = { eng_control_aquitaine }
+	eng_take_over_the_lowlands = {
+		icon = mission_hanseatic_city
+		required_missions = { eng_allies_on_the_mainland }
 		position = 3
 		provinces_to_highlight = {
-			area = anjou_poitou_area
+			OR = {
+				region = low_countries_region
+				region = belgii_region
+			}
 			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+			NOT = { owner = { alliance_with = ROOT } }
+		}		
+		trigger = { 
+			OR = {
+				any_ally = {
+					capital_scope = {
+						OR = {
+							region = low_countries_region
+							region = belgii_region
+						}
+					}
+					total_development = 100
+				}
+				num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+					OR = {
+						region = low_countries_region
+						region = belgii_region
+					}
+					value = 12
+				}
+			}
+		}	
+		effect = {
+			add_country_modifier = {
+			    name = eng_rb_hre_relations
+			    duration = 7300 #20 years
+		    }
 		}
+	}
+	eng_trade_dominance_in_europe = {
+		icon = mission_european_politics
+		required_missions = {
+			eng_royal_charter
+			eng_take_over_the_lowlands
+		}
+		position = 4		
 		trigger = {
-			anjou_poitou_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+			has_institution = Columbian_Exchange
+			236 = {
+				trade_share = {
+					country = ROOT
+					share = 25
+				}
+			}
+			373 = {
+				trade_share = {
+					country = ROOT
+					share = 25
+				}
+			}
+			97 = {
+				trade_share = {
+					country = ROOT
+					share = 25
+				}
+			}
+		}	
+		effect = { 
+			add_dip_power = 100
+			define_advisor = {
+			    type = trader_BG
+				culture = ROOT
+			    skill = 3
+			    discount = yes
+		    }
+		}
+	}
+	eng_strengthen_the_monarchy = {
+		icon = continue_the_renaissance
+		required_missions = { eng_house_divided }
+		position = 6	
+		trigger = {
+			absolutism = 40
+			NOT = { check_key = { lhs = Prov_NOPow value = 70 } }
+		}
+		effect = {
+			add_adm_power = 50
+		}
+	}
+	eng_support_gentry = {
+		icon = mission_english_absolutism
+		required_missions = { eng_strengthen_the_monarchy }		
+		position = 7
+		provinces_to_highlight = { }
+		trigger = {
+			custom_trigger_tooltip = {
+				tooltip = Rights_NOGov5HasGreater
+				Rights_NOGov5HasGreater = yes
 			}
 		}
 		effect = {
-			add_prestige = 15
+			add_country_modifier = {
+				name = "improved_administration"
+				duration = 7300 #20 years
+			}
 		}
 	}
 }
-
-eng_med_base = {
-	slot = 4
+eng_slot_6 = {
+	slot = 6
 	generic = no
 	ai = yes
 	potential = {
@@ -426,80 +729,93 @@ eng_med_base = {
 	}
 	has_country_shield = yes
 	
-	eng_conquer_menorca = {
-		icon = mission_conquer_50_development
-		position = 4
-		provinces_to_highlight = {
-			province_id = 2358
-			NOT = { country_or_non_sovereign_subject_holds = ROOT }
-		}
+	eng_war_of_the_roses = {
+		icon = mission_rb_war_of_the_roses
+		required_missions = {  }
+		position = 1
 		trigger = {
-			2358 = {
-				owned_by = ROOT
-				range = ROOT
-				is_core = ROOT
+			stability = 1
+			has_any_disaster = no
+			OR = {
+				has_country_flag = had_war_of_the_roses
+				AND = {
+					is_year = 1500
+					NOT = { has_country_flag = had_war_of_the_roses }
+				}
 			}
 		}
 		effect = {
-			2358 = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			add_country_modifier = {
+				name = eng_rb_roses_legit
+				duration = 3650 #10 years
 			}
 		}
 	}
-	
-	eng_fortify_menorca = {
-		icon = mission_early_game_buildings
-		position = 5
-		required_missions = { eng_conquer_menorca }
-		provinces_to_highlight = {
-			province_id = 2358
-		}
+	eng_handle_the_reformation = {
+		icon = mission_rb_control_state_religion
+		required_missions = { eng_war_of_the_roses }
+		position = 2
 		trigger = {
-			2358 = {
-				owned_by = ROOT
-				HasBuildingOrBetter = { b1=fort_14th b2=fort_15th b3=fort_16th b4=fort_17th b5=fort_18th }
+			is_religion_enabled = reformed
+			religion_group = christian
+			OR = {
+				AND = { 
+					religion = catholic
+					religious_unity = 0.75
+					OR = {
+						hidden_trigger = { has_province_flag = check_variable = { which = jesuit_support value = 1 } }
+						custom_trigger_tooltip = { tooltip = supported_jesuits }
+						full_idea_group = humanist_ideas
+					}
+				}
+				AND = {
+					NOT = { religion = catholic }
+					religious_unity = 0.9
+				}
 			}
-		}
+		}		
 		effect = {
-			add_mil_power = 50
+			if = {
+				limit = {
+					NOT = { religion = catholic }
+				}
+				add_country_modifier = {
+					name = eng_rb_state_religion_mod
+					duration = 3650 #10 years
+				}
+			}
+			else_if = {
+				limit = {
+					religion = catholic
+				}
+				add_papal_influence = 25
+				define_advisor = {
+					type = inquisitor_CL
+					culture = ROOT
+					skill = 3
+					discount = yes
+				}
+			}
 		}
 	}
-	
-	eng_develop_menorca = {
-		icon = mission_early_game_buildings
-		position = 6
-		required_missions = { eng_fortify_menorca }
-		provinces_to_highlight = {
-			province_id = 2358
-		}
-		trigger = {
-			2358 = {
-				owned_by = ROOT
-				HasBuildingOrBetter = { b1=urban_infrastructure_2 b2=urban_infrastructure_3 b3=urban_infrastructure_4 b4=urban_infrastructure_5 b5=urban_infrastructure_6 }
+	eng_piety_of_the_state = {
+		icon = mission_english_reformation
+		required_missions = { eng_handle_the_reformation }
+		position = 3	
+		trigger = {  
+			custom_trigger_tooltip = {
+				tooltip = Rights_CLHie2HasGreater
+				Rights_CLHie2HasGreater = yes
 			}
-		}
-		effect = {
-			2358 = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			check_key = { lhs = Prov_CLLoy value = 50 }
+		} 
+		effect = {  
+			capital_scope = {
+				add_province_modifier = {
+					name = effective_bishop
+					duration = 7300 #20 years
+				}
 			}
-		}
+		} 
 	}
-	
-	eng_menorca_base = {
-		icon = mission_early_game_buildings
-		position = 7
-		required_missions = { eng_develop_menorca }
-		provinces_to_highlight = {
-			province_id = 2358
-		}
-		trigger = {
-			2358 = {
-				owned_by = ROOT
-				HasBuildingOrBetter = { b1=harbour_infrastructure_2 b2=harbour_infrastructure_3 b3=harbour_infrastructure_4 b4=harbour_infrastructure_5 b5=harbour_infrastructure_6 }
-			}
-		}
-		effect = {
-			add_navy_tradition = 10
-		}
-	}
-}
+}	
