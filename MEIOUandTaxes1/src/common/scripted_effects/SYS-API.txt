@@ -1648,6 +1648,7 @@ Modi_ProdCountry = {
 	set_key = { lhs = Modi_BGLabor value = 1 }
 	set_key = { lhs = Modi_NOLabor value = 1 }
 	set_key = { lhs = Modi_CLLabor value = 1 }
+	set_key = { lhs = Modi_LTLabor value = 1 }
 	set_key = { lhs = Modi_Prod1 value = 1 }	# Food
 	set_key = { lhs = Modi_Prod2 value = 1 }	# Salt
 	set_key = { lhs = Modi_Prod4 value = 1 }	# Fiber
@@ -2388,6 +2389,7 @@ Modi_ProdProvince = {
 	set_key = { lhs = Modi_BGLabor which = owner }
 	set_key = { lhs = Modi_NOLabor which = owner }
 	set_key = { lhs = Modi_CLLabor which = owner }
+	set_key = { lhs = Modi_LTLabor which = owner }
 	set_key = { lhs = Modi_Prod1 which = owner }   # Food
 	set_key = { lhs = Modi_Prod2 which = owner }   # Salt
 	set_key = { lhs = Modi_Prod4 which = owner }   # Fiber
@@ -9122,35 +9124,71 @@ Pol_SetGovernmentHelper2 = {
 }
 ### CALLED EVERY MONTH, SET THESE FLAGS IF NEEDED and not already set by script
 Modi_UpdatePopWealth = {
+	# Update Popnumbers and Wealth numbers monthly if something changes between yearly ticks
 	if = {
 		limit = {
-			has_province_flag = POP_ChangedPop
+			OR = {
+				has_province_flag = POP_ChangedPop
+				has_province_flag = POP_ChangedWealth
+			}
 		}
-		clr_province_flag = POP_ChangedPop
 
-		POP_SetClass = yes
+		if = {
+			limit = {
+				has_province_flag = POP_ChangedPop
+			}
+			
+			clr_province_flag = POP_ChangedPop
 
+			POP_SetClass = yes # Update pops
+
+		}
+		if = {
+			limit = {
+				has_province_flag = POP_ChangedWealth
+			}
+			clr_province_flag = POP_ChangedWealth
+
+			POP_SumWealth = yes # Update wealth
+		}
+
+		# If either change Wealth PC needs recalcultion. The below does calc per class and sum per aggrgate
 		TN_GetWealthPC = { class = SF aggr = Rural aggr_glob = Total }
 		TN_GetWealthPC = { class = NM aggr = Rural aggr_glob = Total }
 		TN_GetWealthPC = { class = RE aggr = Urban aggr_glob = Total }
 		TN_GetWealthPC = { class = NO aggr = Notables aggr_glob = Total }
 		TN_GetWealthPC = { class = BG aggr = Notables aggr_glob = Total }
 		TN_GetWealthPC = { class = CL aggr = Notables aggr_glob = Total }
-	}
-	if = {
-		limit = {
-			has_province_flag = POP_ChangedWealth
+
+		# The below calculates the division for the aggregations of Wealth PC
+		if = {
+			limit = {
+				check_key = { lhs = Class_Rural value = 0.001 }
+			}
+			divide_key = { lhs = Class_RuralWealthPC    which = Class_Rural }
+			multiply_key = { lhs = Class_RuralWealthPC  value = 0.001 } #Divide by 1000 to get per capita
 		}
-		clr_province_flag = POP_ChangedWealth
-
-		POP_SumWealth = yes
-
-		TN_GetWealthPC = { class = SF aggr = Rural aggr_glob = Total }
-		TN_GetWealthPC = { class = NM aggr = Rural aggr_glob = Total }
-		TN_GetWealthPC = { class = RE aggr = Urban aggr_glob = Total }
-		TN_GetWealthPC = { class = NO aggr = Notables aggr_glob = Total }
-		TN_GetWealthPC = { class = BG aggr = Notables aggr_glob = Total }
-		TN_GetWealthPC = { class = CL aggr = Notables aggr_glob = Total }
+		if = {
+			limit = {
+				check_key = { lhs = Class_Urban value = 0.001 }
+			}
+			divide_key = { lhs = Class_UrbanWealthPC    which = Class_Urban }
+			multiply_key = { lhs = Class_UrbanWealthPC  value = 0.001 } #Divide by 1000 to get per capita
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Class_Notables value = 0.001 }
+			}
+			divide_key = { lhs = Class_NotablesWealthPC   which = Class_Notables }
+			multiply_key = { lhs = Class_NotablesWealthPC value = 0.001 } #Divide by 1000 to get per capita
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Class_Total value = 0.001 }
+			}
+			divide_key = { lhs = Class_TotalWealthPC    which = Class_Total }
+			multiply_key = { lhs = Class_TotalWealthPC  value = 0.001 } #Divide by 1000 to get per capita
+		}
 	}
 }
 

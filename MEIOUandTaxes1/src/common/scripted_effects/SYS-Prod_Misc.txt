@@ -90,16 +90,30 @@ Prod_GetWorkerCL = {
     }
 }
 
+# This effectively get as close to 100% of the original pop as litrati labor
 Prod_GetWorkerLT = {
-    Prod_GetWorkerHelper = {
-        class = RE
-        return = $return$
-		rate = 2.5
-		val = 1.2
+	if = {
+        limit = {
+            check_key = { lhs = LT_Total value = 0.001 }
+        }
+		set_key = { lhs = $return$ which = LT_Total }
+
+		multiply_key = { lhs = $return$ value = 0.46} # Deflate
+		multiply_key = { lhs = $return$ which = Modi_LTLabor }
+		multiply_key = { lhs = $return$ which = Modi_Labor }
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = $return$ value = 0 } }
+			}
+			set_key = { lhs = $return$ value = 0 }
+		}
+        set_key = { lhs = WK_LT which = $return$ } #save
     }
-    multiply_key = { lhs = $return$ which = LT_Ratio }
-	multiply_key = { lhs = $return$ value = 0.01 }
-    set_key = { lhs = WK_LT which = $return$ }
+    else = {
+        set_key = { lhs = $return$ value = 0 }
+        set_key = { lhs = WK_LT value = 0 }
+    }
+	
 }
 
 

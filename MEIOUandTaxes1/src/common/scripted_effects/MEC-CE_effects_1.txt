@@ -33,7 +33,9 @@ CE_Main = {
 		set_key = { lhs = tv_ship which = PREV }
 	}
 
-	## Loop through every non empty province hold by overlord and all his subjects - Treat HRE and Japan as an area
+	# Loop through every non empty province held by a country and their subjects - HRE, Japan and the popes get special runner access for all princes/daimyos/catholics
+	# Provinces in the special areas that do not belong to the currently evaluated country can still propagate CE (ie to disconected provinces in the HRE)
+	# But different countries' provinces' CE values are not to be changed, so they get back-uped and a bit later restored (recalc gets skipped)
 	every_province = {
 		limit = {
 			isValidProv = yes
@@ -41,18 +43,18 @@ CE_Main = {
 				country_or_vassal_holds = event_target:tt_highest
 				owner = { overlord = { is_subject_other_than_tributary_trigger = yes is_subject_of = event_target:tt_highest } }
 				AND = {
-					owner = { is_part_of_hre = yes }
+					owner = { is_part_of_hre = yes }     # Allow runners through all of the HRE
 					event_target:tt_highest = { is_part_of_hre = yes }
 				}
 				AND = {
-					owner = { daimyo_trigger = yes }
+					owner = { daimyo_trigger = yes }     # Allow runners through all of Japan
 					event_target:tt_highest = { daimyo_trigger = yes }
 				}
-				AND = {		#Allow mr pope to always send runners trough all cathiloc owned land
+				AND = {		# Allow mr pope to always send runners trough all cathiloc owned land
 					owner = { religion = catholic }
 					event_target:tt_highest = { tag = PAP }
 				}
-				AND = {		#Allow mr anti pope to always send runners through all avignonist owned land
+				AND = {		# Allow mr anti pope to always send runners through all avignonist owned land
 					owner = { religion = avignonist }
 					event_target:tt_highest = { tag = AVI }
 				}
@@ -414,6 +416,8 @@ CE_Main = {
 			clean = yes
 		}
 	}
+
+	#If the province belongs to the current country evaluated, set autonomy modifiers. If not, restore previously saved CE values
 	every_province = {
 		limit = {
 			isValidProv = yes
