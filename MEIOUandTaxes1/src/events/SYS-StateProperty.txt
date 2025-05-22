@@ -3,9 +3,224 @@ namespace = SYS_StateProperty
 ### Concept for Estates Acquiring State Property
 # If Capacity is overburdened, prov will be found where we can sell to local powerbroker
 
-
 country_event = {
 	id = SYS_StateProperty.001
+	title = "no_localisation"
+	desc = "no_localisation"
+	picture = CITY_DEVELOPMENT_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+	}
+	#Event decides what should be sold first
+	#If sale is rejected in event 002, then 001 is called again, but that property is deactivated for one iteration
+	#Weighting table is as follows:
+	#########  Monarch / Tribal / Republic / Theocracy
+	#Farmland   6 / 6 / 1 / 6
+	#Extraction 7 / 7 / 1 / 2
+	#Forestry   4 / 5 / 1 / 3
+	#Fishery    5 / 4 / 1 / 5
+	#Industrial 2 / 2 / 5 / 4
+	#Commerce   1 / 1 / 5 / 1
+	#Academic   3 / 3 / 5 / 7
+	## The higher the number, the less likely it is picked for selling 
+	
+	#Farmland
+	option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyAgriculture value = 10 }
+			NOT = { has_country_flag = NoFarmlandForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 2.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 7.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+	#Extraction
+	option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyExtraction value = 10 }
+			NOT = { has_country_flag = NoExtractionForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 1.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 1.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 7.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 5.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+	#Forestry
+	option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyForestry value = 10 }
+			NOT = { has_country_flag = NoForestryForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 4.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 3.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 7.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 5.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+	#Fishery
+		option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyFishery value = 10 }
+			NOT = { has_country_flag = NoFisheryForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 4.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 3.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 7.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 3.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+	#Industrial
+	option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyIndustrial value = 10 }
+			NOT = { has_country_flag = NoIndustrialForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 6.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 6.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 3.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 4.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+	#Commercial
+	option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyCommercial value = 10 }
+			NOT = { has_country_flag = NoCommercialForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 7.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 7.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 3.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 7.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+	#Academic
+	option = {
+		name = "no_localisation"
+		trigger = {
+			check_key = { lhs = StatePropertyAcademic value = 10 }
+			NOT = { has_country_flag = NoAcademicForSale }
+		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				factor = 5.00
+				owner = { government = monarchy }
+			}
+					modifier = {
+				factor = 5.00
+				owner = { government = tribal }
+			}
+					modifier = {
+				factor = 3.00
+				owner = { government = republic }
+			}
+					modifier = {
+				factor = 1.00
+				owner = { government = theocracy }
+			}
+		}	
+	}
+
+}
+
+country_event = {
+	id = SYS_StateProperty.002
 	title = "no_localisation"
 	desc = "no_localisation"
 	picture = CITY_DEVELOPMENT_eventPicture
@@ -20,8 +235,7 @@ country_event = {
 		#find a province
 			random_owned_province = {
 				limit = {
-					check_key = { lhs = BU_Agriculture value = 10 }
-					check_key = { lhs = Building_AgricultureGross value = 0 }
+					check_key = { lhs = BU_Agriculture value = 0 }
 				}
 				save_event_target_as = StatePropertyBuyOut
 				
@@ -29,6 +243,7 @@ country_event = {
 				multiply_key = { lhs = BuyOutAmount value = 0.75 }
 					
 				set_key = { lhs = BuyOutValue which = Building_AgricultureGross } # take profits of that property
+				#missing condition if profits are below zero
 				divide_key = { lhs = BuyOutValue which = Building_Agriculture } # divide profits with size of that property
 				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
 				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
