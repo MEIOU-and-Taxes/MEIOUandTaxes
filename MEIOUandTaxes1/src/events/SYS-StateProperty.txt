@@ -277,35 +277,51 @@ country_event = {
 				
 				set_key = { lhs = BuyOutAmount which = BU_Agriculture }
 				multiply_key = { lhs = BuyOutAmount value = 0.75 }
-					
-				set_key = { lhs = BuyOutValue which = Building_AgricultureGross } # take profits of that property
-				#missing condition if profits are below zero
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_AgricultureGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_AgricultureGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
 				divide_key = { lhs = BuyOutValue which = Building_Agriculture } # divide profits with size of that property
 				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
 				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
 				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
 				
 				#Nobility
 				set_key = { lhs = Tmp_1 value = 1 }
 				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
-				change_key = { lhs = Tmp_1 value = 1 } #make sure they offer nonzero
-				multiply_key = { lhs = Tmp_1 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
 				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
 				#Clergy
 				set_key = { lhs = Tmp_2 value = 1 }
 				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
-				change_key = { lhs = Tmp_2 value = 1 } #make sure they offer nonzero
-				multiply_key = { lhs = Tmp_2 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
 				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
 				#Burgher
 				set_key = { lhs = Tmp_3 value = 1 }
 				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
-				change_key = { lhs = Tmp_3 value = 1 } #make sure they offer nonzero
-				multiply_key = { lhs = Tmp_3 value = 0.01 } # 1 to 101 -> 0.01 to 1.01
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
 				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
 				#Commoners
 				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
-				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value				
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
 			}
 			
 	}
@@ -448,10 +464,21 @@ country_event = {
 	}
 	after = {
 		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
 			set_key = { lhs = Tmp_1 value = 0 }
 			set_key = { lhs = Tmp_2 value = 0 }
 			set_key = { lhs = Tmp_3 value = 0 }
 			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			
 		}
 	}
 }
