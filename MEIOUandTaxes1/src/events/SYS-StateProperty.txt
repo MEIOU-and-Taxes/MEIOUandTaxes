@@ -19,12 +19,13 @@ country_event = {
 	title = SYS_StateProperty.002.t
 	desc = SYS_StateProperty.002.desc
 	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
 	
 	trigger = {
 		has_country_flag = StatePropertyBurden
 		check_key = { lhs = BuyOutTarget value = 25 }
-		check_key = { lhs = StatePropertyAgriculture value = 5 }
-		NOT = { has_country_flag = NoFarmlandForSale }
+		check_key = { lhs = StatePropertyAgriculture value = 25 }
+		NOT = { has_country_flag = NoAgricultureForSale }
 	}
 	
 	mean_time_to_happen = {
@@ -49,9 +50,10 @@ country_event = {
 	
 	immediate = {
 		#find a province
+		hidden_effect = {
 			random_owned_province = {
 				limit = {
-					check_key = { lhs = BU_Agriculture value = 0.001 }
+					check_key = { lhs = BU_Agriculture value = 3 }
 					#NOT = { has_province_flag = RecentlySoldProperty }
 				}
 				save_event_target_as = StatePropertyBuyOut
@@ -113,7 +115,7 @@ country_event = {
 				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
 				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
 			}
-			
+		}	
 	}
 	#Nobility
 	option = {
@@ -270,7 +272,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoFarmlandForSale
+			set_country_flag = NoAgricultureForSale
 
 		}
 		ai_chance = {
@@ -283,7 +285,1862 @@ country_event = {
 		name = SYS_StateProperty.002.f
 		trigger = {
 			all_owned_province = {
-				NOT = { check_key = { lhs = BU_Agriculture value = 0.001 } }
+				NOT = { check_key = { lhs = BU_Agriculture value = 3 } }
+			}
+		}
+		hidden_effect = {
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	after = {
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = Tmp_5 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = BuyOutTarget value = 25 } }
+				}
+				clr_country_flag = StatePropertyBurden
+			}
+		}
+	}
+}
+#Extraction
+country_event = {
+	id = SYS_StateProperty.003
+	title = SYS_StateProperty.003.t
+	desc = SYS_StateProperty.003.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+		check_key = { lhs = BuyOutTarget value = 25 }
+		check_key = { lhs = StatePropertyExtraction value = 25 }
+		NOT = { has_country_flag = NoExtractionForSale }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		modifier = {
+			factor = 7
+			government = monarchy
+		}
+		modifier = {
+			factor = 7
+			government = tribal
+		}
+		#modifier = {
+		#	factor = 1
+		#	government = republic
+		#}
+		modifier = {
+			factor = 2
+			government = theocracy
+		}
+	}
+	
+	immediate = {
+		#find a province
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = BU_Extraction value = 3 }
+					#NOT = { has_province_flag = RecentlySoldProperty }
+				}
+				save_event_target_as = StatePropertyBuyOut
+				
+				if = { # sell a chunk
+					limit = {
+						check_key = { lhs = BU_Extraction value = 25 }
+					}
+					set_key = { lhs = BuyOutAmount which = BU_Extraction }
+					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				else = { # sell it all 
+					set_key = { lhs = BuyOutAmount which = BU_Extraction }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_ExtractionGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_ExtractionGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
+				divide_key = { lhs = BuyOutValue which = Building_Extraction } # divide profits with size of that property
+				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
+				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
+				
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
+			}
+		}
+	}
+	#Nobility
+	option = {
+		name = SYS_StateProperty.003.a
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = NO_Extraction which = BuyOutAmount }
+				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
+			old_scaled_ducat_gained_country = yes
+			
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+		}
+		
+	}
+	#Clergy
+	option = {
+		name = SYS_StateProperty.003.b
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = CL_Extraction which = BuyOutAmount }
+				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}
+		
+	}
+	#Burgher
+	option = {
+		name = SYS_StateProperty.003.c
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
+				Rights_BGGov4HasGreater = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = BG_Extraction which = BuyOutAmount }
+				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
+		}
+		
+	}
+	#Commoners
+	option = {
+		name = SYS_StateProperty.003.d
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = SF_Wealth which = Tmp_4 }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = SF_Extraction which = BuyOutAmount }
+				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				
+				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
+		}
+		
+	}
+	#Nobody
+	option = {
+		name = SYS_StateProperty.003.e
+		trigger = {
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = Prov_BULoy value = 10 }
+				
+			}
+			set_country_flag = NoExtractionForSale
+
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	#NoProvince has that property
+	option = {
+		name = SYS_StateProperty.003.f
+		trigger = {
+			all_owned_province = {
+				NOT = { check_key = { lhs = BU_Extraction value = 3 } }
+			}
+		}
+		hidden_effect = {
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	after = {
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = Tmp_5 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = BuyOutTarget value = 25 } }
+				}
+				clr_country_flag = StatePropertyBurden
+			}
+		}
+	}
+}
+#Forestry
+country_event = {
+	id = SYS_StateProperty.004
+	title = SYS_StateProperty.004.t
+	desc = SYS_StateProperty.004.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+		check_key = { lhs = BuyOutTarget value = 25 }
+		check_key = { lhs = StatePropertyForestry value = 25 }
+		NOT = { has_country_flag = NoForestryForSale }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		modifier = {
+			factor = 4
+			government = monarchy
+		}
+		modifier = {
+			factor = 5
+			government = tribal
+		}
+		#modifier = {
+		#	factor = 1
+		#	government = republic
+		#}
+		modifier = {
+			factor = 3
+			government = theocracy
+		}
+	}
+	
+	immediate = {
+		#find a province
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = BU_Forestry value = 3 }
+					#NOT = { has_province_flag = RecentlySoldProperty }
+				}
+				save_event_target_as = StatePropertyBuyOut
+				
+				if = { # sell a chunk
+					limit = {
+						check_key = { lhs = BU_Forestry value = 25 }
+					}
+					set_key = { lhs = BuyOutAmount which = BU_Forestry }
+					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				else = { # sell it all 
+					set_key = { lhs = BuyOutAmount which = BU_Forestry }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_ForestryGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_ForestryGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
+				divide_key = { lhs = BuyOutValue which = Building_Forestry } # divide profits with size of that property
+				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
+				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
+				
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
+			}
+		}	
+	}
+	#Nobility
+	option = {
+		name = SYS_StateProperty.004.a
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = NO_Forestry which = BuyOutAmount }
+				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
+			old_scaled_ducat_gained_country = yes
+			
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+		}
+		
+	}
+	#Clergy
+	option = {
+		name = SYS_StateProperty.004.b
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = CL_Forestry which = BuyOutAmount }
+				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}
+		
+	}
+	#Burgher
+	option = {
+		name = SYS_StateProperty.004.c
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
+				Rights_BGGov4HasGreater = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = BG_Forestry which = BuyOutAmount }
+				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
+		}
+		
+	}
+	#Commoners
+	option = {
+		name = SYS_StateProperty.004.d
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = SF_Wealth which = Tmp_4 }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = SF_Forestry which = BuyOutAmount }
+				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				
+				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
+		}
+		
+	}
+	#Nobody
+	option = {
+		name = SYS_StateProperty.004.e
+		trigger = {
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = Prov_BULoy value = 10 }
+				
+			}
+			set_country_flag = NoForestryForSale
+
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	#NoProvince has that property
+	option = {
+		name = SYS_StateProperty.004.f
+		trigger = {
+			all_owned_province = {
+				NOT = { check_key = { lhs = BU_Forestry value = 3 } }
+			}
+		}
+		hidden_effect = {
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	after = {
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = Tmp_5 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = BuyOutTarget value = 25 } }
+				}
+				clr_country_flag = StatePropertyBurden
+			}
+		}
+	}
+}
+#Fishery
+country_event = {
+	id = SYS_StateProperty.005
+	title = SYS_StateProperty.005.t
+	desc = SYS_StateProperty.005.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+		check_key = { lhs = BuyOutTarget value = 25 }
+		check_key = { lhs = StatePropertyFishery value = 25 }
+		NOT = { has_country_flag = NoFisheryForSale }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		modifier = {
+			factor = 5
+			government = monarchy
+		}
+		modifier = {
+			factor = 4
+			government = tribal
+		}
+		#modifier = {
+		#	factor = 1
+		#	government = republic
+		#}
+		modifier = {
+			factor = 5
+			government = theocracy
+		}
+	}
+	
+	immediate = {
+		#find a province
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = BU_Fishery value = 3 }
+					#NOT = { has_province_flag = RecentlySoldProperty }
+				}
+				save_event_target_as = StatePropertyBuyOut
+				
+				if = { # sell a chunk
+					limit = {
+						check_key = { lhs = BU_Fishery value = 25 }
+					}
+					set_key = { lhs = BuyOutAmount which = BU_Fishery }
+					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				else = { # sell it all 
+					set_key = { lhs = BuyOutAmount which = BU_Fishery }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_FisheryGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_FisheryGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
+				divide_key = { lhs = BuyOutValue which = Building_Fishery } # divide profits with size of that property
+				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
+				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
+				
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
+			}
+		}
+	}
+	#Nobility
+	option = {
+		name = SYS_StateProperty.005.a
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = NO_Fishery which = BuyOutAmount }
+				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
+			old_scaled_ducat_gained_country = yes
+			
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+		}
+		
+	}
+	#Clergy
+	option = {
+		name = SYS_StateProperty.005.b
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = CL_Fishery which = BuyOutAmount }
+				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}
+		
+	}
+	#Burgher
+	option = {
+		name = SYS_StateProperty.005.c
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
+				Rights_BGGov4HasGreater = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = BG_Fishery which = BuyOutAmount }
+				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
+		}
+		
+	}
+	#Commoners
+	option = {
+		name = SYS_StateProperty.005.d
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = SF_Wealth which = Tmp_4 }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = SF_Fishery which = BuyOutAmount }
+				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				
+				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
+		}
+		
+	}
+	#Nobody
+	option = {
+		name = SYS_StateProperty.005.e
+		trigger = {
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = Prov_BULoy value = 10 }
+				
+			}
+			set_country_flag = NoFisheryForSale
+
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	#NoProvince has that property
+	option = {
+		name = SYS_StateProperty.005.f
+		trigger = {
+			all_owned_province = {
+				NOT = { check_key = { lhs = BU_Fishery value = 3 } }
+			}
+		}
+		hidden_effect = {
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	after = {
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = Tmp_5 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = BuyOutTarget value = 25 } }
+				}
+				clr_country_flag = StatePropertyBurden
+			}
+		}
+	}
+}
+#Industrial
+country_event = {
+	id = SYS_StateProperty.006
+	title = SYS_StateProperty.006.t
+	desc = SYS_StateProperty.006.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+		check_key = { lhs = BuyOutTarget value = 25 }
+		check_key = { lhs = StatePropertyIndustrial value = 25 }
+		NOT = { has_country_flag = NoIndustrialForSale }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		modifier = {
+			factor = 2
+			government = monarchy
+		}
+		modifier = {
+			factor = 2
+			government = tribal
+		}
+		modifier = {
+			factor = 5
+			government = republic
+		}
+		modifier = {
+			factor = 4
+			government = theocracy
+		}
+	}
+	
+	immediate = {
+		#find a province
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = BU_Industrial value = 3 }
+					#NOT = { has_province_flag = RecentlySoldProperty }
+				}
+				save_event_target_as = StatePropertyBuyOut
+				
+				if = { # sell a chunk
+					limit = {
+						check_key = { lhs = BU_Industrial value = 25 }
+					}
+					set_key = { lhs = BuyOutAmount which = BU_Industrial }
+					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				else = { # sell it all 
+					set_key = { lhs = BuyOutAmount which = BU_Industrial }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_IndustrialGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_IndustrialGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
+				divide_key = { lhs = BuyOutValue which = Building_Industrial } # divide profits with size of that property
+				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
+				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
+				
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
+			}
+		}
+	}
+	#Nobility
+	option = {
+		name = SYS_StateProperty.006.a
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = NO_Industrial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
+			old_scaled_ducat_gained_country = yes
+			
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+		}
+		
+	}
+	#Clergy
+	option = {
+		name = SYS_StateProperty.006.b
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = CL_Industrial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}
+		
+	}
+	#Burgher
+	option = {
+		name = SYS_StateProperty.006.c
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
+				#Rights_BGGov4HasGreater = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = BG_Industrial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
+		}
+		
+	}
+	#Commoners
+	option = {
+		name = SYS_StateProperty.006.d
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = RE_Wealth which = Tmp_4 }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = RE_Industrial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				
+				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
+		}
+		
+	}
+	#Nobody
+	option = {
+		name = SYS_StateProperty.006.e
+		trigger = {
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = Prov_BULoy value = 10 }
+				
+			}
+			set_country_flag = NoIndustrialForSale
+
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	#NoProvince has that property
+	option = {
+		name = SYS_StateProperty.006.f
+		trigger = {
+			all_owned_province = {
+				NOT = { check_key = { lhs = BU_Industrial value = 3 } }
+			}
+		}
+		hidden_effect = {
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	after = {
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = Tmp_5 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = BuyOutTarget value = 25 } }
+				}
+				clr_country_flag = StatePropertyBurden
+			}
+		}
+	}
+}
+#Commercial
+country_event = {
+	id = SYS_StateProperty.007
+	title = SYS_StateProperty.007.t
+	desc = SYS_StateProperty.007.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+		check_key = { lhs = BuyOutTarget value = 25 }
+		check_key = { lhs = StatePropertyCommercial value = 25 }
+		NOT = { has_country_flag = NoCommercialForSale }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		#modifier = {
+		#	factor = 1
+		#	government = monarchy
+		#}
+		#modifier = {
+		#	factor = 6
+		#	government = tribal
+		#}
+		modifier = {
+			factor = 5
+			government = republic
+		}
+		#modifier = {
+		#	factor = 6
+		#	government = theocracy
+		#}
+	}
+	
+	immediate = {
+		#find a province
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = BU_Commercial value = 3 }
+					#NOT = { has_province_flag = RecentlySoldProperty }
+				}
+				save_event_target_as = StatePropertyBuyOut
+				
+				if = { # sell a chunk
+					limit = {
+						check_key = { lhs = BU_Commercial value = 25 }
+					}
+					set_key = { lhs = BuyOutAmount which = BU_Commercial }
+					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				else = { # sell it all 
+					set_key = { lhs = BuyOutAmount which = BU_Commercial }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_CommercialGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_CommercialGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
+				divide_key = { lhs = BuyOutValue which = Building_Commercial } # divide profits with size of that property
+				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
+				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
+				
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
+			}
+		}
+	}
+	#Nobility
+	option = {
+		name = SYS_StateProperty.007.a
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = NO_Commercial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
+			old_scaled_ducat_gained_country = yes
+			
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+		}
+		
+	}
+	#Clergy
+	option = {
+		name = SYS_StateProperty.007.b
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = CL_Commercial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}
+		
+	}
+	#Burgher
+	option = {
+		name = SYS_StateProperty.007.c
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
+				#Rights_BGGov4HasGreater = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = BG_Commercial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
+		}
+		
+	}
+	#Commoners
+	option = {
+		name = SYS_StateProperty.007.d
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = RE_Wealth which = Tmp_4 }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = RE_Commercial which = BuyOutAmount }
+				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				
+				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
+		}
+		
+	}
+	#Nobody
+	option = {
+		name = SYS_StateProperty.007.e
+		trigger = {
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = Prov_BULoy value = 10 }
+				
+			}
+			set_country_flag = NoCommercialForSale
+
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	#NoProvince has that property
+	option = {
+		name = SYS_StateProperty.007.f
+		trigger = {
+			all_owned_province = {
+				NOT = { check_key = { lhs = BU_Commercial value = 3 } }
+			}
+		}
+		hidden_effect = {
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	after = {
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 0 }
+				set_key = { lhs = Tmp_3 value = 0 }
+				set_key = { lhs = Tmp_4 value = 0 }
+				set_key = { lhs = Tmp_5 value = 0 }
+				set_key = { lhs = BuyOutAmount value = 0 }
+				set_key = { lhs = BuyOutValue value = 0 }
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+			set_key = { lhs = Tmp_3 value = 0 }
+			set_key = { lhs = Tmp_4 value = 0 }
+			set_key = { lhs = Tmp_5 value = 0 }
+			set_key = { lhs = BuyOutAmount value = 0 }
+			set_key = { lhs = BuyOutValue value = 0 }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = BuyOutTarget value = 25 } }
+				}
+				clr_country_flag = StatePropertyBurden
+			}
+		}
+	}
+}
+
+#Academic
+country_event = {
+	id = SYS_StateProperty.008
+	title = SYS_StateProperty.008.t
+	desc = SYS_StateProperty.008.desc
+	picture = CITY_DEVELOPMENT_eventPicture
+	goto = StatePropertyBuyOut
+	
+	trigger = {
+		has_country_flag = StatePropertyBurden
+		check_key = { lhs = BuyOutTarget value = 25 }
+		check_key = { lhs = StatePropertyAcademic value = 25 }
+		NOT = { has_country_flag = NoAcademicForSale }
+	}
+	
+	mean_time_to_happen = {
+		months = 1
+		modifier = {
+			factor = 3
+			government = monarchy
+		}
+		modifier = {
+			factor = 3
+			government = tribal
+		}
+		modifier = {
+			factor = 5
+			government = republic
+		}
+		modifier = {
+			factor = 7
+			government = theocracy
+		}
+	}
+	
+	immediate = {
+		#find a province
+		hidden_effect = {
+			random_owned_province = {
+				limit = {
+					check_key = { lhs = BU_Academic value = 3 }
+					#NOT = { has_province_flag = RecentlySoldProperty }
+				}
+				save_event_target_as = StatePropertyBuyOut
+				
+				if = { # sell a chunk
+					limit = {
+						check_key = { lhs = BU_Academic value = 25 }
+					}
+					set_key = { lhs = BuyOutAmount which = BU_Academic }
+					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				else = { # sell it all 
+					set_key = { lhs = BuyOutAmount which = BU_Academic }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+				}
+				
+				if = { 
+					limit = { 
+						check_key = { lhs = Building_AcademicGross value = 1 }
+					}
+					set_key = { lhs = BuyOutValue which = Building_AcademicGross } # take profits of that property
+				}
+				else = {
+					set_key = { lhs = BuyOutValue value = 1 } # to have at least some kind of value
+				}
+				divide_key = { lhs = BuyOutValue which = Building_Academic } # divide profits with size of that property
+				multiply_key = { lhs = BuyOutValue value = 10 } # 10 years projected profits
+				multiply_key = { lhs = BuyOutValue which = BuyOutAmount } # projected profits x amount to be sold
+				ROOT = { set_key = { lhs = BuyOutValue which = PREV } } # Theoretical value saved to country scope
+				ROOT = { set_key = { lhs = BuyOutAmount which = PREV } } # Amount saved to country scope
+				
+				#Nobility
+				set_key = { lhs = Tmp_1 value = 1 }
+				multiply_key = { lhs = Tmp_1 which = Prov_NOLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_1 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+				#Clergy
+				set_key = { lhs = Tmp_2 value = 1 }
+				multiply_key = { lhs = Tmp_2 which = Prov_CLLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_2 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_2 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_2 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_2 which = BuyOutValue } # Factor x Value				
+				#Burgher
+				set_key = { lhs = Tmp_3 value = 1 }
+				multiply_key = { lhs = Tmp_3 which = Prov_BGLoy } # 0 to 100
+				multiply_key = { lhs = Tmp_3 value = 0.5 } # to have a 0 to 50 range
+				change_key = { lhs = Tmp_3 value = 50 } #make sure they offer at least 50%
+				multiply_key = { lhs = Tmp_3 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+				multiply_key = { lhs = Tmp_3 which = BuyOutValue } # Factor x Value
+				#Commoners
+				set_key = { lhs = Tmp_4 value = 0.65 } #Commoners always offer 65% for now
+				multiply_key = { lhs = Tmp_4 which = BuyOutValue } # Factor x Value	
+
+				ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_2 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_3 which = PREV } } # adding that to country scope for loc
+				ROOT = { set_key = { lhs = Tmp_4 which = PREV } } # adding that to country scope for loc
+			}
+		}
+	}
+	#Nobility
+	option = {
+		name = SYS_StateProperty.008.a
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = NO_Wealth which = Tmp_1 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = NO_Academic which = BuyOutAmount }
+				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				
+				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_1 }
+			old_scaled_ducat_gained_country = yes
+			
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = monarchy }
+			}
+		}
+		
+	}
+	#Clergy
+	option = {
+		name = SYS_StateProperty.008.b
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = CL_Wealth which = Tmp_2 }
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {				
+				change_key = { lhs = CL_Academic which = BuyOutAmount }
+				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				
+				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = theocracy }
+			}
+		}
+		
+	}
+	#Burgher
+	option = {
+		name = SYS_StateProperty.008.c
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = BG_Wealth which = Tmp_3 }
+				#Rights_BGGov4HasGreater = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = BG_Academic which = BuyOutAmount }
+				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				
+				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				factor = 2.00
+				owner = { government = republic }
+			}
+		}
+		
+	}
+	#Commoners
+	option = {
+		name = SYS_StateProperty.008.d
+		trigger = {
+			event_target:StatePropertyBuyOut = {
+				check_key = { lhs = RE_Wealth which = Tmp_4 }
+			}
+			OR = {
+				Rights_NOTen4Has = yes
+				Rights_NOGov5Has = yes
+			}
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = RE_Academic which = BuyOutAmount }
+				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				
+				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
+				
+				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
+				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+				set_province_flag = RecentlySoldProperty
+			}
+			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+			old_scaled_ducat_gained_country = yes
+
+		}
+		ai_chance = {
+			factor = 100
+			modifier = {
+				owner = { num_of_cities = 50 }
+				factor = 1.5
+			}
+			modifier = {
+				owner = { num_of_cities = 80 }
+				factor = 1.5
+			}
+		}
+		
+	}
+	#Nobody
+	option = {
+		name = SYS_StateProperty.008.e
+		trigger = {
+		}
+		hidden_effect = {
+			event_target:StatePropertyBuyOut = {
+				change_key = { lhs = Prov_BULoy value = 10 }
+				
+			}
+			set_country_flag = NoAcademicForSale
+
+		}
+		ai_chance = {
+			factor = 0
+		}
+		
+	}
+	#NoProvince has that property
+	option = {
+		name = SYS_StateProperty.008.f
+		trigger = {
+			all_owned_province = {
+				NOT = { check_key = { lhs = BU_Academic value = 3 } }
 			}
 		}
 		hidden_effect = {
