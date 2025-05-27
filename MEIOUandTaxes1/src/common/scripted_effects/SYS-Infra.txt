@@ -1649,26 +1649,56 @@ Infra_DoSpend = {
 				multiply_key = { lhs = Tmp_5 value = 0.1 }
 				multiply_key = { lhs = Tmp_6 value = 0.1 }
 			}
+			## This should tie the investment % for BU to the taxation of BU property, currently disabled.
+			#if = {
+			#	limit = {
+			#		NOT = { has_global_flag = POP_Sim10 }
+			#	}
+			#	if = {
+			#		limit = {
+			#			NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 1 } }
+			#		}
+			#		multiply_key = { lhs = Tmp_7 value = 0.015 }
+			#	}
+			#	else_if = {
+			#		limit = {
+			#			NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 75 } }
+			#		}
+			#		set_key = { lhs = Tmp_8 which = Tax_CostProp$type$Rate }
+			#		multiply_key = { lhs = Tmp_8 value = 1.333 } ### 75% is 100%, and so on
+			#		multiply_key = { lhs = Tmp_8 value = 0.01 }
+			#		multiply_key = { lhs = Tmp_7 which = Tmp_8 }
+			#	}
+			#}
 			if = {
 				limit = {
-					NOT = { has_global_flag = POP_Sim10 }
+					NOT = { has_global_flag = POP_Sim10 } 
 				}
 				if = {
 					limit = {
-						NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 1 } }
+						check_key = { lhs = StatePropertyPercCap value = 200 }
 					}
 					multiply_key = { lhs = Tmp_7 value = 0.015 }
 				}
 				else_if = {
 					limit = {
-						NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 75 } }
+						check_key = { lhs = StatePropertyPercCap value = 105 }
 					}
-					set_key = { lhs = Tmp_8 which = Tax_CostProp$type$Rate }
-					multiply_key = { lhs = Tmp_8 value = 1.333 } ### 75% is 100%, and so on
-					multiply_key = { lhs = Tmp_8 value = 0.01 }
+					set_key = { lhs = Tmp_8 which = StatePropertyPercCap }
+					subtract_key = { lhs = Tmp_8 value = 100  } ##105 - 100
+					multiply_key = { lhs = Tmp_8 value = 0.005 } ## 5 -> 0.025
+					multiply_key = { lhs = Tmp_8 which = Tmp_7 } # 2.5% of it
+					subtract_key = { lhs = Tmp_7 which = Tmp_8 } # remove 2.55% of it
+				}
+				else = {
+					set_key = { lhs = Tmp_8 which = StatePropertyPercCap }
+					multiply_key = { lhs = Tmp_8 value = 0.25 } #25% of it
+					multiply_key = { lhs = Tmp_8 value = 0.01 } #
+					change_key = { lhs = Tmp_8 value = 1 } # -> if cap was at 30%, this would be 
 					multiply_key = { lhs = Tmp_7 which = Tmp_8 }
 				}
 			}
+			
 			# Tribal power reduces BU power and therefore BU share.
 			set_key = { lhs = Tmp_8 value = 100 }
 			subtract_key = { lhs = Tmp_8 which = Prov_TRPow }
