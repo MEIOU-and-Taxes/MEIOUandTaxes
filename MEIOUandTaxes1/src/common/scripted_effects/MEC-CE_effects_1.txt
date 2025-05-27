@@ -98,6 +98,12 @@ CE_Main = {
 	}
 
 	# Set runner_dispatching_province
+	# The runner_dispatching_province sends out runners to all neighboring provinces and sea zones 
+	# a nation has access to. Traveltime is calculated for all possible methods a runner can go to a province
+	# (land, sea, river, ancient pass) and the shortest traveltime to that province gets saved in that 
+	# province's values. Afterwards, a new dispatching province is chosen, until all provinces have a traveltime.
+	# Traveltime is saved as a cumulative value from the nation's capital. 
+	# Based on this traveltime, final CE is then calculated.
 	capital_scope = {
 		set_key = { lhs = tv_tt value = 0 }
 		
@@ -202,8 +208,13 @@ CE_Main = {
 		clr_province_flag = tf_pass
 	}
 	
+    # Evaluation of regional capitols begins here.
 	clr_country_flag = ce_capitols 
 
+	# First, we check if there even exist any regional capitols the nation's runners have visited during
+	# their initial run from the capital. 
+	# In special access zones (HRE, Japan, cahtolic land if popes),
+	# other nation's capital capitol's count as a regional.
 	if = {
 		limit = {
 			any_province = {
@@ -218,6 +229,7 @@ CE_Main = {
 		}
 		set_country_flag = ce_capitols
 		
+		# We backup the original traveltime from the capital before any reductions are applied for later
 		every_province = {
 			limit = {
 				has_province_flag = tf_communication_efficiency_final
@@ -234,6 +246,7 @@ CE_Main = {
 			set_key = { lhs = tv_tt_save which = tv_tt }
 		}
 
+        # All capitols a nation's runners can use as a regional get flagged
 		every_province = {
 			limit = {
 				has_province_flag = tf_communication_efficiency_final_save	
@@ -250,12 +263,17 @@ CE_Main = {
 			}
 	    }
 
+        # All regionals now get evaluated in order by distance to the capital. Flags that mark provinces
+		# as already evaluated get cleared for each new regional, and then runners from that regional 
+		# spread out until no new dispatch province is found. 
+		# This happens if the traveltime to adjacent provinces from all available dispatch provinces
+		# is longer than the original traveltime from the capital. 
 		every_province = {
 			limit = {
 				has_province_flag = is_regional_capital
 			}
 
-			# reset flags for done provinces
+			# Reset flags for done provinces.
 			every_province = {
 				limit = {
 					has_province_flag = tf_communication_efficiency_final_save						
@@ -275,14 +293,14 @@ CE_Main = {
 			}	
 
 
-			# determine which of the remaining regional capitals is closest to the capital
+			# Determine which of the remaining regional capitals is closest to the capital.
 			ce_set_runner_dispatching_province_regional_capitals = {
 				scope = every_province
 				max = 1800
 			}
 
 
-
+			# Apply reduction to traveltime based on capitol level.
 			event_target:runner_dispatching_province = {
 				set_province_flag = regional_capital_ce_final
 				
@@ -303,6 +321,9 @@ CE_Main = {
 					set_key = { lhs = tv_tt value = 0.001 }
 				}
 
+				# Safeguard against exploiting chaining of capitols.
+				# If the runner origin of a capitol is another capitol,
+				# then traveltime cannot be lower than the traveltime of it's runner origin.
 				set_key = { lhs = Tmp_0 which = tv_tt }  
 				set_key = { lhs = Tmp_1 which = pv_prev }
 				ROOT = {
@@ -323,7 +344,7 @@ CE_Main = {
 				set_key = { lhs = Tmp_0 value = 0 }  
 				set_key = { lhs = Tmp_1 value = 0 }				
 										
-				# main loop for current regional
+				# Main loop for current regional
 				while = {
 					limit = {
 						event_target:runner_dispatching_province = {
@@ -395,6 +416,10 @@ CE_Main = {
 		}
 	}
 
+
+	# After the regionals have been done, a global traveltime reduction to all provinces the runners
+	# passed through based on the capitol level in the nation's capital is applied, 
+	# including sea zones and foreign provinces the runners have access to. 
 	set_key = { lhs = Tmp_0 value = 1 }
 
 	capital_scope = {
@@ -431,6 +456,8 @@ CE_Main = {
 		set_key = { lhs = Tmp_0 value = 0 }
 	}	
 
+
+    # Japan has additional reductions 
 	if = {
 		limit = {
 			has_country_flag = limiting_shugo_power
@@ -509,7 +536,8 @@ CE_Main = {
 		}
 	}
 
-	#If the province belongs to the current country evaluated, set autonomy modifiers. If not, restore previously saved CE values
+	# If the province belongs to the current country evaluated, set autonomy modifiers. 
+	# If not, restore previously saved CE values, so we don't override another nations traveltimes for their runners.
 	every_province = {
 		limit = {
 			OR = {
@@ -574,7 +602,10 @@ CE_Main = {
 			limit = {
 				PREV = { has_country_flag = ce_capitols }
 			}
-			## Calc difference in CE
+			# Calc difference in CE
+			# This is the difference in the original, unreduced traveltime to a province from the capital
+			# vs the reduced traveltime from the global reduction from the capital capitol.
+			# and possibly the reduction from regionals. 
 			set_key = { lhs = CE_Diff which = pv_ce }
 			subtract_key = { lhs = CE_Diff which = pv_ce_pre }
 		}
@@ -588,7 +619,7 @@ CE_Main = {
 	}
 	clr_country_flag = ce_capitols 
 
-	# Clear all temporary variables
+	# Clear all temporary variables.
 	ce_cleanup = yes
 }
 
