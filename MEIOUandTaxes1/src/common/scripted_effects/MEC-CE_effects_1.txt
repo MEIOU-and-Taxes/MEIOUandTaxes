@@ -302,8 +302,6 @@ CE_Main = {
 
 			# Apply reduction to traveltime based on capitol level.
 			event_target:runner_dispatching_province = {
-				set_province_flag = regional_capital_ce_final
-				
 				if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 1 } } multiply_key = { lhs = tv_tt value = 0.92 } subtract_key = { lhs = tv_tt value = 20 } }
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 2 } } multiply_key = { lhs = tv_tt value = 0.85 } subtract_key = { lhs = tv_tt value = 40 } }
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 3 } } multiply_key = { lhs = tv_tt value = 0.79 } subtract_key = { lhs = tv_tt value = 60 } }
@@ -324,25 +322,29 @@ CE_Main = {
 				# Safeguard against exploiting chaining of capitols.
 				# If the runner origin of a capitol is another capitol,
 				# then traveltime cannot be lower than the traveltime of it's runner origin.
-				set_key = { lhs = Tmp_0 which = tv_tt }  
-				set_key = { lhs = Tmp_1 which = pv_prev }
-				ROOT = {
-					if {
+				every_province = {
+					limit = {
+						has_province_flag = regional_capital_ce_final
+					}
+					set_key = { lhs = Tmp_0 which = tv_tt }   
+				    set_key = { lhs = Tmp_1 which = ID_Prov }
+				
+					if = {
 						limit = {
 							check_key = { lhs = Tmp_0 which = PREV }
 							is_key_equal = { lhs = Tmp_1 which = PREV }
 						}
-						PREV = { set_key = { lhs = Tmp_0 which = ROOT } }
-					} 
+						PREV = {
+							set_key = { lhs = tv_tt which = PREV }					
+						}
+					}
+					
+					set_key = { lhs = Tmp_0 value = 0 }
+					set_key = { lhs = Tmp_1 value = 0 }
 				}
-				set_key = { lhs = tv_tt which = Tmp_0 }
-				set_key = { lhs = Tmp_1 which = ID_Prov }
-				ROOT = {
-					set_key = { lhs = Tmp_0 which = PREV }  
-					set_key = { lhs = Tmp_1 which = PREV }
-				}
-				set_key = { lhs = Tmp_0 value = 0 }  
-				set_key = { lhs = Tmp_1 value = 0 }				
+				set_key = { lhs = Tmp_0 value = 0 }  					
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_province_flag = regional_capital_ce_final				
 										
 				# Main loop for current regional
 				while = {
@@ -381,9 +383,6 @@ CE_Main = {
 				}
 			}
 		}
-
-		set_key = { lhs = Tmp_0 value = 0 }  
-		set_key = { lhs = Tmp_1 value = 0 }
 
 		every_province = {
 			limit = {
