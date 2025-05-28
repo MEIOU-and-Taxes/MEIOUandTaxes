@@ -12,6 +12,13 @@ namespace = SYS_StateProperty
 	#Commerce   1 / 1 / 5 / 1
 	#Academic   3 / 3 / 5 / 7
 	## The higher the number, the less likely it is picked for selling 
+	
+	
+	## Improvements:
+	## 1. Write effect function for hidden effect in the sales options, just feed Powerbroker, Propertytype and such into it
+	## 2. Instead of setting a flag (deactivated right now) for not wanting to sell a certain type of property, make it a province modifier that expires
+	## 2.a Instead of having an immidiate negative effect on a decline, give that modifier some negatives to corruption
+
 
 #Farmland
 country_event = {
@@ -64,9 +71,13 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Agriculture }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpAgriculture }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
+
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Agriculture }
+					set_key = { lhs = Tmp_6 which = BU_PrpAgriculture }
 					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
 				}
 				
@@ -129,13 +140,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				change_key = { lhs = NO_PrpAgriculture which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAgriculture which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAgriculture } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -163,13 +176,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				change_key = { lhs = CL_PrpAgriculture which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAgriculture which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAgriculture } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -198,13 +213,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				change_key = { lhs = BG_PrpAgriculture which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAgriculture which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAgriculture } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -236,13 +253,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = SF_Agriculture which = BuyOutAmount }
 				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+				change_key = { lhs = SF_PrpAgriculture which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAgriculture which = Tmp_6 }
 				
 				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAgriculture } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -272,7 +291,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoAgricultureForSale
+			#set_country_flag = NoAgricultureForSale
 
 		}
 		ai_chance = {
@@ -373,9 +392,12 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Extraction }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpExtraction }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Extraction }
+					set_key = { lhs = Tmp_6 which = BU_PrpExtraction }
 					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
 				}
 				
@@ -438,13 +460,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Extraction which = BuyOutAmount }
 				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				change_key = { lhs = NO_PrpExtraction which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpExtraction which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -472,13 +496,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Extraction which = BuyOutAmount }
 				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				change_key = { lhs = CL_PrpExtraction which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpExtraction which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -507,13 +533,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Extraction which = BuyOutAmount }
 				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				change_key = { lhs = BG_PrpExtraction which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpExtraction which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -545,13 +573,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = SF_Extraction which = BuyOutAmount }
 				subtract_key = { lhs = BU_Extraction which = BuyOutAmount }
+				change_key = { lhs = SF_PrpExtraction which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpExtraction which = Tmp_6 }
 				
 				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyExtraction } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -581,7 +611,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoExtractionForSale
+			#set_country_flag = NoExtractionForSale
 
 		}
 		ai_chance = {
@@ -682,9 +712,12 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Forestry }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpForestry }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Forestry }
+					set_key = { lhs = Tmp_6 which = BU_PrpForestry }
 					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
 				}
 				
@@ -747,13 +780,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Forestry which = BuyOutAmount }
 				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				change_key = { lhs = NO_PrpForestry which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpForestry which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -781,13 +816,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Forestry which = BuyOutAmount }
 				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				change_key = { lhs = CL_PrpForestry which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpForestry which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -816,13 +853,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Forestry which = BuyOutAmount }
 				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				change_key = { lhs = BG_PrpForestry which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpForestry which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -854,13 +893,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = SF_Forestry which = BuyOutAmount }
 				subtract_key = { lhs = BU_Forestry which = BuyOutAmount }
+				change_key = { lhs = SF_PrpForestry which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpForestry which = Tmp_6 }
 				
 				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyForestry } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -890,7 +931,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoForestryForSale
+			#set_country_flag = NoForestryForSale
 
 		}
 		ai_chance = {
@@ -991,10 +1032,13 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Fishery }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpFishery }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Fishery }
-					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpFishery }
+					#multiply_key = { lhs = BuyOutAmount value = 0.75 }					
 				}
 				
 				if = { 
@@ -1056,13 +1100,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Fishery which = BuyOutAmount }
 				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				change_key = { lhs = NO_PrpFishery which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpFishery which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -1090,13 +1136,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Fishery which = BuyOutAmount }
 				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				change_key = { lhs = CL_PrpFishery which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpFishery which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -1125,13 +1173,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Fishery which = BuyOutAmount }
 				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				change_key = { lhs = BG_PrpFishery which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpFishery which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -1163,13 +1213,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = SF_Fishery which = BuyOutAmount }
 				subtract_key = { lhs = BU_Fishery which = BuyOutAmount }
+				change_key = { lhs = SF_PrpFishery which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpFishery which = Tmp_6 }
 				
 				subtract_key = { lhs = SF_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyFishery } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -1199,7 +1251,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoFisheryForSale
+			#set_country_flag = NoFisheryForSale
 
 		}
 		ai_chance = {
@@ -1300,9 +1352,12 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Industrial }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpIndustrial }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Industrial }
+					set_key = { lhs = Tmp_6 which = BU_PrpIndustrial }
 					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
 				}
 				
@@ -1365,13 +1420,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Industrial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				change_key = { lhs = NO_PrpIndustrial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpIndustrial which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -1399,13 +1456,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Industrial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				change_key = { lhs = CL_PrpIndustrial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpIndustrial which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -1434,13 +1493,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Industrial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				change_key = { lhs = BG_PrpIndustrial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpIndustrial which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -1472,13 +1533,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = RE_Industrial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+				change_key = { lhs = RE_PrpIndustrial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpIndustrial which = Tmp_6 }
 				
 				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -1508,7 +1571,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoIndustrialForSale
+			#set_country_flag = NoIndustrialForSale
 
 		}
 		ai_chance = {
@@ -1609,9 +1672,12 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Commercial }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpCommercial }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Commercial }
+					set_key = { lhs = Tmp_6 which = BU_PrpCommercial }
 					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
 				}
 				
@@ -1674,13 +1740,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Commercial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				change_key = { lhs = NO_PrpCommercial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -1708,13 +1776,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Commercial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				change_key = { lhs = CL_PrpCommercial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -1743,13 +1813,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Commercial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				change_key = { lhs = BG_PrpCommercial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -1781,13 +1853,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = RE_Commercial which = BuyOutAmount }
 				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+				change_key = { lhs = RE_PrpCommercial which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
 				
 				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -1817,7 +1891,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoCommercialForSale
+			#set_country_flag = NoCommercialForSale
 
 		}
 		ai_chance = {
@@ -1919,9 +1993,12 @@ country_event = {
 					}
 					set_key = { lhs = BuyOutAmount which = BU_Academic }
 					multiply_key = { lhs = BuyOutAmount value = 0.75 }
+					set_key = { lhs = Tmp_6 which = BU_PrpAcademic }
+					multiply_key = { lhs = Tmp_6 value = 0.75 }
 				}
 				else = { # sell it all 
 					set_key = { lhs = BuyOutAmount which = BU_Academic }
+					set_key = { lhs = Tmp_6 which = BU_PrpAcademic }
 					#multiply_key = { lhs = BuyOutAmount value = 0.75 }
 				}
 				
@@ -1984,13 +2061,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = NO_Academic which = BuyOutAmount }
 				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				change_key = { lhs = NO_PrpAcademic which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAcademic which = Tmp_6 }
 				
 				subtract_key = { lhs = NO_Wealth which = Tmp_1 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_1 }
@@ -2018,13 +2097,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {				
 				change_key = { lhs = CL_Academic which = BuyOutAmount }
 				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				change_key = { lhs = CL_PrpAcademic which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAcademic which = Tmp_6 }
 				
 				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_2 }
@@ -2053,13 +2134,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = BG_Academic which = BuyOutAmount }
 				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				change_key = { lhs = BG_PrpAcademic which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAcademic which = Tmp_6 }
 				
 				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_3 }
@@ -2091,13 +2174,15 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				change_key = { lhs = RE_Academic which = BuyOutAmount }
 				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+				change_key = { lhs = RE_PrpAcademic which = Tmp_6 }
+				subtract_key = { lhs = BU_PrpAcademic which = Tmp_6 }
 				
 				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
 				
 				set_key = { lhs = Tmp_5 which = BuyOutAmount }
 				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
 				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				set_province_flag = RecentlySoldProperty
+				#set_province_flag = RecentlySoldProperty
 			}
 			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
@@ -2127,7 +2212,7 @@ country_event = {
 				change_key = { lhs = Prov_BULoy value = 10 }
 				
 			}
-			set_country_flag = NoAcademicForSale
+			#set_country_flag = NoAcademicForSale
 
 		}
 		ai_chance = {
