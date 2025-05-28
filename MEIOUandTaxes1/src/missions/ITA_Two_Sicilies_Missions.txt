@@ -1,5 +1,4 @@
-
-sic_missions_one = {
+sic_slot_1 = {
 	slot = 1
 	generic = no
 	ai = yes
@@ -10,241 +9,110 @@ sic_missions_one = {
 		}
 	}
 	has_country_shield = yes
-
-	sic_unify_two_sicilies = {
-		icon = mission_unite_home_region
-		required_missions = {  }
-		position = 1
-		provinces_to_highlight = {
-			OR = {
-				region = naples_region
-				region = sicily_region
-			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-				province_id = 126 #Malta
-			}
-		}
-		trigger = {
-			owns = 125
-			owns = 2531
-			naples_region = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			sicily_region = {
-				type = all
-				OR = {
-					country_or_non_sovereign_subject_holds = ROOT
-					province_id = 126 #Malta
-				}
-			}
-			OR = { #There can only be one Sicily alive
-				AND = {
-					tag = SIC
-					NOT = { exists = KNP }
-				}
-				AND = {
-					tag = KNP
-					NOT = { exists = SIC }
-				}
-			}
-			NOT = { is_emperor = yes }
-			is_colonial_nation = no
-#			adm_tech = 30
-#			capital_scope = { region = sicily_region }
-			culture_group = napolitan
-			government = monarchy
-#			prestige = 50
-custom_trigger_tooltip = {tooltip ="is_free_or_tributary_trigger_tooltip" is_free_or_tributary_trigger = yes }
-#			OR = {
-#				adm_tech = 40
-#				AND = {
-#					NOT = { absolutism = 90 }
-#					stability = 3
-#					full_idea_group = administrative_ideas
-#					full_idea_group = culture_ideas
-#					full_idea_group = diplomacy_ideas
-#				}
-#				AND = {
-#					ADM = 6
-#					Advisor_HasMana = { ADM=yes Level=2 }
-#				}
-#			}
-			is_at_war = no
-		}
-		effect = {
-			country_event = { id = mission_event.024 }
-			hidden_effect = { complete_mission = sic_unify_two_sicilies }
-		}
-	}
 	
-	sic_conquer_lazio = {
-		icon = mission_unite_home_region
-		required_missions = {  }
+	sic_roman_relations = {
+		icon = answer_the_roman_question
+		required_missions = { sic_secure_independence  }
 		position = 2
 		provinces_to_highlight = {
-			OR = {
-				province_id = 118
-				province_id = 1379
-				province_id = 3699
-				province_id = 3701
-				province_id = 3869
+			if = {
+				limit = {
+					ROOT = {
+						religion = catholic
+					}
+				}
+				owner = { tag = PAP }
 			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
+			else = {
+				province_id = 2530
 			}
 		}
 		trigger = {
-			3699 = {
-				country_or_non_sovereign_subject_holds = ROOT
+			religion_group = christian
+			if = {
+				limit = { religion = catholic }
+				num_of_cardinals = 3
+				PAP = {
+					has_opinion = {
+						who = ROOT 
+						value = 120
+					}
+				}
 			}
-			3701 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			1379 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			118 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			3869 = {
-				country_or_non_sovereign_subject_holds = ROOT
+			else = {
+				controls = 2530
 			}
 		}
 		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			if = {
+				limit = { catholic_trigger = yes }
+				add_papal_influence = 25
+			}
+			else = {
+				add_prestige = 10
 			}
 		}
 	}
-	
-	sic_conquer_tuscany = {
-		icon = mission_unite_home_region
-		required_missions = { sic_conquer_lazio }
+	sic_defender_of_the_faith = {
+		icon = defender_of_the_faith
+		required_missions = { sic_roman_relations }
 		position = 3
-		provinces_to_highlight = {
-			OR = {
-				area = tuscany_area
-				area = siena_area
-			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
 		trigger = {
-			tuscany_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+			religion_group = christian
+			if = {
+				limit = {
+					TUR = {
+						exists = yes
+						is_great_power = yes
+					}
+				}
+				has_won_war_against = {
+					who = TUR
+					max_years_since = 10
+				}
 			}
-			siena_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+			else_if = {
+				limit = {
+					OTT = {
+						exists = yes
+						is_great_power = yes
+					}
+				}
+				has_won_war_against = {
+					who = OTT
+					max_years_since = 10
+				}
 			}
-		}
+			else = {
+				hre_leagues_enabled = yes
+				OR = {
+					in_league = protestant
+					in_league = reformed
+					in_league = catholic
+					in_league = hussite
+				}
+			}
+		}		
 		effect = {
-			add_country_modifier = {
-				name = "hegemonic_ambition"
-				duration = 9125 #25 years
+			if = {
+				limit = {
+					NOT = { catholic_trigger = yes }
+				}
+				add_mil_power = 50
+				create_general = { tradition = 50 }
 			}
-		}
-	}
-	
-	sic_conquer_romagna = {
-		icon = mission_unite_home_region
-		required_missions = { sic_conquer_tuscany }
-		position = 4
-		provinces_to_highlight = {
-			OR = {
-				area = marche_area
-				area = emilia_romagna_area
-			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		trigger = {
-			marche_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			emilia_romagna_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
-			}
-		}
-	}
-	
-	sic_conquer_venetia = {
-		icon = mission_unite_home_region
-		required_missions = { sic_conquer_romagna }
-		position = 5
-		provinces_to_highlight = {
-			OR = {
-				area = venetia_area
-				area = friuli_area
-				area = padan_area
-			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		trigger = {
-			venetia_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			friuli_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			padan_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		effect = {
-			add_army_tradition = 10
-		}
-	}
-	
-	sic_conquer_lombardy = {
-		icon = mission_unite_home_region
-		required_missions = { sic_conquer_venetia }
-		position = 6
-		provinces_to_highlight = {
-			OR = {
-				area = lombardy_area
-				area = liguria_area
-			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		trigger = {
-			lombardy_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			liguria_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			else_if = {
+				limit = {
+					catholic_trigger = yes
+				}
+				add_papal_influence = 25
+				create_general = { tradition = 50 }
 			}
 		}
 	}
 }
 
-sic_missions_two = {
+sic_slot_2 = {
 	slot = 2
 	generic = no
 	ai = yes
@@ -256,152 +124,528 @@ sic_missions_two = {
 	}
 	has_country_shield = yes
 	
-	sic_conquer_tunis = {
-		icon = mission_cannons_firing
-		required_missions = {  }
-		position = 1
-		provinces_to_highlight = {
-			area = tunis_area
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		trigger = {
-			tunis_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		effect = {
-			add_navy_tradition = 10
-		}
-	}
-	
-	sic_conquer_kairwan = {
-		icon = mission_cannons_firing
-		required_missions = { sic_conquer_tunis }
+	sic_state_of_the_presidi = {
+		icon = state_of_the_presidi
+		required_missions = { sic_secure_independence }
 		position = 2
 		provinces_to_highlight = {
-			area = kairwan_area
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
+			area = tuscany_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			kairwan_area = {
+			tuscany_area = {
 				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
 		}
 		effect = {
-			add_army_tradition = 10
+			add_country_modifier = {
+			    name = military_victory
+			    duration = 3650 #10 years
+		    }
 		}
 	}
+	sic_italian_wars = {
+		icon = the_italian_league
+		required_missions = { sic_state_of_the_presidi }
+		position = 3
+		provinces_to_highlight = {
+			superregion = italy_superregion
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 40
+				superregion = italy_superregion
+			}
+			custom_trigger_tooltip = {
+				tooltip = sic_italian_wars_tooltip
+				italy_superregion = {
+					type = all
+					owner = {
+						OR = {
+							culture_group = napolitan
+							culture_group = latin
+						}
+						OR = {
+							is_free_or_tributary_trigger = yes
+							overlord = {
+								OR = {
+									culture_group = napolitan
+									culture_group = latin
+								}
+							}
+						}
+					}
+				}
+			}	
+		}
+		effect = {
+			add_country_modifier = {
+			    name = italian_ambition_modifier
+			    duration = 18250 #50 years
+		    }
+		}
+	}
+	sic_durazzo = {
+		icon = union_with_naples
+		required_missions = { sic_despot_of_epirus }
+		position = 4
+		provinces_to_highlight = {
+			area = albania_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 3
+				area = albania_area
+			}
+			2373 = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		effect = {
+			2373 = {
+				add_or_extend_province_modifier_effect = { NAME = urban_development_efforts	DURATION = 9125 }
+			    custom_tooltip = urban_development_efforts_tt
+			}
+		}
+	}
+	sic_dalmatian_conquest = {
+		icon = dalmatian_conquest
+		required_missions = { sic_durazzo }
+		position = 5
+		provinces_to_highlight = {
+			area = east_adriatic_coast_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			east_adriatic_coast_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_country_modifier = {
+			    name = hab_dalmatia_secured
+			    duration = 3650 #10 years
+		    }
+		}
+	}
+}
+
+sic_slot_3 = {
+	slot = 3
+	generic = no
+	ai = yes
+	potential = {
+		OR = {
+			has_country_flag = k_of_nap
+			has_country_flag = k_of_sic
+		}
+	}
+	has_country_shield = yes
 	
-	sic_conquer_cyprus = {
-		icon = mission_cannons_firing
-		required_missions = { sic_conquer_kairwan }
+	sic_secure_independence = {
+		icon = king_of_naples
+		required_missions = {  }
+		position = 1
+		trigger = {
+			army_size_percentage = 0.9
+			OR = {
+				army_size = 20
+				army_professionalism = 0.1
+			}
+			custom_trigger_tooltip = { 
+				tooltip ="is_free_or_tributary_trigger_tooltip" 
+				is_free_or_tributary_trigger = yes 
+			}
+			is_at_war = no
+		}
+		effect = {
+			if = {
+				limit = { tag = KNP }
+				sicily_region = {
+					limit = {
+						NOT = { is_core = ROOT }
+						NOT = { is_claim = ROOT }
+					}
+					add_claim = ROOT
+				}
+			}
+			else_if = {
+				limit = { tag = SIC }
+				naples_region = {
+					limit = {
+						NOT = { is_core = ROOT }
+						NOT = { is_claim = ROOT }
+					}
+					add_claim = ROOT
+				}
+			}
+		}
+	}
+	sic_unify_two_sicilies = {
+		icon = unite_the_two_sicilies
+		required_missions = { sic_secure_independence }
+		position = 2
+		provinces_to_highlight = {
+			OR = {
+				region = naples_region
+				region = sicily_region
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+				province_id = 126 #Malta
+			}
+		}
+		trigger = {
+			OR = {
+				AND = {
+					tag = SIC
+					NOT = { exists = KNP }
+				}
+				AND = {
+					tag = KNP
+					NOT = { exists = SIC }
+				}
+			}
+			naples_region = {
+				type = all
+				owned_by = ROOT
+			}
+			sicily_region = {
+				type = all
+				OR = {
+					owned_by = ROOT
+					province_id = 126 #Malta
+				}
+			}
+			OR = {
+				adm_tech = 29
+				absolutism = 40
+			}
+			custom_trigger_tooltip = { 
+				tooltip ="is_free_or_tributary_trigger_tooltip" 
+				is_free_or_tributary_trigger = yes 
+			}
+			is_at_war = no
+		}
+		effect = {
+			country_event = { id = mission_event.024 }
+		}
+	}
+	sic_despot_of_epirus = {
+		icon = despot_of_epirus
+		required_missions = { sic_navy }
 		position = 3
 		provinces_to_highlight = {
 			OR = {
-				province_id = 321
-				province_id = 2750
+				area = morea_area
+				area = epirus_area
 			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			321 = {
+			OR = {
+				NOT = { exists = EPI }
+				EPI = { is_subject_of = ROOT }
+			}
+			morea_area = {
+				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
-			2750 = {
+			epirus_area = {
+				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
 		}
 		effect = {
-			add_prestige = 10
+			cyprus_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					NOT = { is_claim = ROOT }
+				}
+				add_claim = ROOT
+			}
+			east_adriatic_coast_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					NOT = { is_claim = ROOT }
+				}
+				add_claim = ROOT
+			}
 		}
 	}
-	
-	sic_liberate_jerusalem = {
-		icon = mission_cannons_firing
-		required_missions = { sic_conquer_cyprus }
+	sic_control_cyprus = {
+		icon = kingdom_of_cyprus
+		required_missions = { sic_despot_of_epirus }
 		position = 4
 		provinces_to_highlight = {
-			OR = {
-				province_id = 379
-				province_id = 364
-				province_id = 2634
-				province_id = 2635
-			}
-			NOT = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
+			area = cyprus_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			379 = {
-				country_or_non_sovereign_subject_holds = ROOT
+			OR = {
+				NOT = { exists = CYP }
+				CYP = { is_subject_of = ROOT }
 			}
-			364 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			2634 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			2635 = {
+			cyprus_area = {
+				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
 		}
 		effect = {
-			add_army_tradition = 15
-			add_war_exhaustion = -4
-			add_legitimacy = 10
-			add_horde_unity = 10
-			add_republican_tradition = 10
+			palestine_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					NOT = { is_claim = ROOT }
+				}
+				add_claim = ROOT
+			}
 		}
 	}
-	
-	sic_convert_jerusalem = {
-		icon = mission_cannons_firing
-		required_missions = { sic_liberate_jerusalem }
+	sic_king_of_jerusalem = {
+		icon = jerusalem
+		required_missions = { sic_control_cyprus }
 		position = 5
 		provinces_to_highlight = {
 			OR = {
-				province_id = 379
-				province_id = 364
-				province_id = 2634
-				province_id = 2635
+				area = palestine_area
+				area = lebanon_area
+				area = dimashq_area
+				area = aleppo_area 
 			}
-			NOT = { religion = ROOT }
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
-			379 = {
-				religion = ROOT
-			}
-			364 = {
-				religion = ROOT
-			}
-			2634 = {
-				religion = ROOT
-			}
-			2635 = {
-				religion = ROOT
+			owns_core_province = 379
+			OR = {
+				check_variable = { which = "Demesne_in_Holy_Land" value = 8 }
+				check_variable = { which = "Cores_on_Holy_Land" value = 5 }
 			}
 		}
 		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+			add_country_modifier = {
+				name = liberator_of_jerusalem
+				duration = 18250 #50 years
 			}
-			379 = { 
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
+		}
+	}
+}	
+
+sic_slot_4 = {
+	slot = 4
+	generic = no
+	ai = yes
+	potential = {
+		OR = {
+			has_country_flag = k_of_nap
+			has_country_flag = k_of_sic
+		}
+	}
+	has_country_shield = yes
+	
+	sic_navy = {
+		icon = build_a_roman_navy
+		required_missions = { sic_secure_independence }
+		position = 2
+		trigger = {	
+			navy_size = 16
+		}
+		effect = {
+			add_country_modifier = {
+				name = power_of_the_fleet
+				duration = 7300 #20 years
+			}
+		}
+	}
+	sic_corsica_sardinia = {
+		icon = mission_mediterranean_islands
+		required_missions = { sic_navy }
+		position = 3
+		provinces_to_highlight = {
+			area = corsica_sardinia_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 4
+				area = corsica_sardinia_area
+			}
+		}
+		effect = {
+			baleares_area = {
+				limit = {
+					NOT = { is_core = ROOT }
+					NOT = { is_claim = ROOT }
+				}
+				add_claim = ROOT
+			}
+		}
+	}
+	sic_baleares = {
+		icon = mission_mediterranean_islands
+		required_missions = { sic_corsica_sardinia }
+		position = 4
+		provinces_to_highlight = {
+			area = baleares_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			baleares_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			add_country_modifier = {
+			    name = naval_enthusiasm_mission
+			    duration = 3650 #10 years
+		    }
+		}
+	}
+	sic_crown_of_aragon = {
+		icon = king_of_aragon
+		required_missions = { sic_baleares }
+		position = 5
+		provinces_to_highlight = {
+			region = aragon_region
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			OR = {
+				NOT = { exists = ARA }
+				ARA = { is_subject_of = ROOT }
+			}
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 15
+				region = aragon_region
+			}
+		}
+		effect = {
+			add_country_modifier = {
+			    name = mediterranean_ambition
+			    duration = 7300 #20 years
+		    }
+		}
+	}
+}
+
+sic_slot_5 = {
+	slot = 5
+	generic = no
+	ai = yes
+	potential = {
+		OR = {
+			has_country_flag = k_of_nap
+			has_country_flag = k_of_sic
+		}
+	}
+	has_country_shield = yes
+	
+	sic_renaissance_city = {
+		icon = renaissance_city
+		required_missions = { sic_secure_independence }
+		position = 2
+		provinces_to_highlight = {
+			owned_by = ROOT
+			is_capital = yes
+		}
+		trigger = {
+			OR = {
+				has_country_flag = renaissance
+				has_country_flag = humanism
+			}
+			capital_scope = {
+				HasBuildingOrBetter = { b1=urban_infrastructure_3 b2=urban_infrastructure_4 b3=urban_infrastructure_5 b4=urban_infrastructure_6 }
+				Casual_Literacy = 50
+				OR = {
+					has_province_modifier = LN_Major
+					has_province_modifier = LN_Important
+				}
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					capital_scope = { province_id = 2531 }
+				}
+				country_event = { id = flavor_nap.3 }
+			}
+			define_advisor = {
+			    type = artist_BG
+				culture = ROOT
+			    skill = 2
+			    discount = yes
+		    }
+		}
+	}
+	sic_develop_cities = {
+		icon = develop_naples
+		required_missions = { sic_renaissance_city }
+		position = 3
+		provinces_to_highlight = {
+			OR = { 
+				region = sicily_region
+				region = naples_region 
+			}
+			country_or_non_sovereign_subject_holds = ROOT
+		} 
+		trigger = {
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 3
+				OR = { 
+					region = sicily_region
+					region = naples_region 
+				}
+				HasBuildingOrBetter = { b1=urban_infrastructure_3 b2=urban_infrastructure_4 b3=urban_infrastructure_5 b4=urban_infrastructure_6 }
+				check_key = { lhs = Class_Urban value = 50 }
+			}
+		} 
+		effect = {  
+			add_country_modifier = {
+			    name = urbanization_social_mobility
+			    duration = 7300 #20 years
+		    }
+		}
+	}
+	sic_rein_in_nobility = {
+		icon = rein_in_the_nobles
+		required_missions = { sic_develop_cities }
+		position = 4
+		trigger = {
+			NOT = { check_key = { lhs = Prov_NOPow value = 75 } }
+			custom_trigger_tooltip = {
+				tooltip = Rights_NOGov3HasGreater
+				Rights_NOGov3HasGreater = yes
+			}
+		}
+		effect = {
+			add_country_modifier = {
+				name = monarchy_stabilise_country_mod
+				duration = 7300 #20 years
+			}
+		}
+	}
+	sic_governance = {
+		icon = neapolitan_govenance
+		required_missions = { sic_rein_in_nobility }
+		trigger = {
+			absolutism = 60
+			Privilege_HasGreater = { Privilege=BUCourts Lvl=2 }
+			Privilege_HasGreater = { Privilege=BUStructure Lvl=2 }
+			Privilege_HasGreater = { Privilege=BUHierarchy Lvl=2 }
+		}
+		effect = {
+			add_country_modifier = {
+				name = "improved_administration"
+				duration = 7300 #20 years
 			}
 		}
 	}
 }
 
-sic_missions_three = {
-	slot = 3
+sic_slot_1_knp = {
+	slot = 1
 	generic = no
 	ai = yes
 	potential = {
@@ -409,25 +653,10 @@ sic_missions_three = {
 	}
 	has_country_shield = yes
 	
-	nap_centralise_state = {
-		icon = mission_conquer_50_development
+	knp_subjugate_provence = {
+		icon = develop_provence
 		required_missions = { }
-		position = 1
-		trigger = {
-			absolutism = 30
-		}
-		effect = {
-			add_legitimacy = 10
-			add_horde_unity = 10
-			add_republican_tradition = 10
-			add_heir_claim = 10
-		}
-	}
-	
-	nap_annex_provence = {
-		icon = mission_cannons_firing
-		required_missions = { nap_centralise_state }
-		position = 2
+		position = 4
 		provinces_to_highlight = {
 			OR = {
 				province_id = 201
@@ -435,115 +664,72 @@ sic_missions_three = {
 				province_id = 3377
 				province_id = 3860
 			}
-			NOT = { owned_by = ROOT }
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+			}
 		}
 		trigger = {
 			201 = {
-				owned_by = ROOT
+				country_or_non_sovereign_subject_holds = ROOT
 			}
 			1512 = {
-				owned_by = ROOT
+				country_or_non_sovereign_subject_holds = ROOT
 			}
 			3377 = {
-				owned_by = ROOT
+				country_or_non_sovereign_subject_holds = ROOT
 			}
 			3860 = {
-				owned_by = ROOT
-			}
-		}
-		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
-			}
-		}
-	}
-	
-	nap_conquer_sardinia = {
-		icon = mission_cannons_firing
-		required_missions = { nap_annex_provence }
-		position = 3
-		provinces_to_highlight = {
-			area = corsica_sardinia_area
-			NOT = { country_or_non_sovereign_subject_holds = ROOT }
-		}
-		trigger = {
-			corsica_sardinia_area = {
-				type = all
 				country_or_non_sovereign_subject_holds = ROOT
 			}
 		}
 		effect = {
-			add_army_tradition = 10
+			add_country_modifier = {
+				name = land_enthusiasm_mission
+				duration = 3650 #10 years
+			}
 		}
 	}
-}
-
-sic_missions_four = {
-	slot = 3
-	generic = no
-	ai = yes
-	potential = {
-		has_country_flag = k_of_sic
-	}
-	has_country_shield = yes
-	
-	sic_centralise_state = {
-		icon = mission_conquer_50_development
-		required_missions = { }
-		position = 1
-		trigger = {
-			absolutism = 30
-		}
-		effect = {
-			add_legitimacy = 10
-			add_horde_unity = 10
-			add_republican_tradition = 10
-			add_heir_claim = 10
-		}
-	}
-	
-	sic_annex_athens = {
-		icon = mission_cannons_firing
-		required_missions = { sic_centralise_state }
-		position = 2
+	knp_protect_against_french = {
+		icon = the_gallic_wars
+		required_missions = { knp_subjugate_provence }
+		position = 5
 		provinces_to_highlight = {
+			province_has_current_tech_fort_trigger = no
+			country_or_non_sovereign_subject_holds = ROOT
+			any_neighbor_province = {
+				owner = {
+					tag = FRA
+				}
+			}
+		}
+		trigger = {
 			OR = {
-				province_id = 146
-				province_id = 3872
-			}
-			NOT = { country_or_non_sovereign_subject_holds = ROOT }
-		}
-		trigger = {
-			146 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			3872 = {
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		effect = {
-			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = mis_prov_growth DURATION = 36560 }
-			}
-		}
-	}
-	
-	sic_conquer_morea = {
-		icon = mission_cannons_firing
-		required_missions = { sic_annex_athens }
-		position = 3
-		provinces_to_highlight = {
-			area = morea_area
-			NOT = { country_or_non_sovereign_subject_holds = ROOT }
-		}
-		trigger = {
-			morea_area = {
-				type = all
-				country_or_non_sovereign_subject_holds = ROOT
+				NOT = { exists = FRA }
+				AND = {
+					custom_trigger_tooltip = {
+						tooltip = knp_protect_against_french_tooltip
+						any_owned_province = {
+							province_has_current_tech_fort_trigger = yes
+							country_or_non_sovereign_subject_holds = ROOT
+							any_neighbor_province = {
+								owner = {
+									tag = FRA
+								}
+							}
+						}
+					}
+					any_country = {
+						is_rival = FRA
+						alliance_with = ROOT
+					}
+				}
 			}
 		}
 		effect = {
-			add_army_tradition = 10
+			add_country_modifier = {
+				name = monarchy_protect_our_lands_mod
+				duration = 7300 #20 years
+			}
 		}
 	}
 }
