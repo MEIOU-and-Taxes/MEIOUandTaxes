@@ -1498,6 +1498,7 @@ Prov_DoLoyBU = {
 	set_key = { lhs = Crpt_NO value = 0 }
 	set_key = { lhs = Crpt_BG value = 0 }
 	set_key = { lhs = Crpt_CL value = 0 }
+	set_key = { lhs = Crpt_StateP value = 0 }
 	
 	# Other elites generate corruption proportionate to their power, increasing state reach limits this corruption source
 	set_key = { lhs = Tmp_3 which = Prov_NOPow }
@@ -1587,6 +1588,22 @@ Prov_DoLoyBU = {
 
 		change_key = { lhs = Tmp_0 which = Crpt_CL }
 		multiply_key = { lhs = Crpt_CL value = 100 }
+	}
+	
+	#Corruption from State Property Capacity Overshoot
+	# provides up to 25% corruption at 100% overshoot
+	set_key = { lhs = StatePropertyPercCap which = owner }
+	if = {
+		limit = {
+			check_key = { lhs = StatePropertyPercCap value = 100.999 } # start at 101% to create corruption effect
+		}
+		set_key = { lhs = Crpt_StateP which = StatePropertyPercCap }
+		subtract_key = { lhs = Crpt_StateP value = 100 }
+		multiply_key = { lhs = Crpt_StateP value = 0.25 }
+		multiply_key = { lhs = Crpt_StateP value = 0.01 } # 0-100 scale -> 0-1 scale
+		
+		change_key = { lhs = Tmp_0 which = Crpt_StateP }
+		multiply_key = { lhs = Crpt_StateP value = 100 }
 	}
 	
 	# Bureau neglect, 1.0 to 2.0x effect
@@ -3357,7 +3374,7 @@ Prov_DoTaxBU = {
 				owner = { Tax_TaxLandCan = yes }
 			}
 			Tax_GetTaxRate = { TaxName=TaxLand }
-			set_key = { lhs = Tax_TmpBase value = 5 }
+			set_key = { lhs = Tax_TmpBase value = 10 }
 			# Calc tax rate
 			# Get base rate
 
@@ -3501,7 +3518,7 @@ Prov_DoTaxBU = {
 				owner = { Tax_TaxPollCan = yes }
 			}
 			Tax_GetTaxRate = { TaxName=TaxPoll }
-			set_key = { lhs = Tax_TmpBase value = 5 }
+			set_key = { lhs = Tax_TmpBase value = 10 }
 			# Calc tax rate
 			# X ducats per 1000 people
 
@@ -3948,7 +3965,7 @@ Tax_DoObligations = {
 					Rights_NOObl1Has = yes
 				}
 			}
-			set_key = { lhs = Tax_TmpBase value = 5 }
+			set_key = { lhs = Tax_TmpBase value = 10 }
 		}
 		else_if = {
 			limit = {
@@ -3956,7 +3973,7 @@ Tax_DoObligations = {
 					Rights_NOObl2Has = yes
 				}
 			}
-			set_key = { lhs = Tax_TmpBase value = 10 }
+			set_key = { lhs = Tax_TmpBase value = 12.5 }
 		}
 		else = {
 			set_key = { lhs = Tax_TmpBase value = 15 }
@@ -4026,7 +4043,7 @@ Tax_DoObligations = {
 				Rights_CLObl2Has = yes
 			}
 		}
-		set_key = { lhs = Tax_TmpBase value = 5 }
+		set_key = { lhs = Tax_TmpBase value = 10 }
 
 		multiply_key = { lhs = Tax_TmpBase which = Prov_CLLoy } # Proportionate to loyalty
 		multiply_key = { lhs = Tax_TmpBase value = 0.01 }
