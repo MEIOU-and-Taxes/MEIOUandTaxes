@@ -13,12 +13,22 @@ namespace = SYS_StateProperty
 	#Academic   3 / 3 / 5 / 7
 	## The higher the number, the less likely it is picked for selling 
 	
+##	Type - Default - blocked estates
+	##Farmlands - Nobles, clergy in theocracies - burghers, residents
+	##Forestry - nobles - residents
+	##Mines - nobles, burghers, clergy in respective governments - residents
+	##Fishery - nobles in tribe/monarch, burghers in republic/theocracies, - residents
+	##Industry - Burghers - clergy, tenants
+	##Commerce - Burghers - residents, peasants, clergy
+	##Academia - Clergy  - residents, tenants
+	
 	
 	## Improvements:
 	## 1. Write effect function for hidden effect in the sales options, just feed Powerbroker, Propertytype and such into it
 	## 2. Instead of setting a flag (deactivated right now) for not wanting to sell a certain type of property, make it a province modifier that expires
-	## 2.a Instead of having an immidiate negative effect on a decline, give that modifier some negatives to corruption
-
+	## Public_ChangePowerbrokerLoyaltyTooltip
+	
+	
 
 #Farmland
 country_event = {
@@ -54,10 +64,6 @@ country_event = {
 		#	factor = 1
 		#	government = republic
 		#}
-		modifier = {
-			factor = 6
-			government = theocracy
-		}
 		modifier = {
 			factor = 6
 			government = theocracy
@@ -171,6 +177,12 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 			
 		}
+		if = {
+			trigger = {
+				government = theocracy
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -209,6 +221,16 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = republic
+					government = tribal
+				}
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -219,44 +241,44 @@ country_event = {
 		
 	}
 	#Burgher
-	option = {
-		name = SYS_StateProperty.002.c
-		trigger = {
-			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = BG_Wealth which = Tmp_3 }
-				Rights_BGGov4HasGreater = yes
-			}
-		}
-		hidden_effect = {
-			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = BG_Agriculture which = BuyOutAmount }
-				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
-				change_key = { lhs = BG_PrpAgriculture which = Tmp_6 }
-				subtract_key = { lhs = BU_PrpAgriculture which = Tmp_6 }
-				change_key = { lhs = Building_AgricultureShareBG which = Tmp_7 }
-				subtract_key = { lhs = Building_AgricultureShareBU which = Tmp_7 }
-				
-				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
-				
-				set_key = { lhs = Tmp_5 which = BuyOutAmount }
-				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAgriculture } # calculate impact of sold StateProperty
-				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				#set_province_flag = RecentlySoldProperty
-			}
-			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
-			set_var_from_key = { var = ducat_gain key = Tmp_3 }
-			old_scaled_ducat_gained_country = yes
-
-		}
-		ai_chance = {
-			factor = 100
-			modifier = {
-				factor = 2.00
-				owner = { government = republic }
-			}
-		}
-		
-	}
+#	option = {
+#		name = SYS_StateProperty.002.c
+#		trigger = {
+#			event_target:StatePropertyBuyOut = {
+#				check_key = { lhs = BG_Wealth which = Tmp_3 }
+#				
+#			}
+#			Rights_BGGov4HasGreater = yes
+#		}
+#		hidden_effect = {
+#			event_target:StatePropertyBuyOut = {
+#				change_key = { lhs = BG_Agriculture which = BuyOutAmount }
+#				subtract_key = { lhs = BU_Agriculture which = BuyOutAmount }
+#				change_key = { lhs = BG_PrpAgriculture which = Tmp_6 }
+#				subtract_key = { lhs = BU_PrpAgriculture which = Tmp_6 }
+#				change_key = { lhs = Building_AgricultureShareBG which = Tmp_7 }
+#				subtract_key = { lhs = Building_AgricultureShareBU which = Tmp_7 }
+#				
+#				subtract_key = { lhs = BG_Wealth which = Tmp_3 }
+#				
+#				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+#				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAgriculture } # calculate impact of sold StateProperty
+#				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+#				#set_province_flag = RecentlySoldProperty
+#			}
+#			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+#			set_var_from_key = { var = ducat_gain key = Tmp_3 }
+#			old_scaled_ducat_gained_country = yes
+#
+#		}
+#		ai_chance = {
+#			factor = 100
+#			modifier = {
+#				factor = 2.00
+#				owner = { government = republic }
+#			}
+#		}		
+#	}
 	#Commoners
 	option = {
 		name = SYS_StateProperty.002.d
@@ -264,10 +286,7 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = SF_Wealth which = Tmp_4 }
 			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
+			NOT = { Privilege_Has = { Privilege=NOProcessing Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -289,6 +308,52 @@ country_event = {
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
 			old_scaled_ducat_gained_country = yes
 
+		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+					government = republic
+				}
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
+			}
+		}
+		else_if = {
+			trigger = { 
+				government = theocracy
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=10 }
+			}
 		}
 		ai_chance = {
 			factor = 100
@@ -512,6 +577,18 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 			
 		}
+		if = {
+			trigger = {
+				government = theocracy
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+		}
+		if = {
+			trigger = {
+				government = republic
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -550,6 +627,21 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+				}
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+		}
+		if = {
+			trigger = {
+				government = republic
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -565,8 +657,10 @@ country_event = {
 		trigger = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = BG_Wealth which = Tmp_3 }
-				Rights_BGGov4HasGreater = yes
+
 			}
+			Rights_BGGov4HasGreater = yes
+			NOT = { Privilege_Has = { Privilege=NOProcessing Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -589,6 +683,21 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+				}
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+		}
+		if = {
+			trigger = {
+				government = theocracy
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -605,10 +714,7 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = SF_Wealth which = Tmp_4 }
 			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
+			NOT = { Privilege_Has = { Privilege=NOProcessing Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -630,6 +736,72 @@ country_event = {
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
 			old_scaled_ducat_gained_country = yes
 
+		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+				}
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
+			}
+		}
+		else_if = {
+			trigger = { 
+				government = theocracy
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=10 }
+			}
+		}
+		else_if = {
+			trigger = { 
+				government = republic
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=10 }
+			}
 		}
 		ai_chance = {
 			factor = 100
@@ -869,6 +1041,8 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = CL_Wealth which = Tmp_2 }
 			}
+			NOT = { Privilege_Has = { Privilege=NOForestry Lvl=2 } }
+			NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {				
@@ -891,6 +1065,7 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -906,8 +1081,10 @@ country_event = {
 		trigger = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = BG_Wealth which = Tmp_3 }
-				Rights_BGGov4HasGreater = yes
 			}
+			Rights_BGGov4HasGreater = yes
+			NOT = { Privilege_Has = { Privilege=NOForestry Lvl=2 } }
+			NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -930,6 +1107,7 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -946,10 +1124,8 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = SF_Wealth which = Tmp_4 }
 			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
+			NOT = { Privilege_Has = { Privilege=NOForestry Lvl=2 } }
+			NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -971,6 +1147,22 @@ country_event = {
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
 			old_scaled_ducat_gained_country = yes
 
+		}
+		if = {
+			trigger = {
+				NOT = { Rights_NOTen4Has = yes }
+				NOT = { Rights_NOGov5Has = yes }
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+		}
+		else_if = {
+			trigger = {
+				OR = { 
+					Rights_NOTen4Has = yes
+					Rights_NOGov5Has = yes
+				}
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
 		}
 		ai_chance = {
 			factor = 100
@@ -1194,6 +1386,20 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 			
 		}
+		if = {
+			trigger = {
+				government = theocracy
+				NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }				
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+		}
+		if = {
+			trigger = {
+				government = republic
+				NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -1210,6 +1416,7 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = CL_Wealth which = Tmp_2 }
 			}
+			NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {				
@@ -1232,6 +1439,21 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+				}
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+		}
+		if = {
+			trigger = {
+				government = republic
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -1247,8 +1469,9 @@ country_event = {
 		trigger = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = BG_Wealth which = Tmp_3 }
-				Rights_BGGov4HasGreater = yes
 			}
+			Rights_BGGov4HasGreater = yes
+			NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -1271,6 +1494,21 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+				}
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+		}
+		if = {
+			trigger = {
+				government = theocracy
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -1287,10 +1525,7 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = SF_Wealth which = Tmp_4 }
 			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
+			NOT = { Privilege_Has = { Privilege=NOGame Lvl=2 } }
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -1312,6 +1547,72 @@ country_event = {
 			set_var_from_key = { var = ducat_gain key = Tmp_4 }
 			old_scaled_ducat_gained_country = yes
 
+		}
+		if = {
+			trigger = {
+				OR = {
+					government = monarchy
+					government = tribal
+				}
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=NO Amount=10 }
+			}
+		}
+		else_if = {
+			trigger = { 
+				government = theocracy
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=10 }
+			}
+		}
+		else_if = {
+			trigger = { 
+				government = republic
+			}
+			if = {
+				trigger = {
+					NOT = { Rights_NOTen4Has = yes }
+					NOT = { Rights_NOGov5Has = yes }
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
+			}
+			else_if = {
+				trigger = {
+					OR = { 
+						Rights_NOTen4Has = yes
+						Rights_NOGov5Has = yes
+					}
+				}
+				Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=10 }
+			}
 		}
 		ai_chance = {
 			factor = 100
@@ -1535,6 +1836,7 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 			
 		}
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -1545,50 +1847,48 @@ country_event = {
 		
 	}
 	#Clergy
-	option = {
-		name = SYS_StateProperty.006.b
-		trigger = {
-			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = CL_Wealth which = Tmp_2 }
-			}
-		}
-		hidden_effect = {
-			event_target:StatePropertyBuyOut = {				
-				change_key = { lhs = CL_Industrial which = BuyOutAmount }
-				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
-				change_key = { lhs = CL_PrpIndustrial which = Tmp_6 }
-				subtract_key = { lhs = BU_PrpIndustrial which = Tmp_6 }
-				change_key = { lhs = Building_IndustrialShareCL which = Tmp_7 }
-				subtract_key = { lhs = Building_IndustrialShareBU which = Tmp_7 }
-				
-				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
-				
-				set_key = { lhs = Tmp_5 which = BuyOutAmount }
-				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
-				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				#set_province_flag = RecentlySoldProperty
-			}
-			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
-			set_var_from_key = { var = ducat_gain key = Tmp_2 }
-			old_scaled_ducat_gained_country = yes
-
-		}
-		ai_chance = {
-			factor = 100
-			modifier = {
-				factor = 2.00
-				owner = { government = theocracy }
-			}
-		}
-		
-	}
+#	option = {
+#		name = SYS_StateProperty.006.b
+#		trigger = {
+#			event_target:StatePropertyBuyOut = {
+#				check_key = { lhs = CL_Wealth which = Tmp_2 }
+#			}
+#		}
+#		hidden_effect = {
+#			event_target:StatePropertyBuyOut = {				
+#				change_key = { lhs = CL_Industrial which = BuyOutAmount }
+#				subtract_key = { lhs = BU_Industrial which = BuyOutAmount }
+#				change_key = { lhs = CL_PrpIndustrial which = Tmp_6 }
+#				subtract_key = { lhs = BU_PrpIndustrial which = Tmp_6 }
+#				change_key = { lhs = Building_IndustrialShareCL which = Tmp_7 }
+#				subtract_key = { lhs = Building_IndustrialShareBU which = Tmp_7 }
+#				
+#				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+#				
+#				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+#				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyIndustrial } # calculate impact of sold StateProperty
+#				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+#				#set_province_flag = RecentlySoldProperty
+#			}
+#			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+#			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+#			old_scaled_ducat_gained_country = yes
+#
+#		}
+#		ai_chance = {
+#			factor = 100
+#			modifier = {
+#				factor = 2.00
+#				owner = { government = theocracy }
+#			}
+#		}		
+#	}
 	#Burgher
 	option = {
 		name = SYS_StateProperty.006.c
 		trigger = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = BG_Wealth which = Tmp_3 }
-				#Rights_BGGov4HasGreater = yes
 			}
 		}
 		hidden_effect = {
@@ -1628,10 +1928,6 @@ country_event = {
 			event_target:StatePropertyBuyOut = {
 				check_key = { lhs = RE_Wealth which = Tmp_4 }
 			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
 		}
 		hidden_effect = {
 			event_target:StatePropertyBuyOut = {
@@ -1654,6 +1950,12 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		if = {
+			trigger = {
+				Rights_BGGov4HasGreater = yes
+			}
+			Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=10 }
+		}
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -1664,8 +1966,7 @@ country_event = {
 				num_of_cities = 80
 				factor = 1.5
 			}
-		}
-		
+		}	
 	}
 	#Nobody
 	option = {
@@ -1876,6 +2177,7 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 			
 		}
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=BG Amount=20 }
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -1886,43 +2188,42 @@ country_event = {
 		
 	}
 	#Clergy
-	option = {
-		name = SYS_StateProperty.007.b
-		trigger = {
-			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = CL_Wealth which = Tmp_2 }
-			}
-		}
-		hidden_effect = {
-			event_target:StatePropertyBuyOut = {				
-				change_key = { lhs = CL_Commercial which = BuyOutAmount }
-				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
-				change_key = { lhs = CL_PrpCommercial which = Tmp_6 }
-				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
-				change_key = { lhs = Building_CommercialShareCL which = Tmp_7 }
-				subtract_key = { lhs = Building_CommercialShareBU which = Tmp_7 }
-				
-				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
-				
-				set_key = { lhs = Tmp_5 which = BuyOutAmount }
-				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
-				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				#set_province_flag = RecentlySoldProperty
-			}
-			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
-			set_var_from_key = { var = ducat_gain key = Tmp_2 }
-			old_scaled_ducat_gained_country = yes
-
-		}
-		ai_chance = {
-			factor = 100
-			modifier = {
-				factor = 2.00
-				owner = { government = theocracy }
-			}
-		}
-		
-	}
+#	option = {
+#		name = SYS_StateProperty.007.b
+#		trigger = {
+#			event_target:StatePropertyBuyOut = {
+#				check_key = { lhs = CL_Wealth which = Tmp_2 }
+#			}
+#		}
+#		hidden_effect = {
+#			event_target:StatePropertyBuyOut = {				
+#				change_key = { lhs = CL_Commercial which = BuyOutAmount }
+#				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+#				change_key = { lhs = CL_PrpCommercial which = Tmp_6 }
+#				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
+#				change_key = { lhs = Building_CommercialShareCL which = Tmp_7 }
+#				subtract_key = { lhs = Building_CommercialShareBU which = Tmp_7 }
+#				
+#				subtract_key = { lhs = CL_Wealth which = Tmp_2 }
+#				
+#				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+#				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
+#				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+#				#set_province_flag = RecentlySoldProperty
+#			}
+#			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+#			set_var_from_key = { var = ducat_gain key = Tmp_2 }
+#			old_scaled_ducat_gained_country = yes
+#
+#		}
+#		ai_chance = {
+#			factor = 100
+#			modifier = {
+#				factor = 2.00
+#				owner = { government = theocracy }
+#			}
+#		}
+#	}
 	#Burgher
 	option = {
 		name = SYS_StateProperty.007.c
@@ -1963,51 +2264,50 @@ country_event = {
 		
 	}
 	#Commoners
-	option = {
-		name = SYS_StateProperty.007.d
-		trigger = {
-			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = RE_Wealth which = Tmp_4 }
-			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
-		}
-		hidden_effect = {
-			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = RE_Commercial which = BuyOutAmount }
-				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
-				change_key = { lhs = RE_PrpCommercial which = Tmp_6 }
-				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
-				change_key = { lhs = Building_CommercialShareRE which = Tmp_7 }
-				subtract_key = { lhs = Building_CommercialShareBU which = Tmp_7 }
-				
-				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
-				
-				set_key = { lhs = Tmp_5 which = BuyOutAmount }
-				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
-				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				#set_province_flag = RecentlySoldProperty
-			}
-			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
-			set_var_from_key = { var = ducat_gain key = Tmp_4 }
-			old_scaled_ducat_gained_country = yes
-
-		}
-		ai_chance = {
-			factor = 100
-			modifier = {
-				num_of_cities = 50
-				factor = 1.5
-			}
-			modifier = {
-				num_of_cities = 80
-				factor = 1.5
-			}
-		}
-		
-	}
+#	option = {
+#		name = SYS_StateProperty.007.d
+#		trigger = {
+#			event_target:StatePropertyBuyOut = {
+#				check_key = { lhs = RE_Wealth which = Tmp_4 }
+#			}
+#			OR = {
+#				Rights_NOTen4Has = yes
+#				Rights_NOGov5Has = yes
+#			}
+#		}
+#		hidden_effect = {
+#			event_target:StatePropertyBuyOut = {
+#				change_key = { lhs = RE_Commercial which = BuyOutAmount }
+#				subtract_key = { lhs = BU_Commercial which = BuyOutAmount }
+#				change_key = { lhs = RE_PrpCommercial which = Tmp_6 }
+#				subtract_key = { lhs = BU_PrpCommercial which = Tmp_6 }
+#				change_key = { lhs = Building_CommercialShareRE which = Tmp_7 }
+#				subtract_key = { lhs = Building_CommercialShareBU which = Tmp_7 }
+#				
+#				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
+#				
+#				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+#				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyCommercial } # calculate impact of sold StateProperty
+#				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+#				#set_province_flag = RecentlySoldProperty
+#			}
+#			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+#			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+#			old_scaled_ducat_gained_country = yes
+#
+#		}
+#		ai_chance = {
+#			factor = 100
+#			modifier = {
+#				num_of_cities = 50
+#				factor = 1.5
+#			}
+#			modifier = {
+#				num_of_cities = 80
+#				factor = 1.5
+#			}
+#		}
+#	}
 	#Nobody
 	option = {
 		name = SYS_StateProperty.007.e
@@ -2218,6 +2518,7 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 			
 		}
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -2295,6 +2596,7 @@ country_event = {
 			old_scaled_ducat_gained_country = yes
 
 		}
+		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
 		ai_chance = {
 			factor = 100
 			modifier = {
@@ -2305,51 +2607,51 @@ country_event = {
 		
 	}
 	#Commoners
-	option = {
-		name = SYS_StateProperty.008.d
-		trigger = {
-			event_target:StatePropertyBuyOut = {
-				check_key = { lhs = RE_Wealth which = Tmp_4 }
-			}
-			OR = {
-				Rights_NOTen4Has = yes
-				Rights_NOGov5Has = yes
-			}
-		}
-		hidden_effect = {
-			event_target:StatePropertyBuyOut = {
-				change_key = { lhs = RE_Academic which = BuyOutAmount }
-				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
-				change_key = { lhs = RE_PrpAcademic which = Tmp_6 }
-				subtract_key = { lhs = BU_PrpAcademic which = Tmp_6 }
-				change_key = { lhs = Building_AcademicShareRE which = Tmp_7 }
-				subtract_key = { lhs = Building_AcademicShareBU which = Tmp_7 }
-				
-				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
-				
-				set_key = { lhs = Tmp_5 which = BuyOutAmount }
-				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
-				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
-				#set_province_flag = RecentlySoldProperty
-			}
-			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
-			set_var_from_key = { var = ducat_gain key = Tmp_4 }
-			old_scaled_ducat_gained_country = yes
-
-		}
-		ai_chance = {
-			factor = 100
-			modifier = {
-				num_of_cities = 50
-				factor = 1.5
-			}
-			modifier = {
-				num_of_cities = 80
-				factor = 1.5
-			}
-		}
-		
-	}
+#	option = {
+#		name = SYS_StateProperty.008.d
+#		trigger = {
+#			event_target:StatePropertyBuyOut = {
+#				check_key = { lhs = RE_Wealth which = Tmp_4 }
+#			}
+#			OR = {
+#				Rights_NOTen4Has = yes
+#				Rights_NOGov5Has = yes
+#			}
+#		}
+#		hidden_effect = {
+#			event_target:StatePropertyBuyOut = {
+#				change_key = { lhs = RE_Academic which = BuyOutAmount }
+#				subtract_key = { lhs = BU_Academic which = BuyOutAmount }
+#				change_key = { lhs = RE_PrpAcademic which = Tmp_6 }
+#				subtract_key = { lhs = BU_PrpAcademic which = Tmp_6 }
+#				change_key = { lhs = Building_AcademicShareRE which = Tmp_7 }
+#				subtract_key = { lhs = Building_AcademicShareBU which = Tmp_7 }
+#				
+#				subtract_key = { lhs = RE_Wealth which = Tmp_4 }
+#				
+#				set_key = { lhs = Tmp_5 which = BuyOutAmount }
+#				multiply_key = { lhs = Tmp_5 which = Modi_StatePropertyAcademic } # calculate impact of sold StateProperty
+#				ROOT = { set_key = { lhs = Tmp_5 which = PREV } } # Updating Country Scope, to be used in next iteration
+#				#set_province_flag = RecentlySoldProperty
+#			}
+#			subtract_key = { lhs = BuyOutTarget which = Tmp_5 } # Updating Country Scope, to be used in next iteration
+#			set_var_from_key = { var = ducat_gain key = Tmp_4 }
+#			old_scaled_ducat_gained_country = yes
+#
+#		}
+#		Public_ChangePowerbrokerLoyaltyTooltip = { Powerbroker=CL Amount=20 }
+#		ai_chance = {
+#			factor = 100
+#			modifier = {
+#				num_of_cities = 50
+#				factor = 1.5
+#			}
+#			modifier = {
+#				num_of_cities = 80
+#				factor = 1.5
+#			}
+#		}
+#	}
 	#Nobody
 	option = {
 		name = SYS_StateProperty.008.e
