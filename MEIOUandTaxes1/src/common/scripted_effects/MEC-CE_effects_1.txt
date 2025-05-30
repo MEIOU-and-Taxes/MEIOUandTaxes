@@ -98,6 +98,12 @@ CE_Main = {
 	}
 
 	# Set runner_dispatching_province
+	# The runner_dispatching_province sends out runners to all neighboring provinces and sea zones 
+	# a nation has access to. Traveltime is calculated for all possible methods a runner can go to a province
+	# (land, sea, river, ancient pass) and the shortest traveltime to that province gets saved in that 
+	# province's values. Afterwards, a new dispatching province is chosen, until all provinces have a traveltime.
+	# Traveltime is saved as a cumulative value from the nation's capital. 
+	# Based on this traveltime, final CE is then calculated.
 	capital_scope = {
 		set_key = { lhs = tv_tt value = 0 }
 		
@@ -181,7 +187,7 @@ CE_Main = {
 				limit = {
 					check_key = { lhs = tv_port value = 1 }
 				}
-				ce_set_runner_disptaching_province_sea = {
+				ce_set_runner_dispatching_province_sea = {
 					max = 1800
 				}
 			}
@@ -202,30 +208,13 @@ CE_Main = {
 		clr_province_flag = tf_pass
 	}
 	
-	set_key = { lhs = Tmp_0 value = 1 }
-
-	capital_scope = {
-		if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 1 } } PREV = { set_key = { lhs = Tmp_0 value = 0.94 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 2 } } PREV = { set_key = { lhs = Tmp_0 value = 0.88 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 3 } } PREV = { set_key = { lhs = Tmp_0 value = 0.82 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 4 } } PREV = { set_key = { lhs = Tmp_0 value = 0.77 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 5 } } PREV = { set_key = { lhs = Tmp_0 value = 0.73 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 6 } } PREV = { set_key = { lhs = Tmp_0 value = 0.69 } } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 7 } } PREV = { set_key = { lhs = Tmp_0 value = 0.65 } } }
-	}
-
-	every_owned_province = {
-		limit = {
-			check_key = { lhs = tv_tt value = 0.001 }
-		}
-		set_key = { lhs = Tmp_0 which = PREV }
-
-		multiply_key = { lhs = tv_tt which = Tmp_0 }
-
-		set_key = { lhs = Tmp_0 value = 0 }
-	}
-
+	# Evaluation of regional capitols begins here.
 	clr_country_flag = ce_capitols 
+
+	# First, we check if there even exist any regional capitols the nation's runners have visited during
+	# their initial run from the capital. 
+	# In special access zones (HRE, Japan, cahtolic land if popes),
+	# other nation's capital capitol's count as a regional.
 	if = {
 		limit = {
 			any_province = {
@@ -233,32 +222,86 @@ CE_Main = {
 				
 				check_key = { lhs = Infra_Capitol value = 1 }
 				
-				is_capital = no
+				NOT = {
+					is_capital_of = event_target:tt_highest
+				}
 			}
 		}
-		every_province = {
-			limit = {
-				is_capital = no
-			}
-			set_key = { lhs = tv_tt_save value = 1733 }
-		}
-		PREV = { set_country_flag = ce_capitols }
+		set_country_flag = ce_capitols
+		
+		# We backup the original traveltime from the capital before any reductions are applied for later
 		every_province = {
 			limit = {
 				has_province_flag = tf_communication_efficiency_final
-				
-				is_capital = no
 			}
 			set_province_flag = tf_communication_efficiency_final_save
-			clr_province_flag = tf_communication_efficiency_final
 			set_key = { lhs = tv_tt_save which = tv_tt }
+		}
+		
+		sea_starts = {
+			limit = {
+				has_province_flag = tf_communication_efficiency_final
+			}
+			set_province_flag = tf_communication_efficiency_final_save
+			set_key = { lhs = tv_tt_save which = tv_tt }
+		}
 
+		# All capitols a nation's runners can use as a regional get flagged
+		every_province = {
+			limit = {
+				has_province_flag = tf_communication_efficiency_final_save	
+				
+				NOT = {
+					is_capital_of = event_target:tt_highest
+				}	
+			}
 			if = {
 				limit = {
 					check_key = { lhs = Infra_Capitol value = 1 }
 				}
-				save_event_target_as = runner_dispatching_province
+				set_province_flag = is_regional_capital
+			}
+	    }
 
+		# All regionals now get evaluated in order by distance to the capital. Flags that mark provinces
+		# as already evaluated get cleared for each new regional, and then runners from that regional 
+		# spread out until no new dispatch province is found. 
+		# This happens if the traveltime to adjacent provinces from all available dispatch provinces
+		# is longer than the original traveltime from the capital. 
+		every_province = {
+			limit = {
+				has_province_flag = is_regional_capital
+			}
+
+			# Reset flags for done provinces.
+			every_province = {
+				limit = {
+					has_province_flag = tf_communication_efficiency_final_save						
+				}
+				clr_province_flag = tf_communication_efficiency_final
+				clr_province_flag = tf_river
+				clr_province_flag = tf_pass
+				clr_province_flag = ce_dispatch_cand
+			}
+			
+			sea_starts = {
+				limit = {
+					has_province_flag = tf_communication_efficiency_final_save
+				}
+				clr_province_flag = tf_communication_efficiency_final
+				clr_province_flag = ce_dispatch_cand
+			}	
+
+
+			# Determine which of the remaining regional capitals is closest to the capital.
+			ce_set_runner_dispatching_province_regional_capitals = {
+				scope = every_province
+				max = 1800
+			}
+
+
+			# Apply reduction to traveltime based on capitol level.
+			event_target:runner_dispatching_province = {
 				if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 1 } } multiply_key = { lhs = tv_tt value = 0.92 } subtract_key = { lhs = tv_tt value = 20 } }
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 2 } } multiply_key = { lhs = tv_tt value = 0.85 } subtract_key = { lhs = tv_tt value = 40 } }
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 3 } } multiply_key = { lhs = tv_tt value = 0.79 } subtract_key = { lhs = tv_tt value = 60 } }
@@ -266,7 +309,7 @@ CE_Main = {
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 5 } } multiply_key = { lhs = tv_tt value = 0.69 } subtract_key = { lhs = tv_tt value = 80 } }
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 6 } } multiply_key = { lhs = tv_tt value = 0.64 } subtract_key = { lhs = tv_tt value = 90 } }
 				else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 7 } } multiply_key = { lhs = tv_tt value = 0.6 } subtract_key = { lhs = tv_tt value = 100 } }
-			
+				
 				if = {
 					limit = {
 						NOT = {
@@ -275,44 +318,69 @@ CE_Main = {
 					}
 					set_key = { lhs = tv_tt value = 0.001 }
 				}
-			}
-		}
 
-		ce_set_runner_dispatching_province_land = {
-			scope = every_province
-			max = 960
-		}
-
-		while = {
-			limit = {
-				event_target:runner_dispatching_province = {
-					NOT = { has_province_flag = tf_communication_efficiency_final }
-				}
-			}
-
-			event_target:runner_dispatching_province = {
-				set_province_flag = tf_communication_efficiency_final
+				# Safeguard against exploiting chaining of capitols.
+				# If the runner origin of a capitol is another capitol,
+				# then traveltime cannot be lower than the traveltime of it's runner origin.
+				every_province = {
+					limit = {
+						has_province_flag = regional_capital_ce_final
+					}
+					set_key = { lhs = Tmp_0 which = tv_tt }   
+				    set_key = { lhs = Tmp_1 which = ID_Prov }
 				
-				ce_do_river = {
-					prev = pv_prev
+					if = {
+						limit = {
+							check_key = { lhs = Tmp_0 which = PREV }
+							is_key_equal = { lhs = Tmp_1 which = PREV }
+						}
+						PREV = {
+							set_key = { lhs = tv_tt which = PREV }					
+						}
+					}
+					
+					set_key = { lhs = Tmp_0 value = 0 }
+					set_key = { lhs = Tmp_1 value = 0 }
 				}
-				ce_do_pass = {
-					prev = pv_prev
-				}
-				ce_do_land = {
-					prev = pv_prev
-				}
-				ce_do_sea = {
-					prev = pv_prev
-				}
-			}
+				set_key = { lhs = Tmp_0 value = 0 }  					
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_province_flag = regional_capital_ce_final				
+										
+				# Main loop for current regional
+				while = {
+					limit = {
+						event_target:runner_dispatching_province = {
+							NOT = { has_province_flag = tf_communication_efficiency_final }
+						}
+					}
 
-			ce_set_runner_dispatching_province_land = {
-				scope = every_province
-				max = 960
-			}
-			ce_set_runner_disptaching_province_sea = {
-				max = 960
+					event_target:runner_dispatching_province = {
+						set_province_flag = tf_communication_efficiency_final
+
+
+						ce_do_river = {
+							prev = pv_prev
+						}
+						ce_do_pass = {
+							prev = pv_prev
+						}
+						ce_do_land = {
+							prev = pv_prev
+						}
+						ce_do_sea = {
+							prev = pv_prev
+						}
+	
+		
+						ce_set_runner_dispatching_province_land = {
+							scope = every_province
+							max = 960
+						}
+						ce_set_runner_dispatching_province_sea = {
+							max = 960
+						}	
+					}
+				}
 			}
 		}
 
@@ -323,6 +391,14 @@ CE_Main = {
 			clr_province_flag = tf_communication_efficiency_final_save
 			set_province_flag = tf_communication_efficiency_final
 		}
+		
+		sea_starts = {
+			limit = {
+				has_province_flag = tf_communication_efficiency_final_save
+			}
+			clr_province_flag = tf_communication_efficiency_final_save
+			set_province_flag = tf_communication_efficiency_final
+		}		
 		
 		every_province = {
 			limit = {
@@ -338,7 +414,49 @@ CE_Main = {
 			clr_province_flag = tf_pass
 		}
 	}
-	
+
+
+	# After the regionals have been done, a global traveltime reduction to all provinces the runners
+	# passed through based on the capitol level in the nation's capital is applied, 
+	# including sea zones and foreign provinces the runners have access to. 
+	set_key = { lhs = Tmp_0 value = 1 }
+
+	capital_scope = {
+		if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 1 } } PREV = { set_key = { lhs = Tmp_0 value = 0.94 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 2 } } PREV = { set_key = { lhs = Tmp_0 value = 0.88 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 3 } } PREV = { set_key = { lhs = Tmp_0 value = 0.82 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 4 } } PREV = { set_key = { lhs = Tmp_0 value = 0.77 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 5 } } PREV = { set_key = { lhs = Tmp_0 value = 0.73 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 6 } } PREV = { set_key = { lhs = Tmp_0 value = 0.69 } } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Capitol value = 7 } } PREV = { set_key = { lhs = Tmp_0 value = 0.65 } } }
+	}
+
+	every_province = {
+		limit = {
+			check_key = { lhs = tv_tt value = 0.001 }
+			has_province_flag = tf_communication_efficiency_final
+		}
+		set_key = { lhs = Tmp_0 which = PREV }
+
+		multiply_key = { lhs = tv_tt which = Tmp_0 }
+
+		set_key = { lhs = Tmp_0 value = 0 }
+	}
+
+	sea_starts = {
+		limit = {
+			check_key = { lhs = tv_tt value = 0.001 }
+			has_province_flag = tf_communication_efficiency_final
+		}
+		set_key = { lhs = Tmp_0 which = PREV }
+
+		multiply_key = { lhs = tv_tt which = Tmp_0 }
+
+		set_key = { lhs = Tmp_0 value = 0 }
+	}	
+
+
+	# Japan has additional reductions 
 	if = {
 		limit = {
 			has_country_flag = limiting_shugo_power
@@ -417,7 +535,8 @@ CE_Main = {
 		}
 	}
 
-	#If the province belongs to the current country evaluated, set autonomy modifiers. If not, restore previously saved CE values
+	# If the province belongs to the current country evaluated, set autonomy modifiers. 
+	# If not, restore previously saved CE values, so we don't override another nations traveltimes for their runners.
 	every_province = {
 		limit = {
 			OR = {
@@ -478,15 +597,23 @@ CE_Main = {
 			
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
+
+		# Calc difference in CE
+		# This is the difference in the original, unreduced traveltime to a province from the capital
+		# vs the reduced traveltime from the global reduction from the capital capitol.
+		# and possibly the reduction from regionals. 		
 		if = {
 			limit = {
 				PREV = { has_country_flag = ce_capitols }
+				owned_by = PREV
 			}
-			## Calc difference in CE
 			set_key = { lhs = CE_Diff which = pv_ce }
 			subtract_key = { lhs = CE_Diff which = pv_ce_pre }
 		}
-		else = {
+		else_if = {
+			limit = {
+				owned_by = PREV
+			}
 			set_key = { lhs = CE_Diff value = 0 }
 		}
 
@@ -496,7 +623,7 @@ CE_Main = {
 	}
 	clr_country_flag = ce_capitols 
 
-	# Clear all temporary variables
+	# Clear all temporary variables.
 	ce_cleanup = yes
 }
 
@@ -520,6 +647,7 @@ compare_and_set_travel_time = {
 			}
 			clr_province_flag = tf_river
 			clr_province_flag = tf_pass
+			set_province_flag = ce_dispatch_cand
 			
 			set_key = { lhs = tv_tt which = tv_tt_new }
 
@@ -543,6 +671,7 @@ compare_and_set_travel_time = {
 	else = {
 		clr_province_flag = tf_river
 		clr_province_flag = tf_pass
+		set_province_flag = ce_dispatch_cand
 		
 		event_target:runner_dispatching_province = {
 			if = {
@@ -605,6 +734,9 @@ ce_cleanup = {
 		}
 		clr_province_flag = tf_communication_efficiency_final
 		clr_province_flag = tf_communication_efficiency_final_save
+		clr_province_flag = is_regional_capital
+		clr_province_flag = regional_capital_ce_final
+		clr_province_flag = ce_dispatch_cand
 
 		set_key = { lhs = tv_tt value = 0 }
 		set_key = { lhs = tv_id value = 0 }
@@ -636,6 +768,8 @@ ce_cleanup = {
 			}
 		}
 		clr_province_flag = tf_communication_efficiency_final
+		clr_province_flag = tf_communication_efficiency_final_save
+		clr_province_flag = ce_dispatch_cand
 
 		set_key = { lhs = tv_tt value = 0 }
 		set_key = { lhs = tv_id value = 0 }
@@ -660,9 +794,19 @@ ce_set_runner_dispatching_province_land = {
 		save_event_target_as = runner_dispatching_province
 	}
 }
-ce_set_runner_disptaching_province_sea = {
+ce_set_runner_dispatching_province_sea = {
 	sea_starts = {
 		limit = {
+			has_lowest_travel_time = { max = $max$ }
+		}
+		save_event_target_as = runner_dispatching_province
+	}
+}
+ce_set_runner_dispatching_province_regional_capitals = {
+	$scope$ = {
+		limit = {
+			has_province_flag = is_regional_capital
+			NOT =  { has_province_flag = regional_capital_ce_final }
 			has_lowest_travel_time = { max = $max$ }
 		}
 		save_event_target_as = runner_dispatching_province
@@ -696,9 +840,8 @@ ce_do_sea = {
 		every_neighbor_province = {
 			limit = {
 				has_province_flag = CE_Cand
-				NOT = { 
-					has_province_flag = tf_communication_efficiency_final 
-				}
+				NOT = { has_province_flag = tf_communication_efficiency_final }
+				NOT = { is_capital_of = event_target:tt_highest }
 				isValidProv = yes
 			}
 			export_province_distance_land_province_effect = {
@@ -912,6 +1055,7 @@ ce_do_land = {
 			limit = {
 				has_province_flag = CE_Cand
 				NOT = { has_province_flag = tf_communication_efficiency_final }
+				NOT = { is_capital_of = event_target:tt_highest }
 				isValidProv = yes
 			}
 			export_province_distance_land_province_effect = {
@@ -1000,6 +1144,7 @@ ce_do_river = {
 							}
 						}
 						set_province_flag = tf_river
+						set_province_flag = ce_dispatch_cand
 						
 						set_key = { lhs = tv_tt which = tv_tt_new }
 						
@@ -1107,6 +1252,7 @@ ce_do_pass = {
 							}
 						}
 						set_province_flag = tf_pass
+						set_province_flag = ce_dispatch_cand
 						
 						set_key = { lhs = tv_tt which = tv_tt_new }
 						
