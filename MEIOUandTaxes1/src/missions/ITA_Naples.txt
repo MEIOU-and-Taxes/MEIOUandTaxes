@@ -1,4 +1,4 @@
-sic_slot_1 = {
+nap_slot_1 = {
 	slot = 1
 	generic = no
 	ai = yes
@@ -21,15 +21,17 @@ sic_slot_1 = {
 		}
 	}
 	nap_loyality_and_privilege = {
-		icon = answer_the_roman_question
+		icon = mission_land_of_churches
 		required_missions = {  }
 		position = 2
-		provinces_to_highlight = {
-		}
 		trigger = {
+			check_key = { lhs = Prov_CLLoy value = 80 }
+			check_key = { lhs = Prov_NOLoy value = 80 }
+			check_key = { lhs = Prov_BGLoy value = 80 }
 		}
 		effect = {
 			add_prestige = 10
+			add_legitimacy = 10
 		}
 	}
 	nap_noble_court_2 = {
@@ -65,6 +67,11 @@ sic_slot_1 = {
 		}
 		trigger = {
 			sicily_region = {
+				type = all
+				OR = {
+					owned_by = ROOT
+					province_id = 126 #Malta
+				}
 				HasBuildingOrBetter = { b1=urban_infrastructure_1 b2=urban_infrastructure_2 b3=urban_infrastructure_3 b4=urban_infrastructure_4 b5=urban_infrastructure_5 b6=urban_infrastructure_6 }
 			}
 		}
@@ -232,7 +239,7 @@ sic_slot_1 = {
 		}
 	}
 }
-sic_slot_2 = {
+nap_slot_2 = {
 	slot = 2
 	generic = no
 	ai = yes
@@ -272,11 +279,12 @@ sic_slot_2 = {
 		trigger = {
 			NOT = { check_key = { lhs = Prov_NOPow value = 70 } }
 			custom_trigger_tooltip = {
-				tooltip = Rights_NOGov3HasGreater
-				Rights_NOGov3HasGreater = yes
+				tooltip = Rights_NOGov4HasGreater
+				Rights_NOGov4HasGreater = yes
 			}
 		}
 		effect = {
+			add_adm_power = 150
 			add_country_modifier = {
 				name = monarchy_stabilise_country_mod
 				duration = 7300 #20 years
@@ -332,7 +340,7 @@ sic_slot_2 = {
 		}
 	}
 	nap_conquer_sardinia = {
-		icon = answer_the_roman_question
+		icon = seize_sardinia
 		required_missions = { nap_aristani_beachhead }
 		position = 16
 		provinces_to_highlight = {
@@ -404,7 +412,7 @@ sic_slot_2 = {
 		}
 	}
 }
-sic_slot_3 = {
+nap_slot_3 = {
 	slot = 3
 	generic = no
 	ai = yes
@@ -419,23 +427,74 @@ sic_slot_3 = {
 		required_missions = {  }
 		position = 1
 		provinces_to_highlight = {
+			region = sicily_region
 		}
 		trigger = {
+			AND = {
+				tag = KNP
+				NOT = { exists = SIC }
+			}
+			naples_region = {
+				type = all
+				owned_by = ROOT
+			}
+			sicily_region = {
+				type = all
+				OR = {
+					owned_by = ROOT
+					province_id = 126 #Malta
+				}
+			}
 		}
 		effect = {
-			add_prestige = 10
+			add_country_modifier = {
+			    name = military_victory
+			    duration = 3650 #10 years
+		    }
 		}
 	}
 	nap_two_sicilies = {
-		icon = answer_the_roman_question
+		icon = unite_the_two_sicilies
 		required_missions = { nap_reconquer_sicily }
 		position = 2
 		provinces_to_highlight = {
+			OR = {
+				region = naples_region
+				region = sicily_region
+			}
+			NOT = {
+				country_or_non_sovereign_subject_holds = ROOT
+				province_id = 126 #Malta
+			}
 		}
 		trigger = {
+			AND = {
+				tag = KNP
+				NOT = { exists = SIC }
+			}
+			naples_region = {
+				type = all
+				owned_by = ROOT
+			}
+			sicily_region = {
+				type = all
+				OR = {
+					owned_by = ROOT
+					province_id = 126 #Malta
+				}
+			}
+			OR = {
+				adm_tech = 29
+				absolutism = 40
+			}
+			custom_trigger_tooltip = { 
+				tooltip ="is_free_or_tributary_trigger_tooltip" 
+				is_free_or_tributary_trigger = yes 
+			}
+			is_at_war = no
 		}
 		effect = {
-			add_prestige = 10
+			country_event = { id = mission_event.024 }
 		}
 	}
 	nap_noble_dues_services2 = {
@@ -524,7 +583,7 @@ sic_slot_3 = {
 	}
 	nap_build_capital = {
 		icon = answer_the_roman_question
-		required_missions = { nap_centralization_40 nap_ban_sales_offices nap_indirect_tax2 nap_direct_tax2 nap_volunteers }
+		required_missions = { nap_centralization_40 nap_ban_sales_offices nap_indirect_tax2 nap_direct_tax2 }
 		position = 13
 		provinces_to_highlight = {
 		}
@@ -536,7 +595,7 @@ sic_slot_3 = {
 	}
 	nap_renaissance_state = {
 		icon = answer_the_roman_question
-		required_missions = { nap_build_capital }
+		required_missions = { nap_build_capital nap_volunteers }
 		position = 14
 		provinces_to_highlight = {
 		}
@@ -583,91 +642,108 @@ sic_slot_3 = {
 		}
 	}
 	nap_dismantle_venice = {
-		icon = answer_the_roman_question
+		icon = reclaim_the_aegean
 		required_missions = { nap_find_allies }
 		position = 22
-		provinces_to_highlight = {
-		}
 		trigger = {
+			VEN = {
+				num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+					value = 3
+				}
+			}
 		}
 		effect = {
-			add_prestige = 10
+			add_prestige = 15
 		}
 	}
 	nap_prepare_venice = {
-		icon = answer_the_roman_question
+		icon = mission_raid_on_venice
 		required_missions = { nap_dismantle_venice }
 		position = 23
 		provinces_to_highlight = {
+			province_id = 112
 		}
 		trigger = {
+			navy_size = 30
+			112 = {
+				is_claim = ROOT
+				NOT = { owned_by = ROOT }
+			}
 		}
 		effect = {
-			add_prestige = 10
+			add_country_modifier = {
+				name = "naval_enthusiasm_mission"
+				duration = 9125 #25 years
+			}
 		}
 	}
 	nap_conquer_venice = {
-		icon = answer_the_roman_question
+		icon = ven_capital_of_europe
 		required_missions = { nap_prepare_venice }
 		position = 24
 		provinces_to_highlight = {
+			province_id = 112
 		}
 		trigger = {
+			112 = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		effect = {
-			add_prestige = 10
+			add_prestige = 15
+			add_country_modifier = {
+			    name = military_victory
+			    duration = 3650 #10 years
+		    }
 		}
 	}
 	nap_collect_trade = {
 		icon = answer_the_roman_question
 		required_missions = {  }
 		position = 25
-		provinces_to_highlight = {
-		}
 		trigger = {
+			
 		}
 		effect = {
-			add_prestige = 10
 		}
 	}
 	nap_trade_income5 = {
-		icon = answer_the_roman_question
+		icon = mission_war_chest
 		required_missions = { nap_collect_trade }
 		position = 26
-		provinces_to_highlight = {
-		}
 		trigger = {
+			trade_income_percentage = 0.15
 		}
 		effect = {
-			add_prestige = 10
+			years_of_income = 2
 		}
 	}
 	nap_trade_fleet = {
-		icon = answer_the_roman_question
+		icon = mission_rb_grow_the_channel
 		required_missions = { nap_trade_income5 }
 		position = 27
-		provinces_to_highlight = {
-		}
 		trigger = {
+			navy_size = 20
+			num_of_light_ship = 15
+			
 		}
 		effect = {
-			add_prestige = 10
+			add_navy_tradition = 15
 		}
 	}
 	nap_trade_income15 = {
-		icon = answer_the_roman_question
+		icon = mission_african_gold
 		required_missions = { nap_trade_fleet }
 		position = 28
 		provinces_to_highlight = {
 		}
 		trigger = {
+			trade_income_percentage = 0.25
 		}
 		effect = {
-			add_prestige = 10
+			years_of_income = 3
 		}
 	}
 }
-sic_slot_4 = {
+nap_slot_4 = {
 	slot = 4
 	generic = no
 	ai = yes
@@ -773,6 +849,21 @@ sic_slot_4 = {
 			add_prestige = 10
 		}
 	}
+	nap_volunteers = {
+		icon = mission_crusade_for_varna
+		required_missions = { nap_extended_levies }
+		position = 13
+		trigger = {
+			custom_trigger_tooltip = {
+				tooltip = Rights_BUSer2HasGreater
+				Rights_BUSer2HasGreater = yes
+			}
+		}
+		effect = {
+			add_mil_power = 100
+			create_general = { tradition = 50 }
+		}
+	}
 	nap_develop_durazzo = {
 		icon = answer_the_roman_question
 		required_missions = { nap_into_greece }
@@ -788,7 +879,7 @@ sic_slot_4 = {
 	nap_palermo_luxuries = {
 		icon = answer_the_roman_question
 		required_missions = { nap_income_12 }
-		position = 19
+		position = 18
 		provinces_to_highlight = {
 		}
 		trigger = {
@@ -877,7 +968,7 @@ sic_slot_4 = {
 		}
 	}
 }
-sic_slot_5 = {
+nap_slot_5 = {
 	slot = 5
 	generic = no
 	ai = yes
@@ -948,27 +1039,51 @@ sic_slot_5 = {
 		}
 	}
 	nap_higher_learning = {
-		icon = answer_the_roman_question
+		icon = mission_educated_people
 		required_missions = { nap_polish_capital }
 		position = 8
 		provinces_to_highlight = {
 		}
 		trigger = {
+			num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {
+				value = 7
+				custom_trigger_tooltip = {
+					tooltip = higher_learning_present
+					has_province_flag = Industry_41Present
+				}
+			}
 		}
 		effect = {
-			add_prestige = 10
+			add_prestige = 5
+		    add_adm_power = 25
+			add_dip_power = 25
 		}
 	}
 	nap_prep_literacy = {
-		icon = answer_the_roman_question
+		icon = mission_early_modern_university
 		required_missions = { nap_higher_learning }
 		position = 9
 		provinces_to_highlight = {
+			province_id = 2531
 		}
 		trigger = {
+			2531 = { #Naples 
+				owned_by = ROOT
+				OR = {
+					has_province_modifier = LN_Major
+				    has_province_modifier = LN_Important
+					has_province_modifier = LN_Minor
+			    }
+				custom_trigger_tooltip = { tooltip = miss_output_41_5 check_key = { lhs = TN_ProvSply41 value = 5 } }
+			}
 		}
 		effect = {
-			add_prestige = 10
+			2531 = {
+				add_province_modifier = {
+					name = republic_university_2_mod
+					duration = 7300 #20 years
+				}
+			}
 		}
 	}
 	nap_military_ideas = {
@@ -984,21 +1099,9 @@ sic_slot_5 = {
 		}
 	}
 	nap_extended_levies = {
-		icon = answer_the_roman_question
+		icon = mission_hessian_jaeger_corps
 		required_missions = { nap_military_ideas }
 		position = 12
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-			add_prestige = 10
-		}
-	}
-	nap_volunteers = {
-		icon = answer_the_roman_question
-		required_missions = { nap_extended_levies }
-		position = 13
 		provinces_to_highlight = {
 		}
 		trigger = {
@@ -1034,7 +1137,7 @@ sic_slot_5 = {
 	nap_income_12 = {
 		icon = answer_the_roman_question
 		required_missions = {  }
-		position = 18
+		position = 17
 		provinces_to_highlight = {
 		}
 		trigger = {
@@ -1046,7 +1149,7 @@ sic_slot_5 = {
 	nap_income_20 = {
 		icon = answer_the_roman_question
 		required_missions = { nap_income_12 }
-		position = 19
+		position = 18
 		provinces_to_highlight = {
 		}
 		trigger = {
