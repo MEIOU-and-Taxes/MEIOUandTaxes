@@ -33,6 +33,7 @@ Modi_Main = {
 		Modi_AdminCountry = yes #TBD
 		Modi_CorruptionCountry = yes
 		Modi_AutonomyCountry = yes #TBD
+		Modi_StateProperty = yes						  
 		Modi_EliteLoyaltyCountry = yes
 		Modi_ElitePowerCountry = yes
 		Modi_ElitePromotionDemotion = yes
@@ -85,6 +86,7 @@ Modi_Country = {
 	Modi_AdminCountry = yes #TBD
 	Modi_CorruptionCountry = yes
 	Modi_AutonomyCountry = yes #TBD
+	Modi_StateProperty = yes						 
 	Modi_EliteLoyaltyCountry = yes
 	Modi_ElitePowerCountry = yes
 	Modi_ElitePromotionDemotion = yes
@@ -3136,6 +3138,7 @@ Modi_BuildingCountry = {
 # Modi_$type$Cost: Impacts the amount of labor and tradegood a given type of property requires for its construction and therefore its cost in a given province
 # Modi_BuildingCost: Impacts the amount of tradegood required for construction and therefore its cost for all construction projects in a given province
 # Modi_BuildingTime: Impacts the amount of labor required for construction and therefore its cost for all construction projects in a given province
+# Modi_StateProperty$type$: Impacts the contribution of each property type to the StatePropertyCap 
 Modi_BuildingProvince = {
 	set_key = { lhs = Modi_AgricultureMax which = owner }
 	set_key = { lhs = Modi_FisheryMax which = owner }
@@ -3148,7 +3151,13 @@ Modi_BuildingProvince = {
 	set_key = { lhs = Modi_IndustrialCost which = owner }
 	set_key = { lhs = Modi_CommercialCost which = owner }
 	set_key = { lhs = Modi_AcademicCost which = owner }
-	
+	set_key = { lhs = Modi_StatePropertyAgriculture which = owner }
+	set_key = { lhs = Modi_StatePropertyForestry which = owner }
+	set_key = { lhs = Modi_StatePropertyExtraction which = owner }
+	set_key = { lhs = Modi_StatePropertyFishery which = owner }
+	set_key = { lhs = Modi_StatePropertyIndustrial which = owner }
+	set_key = { lhs = Modi_StatePropertyCommercial which = owner }
+	set_key = { lhs = Modi_StatePropertyAcademic which = owner }
 	export_to_key = { lhs = Modi_ResourceSizeIneffic value = modifier:local_development_cost }
 	export_to_key = { lhs = Modi_BuildingCost value = modifier:local_build_cost }
 	export_to_key = { lhs = Modi_BuildingTime value = modifier:local_build_time }
@@ -5366,6 +5375,256 @@ Modi_AutonomyProvince = {
 		hee_mogadishu_administration = {
 			change_key = { lhs = Modi_AutonomyElites value = 0.05 }
 		}
+	}
+}
+Modi_StateProperty = {
+	set_key = { lhs = Modi_StatePropertyFlat value = 0 }
+	set_key = { lhs = Modi_StatePropertyPerc value = 1 }
+	set_key = { lhs = Modi_StatePropertyAgriculture value = 1 }
+	set_key = { lhs = Modi_StatePropertyForestry value = 1 }
+	set_key = { lhs = Modi_StatePropertyExtraction value = 1 }
+	set_key = { lhs = Modi_StatePropertyFishery value = 1 }
+	set_key = { lhs = Modi_StatePropertyIndustrial value = 1 }
+	set_key = { lhs = Modi_StatePropertyCommercial value = 1 }
+	set_key = { lhs = Modi_StatePropertyAcademic value = 1 }
+	
+	set_key = { lhs = Modi_Tmp0 value = 0 }
+	set_key = { lhs = Modi_Tmp1 value = 1 }
+	
+	if = {
+		limit = {
+			has_idea = agrarian_ideas_3
+		}
+		change_key = { lhs = Modi_StatePropertyFlat value = 100 }
+	}
+	if = {
+		limit = {
+			has_idea = administrative_ideas_4
+		}
+		change_key = { lhs = Modi_StatePropertyFlat value = 100 }
+	}
+	if = {
+		limit = {
+			has_idea = aristocracy_ideas_7
+		}
+		change_key = { lhs = Modi_StatePropertyFlat value = 100 }
+	}
+	trigger_switch = {
+		on_trigger = government_rank
+		6 = { change_key = { lhs = Modi_StatePropertyFlat value = 475 } }
+		5 = { change_key = { lhs = Modi_StatePropertyFlat value = 400 } }
+		4 = { change_key = { lhs = Modi_StatePropertyFlat value = 325 } }
+		3 = { change_key = { lhs = Modi_StatePropertyFlat value = 250 } }
+		2 = { change_key = { lhs = Modi_StatePropertyFlat value = 175 } }
+		1 = { change_key = { lhs = Modi_StatePropertyFlat value = 100 } }
+	}
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=BUStructure Lvl=2 }
+		}
+		change_key = { lhs = Modi_StatePropertyFlat value = 100 }
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=BUStructure Lvl=3 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyFlat value = 200 }
+	}
+	
+	## Centralization effect, higher centralization reduces state capacity at 100 -> -50%
+	export_to_key = { lhs = Modi_Tmp0 value = trigger_value:absolutism }
+	multiply_key = { lhs = Modi_Tmp0 value = 0.005 }
+	subtract_key = { lhs = Modi_StatePropertyPerc which = Modi_Tmp0 }
+	
+    ### technology impact, higher technology increase state capacity 
+	if = {
+		limit = {
+			adm_tech = 70
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.7 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 65
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.65 }
+	}	
+	else_if = {
+		limit = {
+			adm_tech = 60
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.6 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 55
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.55 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 50
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.5 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 45
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.45 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 40
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.4 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 35
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.35 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 30
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.3 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 25
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.25 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 20
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.2 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 15
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.15 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 10
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.1 }
+	}
+	else_if = {
+		limit = {
+			adm_tech = 5
+		}
+		change_key = { lhs = Modi_StatePropertyPerc value = 0.05 }
+	}
+	if = {
+		limit = { 
+			government = monarchy
+		}
+		subtract_key = { lhs = Modi_StatePropertyAgriculture value = 0.2 }
+	}
+	if = {
+		limit = { 
+			government = tribal
+		}
+		subtract_key = { lhs = Modi_StatePropertyAgriculture value = 0.2 }
+	}
+	if = {
+		limit = { 
+			government = republic
+		}
+		subtract_key = { lhs = Modi_StatePropertyIndustrial value = 0.2 }
+	}
+	if = {
+		limit = { 
+			government = theocracy
+		}
+		subtract_key = { lhs = Modi_StatePropertyAcademic value = 0.2 }
+	}	
+	# Processing Monopoly
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=NOProcessing Lvl=1 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.05 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 25 }
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=NOProcessing Lvl=2 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.1 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 50 }
+	}
+	# Game Monopoly
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=NOGame Lvl=1 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyForestry value = 0.05 }
+		subtract_key = { lhs = Modi_StatePropertyFishery value = 0.05 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 25 }
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=NOGame Lvl=2 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyForestry value = 0.1 }
+		subtract_key = { lhs = Modi_StatePropertyFishery value = 0.1 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 50 }
+	}
+	# Forestry Monopoly
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=NOForestry Lvl=1 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyForestry value = 0.05 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 25 }
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=NOForestry Lvl=2 }
+		}
+		subtract_key = { lhs = Modi_StatePropertyForestry value = 0.1 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 50 }
+	}
+	# Rural Governance
+	if = {
+		limit = {
+			Rights_NOGov1Has = yes
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.25 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 75 }
+	}
+	else_if = {
+		limit = {
+			Rights_NOGov2Has = yes
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.225 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 50 }
+	}
+	else_if = {
+		limit = {
+			Rights_NOGov3Has = yes
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.2 }
+		change_key = { lhs = Modi_StatePropertyFlat value = 25 }
+	}
+	else_if = {
+		limit = {
+			Rights_NOGov4Has = yes
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.175 }
+	}
+	else_if = {
+		limit = {
+			Rights_NOGov5Has = yes
+		}
+		subtract_key = { lhs = Modi_StatePropertyExtraction value = 0.15 }
 	}
 }
 

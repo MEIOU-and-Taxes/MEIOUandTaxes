@@ -394,13 +394,23 @@ def compile(compress=False, parse_init=True, debug=False):
 	if debug:
 		print(f"DEBUG: Compiling sequentially (slower)")
 	print(f'0% done', end='')
-	with multiprocessing.Pool() as pool:
-		if compress:
-			compiled_files_it = pool.imap_unordered(compile_and_save_compressed, parsepaths, max(1, round(file_count/1000)))
-		else:
-			compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, parsepaths, max(1, round(file_count/1000)))
-		for i in range(file_count):
-			next(compiled_files_it)
+	if not debug:
+		with multiprocessing.Pool() as pool:
+			if compress:
+				compiled_files_it = pool.imap_unordered(compile_and_save_compressed, parsepaths, max(1, round(file_count/1000)))
+			else:
+				compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, parsepaths, max(1, round(file_count/1000)))
+			for i in range(file_count):
+				next(compiled_files_it)
+				progress = 100*(i+1)/file_count
+				sys.stdout.write('\x1b[2k') # clear line
+				print(f'\r{progress:.1f}% done', end='')
+	else:
+		for i, f in enumerate(parsepaths):
+			if compress:
+				compile_and_save_compressed(f)
+			else:
+				compile_and_save_uncompressed(f)
 			progress = 100*(i+1)/file_count
 			sys.stdout.write('\x1b[2k') # clear line
 			print(f'\r{progress:.1f}% done', end='')
