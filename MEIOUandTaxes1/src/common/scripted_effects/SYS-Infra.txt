@@ -1547,7 +1547,50 @@ Infra_DoSpend = {
 
 	### Handling of state investment
 	if = {
-		limit = { check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 } } # Any state investment occured
+		limit = {
+			check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 }  # Any state investment occured
+			owner = { check_key = { lhs = Tmp_7 value = 0.001 } } # State is not overcapped on State Property. Country Tmp_7 = (StatePropertyCapacity - StatePropertyTotalModified) * 0.9. This is set at the start of Census.0017
+		}
+
+		# If the state has invested, check how many shares the state could buy for the investment, calc how much actual size this would be and then check against the StatePropertyCap
+		# if this would put the state over cap
+		
+		# this is the countries remaining available StatePropertyCapacity, set at the very start of Census.0017, possibly already reduced by investments in other provinces
+		set_key = { lhs = Tmp_7 which = owner }  
+
+		set_key = { lhs = Tmp_8 which = Building_$type$Wealth_Invested }	# Tmp_8 = Amount actually invested this year - investment pool might still have more for followup years
+		multiply_key = { lhs = Tmp_8 value = 0.1 }  						# Tmp_8 = how many shares State could afford with money invested
+
+		set_key = { lhs = Tmp_9 which = Building_$type$ShareSF }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareRE }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareNM }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareNO }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareBG }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareCL }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareBU }  		# Tmp_9 = Total current share amount
+
+		divide_key = { lhs = Tmp_8 which = Tmp_9 }  						# Tmp_8 = how much % of the total existing shares would the additional buy be
+		multiply_key = { lhs = Tmp_8 which = Building_$type$ } 				# Tmp_8 = how much size of current building size would be added by these percentage of shares
+
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_7 which = Tmp_8 }					# if the amount state could buy is lower than the remaining cap then buy more shares
+				check_key = { lhs = Tmp_8 value = 1 }						# but only if state gets at least 1 building size out of it. ideally this would be turned up, but no shot at start of game
+			}
+
+			set_key = { lhs = Tmp_9 which = Building_$type$Wealth_Invested }
+			multiply_key = { lhs = Tmp_9 value = 0.1 } 
+			change_key = { lhs = Building_$type$ShareBU which = Tmp_9 }  # buy shares
+
+			owner = { set_key = { lhs = Tmp_8 which = PREV } }	# provisionally reduce owners StatePropertyCapacity to reflect the buy in this province. 
+			owner = { subtract_key = { lhs = Tmp_7 which = Tmp_8 } }  # full recalc with modifiers happens later in Census
+		}
+	}
+
+	# Irregardless wether the state bought shares with their investment money or not, the money goes to the elites to cover parts or all of the Spend - the elites get money from the state
+	# If state has bought shares, this money can be viewed as paying the estates for their loss of ownership proportion. If state has not bought shares, this money can be viewed as growth-incentivising subsidies.
+	if = {
+		limit = { check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 } }  
 	
 		# give investment money to elites for property build by the state
 		if = {
@@ -1584,20 +1627,24 @@ Infra_DoSpend = {
 		}
 	}
 
+	# If entire operational cost is not covered by possible state investment, costs are divvied up amongst the estates according to their shares and everyone gets new shares akin 
+	# to their proportion of contribution. If an estate is unable to stem the full amount, they will get comparatively less shares, and therefore will lose ownership percentage.
+	# If everyone pays in full for the amount they should contribute, the overall share proportion between the estates remains unchanged. 
 	if = {
 		limit = {
 			check_key = { lhs = Building_$type$Spend value = 0.001 }
 		}
 		set_key = { lhs = Tmp_0 value = 0 }
 		
-		Infra_ShareOffer$type$ = yes
+		Infra_ShareOffer$type$ = yes  #Calc spending amount of classes according to current ownership proportion or defined minimum contribution requirement
 			
-		if = { # calc % of wealth of each.
+		if = { # Calc spending amount of state according to current ownership proportion
 			limit = {
 				check_key = { lhs = Tmp_0 value = 0.01 }
 			}
 			set_key = { lhs = Tmp_7 which = BU_Prp$type$ }
 			multiply_key = { lhs = Tmp_7 value = 0.01 }
+			multiply_key = { lhs = Tmp_7 which = Building_$type$Spend }
 			
 			if = {
 				limit = {
@@ -1649,44 +1696,6 @@ Infra_DoSpend = {
 				multiply_key = { lhs = Tmp_5 value = 0.1 }
 				multiply_key = { lhs = Tmp_6 value = 0.1 }
 			}
-			## This should tie the investment % for BU to the taxation of BU property, currently disabled.
-			#if = {
-			#	limit = {
-			#		NOT = { has_global_flag = POP_Sim10 }
-			#	}
-			#	if = {
-			#		limit = {
-			#			NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 1 } }
-			#		}
-			#		multiply_key = { lhs = Tmp_7 value = 0.015 }
-			#	}
-			#	else_if = {
-			#		limit = {
-			#			NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 75 } }
-			#		}
-			#		set_key = { lhs = Tmp_8 which = Tax_CostProp$type$Rate }
-			#		multiply_key = { lhs = Tmp_8 value = 1.333 } ### 75% is 100%, and so on
-			#		multiply_key = { lhs = Tmp_8 value = 0.01 }
-			#		multiply_key = { lhs = Tmp_7 which = Tmp_8 }
-			#	}
-			#}
-			if = {
-				limit = {
-				}
-				if = {
-					limit = {
-						NOT = { check_key = { lhs = StatePropertyPercCap value = 80 } }
-					}
-					set_key = { lhs = Tmp_8 which = StatePropertyPercCap } #if 75
-					multiply_key = { lhs = Tmp_8 value = 0.02 } # -> 1.5
-					multiply_key = { lhs = Tmp_8 value = -1 } # -> -1.5
-					change_key = { lhs = Tmp_8 value = 1.75 } # -> 0.25	
-					multiply_key = { lhs = Tmp_7 which = Tmp_8 }
-				}
-				else = { 
-					multiply_key = { lhs = Tmp_7 value = 0.01 }
-				}
-			}
 			
 			# Tribal power reduces BU power and therefore BU share.
 			set_key = { lhs = Tmp_8 value = 100 }
@@ -1709,7 +1718,7 @@ Infra_DoSpend = {
 			
 			change_key = { lhs = Tmp_0 which = Tmp_7 }
 			
-			# calc % of wealth of each. Tmp_1 = SF, Tmp_2 = RE, Tmp_3 = NM, Tmp_4 = NO, Tmp_5 = BG, Tmp_6 = CL, Tmp_7 = BU
+			# calc % of contribution of each. Tmp_1 = SF, Tmp_2 = RE, Tmp_3 = NM, Tmp_4 = NO, Tmp_5 = BG, Tmp_6 = CL, Tmp_7 = BU
 			if = {
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0.01 }
