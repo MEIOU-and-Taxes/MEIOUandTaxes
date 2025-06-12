@@ -458,6 +458,17 @@ StatePropertyEffect = {
 	StatePropertyTotalPercCalc = yes
 	StatePropertyCapacityCalc = yes
 	StatePropertyCapacityPerc = yes
+	if = { 
+		limit = {
+			NOT = { has_global_flag = POP_Sim }
+			check_key = { lhs = StatePropertyTotalModified which = StatePropertyCapacity }
+			# If over State Property Cap Clean up Event
+		}
+		country_event = {
+			id = SYS_StateProperty.001
+			days = 3
+		}
+	}
 }
 
 ## Calculates the theoretical softcap of StateProperty
@@ -467,6 +478,12 @@ StatePropertyCapacityCalc = {
 		
 	change_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyFlat }
 	multiply_key = { lhs = StatePropertyCapacity which = Modi_StatePropertyPerc }
+	if = {
+		limit = {
+			has_global_flag = POP_Sim
+		}
+		change_key = { lhs = StatePropertyCapacity value = 200 }
+	}
 }
 
 ## Calculates Percentage of state owned property of total
@@ -504,12 +521,12 @@ StatePropertyCapacityPerc = {
 	}
 	if = {
 		limit = {
-			check_key = { lhs = StatePropertyPercCap value = 105 }
+			check_key = { lhs = StatePropertyPercCap value = 110 }
 		}
 		set_country_flag = StatePropertyBurden
 		set_key = { lhs = BuyOutTarget which = StatePropertyTotalModified }
 		subtract_key = { lhs = BuyOutTarget which = StatePropertyCapacity } # How much are we over cap
-		}
+	}
 	else_if = {
 		limit = { 
 			has_country_flag = StatePropertyBurden
