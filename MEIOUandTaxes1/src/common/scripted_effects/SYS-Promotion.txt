@@ -8,7 +8,7 @@
 
 Promotion_Calc = {
 	Promotion_Reset = yes # Reset last years values
-
+	Promotion_CityFoundation = yes # Populate a new city
 	Promotion_CalcShares = yes # Calculate Relative Share of lower classes of total pop
 
 	[[RE]
@@ -1065,4 +1065,45 @@ Promotion_ResetTmp = {
 	set_key = { lhs = CL_DemotedNM	value = 0 }
 	set_key = { lhs = CL_DemotedRE	value = 0 }
 	set_key = { lhs = NM_PromotedSF	value = 0 }
+}
+
+#If industries are opened in a province without urbans, then this code execudes !once!
+#Providing 1500 new Residents out of the local rural population
+
+Promotion_CityFoundation = {
+	if = {
+		limit = {
+			has_province_flag = City_Present
+			NOT = { has_province_flag = NewCityFounded }
+		}
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = RE_Total value = 1.5 } }
+				check_key = { lhs = SF_Total value = 1.5 }				
+			}
+			set_key = { lhs = Tmp_1 value = 1.5 }
+			subtract_key = { lhs = Tmp_1 which = RE_Total }
+			
+			subtract_key = { lhs = SF_Total which = Tmp_1 }
+			change_key = { lhs = RE_Total which = Tmp_1 }			
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = RE_Total value = 1.5 } }
+				check_key = { lhs = NM_Total value = 1.5 }				
+			}
+			set_key = { lhs = Tmp_1 value = 1.5 }
+			subtract_key = { lhs = Tmp_1 which = RE_Total }
+			
+			subtract_key = { lhs = NM_Total which = Tmp_1 }
+			change_key = { lhs = RE_Total which = Tmp_1 }			
+		}
+		if = {
+			limit = {
+				NOT = { has_global_flag = POP_Sim }
+			}
+			set_province_flag = NewCityFounded
+		}
+		
+	}
 }
