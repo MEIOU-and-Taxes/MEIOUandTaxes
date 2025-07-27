@@ -1113,6 +1113,23 @@ country_event = {{
                         value = mil_tech
                         who = FROM
                     }}
+                    if = {{
+                        limit = {{
+                            has_global_flag = romanus_pontifex_expedition_boost
+                            FROM = {{
+                                religion = catholic
+                            }}
+                            owner = {{
+                                NOT = {{
+                                    religion = catholic
+                                }}
+                            }}
+                        }}
+                        change_key = {{
+                            lhs = MEC_Expeditions_Comparison
+                            value = 1
+                        }}
+                    }}
                     MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
                     subtract_key = {{
                         lhs = MEC_Expeditions_Comparison
@@ -1702,6 +1719,23 @@ province_event = {{ # Called on province being colonized
 					value = mil_tech
 					who = FROM
 				}}
+                if = {{
+                    limit = {{
+                        has_global_flag = romanus_pontifex_expedition_boost
+                        FROM = {{
+                            religion = catholic
+                        }}
+                        owner = {{
+                            NOT = {{
+                                religion = catholic
+                            }}
+                        }}
+                    }}
+                    change_key = {{
+                        lhs = MEC_Expeditions_Comparison
+                        value = 1
+                    }}
+                }}
 				MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
 				subtract_key = {{
 					lhs = MEC_Expeditions_Comparison
