@@ -6,11 +6,11 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import numpy as np
 import codecs
 import math
 
-privilege = pd.read_csv('PrivilegeRaise.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
-privilege_lower = pd.read_csv('PrivilegeLower.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
+privilege = pd.read_csv('PrivilegeRaise.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
 
 file = codecs.open('common/estate_privileges/00_privileges.txt', 'w+', encoding='utf-8')
 file2 = codecs.open('common/scripted_effects/SYS-PrivilegesUIAssign.txt', 'w+', encoding='utf-8')
