@@ -308,7 +308,7 @@ Privilege_{Codename}{Tier}LowerReqs = {{""".format(Codename=Codename,Tier=Tier)
 			TierEffects += """
 	custom_tooltip = Rights_UI_NoneOf
 	custom_tooltip = POP_{Powerbroker}""".format(Codename=Codename,Tier=Tier,Powerbroker=Codename[0:2])
-			if Codename[0:2] == "NO":
+			if Codename[0:2] == "NO" or Codename[0:2] == "BG":
 				TierEffects += """NotHasInfluence_65
 }
 """
@@ -334,7 +334,14 @@ Privilege_{Codename}{Tier}CanLower = {{
 		adm_power = 50
 		dip_power = 25
 		mil_power = 25"""
-			TierEffects2 += """
+			if Codename[0:2] == "NO" or Codename[0:2] == "BG":
+				TierEffects2 += """
+		NOT = {{ faction_influence = {{ faction = FC_{Powerbroker} influence = 65 }} }}
+    }}
+}}
+""".format(Codename=Codename,Tier=Tier,Powerbroker=Codename[0:2])
+			else:
+				TierEffects2 += """
 		NOT = {{ faction_influence = {{ faction = FC_{Powerbroker} influence = 50 }} }}
     }}
 }}
