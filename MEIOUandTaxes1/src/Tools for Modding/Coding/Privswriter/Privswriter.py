@@ -6,27 +6,21 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import numpy as np
 import codecs
 
-privileges = pd.read_csv('PrivAdd.csv', index_col='Index').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
-privileges2 = pd.read_csv('PrivRevoke.csv', index_col='Index').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
+privileges = pd.read_csv('Tools for Modding/Coding/Privswriter/PrivAdd.csv', index_col='Index').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
+privileges2 = pd.read_csv('Tools for Modding/Coding/Privswriter/PrivRevoke.csv', index_col='Index').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
 
 file = codecs.open('privs_se.txt', 'w+', 	encoding='utf-8')
 file2 = codecs.open('privs_seT.txt', 'w+', 	encoding='utf-8')
 file3 = codecs.open('privs_seCL.txt', 'w+', encoding='utf-8')
 file4 = codecs.open('privs_seL.yml', 'w+', 	encoding='utf-8-sig')
-file5 = codecs.open('privs_seP.txt', 'w+', 	encoding='utf-8')
-file6 = codecs.open('privs_seE.txt', 'w+', 	encoding='utf-8')
-file7 = codecs.open('privs_sePL.txt', 'w+', encoding='utf-8')
-file8 = codecs.open('common/scripted_effects/SYS-PrivilegesAssign.txt', 'w+', 	encoding='utf-8')
+file5 = codecs.open('privs_sePL.txt', 'w+', encoding='utf-8')
 Counter = 0
 Counter2 = 0
 TierL = """l_english:
 """
-TierS = """
-Privilege_Assign = {
-"""
-file8.write(TierS)
 
 for key in privileges.keys():
 	
@@ -68,14 +62,13 @@ Privilege_{Codename}Lower = {{
    		}}
 		Privilege_{Codename}0LowerReqs = yes
 		custom_tooltip = Rights_LB
-		custom_tooltip = Privilege_{Codename}0Lower_desc
+		custom_tooltip = Privilege_{Codename}0Lower_description
 		custom_tooltip = Rights_LB
 		if = {{
 			limit = {{
 				Privilege_{Codename}0CanLower = yes
 			}}
 			Privilege_{Codename}0Lower = yes
-            hidden_effect = {{ remove_estate_privilege = Privilege_{Codename}1 }}
 		}}
 		else = {{
 			tooltip = {{ Privilege_{Codename}0Lower = yes }} # dont actually do it
@@ -92,14 +85,13 @@ Privilege_{Codename}Raise = {{
 		}}
 		Privilege_{Codename}1RaiseReqs = yes
 		custom_tooltip = Rights_LB
-		custom_tooltip = Privilege_{Codename}1Raise_desc
+		custom_tooltip = Privilege_{Codename}1Raise_description
 		custom_tooltip = Rights_LB
 		if = {{
 			limit = {{
 				Privilege_{Codename}1CanRaise = yes
 			}}
 			Privilege_{Codename}1Raise = yes
-            hidden_effect = {{ remove_estate_privilege = Privilege_{Codename}0 }}
 		}}
 		else = {{
 			tooltip = {{ Privilege_{Codename}1Raise = yes }} # dont actually do it
@@ -116,14 +108,13 @@ Privilege_{Codename}Raise = {{
    		}}
 		Privilege_{Codename}{Tier}LowerReqs = yes
 		custom_tooltip = Rights_LB
-		custom_tooltip = Privilege_{Codename}{Tier}Lower_desc
+		custom_tooltip = Privilege_{Codename}{Tier}Lower_description
 		custom_tooltip = Rights_LB
 		if = {{
 			limit = {{
 				Privilege_{Codename}{Tier}CanLower = yes
 			}}
 			Privilege_{Codename}{Tier}Lower = yes
-            hidden_effect = {{ remove_estate_privilege = Privilege_{Codename}{NextTier} }}
 		}}
 		else = {{
 			tooltip = {{ Privilege_{Codename}{Tier}Lower = yes }} # dont actually do it
@@ -139,14 +130,13 @@ Privilege_{Codename}Raise = {{
 		}}
 		Privilege_{Codename}{NextTier}RaiseReqs = yes
 		custom_tooltip = Rights_LB
-		custom_tooltip = Privilege_{Codename}{NextTier}Raise_desc
+		custom_tooltip = Privilege_{Codename}{NextTier}Raise_description
 		custom_tooltip = Rights_LB
 		if = {{
 			limit = {{
 				Privilege_{Codename}{NextTier}CanRaise = yes
 			}}
 			Privilege_{Codename}{NextTier}Raise = yes
-            hidden_effect = {{ remove_estate_privilege = Privilege_{Codename}{Tier} }}
 		}}
 		else = {{
 			tooltip = {{ Privilege_{Codename}{NextTier}Raise = yes }} # dont actually do it
@@ -167,7 +157,6 @@ Privilege_{Codename}Raise = {{
 Privilege_{Codename}{Tier}Apply = {{
 	hidden_effect = {{
 		set_key = {{ lhs = Privilege_{Codename} value = {Tier} }}
-        set_estate_privilege = Privilege_{Codename}{Tier}
 	}}
 }}
 """.format(Codename=Codename,Tier=Tier)
@@ -222,9 +211,12 @@ Privilege_{Codename}{Tier}Raise = {{
 			if not SCorruption == 0:
 				TierEffects += """
 	add_corruption = {SCorruption}""".format(SCorruption=SCorruption)
-			if not Stability == 0:
+			if Stability > 0:
 				TierEffects += """
 	Stab_Add{Stability} = yes""".format(Stability=Stability)
+			elif Stability < 0:
+				TierEffects += """
+	Stab_Subtract{Stability} = yes""".format(Stability=Stability*-1)
 			TierEffects += """
 }}
 Privilege_{Codename}{Tier}RaiseReqs = {{""".format(Codename=Codename,Tier=Tier)
@@ -304,16 +296,24 @@ Privilege_{Codename}{Tier}Lower = {{
 			if not SCorruption2 == 0:
 				TierEffects += """
 	add_corruption = {SCorruption}""".format(SCorruption=SCorruption2)
-			if not Stability2 == 0:
+			if Stability2 > 0:
 				TierEffects += """
 	Stab_Add{Stability} = yes""".format(Stability=Stability2)
+			elif Stability2 < 0:
+				TierEffects += """
+	Stab_Subtract{Stability} = yes""".format(Stability=Stability2*-1)
 			TierEffects += """
 }}
 Privilege_{Codename}{Tier}LowerReqs = {{""".format(Codename=Codename,Tier=Tier)
 			TierEffects += """
 	custom_tooltip = Rights_UI_NoneOf
 	custom_tooltip = POP_{Powerbroker}""".format(Codename=Codename,Tier=Tier,Powerbroker=Codename[0:2])
-			TierEffects += """NotHasInfluence_50
+			if Codename[0:2] == "NO":
+				TierEffects += """NotHasInfluence_65
+}
+"""
+			else:
+				TierEffects += """NotHasInfluence_50
 }
 """
 			TierEffects2 += """
@@ -454,6 +454,14 @@ defined_text = {{
 	TierCL += """}"""
 	TierCL += """
 defined_text = {{
+	name = Privilege_{Codename}_d
+	text = {{
+		localisation_key = Privilege_{Codename}_d
+		trigger = {{ always = yes }}
+	}}
+}}""".format(Codename=Codename)
+	TierCL += """
+defined_text = {{
 	name = Privilege_{Codename}Num
 """.format(Codename=Codename,Tier=Tier)
 	for Tier in range(0,Tiers+1):
@@ -476,165 +484,68 @@ defined_text = {{
  Privilege_{Codename}{Tier}_title: "[Privilege_{Codename}{Tier}_title]"
  Privilege_{Codename}{Tier}_o: "§g*{Codename}{Tier}Title* ({Tier})§!"
  Privilege_{Codename}{Tier}_g: "§G*{Codename}{Tier}Title* ({Tier})§!"
- Privilege_{Codename}{Tier}_desc: "*{Codename}{Tier}Desc*"
+ Privilege_{Codename}{Tier}_description: "*{Codename}{Tier}Desc*"
 """.format(Codename=Codename,Tier=Tier)
 		if Tier > 0:
 			TierL += """ Privilege_{Codename}{Tier}_effects: "\\n§YEffects§!\\n*{Codename}{Tier}Effects*"
+""".format(Codename=Codename,Tier=Tier)
+		else:
+			TierL += """ Privilege_{Codename}{Tier}_effects: "§YNo effects§!"
 """.format(Codename=Codename,Tier=Tier)
 		if Tier < Tiers:
 			TierL += """ Privilege_{Codename}{Tier}Lower_title: "*{Codename}{Tier}TitleLower*"
  Privilege_{Codename}{Tier}Lower_title_g: "§g*{Codename}{Tier}TitleLower*§!"
  Privilege_{Codename}{Tier}Lower_effects: "\\n§YEffects§!\\n*{Codename}{Tier}EffectsLower*"
- Privilege_{Codename}{Tier}Lower_desc: "Transition from §Y*{Codename}{NextTier}Title* ({NextTier})§! to §Y*{Codename}{Tier}Title* ({Tier}) §!\\n§G{Privilege}§!\\n*{Codename}{Tier}Desc*\\n\\n§YEffects§!\\n*{Codename}{Tier}EffectsLower*"
+ Privilege_{Codename}{Tier}Lower_description: "Transition from §Y*{Codename}{NextTier}Title* ({NextTier})§! to §Y*{Codename}{Tier}Title* ({Tier}) §!\\n§G{Privilege}§!\\n*{Codename}{Tier}Desc*\\n\\n§YEffects§!\\n*{Codename}{Tier}EffectsLower*"
 """.format(Codename=Codename,Tier=Tier,NextTier=Tier+1,Privilege=Privilege)
 		if Tier > 0:
 			TierL += """ Privilege_{Codename}{Tier}Raise_title: "*{Codename}{Tier}TitleRaise*"
  Privilege_{Codename}{Tier}Raise_title_g: "§g*{Codename}{Tier}TitleRaise*§!"
  Privilege_{Codename}{Tier}Raise_effects: "\\n§YEffects§!\\n*{Codename}{Tier}EffectsRaise*"
- Privilege_{Codename}{Tier}Raise_desc: "Transition from §Y*{Codename}{PrevTier}Title* ({PrevTier})§! to §Y*{Codename}{Tier}Title* ({Tier}) §!\\n§G{Privilege}§!\\n*{Codename}{Tier}Desc*\\n\\n§YEffects§!\\n*{Codename}{Tier}EffectsRaise*"
+ Privilege_{Codename}{Tier}Raise_description: "Transition from §Y*{Codename}{PrevTier}Title* ({PrevTier})§! to §Y*{Codename}{Tier}Title* ({Tier}) §!\\n§G{Privilege}§!\\n*{Codename}{Tier}Desc*\\n\\n§YEffects§!\\n*{Codename}{Tier}EffectsRaise*"
 """.format(Codename=Codename,Tier=Tier,PrevTier=Tier-1,Privilege=Privilege)
-		TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
+		if Codename[0:2] == "NO":
+			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
  Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
  Privilege_{Codename}{Tier}HasGreater: "£estate_greater_nobles_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
  Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_greater_nobles_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
- Privilege_{Codename}{Tier}_G: "§G - Privilege: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
- Privilege_{Codename}{Tier}_R: "§R - Privilege: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+		elif Codename[0:2] == "BG":
+			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
+ Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
+ Privilege_{Codename}{Tier}HasGreater: "£estate_city_burghers_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
+ Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_city_burghers_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_city_burghers_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_city_burghers_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+		elif Codename[0:2] == "CL":
+			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
+ Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
+ Privilege_{Codename}{Tier}HasGreater: "£estate_church_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
+ Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_church_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_church_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_church_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+		elif Codename[0:2] == "BU":
+			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
+ Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
+ Privilege_{Codename}{Tier}HasGreater: "£estate_bureaucracy_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
+ Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_bureaucracy_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_bureaucracy_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_bureaucracy_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
 """.format(Codename=Codename,Tier=Tier,Privilege=Privilege)
 	file4.write(TierL)
 	TierL = ""
-	TierP = ""
-	Counter += 1
-	for Tier in range(0,Tiers+1):
-		TierP += """
-Privilege_{Codename}{Tier} = {{
-	icon = privilege_grant_autonomy
-	land_share = 0
-	max_absolutism = 0
-	loyalty = 0
-	influence = 0
-	can_select = {{
-        Privilege_Has = {{ Privilege={Codename} Lvl={Tier} }}
-	}}
-	on_granted = {{
-	}}
-	on_revoked = {{
-        hidden_effect = {{ if = {{ limit = {{ NOT = {{ has_country_flag = Privilege_Change }} }} country_event = {{ id = Privilege.{Counter} }} }} }}
-    }}
-	penalties = {{
-	}}
-	benefits = {{
-	}}
-	ai_will_do = {{
-		factor = 0
-	}}
-}}""".format(Codename=Codename,Tier=Tier,Counter=Counter)
-	file5.write(TierP)
-	TierE = ""
-	TierE += """
-country_event = {{
-	id = Privilege.{Counter}
-	title = Privilege_{Codename}_t
-	desc = Privilege_{Codename}_d""".format(Codename=Codename,Counter=Counter)
-	if Codename[0:2] == "NO":
-		TierE += """
-	picture = { trigger = { technology_group = western } picture = WE_GN_eventPicture }
-	picture = { trigger = { OR = { technology_group = muslim technology_group = ottoman technology_group = steppestech } } picture = ISL_GN_eventPicture }
-	picture = { trigger = { OR = { technology_group = eastern technology_group = byzantine } } picture = EE_GN_eventPicture }
-	picture = { trigger = { technology_group = indian } picture = IND_GN_eventPicture }
-	picture = { trigger = { OR = { technology_group = chinese technology_group = japanese technology_group = southeast_asian technology_group = tibetan } } picture = EA_GN_eventPicture }
-	picture = { trigger = { OR = { technology_group = soudantech technology_group = sub_saharan technology_group = central_african technology_group = malagasy_tech technology_group = east_african } } picture = AFR_GN_eventPicture }
-	picture = { trigger = { OR = { technology_group = austranesian technology_group = hawaii_tech } } picture = SEA_GN_eventPicture }
-	picture = { trigger = { OR = { technology_group = mesoamerican technology_group = south_american } } picture = AMR_GN_eventPicture }
-"""
-	elif Codename[0:2] == "BG":
-		TierE += """
-	picture = { trigger = { technology_group = western } picture = WE_BUR_eventPicture }
-	picture = { trigger = { OR = { technology_group = muslim technology_group = ottoman technology_group = steppestech } } picture = ISL_BUR_eventPicture }
-	picture = { trigger = { OR = { technology_group = eastern technology_group = byzantine } } picture = EE_BUR_eventPicture }
-	picture = { trigger = { technology_group = indian } picture = IND_BUR_eventPicture }
-	picture = { trigger = { OR = { technology_group = chinese technology_group = japanese technology_group = southeast_asian technology_group = tibetan } } picture = EA_BUR_eventPicture }
-	picture = { trigger = { OR = { technology_group = soudantech technology_group = sub_saharan technology_group = central_african technology_group = malagasy_tech technology_group = east_african } } picture = AFR_BUR_eventPicture }
-	picture = { trigger = { OR = { technology_group = austranesian technology_group = hawaii_tech } } picture = SEA_BUR_eventPicture }
-	picture = { trigger = { OR = { technology_group = mesoamerican technology_group = south_american } } picture = AMR_BUR_eventPicture }
-"""
-	elif Codename[0:2] == "CL":
-		TierE += """
-	picture = all_church_state
-"""
-	elif Codename[0:2] == "TR":
-		TierE += """
-	picture = { trigger = { OR = { technology_group = chinese technology_group = japanese technology_group = southeast_asian technology_group = tibetan technology_group = ottoman technology_group = western technology_group = eastern technology_group = byzantine technology_group = indian technology_group = steppestech } } picture = MON_TRI_eventPicture }
-	picture = { trigger = { OR = { technology_group = muslim technology_group = soudantech } } picture = ARAB_TRI_eventPicture }
-	picture = { trigger = { OR = { technology_group = sub_saharan technology_group = central_african technology_group = malagasy_tech technology_group = east_african } } picture = AFR_LN_eventPicture }
-	picture = { trigger = { OR = { technology_group = austranesian technology_group = hawaii_tech  } } picture = SEA_LN_eventPicture }
-	picture = { trigger = { OR = { technology_group = mesoamerican technology_group = south_american } } picture = AMR_LN_eventPicture }
-"""
-	TierE += """
-	is_triggered_only = yes
-	
-	immediate = {
-        hidden_effect = { set_country_flag = Privilege_Change }
-	}
-"""
-	TierE += """
-	# Raise
-	option = {{
-		name = Privilege_{Codename}Raise_title
-		trigger = {{
-   			NOT = {{ Privilege_Has = {{ Privilege={Codename} Lvl={LastTier} }} }}
-		}}
-		Privilege_{Codename}Raise = yes
-		ai_chance = {{
-			factor = 0
-		}}
-	}}
-	# Lower
-	option = {{
-		name = Privilege_{Codename}Lower_title
-		trigger = {{
-   			NOT = {{ Privilege_Has = {{ Privilege={Codename} Lvl=0 }} }}
-		}}
-		Privilege_{Codename}Lower = yes
-		ai_chance = {{
-			factor = 0
-		}}
-	}}
-    after = {{ 
-        clr_country_flag = Privilege_Change
-    }}
-}}""".format(Codename=Codename,LastTier=Tiers)
-	file6.write(TierE)
 	TierPL = ""
 	for Tier in range(0,Tiers+1):
 		TierPL += """Privilege_{Codename}{Tier}
 """.format(Codename=Codename,Tier=Tier)
-	file7.write(TierPL)
-	TierS = ""
-	TierS += """    if = {{
-        limit = {{
-            Privilege_Has = {{ Privilege={Codename} Lvl=0 }}
-        }}
-        set_estate_privilege = Privilege_{Codename}0
-    }}
-""".format(Codename=Codename)
-	for Tier in range(1,Tiers+1):
-		TierS += """    else_if = {{
-        limit = {{
-            Privilege_Has = {{ Privilege={Codename} Lvl={Tier} }}
-        }}
-        set_estate_privilege = Privilege_{Codename}{Tier}
-    }}
-""".format(Codename=Codename,Tier=Tier)
-	file8.write(TierS)
-
-TierS = """}"""
-file8.write(TierS)
+	file5.write(TierPL)
 
 file.close
 file2.close
 file3.close
 file4.close
 file5.close
-file6.close
-file7.close
-file8.close
