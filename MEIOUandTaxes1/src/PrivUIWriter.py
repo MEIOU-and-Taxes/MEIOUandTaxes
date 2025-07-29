@@ -33,51 +33,6 @@ PrivilegeUI_Assign = {
 PrivilegeL = """l_english:
 """
 PrivilegeEvents = """namespace = Privilege
-country_event = {
-	id = SYS_UI.001
-	title = no_localization
-	desc = no_localization
-	picture = ai_only
-	is_triggered_only = yes
-	hidden = yes
-
-	immediate = {
-		set_country_flag = Reset_UI
-		if = {
-			limit = {
-				ai = no
-			}
-			PrivilegeUI_Assign = yes
-			Nat_Display = yes
-		}
-	}
-	option = {
-		name = PTM_EXIT
-	}
-}
-country_event = { # triggered by monthly pulse
-	id = SYS_UI.002
-	title = no_localization
-	desc = no_localization
-	picture = ai_only
-	is_triggered_only = yes
-	hidden = yes
-
-	immediate = {
-		every_country = {
-			limit = {
-				ai = no
-				isValidCountry = yes
-			}
-			set_country_flag = Reset_UI
-			PrivilegeUI_Assign = yes
-			Nat_Display = yes
-		}		
-	}
-	option = {
-		name = PTM_EXIT
-	}
-}
 
 """
 PrivilegeCustomLoc = ""
