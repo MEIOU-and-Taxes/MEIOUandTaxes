@@ -196,8 +196,9 @@ Privilege_{Codename}{CodeRank} = {{
 """.format(Codename='Privilege_' + Codename,Rank=Rank)
 
 		tmp_gfx += """spriteType = {{
-	name = "Privilege_{Codename}_{Rank}"
+	name = "{Codename}_{Rank}"
 	texturefile = "gfx/interface/estates/privileges/{Codename}_{Rank}.png"
+	legacy_lazy_load = no
 }}
 """.format(Codename=Codename,Rank=Rank)
 
