@@ -840,11 +840,11 @@ country_event = {
 
 					# Set spending of Classes to Infra (Pathing, Harbourage, etc). Add that spending into the infra as Infra_Income
 					# Infra_Income is basically how much money is being injected into the infrastructure.
-					Infra_DoIncomeInfra = { class = NO div = 130  power = yes antinomad = yes	commercial = yes commercial_div = 90 }
-					Infra_DoIncomeInfra = { class = BG div = 70   power = yes charter_BG = yes 	commercial = yes commercial_div = 60 }
-					Infra_DoIncomeInfra = { class = CL div = 115  power = yes 					commercial = no  commercial_div = 100 }
-					Infra_DoIncomeInfra = { class = SF div = 225 			  freedom = yes 	commercial = yes commercial_div = 200 }
-					Infra_DoIncomeInfra = { class = RE div = 200 			  charter_RE = yes 	commercial = yes commercial_div = 175 }
+					Infra_DoIncomeInfra = { class = NO div = 0.075  power = yes antinomad = yes	 commercial = yes commercial_div = 0.110 } # Corlis: It was a division, changed the math behind it
+					Infra_DoIncomeInfra = { class = BG div = 0.145  power = yes charter_BG = yes commercial = yes commercial_div = 0.175 }
+					Infra_DoIncomeInfra = { class = CL div = 0.090  power = yes 				 commercial = no  commercial_div = 0.100 }
+					Infra_DoIncomeInfra = { class = SF div = 0.045 			  	freedom = yes 	 commercial = yes commercial_div = 0.050 }
+					Infra_DoIncomeInfra = { class = RE div = 0.050 			  	charter_RE = yes commercial = yes commercial_div = 0.060 }
 
 					set_key = { lhs = Infra_StateSpend value = 0 }
 
@@ -1287,7 +1287,55 @@ country_event = {
 					else = {
 						change_key = { lhs = Infra_Wealth which = Tmp_0 } ### Put back in the wealth pool
 					}
-				} 
+				}
+				if = {
+					# Only for Colonizers with its TC
+					limit = {
+						num_of_trade_companies = 2
+					}
+					every_owned_province = {
+						limit = {
+							isValidProv = yes
+							is_owned_by_trade_company = yes
+						}
+						set_key = { lhs = TC_Wealth_Prov value = 0 }
+						
+						TN_TC_WealthExtraction = { class=SF fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NM fraction=0.2 }
+						TN_TC_WealthExtraction = { class=RE fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NO fraction=0.2 }
+						TN_TC_WealthExtraction = { class=BG fraction=0.15 }
+						TN_TC_WealthExtraction = { class=CL fraction=0.2 }
+						#log = "[This.GetName] TC_Wealth_Prov [This.GV_TC_Wealth_Prov]"
+					}
+				}
+				if = {
+					# For Colonial Subjects
+					limit = {
+						is_colonial_nation = yes
+					}
+					every_owned_province = {
+						limit = {
+							isValidProv = yes
+						}
+						set_key = { lhs = TC_Wealth_Prov value = 0 }
+						
+						TN_TC_WealthExtraction = { class=SF fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NM fraction=0.2 }
+						TN_TC_WealthExtraction = { class=RE fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NO fraction=0.2 }
+						TN_TC_WealthExtraction = { class=BG fraction=0.15 }
+						TN_TC_WealthExtraction = { class=CL fraction=0.2 }
+						#log = "[This.GetName] TC_Wealth_Prov [This.GV_TC_Wealth_Prov]"
+					}
+				}
+				if = {
+					# Only if enough wealth is in the pool
+					limit = {
+						check_key = { lhs = TC_Wealth value = 500 } 
+					}
+					TN_TC_WealthDividendHelper = yes
+				}				
 			}
 			regiongroup = {
 				region = {
@@ -1308,8 +1356,7 @@ country_event = {
 						}
 					}
 				}
-			}
-
+			}			
 			regiongroup = {
 				region = {
 					limit = {
@@ -1319,7 +1366,7 @@ country_event = {
 
 					set_key = { lhs = Tmp_0 value = 0 }
 					set_key = { lhs = Tmp_1 value = 0 }
-					set_key = { lhs = Tmp_0 value = 0 }
+					set_key = { lhs = Tmp_2 value = 0 }
 					set_key = { lhs = Tmp_3 value = 0 }
 				}
 			}

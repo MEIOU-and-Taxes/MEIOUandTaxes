@@ -93,7 +93,11 @@ categories = [
 			{
 				"name": "Marble",
 				"id": 41
-			}
+			},
+            {
+                "name": "Stone",
+                "id": 23
+            }
 		]
 	},
 	{
@@ -121,7 +125,7 @@ categories = [
 				"id": 25
 			},
 			{
-				"name": "Armament",
+				"name": "Metalwork",
 				"id": 26
 			},
 			{
@@ -129,23 +133,23 @@ categories = [
 				"id": 27
 			},
 			{
-				"name": "Processed Material",
+				"name": "Carpentry",
 				"id": 28
 			},
 			{
-				"name": "Silk",
+				"name": "Furniture",
 				"id": 33
 			},
 			{
-				"name": "Chinaware",
+				"name": "Tailors",
 				"id": 34
 			},
 			{
-				"name": "Carpet",
+				"name": "Machinery",
 				"id": 35
 			},
 			{
-				"name": "Glass",
+				"name": "Tableware",
 				"id": 36
 			},
 			{
@@ -153,7 +157,7 @@ categories = [
 				"id": 39
 			},
 			{
-				"name": "Steel",
+				"name": "Armaments",
 				"id": 40
 			}
 		]

@@ -3903,10 +3903,10 @@ TN_SetTradeIncome = {
 					set_key = { lhs = Stat_Inp which = TN_SectorTV }
 					multiply_key = { lhs = Stat_Inp which = TN_ProvSply51 }
                     multiply_key = { lhs = Stat_Inp value = 3.0 } # Modify in constants.txt `TRADE_VALUE_GLOBAL_MULTIPLIER~value`
-
+					
                     # Vanilla trade value money fraction of magic money
                     multiply_key = { lhs = Stat_Inp value = 0.17 } # Modify in constants.txt `TRADE_VALUE_FRACTION_DIRECTLY_TO_VANILLA_TRADE~value`
-			
+					
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 819.2 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 409.6 }
 					POP_SetMod = { varname = Stat_Inp modname = TN_TradeVal type = province value = 204.8 }
@@ -3927,6 +3927,19 @@ TN_SetTradeIncome = {
 					subtract_key = { lhs = Public_Tmp1 value = 0.17 } # Modify in constants.txt `TRADE_VALUE_FRACTION_DIRECTLY_TO_VANILLA_TRADE~value`
                     multiply_key = { lhs = Public_Tmp1 which = TN_SectorTV }
 					multiply_key = { lhs = Public_Tmp1 which = TN_ProvSply51 }
+					if = {
+						limit = { # from 0.17 to 0.06
+							Global_Trade = 100
+							Banking = 100 							
+						}
+						multiply_key = { lhs = Public_Tmp1 value = 1.5 }
+					}					
+					else_if = {
+						limit = { # from 0.17 to 0.12
+							Banking = 100 
+						}
+						multiply_key = { lhs = Public_Tmp1 value = 3.0 }
+					}
 
                     set_key = { lhs = RE_IncomeTradeValue which = Public_Tmp1 }
                     set_key = { lhs = NO_IncomeTradeValue which = Public_Tmp1 }
@@ -4180,6 +4193,113 @@ TN_DoIncomeSpending = {
 
 }
 
+TN_TC_WealthExtraction = {
+	if = {
+		limit = {
+			check_key = { lhs = $class$_IncomePrp value = 1 }
+		}
+		set_key = { lhs = $class$_TCExtraction which = $class$_IncomePrp }
+		# API Modifier would be here if we have one
+		# Would need a Tmp Key to be used as multiplier, which is filled from API value for example
+		multiply_key = { lhs = $class$_TCExtraction value = $fraction$ }
+		change_key = { lhs = TC_Wealth_Prov which = $class$_TCExtraction }
+	}
+	else = {
+		set_key = { lhs = $class$_TCExtraction value = 0 }
+	}
+}
+
+TN_TC_WealthDividendHelper = {
+	set_key = { lhs = TC_WealthPrev which = TC_Wealth }
+	set_key = { lhs = Public_Tmp2 value = 0 }
+	set_key = { lhs = Public_Tmp3 value = 1 }
+	every_owned_province = {
+		limit = {
+			isValidProv = yes
+			is_territory = no
+			OR = {
+				has_owner_accepted_culture = yes
+				has_owner_culture = yes
+			}
+		}							
+		TN_TC_WealthDividendHelper2 = yes
+		# With the collective Trade Power we can calculate a share per Tradepower
+	}
+	set_key = { lhs = Public_Tmp1 which = TC_Wealth }
+	log = "[This.GetName] TC_Wealth before dividend [This.GV_TC_Wealth]"
+	multiply_key = { lhs = Public_Tmp1 value = 0.9 }
+	divide_key = { lhs = Public_Tmp1 which = Public_Tmp3 }
+	#log = "[This.GetName] Per Tradepower [This.GV_Public_Tmp1]"
+	
+	every_owned_province = {
+		limit = {
+			isValidProv = yes
+			is_territory = no
+			OR = {
+				has_owner_accepted_culture = yes
+				has_owner_culture = yes
+			}
+		}
+		set_key = { lhs = Public_Tmp1 which = PREV }
+		set_key = { lhs = Public_Tmp2 value = 0 }
+		TN_TC_WealthDividend = { class1=RE fraction1=0.1 class2=NO fraction2=0.25 class3=BG fraction3=0.5 class4=CL fraction4=0.15}
+	}
+	# Remove the Wealth from Pool
+	#log = "[This.GetName] Remove Wealth from TC Pool [This.GV_Public_Tmp2]"
+	subtract_key = { lhs = TC_Wealth which = Public_Tmp2 }
+	#log = "[This.GetName] TC_Wealth after removal [This.GV_TC_Wealth]"
+	set_key = { lhs = Public_Tmp2 value = 0 }
+	set_key = { lhs = Public_Tmp3 value = 0 }
+}
+TN_TC_WealthDividendHelper2 = {
+	set_key = { lhs = Public_Tmp3 value = 0 }
+	export_to_key = { lhs = Public_Tmp3 value = province_trade_power }
+	if = {
+		limit = { 
+			NOT = { check_key = { lhs = Public_Tmp3 value = 1 } }
+		}
+		set_key = { lhs = Public_Tmp3 value = 1 }
+	}
+	#log = "[This.GetName] Prov Tradepower [This.GV_Public_Tmp3]"
+	owner = { change_key = { lhs = Public_Tmp3 which = PREV } }
+	# Public_Tmp3 represents a collective trade power amount from all provinces
+	set_key = { lhs = Public_Tmp3 value = 0 }
+}
+
+TN_TC_WealthDividend = {
+	if = { 
+		limit = {
+			#Make sure the fraction of the dividend is actually worth anything
+			check_key = { lhs = Public_Tmp1 value = 0.001 }
+		}
+		export_to_key = { lhs = Public_Tmp2 value = province_trade_power }
+		if = {
+			limit = { 
+				check_key = { lhs = Public_Tmp2 value = 1 }
+			}
+			# Wealth fraction of Dividend x Tradepower = Share
+			multiply_key = { lhs = Public_Tmp2 which = Public_Tmp1 }
+		}
+		else = {
+			set_key = { lhs = Public_Tmp2 which = Public_Tmp1 }
+		}
+		#log = "[This.GetName] Dividend payout [This.GV_Public_Tmp2]"
+		set_key = { lhs = $class1$_TCDividend which = Public_Tmp2 }
+		multiply_key = { lhs = $class1$_TCDividend value = $fraction1$ }
+		set_key = { lhs = $class2$_TCDividend which = Public_Tmp2 }
+		multiply_key = { lhs = $class2$_TCDividend value = $fraction2$ }
+		set_key = { lhs = $class3$_TCDividend which = Public_Tmp2 }
+		multiply_key = { lhs = $class3$_TCDividend value = $fraction3$ }
+		set_key = { lhs = $class4$_TCDividend which = Public_Tmp2 }
+		multiply_key = { lhs = $class4$_TCDividend value = $fraction4$ }
+		
+		owner = { change_key = { lhs = Public_Tmp2 which = PREV } }
+		#log = "[This.GetName] Per Prov Wealth removal value [This.GV_Public_Tmp2]"
+	}
+	set_key = { lhs = Public_Tmp1 value = 0 }
+	set_key = { lhs = Public_Tmp2 value = 0 }
+}
+
 # Summarize various variables into total class and slot incomes
 TN_SetIncome = {
     # Wage
@@ -4240,6 +4360,14 @@ TN_SetIncome = {
 	change_key = { lhs = NO_Income which = NO_IncomeCrpt }
 	change_key = { lhs = BG_Income which = BG_IncomeCrpt }
 	change_key = { lhs = CL_Income which = CL_IncomeCrpt }
+	
+	# Trade Company Dividends
+    change_key = { lhs = SF_Income which = SF_TCDividend }
+    change_key = { lhs = NM_Income which = NM_TCDividend }
+    change_key = { lhs = RE_Income which = RE_TCDividend }
+    change_key = { lhs = NO_Income which = NO_TCDividend }
+    change_key = { lhs = BG_Income which = BG_TCDividend }
+    change_key = { lhs = CL_Income which = CL_TCDividend }
 
     # Class Spending
     set_key = { lhs = SF_Spend which = SF_SpendProd }
@@ -4248,6 +4376,14 @@ TN_SetIncome = {
     set_key = { lhs = NO_Spend which = NO_SpendProd }
     set_key = { lhs = BG_Spend which = BG_SpendProd }
     set_key = { lhs = CL_Spend which = CL_SpendProd }
+	
+	# Trade Company Extraction
+    change_key = { lhs = SF_Spend which = SF_TCExtraction }
+    change_key = { lhs = NM_Spend which = NM_TCExtraction }
+    change_key = { lhs = RE_Spend which = RE_TCExtraction }
+    change_key = { lhs = NO_Spend which = NO_TCExtraction }
+    change_key = { lhs = BG_Spend which = BG_TCExtraction }
+    change_key = { lhs = CL_Spend which = CL_TCExtraction }
 
     # Property
     change_key = { lhs = SF_Spend which = SF_SpendPrp }

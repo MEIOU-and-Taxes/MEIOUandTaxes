@@ -744,6 +744,16 @@ Nat_SumStats = {
 			change_key = { lhs = StatePropertyTotalModified which = PREV }
 			if = {
 				limit = {
+					OR = {
+						num_of_trade_companies = 2
+						is_colonial_nation = yes
+					}
+				}
+				change_key = { lhs = TC_Wealth_Prov which = PREV }
+			}
+			
+			if = {
+				limit = {
 					ai = no # Player Only Variables
 				}
 				change_key = { lhs = TaxD_SF which = PREV }
@@ -1130,7 +1140,25 @@ Nat_SumStats = {
 		Nat_SumAdminHelper1 = { inp=Concern_UrbsTreatR overflow=yes }
 		Nat_SumAdminHelper1 = { inp=Concern_CountrysideTreatR overflow=yes }
 	}
-
+	# Store summed up value into a country key
+	if = {
+		limit = { 
+			check_key = { lhs = TC_Wealth_Prov value = 0.001 }
+		}
+		change_key = { lhs = TC_Wealth which = TC_Wealth_Prov }
+		set_key = { lhs = TC_Wealth_Prov value = 0 }
+		if = {
+			limit = {
+				is_colonial_nation = yes
+			}
+			log = "[This.GetName] TC Wealth before moving to overlord value [This.GV_TC_Wealth]"
+			overlord = {
+				change_key = { lhs = TC_Wealth which = PREV }
+			}
+			set_key = { lhs = TC_Wealth value = 0 }
+		}
+		
+	}	
 	if = {
 		limit = {
 			check_key = { lhs = Dev_Total value = 0.001 }

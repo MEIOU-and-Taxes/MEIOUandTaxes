@@ -5,27 +5,33 @@ TN_GetDmndBudgetAll = {
     ### NOTE, DirectBuy only supports up to FoodStep4
     TN_GetDmndBudget = {
         class = SF
-        div = 6.5
+        #div = 6.5 ##Corlis: Performance!!!
+		mul = 0.154
     }
     TN_GetDmndBudget = {
         class = NM 
-        div = 6.5
+        #div = 6.5
+		mul = 0.154
     }
     TN_GetDmndBudget = {
         class = RE
-        div = 9
+        #div = 9
+		mul = 0.111
     }
     TN_GetDmndBudget = {
         class = NO 
-        div = 17
+        #div = 17
+		mul = 0.06
     }
     TN_GetDmndBudget = {
         class = BG
-        div = 20
+        #div = 20
+		mul = 0.05
     }
     TN_GetDmndBudget = {
         class = CL 
-        div = 16
+        #div = 16
+		mul = 0.063
     }
     set_key = { lhs = SF_DirectBuy1 value = 0 }
     set_key = { lhs = SF_DirectFill1 value = 0 }
@@ -280,7 +286,7 @@ TN_GetDmndAll = {
         class = NO 
         edu = 0.005 
         DirectBuy1 = yes DirectBuy2 = yes DirectBuy4 = yes DirectBuy5 = yes
-        FoodMult=1.0 LifeMult=4.0 ComfortMult=15.0 LuxuryMult=15.0
+        FoodMult=1.0 LifeMult=6.0 ComfortMult=25.0 LuxuryMult=25.0
         FoodStep1=1.0 LifeStep1=1.0
         FoodStep2=1.0 LifeStep2=0.5 ComfortStep2=0.5 LuxuryStep2=0.1
         FoodStep3=1.0 LifeStep3=0.5 ComfortStep3=0.65 LuxuryStep3=0.35
@@ -293,7 +299,7 @@ TN_GetDmndAll = {
     TN_GetDmnd = {
         class = BG 
         edu = 0.005 
-        FoodMult=1.0 LifeMult=4.0 ComfortMult=15.0 LuxuryMult=15.0
+        FoodMult=1.0 LifeMult=6.0 ComfortMult=25.0 LuxuryMult=25.0
         FoodStep1=1.0 LifeStep1=1.0
         FoodStep2=1.0 LifeStep2=0.5 ComfortStep2=0.5 LuxuryStep2=0.1
         FoodStep3=1.0 LifeStep3=0.5 ComfortStep3=0.65 LuxuryStep3=0.35
@@ -306,7 +312,7 @@ TN_GetDmndAll = {
     TN_GetDmnd = {
         class = CL 
         edu = 0.005 
-        FoodMult=1.0 LifeMult=4.0 ComfortMult=10.0 LuxuryMult=10.0
+        FoodMult=1.0 LifeMult=6.0 ComfortMult=20.0 LuxuryMult=20.0
         DirectBuy1 = yes DirectBuy2 = yes DirectBuy4 = yes DirectBuy5 = yes
         FoodStep1=1.0 LifeStep1=0.5
         FoodStep2=1.0 LifeStep2=0.5 ComfortStep2=0.5 LuxuryStep2=0.1
@@ -335,8 +341,29 @@ TN_GetDmndBudget = {
         }
 		# How much a class is planning to spend
         set_key = { lhs = $class$_BudgetFulfil which = $class$_Wealth }
-        divide_key = { lhs = $class$_BudgetFulfil value = $div$ }
+        ##divide_key = { lhs = $class$_BudgetFulfil value = $div$ } ##Corlis-Rewritten for Performance
+		multiply_key = { lhs = $class$_BudgetFulfil value = $mul$ }
 		
+		##Making super rich elites consume more
+		if = {
+			limit = {
+				check_key = { lhs = $class$_WealthPC value = 4000 }
+			}
+			set_key = { lhs = Public_Tmp1 which = $class$_WealthPC }
+			multiply_key = { lhs = Public_Tmp1 value = 0.001 }
+			multiply_key = { lhs = Public_Tmp1 value = 0.25 } ## = divide by 4000
+			
+			if = {
+				limit = {
+					check_key = { lhs = Public_Tmp1 value = 10 }
+				}
+				log = "There are Nobles, which try to spend over 60% of their wealth on consumption. My deer god the economy!!"
+			}
+			# Increase Budget for Consumption
+			multiply_key = { lhs = $class$_BudgetFulfil which = Public_Tmp1 }
+			
+			set_key = { lhs = Public_Tmp1 value = 0 }
+		}		
     }
     else = {
         set_key = { lhs = $class$_BudgetFulfil value = 0 }

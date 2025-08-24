@@ -1,0 +1,235 @@
+## File contain all relevant calculations and effects for upgrading industry slots
+#Calculate current score of province
+Prod_GetUpgradeScore = {
+	#Squarerooted effect from resident population
+	Prod_GetUpgradeScoreRE = yes
+	# More Modifiers will follow here
+	if = {
+		limit = {
+			has_province_modifier = PN_Dominant
+		}
+		multiply_key = { lhs = Prod_UpgradePoints value = 1.25 }
+	}
+	else_if = {
+		limit = {
+			has_province_modifier = PN_Major
+		}
+		multiply_key = { lhs = Prod_UpgradePoints value = 1.20 }
+	}
+	else_if = {
+		limit = {
+			has_province_modifier = PN_Important
+		}
+		multiply_key = { lhs = Prod_UpgradePoints value = 1.15 }
+	}
+	else_if = {
+		limit = {
+			has_province_modifier = PN_Minor
+		}
+		multiply_key = { lhs = Prod_UpgradePoints value = 1.10 }
+	}
+}
+#Calculate Score from Residents
+	#30-> 1 500 -> 4 2500 -> 9
+Prod_GetUpgradeScoreRE = {
+	set_key = { lhs = Tmp_9 which = RE_Total }
+	multiply_key = { lhs = Tmp_9 value = 0.033 }
+	sqrt_effect = { which = Tmp_9 }
+	set_key = { lhs = Prod_UpgradePoints which = Tmp_9 }
+}
+#Calculate used upgraded industries and save
+Prod_GetUpgradedSlots = {
+	set_key = { lhs = Prod_UpgradedSlots value = 0 }
+	###Houseware Branches
+	#Carpentry
+	if = {
+		limit = {
+			has_province_flag = Industry_28Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	#Furniture
+	if = {
+		limit = {
+			has_province_flag = Industry_33Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	#Tableware
+	if = {
+		limit = {
+			has_province_flag = Industry_36Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	###Textile Branches
+	#Tailors
+	if = {
+		limit = {
+			has_province_flag = Industry_34Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	#Luxury Cloth
+	if = {
+		limit = {
+			has_province_flag = Industry_39Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	###Metalworking Branches
+	#Machinery
+	if = {
+		limit = {
+			has_province_flag = Industry_35Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	#Armaments
+	if = {
+		limit = {
+			has_province_flag = Industry_40Present
+		}
+		change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	}
+	###Ship Branches
+	#if = {
+	#	limit = {
+	#		has_province_flag = Industry_28Present
+	#	}
+	#	change_key = { lhs = Prod_UpgradedSlots value = 1 }
+	#}
+}
+#Calculate progress toward upgrade
+Prod_CalculateUpgradeProgress = {
+	#Update already existing Upgrades and Calc current Score
+	Prod_GetUpgradedSlots = yes
+	Prod_GetUpgradeScore = yes
+	
+	if = {
+		limit = {
+			had_province_flag = { flag = Industry_CanNotUpgrade days = 7300 }
+		}
+		clr_province_flag = Industry_CanNotUpgrade
+	}
+	#Calculate Progress/Regress
+	if = {
+		limit = { 
+			is_key_equal = { lhs = Prod_UpgradedSlots value = 0 }
+		}
+		set_key = { lhs = Prod_UpgradeScore which = Prod_UpgradePoints }
+		multiply_key = { lhs = Prod_UpgradeScore value = 100 }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prod_UpgradedSlots value = 0.001 }
+		}
+		set_key = { lhs = Prod_UpgradeScore which = Prod_UpgradePoints }
+		subtract_key = { lhs = Prod_UpgradeScore which = Prod_UpgradedSlots }
+		divide_key = { lhs = Prod_UpgradeScore which = Prod_UpgradedSlots }
+		multiply_key = { lhs = Prod_UpgradeScore value = 100 }
+	}
+	#If Upgrade was possible, but score dropped
+	if = {
+		limit = {
+			has_province_flag = Industry_CanUpgrade
+			NOT = { check_key = { lhs = Prod_UpgradeScore value = 100 } }
+		}
+		clr_province_flag = Industry_CanUpgrade
+	}
+	#If new Upgrade is potentially possible
+	else_if = {
+		limit = {
+			NOT = { has_province_flag = Industry_CanUpgrade }
+			check_key = { lhs = Prod_UpgradeScore value = 100 }
+		}
+		set_province_flag = Industry_CanUpgrade
+	}
+	#If province is declining
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Prod_UpgradeScore value = -10 } }
+		}
+		set_province_flag = Industry_MayDowngrade
+	}
+}
+#Set flags for provinces with dead basic urban industries
+Prod_FindDeadUrbanIndustries = {
+	###Houseware Branches
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_28Present
+				has_province_flag = Industry_33Present
+				has_province_flag = Industry_36Present
+				has_province_flag = Industry_24Present
+			}
+			Prod_Can_24 = yes
+		}
+		set_province_flag = ResurrectIndustry_24
+	}
+	###Textile Branches
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_34Present
+				has_province_flag = Industry_39Present
+				has_province_flag = Industry_25Present
+			}
+			Prod_Can_25 = yes
+		}
+		set_province_flag = ResurrectIndustry_25
+	}
+	###Metalworking Branches
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_35Present
+				has_province_flag = Industry_40Present
+				has_province_flag = Industry_26Present
+			}
+			Prod_Can_26 = yes
+		}
+		set_province_flag = ResurrectIndustry_26
+	}
+	###Ship Branches
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_27Present
+			}
+			Prod_Can_27 = yes
+		}
+		set_province_flag = ResurrectIndustry_27
+	}
+	###Religious Education
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_29Present
+			}
+			Prod_Can_29 = yes
+		}
+		set_province_flag = ResurrectIndustry_29
+	}
+	###Higher Learning
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_30Present
+			}
+			Prod_Can_30 = yes
+		}
+		set_province_flag = ResurrectIndustry_30
+	}	
+	###Commerce
+	if = {
+		limit = {
+			NOT = {
+				has_province_flag = Industry_27Present
+			}
+			Prod_Can_32 = yes
+		}
+		set_province_flag = ResurrectIndustry_32
+	}
+}
