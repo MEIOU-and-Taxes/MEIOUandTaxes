@@ -4286,6 +4286,7 @@ TN_TC_WealthDividend = {
 
 # Summarize various variables into total class and slot incomes
 TN_SetIncome = {
+
     # Wage
     set_key = { lhs = SF_Income which = SF_IncomeProd }
     set_key = { lhs = NM_Income which = NM_IncomeProd }
@@ -4341,9 +4342,31 @@ TN_SetIncome = {
 	change_key = { lhs = CL_Income which = CL_IncomeFarm }
 	
 	# Corruption
-	change_key = { lhs = NO_Income which = NO_IncomeCrpt }
-	change_key = { lhs = BG_Income which = BG_IncomeCrpt }
-	change_key = { lhs = CL_Income which = CL_IncomeCrpt }
+		# Corporate Licensing
+		if = { # Corlis: As improvement, make a new key and then make it proper in SYS-Prov_Misc where corruption is calculated
+		   limit = {
+				Privilege_Has = { Privilege=BGLicensing Lvl=0 }
+			}
+			set_key = { lhs = Tmp_8 which = NO_IncomeCrpt }
+			change_key = { lhs = Tmp_8 which = BG_IncomeCrpt }
+			change_key = { lhs = Tmp_8 which = CL_IncomeCrpt }
+			multiply_key = { lhs = Tmp_8 value = 0.2 }
+			change_key = { lhs = RE_Income which = Tmp_8 }
+			
+			multiply_key = { lhs = NO_IncomeCrpt value = 0.8 }
+			change_key = { lhs = NO_Income which = NO_IncomeCrpt }
+			multiply_key = { lhs = BG_IncomeCrpt value = 0.8 }
+			change_key = { lhs = BG_Income which = BG_IncomeCrpt }
+			multiply_key = { lhs = CL_IncomeCrpt value = 0.8 }
+			change_key = { lhs = CL_Income which = CL_IncomeCrpt }
+			
+			set_key = { lhs = Tmp_8 value = 0 }
+		}
+		else = {
+			change_key = { lhs = NO_Income which = NO_IncomeCrpt }
+			change_key = { lhs = BG_Income which = BG_IncomeCrpt }
+			change_key = { lhs = CL_Income which = CL_IncomeCrpt }
+		}
 	
 	# Trade Company Dividends
     change_key = { lhs = SF_Income which = SF_TCDividend }
