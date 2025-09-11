@@ -201,7 +201,7 @@ Prov_PowInit = {
 			PREV = { set_key = { lhs = Tmp_1 which = PREV } }
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
-		multiply_key = { lhs = Tmp_1 value = 0.16 }
+		multiply_key = { lhs = Tmp_1 value = 0.20 }
 		#multiply_key = { lhs = Tmp_1 which = Tmp_3 }
 		set_key = { lhs = Tmp_0 value = 1 }
 		subtract_key = { lhs = Tmp_0 which = Tmp_1 }
@@ -252,15 +252,15 @@ Prov_PowInit = {
 	if = {
 		limit = {
 			owner = {
-				check_key = { lhs = Privilege_BGTax value = 1 }
+				check_key = { lhs = Privilege_BGTaxE value = 1 }
 			}
 		}
 		owner = {
-			set_key = { lhs = Tmp_1 which = Privilege_BGTax }
+			set_key = { lhs = Tmp_1 which = Privilege_BGTaxE }
 			PREV = { set_key = { lhs = Tmp_1 which = PREV } }
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
-		multiply_key = { lhs = Tmp_1 value = 0.16 }
+		multiply_key = { lhs = Tmp_1 value = 0.20 }
 		#multiply_key = { lhs = Tmp_1 which = Tmp_3 }
 		set_key = { lhs = Tmp_0 value = 1 }
 		subtract_key = { lhs = Tmp_0 which = Tmp_1 }
@@ -609,6 +609,8 @@ Prov_TaxInit = {
 		set_key = { lhs = TaxD_CL_Flow value = 0 }
 
 		set_key = { lhs = TaxD_NM value = 0 }
+		
+		set_key = { lhs = TaxD_REGuildBG value = 0 }
 	}
 	set_key = { lhs = TaxD_TR value = 0 }
 	set_key = { lhs = TaxD_Industry value = 0 }
@@ -645,13 +647,20 @@ Prov_TaxInit = {
 	set_key = { lhs = TaxD_CommerceNO value = 0 }
 	set_key = { lhs = TaxD_PropBG value = 0 }
 	set_key = { lhs = TaxD_PropNO value = 0 }
+	set_key = { lhs = TaxD_CivicNO value = 0 }
+	set_key = { lhs = TaxD_LicensingNO value = 0 }
 	set_key = { lhs = TaxD_TollBG value = 0 }
 	set_key = { lhs = TaxD_ExciseBG value = 0 }
+	set_key = { lhs = TaxD_IndustrialBG value = 0 }
+	set_key = { lhs = TaxD_LuxuryBG value = 0 }
+	set_key = { lhs = TaxD_ConsumerGoodsBG value = 0 }
+	set_key = { lhs = TaxD_PatentBG value = 0 }
+	set_key = { lhs = TaxD_CivicBG value = 0 }
 	set_key = { lhs = TaxD_TitheCL value = 0 }
 	set_key = { lhs = TaxD_DonationsCL value = 0 }
 	set_key = { lhs = TaxD_TributeTR value = 0 }
 	set_key = { lhs = TaxD_Commerce value = 0 }
-	#set_key = { lhs = TaxD_Guilds value = 0 }
+	set_key = { lhs = TaxD_GuildBG value = 0 }
 	set_key = { lhs = TaxD_Special value = 0 }
 	set_key = { lhs = TaxD_CharitySF value = 0 }
 	set_key = { lhs = TaxD_CharityRE value = 0 }
@@ -1773,11 +1782,18 @@ Prov_TaxDo = {
 	change_key = { lhs = NO_IncomeTax which = TaxD_ForestryNO }
 	change_key = { lhs = NO_IncomeTax which = TaxD_GameNO }
 	change_key = { lhs = NO_IncomeTax which = TaxD_PropNO }
+	change_key = { lhs = NO_IncomeTax which = TaxD_CivicNO }
+	change_key = { lhs = NO_IncomeTax which = TaxD_LicensingNO }
 	
 	change_key = { lhs = BG_IncomeTax which = TaxD_PropBG }
 	change_key = { lhs = BG_IncomeTax which = TaxD_ExciseBG }
 	change_key = { lhs = BG_IncomeTax which = TaxD_TollBG }
-	#change_key = { lhs = BG_IncomeTax which = TaxD_Guilds }
+	change_key = { lhs = BG_IncomeTax which = TaxD_IndustrialBG }
+	change_key = { lhs = BG_IncomeTax which = TaxD_LuxuryBG }
+	change_key = { lhs = BG_IncomeTax which = TaxD_ConsumerGoodsBG }
+	change_key = { lhs = BG_IncomeTax which = TaxD_PatentBG }
+	change_key = { lhs = BG_IncomeTax which = TaxD_CivicBG }
+	change_key = { lhs = BG_IncomeTax which = TaxD_GuildBG }
 	
 	change_key = { lhs = CL_IncomeTax which = TaxD_TitheCL }
 	change_key = { lhs = CL_IncomeTax which = TaxD_DonationsCL }
@@ -2657,6 +2673,76 @@ Prov_DoTaxNO = {
 		}
 		Tax_ResetTax = yes
 	}
+	# Urban Civic Service
+	if = {
+		limit = {
+			owner = { Privilege_Has = { Privilege=BGCivic Lvl=3 } }
+		}
+		set_key = { lhs = Tax_TmpBase value = 20 }
+
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=24 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=25 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=26 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=27 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=28 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=33 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=34 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=35 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=36 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=39 TaxType=CivicNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=40 TaxType=CivicNO } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
+	# Urban Civic Service
+	if = {
+		limit = {
+			owner = { Privilege_HasGreater = { Privilege=BGLicensing Lvl=1 } }
+		}
+		if = {
+			limit = {
+				owner = { Privilege_HasGreater = { Privilege=BGLicensing Lvl=2 } }
+			}
+			if = {
+				limit = {
+					owner = { Privilege_Has = { Privilege=BGLicensing Lvl=3 } }
+				}
+				set_key = { lhs = Tax_TmpBase value = 20 }
+			}
+			else = {
+				set_key = { lhs = Tax_TmpBase value = 10 }
+			}
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 5 }
+		}
+
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=24 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=25 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=26 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=27 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=28 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=33 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=34 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=35 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=36 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=39 TaxType=LicensingNO } # Tax the slot
+			Tax_CalcSlot = { GoodID=40 TaxType=LicensingNO } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
 	
 	# Commerce flows
 	# Merchants need protections
@@ -2813,6 +2899,30 @@ Prov_DoTaxBG = {
 			set_key = { lhs = Tax_TmpBase value = 0.5 }
 		}
 
+		# Rural Ownership
+		if = {
+			limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=1 } } }
+			if = {
+				limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=2 } } }
+				if = {
+					limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=3 } } }
+					if = {
+						limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=4 } } }
+						multiply_key = { lhs = Tax_TmpBase value = 1.4 }
+					}
+					else = {
+						multiply_key = { lhs = Tax_TmpBase value = 1.3 }
+					}
+				}
+				else = {
+					multiply_key = { lhs = Tax_TmpBase value = 1.2 }
+				}
+			}
+			else = {
+				multiply_key = { lhs = Tax_TmpBase value = 1.05 }
+			}
+		}
+
 		if = {
 			limit = {
 				check_key = { lhs = Prov_TRPow value = 0.001 }
@@ -2919,6 +3029,30 @@ Prov_DoTaxBG = {
 				}
 			}
 			multiply_key = { lhs = Tax_TmpBase which = SF_PrpBuilding } # Proportionate to power
+
+			# Rural Ownership
+			if = {
+				limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=1 } } }
+				if = {
+					limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=2 } } }
+					if = {
+						limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=3 } } }
+						if = {
+							limit = { owner = { Privilege_HasGreater = { Privilege=BGRuralOwnership Lvl=4 } } }
+								multiply_key = { lhs = Tax_TmpBase value = 1.4 }
+							}
+						else = {
+							multiply_key = { lhs = Tax_TmpBase value = 1.3 }
+						}
+					}
+					else = {
+						multiply_key = { lhs = Tax_TmpBase value = 1.2 }
+					}
+				}
+				else = {
+					multiply_key = { lhs = Tax_TmpBase value = 1.05 }
+				}
+			}
 			multiply_key = { lhs = Tax_TmpBase value = 0.01 } # 0-100 scale -> 0-1 scale
 			if = {
 				limit = {
@@ -2988,6 +3122,204 @@ Prov_DoTaxBG = {
 		Tax_ResetTax = yes
 	}
 	set_key = { lhs = Tmp_4 value = 0 }
+	
+	# Impact of State Reach (50% effect)
+	set_key = { lhs = Tmp_7 which = Prov_BUPowInv }
+	multiply_key = { lhs = Tmp_7 value = 0.5 }
+	change_key = { lhs = Tmp_7 value = 0.5 }
+	
+	set_key = { lhs = Tmp_3 which = BG_PrpResources }
+	multiply_key = { lhs = Tmp_3 value = 0.005 }
+	set_key = { lhs = Tmp_4 value = 1 }
+	subtract_key = { lhs = Tmp_4 which = Tmp_3 }
+
+	# Industrial Monopoly
+	if = {
+		limit = {
+			owner = { Privilege_HasGreater = { Privilege=BGIndustry Lvl=1 } }
+		}
+		if = {
+			limit = {
+				owner = { Privilege_Has = { Privilege=BGIndustry Lvl=2 } }
+			}
+			set_key = { lhs = Tax_TmpBase value = 20 }
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 10 }
+		}
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=26 TaxType=IndustrialBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=28 TaxType=IndustrialBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=35 TaxType=IndustrialBG } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
+
+	# Luxury Monopoly
+	if = {
+		limit = {
+			owner = { Privilege_HasGreater = { Privilege=BGLuxury Lvl=1 } }
+		}
+		if = {
+			limit = {
+				owner = { Privilege_Has = { Privilege=BGLuxury Lvl=2 } }
+			}
+			set_key = { lhs = Tax_TmpBase value = 20 }
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 10 }
+		}
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=36 TaxType=LuxuryBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=39 TaxType=LuxuryBG } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
+
+	# Consumer Goods Monopoly
+	if = {
+		limit = {
+			owner = { Privilege_HasGreater = { Privilege=BGConsumerGoods Lvl=1 } }
+		}
+		if = {
+			limit = {
+				owner = { Privilege_Has = { Privilege=BGConsumerGoods Lvl=2 } }
+			}
+			set_key = { lhs = Tax_TmpBase value = 20 }
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 10 }
+		}
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=24 TaxType=ConsumerGoodsBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=25 TaxType=ConsumerGoodsBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=33 TaxType=ConsumerGoodsBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=34 TaxType=ConsumerGoodsBG } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
+
+	# Patent Enforcement
+	if = {
+		limit = {
+			owner = { Privilege_Has = { Privilege=BGPatent Lvl=2 } }
+		}
+
+		set_key = { lhs = Tax_TmpBase value = 5 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=24 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=25 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=26 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=27 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=28 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=33 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=34 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=35 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=36 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=39 TaxType=PatentBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=40 TaxType=PatentBG } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
+
+	# Urban Civic Service
+	if = {
+		limit = {
+			owner = {
+				Privilege_HasGreater = { Privilege=BGCivic Lvl=1 }
+				NOT = { Privilege_Has = { Privilege=BGCivic Lvl=3 } }
+			}
+		}
+		if = {
+			limit = {
+				owner = { Privilege_Has = { Privilege=BGCivic Lvl=2 } }
+			}
+			set_key = { lhs = Tax_TmpBase value = 10 }
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 5 }
+		}
+
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_4 }
+		multiply_key = { lhs = Tax_TmpBase which = Tmp_7 }
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcSlot = { GoodID=24 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=25 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=26 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=27 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=28 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=33 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=34 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=35 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=36 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=39 TaxType=CivicBG } # Tax the slot
+			Tax_CalcSlot = { GoodID=40 TaxType=CivicBG } # Tax the slot
+		}
+		Tax_ResetTax = yes
+	}
+	# Guild Entrenchment
+	if = {
+		limit = {
+			owner = { Privilege_HasGreater = { Privilege=BGGuild Lvl=1 } }
+		}
+		if = {
+			limit = {
+				owner = { Privilege_HasGreater = { Privilege=BGGuild Lvl=3 } }
+			}
+			if = {
+				limit = {
+					owner = { Privilege_HasGreater = { Privilege=BGGuild Lvl=4 } }
+				}
+				set_key = { lhs = Tax_TmpBase value = 0.30 }
+			}
+			set_key = { lhs = Tax_TmpBase value = 0.20 }
+		}
+		else = {
+			set_key = { lhs = Tax_TmpBase value = 0.10 }
+		}
+
+		if = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			multiply_key = { lhs = Tax_TmpBase which = Prov_TRPowCap }
+			multiply_key = { lhs = Tax_TmpBase value = 0.01 }
+		}
+
+		if = {
+			limit = {
+				check_key = { lhs = Tax_TmpBase value = 0.001 }
+			}
+			Tax_CalcClass = { Class=RE TaxBase=Income TaxType=GuildBG Flow=yes }
+		}
+	}
+	Tax_ResetTax = yes
+	set_key = { lhs = Tmp_3 value = 0 }
+	set_key = { lhs = Tmp_4 value = 0 }
+	set_key = { lhs = Tmp_7 value = 0 }
 }
 Prov_DoPowerCL = {
 }

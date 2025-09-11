@@ -6,11 +6,11 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import numpy as np
 import codecs
 import math
 
-privilege = pd.read_csv('PrivilegeRaise.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
-privilege_lower = pd.read_csv('PrivilegeLower.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
+privilege = pd.read_csv('PrivilegeRaise.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
 
 file = codecs.open('common/estate_privileges/00_privileges.txt', 'w+', encoding='utf-8')
 file2 = codecs.open('common/scripted_effects/SYS-PrivilegesUIAssign.txt', 'w+', encoding='utf-8')
@@ -33,51 +33,6 @@ PrivilegeUI_Assign = {
 PrivilegeL = """l_english:
 """
 PrivilegeEvents = """namespace = Privilege
-country_event = {
-	id = SYS_UI.001
-	title = no_localization
-	desc = no_localization
-	picture = ai_only
-	is_triggered_only = yes
-	hidden = yes
-
-	immediate = {
-		set_country_flag = Reset_UI
-		if = {
-			limit = {
-				ai = no
-			}
-			PrivilegeUI_Assign = yes
-			Nat_Display = yes
-		}
-	}
-	option = {
-		name = PTM_EXIT
-	}
-}
-country_event = { # triggered by monthly pulse
-	id = SYS_UI.002
-	title = no_localization
-	desc = no_localization
-	picture = ai_only
-	is_triggered_only = yes
-	hidden = yes
-
-	immediate = {
-		every_country = {
-			limit = {
-				ai = no
-				isValidCountry = yes
-			}
-			set_country_flag = Reset_UI
-			PrivilegeUI_Assign = yes
-			Nat_Display = yes
-		}		
-	}
-	option = {
-		name = PTM_EXIT
-	}
-}
 
 """
 PrivilegeCustomLoc = ""
@@ -241,8 +196,9 @@ Privilege_{Codename}{CodeRank} = {{
 """.format(Codename='Privilege_' + Codename,Rank=Rank)
 
 		tmp_gfx += """spriteType = {{
-	name = "Privilege_{Codename}_{Rank}"
+	name = "{Codename}_{Rank}"
 	texturefile = "gfx/interface/estates/privileges/{Codename}_{Rank}.png"
+	legacy_lazy_load = no
 }}
 """.format(Codename=Codename,Rank=Rank)
 

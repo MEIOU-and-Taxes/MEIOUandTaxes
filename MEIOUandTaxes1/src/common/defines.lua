@@ -11,12 +11,12 @@ NGame = {
 
 	AGE_USHER_IN_TIME = 120,				-- how many months progress for a new age needs.
 
-	MAX_COLONIAL_NATIONS = 100,  -- Max is 100
-	MAX_CLIENT_STATES = 100,  -- Max is 100 -- TODO: Lower this to 75 after 1.18 (used to start at K75 for some reason)
-	MAX_ESTATE_COUNTRIES = 50,  -- Default: 50
+	MAX_COLONIAL_NATIONS = 50,  -- Max is 100
+	MAX_CLIENT_STATES = 50,  -- Max is 100 -- TODO: Lower this to 75 after 1.18 (used to start at K75 for some reason)
+	MAX_ESTATE_COUNTRIES = 25,  -- Default: 50
 	MAX_FEDERATION_COUNTRIES = 20,			-- Max is 100
-	MAX_TRADING_CITIES = 100,  -- Max is 100
-	MAX_CUSTOM_COUNTRIES = 75,				-- Max is 100
+	MAX_TRADING_CITIES = 25,  -- Max is 100
+	MAX_CUSTOM_COUNTRIES = 25,				-- Max is 100
 	MAX_OBSERVERS = 10,						-- Max is 100
 
 	SIZE_LIMIT_FOR_ISLANDS = 100000,  -- from 45000      Changing this to represent anything smaller than about Australia as an island   Different pixels in ToT projection could cause differences compared to vanilla such as Greenland
@@ -645,7 +645,7 @@ NCountry = {
 
 
 	EXPLORE_COAST_EVENT_CHANCE = 3,  -- Chance (in %) of getting an event when exploring coasts
-	MIN_TECH_FOR_CIRCUMNAVIGATE = 20,  -- Must have this level of dip tech to circumnavigate the globe
+	MIN_TECH_FOR_CIRCUMNAVIGATE = 25,  -- Must have this level of dip tech to circumnavigate the globe
 	CIRCUMNAVIGATION_PROVINCE_1 = 2048,  -- Provinces for circumnavigation (coast of gambia)
 	CIRCUMNAVIGATION_PROVINCE_2 = 1641,  -- Provinces for circumnavigation (magellan strait)
 	CIRCUMNAVIGATION_PROVINCE_3 = 1799,  -- Provinces for circumnavigation (hawaii sea)
