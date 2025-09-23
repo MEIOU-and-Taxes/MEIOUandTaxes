@@ -3,6 +3,7 @@ from pathlib import Path
 
 
 def main():
+    print("Starting data generation...")
     tmp_dp = Path("tmp")
     tmp_dp.mkdir(exist_ok=True, parents=True)
 
@@ -14,6 +15,9 @@ def main():
 
     # generate SYS-GetTag.txt and SYS-SetTagID.txt
     generate_sys_gettag_and_settagid(tmp_dp)
+
+    # generate SYS-GetTagName.txt
+    generate_sys_gettagname(tmp_dp)
 
     # generate tradenode province groups
     generate_tradenode_province_groups(tmp_dp)
@@ -29,6 +33,7 @@ def main():
 
 
 def generate_sys_getprov(tmp_dp: Path):
+    print("Generating SYS-GetProv.txt...")
     output_fp = Path("output.txt")
     tmp_fp = tmp_dp / "SYS-GetProv.txt"
     target_fp = Path("common/scripted_effects/SYS-GetProv.txt")
@@ -71,6 +76,7 @@ def generate_sys_getprov(tmp_dp: Path):
 
 
 def generate_sys_pin(tmp_dp: Path):
+    print("Generating SYS-Pin.txt...")
     output_fp = Path("output.txt")
     tmp_fp = tmp_dp / "SYS-Pin.txt"
     target_fp = Path("common/scripted_effects/SYS-Pin.txt")
@@ -113,6 +119,7 @@ def generate_sys_pin(tmp_dp: Path):
 
 
 def generate_sys_gettag_and_settagid(tmp_dp: Path):
+    print("Generating SYS-GetTag.txt and SYS-SetTagID.txt...")
     output_fp = Path("output.txt")
     outputt_fp = Path("outputt.txt")
     tmp_gettag_fp = tmp_dp / "SYS-GetTag.txt"
@@ -167,7 +174,42 @@ def generate_sys_gettag_and_settagid(tmp_dp: Path):
     target_settagid_fp.write_text(new_text_settagid, encoding="utf-8")
 
 
+def generate_sys_gettagname(tmp_dp: Path):
+    print("Generating SYS-GetTagName.txt...")
+    output_fp = Path("output.txt")
+    tmp_fp = tmp_dp / "SYS-GetTagName.txt"
+    target_fp = Path("common/scripted_effects/SYS-GetTagName.txt")
+
+    start_marker = "#START_REPLACE"
+    stop_marker = "#STOP_REPLACE"
+
+    # delete output and tmp if they exist
+    if output_fp.exists():
+        output_fp.unlink()
+    if tmp_fp.exists():
+        tmp_fp.unlink()
+
+    # generate output.txt
+    subprocess.run(
+        ["python", "binarycountryNames.py"],
+    )
+
+    # move to tmp
+    output_fp.rename(tmp_fp)
+
+    # replace in target
+    target_text = target_fp.read_text(encoding="utf-8")
+    output_text = tmp_fp.read_text(encoding="utf-8")
+
+    before, _, rest = target_text.partition(start_marker)
+    _, _, after = rest.partition(stop_marker)
+
+    new_text = f"{before}{start_marker}\n{output_text}\n{stop_marker}{after}"
+    target_fp.write_text(new_text, encoding="utf-8")
+
+
 def generate_tradenode_province_groups(tmp_dp: Path):
+    print("Generating tradenode province groups...")
     output_fp = Path("output.txt")
     tmp_fp = tmp_dp / "tradenode_province_groups.txt"
     target_fp = Path("map/provincegroup.txt")
@@ -201,12 +243,14 @@ def generate_tradenode_province_groups(tmp_dp: Path):
 
 
 def run_provsize():
+    print("Running provsize.py...")
     subprocess.run(
         ["python", "provsize.py"],
     )
 
 
 def generate_sys_rugged(tmp_dp: Path):
+    print("Generating SYS-Rugged.txt...")
     output_fp = Path("out.txt")
     tmp_fp = tmp_dp / "SYS-Rugged.txt"
     target_fp = Path("common/scripted_effects/SYS-Rugged.txt")
@@ -240,6 +284,7 @@ def generate_sys_rugged(tmp_dp: Path):
 
 
 def generate_pins_for_ambient_objects():
+    print("Generating pins for ambient_objects.txt...")
     output_fp = Path("map/pinpos.txt")
     tmp_fp = Path("tmp/pinpos.txt")
     target_fp = Path("map/ambient_object.txt")
