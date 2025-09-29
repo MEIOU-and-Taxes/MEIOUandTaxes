@@ -334,7 +334,8 @@ def compile(compress=False, parse_init=True, debug=False):
 		link.extend([
 			[ 'events', '00-POP_Init-0.txt' ],
 			[ 'events', '00-POP_Init-1.txt' ],
-			[ 'events', '00-POP_Init-2.txt' ]
+			[ 'events', '00-POP_Init-2.txt' ],
+			[ 'events', '00-POP_Init-3.txt' ]
 		])
 
 	parse = [ os.path.join( *p ) if type( p ) is list else p for p in parse ]
