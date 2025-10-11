@@ -1,4 +1,12 @@
-import os, sys, re, glob, shutil, time, multiprocessing, runpy
+import os
+import sys
+import re
+import glob
+import shutil
+import time
+import multiprocessing
+import runpy
+from concurrent.futures import ProcessPoolExecutor
 
 __all__ = [ 'compile' ]
 
@@ -334,7 +342,8 @@ def compile(compress=False, parse_init=True, debug=False):
 		link.extend([
 			[ 'events', '00-POP_Init-0.txt' ],
 			[ 'events', '00-POP_Init-1.txt' ],
-			[ 'events', '00-POP_Init-2.txt' ]
+			[ 'events', '00-POP_Init-2.txt' ],
+			[ 'events', '00-POP_Init-3.txt' ]
 		])
 
 	parse = [ os.path.join( *p ) if type( p ) is list else p for p in parse ]
@@ -395,16 +404,20 @@ def compile(compress=False, parse_init=True, debug=False):
 		print(f"DEBUG: Compiling sequentially (slower)")
 	print(f'0% done', end='')
 	if not debug:
-		with multiprocessing.Pool() as pool:
+		with ProcessPoolExecutor() as executor:
+			futures = []
 			if compress:
-				compiled_files_it = pool.imap_unordered(compile_and_save_compressed, parsepaths, max(1, round(file_count/1000)))
+				futures = [executor.submit(compile_and_save_compressed, f) for f in parsepaths]
 			else:
-				compiled_files_it = pool.imap_unordered(compile_and_save_uncompressed, parsepaths, max(1, round(file_count/1000)))
-			for i in range(file_count):
-				next(compiled_files_it)
-				progress = 100*(i+1)/file_count
+				futures = [executor.submit(compile_and_save_uncompressed, f) for f in parsepaths]
+			while True:
+				done = sum(f.done() for f in futures)
+				progress = 100*done/file_count
 				sys.stdout.write('\x1b[2k') # clear line
-				print(f'\r{progress:.1f}% done', end='')
+				print(f'\r{done}/{file_count} done', end='')
+				if done == len(futures):
+					break
+				time.sleep(0.1)
 	else:
 		for i, f in enumerate(parsepaths):
 			if compress:

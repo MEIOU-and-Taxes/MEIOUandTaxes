@@ -1,0 +1,363 @@
+namespace = flavor_vtr
+
+country_event = {
+	id = flavor_vtr.1 # Signore of Volterra considers selling to Pisa
+	title = "flavor_vtr.1.ttl"
+	desc = "flavor_vtr.1.dsc"
+	picture = MERCHANTS_TALKING_eventPicture
+	fire_only_once = yes
+
+	trigger = {
+		tag = VTR
+		owns = 3697
+		AND = {
+			num_of_cities = 1
+			NOT = { num_of_cities = 2 }
+		}
+		is_subject = no
+		has_regency = no
+		exists = PIS
+	}
+
+	mean_time_to_happen = {
+		years = 5
+	}
+
+	option = { # offer to sell to Pisa
+		name = "flavor_vtr.1.a"
+		PIS = {
+			country_event = {
+				id = flavor_vtr.2
+				days = 15
+			}
+		}
+	}
+	option = { # do not sell to Pisa
+		name = "flavor_vtr.1.b"
+		add_adm_power = -50
+		add_prestige = 10
+	}
+}
+
+country_event = {
+	id = flavor_vtr.2 # Pisa receives offer from Volterra
+	title = "flavor_vtr.2.ttl"
+	desc = "flavor_vtr.2.dsc"
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = { # accept offer (minimal)
+		name = "flavor_vtr.2.a"
+		trigger = {
+			treasury = 50
+		}
+		ai_chance = {
+			factor = 45
+		}
+		FROM = {
+			country_event = {
+				id = flavor_vtr.3
+				days = 15
+			}
+		}
+	}
+	option = { # accept offer (plus some)
+		name = "flavor_vtr.2.b"
+		trigger = {
+			treasury = 100
+		}
+		ai_chance = {
+			factor = 45
+		}
+		FROM = {
+			country_event = {
+				id = flavor_vtr.4
+				days = 15
+			}
+		}
+	}
+	option = { # decline offer
+		name = "flavor_vtr.2.c"
+		ai_chance = {
+			factor = 10
+		}
+		ROOT = {
+			add_adm_power = 25
+			add_prestige = 5
+		}
+		FROM = {
+			country_event = {
+				id = flavor_vtr.5
+				days = 15
+			}
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.3 # Pisa has agreed to buy Volterra (minimal)
+	title = "flavor_vtr.3.ttl"
+	desc = "flavor_vtr.3.dsc"
+	picture = ECONOMY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.3.a"
+		random_list = {
+			25 = { # the transaction goes smoothly
+				FROM = {
+					country_event = {
+						id = flavor_vtr.6
+						days = 15
+					}
+				}
+			}
+			75 = { # the citizens of Volterra revolt
+				ROOT = {
+					country_event = {
+						id = flavor_vtr.8
+						days = 15
+					}
+				}
+				FROM = {
+					country_event = {
+						id = flavor_vtr.9
+						days = 15
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.4 # Pisa has agreed to buy Volterra (plus some)
+	title = "flavor_vtr.4.ttl"
+	desc = "flavor_vtr.4.dsc"
+	picture = ECONOMY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.4.a"
+		random_list = {
+			90 = { # the transaction goes smoothly
+				FROM = {
+					country_event = {
+						id = flavor_vtr.7
+						days = 15
+					}
+				}
+			}
+			10 = { # the citizens of Volterra revolt
+				ROOT = {
+					country_event = {
+						id = flavor_vtr.8
+						days = 15
+					}
+				}
+				FROM = {
+					country_event = {
+						id = flavor_vtr.9
+						days = 15
+					}
+				}
+			}
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.5 # Pisa has declined to buy Volterra
+	title = "flavor_vtr.5.ttl"
+	desc = "flavor_vtr.5.dsc"
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.5.a"
+		ROOT = {
+			add_stability = -1
+			add_prestige = -10
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.6 # Pisa pays minimal amount for Volterra
+	title = "flavor_vtr.6.ttl"
+	desc = "flavor_vtr.6.dsc"
+	picture = ECONOMY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.6.a"
+		ROOT = {
+			add_treasury = -50
+		}
+		3697 = {
+			add_core = ROOT
+			cede_province = ROOT
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.7 # Pisa pays extra for Volterra
+	title = "flavor_vtr.7.ttl"
+	desc = "flavor_vtr.7.dsc"
+	picture = ECONOMY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.7.a"
+		ROOT = {
+			add_treasury = -100
+			add_prestige = 5
+		}
+		3697 = {
+			add_core = ROOT
+			cede_province = ROOT
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.8 # the citizens of Volterra revolt
+	title = "flavor_vtr.8.ttl"
+	desc = "flavor_vtr.8.dsc"
+	picture = REBELS_eventPicture
+	is_triggered_only = yes
+
+	# ruler is executed, and the Signoria overthrown
+	immediate = {
+		ROOT = {
+			add_government_reform = Pol_Mandate1
+			add_government_reform = Pol_Stylings1
+			kill_ruler = yes
+			add_stability = -1
+		}
+	}
+
+	option = { # request Florentine protection
+		name = "flavor_vtr.8.a"
+		ai_chance = {
+			factor = 45
+		}
+		trigger = {
+			FIR = {
+				exists = yes
+				is_neighbor_of = ROOT
+			}
+		}
+		FIR = {
+			country_event = {
+				id = flavor_vtr.10
+				days = 15
+			}
+		}
+	}
+	option = { # request Sienese protection
+		name = "flavor_vtr.8.b"
+		ai_chance = {
+			factor = 45
+		}
+		trigger = {
+			SIE = {
+				exists = yes
+				is_neighbor_of = ROOT
+			}
+		}
+		SIE = {
+			country_event = {
+				id = flavor_vtr.10
+				days = 15
+			}
+		}
+	}
+	option = { # remain independent
+		name = "flavor_vtr.8.c"
+		ai_chance = {
+			factor = 10
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.9 # Pisa informed that Volterra has revolted
+	title = "flavor_vtr.9.ttl"
+	desc = "flavor_vtr.9.dsc"
+	picture = REBELS_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.9.a"
+		ROOT = {
+			reverse_add_opinion = {
+				who = FROM
+				modifier = insulted
+			}
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.10 # Volterra requests protection
+	title = "flavor_vtr.10.ttl"
+	desc = "flavor_vtr.10.dsc"
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = { # accept (vassalize Volterra)
+		name = "flavor_vtr.10.a"
+		ROOT = {
+			vassalize = FROM
+			reverse_add_opinion = {
+				who = FROM
+				modifier = opinion_sent_aid
+			}
+		}
+		FROM = {
+			country_event = {
+				id = flavor_vtr.11
+			}
+		}
+	}
+	option = { # decline
+		name = "flavor_vtr.10.b"
+		ROOT = {
+			reverse_add_opinion = {
+				who = FROM
+				modifier = opinion_refused_send_help
+			}
+		}
+		FROM = {
+			country_event = {
+				id = flavor_vtr.12
+			}
+		}
+	}
+}
+
+country_event = {
+	id = flavor_vtr.11 # country accepted Volterra as a vassal
+	title = "flavor_vtr.11.ttl"
+	desc = "flavor_vtr.11.dsc"
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.11.a"
+	}
+}
+
+country_event = {
+	id = flavor_vtr.12 # country declined Volterra's request for protection
+	title = "flavor_vtr.12.ttl"
+	desc = "flavor_vtr.12.dsc"
+	picture = DIPLOMACY_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = "flavor_vtr.12.a"
+	}
+}

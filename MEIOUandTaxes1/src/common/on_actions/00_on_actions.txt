@@ -83,6 +83,7 @@ on_startup = {
 				country_event = { id = POP_Init.001 }
 				country_event = { id = POP_Init.002 }
 				country_event = { id = POP_Init.003 }
+				country_event = { id = POP_Init.004 }
 				## load additional prov data
 				country_event = { id = distance_calc.1 }  # Reset province position values from generated files
 				country_event = { id = POP_Rugged.001 } 
@@ -966,6 +967,7 @@ on_war_won = {
 			FROM = {
 				OR = {
 					tag = BYZ
+        			tag = KRE
 					tag = BUL
 					tag = SER
 					tag = EPI
@@ -3852,15 +3854,18 @@ on_create_vassal = {
 		#log = "[This.GetName] had color changed to match their overlord:on_create_vassal"
 		set_country_flag = has_overriden_color_flag
 	}
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = { id = Init.2 }
+	}
 	FROM = {
 		country_event = {
 			id = mec_vassals.5
 		}
 		set_key = { lhs = Integration_Progress value = 0 }
 		set_key = { lhs = Remaining_Years value = 0 }
-	}
-	country_event = {
-		id = Init.2
 	}
 	if = {
 		limit = {
@@ -3924,8 +3929,11 @@ on_flagship_destroyed = {
 # this = Released country, FROM = Releasing country
 on_country_released = {
 	#adopt_reform_progress = FROM not sire this does what we think it does
-	country_event = {
-		id = Init.2
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = { id = Init.2 }
 	}
 	if = {
 		limit = {
@@ -4019,14 +4027,18 @@ on_create_client_state = {
 		}
 		set_country_flag = had_revolution
 	}
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = {
+			id = Init.2
+		}
+	}
 	FROM = {
 		save_event_target_as = Adapt
 	}
 	Pol_AdaptFromScopeRights = yes
-	clr_country_flag = POP_Init
-	country_event = {
-		id = Init.2
-	}
 	if = {
 		limit = {
 			subject_with_overlord_color_trigger = yes
@@ -4140,7 +4152,12 @@ on_colony_established = {
 
 #scope = new country, FROM = parent country
 on_colonial_nation_established = {
-	country_event = { id = Init.2 days = 1 }
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = { id = Init.2 }
+	}
 }
 
 on_colonist_boosting_colony = {
