@@ -35,11 +35,11 @@ data = ["ID", "ID_Region", "Class_Wealth"]
 # log = "log = \"%s\"" % (data)
 
 if __name__ == "__main__":
-    with open("keys.txt", "r") as keyfile:
-        for key in keyfile.readlines():
-            key = key.rstrip("\n").split(" ")
-            if key[0] in data:
-                data = [key[2] if x == key[0] else x for x in data]
+    with open("variables.txt", "r") as variablefile:
+        for variable in variablefile.readlines():
+            variable = variable.rstrip("\n").split(" ")
+            if variable[0] in data:
+                data = [variable[2] if x == variable[0] else x for x in data]
 
 
 

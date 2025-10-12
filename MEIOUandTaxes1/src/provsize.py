@@ -46,18 +46,18 @@ def parse_file(fn):
     def update(dic, new):
         if isinstance(new, dict):
             new = new.items()
-        for key, val in new:
-            if key not in dic:
-                dic[key] = val
-            elif isinstance(dic[key], list):
-                dic[key].append(val)
+        for variable, val in new:
+            if variable not in dic:
+                dic[variable] = val
+            elif isinstance(dic[variable], list):
+                dic[variable].append(val)
             else:
-                dic[key] = [dic[key], val]
+                dic[variable] = [dic[variable], val]
     d = {}
     names = []
     stack = [(d,"")]
     tokens = []
-    key = ""
+    variable = ""
     with open(fn,"rb") as f:
         ff = f.read()
         fff = ff.decode("iso-8859-1")
@@ -65,12 +65,12 @@ def parse_file(fn):
             tokens += parse_line(line)
         for token in tokens:
             if token == "=":
-                key = names.pop()
+                variable = names.pop()
             elif token == "{":
                 dd = {}
-                update(stack[-1][0], {key: dd})
-                stack.append((dd,key))
-                key = ""
+                update(stack[-1][0], {variable: dd})
+                stack.append((dd,variable))
+                variable = ""
             elif token == "}":
                 if len(stack[-1][0]):
                     update(stack.pop()[0], [(n,n) for n in names])
@@ -81,9 +81,9 @@ def parse_file(fn):
                 names = []
             else:
                 names.append(token)
-                if key:
-                    update(stack[-1][0], {key: names.pop()})
-                    key = ""
+                if variable:
+                    update(stack[-1][0], {variable: names.pop()})
+                    variable = ""
     return d
 
 def SetCoordToProv(image, colorToProv):
@@ -455,7 +455,7 @@ def province_stats(path="", compute_from_map=True, prov_per_event=500):
                 pos = positions[str(prov)]["position"]
                 longitude = float(pos[0])
                 latitude  = float(pos[1])
-            except KeyError:
+            except variableError:
                 size = 0
                 latitude = longitude = 0
         
@@ -470,23 +470,23 @@ def province_stats(path="", compute_from_map=True, prov_per_event=500):
         rain = ""
         inun = ""
                 
-        prov_id = " set_key = { lhs = ID_Prov value =%4d }" % (prov)
+        prov_id = " set_variable = { which = ID_Prov value =%4d }" % (prov)
         if prov in land_provinces:
-            coords = " set_key = { lhs = Coord_X value = %.3f } set_key = { lhs = Coord_Y value = %.3f }" % (positions_d[prov][0], positions_d[prov][1])
-            port = " set_key = { lhs = Coord_PortX value = %.3f } set_key = { lhs = Coord_PortY value = %.3f }" % (positions_d[prov][2], positions_d[prov][3])
-            portdist = " set_key = { lhs = Land_PPort value = %.3f }" % math.sqrt((positions_d[prov][0] - positions_d[prov][2])**2 + (positions_d[prov][1] - positions_d[prov][3])**2)
-            soil = ' set_key = { lhs = Land_Soil value = %.3f }' % soilLst[prov]
-            heatAvg = ' set_key = { lhs = Land_AvgTemp value = %.3f }' % heatAvgLst[prov]
-            heatSeasonal = ' set_key = { lhs = Land_SeasonalTemp value = %.3f }' % heatSeasonalLst[prov]
-            heatDaily = ' set_key = { lhs = Land_DailyTemp value = %.3f }' % heatDailyLst[prov]
-            rain = ' set_key = { lhs = Land_Rain value = %.3f }' % rainLst[prov]
-            inun = ' set_key = { lhs = Land_Inundation value = %.3f }' % inunLst[prov]
+            coords = " set_variable = { which = Coord_X value = %.3f } set_variable = { which = Coord_Y value = %.3f }" % (positions_d[prov][0], positions_d[prov][1])
+            port = " set_variable = { which = Coord_PortX value = %.3f } set_variable = { which = Coord_PortY value = %.3f }" % (positions_d[prov][2], positions_d[prov][3])
+            portdist = " set_variable = { which = Land_PPort value = %.3f }" % math.sqrt((positions_d[prov][0] - positions_d[prov][2])**2 + (positions_d[prov][1] - positions_d[prov][3])**2)
+            soil = ' set_variable = { which = Land_Soil value = %.3f }' % soilLst[prov]
+            heatAvg = ' set_variable = { which = Land_AvgTemp value = %.3f }' % heatAvgLst[prov]
+            heatSeasonal = ' set_variable = { which = Land_SeasonalTemp value = %.3f }' % heatSeasonalLst[prov]
+            heatDaily = ' set_variable = { which = Land_DailyTemp value = %.3f }' % heatDailyLst[prov]
+            rain = ' set_variable = { which = Land_Rain value = %.3f }' % rainLst[prov]
+            inun = ' set_variable = { which = Land_Inundation value = %.3f }' % inunLst[prov]
         elif str(prov) in default_map["sea_starts"]:
-            seazone = " set_key = { lhs = Coord_SeaX value = %.3f } set_key = { lhs = Coord_SeaY value = %.3f }" % (longitude, mapimage.height - latitude)
+            seazone = " set_variable = { which = Coord_SeaX value = %.3f } set_variable = { which = Coord_SeaY value = %.3f }" % (longitude, mapimage.height - latitude)
                         
         stats.append([prov, size, latitude, longitude])
         
-        sizes  = " set_key = { lhs = Land_PSize value = %6d } set_key = { lhs = Land_PRad value = %.3f }" % (max(1, size), max(0.001, (size/3.1415)**0.5))
+        sizes  = " set_variable = { which = Land_PSize value = %6d } set_variable = { which = Land_PRad value = %.3f }" % (max(1, size), max(0.001, (size/3.1415)**0.5))
         
                             
         s += "\n\t\t%4d = {%s%s%s%s%s%s%s%s%s%s%s%s  }" % (prov, prov_id, coords, port, portdist, seazone, sizes, soil, heatAvg, heatSeasonal, heatDaily, rain, inun)
@@ -530,12 +530,12 @@ def build_tree(path="", text={}):
     region = parse_file(os.path.join(path, "map", "region.txt"))
     area = parse_file(os.path.join(path, "map", "area.txt"))
     tree = {}
-    for sr in superregion.keys():
+    for sr in superregion.variables():
         s = []
         for re in superregion[sr]:
             for ar in region[re]["areas"]:
                 s.append( (len(area[ar]), ar, re, ", ".join([repr(f) for f in text if ar in text[f]])) )
-        tree[sr] = sorted(s,key=lambda i:i[0],reverse=True)
+        tree[sr] = sorted(s,variable=lambda i:i[0],reverse=True)
     return tree
     
 def load_text(path=""):
@@ -558,7 +558,7 @@ def show(tree):
             ss += "\tProvs = %2d  %-20s %-20s Refs: %s\n" % ar
         mean = sum([stat[i]*i for i in range(20)])/sum(stat)
         s.append((mean,"Subcontinent = %s\tAvg. Prov/Area = %g\n" % (sr, mean) + ss))
-    return "".join([ss[1]for ss in sorted(s,key=lambda i:i[0],reverse=True)])
+    return "".join([ss[1]for ss in sorted(s,variable=lambda i:i[0],reverse=True)])
 """
 
 if __name__ == "__main__":

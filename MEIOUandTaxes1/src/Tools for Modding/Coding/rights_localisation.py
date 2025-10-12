@@ -21,26 +21,26 @@ with open('SYS-Rights_l_english.yml','r',encoding='utf-8') as file:
 	
 custom_loc_total = ""
 items = {}
-for key, value in dictionary['l_english'].items():
-	if key.startswith('Rights_'):
-		if (key.endswith('_desc') or key.endswith('_effects') or key.endswith('_t')) and not ('Lower_desc' in key or 'Raise_desc' in key or 'BackDown' in key or 'Reforms' in key):
-			items[key] = value
+for variable, value in dictionary['l_english'].items():
+	if variable.startswith('Rights_'):
+		if (variable.endswith('_desc') or variable.endswith('_effects') or variable.endswith('_t')) and not ('Lower_desc' in variable or 'Raise_desc' in variable or 'BackDown' in variable or 'Reforms' in variable):
+			items[variable] = value
 		
-keys_to_sub = {}
+variables_to_sub = {}
 reforms = {}
-for key in items.keys():
-	if not re.findall(r'\d', key):
-		key = key[:-2]
-		reforms[key] = {}
+for variable in items.variables():
+	if not re.findall(r'\d', variable):
+		variable = variable[:-2]
+		reforms[variable] = {}
 
-for key in reforms.keys():
-	for subkey,value in items.items():
-		if key in subkey and '_t' in subkey and re.findall(r'\d', subkey):
-			reforms[key][subkey[:-2]] = {}
-	for subkey in reforms[key].keys():
-		for subsubkey, value in items.items():
-			if re.findall(r'{}\D'.format(subkey),subsubkey) and not '_t' in subkey:
-				reforms[key][subkey][subsubkey] = value
+for variable in reforms.variables():
+	for subvariable,value in items.items():
+		if variable in subvariable and '_t' in subvariable and re.findall(r'\d', subvariable):
+			reforms[variable][subvariable[:-2]] = {}
+	for subvariable in reforms[variable].variables():
+		for subsubvariable, value in items.items():
+			if re.findall(r'{}\D'.format(subvariable),subsubvariable) and not '_t' in subvariable:
+				reforms[variable][subvariable][subsubvariable] = value
 	custom_loc_total += """\ndefined_text = {{
 	name = {NAME}
 	text = {{
@@ -49,13 +49,13 @@ for key in reforms.keys():
 			always = yes
 		}}
 	}}				
-}}""".format(NAME=key)
-	for subkey in reforms[key].keys():
-		level = int(re.findall(r'\d+',subkey)[0])
+}}""".format(NAME=variable)
+	for subvariable in reforms[variable].variables():
+		level = int(re.findall(r'\d+',subvariable)[0])
 		lower = False
 		upper = False
-		current_level_key = subkey+'_t'
-		current_level_desc_key = subkey+'_desc'
+		current_level_variable = subvariable+'_t'
+		current_level_desc_variable = subvariable+'_desc'
 		custom_loc_total += """\ndefined_text = {{
 	name = {NAME}
 	text = {{
@@ -64,7 +64,7 @@ for key in reforms.keys():
 			always = yes
 		}}
 	}}				
-}}""".format(NAME=current_level_key)
+}}""".format(NAME=current_level_variable)
 		custom_loc_total += """\ndefined_text = {{
 	name = {NAME}
 	text = {{
@@ -73,13 +73,13 @@ for key in reforms.keys():
 			always = yes
 		}}
 	}}				
-}}""".format(NAME=current_level_desc_key)
-		for subsubkey in reforms[key][subkey].keys():
-			if 'Lower_effects' in subsubkey:
+}}""".format(NAME=current_level_desc_variable)
+		for subsubvariable in reforms[variable][subvariable].variables():
+			if 'Lower_effects' in subsubvariable:
 				lower = True
 				next_level = level+1
-				next_level_key = key+str(next_level)+'_t'
-				current_level_lower_effects_key = subkey+'Lower_effects'
+				next_level_variable = variable+str(next_level)+'_t'
+				current_level_lower_effects_variable = subvariable+'Lower_effects'
 				custom_loc_total += """\ndefined_text = {{
 	name = {NAME}
 	text = {{
@@ -88,12 +88,12 @@ for key in reforms.keys():
 			always = yes
 		}}
 	}}				
-}}""".format(NAME=current_level_lower_effects_key)
-			elif 'Raise_effects' in subsubkey:
+}}""".format(NAME=current_level_lower_effects_variable)
+			elif 'Raise_effects' in subsubvariable:
 				upper = True
 				lower_level = level-1
-				lower_level_key = key+str(lower_level)+'_t'
-				current_level_raise_effects_key = subkey+'Raise_effects'
+				lower_level_variable = variable+str(lower_level)+'_t'
+				current_level_raise_effects_variable = subvariable+'Raise_effects'
 				custom_loc_total += """\ndefined_text = {{
 	name = {NAME}
 	text = {{
@@ -102,20 +102,20 @@ for key in reforms.keys():
 			always = yes
 		}}
 	}}				
-}}""".format(NAME=current_level_raise_effects_key)
+}}""".format(NAME=current_level_raise_effects_variable)
 		if lower:
-			keys_to_sub[subkey+'Lower_desc'] = r"""Transition from [{}] to [{}]\\n[{}]\\n[{}]\\n[{}]""".format(next_level_key,current_level_key,key,current_level_desc_key,current_level_lower_effects_key)
+			variables_to_sub[subvariable+'Lower_desc'] = r"""Transition from [{}] to [{}]\\n[{}]\\n[{}]\\n[{}]""".format(next_level_variable,current_level_variable,variable,current_level_desc_variable,current_level_lower_effects_variable)
 			lower = False
 		if upper:
-			keys_to_sub[subkey+'Raise_desc'] = r"""Transition from [{}] to [{}]\\n[{}]\\n[{}]\\n[{}]""".format(lower_level_key,current_level_key,key,current_level_desc_key,current_level_raise_effects_key)
+			variables_to_sub[subvariable+'Raise_desc'] = r"""Transition from [{}] to [{}]\\n[{}]\\n[{}]\\n[{}]""".format(lower_level_variable,current_level_variable,variable,current_level_desc_variable,current_level_raise_effects_variable)
 			upper = False
 
 
 with open('SYS-Rights_l_english.yml','r',encoding='utf-8') as file:
 	contents = file.read()
 
-for key,value in keys_to_sub.items():
-	contents = re.sub(r'{}.*'.format(key), """{}: \"{}\"""".format(key,value),contents)
+for variable,value in variables_to_sub.items():
+	contents = re.sub(r'{}.*'.format(variable), """{}: \"{}\"""".format(variable,value),contents)
 	
 with open('SYS-Rights_l_english.yml','w',encoding='utf-8') as file:
 	file.write(contents)	

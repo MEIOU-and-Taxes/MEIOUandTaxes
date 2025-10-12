@@ -581,7 +581,7 @@ expeditions_list[-1].set_node_tech_reqs(
 
 can_trigger_MAM_event_15 = ['east_africa', 'indian_ocean', 'arabia', 'indian_ocean', 'western_india', 'southern_india']
 
-# Setup expeditions unlocks dict with keys for each tradenode holding an empty list
+# Setup expeditions unlocks dict with variables for each tradenode holding an empty list
 expedition_unlocks = {}
 for node in trade_nodes:
     expedition_unlocks[node] = []
@@ -595,9 +595,9 @@ for expedition in expeditions_list:
         assert tech >= 13
         assert tech < 50
         expedition_unlocks[trade_node].append((expedition.localized_name, int(tech)))
-for key in expedition_unlocks:  # Sort the list in each each tradenode by teach level
-    expedition_unlocks[key].sort(key=lambda x: x[1])
-assert len(trade_nodes) == len(expedition_unlocks), "Expedition unlocks should have 1 key per trade node"
+for variable in expedition_unlocks:  # Sort the list in each each tradenode by teach level
+    expedition_unlocks[variable].sort(variable=lambda x: x[1])
+assert len(trade_nodes) == len(expedition_unlocks), "Expedition unlocks should have 1 variable per trade node"
 
 num_total_expeditions = len(expeditions_list)
 
@@ -928,7 +928,7 @@ select_expedition_option_frame_bottom = """\
 				expedition_provs.{expedition_name} = {{
 					type = all 
 					is_empty = no
-					owner = {{ check_key = {{ lhs = tech_mil which = ROOT }} }}
+					owner = {{ check_variable = {{ which = tech_mil which = ROOT }} }}
 				}}
 			}}
 		}}
@@ -1023,47 +1023,47 @@ country_event = {{
 					MEC_Expeditions_eligible_province_trigger = yes
 				}}
 			}}
-			set_key = {{ # Counter for loop
-				lhs = Tmp_7
+			set_variable = {{ # Counter for loop
+				which = Tmp_7
 				value = 20
 			}}
-			set_key = {{ # High initial value to guarantee first province will be lower
-				lhs = Tmp_8
+			set_variable = {{ # High initial value to guarantee first province will be lower
+				which = Tmp_8
 				value = 1000
 			}}
 			while = {{
 				limit = {{ # Exit loop when counter is below 1
-					check_key = {{
-						lhs = Tmp_7
+					check_variable = {{
+						which = Tmp_7
 						value = 1
 					}}
 				}}
 			    if = {{ # if best value is negative (aka empty with feature)
 			        limit = {{
 			            NOT = {{
-                            check_key = {{
-                                lhs = Tmp_8
+                            check_variable = {{
+                                which = Tmp_8
                                 value = 0
                             }}
                         }}
 			        }}
 			        # Multiply best value by 5 and then add (it's negative) to loop counter
-			        set_key = {{
-			            lhs = Tmp_6
+			        set_variable = {{
+			            which = Tmp_6
 			            which = Tmp_8
 			        }}
-			        multiply_key = {{ 
-			            lhs = Tmp_6
+			        multiply_variable = {{ 
+			            which = Tmp_6
 			            value = 5
 			        }}
-			        change_key = {{ 
-			            lhs = Tmp_7
+			        change_variable = {{ 
+			            which = Tmp_7
 			            which = Tmp_6
 			        }}
 			    }}
 			    else = {{
-                    subtract_key = {{ # Reduce loop counter
-                        lhs = Tmp_7
+                    subtract_variable = {{ # Reduce loop counter
+                        which = Tmp_7
                         value = 1
                     }}
 				}}
@@ -1073,27 +1073,27 @@ country_event = {{
 						MEC_Expeditions_eligible_province_trigger = yes
 					}}
 					MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
-                    set_key = {{ # Copy current best number from country into this scope
-                        lhs = Tmp_8
+                    set_variable = {{ # Copy current best number from country into this scope
+                        which = Tmp_8
                         which = ROOT
                     }}
                     if = {{ # If the current province number is better target (lower number) then set it as the new target
                         limit = {{ # 8 < 2
                             NOT = {{ 
-                                check_key = {{ 
-                                    lhs = Tmp_9
+                                check_variable = {{ 
+                                    which = Tmp_9
                                     which = Tmp_8
                                 }}
                             }}
                         }}
                         save_event_target_as = MEC_Expedition_Target_Province
-                        set_key = {{ # Overwrite the number in this scope
-                            lhs = Tmp_8
+                        set_variable = {{ # Overwrite the number in this scope
+                            which = Tmp_8
                             which = Tmp_9
                         }}
                         ROOT = {{ # Copy the overwrite to the country scope
-                            set_key = {{
-                                lhs = Tmp_8
+                            set_variable = {{
+                                which = Tmp_8
                                 which = PREV
                             }}
                         }}
@@ -1108,8 +1108,8 @@ country_event = {{
 			                has_country_flag = MEC_Expeditions_always_fight
 			            }}
 			        }}
-			        export_to_key = {{ # Expedition sender mil tech
-                        lhs = MEC_Expeditions_Comparison
+			        export_to_variable = {{ # Expedition sender mil tech
+                        which = MEC_Expeditions_Comparison
                         value = mil_tech
                         who = FROM
                     }}
@@ -1125,14 +1125,14 @@ country_event = {{
                                 }}
                             }}
                         }}
-                        change_key = {{
-                            lhs = MEC_Expeditions_Comparison
+                        change_variable = {{
+                            which = MEC_Expeditions_Comparison
                             value = 1
                         }}
                     }}
                     MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
-                    subtract_key = {{
-                        lhs = MEC_Expeditions_Comparison
+                    subtract_variable = {{
+                        which = MEC_Expeditions_Comparison
                         which = Tmp_9
                     }}
 		            {landing_success}  
@@ -1158,19 +1158,19 @@ country_event = {{
 }}
 """
 
-# Tmp key values set by this effect 0: Harbour level or current owner mil tech, 1: Feature level or doubled fort level, 2: colony, 3: manpower, 4: prov size, 9: total
+# Tmp variable values set by this effect 0: Harbour level or current owner mil tech, 1: Feature level or doubled fort level, 2: colony, 3: manpower, 4: prov size, 9: total
 province_defence_calculation = """\
 MEC_Expeditions_defence_calc_effect = {
     if = { # If uncolonized province
         limit = {
             is_empty = yes
         }
-        set_key = {
-            lhs = Tmp_0
+        set_variable = {
+            which = Tmp_0
             value = 0
         }
-        set_key = {
-            lhs = Tmp_1
+        set_variable = {
+            which = Tmp_1
             value = 0
         }
         # Set Tmp_0 based on level of harbour
@@ -1178,8 +1178,8 @@ MEC_Expeditions_defence_calc_effect = {
             limit = {
                 has_province_flag = TN_Harbour_Major
             }
-            change_key = {
-                lhs = Tmp_0
+            change_variable = {
+                which = Tmp_0
                 value = -5
             }
         }
@@ -1187,8 +1187,8 @@ MEC_Expeditions_defence_calc_effect = {
             limit = {
                 has_province_flag = TN_Harbour_Important
             }
-            change_key = {
-                lhs = Tmp_0
+            change_variable = {
+                which = Tmp_0
                 value = -3
             }
         }
@@ -1196,8 +1196,8 @@ MEC_Expeditions_defence_calc_effect = {
             limit = {
                 has_province_flag = TN_Harbour_Minor
             }
-            change_key = {
-                lhs = Tmp_0
+            change_variable = {
+                which = Tmp_0
                 value = -1
             }
         }
@@ -1206,8 +1206,8 @@ MEC_Expeditions_defence_calc_effect = {
             limit = {
                 has_province_flag = TN_Natural_Major
             }
-            change_key = {
-                lhs = Tmp_1
+            change_variable = {
+                which = Tmp_1
                 value = -3
             }
         }
@@ -1215,8 +1215,8 @@ MEC_Expeditions_defence_calc_effect = {
             limit = {
                 has_province_flag = TN_Natural_Important
             }
-            change_key = {
-                lhs = Tmp_1
+            change_variable = {
+                which = Tmp_1
                 value = -2
             }
         }
@@ -1224,8 +1224,8 @@ MEC_Expeditions_defence_calc_effect = {
             limit = {
                 has_province_flag = TN_Natural_Minor
             }
-            change_key = {
-                lhs = Tmp_1
+            change_variable = {
+                which = Tmp_1
                 value = -1
             }
         }
@@ -1236,198 +1236,198 @@ MEC_Expeditions_defence_calc_effect = {
                     country_or_subject_holds = ROOT
                 }
             }
-            change_key = {
-                lhs = Tmp_1
+            change_variable = {
+                which = Tmp_1
                 value = -1
             }
         }
         # Total values from harbours and natural features
-        set_key = {
-            lhs = Tmp_9
+        set_variable = {
+            which = Tmp_9
             which = Tmp_0
         }
-        change_key = {
-            lhs = Tmp_9
+        change_variable = {
+            which = Tmp_9
             which = Tmp_1
         }
     }
     else = {
-        export_to_key = { # Current owner mil tech
-            lhs = Tmp_0
+        export_to_variable = { # Current owner mil tech
+            which = Tmp_0
             value = mil_tech
             who = owner
         }
-        export_to_key = { # Get defender fort level
-            lhs = Tmp_1
+        export_to_variable = { # Get defender fort level
+            which = Tmp_1
             value = trigger_value:fort_level
         }
-        multiply_key = { # Double fort bonus
-            lhs = Tmp_1
+        multiply_variable = { # Double fort bonus
+            which = Tmp_1
             value = 2
         }
-        set_key = {
-            lhs = Tmp_2
+        set_variable = {
+            which = Tmp_2
             value = 0
         }
         if = {
             limit = { # Bonus against incomplete colonies
                 is_colony = yes
             }
-            change_key = {
-                lhs = Tmp_2
+            change_variable = {
+                which = Tmp_2
                 value = -5
             }
         }
         # Sum manpower in province
-        set_key = {
-            lhs = Tmp_3
+        set_variable = {
+            which = Tmp_3
             value = 0
         }
-        change_key = {
-            lhs = Tmp_3
+        change_variable = {
+            which = Tmp_3
             which = Tax_MP
         }
-        change_key = {
-            lhs = Tmp_3
+        change_variable = {
+            which = Tmp_3
             which = Tax_NOMP
         }
-        change_key = {
-            lhs = Tmp_3
+        change_variable = {
+            which = Tmp_3
             which = Tax_BGMP
         }
-        change_key = {
-            lhs = Tmp_3
+        change_variable = {
+            which = Tmp_3
             which = Tax_TRMP
         }
         if = { # If manpower sum > 10 set 5 elif > 7 set 4 elif > 4 set 2 elif > 2 set 1
             limit = {
-                check_key = {
-                    lhs = Tmp_3
+                check_variable = {
+                    which = Tmp_3
                     value = 10
                 }
             }
-            set_key = {
-                lhs = Tmp_3
+            set_variable = {
+                which = Tmp_3
                 value = 5
             }
         }
         else_if = {
             limit = {
-                check_key = {
-                    lhs = Tmp_3
+                check_variable = {
+                    which = Tmp_3
                     value = 7
                 }
             }
-            set_key = {
-                lhs = Tmp_3
+            set_variable = {
+                which = Tmp_3
                 value = 4
             }
         }
         else_if = {
             limit = {
-                check_key = {
-                    lhs = Tmp_3
+                check_variable = {
+                    which = Tmp_3
                     value = 4
                 }
             }
-            set_key = {
-                lhs = Tmp_3
+            set_variable = {
+                which = Tmp_3
                 value = 2
             }
         }
         else_if = {
             limit = {
-                check_key = {
-                    lhs = Tmp_3
+                check_variable = {
+                    which = Tmp_3
                     value = 2
                 }
             }
-            set_key = {
-                lhs = Tmp_3
+            set_variable = {
+                which = Tmp_3
                 value = 1
             }
         }
         else = {
-            set_key = {
-                lhs = Tmp_3
+            set_variable = {
+                which = Tmp_3
                 value = 0
             }
         }
-        set_key = {
-            lhs = Tmp_4
+        set_variable = {
+            which = Tmp_4
             value = 0
         }
         if = { # If Land Province Size > 700 set 5 elif > 400 set 3 elif >250 set 2 elif > 100 set 1
             limit = {
-                check_key = {
-                    lhs = Land_Size
+                check_variable = {
+                    which = Land_Size
                     value = 700
                 }
             }
-            set_key = {
-                lhs = Tmp_4
+            set_variable = {
+                which = Tmp_4
                 value = 5
             }
         }
         else_if = {
             limit = {
-                check_key = {
-                    lhs = Land_Size
+                check_variable = {
+                    which = Land_Size
                     value = 400
                 }
             }
-            set_key = {
-                lhs = Tmp_4
+            set_variable = {
+                which = Tmp_4
                 value = 3
             }
         }
         else_if = {
             limit = {
-                check_key = {
-                    lhs = Land_Size
+                check_variable = {
+                    which = Land_Size
                     value = 250
                 }
             }
-            set_key = {
-                lhs = Tmp_4
+            set_variable = {
+                which = Tmp_4
                 value = 2
             }
         }
         else_if = {
             limit = {
-                check_key = {
-                    lhs = Land_Size
+                check_variable = {
+                    which = Land_Size
                     value = 100
                 }
             }
-            set_key = {
-                lhs = Tmp_4
+            set_variable = {
+                which = Tmp_4
                 value = 1
             }
         }
         # Sum all values into Tmp_9 for total defence value
-        set_key = {
-            lhs = Tmp_9
+        set_variable = {
+            which = Tmp_9
             value = 0
         }
-        change_key = {
-            lhs = Tmp_9
+        change_variable = {
+            which = Tmp_9
             which = Tmp_0
         }
-        change_key = {
-            lhs = Tmp_9
+        change_variable = {
+            which = Tmp_9
             which = Tmp_1
         }
-        change_key = {
-            lhs = Tmp_9
+        change_variable = {
+            which = Tmp_9
             which = Tmp_2
         }
-        change_key = {
-            lhs = Tmp_9
+        change_variable = {
+            which = Tmp_9
             which = Tmp_3
         }
-        change_key = {
-            lhs = Tmp_9
+        change_variable = {
+            which = Tmp_9
             which = Tmp_4
         }
 	}
@@ -1439,8 +1439,8 @@ MEC_Expeditions_defence_calc_effect = {
 landing_success = """\
 if = {{ # Use MEC_Expeditions_Comparison as success chance
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 10
         }}
     }}
@@ -1453,8 +1453,8 @@ if = {{ # Use MEC_Expeditions_Comparison as success chance
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 9
         }}
     }}
@@ -1486,8 +1486,8 @@ else_if = {{
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 8
         }}
     }}
@@ -1519,8 +1519,8 @@ else_if = {{
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 7
         }}
     }}
@@ -1552,8 +1552,8 @@ else_if = {{
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 6
         }}
     }}
@@ -1585,8 +1585,8 @@ else_if = {{
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 5
         }}
     }}
@@ -1618,8 +1618,8 @@ else_if = {{
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 4
         }}
     }}
@@ -1651,8 +1651,8 @@ else_if = {{
 }}
 else_if = {{
     limit = {{
-        check_key = {{
-            lhs = MEC_Expeditions_Comparison
+        check_variable = {{
+            which = MEC_Expeditions_Comparison
             value = 3
         }}
     }}
@@ -1714,8 +1714,8 @@ province_event = {{ # Called on province being colonized
 				limit = {{
 					is_empty = no
 				}} # Note if make changes here also have to make changes to the similar section in the previous event
-				export_to_key = {{ # Expedition sender mil tech
-					lhs = MEC_Expeditions_Comparison
+				export_to_variable = {{ # Expedition sender mil tech
+					which = MEC_Expeditions_Comparison
 					value = mil_tech
 					who = FROM
 				}}
@@ -1731,40 +1731,40 @@ province_event = {{ # Called on province being colonized
                             }}
                         }}
                     }}
-                    change_key = {{
-                        lhs = MEC_Expeditions_Comparison
+                    change_variable = {{
+                        which = MEC_Expeditions_Comparison
                         value = 1
                     }}
                 }}
 				MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
-				subtract_key = {{
-					lhs = MEC_Expeditions_Comparison
+				subtract_variable = {{
+					which = MEC_Expeditions_Comparison
 					which = Tmp_9
 				}}
 				# Cap value between 0-10 for display purpose
                 if = {{ # if >= 10 set to 10
                     limit = {{
-                        check_key = {{
-                            lhs = MEC_Expeditions_Comparison
+                        check_variable = {{
+                            which = MEC_Expeditions_Comparison
                             value = 10
                         }}
                     }}
-                    set_key = {{
-                        lhs = MEC_Expeditions_Comparison
+                    set_variable = {{
+                        which = MEC_Expeditions_Comparison
                         value = 10
                     }}
                 }}
                 else_if = {{ # if < 0 set to 0
                     limit = {{
                         NOT = {{
-                            check_key = {{
-                                lhs = MEC_Expeditions_Comparison
+                            check_variable = {{
+                                which = MEC_Expeditions_Comparison
                                 value = 0
                             }}
                         }}
                     }}
-                    set_key = {{
-                        lhs = MEC_Expeditions_Comparison
+                    set_variable = {{
+                        which = MEC_Expeditions_Comparison
                         value = 0
                     }}
                 }}
@@ -1793,51 +1793,51 @@ province_event = {{ # Called on province being colonized
 			factor = 1
 			modifier = {{
 				factor = 2
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 6
 				}}
 			}}
 			modifier = {{
 				factor = 4
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 5
 				}}
 			}}
 			modifier = {{
 				factor = 6
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 4
 				}}
 			}}
 			modifier = {{
 				factor = 10
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 3
 				}}
 			}}
 			modifier = {{
 				factor = 16
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 2
 				}}
 			}}
 			modifier = {{
 				factor = 20
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 1
 				}}
 			}}
 			modifier = {{
 				factor = 100
 				NOT = {{
-					check_key = {{
-						lhs = MEC_Expeditions_Comparison
+					check_variable = {{
+						which = MEC_Expeditions_Comparison
 						value = 1
 					}}
 				}}
@@ -1867,22 +1867,22 @@ province_event = {{ # Called on province being colonized
 			factor = 1
 			modifier = {{
 				factor = 9
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 9
 				}}
 			}}
 			modifier = {{
 				factor = 4
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 8
 				}}
 			}}
 			modifier = {{
 				factor = 2
-				check_key = {{
-					lhs = MEC_Expeditions_Comparison
+				check_variable = {{
+					which = MEC_Expeditions_Comparison
 					value = 7
 				}}
 			}}
@@ -1933,19 +1933,19 @@ country_event = {{
 					change_culture = ROOT
 					ROOT = {{
 						capital_scope = {{
-							event_target:MEC_Expedition_Target_Province = {{ set_key = {{ lhs = Plague_Resistance1 which = PREV }} }}
-							event_target:MEC_Expedition_Target_Province = {{ set_key = {{ lhs = Plague_Resistance2 which = PREV }} }}
-							event_target:MEC_Expedition_Target_Province = {{ set_key = {{ lhs = Plague_Resistance4 which = PREV }} }}
+							event_target:MEC_Expedition_Target_Province = {{ set_variable = {{ which = Plague_Resistance1 which = PREV }} }}
+							event_target:MEC_Expedition_Target_Province = {{ set_variable = {{ which = Plague_Resistance2 which = PREV }} }}
+							event_target:MEC_Expedition_Target_Province = {{ set_variable = {{ which = Plague_Resistance4 which = PREV }} }}
 						    
-						    event_target:MEC_Expedition_Target_Province = {{ divide_key = {{ lhs = Plague_Resistance1 value = 3 }} }}
-						    event_target:MEC_Expedition_Target_Province = {{ divide_key = {{ lhs = Plague_Resistance2 value = 3 }} }}
-						    event_target:MEC_Expedition_Target_Province = {{ divide_key = {{ lhs = Plague_Resistance4 value = 3 }} }}
+						    event_target:MEC_Expedition_Target_Province = {{ divide_variable = {{ which = Plague_Resistance1 value = 3 }} }}
+						    event_target:MEC_Expedition_Target_Province = {{ divide_variable = {{ which = Plague_Resistance2 value = 3 }} }}
+						    event_target:MEC_Expedition_Target_Province = {{ divide_variable = {{ which = Plague_Resistance4 value = 3 }} }}
 						}}
 						
                         if = {{
                             limit = {{
                                 any_owned_province = {{
-                                    check_key = {{ lhs = Plague_SpawnChance4 value = 0.1 }}
+                                    check_variable = {{ which = Plague_SpawnChance4 value = 0.1 }}
                                 }}
                             }}                        
                             event_target:MEC_Expedition_Target_Province = {{
@@ -1981,8 +1981,8 @@ country_event = {{
                                     every_neighbor_province = {{
                                         limit = {{
                                             NOT = {{
-                                                check_key = {{ lhs = Plague_SpawnChance2 value = 0.1 }}
-                                                check_key = {{ lhs = Plague_Resistance2 value = 0.1 }}
+                                                check_variable = {{ which = Plague_SpawnChance2 value = 0.1 }}
+                                                check_variable = {{ which = Plague_Resistance2 value = 0.1 }}
                                             }}
                                             owner = {{
                                                 OR = {{
@@ -2005,8 +2005,8 @@ country_event = {{
                                     every_neighbor_province = {{
                                         limit = {{
                                             NOT = {{
-                                                check_key = {{ lhs = Plague_SpawnChance2 value = 0.1 }}
-                                                check_key = {{ lhs = Plague_Resistance2 value = 0.1 }}
+                                                check_variable = {{ which = Plague_SpawnChance2 value = 0.1 }}
+                                                check_variable = {{ which = Plague_Resistance2 value = 0.1 }}
                                             }}
                                             owner = {{
                                                 OR = {{
@@ -2030,8 +2030,8 @@ country_event = {{
                                 every_neighbor_province = {{
                                     limit = {{
                                         NOT = {{
-                                            check_key = {{ lhs = Plague_SpawnChance2 value = 0.1 }}
-                                            check_key = {{ lhs = Plague_Resistance2 value = 0.1 }}
+                                            check_variable = {{ which = Plague_SpawnChance2 value = 0.1 }}
+                                            check_variable = {{ which = Plague_Resistance2 value = 0.1 }}
                                         }}
                                         owner = {{
                                             OR = {{
@@ -2340,7 +2340,7 @@ with open(Path('common/scripted_triggers/MEC-Expeditions_triggers.txt'), 'w', en
         triggers.write(f"\t\texpedition_provs.{expedition.name} = {{\n\t\t\tMEC_Expeditions_eligible_province_trigger = yes\n\t\t}}\n")
         triggers.write(f"\t\tOR = {{ # Dip tech requirements based on capital location in trade node\n")
         current_nodes = [False]
-        for (node, tech) in sorted(expedition.node_tech_reqs, key=lambda x: x[1], reverse=True):
+        for (node, tech) in sorted(expedition.node_tech_reqs, variable=lambda x: x[1], reverse=True):
             if tech == current_nodes[0]:
                 current_nodes.append(node)
             elif current_nodes[0] == False:  # First time through don't print
@@ -2409,7 +2409,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
             for (location, level) in expedition_unlocks[trade_node]:
                 level_locations.setdefault(level, [])
                 level_locations.get(level).append(location)
-            for level in sorted(level_locations.keys()):
+            for level in sorted(level_locations.variables()):
                 loc.write(f'\\n§Y{level}§!: ' + ', '.join(sorted(level_locations.get(level))))
             level_locations.clear()
             loc.write('"\n')
@@ -2420,7 +2420,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
             for (location, level) in expedition.node_tech_reqs:
                 level_locations.setdefault(level, [])
                 level_locations.get(level).append(location)
-            for level in sorted(level_locations.keys()):
+            for level in sorted(level_locations.variables()):
                 loc.write(f'\\n§Y{level}§!: ' + ', '.join(sorted(level_locations.get(level))))
             level_locations.clear()
             loc.write('"\n')
@@ -2474,7 +2474,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
         for expedition in expeditions_list:
             events.write(f"\t\t\tMEC_Expeditions_available_{expedition.name}_trigger = yes\n")
         events.write("\t\t}\n\t}\n\n")
-        events.write('\timmediate = {\n\t\thidden_effect = {\n\t\t\tROOT = {\n\t\t\t\tsubtract_key = { lhs = tech_mil value = 5 }\n\t\t\t}\n\t\t}\n\t}\n\n')
+        events.write('\timmediate = {\n\t\thidden_effect = {\n\t\t\tROOT = {\n\t\t\t\tsubtract_variable = { which = tech_mil value = 5 }\n\t\t\t}\n\t\t}\n\t}\n\n')
         events.write(f"\toption = {{ # AI should take when no expedition available\n\t\tname = MEC_Expeditions.{str(menu_event_number).zfill(3)}.dont\n\t\tai_chance = {{\n\t\t\tfactor = 0.1\n\t\t}}\n\t}}\n\n")
 
         clr_all_sent_flags = ''
@@ -2528,7 +2528,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
             loc.write(f' MEC_Expeditions.{str(menu_event_number).zfill(3)}.{expedition.name}: "Send the expedition to {expedition.localized_name}"\n')
 
         events.write('\tafter = {\n\t\tif = {\n\t\t\tlimit = {\n\t\t\t\tNOT = {\n\t\t\t\t\thas_idea = colonialism_ideas_1\n\t\t\t\t}\n\t\t\t}\n\t\t\tset_country_flag = MEC_Expeditions_skip_year\n\t\t}\n')
-        events.write('\t\tROOT = {change_key = { lhs = tech_mil value = 5 }}\n\t}\n}\n')
+        events.write('\t\tROOT = {change_variable = { which = tech_mil value = 5 }}\n\t}\n}\n')
         # Write the Expedition Arrival section header
         events.write(hash_line)
         events.write(

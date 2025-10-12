@@ -24,7 +24,7 @@ def set_scopes(scopes, path):
             scopes.append("event_target:" + line)
             scopes.sort()
 
-def get_key(val):
+def get_variable(val):
     import string
     
     table = list(string.ascii_lowercase)
@@ -41,7 +41,7 @@ def get_key(val):
 
     return out
 
-def set_key(dct):
+def set_variable(dct):
     count = 702
     
     for var in dct:
@@ -52,9 +52,9 @@ def set_key(dct):
             x = int("".join(width[0][1:])) - 1
             if x < 0:
                 x = 0
-            dct[var] = [get_key(count), x, int(width[1]), width[0][0]]
+            dct[var] = [get_variable(count), x, int(width[1]), width[0][0]]
         else:
-            dct[var] = [get_key(count)]
+            dct[var] = [get_variable(count)]
         count += 1
 
 def gen_scripts(tmplt, dct, out, encoding=None):
@@ -134,272 +134,272 @@ def compress2(txt):
 def compressH(txt):
     return ' ' + (' '.join(txt.replace('\t','').replace('\n',' ').split()))
 
-dont = ['keys.txt', '00-scripts_core.txt', '00-scripts.txt', '00-triggers_core.txt', '00-triggers.txt',
+dont = ['variables.txt', '00-scripts_core.txt', '00-scripts.txt', '00-triggers_core.txt', '00-triggers.txt',
         'vars.txt', '00-locs_l_english.yml', '00-locs.txt']
 
-effect = """set_key = {
+effect = """set_variable = {
 [[which]
-    set_key_lhs_$lhs$ = {
+    set_variable_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    set_key_value_$lhs$ = {
+    set_variable_value_$which$ = {
         value = $value$
     }
 ]
 }
-change_key = {
+change_variable = {
 [[which]
-    change_key_lhs_$lhs$ = {
+    change_variable_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    change_key_value_$lhs$ = {
+    change_variable_value_$which$ = {
         value = $value$
     }
 ]
 }
-subtract_key = {
+subtract_variable = {
 [[which]
-    subtract_key_lhs_$lhs$ = {
+    subtract_variable_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    subtract_key_value_$lhs$ = {
+    subtract_variable_value_$which$ = {
         value = $value$
     }
 ]
 }
-multiply_key = {
+multiply_variable = {
 [[which]
-    multiply_key_lhs_$lhs$ = {
+    multiply_variable_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    multiply_key_value_$lhs$ = {
+    multiply_variable_value_$which$ = {
         value = $value$
     }
 ]
 }
-divide_key = {
+divide_variable = {
 [[which]
-    divide_key_lhs_$lhs$ = {
+    divide_variable_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    divide_key_value_$lhs$ = {
+    divide_variable_value_$which$ = {
         value = $value$
     }
 ]
 }
-export_to_key = {
+export_to_variable = {
     export_to_variable = {
         which = export
         value = $value$
 [[who]  who = $who$ ]
 [[with] with = $with$ ]
     }
-    set_key_from_var = { key = $lhs$ var = export }
+    set_variable_from_var = { variable = $which$ var = export }
 }
-set_var_from_key = {
-    set_key_rhs_$key$ = {
-        lhs = $var$
-    }
-}
-set_key_from_var = {
-    set_key_which_$key$ = {
+set_var_from_variable = {
+    set_variable_rhs_$variable$ = {
         which = $var$
     }
 }
-change_var_by_key = {
-    change_key_rhs_$key$ = {
-        lhs = $var$
-    }
-}
-subtract_var_by_key = {
-    subtract_key_rhs_$key$ = {
-        lhs = $var$
-    }
-}
-multiply_var_by_key = {
-    multiply_key_rhs_$key$ = {
-        lhs = $var$
-    }
-}
-divide_var_by_key = {
-    divide_key_rhs_$key$ = {
-        lhs = $var$
-    }
-}
-change_key_by_var = {
-    change_key_lhs_$key$ = {
+set_variable_from_var = {
+    set_variable_which_$variable$ = {
         which = $var$
     }
 }
-subtract_key_by_var = {
-    subtract_key_lhs_$key$ = {
+change_var_by_variable = {
+    change_variable_rhs_$variable$ = {
         which = $var$
     }
 }
-multiply_key_by_var = {
-    multiply_key_lhs_$key$ = {
+subtract_var_by_variable = {
+    subtract_variable_rhs_$variable$ = {
         which = $var$
     }
 }
-divide_key_by_var = {
-    divide_key_lhs_$key$ = {
+multiply_var_by_variable = {
+    multiply_variable_rhs_$variable$ = {
         which = $var$
     }
 }
-export_key_to_var = {
+divide_var_by_variable = {
+    divide_variable_rhs_$variable$ = {
+        which = $var$
+    }
+}
+change_variable_by_var = {
+    change_variable_which_$variable$ = {
+        which = $var$
+    }
+}
+subtract_variable_by_var = {
+    subtract_variable_which_$variable$ = {
+        which = $var$
+    }
+}
+multiply_variable_by_var = {
+    multiply_variable_which_$variable$ = {
+        which = $var$
+    }
+}
+divide_variable_by_var = {
+    divide_variable_which_$variable$ = {
+        which = $var$
+    }
+}
+export_variable_to_var = {
     export_to_variable = {
         which = $var$
         value = 0
     }
-    change_var_by_key = {
+    change_var_by_variable = {
         var = $var$
-        key = $key$
+        variable = $variable$
     }
 }
 """
 effect = compress(effect)
 
-tmplt_effect_scope = """set_key_rhs_%s={
-    _b={d=%s l=$lhs$}
+tmplt_effect_scope = """set_variable_rhs_%s={
+    _b={d=%s l=$which$}
 }
-change_key_rhs_%s={
-    _f={d=%s l=$lhs$}
+change_variable_rhs_%s={
+    _f={d=%s l=$which$}
 }
-subtract_key_rhs_%s={
-    _i={d=%s l=$lhs$}
+subtract_variable_rhs_%s={
+    _i={d=%s l=$which$}
 }
-multiply_key_rhs_%s={
-    _o={d=%s l=$lhs$}
+multiply_variable_rhs_%s={
+    _o={d=%s l=$which$}
 }
-divide_key_rhs_%s={
-    _l={d=%s l=$lhs$}
+divide_variable_rhs_%s={
+    _l={d=%s l=$which$}
 }
 """
 tmplt_effect_scope = compress2(tmplt_effect_scope)
 
-tmplt_effect = """set_key_lhs_%s={
+tmplt_effect = """set_variable_which_%s={
     _a={d=%d w=$which$}
 }
-set_key_rhs_%s={
-    _b={d=%d l=$lhs$}
+set_variable_rhs_%s={
+    _b={d=%d l=$which$}
 }
-set_key_value_%s={
+set_variable_value_%s={
     _c={d=%d v=$value$}
 }
-set_key_which_%s={
+set_variable_which_%s={
     _d={d=%d w=$which$}
 }
-change_key_lhs_%s={
+change_variable_which_%s={
     _e={d=%d w=$which$}
 }
-change_key_rhs_%s={
-    _f={d=%d l=$lhs$}
+change_variable_rhs_%s={
+    _f={d=%d l=$which$}
 }
-change_key_value_%s={
+change_variable_value_%s={
     _g={d=%d v=$value$}
 }
-subtract_key_lhs_%s={
+subtract_variable_which_%s={
     _h={d=%d w=$which$}
 }
-subtract_key_rhs_%s={
-    _i={d=%d l=$lhs$}
+subtract_variable_rhs_%s={
+    _i={d=%d l=$which$}
 }
-subtract_key_value_%s={
+subtract_variable_value_%s={
     _j={d=%d v=$value$}
 }
-divide_key_lhs_%s={
+divide_variable_which_%s={
     _k={d=%d w=$which$}
 }
-divide_key_rhs_%s={
-    _l={d=%d l=$lhs$}
+divide_variable_rhs_%s={
+    _l={d=%d l=$which$}
 }
-divide_key_value_%s={
+divide_variable_value_%s={
     _m={d=%d v=$value$}
 }
-multiply_key_lhs_%s={
+multiply_variable_which_%s={
     _n={d=%d w=$which$}
 }
-multiply_key_rhs_%s={
-    _o={d=%d l=$lhs$}
+multiply_variable_rhs_%s={
+    _o={d=%d l=$which$}
 }
-multiply_key_value_%s={
+multiply_variable_value_%s={
     _p={d=%d v=$value$}
 }
 """
 tmplt_effect = compress2(tmplt_effect)
 
-trigger = """check_key = {
+trigger = """check_variable = {
 [[which]
-    check_key_lhs_$lhs$ = {
+    check_variable_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    check_key_value_$lhs$ = {
+    check_variable_value_$which$ = {
         value = $value$
     }
 ]
 }
-is_key_equal = {
+is_variable_equal = {
 [[which]
-    is_key_equal_lhs_$lhs$ = {
+    is_variable_equal_which_$which$ = {
         which = $which$
     }
 ]
 [[value]
-    is_key_equal_value_$lhs$ = {
+    is_variable_equal_value_$which$ = {
         value = $value$
     }
 ]
 }
-check_var_by_key = {
-    check_key_rhs_$key$ = {
-        lhs = $var$
+check_var_by_variable = {
+    check_variable_rhs_$variable$ = {
+        which = $var$
     }
 }
-is_var_equal_to_key = {
-    is_key_equal_rhs_$key$ = {
-        lhs = $var$
+is_var_equal_to_variable = {
+    is_variable_equal_rhs_$variable$ = {
+        which = $var$
     }
 }
 """
 trigger = compress(trigger)
 
-tmplt_trigger_scope = """check_key_rhs_%s={
-    _r={d=%s l=$lhs$}
+tmplt_trigger_scope = """check_variable_rhs_%s={
+    _r={d=%s l=$which$}
 }
-is_key_equal_rhs_%s={
-    _u={d=%s l=$lhs$}
+is_variable_equal_rhs_%s={
+    _u={d=%s l=$which$}
 }
 """
 tmplt_trigger_scope = compress2(tmplt_trigger_scope)
 
-tmplt_trigger = """check_key_lhs_%s={
+tmplt_trigger = """check_variable_which_%s={
     _q={d=%d w=$which$}
 }
-check_key_rhs_%s={
-    _r={d=%d l=$lhs$}
+check_variable_rhs_%s={
+    _r={d=%d l=$which$}
 }
-check_key_value_%s={
+check_variable_value_%s={
     _s={d=%d v=$value$}
 }
-is_key_equal_lhs_%s={
+is_variable_equal_which_%s={
     _t={d=%d w=$which$}
 }
-is_key_equal_rhs_%s={
-    _u={d=%d l=$lhs$}
+is_variable_equal_rhs_%s={
+    _u={d=%d l=$which$}
 }
-is_key_equal_value_%s={
+is_variable_equal_value_%s={
     _w={d=%d v=$value$}
 }
 """
@@ -585,7 +585,7 @@ if __name__ == "__main__":
 
     set_scopes(scopes, 'event_targets.txt')
     set_dct(dct, 'vars.txt')
-    set_key(dct)
+    set_variable(dct)
 
     for scope in scopes:
         trigger += tmplt_trigger_scope.replace('%s', scope)
@@ -603,5 +603,5 @@ if __name__ == "__main__":
     for i in dct:
         string += '%s : %s\n' % (i, dct[i][0])
 
-    with open('keys.txt', 'w', newline = '\n') as f:
+    with open('variables.txt', 'w', newline = '\n') as f:
         f.write(string)

@@ -33,14 +33,14 @@ RightsCrownlandButtons =""
 RightsL = """l_english:
 """
 
-for key in rights.keys():
+for variable in rights.variables():
 	
-	Right = rights[key]['Right']
-	Codename = rights[key]['Codename']
-	Ranks = int(rights[key]['Ranks'])
-	Interactions = int(rights[key]['Interactions'])
-	DefaultPosition = int(rights[key]['DefaultPosition'])
-	Icon = rights[key]['Icon']
+	Right = rights[variable]['Right']
+	Codename = rights[variable]['Codename']
+	Ranks = int(rights[variable]['Ranks'])
+	Interactions = int(rights[variable]['Interactions'])
+	DefaultPosition = int(rights[variable]['DefaultPosition'])
+	Icon = rights[variable]['Icon']
 
 	index = 1
 
@@ -58,7 +58,7 @@ for key in rights.keys():
 	influence = 0
 	can_select = {{
 		hidden_trigger = {{ ai = no }}
-        is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+        is_variable_equal = {{ which = {Codename} value = {ValueRank} }}
 	}}
 	on_granted = {{
 	}}
@@ -127,7 +127,7 @@ for key in rights.keys():
 		if(Rank == 0):
 			RightsAssign += """    if = {{
         limit = {{
-            is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+            is_variable_equal = {{ which = {Codename} value = {ValueRank} }}
         }}
         set_estate_privilege = {Codename}{CodeRank}
     }}
@@ -135,7 +135,7 @@ for key in rights.keys():
 		else:
 			RightsAssign += """    else_if = {{
         limit = {{
-            is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+            is_variable_equal = {{ which = {Codename} value = {ValueRank} }}
         }}
 		set_estate_privilege = {Codename}{CodeRank}
     }}
@@ -144,9 +144,9 @@ for key in rights.keys():
 RightsAssign += """}"""
 
 # Create UP_DOWN Buttons
-for i in ui_matrix.keys():
+for i in ui_matrix.variables():
 	
-	Key = ui_matrix[i]['Key']
+	variable = ui_matrix[i]['variable']
 	Type = ui_matrix[i]['Type']
 	if ui_matrix[i]['Event_ID'] != None:
 		Event = "hidden_effect = { country_event = { id = "+ ui_matrix[i]['Event_ID'] +" } }"
@@ -203,10 +203,10 @@ for i in ui_matrix.keys():
         	custom_tooltip = Rights_LB
         	custom_tooltip = Rights_LowStab
 			hidden_effect = {
-				change_key = { lhs = NO_Mood value = -1 }
-				change_key = { lhs = BG_Mood value = -1 }
-				change_key = { lhs = CL_Mood value = -1 }
-				change_key = { lhs = TR_Mood value = -1 }
+				change_variable = { which = NO_Mood value = -1 }
+				change_variable = { which = BG_Mood value = -1 }
+				change_variable = { which = CL_Mood value = -1 }
+				change_variable = { which = TR_Mood value = -1 }
 			}
 			custom_tooltip = NO_ReformMoodDispleased
 			custom_tooltip = BG_ReformMoodDispleased
@@ -220,10 +220,10 @@ for i in ui_matrix.keys():
         	custom_tooltip = Rights_LB
         	custom_tooltip = Rights_BadStab
 			hidden_effect = {
-				change_key = { lhs = NO_Mood value = -3 }
-				change_key = { lhs = BG_Mood value = -3 }
-				change_key = { lhs = CL_Mood value = -3 }
-				change_key = { lhs = TR_Mood value = -3 }
+				change_variable = { which = NO_Mood value = -3 }
+				change_variable = { which = BG_Mood value = -3 }
+				change_variable = { which = CL_Mood value = -3 }
+				change_variable = { which = TR_Mood value = -3 }
 			}
 			custom_tooltip = NO_ReformMoodAngry
 			custom_tooltip = BG_ReformMoodAngry
@@ -283,8 +283,8 @@ for i in ui_matrix.keys():
 
 
 			if Rank == 1:
-				RightsL += ''' {Key}: ""
-'''.format(Key = Key)
+				RightsL += ''' {variable}: ""
+'''.format(variable = variable)
 				trigger_tmp = """
 		custom_trigger_tooltip = {{
 			tooltip = Rights_ReformSelectionOngoing
@@ -292,7 +292,7 @@ for i in ui_matrix.keys():
 		}}
 		custom_trigger_tooltip = {{
 			tooltip = Reform_HighSeverity
-			NOT = {{ check_key = {{ lhs = Rights_SeverityR value = 10.001 }} }}
+			NOT = {{ check_variable = {{ which = Rights_SeverityR value = 10.001 }} }}
 		}}
 		hidden_trigger = {{
 			NOT = {{ has_country_modifier = Reform_CD }}
@@ -390,7 +390,7 @@ for i in ui_matrix.keys():
 
 
 	RightsCrownlandButtons += """interaction={{ {Comment}
-    key = {key}
+    variable = {variable}
 	random_seed = random 
 	cooldown_months = {cooldown} 
     trigger = {{
@@ -409,7 +409,7 @@ for i in ui_matrix.keys():
 		factor = 0
 	}}
 }}
-""".format(key = Key, event = Event, cooldown = Cooldown, effects = Effect, trigger = Trigger, hidden_trigger = HiddenTrigger, Comment = Comment, Desc=Desc, Custom_Tooltip=Custom_Tooltip)
+""".format(variable = variable, event = Event, cooldown = Cooldown, effects = Effect, trigger = Trigger, hidden_trigger = HiddenTrigger, Comment = Comment, Desc=Desc, Custom_Tooltip=Custom_Tooltip)
 
 
 file.write(RightsP)

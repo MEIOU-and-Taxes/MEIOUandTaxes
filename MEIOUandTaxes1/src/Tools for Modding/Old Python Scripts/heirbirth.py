@@ -45,7 +45,7 @@ for file in os.listdir(os.getcwd()+r'\history\countries'):
 				if birthday < datetime(1356,12,26):
 					heirdict[birthday] = heir
 			for heir in heirdict.items():
-				if heir[0] == max(heirdict.keys()):
+				if heir[0] == max(heirdict.variables()):
 					Tag(file[0:3],heir[1],heir[0])
 					break
 

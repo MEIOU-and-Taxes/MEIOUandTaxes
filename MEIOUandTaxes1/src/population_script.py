@@ -42,41 +42,41 @@ for i in range(len(pop_excel)):
 
 	with open(current_filename, mode='a', encoding='iso-8859-1') as current_file:
 		current_file.write("\n100.1.1 = {")
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1300 value = %.3f }" % (pop_excel.loc[i,"RP 1300"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1300 value = %.3f }" % (pop_excel.loc[i,"UP 1300"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1300 value = %.3f }" % (pop_excel.loc[i,"RP 1300"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1300 value = %.3f }" % (pop_excel.loc[i,"UP 1300"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1350 value = %.3f }" % (pop_excel.loc[i,"RP 1350"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1350 value = %.3f }" % (pop_excel.loc[i,"UP 1350"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1350 value = %.3f }" % (pop_excel.loc[i,"RP 1350"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1350 value = %.3f }" % (pop_excel.loc[i,"UP 1350"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1400 value = %.3f }" % (pop_excel.loc[i,"RP 1400"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1400 value = %.3f }" % (pop_excel.loc[i,"UP 1400"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1400 value = %.3f }" % (pop_excel.loc[i,"RP 1400"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1400 value = %.3f }" % (pop_excel.loc[i,"UP 1400"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1450 value = %.3f }" % (pop_excel.loc[i,"RP 1450"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1450 value = %.3f }" % (pop_excel.loc[i,"UP 1450"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1450 value = %.3f }" % (pop_excel.loc[i,"RP 1450"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1450 value = %.3f }" % (pop_excel.loc[i,"UP 1450"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1500 value = %.3f }" % (pop_excel.loc[i,"RP 1500"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1500 value = %.3f }" % (pop_excel.loc[i,"UP 1500"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1500 value = %.3f }" % (pop_excel.loc[i,"RP 1500"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1500 value = %.3f }" % (pop_excel.loc[i,"UP 1500"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1550 value = %.3f }" % (pop_excel.loc[i,"RP 1550"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1550 value = %.3f }" % (pop_excel.loc[i,"UP 1550"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1550 value = %.3f }" % (pop_excel.loc[i,"RP 1550"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1550 value = %.3f }" % (pop_excel.loc[i,"UP 1550"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1600 value = %.3f }" % (pop_excel.loc[i,"RP 1600"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1600 value = %.3f }" % (pop_excel.loc[i,"UP 1600"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1600 value = %.3f }" % (pop_excel.loc[i,"RP 1600"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1600 value = %.3f }" % (pop_excel.loc[i,"UP 1600"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1650 value = %.3f }" % (pop_excel.loc[i,"RP 1650"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1650 value = %.3f }" % (pop_excel.loc[i,"UP 1650"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1650 value = %.3f }" % (pop_excel.loc[i,"RP 1650"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1650 value = %.3f }" % (pop_excel.loc[i,"UP 1650"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1700 value = %.3f }" % (pop_excel.loc[i,"RP 1700"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1700 value = %.3f }" % (pop_excel.loc[i,"UP 1700"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1700 value = %.3f }" % (pop_excel.loc[i,"RP 1700"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1700 value = %.3f }" % (pop_excel.loc[i,"UP 1700"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1750 value = %.3f }" % (pop_excel.loc[i,"RP 1750"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1750 value = %.3f }" % (pop_excel.loc[i,"UP 1750"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1750 value = %.3f }" % (pop_excel.loc[i,"RP 1750"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1750 value = %.3f }" % (pop_excel.loc[i,"UP 1750"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1800 value = %.3f }" % (pop_excel.loc[i,"RP 1800"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1800 value = %.3f }" % (pop_excel.loc[i,"UP 1800"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1800 value = %.3f }" % (pop_excel.loc[i,"RP 1800"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1800 value = %.3f }" % (pop_excel.loc[i,"UP 1800"]/1000))
 		
-		current_file.write("\n\tset_key = { lhs = starting_rural_pop_1850 value = %.3f }" % (pop_excel.loc[i,"RP 1850"]/1000))
-		current_file.write("\n\tset_key = { lhs = starting_urban_pop_1850 value = %.3f }" % (pop_excel.loc[i,"UP 1850"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_rural_pop_1850 value = %.3f }" % (pop_excel.loc[i,"RP 1850"]/1000))
+		current_file.write("\n\tset_variable = { which = starting_urban_pop_1850 value = %.3f }" % (pop_excel.loc[i,"UP 1850"]/1000))
 		
 		current_file.write("\n}")
 

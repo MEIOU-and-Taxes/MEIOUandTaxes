@@ -29,9 +29,9 @@ def get_constants():
                 line = line[:ind]
 
             if line:
-                key, val = [t.strip() for t in line.split(':')]
+                variable, val = [t.strip() for t in line.split(':')]
 
-                out[key] = val
+                out[variable] = val
     
     return out
 

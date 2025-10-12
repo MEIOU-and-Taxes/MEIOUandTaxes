@@ -21,9 +21,9 @@ def check_error(command):
 
     if len(command) != 4:
         return True
-    if command[0] != 'lhs':
+    if command[0] != 'which':
         return True
-    if command[1] == 'lhs' or command[1] == 'which' or command[1] == 'value' or command[1] == 'PREV' or command[1] == 'ROOT' or 'event_target:' in command[1]:
+    if command[1] == 'which' or command[1] == 'which' or command[1] == 'value' or command[1] == 'PREV' or command[1] == 'ROOT' or 'event_target:' in command[1]:
         return True
     if command[2] != 'which' and command[2] != 'value' and not '$' in command[2]:
         return True
@@ -32,7 +32,7 @@ def check_error(command):
             float(command[3])
         except:
             return True
-    if command[3] == 'lhs' or command[3] == 'which' or command[3] == 'value':
+    if command[3] == 'which' or command[3] == 'which' or command[3] == 'value':
         return True
 
     return False
@@ -67,17 +67,17 @@ def update_script(path):
                 while '  ' in command:
                     command = command.replace('  ', ' ')
 
-                newoperator = operator.replace('variable', 'key')
+                newoperator = operator.replace('variable', 'variable')
 
                 if len(command) > 0:
                     if command.count('=') == 1:
                         command = command.split('=')
 
-                        command = '%s = { lhs = %s value = %s }' % (newoperator, command[0].strip(' \n\t'), command[1].strip(' \n\t'))
+                        command = '%s = { which = %s value = %s }' % (newoperator, command[0].strip(' \n\t'), command[1].strip(' \n\t'))
                     else:
                         command = command.split(' ')
                         
-                        command = '%s = { lhs = %s %s = %s }' % (newoperator, command[2], command[3], command[5])
+                        command = '%s = { which = %s %s = %s }' % (newoperator, command[2], command[3], command[5])
 
                     if check_error(command):
                         print(command)
@@ -104,7 +104,7 @@ def update_local(dct, path):
         with open(path, 'w', encoding='ISO-8859-1') as ff:
             ff.write(local)
 
-with open('keys.txt') as f:
+with open('variables.txt') as f:
     dct = dict()
 
     for line in f.readlines():
@@ -115,7 +115,7 @@ with open('keys.txt') as f:
 operators = ['set_variable', 'change_variable', 'subtract_variable',
              'divide_variable', 'multiply_variable',
              'check_variable', 'is_variable_equal']
-dont = ['keys.txt', '00-scripts.txt', '00-triggers.txt',
+dont = ['variables.txt', '00-scripts.txt', '00-triggers.txt',
         'vars.txt', '00-locs_l_english.yml', '00-locs.txt']
 for path in glob.glob(os.path.join('**', '*.txt'), recursive = True):
     in_dont = False

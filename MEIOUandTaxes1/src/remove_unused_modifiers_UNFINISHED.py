@@ -220,24 +220,24 @@ def check_dont(path, dont):
 		
 	return False
 
-def find_code(file, keywords):
+def find_code(file, variablewords):
 	out = list()
 
 	for f in file:
-		if f[0] in keywords:
+		if f[0] in variablewords:
 			out.extend([f[0],f[2]])
 		elif type(f[2]) != type(list()) or not f[2] or type(f[2][0]) != type(list()):
 			continue
 		else:
-			out.extend(find_code(f[2], keywords))
+			out.extend(find_code(f[2], variablewords))
 			
 	return out
 
-def remove_code(file, keywords):
+def remove_code(file, variablewords):
 	out = list()
 
 	for f in file:
-		if f[0] in keywords:
+		if f[0] in variablewords:
 			continue
 		else:
 			out.append(f)
@@ -313,7 +313,7 @@ if __name__ == '__main__':
 
 	modfiles = dict()
 	modifiers = []
-	keywords = ["add_country_modifier", "add_province_modifier", "add_ruler_modifier", "add_permanent_province_modifier", "add_disaster_modifier", "extend_province_modifier", "add_province_triggered_modifier"]
+	variablewords = ["add_country_modifier", "add_province_modifier", "add_ruler_modifier", "add_permanent_province_modifier", "add_disaster_modifier", "extend_province_modifier", "add_province_triggered_modifier"]
 
 	print("Loading modifier files...")
 	
@@ -328,7 +328,7 @@ if __name__ == '__main__':
 		for modifier in modfiles[path]:
 			modifiers.append(modifier[0])
 
-	modifierlist = [find_code(path, keywords) for path in paths]
+	modifierlist = [find_code(path, variablewords) for path in paths]
 	used_modifiers = []
 	for x in modifierlist:
 		for y in x[1::2]:

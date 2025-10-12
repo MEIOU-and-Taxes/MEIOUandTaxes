@@ -40,7 +40,7 @@ with open(fontfile, 'r') as fontf:
 	for kern in [line.split() for line in font if line.startswith("kerning first=")]:
 		try:
 			kerndict[chr(int(kern[1].split("=")[1]))][chr(int(kern[2].split("=")[1]))] = int(kern[3].split("=")[1])
-		except KeyError:
+		except variableError:
 			kerndict[chr(int(kern[1].split("=")[1]))] = dict([(chr(int(kern[2].split("=")[1])), int(kern[3].split("=")[1]))])
 
 
@@ -59,7 +59,7 @@ with codecs.open(locfile, 'r', encoding='utf-8-sig') as locf:
 				length += chardict[char]
 				try:
 					length += kerndict[lchar][char]
-				except KeyError:
+				except variableError:
 					pass
 				lchar = char
 			if length > maxlen:

@@ -17,39 +17,39 @@ Growth_GetBirthProv = {
     # 1% of resident population
     if = {
         limit = {
-            check_key = { lhs = RE_Total value = 0.001 }
+            check_variable = { which = RE_Total value = 0.001 }
         }
-        set_key = { lhs = LT_Total which = RE_Total }
-		multiply_key = { lhs = LT_Total value = 0.01 }
+        set_variable = { which = LT_Total which = RE_Total }
+		multiply_variable = { which = LT_Total value = 0.01 }
 
-        set_key = { lhs = LT_Ratio which = LT_Total }
-        multiply_key = { lhs = LT_Ratio value = 100 }
-        divide_key = { lhs = LT_Ratio which = RE_Total }
+        set_variable = { which = LT_Ratio which = LT_Total }
+        multiply_variable = { which = LT_Ratio value = 100 }
+        divide_variable = { which = LT_Ratio which = RE_Total }
     }
     else = { 
-        set_key = { lhs = LT_Total value = 0 }
-        set_key = { lhs = LT_Ratio value = 0 }
+        set_variable = { which = LT_Total value = 0 }
+        set_variable = { which = LT_Ratio value = 0 }
     }
 
-    # Update overall pop birth key for all classes
-    # --> the birth keys are the sum of birth and death
-    set_key = { lhs = Class_RuralBirth      which = SF_Birth }
-    change_key = { lhs = Class_RuralBirth   which = NM_Birth }
+    # Update overall pop birth variable for all classes
+    # --> the birth variables are the sum of birth and death
+    set_variable = { which = Class_RuralBirth      which = SF_Birth }
+    change_variable = { which = Class_RuralBirth   which = NM_Birth }
 
-    set_key = { lhs = Class_UrbanBirth which = RE_Birth }
+    set_variable = { which = Class_UrbanBirth which = RE_Birth }
 
-    set_key = { lhs = Class_NotablesBirth       which = CL_Birth }
-    change_key = { lhs = Class_NotablesBirth    which = BG_Birth }
-    change_key = { lhs = Class_NotablesBirth    which = NO_Birth }
+    set_variable = { which = Class_NotablesBirth       which = CL_Birth }
+    change_variable = { which = Class_NotablesBirth    which = BG_Birth }
+    change_variable = { which = Class_NotablesBirth    which = NO_Birth }
 
-    set_key = { lhs = Class_TotalBirth      which = Class_RuralBirth }
-    change_key = { lhs = Class_TotalBirth   which = Class_UrbanBirth }
-    change_key = { lhs = Class_TotalBirth   which = Class_NotablesBirth }
+    set_variable = { which = Class_TotalBirth      which = Class_RuralBirth }
+    change_variable = { which = Class_TotalBirth   which = Class_UrbanBirth }
+    change_variable = { which = Class_TotalBirth   which = Class_NotablesBirth }
 
-    set_key = { lhs = Class_RuralChange which = Class_RuralBirth }
-    set_key = { lhs = Class_UrbanChange which = Class_UrbanBirth }
-    set_key = { lhs = Class_NotablesChange which = Class_NotablesBirth }
-    set_key = { lhs = Class_TotalChange which = Class_TotalBirth }
+    set_variable = { which = Class_RuralChange which = Class_RuralBirth }
+    set_variable = { which = Class_UrbanChange which = Class_UrbanBirth }
+    set_variable = { which = Class_NotablesChange which = Class_NotablesBirth }
+    set_variable = { which = Class_TotalChange which = Class_TotalBirth }
 }
 
 # Handle birth and death calculation for each class
@@ -60,113 +60,113 @@ Growth_GetBirthProv = {
 Growth_GetBirth = {
     if = {
         limit = {
-            check_key = { lhs = $class$_Total value = 0.001 } # If there are pops do calc
+            check_variable = { which = $class$_Total value = 0.001 } # If there are pops do calc
         }
         ### CASE SWITCH
         # CASE $class$ LifeC Fulfilment >= Growth_PointNeutralFill%
 		if = {
 			limit = {
-				check_key = { lhs = $class$_FillLifeC value = 0.85 } # `Growth_PointNeutralFill~value`
+				check_variable = { which = $class$_FillLifeC value = 0.85 } # `Growth_PointNeutralFill~value`
 			}
             # Tmp_0 = LifeCFullfilment - Growth_PointNeutralFill
             # Tmp_1 = LifeCFullfilment
-			set_key = { lhs = Tmp_0 which = $class$_FillLifeC }
+			set_variable = { which = Tmp_0 which = $class$_FillLifeC }
             if = {
                 limit = {
-                    check_key = { lhs = $class$_FillLifeC value = 2.33 } # `Growth_PointMaxFulfill~value`
+                    check_variable = { which = $class$_FillLifeC value = 2.33 } # `Growth_PointMaxFulfill~value`
                 }
-                set_key = { lhs = Tmp_0 value = 2.33 } # `Growth_PointMaxFulfill~value`
+                set_variable = { which = Tmp_0 value = 2.33 } # `Growth_PointMaxFulfill~value`
             }
-			set_key = { lhs = Tmp_1 which = Tmp_0 }
-			subtract_key = { lhs = Tmp_0 value = 0.85 } # `Growth_PointNeutralFill~value`
+			set_variable = { which = Tmp_1 which = Tmp_0 }
+			subtract_variable = { which = Tmp_0 value = 0.85 } # `Growth_PointNeutralFill~value`
 			
 			# Birth Rate formula:
 			#  (LifeCFulfillment - Growth_PointNeutralFill) * Growth_MultPositiveFill
 			# (--------------------------------------------------------------------- * (LifeCFulfillment - Growth_PointNeutralFill) + 1) * rBirth
 			#                             LifeCFulfillment
 			
-			set_key = { lhs = Growth_Birth which = Tmp_0 }
-			multiply_key = { lhs = Growth_Birth value = 1.0 }   # `Growth_MultPositiveFill~value` ## TOO STRONK
-			divide_key = { lhs = Growth_Birth which = Tmp_1 }
-			multiply_key = { lhs = Growth_Birth which = Tmp_0 }
-			change_key = { lhs = Growth_Birth value = 1 }
-			multiply_key = { lhs = Growth_Birth value = $rBirth$ }
+			set_variable = { which = Growth_Birth which = Tmp_0 }
+			multiply_variable = { which = Growth_Birth value = 1.0 }   # `Growth_MultPositiveFill~value` ## TOO STRONK
+			divide_variable = { which = Growth_Birth which = Tmp_1 }
+			multiply_variable = { which = Growth_Birth which = Tmp_0 }
+			change_variable = { which = Growth_Birth value = 1 }
+			multiply_variable = { which = Growth_Birth value = $rBirth$ }
 			
 			## Modifer on pop growth based on usage of land / fisheries in the province
 			# The more unused land / fisheries in % the higher the bonus to birth rate due to abundand ressoure and opportunity
             # Applies by the condition rural (currently used for peasants and nomads)
 			[[rural]
-				set_key = { lhs = Tmp_2 value = 0 }
-				set_key = { lhs = Tmp_3 value = 0 }
+				set_variable = { which = Tmp_2 value = 0 }
+				set_variable = { which = Tmp_3 value = 0 }
 
                 ### Calculate multiplier by agricultural filling
 				if = {
 					limit = {
 						has_province_flag = Building_AgricultureHas
-						check_key = { lhs = Building_AgricultureFill value = 0.001 }
+						check_variable = { which = Building_AgricultureFill value = 0.001 }
 					}
-					set_key = { lhs = Tmp_2 which = Building_AgricultureFill }
-                    set_key = { lhs = Tmp_4 which = Tmp_2 }
+					set_variable = { which = Tmp_2 which = Building_AgricultureFill }
+                    set_variable = { which = Tmp_4 which = Tmp_2 }
 
-					change_key = { lhs = Tmp_2 value = 0.30 }   # `Growth_BaseDividendBirthFromEmptyAgriculture~value`
-                    multiply_key = { lhs = Tmp_4 value = 1.30 } # `Growth_MultDivisorBirthFromEmptyAgriculture~value`
-                    change_key = { lhs = Tmp_4 value = 0.1 }   # `Growth_BaseDivisorBirthFromEmptyAgriculture~value`
-					divide_key = { lhs = Tmp_2 which = Tmp_4 }
+					change_variable = { which = Tmp_2 value = 0.30 }   # `Growth_BaseDividendBirthFromEmptyAgriculture~value`
+                    multiply_variable = { which = Tmp_4 value = 1.30 } # `Growth_MultDivisorBirthFromEmptyAgriculture~value`
+                    change_variable = { which = Tmp_4 value = 0.1 }   # `Growth_BaseDivisorBirthFromEmptyAgriculture~value`
+					divide_variable = { which = Tmp_2 which = Tmp_4 }
 				}
                 ### Calculate multiplier by fishery filling
 				if = {
 					limit = {
 						has_province_flag = Building_FisheryHas
-						check_key = { lhs = Building_FisheryFill value = 0.001 }
+						check_variable = { which = Building_FisheryFill value = 0.001 }
 					}
 
-					set_key = { lhs = Tmp_3 which = Building_FisheryFill }
-                    set_key = { lhs = Tmp_4 which = Tmp_3 }
+					set_variable = { which = Tmp_3 which = Building_FisheryFill }
+                    set_variable = { which = Tmp_4 which = Tmp_3 }
 
-					change_key = { lhs = Tmp_3 value = 0.30 }   # `Growth_BaseDividendBirthFromEmptyFishery~value`
-                    multiply_key = { lhs = Tmp_4 value = 1.30 } # `Growth_MultDivisorBirthFromEmptyFishery~value`
-                    change_key = { lhs = Tmp_4 value = 0.1 }   # `Growth_BaseDivisorBirthFromEmptyFishery~value`
-					divide_key = { lhs = Tmp_3 which = Tmp_4 }
+					change_variable = { which = Tmp_3 value = 0.30 }   # `Growth_BaseDividendBirthFromEmptyFishery~value`
+                    multiply_variable = { which = Tmp_4 value = 1.30 } # `Growth_MultDivisorBirthFromEmptyFishery~value`
+                    change_variable = { which = Tmp_4 value = 0.1 }   # `Growth_BaseDivisorBirthFromEmptyFishery~value`
+					divide_variable = { which = Tmp_3 which = Tmp_4 }
 				}
 
 				### Weight Fishery and Agriculture multiplier by some factor
 				if = {
 					limit = {
-						check_key = { lhs = Tmp_2 value = 0.001 }
-						check_key = { lhs = Tmp_3 value = 0.001 }
+						check_variable = { which = Tmp_2 value = 0.001 }
+						check_variable = { which = Tmp_3 value = 0.001 }
 					}
-					multiply_key = { lhs = Tmp_2 value = 0.8 }  # `Growth_ScaleBirthFromEmptyAgriculture~value`
-					multiply_key = { lhs = Tmp_3 value = 0.2 }  # `Growth_ScaleBirthFromEmptyFishery~value`
+					multiply_variable = { which = Tmp_2 value = 0.8 }  # `Growth_ScaleBirthFromEmptyAgriculture~value`
+					multiply_variable = { which = Tmp_3 value = 0.2 }  # `Growth_ScaleBirthFromEmptyFishery~value`
 
-					change_key = { lhs = Tmp_2 which = Tmp_3 }
+					change_variable = { which = Tmp_2 which = Tmp_3 }
 				}
 
 				### Check modifier constraints
 				if = {
 					limit = {
-						NOT = { is_key_equal = { lhs = Tmp_2 value = 0 } }
+						NOT = { is_variable_equal = { which = Tmp_2 value = 0 } }
 					}
 
 					if = {
 						limit = {
-							check_key = { lhs = Tmp_2 value = 1.5 }            # `Growth_MaxBirthFromEmpty~value`
+							check_variable = { which = Tmp_2 value = 1.5 }            # `Growth_MaxBirthFromEmpty~value`
 						}
-						set_key = { lhs = Tmp_2 value = 1.5 }                  # `Growth_MaxBirthFromEmpty~value`
+						set_variable = { which = Tmp_2 value = 1.5 }                  # `Growth_MaxBirthFromEmpty~value`
 					}
 
 					else_if = {
 						limit = {
-							NOT = { check_key = { lhs = Tmp_2 value = 0.95 } }  # `Growth_MinBirthFromEmpty~value`
+							NOT = { check_variable = { which = Tmp_2 value = 0.95 } }  # `Growth_MinBirthFromEmpty~value`
 						}
-						set_key = { lhs = Tmp_2 value = 0.95 }                  # `Growth_MinBirthFromEmpty~value`
+						set_variable = { which = Tmp_2 value = 0.95 }                  # `Growth_MinBirthFromEmpty~value`
 					}
 
-					multiply_key = { lhs = Growth_Birth which = Tmp_2 }
+					multiply_variable = { which = Growth_Birth which = Tmp_2 }
 				}
 			]
 
 
-			set_key = { lhs = Growth_Death value = $rDeath$ }
+			set_variable = { which = Growth_Death value = $rDeath$ }
             
             # Special Handling for Urban death rates
 			[[urban]
@@ -180,19 +180,19 @@ Growth_GetBirth = {
                     ## If above the cap, recalculate birth rate for this case
 					if = {
 						limit = {
-							check_key = { lhs = RE_Total which = Tmp_0 }
+							check_variable = { which = RE_Total which = Tmp_0 }
 						}
 
                         # Death rate formula:
                         # (Residents - AmenitiesCap)
                         # -------------------------   * rDeath * Growth_DeathMultFromLowAmenities + rDeath
                         #         Residents
-						set_key = { lhs = Growth_Death which = RE_Total }
-						subtract_key = { lhs = Growth_Death which = Tmp_0 }
-						divide_key = { lhs = Growth_Death which = RE_Total }
-						multiply_key = { lhs = Growth_Death value = $rDeath$ }
-						multiply_key = { lhs = Growth_Death value = 2.0 } # `Growth_DeathMultFromLowAmenities~value`
-						change_key = { lhs = Growth_Death value = $rDeath$ }
+						set_variable = { which = Growth_Death which = RE_Total }
+						subtract_variable = { which = Growth_Death which = Tmp_0 }
+						divide_variable = { which = Growth_Death which = RE_Total }
+						multiply_variable = { which = Growth_Death value = $rDeath$ }
+						multiply_variable = { which = Growth_Death value = 2.0 } # `Growth_DeathMultFromLowAmenities~value`
+						change_variable = { which = Growth_Death value = $rDeath$ }
 					}
 				}
 			]
@@ -200,11 +200,11 @@ Growth_GetBirth = {
 		else = { # CASE $class$ LifeC Fulfilment < Growth_PointNeutralFill%
 			
             # Birth rate formula: LifeCFulfillment * 0.782 + 0.414
-            set_key = { lhs = Growth_Birth which = $class$_FillLifeC }
-			multiply_key = { lhs = Growth_Birth value = 0.689 } # `Growth_MultNegativeFill~value`
-			change_key = { lhs = Growth_Birth value = 0.414 }   # `Growth_BaseNegativeFill~value`
+            set_variable = { which = Growth_Birth which = $class$_FillLifeC }
+			multiply_variable = { which = Growth_Birth value = 0.689 } # `Growth_MultNegativeFill~value`
+			change_variable = { which = Growth_Birth value = 0.414 }   # `Growth_BaseNegativeFill~value`
 			
-			set_key = { lhs = Growth_Death value = $rDeath$ }
+			set_variable = { which = Growth_Death value = $rDeath$ }
 
             # Special Handling for Urban death rates
 			[[urban]
@@ -217,60 +217,60 @@ Growth_GetBirth = {
 
                     if = {
 						limit = {
-							check_key = { lhs = RE_Total which = Tmp_0 }
+							check_variable = { which = RE_Total which = Tmp_0 }
 						}
 					    
                         # Death rate formula:
                         # (Residents - AmenitiesCap)
                         # -------------------------   * rDeath * Growth_DeathMultFromLowAmenities + rDeath
                         #         Residents
-						set_key = { lhs = Growth_Death which = RE_Total }
-						subtract_key = { lhs = Growth_Death which = Tmp_0 }
-						divide_key = { lhs = Growth_Death which = RE_Total }
-						multiply_key = { lhs = Growth_Death value = $rDeath$ }
-						multiply_key = { lhs = Growth_Death value = 2.0 } # `Growth_DeathMultFromLowAmenities~value`
-						change_key = { lhs = Growth_Death value = $rDeath$ }
+						set_variable = { which = Growth_Death which = RE_Total }
+						subtract_variable = { which = Growth_Death which = Tmp_0 }
+						divide_variable = { which = Growth_Death which = RE_Total }
+						multiply_variable = { which = Growth_Death value = $rDeath$ }
+						multiply_variable = { which = Growth_Death value = 2.0 } # `Growth_DeathMultFromLowAmenities~value`
+						change_variable = { which = Growth_Death value = $rDeath$ }
 					}
 				}
 			]
 
-			divide_key = { lhs = Growth_Death which = Growth_Birth } # Get birth death rate ratio
+			divide_variable = { which = Growth_Death which = Growth_Birth } # Get birth death rate ratio
 
-			multiply_key = { lhs = Growth_Birth value = $rBirth$ } # Apply hardcoded modifier on birth rate
+			multiply_variable = { which = Growth_Birth value = $rBirth$ } # Apply hardcoded modifier on birth rate
 		}
 
         # Apply API modifiers to Birth and Death rates
-		multiply_key = { lhs = Growth_Birth which = Modi_Birth }
-		multiply_key = { lhs = Growth_Birth which = Modi_Birth$class$ }
-		multiply_key = { lhs = Growth_Death which = Modi_Death }
+		multiply_variable = { which = Growth_Birth which = Modi_Birth }
+		multiply_variable = { which = Growth_Birth which = Modi_Birth$class$ }
+		multiply_variable = { which = Growth_Death which = Modi_Death }
 
         # Subtract Birth and Death Rate
-		set_key = { lhs = $class$_Birth which = Growth_Birth }
-		subtract_key = { lhs = $class$_Birth which = Growth_Death }
+		set_variable = { which = $class$_Birth which = Growth_Birth }
+		subtract_variable = { which = $class$_Birth which = Growth_Death }
 
         # Multiply combined birth/death rate with class total to get absolute pop change
-		multiply_key = { lhs = $class$_Birth which = $class$_Total }
-		multiply_key = { lhs = $class$_Birth value = 0.01 }  # `Growth_GrowthSpeed~value`
+		multiply_variable = { which = $class$_Birth which = $class$_Total }
+		multiply_variable = { which = $class$_Birth value = 0.01 }  # `Growth_GrowthSpeed~value`
 
-        # Apply change to actual total pop key
-		change_key = { lhs = $class$_Total which = $class$_Birth }
+        # Apply change to actual total pop variable
+		change_variable = { which = $class$_Total which = $class$_Birth }
 
         # Exception handling for negative pop values
 		if = {
 			limit = {
 				NOT = {
-					check_key = { lhs = $class$_Total value = 0 }
+					check_variable = { which = $class$_Total value = 0 }
 				}
 			}
-			set_key = { lhs = $class$_Total value = 0 }
+			set_variable = { which = $class$_Total value = 0 }
 		}
 
-		set_key = { lhs = Growth_Birth value = 0 }
-		set_key = { lhs = Growth_Death value = 0 }
+		set_variable = { which = Growth_Birth value = 0 }
+		set_variable = { which = Growth_Death value = 0 }
 	}
 	else = { # Exception handling for no local pop of $class$
-		set_key = { lhs = $class$_Birth value = 0 }
-		set_key = { lhs = $class$_Total value = 0 }
+		set_variable = { which = $class$_Birth value = 0 }
+		set_variable = { which = $class$_Total value = 0 }
 	}
 }
 
@@ -291,24 +291,24 @@ Growth_DoMove = {
         #Growth_SetPressure = { class = NO labor = NO }
         #Growth_SetPressure = { class = BG labor = BG burgher=yes }
         #Growth_SetPressure = { class = CL labor = CL }
-		set_key = { lhs = Growth_PressureNO value = 0 }
-		set_key = { lhs = Growth_PressureBG value = 0 }
-		set_key = { lhs = Growth_PressureCL value = 0 }
+		set_variable = { which = Growth_PressureNO value = 0 }
+		set_variable = { which = Growth_PressureBG value = 0 }
+		set_variable = { which = Growth_PressureCL value = 0 }
         
         ### Get multiplication of class pop numbers and calculated outward pressure % --> potential pressure
-        set_key = { lhs = Tmp_2 which = SF_Total }
-        set_key = { lhs = Tmp_3 which = NM_Total }
-        set_key = { lhs = Tmp_4 which = RE_Total }
-        set_key = { lhs = Tmp_5 which = NO_Total }
-        set_key = { lhs = Tmp_6 which = BG_Total }
-        set_key = { lhs = Tmp_7 which = CL_Total }
+        set_variable = { which = Tmp_2 which = SF_Total }
+        set_variable = { which = Tmp_3 which = NM_Total }
+        set_variable = { which = Tmp_4 which = RE_Total }
+        set_variable = { which = Tmp_5 which = NO_Total }
+        set_variable = { which = Tmp_6 which = BG_Total }
+        set_variable = { which = Tmp_7 which = CL_Total }
 
-        multiply_key = { lhs = Tmp_2 which = Growth_PressureSF }
-        multiply_key = { lhs = Tmp_3 which = Growth_PressureNM }
-        multiply_key = { lhs = Tmp_4 which = Growth_PressureRE }
-        multiply_key = { lhs = Tmp_5 which = Growth_PressureNO }
-        multiply_key = { lhs = Tmp_6 which = Growth_PressureBG }
-        multiply_key = { lhs = Tmp_7 which = Growth_PressureCL }
+        multiply_variable = { which = Tmp_2 which = Growth_PressureSF }
+        multiply_variable = { which = Tmp_3 which = Growth_PressureNM }
+        multiply_variable = { which = Tmp_4 which = Growth_PressureRE }
+        multiply_variable = { which = Tmp_5 which = Growth_PressureNO }
+        multiply_variable = { which = Tmp_6 which = Growth_PressureBG }
+        multiply_variable = { which = Tmp_7 which = Growth_PressureCL }
 
 		### Apply modifier on migration based on peasant freedom and tenacy reform
         #
@@ -318,66 +318,66 @@ Growth_DoMove = {
         #
         # Constraints: [0.1, 1]
 		owner = { 
-		    set_key = { lhs = Tmp_8 which = Rights_NOTen }
+		    set_variable = { which = Tmp_8 which = Rights_NOTen }
 		}
 
-		set_key = { lhs = Tmp_8 which = owner }
-		change_key = { lhs = Tmp_8 value = 3 } # move the reform key from the scale [-2,1] to [1,4]
-		divide_key = { lhs = Tmp_8 value = 4 }
+		set_variable = { which = Tmp_8 which = owner }
+		change_variable = { which = Tmp_8 value = 3 } # move the reform variable from the scale [-2,1] to [1,4]
+		divide_variable = { which = Tmp_8 value = 4 }
 
-		set_key = { lhs = Tmp_9 which = SF_Freedom }
+		set_variable = { which = Tmp_9 which = SF_Freedom }
 
-		divide_key = { lhs = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
+		divide_variable = { which = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
 
-		multiply_key = { lhs = Tmp_8 which = Tmp_9 } # calculate multiplier
+		multiply_variable = { which = Tmp_8 which = Tmp_9 } # calculate multiplier
 
-		change_key = { lhs = Tmp_8 value = 0.1 }
+		change_variable = { which = Tmp_8 value = 0.1 }
 		if = {
 		    limit = {
-		        check_key = { lhs = Tmp_8 value = 1.001 }
+		        check_variable = { which = Tmp_8 value = 1.001 }
 		    }
-		    set_key = { lhs = Tmp_8 value = 1 }
+		    set_variable = { which = Tmp_8 value = 1 }
 		}
 		else_if = {
 		    limit = {
-		        NOT = { check_key = { lhs = Tmp_8 value = 0.1 } }
+		        NOT = { check_variable = { which = Tmp_8 value = 0.1 } }
 		    }
-		    set_key = { lhs = Tmp_8 value = 0.1 }
+		    set_variable = { which = Tmp_8 value = 0.1 }
 		}
 
-		multiply_key = { lhs = Tmp_2 which = Tmp_8 } # apply multiplier to actual migrants pool
+		multiply_variable = { which = Tmp_2 which = Tmp_8 } # apply multiplier to actual migrants pool
 
 		# Tmp_0 = total sum of possible migrants
-        set_key = { lhs = Tmp_0 which = Tmp_2 }
-        change_key = { lhs = Tmp_0 which = Tmp_3 }
-        change_key = { lhs = Tmp_0 which = Tmp_4 }
-        change_key = { lhs = Tmp_0 which = Tmp_5 }
-        change_key = { lhs = Tmp_0 which = Tmp_6 }
-        change_key = { lhs = Tmp_0 which = Tmp_7 }
+        set_variable = { which = Tmp_0 which = Tmp_2 }
+        change_variable = { which = Tmp_0 which = Tmp_3 }
+        change_variable = { which = Tmp_0 which = Tmp_4 }
+        change_variable = { which = Tmp_0 which = Tmp_5 }
+        change_variable = { which = Tmp_0 which = Tmp_6 }
+        change_variable = { which = Tmp_0 which = Tmp_7 }
 
         # Tmp_1 = All classes - NO - CL - BG
-        set_key = { lhs = Tmp_1 which = SF_Total }
-		multiply_key = { lhs = Tmp_1 which = Tmp_8 } # deduct peasant freedom effect from peasant total
-        change_key = { lhs = Tmp_1 which = NM_Total }
-        change_key = { lhs = Tmp_1 which = RE_Total }
-        #change_key = { lhs = Tmp_1 which = BG_Total }
-        #change_key = { lhs = Tmp_1 which = NO_Total }
-        #change_key = { lhs = Tmp_1 which = CL_Total }
+        set_variable = { which = Tmp_1 which = SF_Total }
+		multiply_variable = { which = Tmp_1 which = Tmp_8 } # deduct peasant freedom effect from peasant total
+        change_variable = { which = Tmp_1 which = NM_Total }
+        change_variable = { which = Tmp_1 which = RE_Total }
+        #change_variable = { which = Tmp_1 which = BG_Total }
+        #change_variable = { which = Tmp_1 which = NO_Total }
+        #change_variable = { which = Tmp_1 which = CL_Total }
         
         # Reset existing migration variables of last year
-        set_key = { lhs = SF_In value = 0 }
-        set_key = { lhs = NM_In value = 0 }
-        set_key = { lhs = RE_In value = 0 }
-        set_key = { lhs = NO_In value = 0 }
-        set_key = { lhs = BG_In value = 0 }
-        set_key = { lhs = CL_In value = 0 }
+        set_variable = { which = SF_In value = 0 }
+        set_variable = { which = NM_In value = 0 }
+        set_variable = { which = RE_In value = 0 }
+        set_variable = { which = NO_In value = 0 }
+        set_variable = { which = BG_In value = 0 }
+        set_variable = { which = CL_In value = 0 }
 
-        set_key = { lhs = SF_Out value = 0 }
-        set_key = { lhs = NM_Out value = 0 }
-        set_key = { lhs = RE_Out value = 0 }
-        set_key = { lhs = NO_Out value = 0 }
-        set_key = { lhs = BG_Out value = 0 }
-        set_key = { lhs = CL_Out value = 0 }
+        set_variable = { which = SF_Out value = 0 }
+        set_variable = { which = NM_Out value = 0 }
+        set_variable = { which = RE_Out value = 0 }
+        set_variable = { which = NO_Out value = 0 }
+        set_variable = { which = BG_Out value = 0 }
+        set_variable = { which = CL_Out value = 0 }
     }
 
     # Flag migration zone for each independent country + subjects (4 subject lvls at max) with Growth_Zone province flag
@@ -430,9 +430,9 @@ Growth_DoMove = {
             }
         }
 	    
-        # Reset keys
-		set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
+        # Reset variables
+		set_variable = { which = Tmp_0 value = 0 }
+        set_variable = { which = Tmp_1 value = 0 }
 
 		# Sum up per growth zone 
 		# Tmp_0 = total sum of possible migrants
@@ -442,39 +442,39 @@ Growth_DoMove = {
 				has_province_flag = Growth_Zone
             }
             PREV = {
-                change_key = { lhs = Tmp_0 which = PREV }
-                change_key = { lhs = Tmp_1 which = PREV }
+                change_variable = { which = Tmp_0 which = PREV }
+                change_variable = { which = Tmp_1 which = PREV }
             }
         }
 
 		# Public_Tmp1 = PossibleMigrants in Growth Zone / Total pops in growth zone
         if = {
             limit = {
-                check_key = { lhs = Tmp_0 value = 0.001 }
-                check_key = { lhs = Tmp_1 value = 0.001 }
+                check_variable = { which = Tmp_0 value = 0.001 }
+                check_variable = { which = Tmp_1 value = 0.001 }
             }
-            set_key = { lhs = Public_Tmp1 which = Tmp_0 }
-            divide_key = { lhs = Public_Tmp1 which = Tmp_1 }
+            set_variable = { which = Public_Tmp1 which = Tmp_0 }
+            divide_variable = { which = Public_Tmp1 which = Tmp_1 }
 
             # If there are possible migrants calculate
             if = {
                 limit = {
-                    check_key = { lhs = Public_Tmp1 value = 0.001 }
+                    check_variable = { which = Public_Tmp1 value = 0.001 }
                 }
-                set_key = { lhs = Public_Tmp2 value = 0 }
-                set_key = { lhs = Public_Tmp3 value = 0 }
-                set_key = { lhs = Public_Tmp4 value = 0 }
-                set_key = { lhs = Public_Tmp5 value = 0 }
+                set_variable = { which = Public_Tmp2 value = 0 }
+                set_variable = { which = Public_Tmp3 value = 0 }
+                set_variable = { which = Public_Tmp4 value = 0 }
+                set_variable = { which = Public_Tmp5 value = 0 }
 
                 every_province = {
                     limit = {
                         has_province_flag = Growth_Zone
                     }
-                    set_key = { lhs = Public_Tmp1 which = PREV } # get possible migrant % of total pops
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
+                    set_variable = { which = Public_Tmp1 which = PREV } # get possible migrant % of total pops
+                    set_variable = { which = Public_Tmp2 value = 0 }
+                    set_variable = { which = Public_Tmp3 value = 0 }
+                    set_variable = { which = Public_Tmp4 value = 0 }
+                    set_variable = { which = Public_Tmp5 value = 0 }
 
                     # Calculate migration on province level
                     # how many pops want to go in vs. out
@@ -486,19 +486,19 @@ Growth_DoMove = {
                     Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 }
 
                     PREV = { # sum up all values in growth zone
-                        change_key = { lhs = Public_Tmp2 which = PREV } # Total inward migration
-                        change_key = { lhs = Public_Tmp3 which = PREV } # Total outward migration
-                        change_key = { lhs = Public_Tmp4 which = PREV } # Total inward migration
-                        change_key = { lhs = Public_Tmp5 which = PREV } # Total outward migration
+                        change_variable = { which = Public_Tmp2 which = PREV } # Total inward migration
+                        change_variable = { which = Public_Tmp3 which = PREV } # Total outward migration
+                        change_variable = { which = Public_Tmp4 which = PREV } # Total inward migration
+                        change_variable = { which = Public_Tmp5 which = PREV } # Total outward migration
                     }
                 }
 
                 # cap actual migration to smaller of outward/inward
                 if = {
                     limit = {
-                        check_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
+                        check_variable = { which = Public_Tmp4 which = Public_Tmp5 }
                     }
-                    set_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
+                    set_variable = { which = Public_Tmp4 which = Public_Tmp5 }
                 }
 
                 # 
@@ -507,9 +507,9 @@ Growth_DoMove = {
                         has_province_flag = Growth_Zone
                     }
                     # Get previous calculation results
-                    set_key = { lhs = Public_Tmp2 which = PREV } # Total outward migration
-                    set_key = { lhs = Public_Tmp3 which = PREV } # Total inward migration
-                    set_key = { lhs = Public_Tmp4 which = PREV } # Total actual migration, smaller of outward/inward
+                    set_variable = { which = Public_Tmp2 which = PREV } # Total outward migration
+                    set_variable = { which = Public_Tmp3 which = PREV } # Total inward migration
+                    set_variable = { which = Public_Tmp4 which = PREV } # Total actual migration, smaller of outward/inward
 
                     # Distribute migration on provinces
                     Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }
@@ -522,26 +522,26 @@ Growth_DoMove = {
                     # Clear calculation data
                     clr_province_flag = Growth_Zone 
 
-                    set_key = { lhs = Public_Tmp1 value = 0 }
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
-                    set_key = { lhs = Public_Tmp9 value = 0 }
+                    set_variable = { which = Public_Tmp1 value = 0 }
+                    set_variable = { which = Public_Tmp2 value = 0 }
+                    set_variable = { which = Public_Tmp3 value = 0 }
+                    set_variable = { which = Public_Tmp4 value = 0 }
+                    set_variable = { which = Public_Tmp5 value = 0 }
+                    set_variable = { which = Public_Tmp9 value = 0 }
                 }
 
                 # Clear calculation data
-                set_key = { lhs = Public_Tmp2 value = 0 }
-                set_key = { lhs = Public_Tmp3 value = 0 }
-                set_key = { lhs = Public_Tmp4 value = 0 }
-                set_key = { lhs = Public_Tmp5 value = 0 }
+                set_variable = { which = Public_Tmp2 value = 0 }
+                set_variable = { which = Public_Tmp3 value = 0 }
+                set_variable = { which = Public_Tmp4 value = 0 }
+                set_variable = { which = Public_Tmp5 value = 0 }
             }
         }
 
-        set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
+        set_variable = { which = Tmp_0 value = 0 }
+        set_variable = { which = Tmp_1 value = 0 }
 
-        set_key = { lhs = Public_Tmp1 value = 0 }
+        set_variable = { which = Public_Tmp1 value = 0 }
     }
 
 	#### Migration Zone Mechanics:
@@ -583,72 +583,72 @@ Growth_DoMove = {
 		set_province_flag = POP_ChangedPop
 
         ## Sum up changes per class category
-        set_key = { lhs = Class_RuralIn      which = SF_In }
-        change_key = { lhs = Class_RuralIn   which = NM_In }
+        set_variable = { which = Class_RuralIn      which = SF_In }
+        change_variable = { which = Class_RuralIn   which = NM_In }
 
-        set_key = { lhs = Class_UrbanIn which = RE_In }
+        set_variable = { which = Class_UrbanIn which = RE_In }
 
-        set_key = { lhs = Class_NotablesIn       which = CL_In }
-        change_key = { lhs = Class_NotablesIn    which = BG_In }
-        change_key = { lhs = Class_NotablesIn    which = NO_In }
+        set_variable = { which = Class_NotablesIn       which = CL_In }
+        change_variable = { which = Class_NotablesIn    which = BG_In }
+        change_variable = { which = Class_NotablesIn    which = NO_In }
 
-        set_key = { lhs = Class_TotalIn      which = Class_RuralIn }
-        change_key = { lhs = Class_TotalIn   which = Class_UrbanIn }
-        change_key = { lhs = Class_TotalIn   which = Class_NotablesIn }
+        set_variable = { which = Class_TotalIn      which = Class_RuralIn }
+        change_variable = { which = Class_TotalIn   which = Class_UrbanIn }
+        change_variable = { which = Class_TotalIn   which = Class_NotablesIn }
 
-        set_key = { lhs = Class_RuralOut      which = SF_Out }
-        change_key = { lhs = Class_RuralOut   which = NM_Out }
+        set_variable = { which = Class_RuralOut      which = SF_Out }
+        change_variable = { which = Class_RuralOut   which = NM_Out }
 
-        set_key = { lhs = Class_UrbanOut which = RE_Out }
+        set_variable = { which = Class_UrbanOut which = RE_Out }
 
-        set_key = { lhs = Class_NotablesOut       which = CL_Out }
-        change_key = { lhs = Class_NotablesOut    which = BG_Out }
-        change_key = { lhs = Class_NotablesOut    which = NO_Out }
+        set_variable = { which = Class_NotablesOut       which = CL_Out }
+        change_variable = { which = Class_NotablesOut    which = BG_Out }
+        change_variable = { which = Class_NotablesOut    which = NO_Out }
 
-        set_key = { lhs = Class_TotalOut      which = Class_RuralOut }
-        change_key = { lhs = Class_TotalOut   which = Class_UrbanOut }
-        change_key = { lhs = Class_TotalOut   which = Class_NotablesOut }
+        set_variable = { which = Class_TotalOut      which = Class_RuralOut }
+        change_variable = { which = Class_TotalOut   which = Class_UrbanOut }
+        change_variable = { which = Class_TotalOut   which = Class_NotablesOut }
 
-        ### THOSE KEYS ARE INITIALLY SET IN BIRTH CALCULATION --> THEY SUM UP TOTAL PROVINCE POP CHANGE
-        change_key = { lhs = Class_RuralChange which = Class_RuralIn }
-        subtract_key = { lhs = Class_RuralChange which = Class_RuralOut }
-        change_key = { lhs = Class_UrbanChange which = Class_UrbanIn }
-        subtract_key = { lhs = Class_UrbanChange which = Class_UrbanOut }
-        change_key = { lhs = Class_NotablesChange which = Class_NotablesIn }
-        subtract_key = { lhs = Class_NotablesChange which = Class_NotablesOut }
-        change_key = { lhs = Class_TotalChange which = Class_TotalIn }
-        subtract_key = { lhs = Class_TotalChange which = Class_TotalOut }
+        ### THOSE variableS ARE INITIALLY SET IN BIRTH CALCULATION --> THEY SUM UP TOTAL PROVINCE POP CHANGE
+        change_variable = { which = Class_RuralChange which = Class_RuralIn }
+        subtract_variable = { which = Class_RuralChange which = Class_RuralOut }
+        change_variable = { which = Class_UrbanChange which = Class_UrbanIn }
+        subtract_variable = { which = Class_UrbanChange which = Class_UrbanOut }
+        change_variable = { which = Class_NotablesChange which = Class_NotablesIn }
+        subtract_variable = { which = Class_NotablesChange which = Class_NotablesOut }
+        change_variable = { which = Class_TotalChange which = Class_TotalIn }
+        subtract_variable = { which = Class_TotalChange which = Class_TotalOut }
 
-        change_key = { lhs = SF_Total which = SF_In }
-        change_key = { lhs = NM_Total which = NM_In }
-        change_key = { lhs = RE_Total which = RE_In }
-        change_key = { lhs = NO_Total which = NO_In }
-        change_key = { lhs = BG_Total which = BG_In }
-        change_key = { lhs = CL_Total which = CL_In }
+        change_variable = { which = SF_Total which = SF_In }
+        change_variable = { which = NM_Total which = NM_In }
+        change_variable = { which = RE_Total which = RE_In }
+        change_variable = { which = NO_Total which = NO_In }
+        change_variable = { which = BG_Total which = BG_In }
+        change_variable = { which = CL_Total which = CL_In }
 
-        subtract_key = { lhs = SF_Total which = SF_Out }
-        subtract_key = { lhs = NM_Total which = NM_Out }
-        subtract_key = { lhs = RE_Total which = RE_Out }
-        subtract_key = { lhs = NO_Total which = NO_Out }
-        subtract_key = { lhs = BG_Total which = BG_Out }
-        subtract_key = { lhs = CL_Total which = CL_Out }
+        subtract_variable = { which = SF_Total which = SF_Out }
+        subtract_variable = { which = NM_Total which = NM_Out }
+        subtract_variable = { which = RE_Total which = RE_Out }
+        subtract_variable = { which = NO_Total which = NO_Out }
+        subtract_variable = { which = BG_Total which = BG_Out }
+        subtract_variable = { which = CL_Total which = CL_Out }
 
-        set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
-        set_key = { lhs = Tmp_2 value = 0 }
-        set_key = { lhs = Tmp_3 value = 0 }
-        set_key = { lhs = Tmp_4 value = 0 }
-        set_key = { lhs = Tmp_5 value = 0 }
-        set_key = { lhs = Tmp_6 value = 0 }
-        set_key = { lhs = Tmp_7 value = 0 }
+        set_variable = { which = Tmp_0 value = 0 }
+        set_variable = { which = Tmp_1 value = 0 }
+        set_variable = { which = Tmp_2 value = 0 }
+        set_variable = { which = Tmp_3 value = 0 }
+        set_variable = { which = Tmp_4 value = 0 }
+        set_variable = { which = Tmp_5 value = 0 }
+        set_variable = { which = Tmp_6 value = 0 }
+        set_variable = { which = Tmp_7 value = 0 }
     }
 }
 
 ### Inputs:
 # $class$ = SF | NM | RE | NO | BG | CL
-# $tmp$ = tmp key number to use for calculation
+# $tmp$ = tmp variable number to use for calculation
 # $factor$ = balancing factor to reduce migration speed
-## Keys:
+## variables:
 # Growth_Pressure$class$ = Local outward migratory pressure in % of the population
 # Public_Tmp1 = (PossibleMigrants in Growth Zone / Total pops in growth zone)
 ## Conditionals:
@@ -659,27 +659,27 @@ Growth_DoMove = {
 Growth_DoMove_HandleLocalMigration = {
     if = {
         limit = {
-            check_key = { lhs = Growth_Pressure$class$ value = 0.001 } # If pressure per $class$ greater 0.001 in this province
+            check_variable = { which = Growth_Pressure$class$ value = 0.001 } # If pressure per $class$ greater 0.001 in this province
         }
 		
 		# Public_Tmp9 = Migratory pressure of class / (PossibleMigrants in Growth Zone / Total pops in growth zone)
-        set_key = { lhs = Public_Tmp9 which = Growth_Pressure$class$ }
-        divide_key = { lhs = Public_Tmp9 which = Public_Tmp1 }
+        set_variable = { which = Public_Tmp9 which = Growth_Pressure$class$ }
+        divide_variable = { which = Public_Tmp9 which = Public_Tmp1 }
         
 		# Ceiling at factor of 3
         if = {
             limit = {
-                check_key = { lhs = Public_Tmp9 value = 3 }
+                check_variable = { which = Public_Tmp9 value = 3 }
             }
-            set_key = { lhs = Public_Tmp9 value = 3 }
+            set_variable = { which = Public_Tmp9 value = 3 }
         }
 
-        subtract_key = { lhs = Public_Tmp9 value = 1 }
+        subtract_variable = { which = Public_Tmp9 value = 1 }
 		
 		## Case: Migratory outward pressured pops % of province >= Possible Migrants in % of zone pops --> outward migration
         if = {
             limit = {
-                check_key = { lhs = Growth_Pressure$class$ which = Public_Tmp1 }
+                check_variable = { which = Growth_Pressure$class$ which = Public_Tmp1 }
             }
 
 			#       $class$_Total * (Pressure/Possible Migrants%) [[freedom] * Freedom modifier on migration] [[zone] * 0.5]
@@ -687,16 +687,16 @@ Growth_DoMove_HandleLocalMigration = {
 			#                                80
 			#                     ------------------------
 			#                          [[factor] factor]
-			set_key = { lhs = Tmp_$tmp$ which = $class$_Total }
-			[[zone]multiply_key = { lhs = Tmp_$tmp$ value = 0.5 }]
-			[[freedom] multiply_key = { lhs = Tmp_$tmp$ which = $freedom$ }]
-			multiply_key = { lhs = Tmp_$tmp$ which = Public_Tmp9 }
-			divide_key = { lhs = Tmp_$tmp$ value = 80 }
-			[[factor] divide_key = { lhs = Tmp_$tmp$ value = $factor$ } ]
+			set_variable = { which = Tmp_$tmp$ which = $class$_Total }
+			[[zone]multiply_variable = { which = Tmp_$tmp$ value = 0.5 }]
+			[[freedom] multiply_variable = { which = Tmp_$tmp$ which = $freedom$ }]
+			multiply_variable = { which = Tmp_$tmp$ which = Public_Tmp9 }
+			divide_variable = { which = Tmp_$tmp$ value = 80 }
+			[[factor] divide_variable = { which = Tmp_$tmp$ value = $factor$ } ]
 			
 			# Store results
-            change_key = { lhs = Public_Tmp2 which = Tmp_$tmp$ }
-            change_key = { lhs = Public_Tmp4 which = Tmp_$tmp$ }
+            change_variable = { which = Public_Tmp2 which = Tmp_$tmp$ }
+            change_variable = { which = Public_Tmp4 which = Tmp_$tmp$ }
         }
         else = { # Migratory outward pressured pops % of province < Possible Migrants in % of zone pops --> inward migration
 			
@@ -705,17 +705,17 @@ Growth_DoMove_HandleLocalMigration = {
 			#                                -40
 			#                     ------------------------
 			#                          [[factor] factor]
-			set_key = { lhs = Tmp_$tmp$ which = $class$_Total }
-			[[zone]multiply_key = { lhs = Tmp_$tmp$ value = 0.5 }]
-			[[freedom] multiply_key = { lhs = Tmp_$tmp$ which = $freedom$ }]
-			change_key = { lhs = Tmp_$tmp$ value = 10 }
-			multiply_key = { lhs = Tmp_$tmp$ which = Public_Tmp9 }
-			divide_key = { lhs = Tmp_$tmp$ value = -40 }
-			[[factor] divide_key = { lhs = Tmp_$tmp$ value = $factor$ } ]
+			set_variable = { which = Tmp_$tmp$ which = $class$_Total }
+			[[zone]multiply_variable = { which = Tmp_$tmp$ value = 0.5 }]
+			[[freedom] multiply_variable = { which = Tmp_$tmp$ which = $freedom$ }]
+			change_variable = { which = Tmp_$tmp$ value = 10 }
+			multiply_variable = { which = Tmp_$tmp$ which = Public_Tmp9 }
+			divide_variable = { which = Tmp_$tmp$ value = -40 }
+			[[factor] divide_variable = { which = Tmp_$tmp$ value = $factor$ } ]
 			
 			# Store results
-			change_key = { lhs = Public_Tmp3 which = Tmp_$tmp$ }
-			change_key = { lhs = Public_Tmp5 which = Tmp_$tmp$ }
+			change_variable = { which = Public_Tmp3 which = Tmp_$tmp$ }
+			change_variable = { which = Public_Tmp5 which = Tmp_$tmp$ }
 		}
     }
 }
@@ -723,9 +723,9 @@ Growth_DoMove_HandleLocalMigration = {
 # This function distributes the migration happening on the provinces inside the growth zone
 ### Inputs:
 # $class$ = SF | NM | RE | NO | BG | CL
-# $tmp$ = tmp key number to use for calculation
+# $tmp$ = tmp variable number to use for calculation
 #
-## Keys:
+## variables:
 # Growth_Pressure$class$ = Local outward migratory pressure in % of the population
 # Public_Tmp1 = (PossibleMigrants in Growth Zone / Total pops in growth zone)
 # Public_Tmp2 = Total per Growth Zone Outward migration absolute
@@ -737,49 +737,49 @@ Growth_DoMove_HandleLocalMigration = {
 Growth_DoMove_DistributeMigration = {
     if = {
         limit = {
-            check_key = { lhs = Growth_Pressure$class$ value = 0.001 } #if province has pressure
+            check_variable = { which = Growth_Pressure$class$ value = 0.001 } #if province has pressure
         }
         if = {
             limit = {
-                check_key = { lhs = Growth_Pressure$class$ which = Public_Tmp1 } # local pressure >= possible migrants %
+                check_variable = { which = Growth_Pressure$class$ which = Public_Tmp1 } # local pressure >= possible migrants %
             }
             if = {
                 limit = {
-                    check_key = { lhs = Public_Tmp2 value = 0.001 } # total outward migration > 0
+                    check_variable = { which = Public_Tmp2 value = 0.001 } # total outward migration > 0
                 }
 
 				### Outward migration in province
 				#     local migration 
 				# ----------------------  * total outward migration
 				# total outward migration
-                set_key = { lhs = Public_Tmp9 which = Tmp_$tmp$ } # Result of local migration calc
-				multiply_key = { lhs = Public_Tmp9 which = Public_Tmp4 }
+                set_variable = { which = Public_Tmp9 which = Tmp_$tmp$ } # Result of local migration calc
+				multiply_variable = { which = Public_Tmp9 which = Public_Tmp4 }
 				if = {
 					limit = { 
-						check_key = { lhs = Public_Tmp9 value = 0.001 }
+						check_variable = { which = Public_Tmp9 value = 0.001 }
 					}
-					divide_key = { lhs = Public_Tmp9 which = Public_Tmp2 }
+					divide_variable = { which = Public_Tmp9 which = Public_Tmp2 }
 				}
 				else = {
-					set_key = { lhs = Public_Tmp9 value = 0 }
+					set_variable = { which = Public_Tmp9 value = 0 }
 				}
-                change_key = { lhs = $class$_Out which = Public_Tmp9 }
+                change_variable = { which = $class$_Out which = Public_Tmp9 }
             }
         }
         else_if = {
             limit = {
-                check_key = { lhs = Public_Tmp3 value = 0.001 } # total inward migration > 0
+                check_variable = { which = Public_Tmp3 value = 0.001 } # total inward migration > 0
             }
 
 			### Inward migration in province
 			#     local migration 
 			# ----------------------  * total inward migration
 			# total inward migration
-            set_key = { lhs = Public_Tmp9 which = Tmp_$tmp$ }
-			multiply_key = { lhs = Public_Tmp9 which = Public_Tmp4 }
-            divide_key = { lhs = Public_Tmp9 which = Public_Tmp3 }
+            set_variable = { which = Public_Tmp9 which = Tmp_$tmp$ }
+			multiply_variable = { which = Public_Tmp9 which = Public_Tmp4 }
+            divide_variable = { which = Public_Tmp9 which = Public_Tmp3 }
             
-            change_key = { lhs = $class$_In which = Public_Tmp9 }
+            change_variable = { which = $class$_In which = Public_Tmp9 }
         }
     }
 }
@@ -797,8 +797,8 @@ Growth_SetPressure = {
     if = {
         limit = {
             OR = {
-				check_key = { lhs = $class$_Total value = 0.001 }
-				check_key = { lhs = Class_P$labor$ value = 1.001 }
+				check_variable = { which = $class$_Total value = 0.001 }
+				check_variable = { which = Class_P$labor$ value = 1.001 }
 			}
 			[[urban] # only allow resident migration if there is a city
 			always = $urban$
@@ -824,9 +824,9 @@ Growth_SetPressure = {
         #        Province Labor Cost per Type
         # ---------------------------------------
         #                   400
-        set_key = { lhs = Growth_Pressure$class$ value = 40 }
-        divide_key = { lhs = Growth_Pressure$class$ which = Class_P$labor$ }
-        divide_key = { lhs = Growth_Pressure$class$ value = 400 }
+        set_variable = { which = Growth_Pressure$class$ value = 40 }
+        divide_variable = { which = Growth_Pressure$class$ which = Class_P$labor$ }
+        divide_variable = { which = Growth_Pressure$class$ value = 400 }
 		
 
 		[[urban]
@@ -839,73 +839,73 @@ Growth_SetPressure = {
                 # Constraints: [Growth_MinBaseMigrationPressureEmptyAmenities, Growth_MaxMigrationPressureEmptyAmenities]
                 Infra_GetAmenities_Cap = { return = Tmp_0 }
 
-                set_key = { lhs = Tmp_1 which = $class$_Total }
-				change_key = { lhs = Tmp_1 value = 0.001 } # In case we have 0 residents, if that is somehow possible)
-                divide_key = { lhs = Tmp_1 which = Tmp_0 }
+                set_variable = { which = Tmp_1 which = $class$_Total }
+				change_variable = { which = Tmp_1 value = 0.001 } # In case we have 0 residents, if that is somehow possible)
+                divide_variable = { which = Tmp_1 which = Tmp_0 }
 
                 if = {
                     limit = {
-                        check_key = { lhs = Tmp_1 value = 2 }
+                        check_variable = { which = Tmp_1 value = 2 }
                     }
-                    set_key = { lhs = Tmp_1 value = 1.25 }      # `Growth_MaxMigrationPressureEmptyAmenities~value`
+                    set_variable = { which = Tmp_1 value = 1.25 }      # `Growth_MaxMigrationPressureEmptyAmenities~value`
                 }
                 else_if = {
                     limit = {
-                        check_key = { lhs = Tmp_1 value = 1 }
+                        check_variable = { which = Tmp_1 value = 1 }
                     }
-                    multiply_key = { lhs = Tmp_1 value = 0.25 }
-                    change_key = { lhs = Tmp_1 value = 0.75 }
+                    multiply_variable = { which = Tmp_1 value = 0.25 }
+                    change_variable = { which = Tmp_1 value = 0.75 }
                 }
                 else = {
-                    multiply_key = { lhs = Tmp_1 value = 0.2 }  # `Growth_MinMultMigrationPressureEmptyAmenities~value`
-                    change_key = { lhs = Tmp_1 value = 0.8 }    # `Growth_MinBaseMigrationPressureEmptyAmenities~value`
+                    multiply_variable = { which = Tmp_1 value = 0.2 }  # `Growth_MinMultMigrationPressureEmptyAmenities~value`
+                    change_variable = { which = Tmp_1 value = 0.8 }    # `Growth_MinBaseMigrationPressureEmptyAmenities~value`
                 }
 
-				multiply_key = { lhs = Growth_Pressure$class$ which = Tmp_1 }
+				multiply_variable = { which = Growth_Pressure$class$ which = Tmp_1 }
 
                 ### Apply multiplier based on city size
                 # Min: Growth_BaseDividendMigrationPressureCitySize / Growth_BaseDivisorMigrationPressureCitySize
                 # Max: Growth_MultDividendMigrationPressureCitySize / Growth_MultDivisorMigrationPressureCitySize
-                set_key = { lhs = Tmp_0 which = $class$_Total }
-                set_key = { lhs = Tmp_1 which = $class$_Total }
-                multiply_key = { lhs = Tmp_0 value = 2 }        # `Growth_MultDividendMigrationPressureCitySize~value`
-                multiply_key = { lhs = Tmp_1 value = 1.25 }     # `Growth_MultDivisorMigrationPressureCitySize~value`
-                change_key = { lhs = Tmp_0 value = 60 }         # `Growth_BaseDividendMigrationPressureCitySize~value`
-                change_key = { lhs = Tmp_1 value = 120 }        # `Growth_BaseDivisorMigrationPressureCitySize~value`
-                divide_key = { lhs = Tmp_0 which = Tmp_1 }
+                set_variable = { which = Tmp_0 which = $class$_Total }
+                set_variable = { which = Tmp_1 which = $class$_Total }
+                multiply_variable = { which = Tmp_0 value = 2 }        # `Growth_MultDividendMigrationPressureCitySize~value`
+                multiply_variable = { which = Tmp_1 value = 1.25 }     # `Growth_MultDivisorMigrationPressureCitySize~value`
+                change_variable = { which = Tmp_0 value = 60 }         # `Growth_BaseDividendMigrationPressureCitySize~value`
+                change_variable = { which = Tmp_1 value = 120 }        # `Growth_BaseDivisorMigrationPressureCitySize~value`
+                divide_variable = { which = Tmp_0 which = Tmp_1 }
 
-				multiply_key = { lhs = Growth_Pressure$class$ which = Tmp_0 }
+				multiply_variable = { which = Growth_Pressure$class$ which = Tmp_0 }
 			}
 		]
 
         # Apply API effects on pressure
-		multiply_key = { lhs = Growth_Pressure$class$ which = Modi_PressureMulti$class$ }
-		change_key = { lhs = Growth_Pressure$class$ which = Modi_PressureAdd$class$ }
+		multiply_variable = { which = Growth_Pressure$class$ which = Modi_PressureMulti$class$ }
+		change_variable = { which = Growth_Pressure$class$ which = Modi_PressureAdd$class$ }
 		
 		if = {
 			limit = {
 				NOT = {
-					check_key = { lhs = Growth_Pressure$class$ value = 0.002 }
+					check_variable = { which = Growth_Pressure$class$ value = 0.002 }
 				}
 			}
-			set_key = { lhs = Growth_Pressure$class$ value = 0.002 }
+			set_variable = { which = Growth_Pressure$class$ value = 0.002 }
 		}
 		if = {
 			limit = {
-				check_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+				check_variable = { which = Growth_Pressure$class$ value = 0.1 }
 			}
-			set_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+			set_variable = { which = Growth_Pressure$class$ value = 0.1 }
 		}
     }
     else = {
-        set_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+        set_variable = { which = Growth_Pressure$class$ value = 0.1 }
     }
 }
 
 Growth_ZoneHelper = {
-    set_key = { lhs = Tmp_0 value = 0 }
-    set_key = { lhs = Tmp_1 value = 0 }
-    set_key = { lhs = Public_Tmp1 value = 0 }
+    set_variable = { which = Tmp_0 value = 0 }
+    set_variable = { which = Tmp_1 value = 0 }
+    set_variable = { which = Public_Tmp1 value = 0 }
 
     $scope$ = {
         limit = {
@@ -922,14 +922,14 @@ Growth_ZoneHelper = {
             [[cultg] culture_group = $cultg$ ]
             [[cult] culture = $cult$ ]
         }
-        set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
+        set_variable = { which = Tmp_0 value = 0 }
+        set_variable = { which = Tmp_1 value = 0 }
 
         [[SF]
         Growth_SetPressure = { class = SF labor = R peasant=yes }
-        set_key = { lhs = Tmp_2 which = SF_Total }
-        multiply_key = { lhs = Tmp_2 value = 0.5 }
-        multiply_key = { lhs = Tmp_2 which = Growth_PressureSF }
+        set_variable = { which = Tmp_2 which = SF_Total }
+        multiply_variable = { which = Tmp_2 value = 0.5 }
+        multiply_variable = { which = Tmp_2 which = Growth_PressureSF }
 
 		### Apply modifier on migration based on peasant freedom and tenacy reform
         #
@@ -939,106 +939,106 @@ Growth_ZoneHelper = {
         #
         # Constraints: [0.1, 1]
 		owner = { 
-		    set_key = { lhs = Tmp_8 which = Rights_NOTen }
+		    set_variable = { which = Tmp_8 which = Rights_NOTen }
 		}
 
-		set_key = { lhs = Tmp_8 which = owner }
-		change_key = { lhs = Tmp_8 value = 3 } # move the reform key from the scale [-2,1] to [1,4]
-		divide_key = { lhs = Tmp_8 value = 4 }
+		set_variable = { which = Tmp_8 which = owner }
+		change_variable = { which = Tmp_8 value = 3 } # move the reform variable from the scale [-2,1] to [1,4]
+		divide_variable = { which = Tmp_8 value = 4 }
 
-		set_key = { lhs = Tmp_9 which = SF_Freedom }
+		set_variable = { which = Tmp_9 which = SF_Freedom }
 
-		divide_key = { lhs = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
+		divide_variable = { which = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
 
-		multiply_key = { lhs = Tmp_8 which = Tmp_9 } # calculate multiplier
+		multiply_variable = { which = Tmp_8 which = Tmp_9 } # calculate multiplier
 
-		change_key = { lhs = Tmp_8 value = 0.1 }
+		change_variable = { which = Tmp_8 value = 0.1 }
 		if = {
 		    limit = {
-		        check_key = { lhs = Tmp_8 value = 1.001 }
+		        check_variable = { which = Tmp_8 value = 1.001 }
 		    }
-		    set_key = { lhs = Tmp_8 value = 1 }
+		    set_variable = { which = Tmp_8 value = 1 }
 		}
 		else_if = {
 		    limit = {
-		        NOT = { check_key = { lhs = Tmp_8 value = 0.1 } }
+		        NOT = { check_variable = { which = Tmp_8 value = 0.1 } }
 		    }
-		    set_key = { lhs = Tmp_8 value = 0.1 }
+		    set_variable = { which = Tmp_8 value = 0.1 }
 		}
 
-		multiply_key = { lhs = Tmp_2 which = Tmp_8 } # apply multiplier to actual migrants pool
+		multiply_variable = { which = Tmp_2 which = Tmp_8 } # apply multiplier to actual migrants pool
 
-        change_key = { lhs = Tmp_0 which = Tmp_2 }
+        change_variable = { which = Tmp_0 which = Tmp_2 }
 
-		set_key = { lhs = Tmp_9 which = SF_Total }
-		multiply_key = { lhs = Tmp_9 which = Tmp_8 }
-		change_key = { lhs = Tmp_1 which = Tmp_9 }
+		set_variable = { which = Tmp_9 which = SF_Total }
+		multiply_variable = { which = Tmp_9 which = Tmp_8 }
+		change_variable = { which = Tmp_1 which = Tmp_9 }
 		]
         [[NM]
         Growth_SetPressure = { class = NM labor = NM nomad=yes }
-        set_key = { lhs = Tmp_3 which = NM_Total }
-        multiply_key = { lhs = Tmp_3 value = 0.5 }
-        multiply_key = { lhs = Tmp_3 which = Growth_PressureNM }
-        change_key = { lhs = Tmp_0 which = Tmp_3 }
-		change_key = { lhs = Tmp_1 which = NM_Total }
+        set_variable = { which = Tmp_3 which = NM_Total }
+        multiply_variable = { which = Tmp_3 value = 0.5 }
+        multiply_variable = { which = Tmp_3 which = Growth_PressureNM }
+        change_variable = { which = Tmp_0 which = Tmp_3 }
+		change_variable = { which = Tmp_1 which = NM_Total }
         ]
         [[RE]
         Growth_SetPressure = { class = RE labor = UL urban=yes }
-        set_key = { lhs = Tmp_4 which = RE_Total }
-        multiply_key = { lhs = Tmp_4 value = 0.5 }
-        multiply_key = { lhs = Tmp_4 which = Growth_PressureRE }
-        change_key = { lhs = Tmp_0 which = Tmp_4 }
-		change_key = { lhs = Tmp_1 which = RE_Total }
+        set_variable = { which = Tmp_4 which = RE_Total }
+        multiply_variable = { which = Tmp_4 value = 0.5 }
+        multiply_variable = { which = Tmp_4 which = Growth_PressureRE }
+        change_variable = { which = Tmp_0 which = Tmp_4 }
+		change_variable = { which = Tmp_1 which = RE_Total }
         ]
         [[NO]
         Growth_SetPressure = { class = NO labor = NO }
-        set_key = { lhs = Tmp_5 which = NO_Total }
-        multiply_key = { lhs = Tmp_5 value = 0.5 }
-        multiply_key = { lhs = Tmp_5 which = Growth_PressureNO }
-        change_key = { lhs = Tmp_0 which = Tmp_5 }
-		change_key = { lhs = Tmp_1 which = NO_Total }
+        set_variable = { which = Tmp_5 which = NO_Total }
+        multiply_variable = { which = Tmp_5 value = 0.5 }
+        multiply_variable = { which = Tmp_5 which = Growth_PressureNO }
+        change_variable = { which = Tmp_0 which = Tmp_5 }
+		change_variable = { which = Tmp_1 which = NO_Total }
         ]
         [[BG]
         Growth_SetPressure = { class = BG labor = BG burgher=yes }
-        set_key = { lhs = Tmp_6 which = BG_Total }
-        multiply_key = { lhs = Tmp_6 value = 0.5 }
-        multiply_key = { lhs = Tmp_6 which = Growth_PressureBG }
-		change_key = { lhs = Tmp_1 which = BG_Total }
-        change_key = { lhs = Tmp_0 which = Tmp_6 }
+        set_variable = { which = Tmp_6 which = BG_Total }
+        multiply_variable = { which = Tmp_6 value = 0.5 }
+        multiply_variable = { which = Tmp_6 which = Growth_PressureBG }
+		change_variable = { which = Tmp_1 which = BG_Total }
+        change_variable = { which = Tmp_0 which = Tmp_6 }
         ]
         [[CL]
         Growth_SetPressure = { class = CL labor = CL }
-        set_key = { lhs = Tmp_7 which = CL_Total }
-        multiply_key = { lhs = Tmp_7 value = 0.5 }
-        multiply_key = { lhs = Tmp_7 which = Growth_PressureCL }
-        change_key = { lhs = Tmp_0 which = Tmp_7 }
-		change_key = { lhs = Tmp_1 which = CL_Total }
+        set_variable = { which = Tmp_7 which = CL_Total }
+        multiply_variable = { which = Tmp_7 value = 0.5 }
+        multiply_variable = { which = Tmp_7 which = Growth_PressureCL }
+        change_variable = { which = Tmp_0 which = Tmp_7 }
+		change_variable = { which = Tmp_1 which = CL_Total }
         ]
-        multiply_key = { lhs = Tmp_1 value = 0.5 }
+        multiply_variable = { which = Tmp_1 value = 0.5 }
         
         PREV = {
-            change_key = { lhs = Tmp_0 which = PREV }
-            change_key = { lhs = Tmp_1 which = PREV }
+            change_variable = { which = Tmp_0 which = PREV }
+            change_variable = { which = Tmp_1 which = PREV }
         }
     }
 
     if = {
         limit = {
-            check_key = { lhs = Tmp_0 value = 0.001 }
-            check_key = { lhs = Tmp_1 value = 0.001 }
+            check_variable = { which = Tmp_0 value = 0.001 }
+            check_variable = { which = Tmp_1 value = 0.001 }
         }
-        set_key = { lhs = Public_Tmp1 which = Tmp_0 }
-        divide_key = { lhs = Public_Tmp1 which = Tmp_1 }
+        set_variable = { which = Public_Tmp1 which = Tmp_0 }
+        divide_variable = { which = Public_Tmp1 which = Tmp_1 }
     }
 
     if = {
         limit = {
-            check_key = { lhs = Public_Tmp1 value = 0.001 }
+            check_variable = { which = Public_Tmp1 value = 0.001 }
         }
-        set_key = { lhs = Public_Tmp2 value = 0 }
-        set_key = { lhs = Public_Tmp3 value = 0 }
-        set_key = { lhs = Public_Tmp4 value = 0 }
-        set_key = { lhs = Public_Tmp5 value = 0 }
+        set_variable = { which = Public_Tmp2 value = 0 }
+        set_variable = { which = Public_Tmp3 value = 0 }
+        set_variable = { which = Public_Tmp4 value = 0 }
+        set_variable = { which = Public_Tmp5 value = 0 }
 
         $scope$ = {
             limit = {
@@ -1055,11 +1055,11 @@ Growth_ZoneHelper = {
                 [[cultg]culture_group = $cultg$]
                 [[cult]culture = $cult$]
             }
-            set_key = { lhs = Public_Tmp1 which = PREV }
-            set_key = { lhs = Public_Tmp2 value = 0 }
-            set_key = { lhs = Public_Tmp3 value = 0 }
-            set_key = { lhs = Public_Tmp4 value = 0 }
-            set_key = { lhs = Public_Tmp5 value = 0 }
+            set_variable = { which = Public_Tmp1 which = PREV }
+            set_variable = { which = Public_Tmp2 value = 0 }
+            set_variable = { which = Public_Tmp3 value = 0 }
+            set_variable = { which = Public_Tmp4 value = 0 }
+            set_variable = { which = Public_Tmp5 value = 0 }
 
             [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 zone=yes freedom = Tmp_8 }]
             [[NM] Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 zone=yes }]
@@ -1069,18 +1069,18 @@ Growth_ZoneHelper = {
             [[CL] Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 zone=yes }]
 
             PREV = {
-                change_key = { lhs = Public_Tmp2 which = PREV }
-                change_key = { lhs = Public_Tmp3 which = PREV }
-                change_key = { lhs = Public_Tmp4 which = PREV }
-                change_key = { lhs = Public_Tmp5 which = PREV }
+                change_variable = { which = Public_Tmp2 which = PREV }
+                change_variable = { which = Public_Tmp3 which = PREV }
+                change_variable = { which = Public_Tmp4 which = PREV }
+                change_variable = { which = Public_Tmp5 which = PREV }
             }
         }
 
         if = {
             limit = {
-                check_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
+                check_variable = { which = Public_Tmp4 which = Public_Tmp5 }
             }
-            set_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
+            set_variable = { which = Public_Tmp4 which = Public_Tmp5 }
         }
 
         $scope$ = {
@@ -1098,9 +1098,9 @@ Growth_ZoneHelper = {
                 [[cultg]culture_group = $cultg$]
                 [[cult]culture = $cult$]
             }
-            set_key = { lhs = Public_Tmp2 which = PREV }
-            set_key = { lhs = Public_Tmp3 which = PREV }
-            set_key = { lhs = Public_Tmp4 which = PREV }
+            set_variable = { which = Public_Tmp2 which = PREV }
+            set_variable = { which = Public_Tmp3 which = PREV }
+            set_variable = { which = Public_Tmp4 which = PREV }
 
             [[SF]Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }]
             [[NM]Growth_DoMove_DistributeMigration = { class = NM tmp = 3 }]
@@ -1109,22 +1109,22 @@ Growth_ZoneHelper = {
             [[BG]Growth_DoMove_DistributeMigration = { class = BG tmp = 6 }]
             [[CL]Growth_DoMove_DistributeMigration = { class = CL tmp = 7 }]
 
-            set_key = { lhs = Public_Tmp1 value = 0 }
-            set_key = { lhs = Public_Tmp2 value = 0 }
-            set_key = { lhs = Public_Tmp3 value = 0 }
-            set_key = { lhs = Public_Tmp4 value = 0 }
-            set_key = { lhs = Public_Tmp5 value = 0 }
-            set_key = { lhs = Public_Tmp9 value = 0 }
+            set_variable = { which = Public_Tmp1 value = 0 }
+            set_variable = { which = Public_Tmp2 value = 0 }
+            set_variable = { which = Public_Tmp3 value = 0 }
+            set_variable = { which = Public_Tmp4 value = 0 }
+            set_variable = { which = Public_Tmp5 value = 0 }
+            set_variable = { which = Public_Tmp9 value = 0 }
         }
 
-        set_key = { lhs = Public_Tmp2 value = 0 }
-        set_key = { lhs = Public_Tmp3 value = 0 }
-        set_key = { lhs = Public_Tmp4 value = 0 }
-        set_key = { lhs = Public_Tmp5 value = 0 }
+        set_variable = { which = Public_Tmp2 value = 0 }
+        set_variable = { which = Public_Tmp3 value = 0 }
+        set_variable = { which = Public_Tmp4 value = 0 }
+        set_variable = { which = Public_Tmp5 value = 0 }
     }
 
-    set_key = { lhs = Tmp_0 value = 0 }
-    set_key = { lhs = Tmp_1 value = 0 }
+    set_variable = { which = Tmp_0 value = 0 }
+    set_variable = { which = Tmp_1 value = 0 }
 
-    set_key = { lhs = Public_Tmp1 value = 0 }
+    set_variable = { which = Public_Tmp1 value = 0 }
 }

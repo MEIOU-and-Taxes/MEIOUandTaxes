@@ -55,7 +55,7 @@ for itr in range(1, 101):
     
     string += form % (itr, rgb[0], rgb[1], rgb[2])
 
-form = 'else_if = { limit = { is_key_equal = { lhs = iter value = %s } } every_owned_province = { limit = { PartOfRank1 = { Compare = event_target:Prov } } set_estate = disp_ss_%s } }\n'
+form = 'else_if = { limit = { is_variable_equal = { which = iter value = %s } } every_owned_province = { limit = { PartOfRank1 = { Compare = event_target:Prov } } set_estate = disp_ss_%s } }\n'
 
 for itr in range(1, 101):
     string += form % (itr, itr)

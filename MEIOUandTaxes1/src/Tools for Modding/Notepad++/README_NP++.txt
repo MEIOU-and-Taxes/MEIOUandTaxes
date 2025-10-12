@@ -4,7 +4,7 @@
 
 - M&T Paradox Script highlighting
 
-	This file colors in keywords for Paradox code, and includes Meiou & Taxes things.
+	This file colors in variablewords for Paradox code, and includes Meiou & Taxes things.
 	In Notepad++, go to Menu, Language, Define your language. Import "MT_highlight.xml" as a new language and save it under a name of your choice.
 	The file will be updated occasionally, adding new things. Be sure to import it again occasionally.
 
@@ -42,7 +42,7 @@ Put shortcuts.xml into %appdata%/Notepad++ to skip recording the macros (merge t
 
 - Commenting (alt + Q, alt + W)
 
-	Use the following macros to quickly comment/uncomment code. Simply select the relevant lines of code and do the macro key combination.
+	Use the following macros to quickly comment/uncomment code. Simply select the relevant lines of code and do the macro variable combination.
 	To comment code, replace "^" with "^#" on selected text in "regular expression" replacement mode.
 	To uncomment code, replace "^#" with "^".
 

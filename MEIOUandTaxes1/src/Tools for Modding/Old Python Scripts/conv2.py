@@ -12,8 +12,8 @@ if __name__ == '__main__':
                 
             t = ff.read()
 
-            for key in dct:
-                t = t.replace('[%s]' % key, '[%s]' % dct[key])
+            for variable in dct:
+                t = t.replace('[%s]' % variable, '[%s]' % dct[variable])
 
             with open(p1, 'w') as fff:
                 fff.write(t)

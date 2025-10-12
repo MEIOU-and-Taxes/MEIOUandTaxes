@@ -26,7 +26,7 @@ cust_localisation_tmpl = """
                 localisation_key = Prov%id
 
                 trigger = {
-                        is_key_equal = { lhs = %variable value = %id }
+                        is_variable_equal = { which = %variable value = %id }
                 }
         }
 """

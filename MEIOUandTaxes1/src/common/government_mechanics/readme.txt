@@ -46,7 +46,7 @@
 #   effect = { <country effects> } #Defines the effects happening when you press the button
 #   cooldown_years = <int> #Defines the cooldown years for this one button.
 #   cooldown_token = <any token> #defines the cooldown to use. If not specified, it will use the id of the action, so the cooldown will be unique to the action. This is useful if actions are to be mutually exclusive
-#   cooldown_desc = <string key> #defines the string to use for the name of the cooldown. If not specified, it will use the name of the interaction.
+#   cooldown_desc = <string variable> #defines the string to use for the name of the cooldown. If not specified, it will use the name of the interaction.
 #   ai_chance = <mtth> #mean time to happen, used to test to see how interested the AI is in doing this interaction
 #  }
 # }

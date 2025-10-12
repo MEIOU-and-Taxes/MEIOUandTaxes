@@ -20,18 +20,18 @@ def parse_file(fn):
 	def update(dic, new):
 		if isinstance(new, dict):
 			new = new.items()
-		for key, val in new:
-			if key not in dic:
-				dic[key] = val
-			elif isinstance(dic[key], list):
-				dic[key].append(val)
+		for variable, val in new:
+			if variable not in dic:
+				dic[variable] = val
+			elif isinstance(dic[variable], list):
+				dic[variable].append(val)
 			else:
-				dic[key] = [dic[key], val]
+				dic[variable] = [dic[variable], val]
 	d = {}
 	names = []
 	stack = [(d,"")]
 	tokens = []
-	key = ""
+	variable = ""
 	with open(fn,"rb") as f:
 		ff = f.read()
 		fff = ff.decode("iso-8859-1")
@@ -39,12 +39,12 @@ def parse_file(fn):
 			tokens += parse_line(line)
 		for token in tokens:
 			if token == "=":
-				key = names.pop()
+				variable = names.pop()
 			elif token == "{":
 				dd = {}
-				update(stack[-1][0], {key: dd})
-				stack.append((dd,key))
-				key = ""
+				update(stack[-1][0], {variable: dd})
+				stack.append((dd,variable))
+				variable = ""
 			elif token == "}":
 				if len(stack[-1][0]):
 					update(stack.pop()[0], [(n,n) for n in names])
@@ -55,9 +55,9 @@ def parse_file(fn):
 				names = []
 			else:
 				names.append(token)
-				if key:
-					update(stack[-1][0], {key: names.pop()})
-					key = ""
+				if variable:
+					update(stack[-1][0], {variable: names.pop()})
+					variable = ""
 	return d
 
 def btree(lst, td, form, body):
@@ -84,14 +84,14 @@ if __name__ == "__main__":
 
         td = { tag:tags.index(tag) + 1 for tag in tags }
 
-        cond = 'check_key = { lhs = $var$ value = %s }'
+        cond = 'check_variable = { which = $var$ value = %s }'
         body = '%s = { save_event_target_as = $return$ }'
         form = 'if = { limit = { %s }\n\t%s\n}\nelse = {\n\t%s\n}' % (cond, '%s', '%s')
 
         with open('output.txt', 'w') as f:
                 f.write(btree(tags, td, form, body))
 
-        form = '%s = { set_key = { lhs = ID_Tag value = %s } }\n'
+        form = '%s = { set_variable = { which = ID_Tag value = %s } }\n'
         txt = ''
 
         for tag in tags:

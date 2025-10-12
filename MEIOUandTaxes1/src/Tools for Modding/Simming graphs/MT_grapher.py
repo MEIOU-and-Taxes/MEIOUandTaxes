@@ -82,7 +82,7 @@ Refresh to read game.log again.
     def read_all_logs():
         text = ""
         files = glob.glob("game_*.log")
-        files.sort(key=lambda x: int(x[5:-4]))
+        files.sort(variable=lambda x: int(x[5:-4]))
         for fn in files:
             with open(fn, "r") as f:
                 text += f.read()
@@ -162,7 +162,7 @@ Refresh to read game.log again.
                 if color:
                     try:
                         btn = Button(pos, slot, None, *colors[color])
-                    except KeyError:
+                    except variableError:
                         print(f"WARNING: Unknown color {color} used for {slot}")
                         btn = Button(pos, slot, None, *colors["l"])
                     color = None

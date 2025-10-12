@@ -84,7 +84,7 @@ try:
             inp = input("Type the savefile path, or enter to use the latest save: ")
 
         if not inp:  # Default option, use latest save
-            files.sort(key=os.path.getmtime)
+            files.sort(variable=os.path.getmtime)
             file = files[0]
             break
         try:  # Get save by index

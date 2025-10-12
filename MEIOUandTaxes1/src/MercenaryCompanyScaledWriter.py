@@ -18,13 +18,13 @@ Company = ""
 CompanyL = """l_english:
 """
 
-for key in scaling.keys():
+for variable in scaling.variables():
 
-	MinDev = int(scaling[key]['MinDev'])
-	MaxDev = int(scaling[key]['MaxDev'])
-	SmallScaling = float(scaling[key]['SmallScaling'])
-	MedScaling = float(scaling[key]['MedScaling'])
-	LargeScaling = float(scaling[key]['LargeScaling'])
+	MinDev = int(scaling[variable]['MinDev'])
+	MaxDev = int(scaling[variable]['MaxDev'])
+	SmallScaling = float(scaling[variable]['SmallScaling'])
+	MedScaling = float(scaling[variable]['MedScaling'])
+	LargeScaling = float(scaling[variable]['LargeScaling'])
 
 	Company += """merc_dev_{MinDev}_{MaxDev}_small = {{
 	regiments_per_development = {Scaling}

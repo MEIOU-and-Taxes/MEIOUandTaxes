@@ -37,15 +37,15 @@ PrivilegeEvents = """namespace = Privilege
 """
 PrivilegeCustomLoc = ""
 Counter = 0
-for key in privilege.keys():
+for variable in privilege.variables():
 	
-	Right = privilege[key]['Privilege']
-	Codename = privilege[key]['Codename']
-	Ranks = int(privilege[key]['Ranks'])
-	Interactions = int(privilege[key]['Interactions'])
-	DefaultPosition = int(privilege[key]['DefaultPosition'])
-	Icon = privilege[key]['Icon']
-	Event = privilege[key]['Event']
+	Right = privilege[variable]['Privilege']
+	Codename = privilege[variable]['Codename']
+	Ranks = int(privilege[variable]['Ranks'])
+	Interactions = int(privilege[variable]['Interactions'])
+	DefaultPosition = int(privilege[variable]['DefaultPosition'])
+	Icon = privilege[variable]['Icon']
+	Event = privilege[variable]['Event']
 
 	Counter += 1
 	Events_Tmp = ""

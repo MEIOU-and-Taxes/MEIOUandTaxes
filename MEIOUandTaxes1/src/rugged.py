@@ -84,9 +84,9 @@ if __name__ == '__main__':
 
     for prov in land_provinces:
         if prov in rugged:
-            eff.append('%s = { set_key = { lhs = Land_Rugged value = %.3f } }' % (prov, min(100, rugged[prov][0] / rugged[prov][1] / 255 * 100)))
+            eff.append('%s = { set_variable = { which = Land_Rugged value = %.3f } }' % (prov, min(100, rugged[prov][0] / rugged[prov][1] / 255 * 100)))
         else:
-            eff.append('%s = { set_key = { lhs = Land_Rugged value = 1 } }' % prov)
+            eff.append('%s = { set_variable = { which = Land_Rugged value = 1 } }' % prov)
 
     with open('out.txt', 'w') as f:
         f.write('\n'.join(eff))

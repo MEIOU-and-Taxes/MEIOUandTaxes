@@ -1,18 +1,18 @@
 # determine civil war center
 civil_war_find_center = {
-    set_key = { lhs = Public_Tmp0 value = 0 }
+    set_variable = { which = Public_Tmp0 value = 0 }
 
 	### find province with highest power + autonomy - loyalty
 	every_owned_province = {
 		limit = {
-			check_key = { lhs = Public_Tmp0 which = $orig_scope$ }
+			check_variable = { which = Public_Tmp0 which = $orig_scope$ }
 			NOT = { is_capital = yes }
             any_neighbor_province = {
                 owned_by = $orig_scope$
             }
 		}
-		export_to_key = { 
-			lhs = Public_Tmp0
+		export_to_variable = { 
+			which = Public_Tmp0
 			value = local_autonomy
 		}
         [[Dev]
@@ -20,8 +20,8 @@ civil_war_find_center = {
 			limit = {
 				always = $Dev$
 			}
-			change_key = { 
-				lhs = Public_Tmp0 
+			change_variable = { 
+				which = Public_Tmp0 
 				which = Dev_Total
 			}
 		}
@@ -31,8 +31,8 @@ civil_war_find_center = {
 			limit = {
 				always = $Pow$
 			}
-			change_key = { 
-				lhs = Public_Tmp0 
+			change_variable = { 
+				which = Public_Tmp0 
 				which = Prov_$elite$Pow 
 			}
 		}
@@ -42,18 +42,18 @@ civil_war_find_center = {
 			limit = {
 				always = $Loy$
 			}
-			subtract_key = {
-				lhs = Public_Tmp0
+			subtract_variable = {
+				which = Public_Tmp0
 				which = Prov_$elite$Loy
 			}
 		}
         ]
-		$orig_scope$ = { set_key = { lhs = Public_Tmp0 which = PREV } }
+		$orig_scope$ = { set_variable = { which = Public_Tmp0 which = PREV } }
 	}
 
 	random_owned_province = {
 		limit = { 
-            is_key_equal = { lhs = Public_Tmp0 which = $orig_scope$ } 
+            is_variable_equal = { which = Public_Tmp0 which = $orig_scope$ } 
         }
 		
 		save_global_event_target_as = cw_rebellion_center
@@ -69,7 +69,7 @@ flood_fill_owned_provinces = {
     while = {
 		limit = { 
             NOT = { 
-                check_key = { lhs = $end_perc_key$ $end_perc_type$ = $end_perc_inp$  } 
+                check_variable = { which = $end_perc_variable$ $end_perc_type$ = $end_perc_inp$  } 
             } 
         }
 
@@ -102,22 +102,22 @@ flood_fill_owned_provinces = {
 				limit = {
 					always = $strength_mode_prov$
 				}
-				ROOT = { change_key = { lhs = $prov_assigned_key$ value = 1 } } ]
+				ROOT = { change_variable = { which = $prov_assigned_variable$ value = 1 } } ]
 			}
             [[strength_mode_dev]  
 			if = {
 				limit = {
 					always = $strength_mode_dev$
 				}
-                set_key = { lhs = $prov_assigned_key$ which = Dev_Total }
-                ROOT = { change_key = { lhs = $prov_assigned_key$ which = PREV } }
+                set_variable = { which = $prov_assigned_variable$ which = Dev_Total }
+                ROOT = { change_variable = { which = $prov_assigned_variable$ which = PREV } }
 			}
             ]
             
 		}
 
-		set_key = { lhs = $end_perc_key$ which = $prov_assigned_key$ }
-		divide_key = { lhs = $end_perc_key$ which = $prov_total_key$ }
+		set_variable = { which = $end_perc_variable$ which = $prov_assigned_variable$ }
+		divide_variable = { which = $end_perc_variable$ which = $prov_total_variable$ }
 	}
 }
 
@@ -128,27 +128,27 @@ civil_war_determine_strength_in_perc = {
     [[elite]
     ### Strength of rebellion is:
     # Avg Elite Pow * (1 - Avg Elite Loy) * Balance Factor (0.8)
-    set_key = { lhs = cw_rebellion_strength_percentage which = Prov_$elite$Pow }
-    divide_key = { lhs = cw_rebellion_strength_percentage value = 100 } # transform to scale of [0-1]
+    set_variable = { which = cw_rebellion_strength_percentage which = Prov_$elite$Pow }
+    divide_variable = { which = cw_rebellion_strength_percentage value = 100 } # transform to scale of [0-1]
 
 	# input modifier for strength
-	multiply_key = { lhs = cw_rebellion_strength_percentage $strength_type$ = $strength_inp$ }
+	multiply_variable = { which = cw_rebellion_strength_percentage $strength_type$ = $strength_inp$ }
 
 	# balance limiter - max amount of dev to break away
 	if = {
 		limit = { 
-			check_key = { lhs = cw_rebellion_strength_percentage value = 0.9 } # `CIVIL_WAR_MAX_STRENGTH_PERC~value`
+			check_variable = { which = cw_rebellion_strength_percentage value = 0.9 } # `CIVIL_WAR_MAX_STRENGTH_PERC~value`
 		}
-		set_key = { lhs = cw_rebellion_strength_percentage value = 0.9 } # `CIVIL_WAR_MAX_STRENGTH_PERC~value`
+		set_variable = { which = cw_rebellion_strength_percentage value = 0.9 } # `CIVIL_WAR_MAX_STRENGTH_PERC~value`
 	}
 	
 
-    set_key = { lhs = Public_Tmp1 value = 100 }
-    subtract_key = { lhs = Public_Tmp1 which = Prov_$elite$Loy }
-    multiply_key = { lhs = Public_Tmp1 value = 0.01 } # transform to scale of [0-1]
+    set_variable = { which = Public_Tmp1 value = 100 }
+    subtract_variable = { which = Public_Tmp1 which = Prov_$elite$Loy }
+    multiply_variable = { which = Public_Tmp1 value = 0.01 } # transform to scale of [0-1]
 
-    multiply_key = { lhs = cw_rebellion_strength_percentage which = Public_Tmp1 }
-	multiply_key = { lhs = cw_rebellion_strength_percentage which = Modi_CivilWarStrength } # API Modifier
+    multiply_variable = { which = cw_rebellion_strength_percentage which = Public_Tmp1 }
+	multiply_variable = { which = cw_rebellion_strength_percentage which = Modi_CivilWarStrength } # API Modifier
     ]
 
 	[[strength_mode_prov]
@@ -157,11 +157,11 @@ civil_war_determine_strength_in_perc = {
 			always = $strength_mode_prov$
 		}
 		# get total amount of cities
-		export_to_key = {
-			lhs = Public_Tmp1
+		export_to_variable = {
+			which = Public_Tmp1
 			value = num_of_cities
 		}
-		set_key = { lhs = Public_Tmp2 value = 0 }
+		set_variable = { which = Public_Tmp2 value = 0 }
 	}
 	]
 	[[strength_mode_dev]
@@ -169,8 +169,8 @@ civil_war_determine_strength_in_perc = {
 		limit = {
 			always = $strength_mode_dev$
 		}
-		set_key = { lhs = Public_Tmp1 which = Dev_Total }		
-		set_key = { lhs = Public_Tmp2 value = 0 }	
+		set_variable = { which = Public_Tmp1 which = Dev_Total }		
+		set_variable = { which = Public_Tmp2 value = 0 }	
 	}
 	]
 }
@@ -226,14 +226,14 @@ setup_civil_war = {
 }
 
 setup_civil_war_elite = {
-	### Setup general flags and keys
+	### Setup general flags and variables
     set_country_flag = ongoing_civil_war
     set_country_flag = civil_war_orig_tag
 	set_country_flag = civil_war_$elite$_rebels
 	set_country_flag = PriorityTag
 
 	log = "[GetYear]: [Root.GetName] entered Civil War"
-	set_key = { lhs = cw_total_control_abs which = Dev_Total }	
+	set_variable = { which = cw_total_control_abs which = Dev_Total }	
 
 	### Determine a center of the rebellion
     civil_war_find_center = {
@@ -257,13 +257,13 @@ setup_civil_war_elite = {
 		start_event_target = cw_rebellion_center
 		start_flag = rebellion_center
 		iter_flag = assigned_rebellion
-		prov_total_key = Public_Tmp1
-		prov_assigned_key = Public_Tmp2
+		prov_total_variable = Public_Tmp1
+		prov_assigned_variable = Public_Tmp2
         strength_mode_dev = yes
         #strength_mode_prov = yes
-		end_perc_key = Public_Tmp3
+		end_perc_variable = Public_Tmp3
 		end_perc_type = which # value or which
-		end_perc_inp = cw_rebellion_strength_percentage # key or number
+		end_perc_inp = cw_rebellion_strength_percentage # variable or number
 		core_add_tag = $rebel_tag$ #optional
 	}
     every_owned_province = {
@@ -299,7 +299,7 @@ setup_civil_war_elite = {
 		civil_war_start_internal_cohesion_loyalty = {
 			elite = $elite$
 		}
-		civil_war_transfer_desired_reform_keys = {
+		civil_war_transfer_desired_reform_variables = {
 			scp1 = $rebel_tag$
 			scp2 = $orig_scope$
 		}
@@ -335,18 +335,18 @@ setup_civil_war_elite = {
 	### Calc control %
 
 	#Store total value for later comparison
-	set_key = { lhs = cw_control_perc value = 1 }
-	subtract_key = { lhs = cw_control_perc which = cw_rebellion_strength_percentage }
+	set_variable = { which = cw_control_perc value = 1 }
+	subtract_variable = { which = cw_control_perc which = cw_rebellion_strength_percentage }
 
-	set_key = { lhs = cw_current_control_abs which = Dev_Total }
+	set_variable = { which = cw_current_control_abs which = Dev_Total }
 	
 
 	$rebel_tag$ = {
-		set_key = { lhs = cw_rebellion_strength_percentage which = $orig_scope$ }
-		set_key = { lhs = cw_control_perc which = cw_rebellion_strength_percentage }
+		set_variable = { which = cw_rebellion_strength_percentage which = $orig_scope$ }
+		set_variable = { which = cw_control_perc which = cw_rebellion_strength_percentage }
 
-		set_key = { lhs = cw_current_control_abs which = Dev_Total }
-		set_key = { lhs = cw_total_control_abs which = $orig_scope$ }
+		set_variable = { which = cw_current_control_abs which = Dev_Total }
+		set_variable = { which = cw_total_control_abs which = $orig_scope$ }
 	}
 
 	country_event = { id = civil_wars.203 days = 1 } #look for outside help for rebels
@@ -363,21 +363,21 @@ civil_war_start_internal_cohesion_loyalty = {
     add_stability = 1
 }
 
-civil_war_transfer_desired_reform_keys = {
+civil_war_transfer_desired_reform_variables = {
 	$scp1$ = {
-		set_key = { lhs = Rights_NOGovChange which = $scp2$ }
-		set_key = { lhs = Rights_NOOblChange which = $scp2$ }
-		set_key = { lhs = Rights_NOTenChange which = $scp2$ }
-		set_key = { lhs = Rights_NOSerChange which = $scp2$ }
-		set_key = { lhs = Rights_BGComChange which = $scp2$ }
-		set_key = { lhs = Rights_BGGovChange which = $scp2$ }
-		set_key = { lhs = Rights_CLHieChange which = $scp2$ }
-		set_key = { lhs = Rights_CLTaxChange which = $scp2$ }
-		set_key = { lhs = Rights_CLOblChange which = $scp2$ }
-		set_key = { lhs = Rights_BUTaxChange which = $scp2$ }
-		set_key = { lhs = Rights_BUDirChange which = $scp2$ }
-		set_key = { lhs = Rights_BUIndChange which = $scp2$ }
-		set_key = { lhs = Rights_BUSerChange which = $scp2$ }
+		set_variable = { which = Rights_NOGovChange which = $scp2$ }
+		set_variable = { which = Rights_NOOblChange which = $scp2$ }
+		set_variable = { which = Rights_NOTenChange which = $scp2$ }
+		set_variable = { which = Rights_NOSerChange which = $scp2$ }
+		set_variable = { which = Rights_BGComChange which = $scp2$ }
+		set_variable = { which = Rights_BGGovChange which = $scp2$ }
+		set_variable = { which = Rights_CLHieChange which = $scp2$ }
+		set_variable = { which = Rights_CLTaxChange which = $scp2$ }
+		set_variable = { which = Rights_CLOblChange which = $scp2$ }
+		set_variable = { which = Rights_BUTaxChange which = $scp2$ }
+		set_variable = { which = Rights_BUDirChange which = $scp2$ }
+		set_variable = { which = Rights_BUIndChange which = $scp2$ }
+		set_variable = { which = Rights_BUSerChange which = $scp2$ }
 	}
 }
 
@@ -443,106 +443,106 @@ transfer_army_tradition = {
 civil_war_adapt_rights_from_rebels = {
 	$orig_scp$ = {
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_NOGov which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_NOGov which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_NOGov which = $rebel_scp$ }
+				set_variable = { which = Rights_NOGov which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_NOGov_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_NOObl which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_NOObl which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_NOObl which = $rebel_scp$ }
+				set_variable = { which = Rights_NOObl which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_NOObl_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_NOTen which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_NOTen which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_NOTen which = $rebel_scp$ }
+				set_variable = { which = Rights_NOTen which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_NOTen_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_NOSer which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_NOSer which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_NOSer which = $rebel_scp$ }
+				set_variable = { which = Rights_NOSer which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_NOSer_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_BGCom which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_BGCom which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_BGCom which = $rebel_scp$ }
+				set_variable = { which = Rights_BGCom which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_BGCom_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_BGGov which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_BGGov which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_BGGov which = $rebel_scp$ }
+				set_variable = { which = Rights_BGGov which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_BGGov_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_CLHie which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_CLHie which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_CLHie which = $rebel_scp$ }
+				set_variable = { which = Rights_CLHie which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_CLHie_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_CLTax which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_CLTax which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_CLTax which = $rebel_scp$ }
+				set_variable = { which = Rights_CLTax which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_CLTax_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_CLObl which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_CLObl which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_CLObl which = $rebel_scp$ }
+				set_variable = { which = Rights_CLObl which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_CLObl_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_BUTax which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_BUTax which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_BUTax which = $rebel_scp$ }
+				set_variable = { which = Rights_BUTax which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_BUTax_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_BUDir which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_BUDir which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_BUDir which = $rebel_scp$ }
+				set_variable = { which = Rights_BUDir which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_BUDir_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_BUInd which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_BUInd which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_BUInd which = $rebel_scp$ }
+				set_variable = { which = Rights_BUInd which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_BUInd_reform
 		}
 		if = {
-			limit = { NOT = { is_key_equal = { lhs = Rights_BUSer which = $rebel_scp$ } } }
+			limit = { NOT = { is_variable_equal = { which = Rights_BUSer which = $rebel_scp$ } } }
 
 			hidden_effect = {
-				set_key = { lhs = Rights_BUSer which = $rebel_scp$ }
+				set_variable = { which = Rights_BUSer which = $rebel_scp$ }
 			}
 			custom_tooltip = cw_revent_BUSer_reform
 		}
@@ -556,7 +556,7 @@ civil_war_adapt_rights_from_rebels = {
 	}
 }
 
-civil_war_reset_flags_keys_gov = {
+civil_war_reset_flags_variables_gov = {
 	clr_country_flag = ongoing_civil_war
 	clr_country_flag = civil_war_orig_tag
 
@@ -577,12 +577,12 @@ civil_war_reset_flags_keys_gov = {
 	clr_country_flag = RE_ThreatCivilWar_Land
 	clr_country_flag = TR_ChangeGovCivilWar
 
-	set_key = { lhs = cw_rebellion_strength_percentage value = 0 }
-	set_key = { lhs = cw_control_perc value = 0 }
-	set_key = { lhs = cw_current_control_abs value = 0 }
-	set_key = { lhs = cw_total_control_abs value = 0 }
+	set_variable = { which = cw_rebellion_strength_percentage value = 0 }
+	set_variable = { which = cw_control_perc value = 0 }
+	set_variable = { which = cw_current_control_abs value = 0 }
+	set_variable = { which = cw_total_control_abs value = 0 }
 
-	set_key = { lhs = cw_rebellion_strength_percentage value = 0 }
+	set_variable = { which = cw_rebellion_strength_percentage value = 0 }
 	every_owned_province = {
 		limit = {
 			OR = {
@@ -605,7 +605,7 @@ civil_war_reset_flags_keys_gov = {
 	}
 }
 
-civil_war_reset_flags_keys_rebel = {
+civil_war_reset_flags_variables_rebel = {
 	clr_country_flag = ongoing_civil_war
 	clr_country_flag = civil_war_rebel_tag
 	clr_country_flag = civil_war_NO_rebels
@@ -615,35 +615,35 @@ civil_war_reset_flags_keys_rebel = {
 	Rights_ReformReset = yes
 	country_event = { id = SYS_UI.003 }
 
-	set_key = { lhs = cw_rebellion_strength_percentage value = 0 }
-	set_key = { lhs = cw_control_perc value = 0 }
-	set_key = { lhs = cw_current_control_abs value = 0 }
-	set_key = { lhs = cw_total_control_abs value = 0 }
+	set_variable = { which = cw_rebellion_strength_percentage value = 0 }
+	set_variable = { which = cw_control_perc value = 0 }
+	set_variable = { which = cw_current_control_abs value = 0 }
+	set_variable = { which = cw_total_control_abs value = 0 }
 }
 
 civil_war_handle_province_siege = {
 	FROM = { 
-		set_key = { lhs = Public_Tmp0 which = Dev_Total } # get province dev
+		set_variable = { which = Public_Tmp0 which = Dev_Total } # get province dev
 	}
 	
-	set_key = { lhs = Public_Tmp0 which = PREV } # get province dev
+	set_variable = { which = Public_Tmp0 which = PREV } # get province dev
 
 	
-	subtract_key = { lhs = cw_current_control_abs which = Public_Tmp0 }
-	set_key = { lhs = cw_control_perc which = cw_current_control_abs }
-	divide_key = { lhs = cw_control_perc which = cw_total_control_abs }
+	subtract_variable = { which = cw_current_control_abs which = Public_Tmp0 }
+	set_variable = { which = cw_control_perc which = cw_current_control_abs }
+	divide_variable = { which = cw_control_perc which = cw_total_control_abs }
 
 	
-	set_key = { lhs = Public_Tmp0 value = 0 }
+	set_variable = { which = Public_Tmp0 value = 0 }
 	FROM = {
 		owner = {
-			set_key = { lhs = Public_Tmp0 which = FROM } # get province dev
+			set_variable = { which = Public_Tmp0 which = FROM } # get province dev
 
-			subtract_key = { lhs = cw_current_control_abs which = Public_Tmp0 }
-			set_key = { lhs = cw_control_perc which = cw_current_control_abs }
-			divide_key = { lhs = cw_control_perc which = cw_total_control_abs }
+			subtract_variable = { which = cw_current_control_abs which = Public_Tmp0 }
+			set_variable = { which = cw_control_perc which = cw_current_control_abs }
+			divide_variable = { which = cw_control_perc which = cw_total_control_abs }
 			
-			set_key = { lhs = Public_Tmp0 value = 0 }
+			set_variable = { which = Public_Tmp0 value = 0 }
 		}
 		cede_province = ROOT 
 	}
@@ -731,17 +731,17 @@ civil_war_prepare_land_reset = {
 	hidden_effect = {
 		every_owned_province = {
 			limit = {
-				check_key = { lhs = LandInt_Units value = 0.001 }
+				check_variable = { which = LandInt_Units value = 0.001 }
 				isValidProv = yes
 			}
 
-			set_key = { lhs = LandInt_Type 		which = LandInt_Type_Change }
-			set_key = { lhs = LandInt_Building 	which = LandInt_Building_Change }
-			set_key = { lhs = LandInt_Class 	which = LandInt_Class_Change }
-			set_key = { lhs = LandInt_Class2 	which = LandInt_Class2_Change }
+			set_variable = { which = LandInt_Type 		which = LandInt_Type_Change }
+			set_variable = { which = LandInt_Building 	which = LandInt_Building_Change }
+			set_variable = { which = LandInt_Class 	which = LandInt_Class_Change }
+			set_variable = { which = LandInt_Class2 	which = LandInt_Class2_Change }
 
-			set_key = { lhs = LandInt_Share which = LandInt_Share }	
-			set_key = { lhs = LandInt_Units which = LandInt_Units }	
+			set_variable = { which = LandInt_Share which = LandInt_Share }	
+			set_variable = { which = LandInt_Units which = LandInt_Units }	
 		}
 
 		LandInt_ClearSaveChange = yes

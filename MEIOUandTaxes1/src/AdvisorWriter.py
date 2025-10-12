@@ -33,17 +33,17 @@ AdvisorsL = """l_english:
 AdvisorTmp = ""
 AdvisorTrigger = ""
 tmp2 = ""
-for key in advisors.keys():
+for variable in advisors.variables():
 	
-	Codename = advisors[key]['Codename']
-	Manatype = advisors[key]['Manatype']
-	Modifier1 = advisors[key]['Modifier1']
-	Modifier2 = advisors[key]['Modifier2']
-	Modifier3 = advisors[key]['Modifier3']
-	Factions = advisors[key]['Factions'].split(' ')
-	Factor1 = advisors[key]['Factor1']
-	Factor2 = advisors[key]['Factor2']
-	Factor3 = advisors[key]['Factor3']
+	Codename = advisors[variable]['Codename']
+	Manatype = advisors[variable]['Manatype']
+	Modifier1 = advisors[variable]['Modifier1']
+	Modifier2 = advisors[variable]['Modifier2']
+	Modifier3 = advisors[variable]['Modifier3']
+	Factions = advisors[variable]['Factions'].split(' ')
+	Factor1 = advisors[variable]['Factor1']
+	Factor2 = advisors[variable]['Factor2']
+	Factor3 = advisors[variable]['Factor3']
 	
 	if(Modifier1 == None):
 		Modifier1 = ''
@@ -85,24 +85,24 @@ for key in advisors.keys():
 		}}
 		modifier = {{
 			factor = 0.95
-			owner = {{ NOT = {{ check_key = {{ lhs = Prov_{Faction}Pow value = 80 }} }} }}
+			owner = {{ NOT = {{ check_variable = {{ which = Prov_{Faction}Pow value = 80 }} }} }}
 		}}
 		modifier = {{
 			factor = 0.95
-			owner = {{ NOT = {{ check_key = {{ lhs = Prov_{Faction}Pow value = 60 }} }} }}
+			owner = {{ NOT = {{ check_variable = {{ which = Prov_{Faction}Pow value = 60 }} }} }}
 		}}
 		modifier = {{
 			factor = 0.95
-			owner = {{ NOT = {{ check_key = {{ lhs = Prov_{Faction}Pow value = 40 }} }} }}
+			owner = {{ NOT = {{ check_variable = {{ which = Prov_{Faction}Pow value = 40 }} }} }}
 		}}
 		modifier = {{
 			factor = 0.95
-			owner = {{ NOT = {{ check_key = {{ lhs = Prov_{Faction}Pow value = 20 }} }} }}
+			owner = {{ NOT = {{ check_variable = {{ which = Prov_{Faction}Pow value = 20 }} }} }}
 		}}
 		modifier = {{
 			factor = 0
 			AND = {{ 
-				owner = {{ NOT = {{ check_key = {{ lhs = Prov_{Faction}Pow value = 1.0 }} }} }}
+				owner = {{ NOT = {{ check_variable = {{ which = Prov_{Faction}Pow value = 1.0 }} }} }}
 				is_year = 1357
 			}}
 		}}
@@ -187,19 +187,19 @@ for key in advisors.keys():
 					limit = {{
 						{Codename}_{Faction} = 3
 					}}
-					set_key = {{ lhs = Advisor_{Manatype} value = 3 }}
+					set_variable = {{ which = Advisor_{Manatype} value = 3 }}
 				}}
 				else_if = {{
 					limit = {{
 						{Codename}_{Faction} = 2
 					}}
-					set_key = {{ lhs = Advisor_{Manatype} value = 2 }}
+					set_variable = {{ which = Advisor_{Manatype} value = 2 }}
 				}}
 				else = {{
-					set_key = {{ lhs = Advisor_{Manatype} value = 1 }}
+					set_variable = {{ which = Advisor_{Manatype} value = 1 }}
 				}}
-				#set_key = {{ lhs = Advisor_{Manatype}Type value = 1 }}
-				set_key = {{ lhs = Advisor_{Manatype}Faction value = {FactionValue} }}
+				#set_variable = {{ which = Advisor_{Manatype}Type value = 1 }}
+				set_variable = {{ which = Advisor_{Manatype}Faction value = {FactionValue} }}
 			}}
 """.format(Codename=Codename, Manatype=Manatype, Faction=Faction, FactionValue=FactionValue)
 

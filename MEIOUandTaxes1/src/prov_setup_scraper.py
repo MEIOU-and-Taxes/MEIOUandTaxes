@@ -1,4 +1,4 @@
-# This script reads all the keys from events/00-Province_Setup and outputs them to provs_setup.csv for easy reading/use
+# This script reads all the variables from events/00-Province_Setup and outputs them to provs_setup.csv for easy reading/use
 
 import sys, os
 import csv
@@ -9,20 +9,20 @@ import re
 input_file = Path('events/00-Province_Setup.txt')
 input = input_file.read_text()
 
-# Setup and use the regexes to scan the lhs and value for every key
-val_lhs_regex = re.compile(r'(?<=lhs = )\w+')
+# Setup and use the regexes to scan the which and value for every variable
+val_which_regex = re.compile(r'(?<=which = )\w+')
 val_value_regex = re.compile(r'(?<=value =)\s+[0-9.]+')
-lhs_matches = val_lhs_regex.findall(input)
+which_matches = val_which_regex.findall(input)
 value_matches = val_value_regex.findall(input)
 
 # Open the output csv
 with open(Path('provs_setup.csv'), 'w', encoding='utf-8') as out:
 
     # Write the Header
-    out.write(lhs_matches[0]+',')
+    out.write(which_matches[0]+',')
     max_columns = 1
-    for match in lhs_matches[1:]:
-        if match == lhs_matches[0]:
+    for match in which_matches[1:]:
+        if match == which_matches[0]:
             break
         else:
             out.write(match+',')

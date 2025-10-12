@@ -126,7 +126,7 @@ def get_history2(tag, var, flag, modifier):
 
 def newest_save():
     saves = glob.glob(os.path.expanduser(os.path.join('~', '.local', 'share', 'Paradox Interactive', 'Europa Universalis IV', 'save games', '*')))
-    return max(saves, key=os.path.getmtime)
+    return max(saves, variable=os.path.getmtime)
 
 with open(newest_save(), encoding='ISO-8859-1') as f:
     t = f.read()

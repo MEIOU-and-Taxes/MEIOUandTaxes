@@ -22,37 +22,37 @@ Counter2 = 0
 TierL = """l_english:
 """
 
-for key in privileges.keys():
+for variable in privileges.variables():
 	
-	Privilege = privileges[key]['Privilege']
-	Codename = privileges[key]['Codename']
-	Tiers = int(privileges[key]['Tiers'])
-	Nobles = int(privileges[key]['Nobles'])
-	Aristocrats = int(privileges[key]['Aristocrats'])
-	Burghers = int(privileges[key]['Burghers'])
-	Metropolitans = int(privileges[key]['Metropolitans'])
-	Clergy = int(privileges[key]['Clergy'])
-	Spiritualists = int(privileges[key]['Spiritualists'])
-	Clans = int(privileges[key]['Clans'])
-	Chiefs = int(privileges[key]['Chiefs'])
-	Welfare = int(privileges[key]['Welfare'])
-	Bureaucrats = int(privileges[key]['Bureaucrats'])
-	LCorruption = int(privileges[key]['LCorruption'])
-	SCorruption = int(privileges[key]['SCorruption'])
-	Stability = int(privileges[key]['Stability'])
-	Nobles2 = int(privileges2[key]['Nobles'])
-	Aristocrats2 = int(privileges2[key]['Aristocrats'])
-	Burghers2 = int(privileges2[key]['Burghers'])
-	Metropolitans2 = int(privileges2[key]['Metropolitans'])
-	Clergy2 = int(privileges2[key]['Clergy'])
-	Spiritualists2 = int(privileges2[key]['Spiritualists'])
-	Clans2 = int(privileges2[key]['Clans'])
-	Chiefs2 = int(privileges2[key]['Chiefs'])
-	Welfare2 = int(privileges2[key]['Welfare'])
-	Bureaucrats2 = int(privileges2[key]['Bureaucrats'])
-	LCorruption2 = int(privileges2[key]['LCorruption'])
-	SCorruption2 = int(privileges2[key]['SCorruption'])
-	Stability2 = int(privileges2[key]['Stability'])
+	Privilege = privileges[variable]['Privilege']
+	Codename = privileges[variable]['Codename']
+	Tiers = int(privileges[variable]['Tiers'])
+	Nobles = int(privileges[variable]['Nobles'])
+	Aristocrats = int(privileges[variable]['Aristocrats'])
+	Burghers = int(privileges[variable]['Burghers'])
+	Metropolitans = int(privileges[variable]['Metropolitans'])
+	Clergy = int(privileges[variable]['Clergy'])
+	Spiritualists = int(privileges[variable]['Spiritualists'])
+	Clans = int(privileges[variable]['Clans'])
+	Chiefs = int(privileges[variable]['Chiefs'])
+	Welfare = int(privileges[variable]['Welfare'])
+	Bureaucrats = int(privileges[variable]['Bureaucrats'])
+	LCorruption = int(privileges[variable]['LCorruption'])
+	SCorruption = int(privileges[variable]['SCorruption'])
+	Stability = int(privileges[variable]['Stability'])
+	Nobles2 = int(privileges2[variable]['Nobles'])
+	Aristocrats2 = int(privileges2[variable]['Aristocrats'])
+	Burghers2 = int(privileges2[variable]['Burghers'])
+	Metropolitans2 = int(privileges2[variable]['Metropolitans'])
+	Clergy2 = int(privileges2[variable]['Clergy'])
+	Spiritualists2 = int(privileges2[variable]['Spiritualists'])
+	Clans2 = int(privileges2[variable]['Clans'])
+	Chiefs2 = int(privileges2[variable]['Chiefs'])
+	Welfare2 = int(privileges2[variable]['Welfare'])
+	Bureaucrats2 = int(privileges2[variable]['Bureaucrats'])
+	LCorruption2 = int(privileges2[variable]['LCorruption'])
+	SCorruption2 = int(privileges2[variable]['SCorruption'])
+	Stability2 = int(privileges2[variable]['Stability'])
 	
 	LowerEffect = """
 Privilege_{Codename}Lower = {{
@@ -156,7 +156,7 @@ Privilege_{Codename}Raise = {{
 		TierEffects = """
 Privilege_{Codename}{Tier}Apply = {{
 	hidden_effect = {{
-		set_key = {{ lhs = Privilege_{Codename} value = {Tier} }}
+		set_variable = {{ which = Privilege_{Codename} value = {Tier} }}
 	}}
 }}
 """.format(Codename=Codename,Tier=Tier)
