@@ -134,7 +134,7 @@ def compress2(txt):
 def compressH(txt):
     return ' ' + (' '.join(txt.replace('\t','').replace('\n',' ').split()))
 
-dont = ['variables.txt', '00-scripts_core.txt', '00-scripts.txt', '00-triggers_core.txt', '00-triggers.txt',
+dont = ['keys.txt', '00-scripts_core.txt', '00-scripts.txt', '00-triggers_core.txt', '00-triggers.txt',
         'vars.txt', '00-locs_l_english.yml', '00-locs.txt']
 
 effect = """set_variable = {
@@ -603,5 +603,5 @@ if __name__ == "__main__":
     for i in dct:
         string += '%s : %s\n' % (i, dct[i][0])
 
-    with open('variables.txt', 'w', newline = '\n') as f:
+    with open('keys.txt', 'w', newline = '\n') as f:
         f.write(string)

@@ -8,7 +8,7 @@ list_of_dbz = re.findall(r'(?<=Variable division with zero attempted for variabl
 
 dbz_dict = {i: list_of_dbz.count(i) for i in list_of_dbz}
 variables = list(dbz_dict.variables())
-with open('variables.txt') as rf:
+with open('keys.txt') as rf:
     lines = rf.readlines()
     for line in lines:
         if line.partition(':')[2].strip() in variables:

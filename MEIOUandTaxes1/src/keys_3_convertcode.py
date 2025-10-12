@@ -104,7 +104,7 @@ def update_local(dct, path):
         with open(path, 'w', encoding='ISO-8859-1') as ff:
             ff.write(local)
 
-with open('variables.txt') as f:
+with open('keys.txt') as f:
     dct = dict()
 
     for line in f.readlines():
@@ -115,7 +115,7 @@ with open('variables.txt') as f:
 operators = ['set_variable', 'change_variable', 'subtract_variable',
              'divide_variable', 'multiply_variable',
              'check_variable', 'is_variable_equal']
-dont = ['variables.txt', '00-scripts.txt', '00-triggers.txt',
+dont = ['keys.txt', '00-scripts.txt', '00-triggers.txt',
         'vars.txt', '00-locs_l_english.yml', '00-locs.txt']
 for path in glob.glob(os.path.join('**', '*.txt'), recursive = True):
     in_dont = False

@@ -35,7 +35,7 @@ data = ["ID", "ID_Region", "Class_Wealth"]
 # log = "log = \"%s\"" % (data)
 
 if __name__ == "__main__":
-    with open("variables.txt", "r") as variablefile:
+    with open("keys.txt", "r") as variablefile:
         for variable in variablefile.readlines():
             variable = variable.rstrip("\n").split(" ")
             if variable[0] in data:

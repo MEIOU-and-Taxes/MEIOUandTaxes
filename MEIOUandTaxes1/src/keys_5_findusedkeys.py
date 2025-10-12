@@ -33,12 +33,12 @@ def pathend (text):
 dont = ['Tools for Modding', 'graphicalculturetype.txt', pathcont('bookmarks'), pathcont('countries'), pathcont('country_colors'), pathcont('country_tags'),
     pathcont('cultures'), pathcont('event_modifiers'), pathcont('opinion_modifiers'), pathstart('map'), pathstart('interface'), pathstart('gfx'), pathcont('units'),
     pathcont('static_modifiers'), pathcont('countries'), pathcont('country_tags'), pathcont('province_names'), pathcont('tradenodes'), 'SYS-CensusDisplay.txt',
-    pathcont('event_modifiers'), pathcont('scripted_effects'), pathcont('scripted_triggers'), 'variables.txt', '00-scripts_core.txt', '00-scripts.txt', '00-triggers_core.txt', '00-triggers.txt',
+    pathcont('event_modifiers'), pathcont('scripted_effects'), pathcont('scripted_triggers'), 'keys.txt', '00-scripts_core.txt', '00-scripts.txt', '00-triggers_core.txt', '00-triggers.txt',
         'vars.txt', '00-locs_l_english.yml', '00-locs.txt', 
     '00-POP_Init.txt', '00-POP_Init-0.txt', '00-POP_Init-1.txt', '00-POP_Init-2.txt']
 
 
-with open("variables.txt", encoding='ISO-8859-1') as f:
+with open("keys.txt", encoding='ISO-8859-1') as f:
     for l_no, line in enumerate(f):
         variableset = line.split(':')
         variableList[variableset[1].strip('\n\t ')] = False

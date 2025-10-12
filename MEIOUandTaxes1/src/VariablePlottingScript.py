@@ -43,7 +43,7 @@ for tmpLine in dataLines:
 
 # After converting everything into the array its now saved as Data with the variable and the idp
 
-# Follow the variables.txt file in the MEIOUandTaxes1 folder to know which variable represents what. 
+# Follow the keys.txt file in the MEIOUandTaxes1 folder to know which variable represents what. 
 # For plotting a single variable one can use this simple code:
 
 #plt.plot(data['abr'], 'bo') # abr for pixelsize

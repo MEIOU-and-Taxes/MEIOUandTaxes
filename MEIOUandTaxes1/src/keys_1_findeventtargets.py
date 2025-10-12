@@ -4,7 +4,7 @@ import os
 
 os.chdir(os.path.dirname(__file__))
 
-dont = ['variables.txt', '00-scripts.txt', '00-triggers.txt',
+dont = ['keys.txt', '00-scripts.txt', '00-triggers.txt',
         'vars.txt', '00-locs_l_english.yml', '00-locs.txt']
 
 with open('event_targets.txt', 'r') as file:

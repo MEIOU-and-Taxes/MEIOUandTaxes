@@ -23,7 +23,7 @@ def convfile(file):
     else:
         print('Could not find file')
 
-with open("variables.txt", "r") as variablefile:
+with open("keys.txt", "r") as variablefile:
     variables = {}
     for variable in variablefile:
         variable = variable.strip("\n").split(":")
