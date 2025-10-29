@@ -26,50 +26,10 @@ distance_1d_effect = {
 
 # Example: sqrt_effect = { which = v_my_variable }
 sqrt_effect = {
-	if = {
-		limit = {
-			check_key = { lhs = $which$ value = 0.001 }
-		}
-
-		set_key = { lhs = tv_sqrt_precision value = 0.001 }
-		set_key = { lhs = tv_sqrt_length which = $which$ }
-		set_key = { lhs = tv_sqrt_width value = 1 }
-		set_key = { lhs = tv_sqrt_delta which = $which$ }
-		subtract_key = { lhs = tv_sqrt_delta value = 1 }
-
-		while = {
-			limit = {
-				NOT = {
-					check_key = { lhs = tv_sqrt_precision which = tv_sqrt_delta }
-				}
-			}
-
-			# tv_sqrt_length = (tv_sqrt_length + tv_sqrt_width) / 2
-			change_key = { lhs = tv_sqrt_length which = tv_sqrt_width }
-			divide_key = { lhs = tv_sqrt_length value = 2 }
-
-			# tv_sqrt_width = $which$ / tv_sqrt_length
-			set_key = { lhs = tv_sqrt_width which = $which$ }
-			divide_key = { lhs = tv_sqrt_width which = tv_sqrt_length }
-
-			distance_1d_effect = {
-				which	= tv_sqrt_delta
-				which_x1 = tv_sqrt_length
-				which_x2 = tv_sqrt_width
-			}
-		}
-
-		set_key = { lhs = $which$ which = tv_sqrt_length }
-
-		# cleanup
-		set_key = { lhs = tv_sqrt_precision value = 0 }
-		set_key = { lhs = tv_sqrt_length value = 0 }
-		set_key = { lhs = tv_sqrt_width value = 0 }
-		set_key = { lhs = tv_sqrt_delta value = 0 }
-	}
-	else = {
-		set_key = { lhs = $which$ value = 0 }
-	}
+	set_var_from_key = { var = sqrt_var key = $which$ }
+	sqrt_variable = { which = sqrt_var }
+	set_key_from_var = { key = $which$ var = sqrt_var }
+	set_variable = { which = sqrt_var value = 0 }
 }
 
 # Inputs
@@ -85,8 +45,14 @@ distance_2d_effect = {
 	subtract_key = { lhs = Xdiff which = $which_x1$ }
 	subtract_key = { lhs = Ydiff which = $which_y1$ }
 
-	pythagoras_approx_opt = { return=$which$ }
+	multiply_key = { lhs = Xdiff which = Xdiff }
+	multiply_key = { lhs = Ydiff which = Ydiff }
+
+	set_key = { lhs = $which$ which = Xdiff }
+	change_key = { lhs = $which$ which = Ydiff }
 	
+	sqrt_effect = { which = $which$ }
+
 	set_key = { lhs = Xdiff value = 0 }
 	set_key = { lhs = Ydiff value = 0 }
 }
