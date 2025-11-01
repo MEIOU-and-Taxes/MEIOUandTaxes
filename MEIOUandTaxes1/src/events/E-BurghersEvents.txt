@@ -38,13 +38,13 @@ country_event = {
 	title = burghers_estate_events.2.t
 	desc = burghers_estate_events.2.d
 	picture = BURGHER_ESTATE_eventPicture
-	goto = robber_baron_province
 	trigger = {
 		check_key = { lhs = Prov_NOPow value = 60 }
 		any_owned_province = {
 		    is_capital = no
 			is_overseas = no
-			check_key = { lhs = Prov_BGPow value = 25 }
+			check_key = { lhs = Prov_BGPow value = 40 }
+			check_key = { lhs = Prov_NOPow value = 60 }
 			OR = {
 			    has_province_modifier = TN_Minor
 				has_province_modifier = TN_Important
@@ -52,6 +52,7 @@ country_event = {
 				has_province_modifier = TN_Dominant
 			}
 		}
+		NOT = { has_country_modifier = minor_trade_crisis }
 	}
 	
 	is_triggered_only = yes #on_thri_yearly_pulse_4 on_action
@@ -60,23 +61,6 @@ country_event = {
 		days = 1
 	}
 
-	immediate = {
-		hidden_effect = {
-			random_owned_province = {
-				limit = {
-					is_capital = no
-	    	    	is_overseas = no
-	        		OR = {
-	    	    	    has_province_modifier = TN_Minor
-	    	    		has_province_modifier = TN_Important
-		        		has_province_modifier = TN_Major
-		    	    	has_province_modifier = TN_Dominant
-		        	}
-				}
-				save_event_target_as = robber_baron_province
-			}
-		}
-	}
 
 	option = {
 		name = burghers_estate_events.2.a #They only take what is their right.
@@ -523,13 +507,18 @@ country_event = {
 			}
 			modifier = {
 				factor = 0.3
+				NOT = { treasury = 50 }
+			}
+			modifier = {
+				factor = 0.5
 				NOT = { treasury = 25 }
 			}
 		}
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
-		add_treasury = -25
+		add_treasury = -25 #TODO: maybe values should scale with province wealth? it can be cheap way to buy loyalty in late game
+		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=2 }
+
 		event_target:bankrupted_merchants_province = {
-			Public_ChangeClassWealthVal = { class=BG type=value inp=25 }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
 		}
 	}
 	option = {
@@ -542,7 +531,12 @@ country_event = {
 			}
 		}
 		add_country_modifier = { name = minor_trade_crisis duration = 730 }
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-5 }
+		Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-2 }
+
+		event_target:bankrupted_merchants_province = {
+			Public_ChangeClassWealthVal = { class=BG type=value inp=-25 }
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-15 }
+		}
 	}
 }
 
@@ -635,14 +629,19 @@ country_event = {
 			}
 			modifier = {
 				factor = 0.3
-				NOT = { treasury = 40 }
+				NOT = { treasury = 80 }
 			}
 		}
-		add_treasury = -40
-		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+		add_treasury = -80
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
 		hidden_effect = {
 			event_target:urbanization_province = {
-				Public_ChangeClassWealthVal = { class=RE type=value inp=40 }
+				change_key = { lhs = Infra_Wealth value = 80 }
+				set_key = { lhs = Tmp_1 value = 2 }
+				set_key = { lhs = Tmp_2 value = 2 }
+				Infra_StartProject = { id = 10 height = Tmp_1 width = Tmp_2 }
+				set_key = { lhs = Tmp_1 value = 0 }
+				set_key = { lhs = Tmp_2 value = 2 }
 			}
 		}
 	}
