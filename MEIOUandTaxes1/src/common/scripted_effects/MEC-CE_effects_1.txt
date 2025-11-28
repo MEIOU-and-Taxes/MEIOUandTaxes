@@ -173,7 +173,6 @@ CE_Main = {
 				}
 			}
 		}
-
 		if = {
 			limit = {
 				check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 }
@@ -260,6 +259,8 @@ CE_Main = {
 					check_key = { lhs = Infra_Capitol value = 1 }
 				}
 				set_province_flag = is_regional_capital
+				
+				set_key = { lhs = Tmp_9 value = 0 }		# To enforce chaining restriction
 			}
 	    }
 
@@ -291,12 +292,23 @@ CE_Main = {
 				clr_province_flag = tf_communication_efficiency_final
 				clr_province_flag = ce_dispatch_cand
 			}	
-
-
-			# Determine which of the remaining regional capitals is closest to the capital.
-			ce_set_runner_dispatching_province_regional_capitals = {
-				scope = every_province
-				max = 1800
+			
+			# Find unusued regional with best distance
+			save_event_target_as = runner_dispatching_province
+			
+			every_province = {
+				limit = {
+					has_province_flag = is_regional_capital
+	
+					NOT = {
+						has_province_flag = regional_capital_ce_final
+					}
+					
+					NOT = {
+						check_key = { lhs = tv_tt which = event_target:runner_dispatching_province }
+					}
+				}
+				save_event_target_as = runner_dispatching_province
 			}
 
 
@@ -322,29 +334,28 @@ CE_Main = {
 				# Safeguard against exploiting chaining of capitols.
 				# If the runner origin of a capitol is another capitol,
 				# then traveltime cannot be lower than the traveltime of it's runner origin.
-				every_province = {
+				# there can be an exception that was not previously considered
+				# If a given province was visited by more than one regional, then there could be a case where,
+				# regional A gives better distance to the current regional, but regional B has a better distance itself.
+				# In such a case, if capitol is high enough in the current regional, then it can actually be more beneficial for the current regional
+				# to have received the runner from regional B, even though before the discount is considered it would give a worse distance
+				# If one is to implement such a feature the logic would get pretty more complex, with quite the impact on performance
+				# So, it is assumed that such an exception is to be handled by checking only the regional that sent the best runner
+				# which regional to receive runner from
+				if = {
 					limit = {
-						has_province_flag = regional_capital_ce_final
-					}
-					set_key = { lhs = Tmp_0 which = tv_tt }   
-				    set_key = { lhs = Tmp_1 which = ID_Prov }
-				
-					if = {
-						limit = {
-							check_key = { lhs = Tmp_0 which = PREV }
-							is_key_equal = { lhs = Tmp_1 which = PREV }
-						}
-						PREV = {
-							set_key = { lhs = tv_tt which = PREV }					
+						check_key = { lhs = Tmp_9 value = 0.001 }
+						
+						NOT = {
+							check_key = { lhs = tv_tt which = Tmp_9 }
 						}
 					}
-					
-					set_key = { lhs = Tmp_0 value = 0 }
-					set_key = { lhs = Tmp_1 value = 0 }
+					set_key = { lhs = tv_tt which = Tmp_9 }
 				}
-				set_key = { lhs = Tmp_0 value = 0 }  					
-				set_key = { lhs = Tmp_1 value = 0 }
-				set_province_flag = regional_capital_ce_final				
+					
+				
+				set_province_flag = regional_capital_ce_final		
+				set_key = { lhs = Tmp_9 which = tv_tt }
 										
 				# Main loop for current regional
 				while = {
@@ -356,7 +367,19 @@ CE_Main = {
 
 					event_target:runner_dispatching_province = {
 						set_province_flag = tf_communication_efficiency_final
-
+						
+						if = {
+							limit = {
+								NOT = {
+									has_province_flag = is_regional_capital
+	
+									NOT = {
+										has_province_flag = regional_capital_ce_final
+									}
+								}
+							}
+							set_key = { lhs = Tmp_9 which = PREV }
+						}
 
 						ce_do_river = {
 							prev = pv_prev
@@ -378,7 +401,7 @@ CE_Main = {
 						}
 						ce_set_runner_dispatching_province_sea = {
 							max = 960
-						}	
+						}
 					}
 				}
 			}
@@ -761,6 +784,8 @@ ce_cleanup = {
 		set_key = { lhs = tv_port_x_other value = 0 }
 		set_key = { lhs = tv_port_z_other value = 0 }
 		
+		set_key = { lhs = Tmp_9 value = 0 }
+		
 		set_key = { lhs = tv_tt_save value = 0 }
 		clr_province_flag = CE_Cand
 	}
@@ -792,31 +817,33 @@ ce_cleanup = {
 }
 
 ce_set_runner_dispatching_province_land = {
+	set_key = { lhs = Tmp_0 which = tv_tt }
+	set_key = { lhs = tv_tt value = 1800 }
 	$scope$ = {
 		limit = {
 			has_province_flag = CE_Cand
 			has_lowest_travel_time = { max = $max$ }
 		}
-		save_event_target_as = runner_dispatching_province
+		PREV = { set_key = { lhs = tv_tt which = PREV } }
+		save_event_target_as = runner_dispatching_province_cand
 	}
+	event_target:runner_dispatching_province_cand = { save_event_target_as = runner_dispatching_province }
+	set_key = { lhs = tv_tt which = Tmp_0 }
+	set_key = { lhs = Tmp_0 value = 0 }
 }
 ce_set_runner_dispatching_province_sea = {
+	set_key = { lhs = Tmp_0 which = tv_tt }
+	set_key = { lhs = tv_tt value = 1800 }
 	sea_starts = {
 		limit = {
 			has_lowest_travel_time = { max = $max$ }
 		}
-		save_event_target_as = runner_dispatching_province
+		PREV = { set_key = { lhs = tv_tt which = PREV } }
+		save_event_target_as = runner_dispatching_province_cand
 	}
-}
-ce_set_runner_dispatching_province_regional_capitals = {
-	$scope$ = {
-		limit = {
-			has_province_flag = is_regional_capital
-			NOT =  { has_province_flag = regional_capital_ce_final }
-			has_lowest_travel_time = { max = $max$ }
-		}
-		save_event_target_as = runner_dispatching_province
-	}
+	event_target:runner_dispatching_province_cand = { save_event_target_as = runner_dispatching_province }
+	set_key = { lhs = tv_tt which = Tmp_0 }
+	set_key = { lhs = Tmp_0 value = 0 }
 }
 
 ce_do_sea = {
@@ -1068,8 +1095,6 @@ ce_do_land = {
 				which = tv_province_distance
 				who = event_target:runner_dispatching_province
 			}
-			
-			change_key = { lhs = tv_province_distance which = PREV }
 
 			compare_and_set_travel_time = {
 				prev = $prev$
