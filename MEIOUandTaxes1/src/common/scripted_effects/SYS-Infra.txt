@@ -2606,70 +2606,59 @@ Infra_GetAppealInfra = {
         Infra_GetAppealHelper = { class = BG weight = $weightBG$ return = $return$ [[rural] rural = $rural$ ] [[urban] urban = $urban$ ] [[nomad] nomad = $nomad$ ] }
         Infra_GetAppealHelper = { class = CL weight = $weightCL$ return = $return$ [[rural] rural = $rural$ ] [[urban] urban = $urban$ ] [[nomad] nomad = $nomad$ ] }
 
-		[[amenities] # amenities appeal
+		[[amenities] ## ONLY UPGRADE AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
 			if = {
-				limit = {
+				limit = { 
 					always = $amenities$
 				}
-				Infra_GetAmenities_Cap = { return = Public_Tmp0 } # Get amenities population capacity
-				set_key = { lhs = Public_Tmp1 which = RE_Total }
-				change_key = { lhs = Public_Tmp1 value = 5 } #make smaller resident pops look unsupported
 
-				## Multiply pre cost appeal by a modifier based on how much a city is over it's amenities limit
-				# Formula: (Residents / Cap)
-				# use this to balance the effect vs. the cap -> 1.5 = at the cap you get 50% more appeal
-				multiply_key = { lhs = Public_Tmp1 value = 1.8 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_OVER_AMENITIES_LIMIT~value`
+				Infra_GetAmenities_Cap = { return = Tmp8 } # Get amenities population capacity
+				
 				if = {
 					limit = {
-						check_key = { lhs = Public_Tmp0 value = 0.001 }
+						check_key = { lhs = Tmp8 value = 0.001 }
 					}
-					divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+					divide_key = { lhs = Tmp8 which = RE_Total }
 				}
 				else = {
-					set_key = { lhs = Public_Tmp1 value = 0 }
-				}
+					set_key = { lhs = Tmp8 value = 0 }
+				} 
 
-				# Maximum x2.5 appeal, min x 0.75 (reduced to 2.5 by Corlis)
 				if = {
-					limit = {
-						check_key = { lhs = Public_Tmp1 value = 2.5 }
+					limit = { 
+						NOT = { check_key = { lhs = Tmp8 value = 0.85 } } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_AMENITIES_UPGRADE_MIN_RATIO~value`
 					}
-					set_key = { lhs = Public_Tmp1 value = 2.5 }
-				}
-				else_if = {
-					limit = {
-						NOT = { check_key = { lhs = Public_Tmp1 value = 0.75 } }
-					}
-					set_key = { lhs = Public_Tmp1 value = 0.75 }
-				}
 
-				multiply_key = { lhs = $return$ which = Public_Tmp1 }
-				set_key = { lhs = Public_Tmp0 value = 0 }
-				set_key = { lhs = Public_Tmp1 value = 0 }
+					set_key = { lhs = $return$ value = -1 }
+				} else_if = {
+					limit = {
+						check_key = { lhs = Tmp8 value = 1.0 }
+					}
+					multiply_key = { lhs = $return$ value = 1.8 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_OVER_AMENITIES_LIMIT~value`
+				}
 			}
 		]
 		[[paths]
-		if = {
-			limit = { always = $paths$ check_key = { lhs = TN_Pass value = 1 } } 
-			# ancient paths are desired to have Pathing
-			multiply_key = { lhs = $return$ value = 1.5 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_ANCIENT_PATHS~value`
-		}
+			if = {
+				limit = { always = $paths$ check_key = { lhs = TN_Pass value = 1 } } 
+				# ancient paths are desired to have Pathing
+				multiply_key = { lhs = $return$ value = 1.5 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_ANCIENT_PATHS~value`
+			}
 		]
 		[[tn_harbour]
-		if = {
-			limit = {
-				always = $tn_harbour$
-				OR = {
-					has_province_flag = TN_Harbour_Major
-					has_province_flag = TN_Harbour_Important
-					has_province_flag = TN_Harbour_Minor
-				}
-			} 
-			# Natural Harbours want to be developed
-			multiply_key = { lhs = $return$ value = 1.5 }
-		}
+			if = {
+				limit = {
+					always = $tn_harbour$
+					OR = {
+						has_province_flag = TN_Harbour_Major
+						has_province_flag = TN_Harbour_Important
+						has_province_flag = TN_Harbour_Minor
+					}
+				} 
+				# Natural Harbours want to be developed
+				multiply_key = { lhs = $return$ value = 1.5 }
+			}
 		]		
-		
 
         Infra_GetCostBuild$type$ = yes # get base goods to build one unit
 
@@ -2706,36 +2695,6 @@ Infra_GetAppealInfra = {
 		# Appeal / Rank+1
 		divide_key = { lhs = $return$ which = Tmp_9 }
 
-		[[amenities] ## ONLY UPGRADE AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
-			if = {
-				limit = { 
-					always = $amenities$
-				}
-
-				Infra_GetAmenities_Cap = { return = Public_Tmp0 } # Get amenities population capacity
-				set_key = { lhs = Public_Tmp1 which = RE_Total }
-				change_key = { lhs = Public_Tmp1 value = 5 } # make small resident pops look unsupported, to prevent edge cases
-				
-				if = {
-					limit = {
-						check_key = { lhs = Public_Tmp0 value = 0.001 }
-					}
-					divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
-				}
-				else = {
-					set_key = { lhs = Public_Tmp1 value = 0 }
-				} 
-
-				if = {
-					limit = { 
-						NOT = { check_key = { lhs = Public_Tmp1 value = 0.9 } } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_AMENITIES_UPGRADE_MAX_RATIO~value`
-					}
-
-					set_key = { lhs = $return$ value = -1 }
-				}
-			}
-		]
-
 		# Clear variables
         set_key = { lhs = Infra_Cost6 value = 0 }
 		set_key = { lhs = Infra_Cost10 value = 0 }
@@ -2746,6 +2705,7 @@ Infra_GetAppealInfra = {
         set_key = { lhs = Infra_CostR value = 0 }
         set_key = { lhs = Infra_CostUL value = 0 }
         set_key = { lhs = Tmp_9 value = 0 }
+		set_key = { lhs = Tmp_8 value = 0 }
     }
 }
 
