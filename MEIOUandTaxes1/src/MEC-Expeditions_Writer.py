@@ -829,11 +829,11 @@ select_expedition_option_frame_bottom_jumping_node = """\
 				factor = 0.1
 				num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
 					province_group = expedition_provs.{expedition_name}
-					OR = {{
-						has_province_modifier = trading_post_province
-						has_province_flag = TN_Natural
-						}}
-					value = 1
+					#OR = {{
+					#	has_province_modifier = trading_post_province
+					#	has_province_flag = TN_Natural
+					#	}}
+					#value = 1
 				}}
 			}}
 """
@@ -865,10 +865,10 @@ select_expedition_option_frame_bottom_chinese_mainland = """\
 				factor = 0.1
 				num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
 					province_group = expedition_provs.{expedition_name}
-					OR = {{
-						has_province_modifier = trading_post_province
-						has_province_flag = TN_Natural
-						}}
+					#OR = {{
+					#	has_province_modifier = trading_post_province
+					#	has_province_flag = TN_Natural
+					#	}}
 					value = 1
 				}}
 			}}
@@ -971,6 +971,75 @@ select_expedition_option_frame_bottom = """\
 				}}
 			}}
 		}}
+		else_if = {{
+			limit = {{
+				has_idea = colonialism_ideas_1
+                num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
+					province_group = expedition_provs.{expedition_name}
+					value = 3
+				}}                
+			}}
+			random_list = {{
+				50 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_arrival}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				30 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_trade_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_map_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_total_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+			}}
+		}}
+		else_if = {{
+			limit = {{
+                num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
+					province_group = expedition_provs.{expedition_name}
+					value = 3
+				}}                
+			}}        
+			random_list = {{
+				20 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_arrival}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				70 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_trade_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_map_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_total_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+			}}
+		}}         
 		else = {{
 			random_list = {{
 				40 = {{
@@ -2470,7 +2539,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
         loc.write(f' MEC_Expeditions.{str(menu_event_number).zfill(3)}.dont: "Don\'t send an expedition."\n')
 
         events.write(
-            "\ttrigger = {\n\t\tOR = {\n\t\t\thas_idea = exploration_ideas_3\n\t\t\thas_country_modifier = can_colonize_country_modifier\n\t\t}\n\t\tmax_sailors = 1500\n\t\tNOT = {\n\t\t\thas_country_flag = MEC_Expeditions_paused\n\t\t}\n\t\tnum_of_ports = 1\n\t\tOR = { # Has an expedition available\n")
+            "\ttrigger = {\n\t\tOR = {\n\t\t\thas_idea = exploration_ideas_3\n\t\t\thas_country_modifier = can_colonize_country_modifier\n\t\t}\n\t\tOR = {\n\t\t\thas_idea = naval_ideas_3\n\t\t\tdip_tech = 33\n\t\t}\n\t\tmax_sailors = 1500\n\t\tNOT = {\n\t\t\thas_country_flag = MEC_Expeditions_paused\n\t\t}\n\t\tnum_of_ports = 1\n\t\tOR = { # Has an expedition available\n")
         for expedition in expeditions_list:
             events.write(f"\t\t\tMEC_Expeditions_available_{expedition.name}_trigger = yes\n")
         events.write("\t\t}\n\t}\n\n")
