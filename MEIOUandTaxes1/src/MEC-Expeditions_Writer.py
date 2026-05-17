@@ -1,4 +1,5 @@
 # This generates the code for expedition related files
+### DOESNT SEEM TO WORK PROPERLY ANYMORE
 
 # Python 3.6 or later
 from pathlib import Path
@@ -829,11 +830,11 @@ select_expedition_option_frame_bottom_jumping_node = """\
 				factor = 0.1
 				num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
 					province_group = expedition_provs.{expedition_name}
-					OR = {{
-						has_province_modifier = trading_post_province
-						has_province_flag = TN_Natural
-						}}
-					value = 1
+					#OR = {{
+					#	has_province_modifier = trading_post_province
+					#	has_province_flag = TN_Natural
+					#	}}
+					#value = 1
 				}}
 			}}
 """
@@ -865,10 +866,10 @@ select_expedition_option_frame_bottom_chinese_mainland = """\
 				factor = 0.1
 				num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
 					province_group = expedition_provs.{expedition_name}
-					OR = {{
-						has_province_modifier = trading_post_province
-						has_province_flag = TN_Natural
-						}}
+					#OR = {{
+					#	has_province_modifier = trading_post_province
+					#	has_province_flag = TN_Natural
+					#	}}
 					value = 1
 				}}
 			}}
@@ -971,6 +972,75 @@ select_expedition_option_frame_bottom = """\
 				}}
 			}}
 		}}
+		else_if = {{
+			limit = {{
+				has_idea = colonialism_ideas_1
+                num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
+					province_group = expedition_provs.{expedition_name}
+					value = 3
+				}}                
+			}}
+			random_list = {{
+				50 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_arrival}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				30 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_trade_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_map_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_total_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+			}}
+		}}
+		else_if = {{
+			limit = {{
+                num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
+					province_group = expedition_provs.{expedition_name}
+					value = 3
+				}}                
+			}}        
+			random_list = {{
+				20 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_arrival}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				70 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_trade_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_map_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+				5 = {{
+					country_event = {{
+						id = MEC_Expeditions.{event_num_total_failure}
+						days = {expedition_duration} random = 25
+					}}
+				}}
+			}}
+		}}               
 		else = {{
 			random_list = {{
 				40 = {{
