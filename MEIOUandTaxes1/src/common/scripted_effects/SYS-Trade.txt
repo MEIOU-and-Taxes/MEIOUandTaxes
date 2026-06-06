@@ -561,14 +561,6 @@ TN_PrepSector = {
                 set_key = { lhs = TN_SectorStockpileOffer25 value = 0 }
 
                 set_key = { lhs = TN_SectorStockpileOffer41 value = 0 } 
-                
-                set_key = { lhs = Nat_Capital1 value = 0 }
-                set_key = { lhs = Nat_Capital2 value = 0 }
-                set_key = { lhs = Nat_Capital5 value = 0 }
-                set_key = { lhs = Nat_Capital21 value = 0 }
-                set_key = { lhs = Nat_Capital22 value = 0 }                
-                set_key = { lhs = Nat_Capital24 value = 0 }                
-                set_key = { lhs = Nat_Capital41 value = 0 }
             }
         }
     }
@@ -1878,22 +1870,6 @@ TN_DoTrade = {
             TN_DoTradeHelper1 = { prod = 25 }
             TN_DoTradeHelper1 = { prod = 41 }
             
-            
-            if = {
-                limit = {
-                    owner = {
-                        ai = no                        
-                    }
-                }
-                Nat_Stockpile_Take = { prod = 1 }
-                Nat_Stockpile_Take = { prod = 2 }
-                Nat_Stockpile_Take = { prod = 5 }
-                Nat_Stockpile_Take = { prod = 21 }
-                Nat_Stockpile_Take = { prod = 22 }
-                Nat_Stockpile_Take = { prod = 24 }
-                Nat_Stockpile_Take = { prod = 41 }
-            }
-            
             # If local demand of food wasn't met or demand is higher than surplus don't sell abroad, stockpile it.
             # Also only if stockpile is at least 3 time the demand allow to sell.
             set_key = { lhs = Tmp_0 which = TN_SectorStockpile1 }
@@ -2729,56 +2705,6 @@ TN_SetMilFills = {
     multiply_key = { lhs = Mil_$prod$ value = 0.01 }
     owner = {
         change_key = { lhs = Mil_$prod$ which = PREV }
-    }
-
-    if = {
-        limit = {
-            owner = {
-                ai = no
-                #is_at_war = yes
-            }
-            NOT = { check_key = { lhs = TN_ProvFill$prod$ value = 99.999 } }
-            owner = { check_key = { lhs = Nat_Stockpile$prod$ value = 0.001 } }
-        }
-        set_key = { lhs = Nat_Stockpile$prod$ which = owner }
-        set_key = { lhs = Tmp_1 which = $var$ } #  $var$ = Total amount of needed military goods. 
-        set_key = { lhs = Mil_Fill$prod$ value = 100 }
-        subtract_key = { lhs = Mil_Fill$prod$ which = TN_ProvFill$prod$ } # How much remaining Fill is needed        
-        
-        set_key = { lhs = PublicHelper_Tmp9 which = Mil_Fill$prod$ }
-        multiply_key = { lhs = PublicHelper_Tmp9 value = 0.01 }
-        multiply_key = { lhs = $var$ which = PublicHelper_Tmp9 } # How much net amount of goods remained unfullfilled for the armies need
-
-        if = {
-            limit = {
-                check_key = { lhs = Nat_Stockpile$prod$ which = $var$ } # If it can supply everything, easy.
-            }
-            subtract_key = { lhs = Nat_Stockpile$prod$ which = $var$ } # Remove from stockpile 
-            #log = "testingg"
-            owner = {
-                set_key = { lhs = $var$ which = PREV }
-                subtract_key = { lhs = Nat_Stockpile$prod$ which = $var$ }
-                change_key = { lhs = TN_SectorExported$prod$ which = $var$ } # How much Country gave. Display purpose
-            }
-            set_key = { lhs = $var$ value = 0 } 
-        }
-        else = {
-            subtract_key = { lhs = $var$ which = Nat_Stockpile$prod$ } # Give them everything we have
-            # Calculate how much it was fullfiled.
-			if = {
-				limit = { 
-					NOT = { is_key_equal = { lhs = Tmp_1 value = 0 } }
-				}
-			    divide_key = { lhs = $var$ which = Tmp_1 } 
-            }
-			set_key = { lhs = Tmp_0 value = 1 }
-            subtract_key = { lhs = Tmp_0 which = Tmp_1 } # How much it was filled
-            multiply_key = { lhs = Mil_Fill$prod$ which = Tmp_0 }  # How much it filled of what remained to be filled
-            owner = {
-                change_key = { lhs = TN_SectorExported$prod$ which = Nat_Stockpile$prod$ }
-                set_key = { lhs = Nat_Stockpile$prod$ value = 0 }
-            }            
-        }
     }    
 }
 
@@ -2949,58 +2875,6 @@ TN_DoTradeHelper1 = {
 			}
         }
     }
-}
-
-Nat_Stockpile_Take = {
-    # State buys from Merchants
-    if = {
-        limit = {
-            check_key = { lhs = TN_SectorStockpileOffer$prod$ value = 0.001 } # Anything left to sell?
-            owner = { check_key = { lhs = Nat_Capital$prod$ value = 0.001 } } # how much money the state is putting into buying goods
-			NOT = { is_key_equal = { lhs = TN_ProvPrc$prod$ value = 0 } } # shouldnt occur, but who knows
-		}
-        set_key = { lhs = Nat_Capital$prod$ which = owner }
-        set_key = { lhs = Tmp_0 which = Nat_Capital$prod$ }
-        set_key = { lhs = Tmp_1 which = TN_ProvPrc$prod$ }
-        multiply_key = { lhs = Tmp_1 value = 1.1 } # price you pay
-        divide_key = { lhs = Tmp_0 which = Tmp_1 } # How many goods it can purchase.         
-
-        if = {
-            limit = { ##FUNDS > OFFER
-                check_key = { lhs = Tmp_0 which = TN_SectorStockpileOffer$prod$ }
-            }
-            set_key = { lhs = Tmp_0 which = TN_SectorStockpileOffer$prod$ } # This is what it can buy.
-            multiply_key = { lhs = Tmp_1 which = Tmp_0 } # price * goods
-            
-            set_key = { lhs = Nat_Capital$prod$ which = Tmp_1 } # this is how much money was spent            
-            change_key = { lhs = TN_SectorTrade which = Tmp_1 } # add income to merchants
-
-            set_key = { lhs = Nat_Stockpile$prod$ which = Tmp_0 } # Add goods to national stockpile
-            set_key = { lhs = TN_SectorStockpileOffer$prod$ value = 0 } # Nothing left to sell
-            change_key = { lhs = TN_SectorStockpileOut$prod$ which = Tmp_0 }
-            subtract_key = { lhs = TN_SectorStockpile$prod$ which = Tmp_0 }
-            owner = {
-                subtract_key = { lhs = Nat_Capital$prod$ which = PREV }
-                change_key = { lhs = Nat_Stockpile$prod$ which = PREV }
-            }
-            set_key = { lhs = Nat_Capital$prod$ which = Tmp_0 } # display
-            
-        }
-        else = { ##OFFER > FUNDS
-            multiply_key = { lhs = Tmp_1 which = Tmp_0 } # price * goods
-            change_key = { lhs = TN_SectorTrade which = Tmp_1 } # add income to merchants
-            
-            set_key = { lhs = Nat_Stockpile$prod$ which = Tmp_0 } # Add goods to national stockpile
-            subtract_key = { lhs = TN_SectorStockpileOffer$prod$ which = Tmp_0 }
-            change_key = { lhs = TN_SectorStockpileOut$prod$ which = Tmp_0 }
-            subtract_key = { lhs = TN_SectorStockpile$prod$ which = Tmp_0 }
-            owner = {
-                set_key = { lhs = Nat_Capital$prod$ value = 0 } # No more funds left
-                change_key = { lhs = Nat_Stockpile$prod$ which = PREV }
-            }
-            set_key = { lhs = Nat_Capital$prod$ which = Tmp_0 } # How much the State bought. Store for display purposes
-        }
-    }    
 }
 
 TN_DoTradeSetScoreImport = {
