@@ -1,4 +1,4 @@
-Infra_SetBuildingMax = { #sets max limit for some types of buildings
+Infra_SetBuildingMax = { # Sets provincial district max limits based on calculated land size, forest area and preset resource keys
 	set_key = { lhs = Building_AgricultureMax which = Land_Size }
 	multiply_key = { lhs = Building_AgricultureMax which = Modi_AgricultureMax }
 	
@@ -6,7 +6,18 @@ Infra_SetBuildingMax = { #sets max limit for some types of buildings
 	multiply_key = { lhs = Building_ForestryMax which = Modi_ForestryMax }
 	
 	set_key = { lhs = Building_ExtractionMax which = Land_Resource }
+	Infra_AddExtractionSizeForCoal = yes
+
+	multiply_key = { lhs = Building_ExtractionMax value = 10 }
+	multiply_key = { lhs = Building_ExtractionMax which = Modi_ExtractionMax }
 	
+	set_key = { lhs = Building_FisheryMax which = Land_Fish }
+	multiply_key = { lhs = Building_FisheryMax value = 10 }
+	multiply_key = { lhs = Building_FisheryMax which = Modi_FisheryMax }
+}
+
+# TODOTG: 
+Infra_AddExtractionSizeForCoal = {
 	if = {
 		limit = {
 			has_province_flag = coal
@@ -42,12 +53,6 @@ Infra_SetBuildingMax = { #sets max limit for some types of buildings
 			change_key = { lhs = Building_ExtractionMax value = 30 }
 		}
 	}
-	multiply_key = { lhs = Building_ExtractionMax value = 10 }
-	multiply_key = { lhs = Building_ExtractionMax which = Modi_ExtractionMax }
-	
-	set_key = { lhs = Building_FisheryMax which = Land_Fish }
-	multiply_key = { lhs = Building_FisheryMax value = 10 }
-	multiply_key = { lhs = Building_FisheryMax which = Modi_FisheryMax }
 }
 
 Infra_AddPrp = {
@@ -236,8 +241,8 @@ Infra_CheckProject = {
                 is_key_equal = { lhs = Infra_S$slot$R value = 0 }
                 is_key_equal = { lhs = Infra_S$slot$UL value = 0 }
             }
-            Infra_RunScript = { id = Infra_S$slot$ script = Infra_AddBuilding }
-            Infra_RunScript = { id = Infra_S$slot$ script = Infra_InConstSubt }
+            Infra_RunScript = { id = Infra_S$slot$ script = Infra_IncreaseSizeByOne }
+            Infra_RunScript = { id = Infra_S$slot$ script = Infra_InConstSubtractOne }
 
             if = {
                 limit = {
@@ -354,20 +359,10 @@ Infra_SpendProject = {
 }
 
 Infra_InConstAdd = {
-    [[building]
-        change_key = { lhs = Infra_InConst$building$ which = $size$ }
-    ]
-    [[infra]
-        change_key = { lhs = Infra_InConst$infra$ which = $size$ }
-    ]
+    change_key = { lhs = Infra_InConst$infra$ which = $size$ }
 }
-Infra_InConstSubt = {
-    [[building]
-        subtract_key = { lhs = Infra_InConst$building$ value = 1 }
-    ]
-    [[infra]
-        subtract_key = { lhs = Infra_InConst$infra$ value = 1 }
-    ]
+Infra_InConstSubtractOne = {
+    subtract_key = { lhs = Infra_InConst$infra$ value = 1 }
 }
 
 Infra_StartProjectHelper = {
@@ -1868,7 +1863,16 @@ Infra_DoDecay = { # add decay
 	}
 }
 
-Infra_CheckClass = { # remove dead classes
+Infra_RemoveDeadClasses = {
+	Infra_RemoveClassIfDead = { class=SF }
+	Infra_RemoveClassIfDead = { class=NM }
+	Infra_RemoveClassIfDead = { class=RE }
+	Infra_RemoveClassIfDead = { class=NO }
+	Infra_RemoveClassIfDead = { class=BG }
+	Infra_RemoveClassIfDead = { class=CL }
+}
+
+Infra_RemoveClassIfDead = { # remove dead classes
 	if = {
 		limit = {
 			NOT = { check_key = { lhs = $class$_Total value = 0.001 } }
@@ -2709,6 +2713,11 @@ Infra_GetAppealInfra = {
     }
 }
 
+# Sets the rank of the infra, 0-7, based on its current size. 
+# 
+# Loops through the goals of each level, starting with level 0) 
+# Checks if the current size is bigger than the goal
+# If size is bigger than goal, increments the level and checks for the next levels goal
 Infra_SetRankInfra = {
     set_key = { lhs = Infra_$type$ value = 0 }
 
