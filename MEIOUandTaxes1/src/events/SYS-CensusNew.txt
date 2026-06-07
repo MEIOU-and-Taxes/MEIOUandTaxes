@@ -518,14 +518,14 @@ country_event = {
 					TN_SetPrcFill = { prod = 4 fluctuationFactor=0.666 }
 					TN_SetPrcFill = { prod = 5 fluctuationFactor=0.666 }
 					TN_SetPrcFill = { prod = 6 fluctuationFactor=0.8 }
-					TN_SetPrcFill = { prod = 9 fluctuationFactor=1.5 }
+					TN_SetPrcFill = { prod = 9 fluctuationFactor=1.666 }
 					TN_SetPrcFill = { prod = 10 fluctuationFactor=0.8 }
-					TN_SetPrcFill = { prod = 21 fluctuationFactor=1.5 }
-					TN_SetPrcFill = { prod = 22 }
-					TN_SetPrcFill = { prod = 23 }
+					TN_SetPrcFill = { prod = 21 fluctuationFactor=1.25 }
+					TN_SetPrcFill = { prod = 22 fluctuationFactor=1.5 }
+					TN_SetPrcFill = { prod = 23 fluctuationFactor=1.5 }
 					TN_SetPrcFill = { prod = 24 fluctuationFactor=1.5 }
-					TN_SetPrcFill = { prod = 25 fluctuationFactor=1.5 }
-					TN_SetPrcFill = { prod = 41 fluctuationFactor=1.5 }
+					TN_SetPrcFill = { prod = 25 fluctuationFactor=1.666 }
+					TN_SetPrcFill = { prod = 41 fluctuationFactor=1.666 }
 
 					TN_SetMilFills = { prod = 1 var = PublicHelper_Tmp1 }
 					TN_SetMilFills = { prod = 2 var = PublicHelper_Tmp2 }
@@ -675,6 +675,11 @@ country_event = {
 					isValidCountry = yes
 				}
 				set_key = { lhs = Infra_StateSpend value = 0 }
+
+				# Temp variable for Infra_DoSpend to keep track of remaining StatePropertyCapacity when investing into provinces
+				set_key = { lhs = Tmp_7 which = StatePropertyCapacity }
+				subtract_key = { lhs = Tmp_7 which = StatePropertyTotalModified }
+				multiply_key = { lhs = Tmp_7 value = 0.9 } 
 			}
 
 			regiongroup = {
@@ -835,11 +840,11 @@ country_event = {
 
 					# Set spending of Classes to Infra (Pathing, Harbourage, etc). Add that spending into the infra as Infra_Income
 					# Infra_Income is basically how much money is being injected into the infrastructure.
-					Infra_DoIncomeInfra = { class = NO div = 130  power = yes antinomad = yes	commercial = yes commercial_div = 90 }
-					Infra_DoIncomeInfra = { class = BG div = 70   power = yes charter_BG = yes 	commercial = yes commercial_div = 60 }
-					Infra_DoIncomeInfra = { class = CL div = 115  power = yes 					commercial = no  commercial_div = 100 }
-					Infra_DoIncomeInfra = { class = SF div = 225 			  freedom = yes 	commercial = yes commercial_div = 200 }
-					Infra_DoIncomeInfra = { class = RE div = 200 			  charter_RE = yes 	commercial = yes commercial_div = 175 }
+					Infra_DoIncomeInfra = { class = NO div = 0.09  power = yes antinomad = yes	 commercial = yes commercial_div = 0.120 } # Corlis: It was a division, changed the math behind it
+					Infra_DoIncomeInfra = { class = BG div = 0.155  power = yes charter_BG = yes commercial = yes commercial_div = 0.190 }
+					Infra_DoIncomeInfra = { class = CL div = 0.090  power = yes 				 commercial = no  commercial_div = 0.110 }
+					Infra_DoIncomeInfra = { class = SF div = 0.045 			  	freedom = yes 	 commercial = yes commercial_div = 0.050 }
+					Infra_DoIncomeInfra = { class = RE div = 0.050 			  	charter_RE = yes commercial = yes commercial_div = 0.060 }
 
 					set_key = { lhs = Infra_StateSpend value = 0 }
 
@@ -1148,6 +1153,9 @@ country_event = {
 					change_key = { lhs = Building_Total which = Building_Resources }
 					change_key = { lhs = Building_Total which = Building_Building }
 					
+					# Sum up the State owned Property Total
+					StatePropertyTotalCalc = yes
+					
 					# Sums of income
 					Prp_SetPrpGross = yes
 					Infra_RefreshModifier = yes
@@ -1201,6 +1209,20 @@ country_event = {
 					set_key = { lhs = Tmp_0 value = 0 }
 					set_key = { lhs = Tmp_1 value = 0 }
 					set_key = { lhs = Tmp_2 value = 0 }
+					
+					set_key = { lhs = SF_TCExtraction value = 0 }
+					set_key = { lhs = RE_TCExtraction value = 0 }
+					set_key = { lhs = NM_TCExtraction value = 0 }
+					set_key = { lhs = NO_TCExtraction value = 0 }
+					set_key = { lhs = BG_TCExtraction value = 0 }
+					set_key = { lhs = CL_TCExtraction value = 0 }
+					
+					set_key = { lhs = SF_TCDividend value = 0 }
+					set_key = { lhs = RE_TCDividend value = 0 }
+					set_key = { lhs = NM_TCDividend value = 0 }
+					set_key = { lhs = NO_TCDividend value = 0 }
+					set_key = { lhs = BG_TCDividend value = 0 }
+					set_key = { lhs = CL_TCDividend value = 0 }
 				}
 			}
 			every_country = {
@@ -1279,7 +1301,55 @@ country_event = {
 					else = {
 						change_key = { lhs = Infra_Wealth which = Tmp_0 } ### Put back in the wealth pool
 					}
-				} 
+				}
+				if = {
+					# Only for Colonizers with its TC
+					limit = {
+						num_of_trade_companies = 2
+					}
+					every_owned_province = {
+						limit = {
+							isValidProv = yes
+							is_owned_by_trade_company = yes
+						}
+						set_key = { lhs = TC_Wealth_Prov value = 0 }
+						
+						TN_TC_WealthExtraction = { class=SF fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NM fraction=0.2 }
+						TN_TC_WealthExtraction = { class=RE fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NO fraction=0.2 }
+						TN_TC_WealthExtraction = { class=BG fraction=0.15 }
+						TN_TC_WealthExtraction = { class=CL fraction=0.2 }
+						#log = "[This.GetName] TC_Wealth_Prov [This.GV_TC_Wealth_Prov]"
+					}
+				}
+				if = {
+					# For Colonial Subjects
+					limit = {
+						is_colonial_nation = yes
+					}
+					every_owned_province = {
+						limit = {
+							isValidProv = yes
+						}
+						set_key = { lhs = TC_Wealth_Prov value = 0 }
+						
+						TN_TC_WealthExtraction = { class=SF fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NM fraction=0.2 }
+						TN_TC_WealthExtraction = { class=RE fraction=0.2 }
+						TN_TC_WealthExtraction = { class=NO fraction=0.2 }
+						TN_TC_WealthExtraction = { class=BG fraction=0.15 }
+						TN_TC_WealthExtraction = { class=CL fraction=0.2 }
+						#log = "[This.GetName] TC_Wealth_Prov [This.GV_TC_Wealth_Prov]"
+					}
+				}
+				if = {
+					# Only if enough wealth is in the pool
+					limit = {
+						check_key = { lhs = TC_Wealth value = 500 } 
+					}
+					TN_TC_WealthDividendHelper = yes
+				}				
 			}
 			regiongroup = {
 				region = {
@@ -1300,8 +1370,7 @@ country_event = {
 						}
 					}
 				}
-			}
-
+			}			
 			regiongroup = {
 				region = {
 					limit = {
@@ -1311,7 +1380,7 @@ country_event = {
 
 					set_key = { lhs = Tmp_0 value = 0 }
 					set_key = { lhs = Tmp_1 value = 0 }
-					set_key = { lhs = Tmp_0 value = 0 }
+					set_key = { lhs = Tmp_2 value = 0 }
 					set_key = { lhs = Tmp_3 value = 0 }
 				}
 			}
@@ -1631,6 +1700,7 @@ country_event = {
 				#Nat_StateCrpt = yes
 				Stat_CountrySet = yes
 				FC_Census = yes
+				StatePropertyEffect = yes
 				
 				#Desire_DoGainAnnual = { type = NO }
 				#Desire_DoGainAnnual = { type = BG }
@@ -1642,6 +1712,7 @@ country_event = {
 						NOT = { has_global_flag = POP_Sim }
 					}
 					Combat_Penalties = yes
+					
 				}
 			}
 		}
@@ -4227,7 +4298,7 @@ country_event = {
 					# Pathing
 					if = { 
 						limit = { Infra_CanPathing = yes }
-						Infra_GetAppealInfra = { type = Pathing weightNO = 0.5 weightBG = 0.5 weightCL = 0.5 rural = yes nomad = yes paths = yes return = Tmp_3 } # Get Pathing appeal
+						Infra_GetAppealInfra = { type = Pathing weightNO = 1.0 weightBG = 0.5 weightCL = 0.5 rural = yes nomad = yes paths = yes return = Tmp_3 } # Get Pathing appeal
 						if = { 
 							limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If Pathing Appeal > Current Highest
 							set_key = { lhs = Tmp_1 which = Tmp_3 }  # Set current highest to pathing appeal
@@ -4242,7 +4313,7 @@ country_event = {
 						}
 						if = { 
 							limit = { Infra_CanHarbourage = yes	}
-							Infra_GetAppealInfra = { type = Harbourage weightNO = 0.5 weightBG = 1.5 weightCL = 0.5 urban = yes return = Tmp_3 } # Get Harbourage appeal
+							Infra_GetAppealInfra = { type = Harbourage weightNO = 0.5 weightBG = 1.5 weightCL = 0.5 urban = yes tn_harbour = yes return = Tmp_3 } # Get Harbourage appeal
 							if = { 
 								limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If harbourage appeal > Current Highest
 								set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to harbourage appeal
@@ -4252,7 +4323,7 @@ country_event = {
 						
 						if = { 
 							limit = { Infra_CanAmenities = yes }
-							Infra_GetAppealInfra = { type = Amenities weightNO = 0.5 weightBG = 2.0 weightCL = 0.6 urban = yes return = Tmp_3 } # Get amenities appeal
+							Infra_GetAppealInfra = { type = Amenities weightNO = 0.5 weightBG = 2.0 weightCL = 0.75 urban = yes return = Tmp_3 amenities = yes } # Get amenities appeal
 							if = { limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If amenities appeal > Current Highest
 								set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to amenities appeal
 								set_key = { lhs = Tmp_2 value = 3 } # set current desired build type to amenities (id = 3)
@@ -4263,7 +4334,7 @@ country_event = {
 					if = { 
 						limit = { Infra_CanIrrigation = yes	}
 						# Irrigation
-						Infra_GetAppealInfra = { type = Irrigation weightNO = 2.5 weightBG = 0.5 weightCL = 1.0 rural = yes nomad = yes return = Tmp_3 } # Get Irrigation appeal
+						Infra_GetAppealInfra = { type = Irrigation weightNO = 3.0 weightBG = 0.5 weightCL = 1.0 rural = yes nomad = yes return = Tmp_3 } # Get Irrigation appeal
 						if = { limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If Irrigation appeal > Current Highest
 							set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to Irrigation appeal
 							set_key = { lhs = Tmp_2 value = 4 } # set current desired build type to Irrigation (id = 4)
@@ -4277,7 +4348,7 @@ country_event = {
 
 					if = { 
 						limit = { Infra_CanGarrison = yes }
-						Infra_GetAppealInfra = { type = Garrison weightNO = 2.0 weightBG = 0.8 weightCL = 0.5 rural = yes nomad = yes return = Tmp_3 
+						Infra_GetAppealInfra = { type = Garrison weightNO = 2.5 weightBG = 1.2 weightCL = 0.5 rural = yes nomad = yes return = Tmp_3 
 						}
 						if = { limit = { check_key = { lhs = Tmp_3 which = Tmp_1 } } # If Garrison appeal > Current Highest
 							set_key = { lhs = Tmp_1 which = Tmp_3 } # Set current highest to Garrison appeal
@@ -4692,6 +4763,14 @@ country_event = {
 				#Privileges
 				log = "Privileges2:[GV_Privilege_BUOffice]:[GV_Privilege_BUFarm]:[GV_Privilege_BUTenure]:[GV_Privilege_BUWages]:[GV_Privilege_BUHierarchy]:[GV_Privilege_BUHire]:[GV_Privilege_BUExams]:[GV_Privilege_BUOversight]:[GV_Privilege_BUEnlist]:[GV_Privilege_BUStructure]:[GV_Privilege_BUCourts]:[GV_Privilege_BUPolitics]:[GV_Privilege_BURotate]"
 			}
+			log = "Privileges3: BGIndustry: BGLuxury: BGConsumerGoods: BGAutonomy: BGPatent: BGCivic: BGOligopolization: BGRuralOwnership: BGGuild: BGLicensing: BGTaxE: BGServiceE"
+			every_country = {
+				limit = { 
+					isValidCountry = yes
+				}	
+				#Privileges
+				log = "Privileges3:[Privilege_BGIndustry]:[GV_Privilege_BGLuxury]:[GV_Privilege_BGConsumerGoods]:[GV_Privilege_BGAutonomy]:[GV_Privilege_BGPatent]:[GV_Privilege_BGCivic]:[GV_Privilege_BGOligopolization]:[GV_Privilege_BGRuralOwnership]:[GV_Privilege_BGGuild]:[GV_Privilege_BGLicensing]:[GV_Privilege_BGTaxE]:[GV_Privilege_BGServiceE]"
+			}
 
 			### OUTPUT DATA PROVINCE:
 			log = "PopulationData:ID-Name:Class_type:Owner:Continent:Amount(in k):Ratio:Wealth:FoodNeeds:Life Needs:Food_LifeCombined:Comfort Needs:Luxury Needs"
@@ -4751,9 +4830,9 @@ country_event = {
 							limit = {
 								NOT = { check_key = { lhs = Land_WheatAvailability value = 100 } }
 							}				
-							set_key = { lhs = Tmp_0 value = 0.5 } ## Base Progression / Balancing Factor 
+							set_key = { lhs = Tmp_0 value = 0.6 } ## Base Progression / Balancing Factor 
 							## 0.3 represents about 110 years for adaption at 60 peasant freedom and 120% maximum suitability
-							set_key = { lhs = Tmp_1 which = SF_Freedom } # 0-100
+							set_key = { lhs = Tmp_1 value = 100 } #prev SF_Freedom 0-100
 							multiply_key = { lhs = Tmp_1 which = Land_WheatSuitability } # Goes up from 0 to X, depending on Availability
 							subtract_key = { lhs = Tmp_1 which = NM_Ratio } # 0-100
 							multiply_key = { lhs = Tmp_1 value = 0.01 }
@@ -4772,9 +4851,9 @@ country_event = {
 							limit = {
 								NOT = { check_key = { lhs = Land_RiceAvailability value = 100 } }
 							}
-							set_key = { lhs = Tmp_0 value = 0.5 } ## Base Progression / Balancing Factor 
+							set_key = { lhs = Tmp_0 value = 0.7 } ## Base Progression / Balancing Factor 
 							
-							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							set_key = { lhs = Tmp_1 value = 100 } #prev SF_Freedom 0-100
 							multiply_key = { lhs = Tmp_1 which = Land_RiceSuitability } # Goes up from 0 to X, depending on Availability
 							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
 							multiply_key = { lhs = Tmp_1 value = 0.01 }
@@ -4793,9 +4872,9 @@ country_event = {
 							limit = {
 								NOT = { check_key = { lhs = Land_MilletAvailability value = 100 } }
 							}
-							set_key = { lhs = Tmp_0 value = 0.5 } ## Base Progression / Balancing Factor 
+							set_key = { lhs = Tmp_0 value = 0.6 } ## Base Progression / Balancing Factor 
 							
-							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							set_key = { lhs = Tmp_1 value = 100 } #prev SF_Freedom 0-100
 							multiply_key = { lhs = Tmp_1 which = Land_MilletSuitability } # Goes up from 0 to X, depending on Availability
 							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
 							multiply_key = { lhs = Tmp_1 value = 0.01 }
@@ -4814,9 +4893,9 @@ country_event = {
 							limit = {
 								NOT = { check_key = { lhs = Land_BarleyAvailability value = 100 } }
 							}
-							set_key = { lhs = Tmp_0 value = 0.5 } ## Base Progression / Balancing Factor 
+							set_key = { lhs = Tmp_0 value = 0.6 } ## Base Progression / Balancing Factor 
 							
-							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							set_key = { lhs = Tmp_1 value = 100 } #prev SF_Freedom 0-100
 							multiply_key = { lhs = Tmp_1 which = Land_BarleySuitability } # Goes up from 0 to X, depending on Availability
 							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
 							multiply_key = { lhs = Tmp_1 value = 0.01 }
@@ -4837,7 +4916,7 @@ country_event = {
 							}
 							set_key = { lhs = Tmp_0 value = 0.75 } ## Base Progression / Balancing Factor 
 							
-							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							set_key = { lhs = Tmp_1 value = 100 } #prev SF_Freedom 0-100
 							multiply_key = { lhs = Tmp_1 which = Land_MaizeSuitability } # Goes up from 0 to X, depending on Availability
 							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
 							multiply_key = { lhs = Tmp_1 value = 0.01 }
@@ -4856,9 +4935,9 @@ country_event = {
 							limit = {
 								NOT = { check_key = { lhs = Land_PotatoAvailability value = 100 } }
 							}
-							set_key = { lhs = Tmp_0 value = 0.25 } ## Base Progression / Balancing Factor 
+							set_key = { lhs = Tmp_0 value = 0.40 } ## Base Progression / Balancing Factor 
 							# As it was a nightshade plant it spread slower or with more opposition
-							set_key = { lhs = Tmp_1 which = SF_Freedom }
+							set_key = { lhs = Tmp_1 value = 100 } #prev SF_Freedom 0-100
 							multiply_key = { lhs = Tmp_1 which = Land_PotatoSuitability } # Goes up from 0 to X, depending on Availability
 							subtract_key = { lhs = Tmp_1 which = NM_Ratio }
 							multiply_key = { lhs = Tmp_1 value = 0.01 }

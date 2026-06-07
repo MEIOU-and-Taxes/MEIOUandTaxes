@@ -11,12 +11,12 @@ NGame = {
 
 	AGE_USHER_IN_TIME = 120,				-- how many months progress for a new age needs.
 
-	MAX_COLONIAL_NATIONS = 100,  -- Max is 100
-	MAX_CLIENT_STATES = 100,  -- Max is 100 -- TODO: Lower this to 75 after 1.18 (used to start at K75 for some reason)
-	MAX_ESTATE_COUNTRIES = 50,  -- Default: 50
+	MAX_COLONIAL_NATIONS = 50,  -- Max is 100
+	MAX_CLIENT_STATES = 50,  -- Max is 100 -- TODO: Lower this to 75 after 1.18 (used to start at K75 for some reason)
+	MAX_ESTATE_COUNTRIES = 25,  -- Default: 50
 	MAX_FEDERATION_COUNTRIES = 20,			-- Max is 100
-	MAX_TRADING_CITIES = 100,  -- Max is 100
-	MAX_CUSTOM_COUNTRIES = 75,				-- Max is 100
+	MAX_TRADING_CITIES = 25,  -- Max is 100
+	MAX_CUSTOM_COUNTRIES = 25,				-- Max is 100
 	MAX_OBSERVERS = 10,						-- Max is 100
 
 	SIZE_LIMIT_FOR_ISLANDS = 100000,  -- from 45000      Changing this to represent anything smaller than about Australia as an island   Different pixels in ToT projection could cause differences compared to vanilla such as Greenland
@@ -557,7 +557,7 @@ NCountry = {
 	INSTITUTION_CAP_IMP_DEVELOPMENT = 10,  
 	INSTITUTION_BASE_IMP_DEVELOPMENT = 30,  
 
-	EMBRACE_INSTITUTION_COST = 2.5,  -- 2.5 per development (autonomy modified)
+	EMBRACE_INSTITUTION_COST = 1.25,  -- 2.5 per development (autonomy modified)
 	MAXIMUM_CONDOTTIERI = 0,  -- FROM 20 => meant to disable condotierri -- Base number of units you can rent out
 	CORRUPTION_COST = 0.03,  -- cost for monthly combat per development
 	STATE_MAINTENANCE_DEV_FACTOR = 0.01,  -- per dev
@@ -645,7 +645,7 @@ NCountry = {
 
 
 	EXPLORE_COAST_EVENT_CHANCE = 3,  -- Chance (in %) of getting an event when exploring coasts
-	MIN_TECH_FOR_CIRCUMNAVIGATE = 20,  -- Must have this level of dip tech to circumnavigate the globe
+	MIN_TECH_FOR_CIRCUMNAVIGATE = 25,  -- Must have this level of dip tech to circumnavigate the globe
 	CIRCUMNAVIGATION_PROVINCE_1 = 2048,  -- Provinces for circumnavigation (coast of gambia)
 	CIRCUMNAVIGATION_PROVINCE_2 = 1641,  -- Provinces for circumnavigation (magellan strait)
 	CIRCUMNAVIGATION_PROVINCE_3 = 1799,  -- Provinces for circumnavigation (hawaii sea)
@@ -743,8 +743,8 @@ NCountry = {
 	PS_BUY_CONQUISTADOR = 30,
 	PS_BUY_EXPLORER = 30,
 	PS_ASSAULT = 0,
-	PS_ARTILLERY_BARRAGE = 999,
-	PS_NAVAL_BARRAGE = 999,
+	PS_ARTILLERY_BARRAGE = 9999,
+	PS_NAVAL_BARRAGE = 9999,
 	PS_ADD_TRIBAL_LAND = 100,
 	PS_ADD_TRIBAL_LAND_EXTRA_COST_PER_PROVINCE = 10,
 	PS_FORCE_MARCH = 2,
@@ -1159,8 +1159,8 @@ NEconomy = {
 	GOLD_INFLATION = 0.60,  -- _EDEF_GOLD_INFLATION_
 	TREASURE_FLEET_INFLATION = 0.25,  
 	BASE_YEARLY_INFLATION = 0,					-- yearly inflation increase
-	INFLATION_FROM_LOAN = 0.1,  -- increase per loan
-	INFLATION_FROM_PEACE_GOLD = 0.04,  -- inflation per month of income taken in peace (also applied to province sales)
+	INFLATION_FROM_LOAN = 0.05,  -- increase per loan
+	INFLATION_FROM_PEACE_GOLD = 0.02,  -- inflation per month of income taken in peace (also applied to province sales)
 	INFLATION_ACTION_REDUCTION = 1,  -- amount per action
 	BANKRUPTCY_DURATION = 5,						-- _EDEF_BANKRUPTCY_DURATION_
 	BANKRUPTCY_BUILDING_DESTRUCTION_THRESHOLD = 0,  

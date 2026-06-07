@@ -6,15 +6,11 @@ Infra_SetBuildingMax = { #sets max limit for some types of buildings
 	multiply_key = { lhs = Building_ForestryMax which = Modi_ForestryMax }
 	
 	set_key = { lhs = Building_ExtractionMax which = Land_Resource }
+	
 	if = {
 		limit = {
 			has_province_flag = coal
-			OR = {
-				has_province_flag = m
-				has_province_flag = salt
-				has_port = yes
-			}
-			Prod_NotHasProd = { Prod=14 }
+			Banking = 100
 		}
 		if = {
 			limit = {
@@ -26,7 +22,7 @@ Infra_SetBuildingMax = { #sets max limit for some types of buildings
 					province_id = 2507 	#Belz, Ruthenia
 				}
 			}
-			subtract_key = { lhs = Building_ExtractionMax value = 80 }
+			change_key = { lhs = Building_ExtractionMax value = 80 }
 		}
 		else_if = {
 			limit = {
@@ -40,16 +36,10 @@ Infra_SetBuildingMax = { #sets max limit for some types of buildings
 					province_id = 5471	#Shanzou, North China
 				}
 			}
-			subtract_key = { lhs = Building_ExtractionMax value = 40 }
+			change_key = { lhs = Building_ExtractionMax value = 40 }
 		}
 		else = {
-			subtract_key = { lhs = Building_ExtractionMax value = 30 }
-		}
-		if = {
-			limit = {
-				NOT = { check_key = { lhs = Building_ExtractionMax value = 0 } }
-			}
-			set_key = { lhs = Building_ExtractionMax value = 0 }
+			change_key = { lhs = Building_ExtractionMax value = 30 }
 		}
 	}
 	multiply_key = { lhs = Building_ExtractionMax value = 10 }
@@ -66,8 +56,10 @@ Infra_AddPrp = {
 			limit = {
 				NOT = { check_key = { lhs = Building_$Type$ value = $Amount$ } }
 			}
-			set_key = { lhs = Building_$Type$ value = $Amount$ }
+			change_key = { lhs = Building_$Type$ value = $Amount$ }
 		}
+		change_key = { lhs = Building_$Type$Share$Broker1$ value = 0.75 }
+		change_key = { lhs = Building_$Type$Share$Broker2$ value = 0.25 }
 		[[Cap]
 		if = {
 			limit = {
@@ -1547,7 +1539,50 @@ Infra_DoSpend = {
 
 	### Handling of state investment
 	if = {
-		limit = { check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 } } # Any state investment occured
+		limit = {
+			check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 }  # Any state investment occured
+			owner = { check_key = { lhs = Tmp_7 value = 0.001 } } # State is not overcapped on State Property. Country Tmp_7 = (StatePropertyCapacity - StatePropertyTotalModified) * 0.9. This is set at the start of Census.0017
+		}
+
+		# If the state has invested, check how many shares the state could buy for the investment, calc how much actual size this would be and then check against the StatePropertyCap
+		# if this would put the state over cap
+		
+		# this is the countries remaining available StatePropertyCapacity, set at the very start of Census.0017, possibly already reduced by investments in other provinces
+		set_key = { lhs = Tmp_7 which = owner }  
+
+		set_key = { lhs = Tmp_8 which = Building_$type$Wealth_Invested }	# Tmp_8 = Amount actually invested this year - investment pool might still have more for followup years
+		multiply_key = { lhs = Tmp_8 value = 0.1 }  						# Tmp_8 = how many shares State could afford with money invested
+
+		set_key = { lhs = Tmp_9 which = Building_$type$ShareSF }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareRE }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareNM }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareNO }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareBG }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareCL }
+		change_key = { lhs = Tmp_9 which = Building_$type$ShareBU }  		# Tmp_9 = Total current share amount
+
+		divide_key = { lhs = Tmp_8 which = Tmp_9 }  						# Tmp_8 = how much % of the total existing shares would the additional buy be
+		multiply_key = { lhs = Tmp_8 which = Building_$type$ } 				# Tmp_8 = how much size of current building size would be added by these percentage of shares
+
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_7 which = Tmp_8 }					# if the amount state could buy is lower than the remaining cap then buy more shares
+				check_key = { lhs = Tmp_8 value = 1 }						# but only if state gets at least 1 building size out of it. ideally this would be turned up, but no shot at start of game
+			}
+
+			set_key = { lhs = Tmp_9 which = Building_$type$Wealth_Invested }
+			multiply_key = { lhs = Tmp_9 value = 0.1 } 
+			change_key = { lhs = Building_$type$ShareBU which = Tmp_9 }  # buy shares
+
+			owner = { set_key = { lhs = Tmp_8 which = PREV } }	# provisionally reduce owners StatePropertyCapacity to reflect the buy in this province. 
+			owner = { subtract_key = { lhs = Tmp_7 which = Tmp_8 } }  # full recalc with modifiers happens later in Census
+		}
+	}
+
+	# Irregardless wether the state bought shares with their investment money or not, the money goes to the elites to cover parts or all of the Spend - the elites get money from the state
+	# If state has bought shares, this money can be viewed as paying the estates for their loss of ownership proportion. If state has not bought shares, this money can be viewed as growth-incentivising subsidies.
+	if = {
+		limit = { check_key = { lhs = Building_$type$Wealth_Invested value = 0.001 } }  
 	
 		# give investment money to elites for property build by the state
 		if = {
@@ -1584,20 +1619,24 @@ Infra_DoSpend = {
 		}
 	}
 
+	# If entire operational cost is not covered by possible state investment, costs are divvied up amongst the estates according to their shares and everyone gets new shares akin 
+	# to their proportion of contribution. If an estate is unable to stem the full amount, they will get comparatively less shares, and therefore will lose ownership percentage.
+	# If everyone pays in full for the amount they should contribute, the overall share proportion between the estates remains unchanged. 
 	if = {
 		limit = {
 			check_key = { lhs = Building_$type$Spend value = 0.001 }
 		}
 		set_key = { lhs = Tmp_0 value = 0 }
 		
-		Infra_ShareOffer$type$ = yes
+		Infra_ShareOffer$type$ = yes  #Calc spending amount of classes according to current ownership proportion or defined minimum contribution requirement
 			
-		if = { # calc % of wealth of each.
+		if = { # Calc spending amount of state according to current ownership proportion
 			limit = {
 				check_key = { lhs = Tmp_0 value = 0.01 }
 			}
 			set_key = { lhs = Tmp_7 which = BU_Prp$type$ }
 			multiply_key = { lhs = Tmp_7 value = 0.01 }
+			multiply_key = { lhs = Tmp_7 which = Building_$type$Spend }
 			
 			if = {
 				limit = {
@@ -1649,26 +1688,7 @@ Infra_DoSpend = {
 				multiply_key = { lhs = Tmp_5 value = 0.1 }
 				multiply_key = { lhs = Tmp_6 value = 0.1 }
 			}
-			if = {
-				limit = {
-					NOT = { has_global_flag = POP_Sim10 }
-				}
-				if = {
-					limit = {
-						NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 1 } }
-					}
-					multiply_key = { lhs = Tmp_7 value = 0.015 }
-				}
-				else_if = {
-					limit = {
-						NOT = { check_key = { lhs = Tax_CostProp$type$Rate value = 75 } }
-					}
-					set_key = { lhs = Tmp_8 which = Tax_CostProp$type$Rate }
-					multiply_key = { lhs = Tmp_8 value = 1.333 } ### 75% is 100%, and so on
-					multiply_key = { lhs = Tmp_8 value = 0.01 }
-					multiply_key = { lhs = Tmp_7 which = Tmp_8 }
-				}
-			}
+			
 			# Tribal power reduces BU power and therefore BU share.
 			set_key = { lhs = Tmp_8 value = 100 }
 			subtract_key = { lhs = Tmp_8 which = Prov_TRPow }
@@ -1690,7 +1710,7 @@ Infra_DoSpend = {
 			
 			change_key = { lhs = Tmp_0 which = Tmp_7 }
 			
-			# calc % of wealth of each. Tmp_1 = SF, Tmp_2 = RE, Tmp_3 = NM, Tmp_4 = NO, Tmp_5 = BG, Tmp_6 = CL, Tmp_7 = BU
+			# calc % of contribution of each. Tmp_1 = SF, Tmp_2 = RE, Tmp_3 = NM, Tmp_4 = NO, Tmp_5 = BG, Tmp_6 = CL, Tmp_7 = BU
 			if = {
 				limit = {
 					check_key = { lhs = Tmp_1 value = 0.01 }
@@ -2473,7 +2493,7 @@ Infra_DoIncomeInfra = {
 				}
 				else_if = {
 					limit = { owner = { Rights_BGGov7Has = yes } }
-					change_key = { lhs = Tmp_0 value = -25 }
+					change_key = { lhs = Tmp_0 value = -20 }
 				}
 			}
 		]
@@ -2484,11 +2504,11 @@ Infra_DoIncomeInfra = {
 				}
 				if = {
 					limit = { owner = { Rights_BGGov1Has = yes } }
-					change_key = { lhs = Tmp_0 value = -10 }
+					change_key = { lhs = Tmp_0 value = -5.0 }
 				}
 				else_if = {
 					limit = { owner = { Rights_BGGov2Has = yes } }
-					change_key = { lhs = Tmp_0 value = -7.5 }
+					change_key = { lhs = Tmp_0 value = -5.0 }
 				}
 				else_if = {
 					limit = { owner = { Rights_BGGov3Has = yes } }
@@ -2540,10 +2560,15 @@ Infra_DoIncomeInfra = {
 					always = $commercial$ 
 					Banking = 100 
 				}
-				[[commercial_div] divide_key = { lhs = Tmp_0 value = $commercial_div$ } ]
+				#Corlis: changes from a division, ingore the div name
+				[[commercial_div] 
+					multiply_key = { lhs = Tmp_0 value = $commercial_div$ }
+					multiply_key = { lhs = Tmp_0 value = 0.1 } 
+				]
 			}
 			else = {
-				divide_key = { lhs = Tmp_0 value = $div$ }
+				multiply_key = { lhs = Tmp_0 value = $div$ } #Corlis: no longer a division
+				multiply_key = { lhs = Tmp_0 value = 0.1 }
 			}
 			if = {
 				limit = {
@@ -2571,7 +2596,7 @@ Infra_GetAppealInfra = {
                 check_key = { lhs = Infra_$type$ value = 7 }
             }
         }
-        set_key = { lhs = $return$ value = -1 } # if infrstructure cannot be build, stop upgrading
+        set_key = { lhs = $return$ value = -1 } # if infrastructure cannot be build, stop upgrading
     }
     else = {
         set_key = { lhs = $return$ value = 0 } # reset appeal
@@ -2581,55 +2606,59 @@ Infra_GetAppealInfra = {
         Infra_GetAppealHelper = { class = BG weight = $weightBG$ return = $return$ [[rural] rural = $rural$ ] [[urban] urban = $urban$ ] [[nomad] nomad = $nomad$ ] }
         Infra_GetAppealHelper = { class = CL weight = $weightCL$ return = $return$ [[rural] rural = $rural$ ] [[urban] urban = $urban$ ] [[nomad] nomad = $nomad$ ] }
 
-		[[urban]
+		[[amenities] ## ONLY UPGRADE AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
 			if = {
-				limit = {
-					always = $urban$
+				limit = { 
+					always = $amenities$
 				}
-				Infra_GetAmenities_Cap = { return = Public_Tmp0 } # Get amenities population capacity
-				set_key = { lhs = Public_Tmp1 which = RE_Total }
-				change_key = { lhs = Public_Tmp1 value = 5 } #make smaller resident pops look unsupported
 
-				## Multiply pre cost appeal by a modifier based on how much a city is over it's amenities limit
-				# Formula: (Residents / Cap)
-				# use this to balance the effect vs. the cap -> 1.5 = at the cap you get 50% more appeal
-				multiply_key = { lhs = Public_Tmp1 value = 1.8 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_OVER_AMENITIES_LIMIT~value`
+				Infra_GetAmenities_Cap = { return = Tmp_8 } # Get amenities population capacity
+				
 				if = {
 					limit = {
-						check_key = { lhs = Public_Tmp0 value = 0.001 }
+						check_key = { lhs = Tmp_8 value = 0.001 }
 					}
-					divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+					divide_key = { lhs = Tmp_8 which = RE_Total }
 				}
 				else = {
-					set_key = { lhs = Public_Tmp1 value = 0 }
-				}
+					set_key = { lhs = Tmp_8 value = 0 }
+				} 
 
-				# Maximum x2.5 appeal, min x 0.75 (reduced to 2.5 by Corlis)
 				if = {
-					limit = {
-						check_key = { lhs = Public_Tmp0 value = 2.5 }
+					limit = { 
+						NOT = { check_key = { lhs = Tmp_8 value = 0.85 } } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_AMENITIES_UPGRADE_MIN_RATIO~value`
 					}
-					set_key = { lhs = Public_Tmp0 value = 2.5 }
-				}
-				else_if = {
-					limit = {
-						NOT = { check_key = { lhs = Public_Tmp0 value = 0.75 } }
-					}
-					set_key = { lhs = Public_Tmp0 value = 0.75 }
-				}
 
-				multiply_key = { lhs = $return$ which = Public_Tmp0 }
-				set_key = { lhs = Public_Tmp0 value = 0 }
-				set_key = { lhs = Public_Tmp1 value = 0 }
+					set_key = { lhs = $return$ value = -1 }
+				} else_if = {
+					limit = {
+						check_key = { lhs = Tmp_8 value = 1.0 }
+					}
+					multiply_key = { lhs = $return$ value = 1.8 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_OVER_AMENITIES_LIMIT~value`
+				}
 			}
 		]
 		[[paths]
-		if = {
-			limit = { always = $paths$ check_key = { lhs = TN_Pass value = 1 } } 
-			# ancient paths are desired to have Pathing
-			multiply_key = { lhs = $return$ value = 1.5 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_ANCIENT_PATHS~value`
-		}
+			if = {
+				limit = { always = $paths$ check_key = { lhs = TN_Pass value = 1 } } 
+				# ancient paths are desired to have Pathing
+				multiply_key = { lhs = $return$ value = 1.5 } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_APPEAL_MULTI_ANCIENT_PATHS~value`
+			}
 		]
+		[[tn_harbour]
+			if = {
+				limit = {
+					always = $tn_harbour$
+					OR = {
+						has_province_flag = TN_Harbour_Major
+						has_province_flag = TN_Harbour_Important
+						has_province_flag = TN_Harbour_Minor
+					}
+				} 
+				# Natural Harbours want to be developed
+				multiply_key = { lhs = $return$ value = 1.5 }
+			}
+		]		
 
         Infra_GetCostBuild$type$ = yes # get base goods to build one unit
 
@@ -2666,34 +2695,6 @@ Infra_GetAppealInfra = {
 		# Appeal / Rank+1
 		divide_key = { lhs = $return$ which = Tmp_9 }
 
-		[[urban] ## ONLY UPGRAED AMENITIES WHEN HAVING THE LAST RANK SOMEWHAT FULFILLED ATLEAST
-			if = {
-				limit = { always = $urban$ }
-
-				Infra_GetAmenities_Cap = { return = Public_Tmp0 } # Get amenities population capacity
-				set_key = { lhs = Public_Tmp1 which = RE_Total }
-				change_key = { lhs = Public_Tmp1 value = 5 } # make small resident pops look unsupported, to prevent edge cases
-				
-				if = {
-					limit = {
-						check_key = { lhs = Public_Tmp0 value = 0.001 }
-					}
-					divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
-				}
-				else = {
-					set_key = { lhs = Public_Tmp1 value = 0 }
-				} 
-
-				if = {
-					limit = { 
-						NOT = { check_key = { lhs = Public_Tmp1 value = 0.9 } } # Modify in constants.txt only! # `AI_CLASS_CONSTRUCTION_AMENITIES_UPGRADE_MAX_RATIO~value`
-					}
-
-					set_key = { lhs = $return$ value = -1 }
-				}
-			}
-		]
-
 		# Clear variables
         set_key = { lhs = Infra_Cost6 value = 0 }
 		set_key = { lhs = Infra_Cost10 value = 0 }
@@ -2704,6 +2705,7 @@ Infra_GetAppealInfra = {
         set_key = { lhs = Infra_CostR value = 0 }
         set_key = { lhs = Infra_CostUL value = 0 }
         set_key = { lhs = Tmp_9 value = 0 }
+		set_key = { lhs = Tmp_8 value = 0 }
     }
 }
 
@@ -2764,7 +2766,7 @@ Infra_RefreshModifier = {
 Infra_UISet = {
 	if = {
 		limit = {
-			PREV = { has_country_flag = Infra_$Infra$25 }
+			owner = { has_country_flag = Infra_$Infra$25 }
 		}
 		set_province_flag = Infra_$Infra$25
 	}
@@ -2773,7 +2775,7 @@ Infra_UISet = {
 	}
 	if = {
 		limit = {
-			PREV = { has_country_flag = Infra_$Infra$50 }
+			owner = { has_country_flag = Infra_$Infra$50 }
 		}
 		set_province_flag = Infra_$Infra$50
 	}
@@ -2782,7 +2784,7 @@ Infra_UISet = {
 	}
 	if = {
 		limit = {
-			PREV = { has_country_flag = Infra_$Infra$75 }
+			owner = { has_country_flag = Infra_$Infra$75 }
 		}
 		set_province_flag = Infra_$Infra$75
 	}
@@ -2791,7 +2793,7 @@ Infra_UISet = {
 	}
 	if = {
 		limit = {
-			PREV = { has_country_flag = Infra_$Infra$100 }
+			owner = { has_country_flag = Infra_$Infra$100 }
 		}
 		set_province_flag = Infra_$Infra$100
 	}

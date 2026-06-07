@@ -8,7 +8,6 @@
 
 Promotion_Calc = {
 	Promotion_Reset = yes # Reset last years values
-
 	Promotion_CalcShares = yes # Calculate Relative Share of lower classes of total pop
 
 	[[RE]
@@ -128,7 +127,15 @@ Promotion_REPromotion = {
 		change_key = { lhs = Tmp_5 value = 90 }
 		set_key = { lhs = Tmp_6 which = RE_FillLifeC }
 		multiply_key = { lhs = Tmp_6 value = -1 }
-		divide_key = { lhs = Tmp_5 which = Tmp_6 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_5 value = 0.001 }
+			}
+			divide_key = { lhs = Tmp_5 which = Tmp_6 }
+		}
+		else = {
+			set_key = { lhs = Tmp_5 value = 0 }
+		}
 		multiply_key = { lhs = Tmp_5 value = 0.025 }
 
 		# Upper lower case handling: [-0.01,0.01]
@@ -341,6 +348,7 @@ Promotion_NODemotion = {
 	if = { # Check if NO_Total is at least this
 		limit = {
 			check_key = { lhs = NO_Total which = Ideal_NobleSize } # Nobles > Ideal Size
+			check_key = { lhs = NO_FillLifeC value = 0.001 }
 		}
 
 		set_key = { lhs = Tmp_0 value = 0.02 } # Base speed of change 1% of dif <- use this for balance
@@ -482,8 +490,16 @@ Promotion_DeriveBurgherRestingPoint = {
 		}
 
 		# Calc and apply multiplier based on labour supply vs. demand
-		set_key = { lhs = Tmp_4 which = Tmp_3 } 
-		divide_key = { lhs = Tmp_4 which = WK_BG }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_3 value = 0.001 }
+			}
+			set_key = { lhs = Tmp_4 which = Tmp_3 } 
+			divide_key = { lhs = Tmp_4 which = WK_BG }
+		}
+		else = {
+			set_key = { lhs = Tmp_4 value = 0 } 
+		}
 
 		# Add API effects on base rate
 		change_key = { lhs = Tmp_4 which = Modi_IdealBurgherSizePerc_Add }
@@ -663,6 +679,7 @@ Promotion_BGDemotion = {
 	if = {
 		limit = {
 			check_key = { lhs = BG_Total which = Ideal_BurgherSize } # Burgher > IdealSize
+			check_key = { lhs = BG_FillLifeC value = 0.001 }
 		}
 		set_key = { lhs = Tmp_3 value = 0.02 } # Base rate of change - use for balance
 
@@ -834,6 +851,45 @@ Promotion_Handle = {
 
 	change_key = { lhs = NM_Total which = NM_Demoted }
 	subtract_key = { lhs = NM_Total which = NM_Promoted }
+}
+
+Promotion_ClassAggregationDisplay = {
+    ## Sum up changes per class category
+    set_key = { lhs = Class_RuralPromoted      which = SF_Promoted }
+    change_key = { lhs = Class_RuralPromoted   which = NM_Promoted }
+
+    set_key = { lhs = Class_UrbanPromoted which = RE_Promoted }
+
+    set_key = { lhs = Class_NotablesPromoted       which = CL_Promoted }
+    change_key = { lhs = Class_NotablesPromoted    which = BG_Promoted }
+    change_key = { lhs = Class_NotablesPromoted    which = NO_Promoted }
+
+    set_key = { lhs = Class_TotalPromoted      which = Class_RuralPromoted }
+    change_key = { lhs = Class_TotalPromoted   which = Class_UrbanPromoted }
+    change_key = { lhs = Class_TotalPromoted   which = Class_NotablesPromoted }
+
+    set_key = { lhs = Class_RuralDemoted      which = SF_Demoted }
+    change_key = { lhs = Class_RuralDemoted   which = NM_Demoted }
+
+    set_key = { lhs = Class_UrbanDemoted which = RE_Demoted }
+
+    set_key = { lhs = Class_NotablesDemoted       which = CL_Demoted }
+    change_key = { lhs = Class_NotablesDemoted    which = BG_Demoted }
+    change_key = { lhs = Class_NotablesDemoted    which = NO_Demoted }
+
+    set_key = { lhs = Class_TotalDemoted      which = Class_RuralDemoted }
+    change_key = { lhs = Class_TotalDemoted   which = Class_UrbanDemoted }
+    change_key = { lhs = Class_TotalDemoted   which = Class_NotablesDemoted }
+
+    ### THOSE KEYS ARE INITIALLY SET IN BIRTH CALCULATION --> THEY SUM UP TOTAL PROVINCE POP CHANGE
+    change_key = { lhs = Class_RuralChange which = Class_RuralPromoted }
+    subtract_key = { lhs = Class_RuralChange which = Class_RuralDemoted }
+    change_key = { lhs = Class_UrbanChange which = Class_UrbanPromoted }
+    subtract_key = { lhs = Class_UrbanChange which = Class_UrbanDemoted }
+    change_key = { lhs = Class_NotablesChange which = Class_NotablesPromoted }
+    subtract_key = { lhs = Class_NotablesChange which = Class_NotablesDemoted }
+    change_key = { lhs = Class_TotalChange which = Class_TotalPromoted }
+    subtract_key = { lhs = Class_TotalChange which = Class_TotalDemoted }
 }
 
 Promotion_GetCommerceDataHelper = {
@@ -1016,4 +1072,55 @@ Promotion_ResetTmp = {
 	set_key = { lhs = CL_DemotedNM	value = 0 }
 	set_key = { lhs = CL_DemotedRE	value = 0 }
 	set_key = { lhs = NM_PromotedSF	value = 0 }
+}
+
+#If industries are opened in a province without urbans, then this code execudes !once!
+#Providing 2500 new Residents out of the local rural population
+
+Promotion_CityFoundation = {
+	if = {
+		limit = {
+			has_province_flag = City_Present
+			NOT = { has_province_flag = NewCityFounded }
+			NOT = { check_key = { lhs = RE_Total value = 0.5 } }
+		}
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = RE_Total value = 2.5 } }
+				check_key = { lhs = SF_Total value = 2.5 }				
+			}
+			set_key = { lhs = Tmp_1 value = 2.5 }
+			subtract_key = { lhs = Tmp_1 which = RE_Total }
+			
+			subtract_key = { lhs = SF_Total which = Tmp_1 }
+			change_key = { lhs = RE_Total which = Tmp_1 }
+			change_key = { lhs = BG_Total value = 0.2 }			
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = RE_Total value = 2.5 } }
+				check_key = { lhs = NM_Total value = 2.5 }				
+			}
+			set_key = { lhs = Tmp_1 value = 2.5 }
+			subtract_key = { lhs = Tmp_1 which = RE_Total }
+			
+			subtract_key = { lhs = NM_Total which = Tmp_1 }
+			change_key = { lhs = RE_Total which = Tmp_1 }
+			change_key = { lhs = BG_Total value = 0.1 }			
+		}
+		else_if = {
+			limit = {
+				NOT = { check_key = { lhs = RE_Total value = 0.5 } }			
+			}
+			change_key = { lhs = RE_Total value = 0.5 }
+			change_key = { lhs = BG_Total value = 0.05 }			
+		}
+		if = {
+			limit = {
+				NOT = { has_global_flag = POP_Sim }
+			}
+			set_province_flag = NewCityFounded
+		}
+		set_key = { lhs = Tmp_1 value = 0 }		
+	}
 }

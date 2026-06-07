@@ -1,4 +1,11 @@
 smm_recalc_mapmode_1 = { ## %%% 32-choice ## resets mapmode according to smm_scope variable - part 1 of 4: Finding the scope
+	every_province = { ## make sure the entire map is properly reset
+		limit = {
+			isValidEmpty = yes
+		}
+		clr_province_flag = smm
+		set_variable = { which = calcvar_L value = 0 }
+	}	
 	if = {  ## set smm province flag in all affected provinces
 		limit = {
 			check_variable = { which = smm_scope value = 16 }
@@ -121,7 +128,12 @@ smm_recalc_mapmode_1 = { ## %%% 32-choice ## resets mapmode according to smm_sco
 					NOT = {
 						continent = north_america
 						continent = south_america
-						continent = oceania
+						AND = {
+							continent = oceania
+							NOT = { 
+								superregion = japan_superregion
+							}
+						}
 					}
 				}
 				set_province_flag = smm
@@ -1816,10 +1828,87 @@ smm_recalc_mapmode_2 = { ## %%% 512-choice ## resets mapmode according to smm_ty
 										limit = {
 											check_variable = { which = smm_type value = 331 }
 										}
-										#331
+										#331 - Knowledge Fulfillment
+										every_province = {
+											limit = {
+												isValidEmpty = yes
+												has_province_flag = smm
+											}									
+											set_key = { lhs = Tmp_0 which = SF_FillKnowledge }
+											multiply_key = { lhs = Tmp_0 which = SF_Total }
+
+											#set_key = { lhs = Tmp_1 which = NM_FillKnowledge }
+											#multiply_key = { lhs = Tmp_1 which = NM_Total }
+
+											set_key = { lhs = Tmp_2 which = RE_FillKnowledge }
+											multiply_key = { lhs = Tmp_2 which = RE_Total }
+
+											#set_key = { lhs = Tmp_3 which = NO_FillKnowledge }
+											#multiply_key = { lhs = Tmp_3 which = NO_Total }
+
+											#set_key = { lhs = Tmp_4 which = BG_FillKnowledge }
+											#multiply_key = { lhs = Tmp_4 which = BG_Total }
+
+											#set_key = { lhs = Tmp_5 which = CL_FillKnowledge }
+											#multiply_key = { lhs = Tmp_5 which = Cl_Total }											
+
+											#change_key = { lhs = Tmp_0 which = Tmp_1 }
+											change_key = { lhs = Tmp_0 which = Tmp_2 }
+											#change_key = { lhs = Tmp_0 which = Tmp_3 }
+											#change_key = { lhs = Tmp_0 which = Tmp_4 }
+											#change_key = { lhs = Tmp_0 which = Tmp_5 }
+
+								
+											set_key = { lhs = Tmp_1 which = SF_Total }
+											#change_key = { lhs = Tmp_1 which = NM_Total }
+											change_key = { lhs = Tmp_1 which = RE_Total }
+											#change_key = { lhs = Tmp_1 which = NO_Total }
+											#change_key = { lhs = Tmp_1 which = BG_Total }
+											#change_key = { lhs = Tmp_1 which = CL_Total }
+
+											divide_key = { lhs = Tmp_0 which = Tmp_1 }
+											multiply_key = { lhs = Tmp_0 value = 100 }
+											
+											set_var_from_key = { var=calcvar_L key=Tmp_0  }	
+										}
+										smm_scale_get_maxmin = { var=calcvar_L }
+										every_province = {
+											limit = {
+												isValidEmpty = yes
+												has_province_flag = smm
+											}
+											set_key = { lhs = Tmp_0 value = 0 }
+											set_key = { lhs = Tmp_0 value = 0 }											
+											set_variable = { which = calcvar_L value = 0 }
+										}											
 									}
 									else = {
-										#330
+										#330 - Per Capita Knowledge Output
+										every_province = {
+											limit = {
+												isValidEmpty = yes
+												has_province_flag = smm
+											}									
+											set_key = { lhs = Tmp_0 which = TN_ProvSply41 }
+											set_key = { lhs = Tmp_1 which = Class_Rural }
+											change_key = { lhs = Tmp_1 which = Class_Urban }
+											change_key = { lhs = Tmp_1 which = Class_Notables }
+
+											divide_key = { lhs = Tmp_0 which = Tmp_1 }
+											
+											set_var_from_key = { var=calcvar_L key=Tmp_0  }	
+											
+										}
+										smm_scale_get_maxmin = { var=calcvar_L }
+										every_province = {
+											limit = {
+												isValidEmpty = yes
+												has_province_flag = smm
+											}
+											set_key = { lhs = Tmp_0 value = 0 }
+											set_key = { lhs = Tmp_0 value = 0 }
+											set_variable = { which = calcvar_L value = 0 }
+										}										
 									}
 								}
 								else = {
@@ -3581,11 +3670,11 @@ smm_recalc_mapmode_2 = { ## %%% 512-choice ## resets mapmode according to smm_ty
 											check_variable = { which = smm_type value = 197 }
 										}
 										#197
-										smm_mapmode_type_religion_fraction = { rel=59 }
+										smm_mapmode_type_religion_fraction = { rel=72 }
 									}
 									else = {
 										#196
-										smm_mapmode_type_religion_fraction = { rel=56 }
+										smm_mapmode_type_religion_fraction = { rel=52 }
 									}
 								}
 							}
@@ -3599,7 +3688,7 @@ smm_recalc_mapmode_2 = { ## %%% 512-choice ## resets mapmode according to smm_ty
 											check_variable = { which = smm_type value = 195 }
 										}
 										#195
-										smm_mapmode_type_religion_fraction = { rel=55 }
+										smm_mapmode_type_religion_fraction = { rel=51 }
 									}
 									else = {
 										#194
@@ -3612,11 +3701,11 @@ smm_recalc_mapmode_2 = { ## %%% 512-choice ## resets mapmode according to smm_ty
 											check_variable = { which = smm_type value = 193 }
 										}
 										#193
-										smm_mapmode_type_religion_fraction = { rel=53 }
+										smm_mapmode_type_religion_fraction = { rel=54 }
 									}
 									else = {
 										#192
-										smm_mapmode_type_religion_fraction = { rel=52 }
+										smm_mapmode_type_religion_fraction = { rel=53 }
 									}
 								}
 							}
@@ -6600,7 +6689,16 @@ smm_recalc_mapmode_2 = { ## %%% 512-choice ## resets mapmode according to smm_ty
 												has_province_flag = smm
 												has_province_flag = coal
 											}
-											set_var_from_key = { var=calcvar_L key=Land_Resource }
+											# Coal only gets its land resource set once you have Banking institution
+											if = {
+												limit = {
+													check_key = { lhs=Land_Resource value=1 }
+												}
+												set_var_from_key = { var=calcvar_L key=Land_Resource }
+											}
+											else = {
+												set_variable = { which = calcvar_L value = 30 }
+											}
 										}
 										smm_scale_get_maxmin = { var=calcvar_L }
 										every_province = {

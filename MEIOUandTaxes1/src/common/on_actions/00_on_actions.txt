@@ -15,9 +15,15 @@ on_startup = {
 			Modi_Global = yes
 			set_global_flag = Global_Modi_Set
 		}
-        country_event = { ### Apply Pass system
-            id = POP_StartInit.001
-        }
+		if = {
+			limit = {
+				NOT = { has_global_flag = Global_Pass_Set }
+			}
+			country_event = { ### Apply Pass system
+				id = POP_StartInit.001
+			}
+			set_global_flag = Global_Pass_Set
+		}
 	}
 	emperor = {
 		save_global_event_target_as = Emperor
@@ -524,6 +530,8 @@ on_startup = {
 	}
 	events = {
 		government_reforms.1		#Ruler stats affect legitimacy calc
+		flavor_hyw.10000
+		flavor_hyw.10001
 	}
 }
 
@@ -904,6 +912,20 @@ on_war_won = {
 	}
 	if = {
 		limit = {
+			tag = ENG
+			FROM = { tag = LNC }
+		}
+		country_event = { id = richardii_crisis.22 } # End of Richard II disaster, setup lancaster and WoR
+	}
+	if = {
+		limit = {
+			tag = LNC
+			FROM = { tag = ENG }
+		}
+		ENG = { country_event = { id = richardii_crisis.22 }} # End of Richard II disaster, setup lancaster and WoR
+	}
+	if = {
+		limit = {
 			tag = SWE
 			FROM = { tag = RSW NOT = { num_of_cities = 16 } }
 		}
@@ -1128,7 +1150,21 @@ on_battle_lost_country = {
 # province
 # root = location, from = loser country
 on_battle_won_province = {
-
+	# if = {				#War of the Roses.200 not yet implemented
+	# 	limit = {
+	# 		from = { tag = FRA }
+	# 		owner = {
+	# 			tag = ENG
+	# 			has_disaster = war_of_the_roses
+	# 			had_global_flag = { 
+	# 				flag = war_of_the_roses 
+	# 				days = 365 
+	# 			}
+	# 			NOT = { has_country_flag = war_of_the_roses_pretender_fled }
+	# 		}
+	# 	}
+	# 	owner = { country_event = { id = war_of_the_roses.200 days = 2 } }
+	# }
 }
 
 #Unit Scope OnAction for Battle Won
@@ -1137,6 +1173,22 @@ on_battle_won_unit = {
 
 # #Unit Scope OnAction for Battle Lost
 on_battle_lost_unit = {
+    if = {
+        limit = {
+            unit_owner = {
+                tag = FRA
+                general_with_name = "Jeanne d'Arc"
+            }
+			enemy_unit = {
+				unit_owner = {
+					tag = ENG
+				}
+			}
+        }
+        FRA = {
+            country_event = { id = flavor_hyw.110 }
+        }
+    }
 }
 
 # province
@@ -1291,12 +1343,14 @@ on_monarch_death = {
 			tag = PAP 
 		}
 		PAP = { country_event = { id = DG_Papacy.101 } }
+		reset_golden_bull_effect = yes
 	}
 	if = {
 		limit = { 
 			tag = AVI
 		}
 		AVI = { country_event = { id = DG_Papacy.101 } }
+		reset_golden_bull_effect = yes
 	}
 	temporary_union_break_effect = yes #ends any temporary PUs
 	#custom_regency_council_effect = yes #renames regency councils according to the scripted effect, keep in mind that it spawns a "A New $MonarchTitle$" message when it does
@@ -1308,8 +1362,8 @@ on_monarch_death = {
 		}
 		POL = { country_event = { id = flavor_pol.500 days = 2 } }  #death of Kazimierz
 		POL = { country_event = { id = flavor_pol.505 days = 20 } } #mazovia thing
-		POL = { country_event = { id = flavor_pol.302 days = 2 } }  #HUN-PU-> woman
-		POL = { country_event = { id = flavor_pol.303 days = 2 } }  #HUN -PU-> male
+		POL = { country_event = { id = flavor_pol.302 days = 5 } }  #HUN-PU-> woman
+		POL = { country_event = { id = flavor_pol.303 days = 5 } }  #HUN-PU-> male
 		POL = { country_event = { id = flavor_pol.305 } } 			#estabilishing Jagiellon dynasty
 		POL = { country_event = { id = flavor_pol.767 days = 20 } } #Election after Union of Krakow and Vilnius
 	}
@@ -1419,8 +1473,9 @@ on_monarch_death = {
 	if = {
 		limit = {
 			tag = HUN
+			NOT = { has_country_flag = flavor_hun_12_happened }
 		}
-		country_event = { id = flavor_hun.12 }	#Hungary offering its throne to one of its neighbours on Louis d'Anjou death
+		country_event = { id = flavor_hun.12 days = 2 }	#Hungary offering its throne to one of its neighbours on Louis d'Anjou death
 	}
 	if = {
 		limit = {
@@ -2525,6 +2580,21 @@ on_yearly_pulse_4 = {
 	}
 }
 on_yearly_pulse_5 = {
+
+	if = {
+		limit = {
+			has_country_flag = StatePropertyBurden
+		}	
+		random_list = {
+			10 = { country_event = { id = SYS_StateProperty.002 days = 5 } }
+			10 = { country_event = { id = SYS_StateProperty.003 days = 5 } } 
+			10 = { country_event = { id = SYS_StateProperty.004 days = 5 } } 
+			10 = { country_event = { id = SYS_StateProperty.005 days = 5 } } 
+			10 = { country_event = { id = SYS_StateProperty.006 days = 5 } } 
+			10 = { country_event = { id = SYS_StateProperty.007 days = 5 } } 
+			10 = { country_event = { id = SYS_StateProperty.008 days = 5 } } 
+		}
+	}
 }
 
 # country random events
@@ -2788,6 +2858,7 @@ on_thri_yearly_pulse = {
 	events = {
 		#POP_Census.116 # edu system
 		mec_coal_events.0	#AI system to open coal slots, no need to fire this often
+		POP_Prod.10
 	}
 }
 
@@ -2915,6 +2986,7 @@ on_five_year_pulse = {
 		flavor_pol.604
 		capital_city.002 #looking for better capital city
 		POP_Census.114
+		#POP_Prod.12
 	}
 	random_events = {
 		50 = Plague_Spawner.1
@@ -3000,7 +3072,7 @@ on_five_year_pulse_4 = {
 		country_event = { id = mission_event.999 } #flavour from missions the AI can't complete
 	}
 	events = {
-		slots.1
+		#slots.1 
 		colonial_nation.201 #Brazil
 		colonial_nation.202 #Canada
 		colonial_nation.203 #La Plata
@@ -3207,6 +3279,32 @@ on_province_culture_converted = {
 			}
 		}
 	}
+	if = {
+		limit = {
+		## Andean Tag and Culture
+			owner = {
+				OR = {
+					culture_group = andean_group
+					culture_group = north_central_tradition_group
+				}
+			}
+			OR = {
+				culture_group = andean_group
+				culture_group = north_central_tradition_group
+			}
+			OR = {
+				has_terrain = forest_mountains
+				has_terrain = wood_mountains
+				has_terrain = shrub_mountains
+				has_terrain = grass_mountains
+				has_terrain = desert_mountains
+				has_terrain = forest_mountains
+				has_terrain = alpine_tundra
+			}
+			NOT = { has_province_modifier = terrace_farm }
+		}
+		add_province_modifier = { name = terrace_farm duration = -1 }
+	}
 }
 # province, general conversion through effects
 on_province_culture_changed = {
@@ -3266,6 +3364,31 @@ on_province_owner_change = {
 			owner = {
 				set_country_flag = AITax_Yearly
 			}
+			## Transfer State property to Powerbrokers
+			if = {
+				limit = { 
+					NOT = { check_key = { lhs = SF_Total value = 0.001 } }
+				}
+				StatePropertyAnnexation = { broker = NO type = Agriculture }
+			}
+			else = {
+				StatePropertyAnnexation = { broker = SF type = Agriculture }
+			}
+			StatePropertyAnnexation = { broker = SF type = Extraction }
+			StatePropertyAnnexation = { broker = SF type = Forestry }
+			StatePropertyAnnexation = { broker = SF type = Fishery }
+			if = {
+				limit = { 
+					NOT = { check_key = { lhs = RE_Total value = 0.001 } }
+				}
+				StatePropertyAnnexation = { broker = NO type = Industrial }
+			}
+			else = {
+				StatePropertyAnnexation = { broker = RE type = Industrial }
+			}
+			StatePropertyAnnexation = { broker = NO type = Industrial }
+			StatePropertyAnnexation = { broker = BG type = Commercial }
+			StatePropertyAnnexation = { broker = CL type = Academic }
 		}
 		if = {
 			limit = {
@@ -3285,6 +3408,35 @@ on_province_owner_change = {
 				}	
 			}
 			12 = { remove_province_modifier = oresund_toll_tm }
+		}
+		if = {
+			limit = {
+				## Andean Tag and Culture
+				owner = {
+					OR = {
+						culture_group = andean_group
+						culture_group = north_central_tradition_group
+					}
+				}
+				OR = {
+					culture_group = andean_group
+					culture_group = north_central_tradition_group
+				}
+				NOT = { has_province_modifier = terrace_farm }
+				OR = {
+					has_terrain = forest_mountains
+					has_terrain = wood_mountains
+					has_terrain = shrub_mountains
+					has_terrain = grass_mountains
+					has_terrain = desert_mountains
+					has_terrain = forest_mountains
+					has_terrain = alpine_tundra
+				}
+			}
+			add_province_modifier = { name = terrace_farm duration = -1 }
+		}
+		else = {
+			remove_province_modifier = terrace_farm
 		}
 	}
 	if = {
@@ -3772,15 +3924,18 @@ on_create_vassal = {
 		#log = "[This.GetName] had color changed to match their overlord:on_create_vassal"
 		set_country_flag = has_overriden_color_flag
 	}
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = { id = Init.2 }
+	}
 	FROM = {
 		country_event = {
 			id = mec_vassals.5
 		}
 		set_key = { lhs = Integration_Progress value = 0 }
 		set_key = { lhs = Remaining_Years value = 0 }
-	}
-	country_event = {
-		id = Init.2
 	}
 	if = {
 		limit = {
@@ -3844,8 +3999,11 @@ on_flagship_destroyed = {
 # this = Released country, FROM = Releasing country
 on_country_released = {
 	#adopt_reform_progress = FROM not sire this does what we think it does
-	country_event = {
-		id = Init.2
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = { id = Init.2 }
 	}
 	if = {
 		limit = {
@@ -3939,6 +4097,25 @@ on_create_client_state = {
 		}
 		set_country_flag = had_revolution
 	}
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = {
+			id = Init.2
+		}
+	}
+	FROM = {
+		save_event_target_as = Adapt
+	}
+	Pol_AdaptFromScopeRights = yes
+	if = {
+		limit = {
+			subject_with_overlord_color_trigger = yes
+		}
+		change_country_color = { country = overlord }
+		set_country_flag = has_overriden_color_flag
+	}
 }
 
 # this = new target, from = previous target (both can be non-existent tag)
@@ -3948,6 +4125,10 @@ on_change_revolution_target = {
 # this = curia controller (enactor of the bull)
 on_golden_bull_enacted = {
 	set_country_flag = enacted_golden_bull
+	country_event = {
+		id = DG_GoldenBulls.001
+		days = 5
+	}
 }
 
 on_country_creation = {
@@ -4041,7 +4222,12 @@ on_colony_established = {
 
 #scope = new country, FROM = parent country
 on_colonial_nation_established = {
-	country_event = { id = Init.2 days = 1 }
+	if = {
+		limit = {
+			NOT = { has_country_flag = POP_Init }
+		}
+		country_event = { id = Init.2 }
+	}
 }
 
 on_colonist_boosting_colony = {
@@ -4091,10 +4277,10 @@ on_capital_moved = {
 		}
 	}
 
-	province_event = {
-		id = SYS_Colony.004 ## Spawn new industries
-		days = 2 #give capital_city.001 event a chance to move the capital to its proper place
-	}
+	#province_event = {
+	#	id = SYS_Colony.004 ## Spawn new industries
+	#	days = 2 #give capital_city.001 event a chance to move the capital to its proper place
+	#}
 }
 
 on_expanded_infrastructure = {

@@ -573,6 +573,7 @@ country_event = {
 	fire_only_once = yes
 	
 	trigger = {
+		NOT = { has_country_flag = flavor_hun_12_happened }
 		tag = HUN
 		government = monarchy
 		NOT = { has_ruler = "Louis the Great" }
@@ -587,19 +588,21 @@ country_event = {
 		is_lesser_in_union = no
 	}
 	immediate = {
+		set_country_flag = flavor_hun_12_happened
 		log = "FE-HUN:[GetYear]:[Root.GetName]:before proposing union was ruled by [Root.Monarch.GetName] [Root.Monarch.Dynasty.GetName]:flavor_hun.12"
 	}
 	option = {
 		name = "flavor_hun.12.a"
 		trigger = {
 			exists = BOH
-			BOH = { 
+			BOH = {
+				government = monarchy
 			    is_lesser_in_union = no 
 			    is_female = no
 			}
 		}
 		ai_chance = {
-			factor = 60
+			factor = 80
 			modifier = {
 				factor = 0.2
 				is_rival = BOH
@@ -617,7 +620,8 @@ country_event = {
 		name = "flavor_hun.12.b"
 		trigger = {
 			exists = HAB
-			HAB = { 
+			HAB = {
+				government = monarchy
 			    is_lesser_in_union = no 
 				is_female = no
 			}
@@ -641,9 +645,10 @@ country_event = {
 		name = "flavor_hun.12.d"
 		trigger = {
 			exists = POL
-			POL = { 
+			POL = {
+				government = monarchy
 			    is_lesser_in_union = no
-                is_female = no
+               is_female = no
 			}
 		}
 		ai_chance = {
@@ -665,7 +670,8 @@ country_event = {
 		name = "flavor_hun.12.c"
 		trigger = {
 			exists = KNP
-			KNP = { 
+			KNP = {
+				government = monarchy
 				is_lesser_in_union = no 
 				is_female = no
 				dynasty = "d'Anjou"
@@ -688,7 +694,7 @@ country_event = {
 	}
 	option = {
 		name = "flavor_hun.12.f"
-		ai_chance = { factor = 0 }
+		ai_chance = { factor = 5 }
 		random_core_province = {
 			spawn_rebels = {
 					type = pretender_rebels
@@ -711,7 +717,7 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-	    clr_country_flag = looking_for_heir
+		break_marriage = HUN ##Is this the source of CTD?
 	}
 	
 	option = {
@@ -719,11 +725,8 @@ country_event = {
 		log = "FE-HUN:[GetYear]:[Root.GetName]:accepted offer of creating union with [HUN.GetName]:flavor_hun.11"
 		ai_chance = {
 			factor = 90
-			modifier = {
-				factor = 0.5
-				is_rival = HUN
-			}
 		}
+		log = "FE-HUN:[GetYear]:Do we crash before creating PU? with [HUN.GetName]:flavor_hun.11"
 		create_subject = {
 			subject_type = temporary_union
 			subject = HUN
@@ -732,6 +735,7 @@ country_event = {
 			who = HUN
 			modifier = hun_inheritance
 		}
+		log = "FE-HUN:[GetYear]:Do we crash after creating PU? with [HUN.GetName]:flavor_hun.11"
 		HUN = {
 			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker = NO Amount = -30 }
 			add_opinion = {
@@ -766,15 +770,19 @@ country_event = {
 			    }
 			}
 		}
+		log = "FE-HUN:[GetYear]:Do we crash before aftereffect? with [HUN.GetName]:flavor_hun.11"
 	}
 	option = {
 		name = "OPT.SENDAWAY"
 		log = "FE-HUN:[GetYear]:[Root.GetName]:rejected offer of creating union with [HUN.GetName]:flavor_hun.11"
 		ai_chance = { factor = 10 }
-		add_prestige = 5
+		add_prestige = 25
 	}
 	after = {
-		log = "FE-HUN:[GetYear]:[Root.GetName]:after union decision was made, [HUN.GetName] was ruled by [HUN.Monarch.GetName] [Root.Monarch.Dynasty.GetName]:flavor_hun.11"
+		HUN = { clr_country_flag = looking_for_heir }
+		#log = "FE-HUN:[GetYear]:[Root.GetName]:after union decision was made, [HUN.GetName] was ruled by [HUN.Monarch.GetName] [Root.Monarch.Dynasty.GetName]:flavor_hun.11"
+		#Maybe it has to do with the invalid monarch type stuff, we see Errors about in other moments. Maybe the Log actually crashes the game?
+		log = "FE-HUN:[GetYear]:[Root.GetName]:after union decision was made, we are now finishing the event. :flavor_hun.11"
 	}
 }
 
@@ -1597,7 +1605,7 @@ country_event = {
 #		name = flavor_hun.29.a
 #		event_target:mercenary_mutiny_province = {
 #			spawn_rebels = {
-#				type = noble_rebels
+#				type = warlord_rebels
 #				size = 2
 #			}
 #			add_devastation = 35

@@ -6,12 +6,13 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import numpy as np
 import codecs
 import math
 
-rights = pd.read_csv('RightsRaise.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
-rights_lower = pd.read_csv('RightsLower.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
-ui_matrix = pd.read_csv('RightsCrownlandButtonUI.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
+rights = pd.read_csv('RightsRaise.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
+rights_lower = pd.read_csv('RightsLower.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
+ui_matrix = pd.read_csv('RightsCrownlandButtonUI.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
 
 file = codecs.open('common/estate_privileges/01_Rights.txt', 'w+', encoding='utf-8')
 file2 = codecs.open('common/scripted_effects/SYS-RightsUIAssign.txt', 'w+', encoding='utf-8')

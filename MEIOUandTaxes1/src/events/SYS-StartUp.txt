@@ -306,25 +306,28 @@ country_event = {
                 duration = -1  
             }
             
-            if = {
-				limit = {
-					isValidProv = yes
-				}
-				add_permanent_province_modifier = {
-					name = Tax_Mod
-					duration = -1
-				}
-			}
+            # if = {
+			# 	limit = {
+			# 		isValidProv = yes
+			# 	}
+			# 	add_permanent_province_modifier = {
+			# 		name = Tax_Mod
+			# 		duration = -1
+            #         hidden = yes
+			# 	}
+			# }
             
-            add_permanent_province_modifier = {
-				name = Disp_Mil
-				duration = -1
-			}
+            # add_permanent_province_modifier = {
+			# 	name = Disp_Mil
+			# 	duration = -1
+            #     hidden = yes
+			# }
             
-            add_permanent_province_modifier = {
-                name = Prov_Info_mod
-                duration = -1
-            }
+            # add_permanent_province_modifier = {
+            #     name = Prov_Info_mod
+            #     duration = -1
+            #     hidden = yes
+            # }
             
             add_permanent_province_modifier = {
                 name = POP_Unrest
@@ -337,24 +340,28 @@ country_event = {
 				desc = DG_RelGrp_tooltip
 			}
             
-            add_permanent_province_modifier = { 
-                name = Disp_Pop
-                duration = -1  
-            }
+            # add_permanent_province_modifier = { 
+            #     name = Disp_Pop
+            #     duration = -1  
+            #     hidden = yes
+            # }
             
-            add_permanent_province_modifier = { 
-                name = Infra_disp
-                duration = -1  
-            }
+            # add_permanent_province_modifier = { 
+            #     name = Infra_disp
+            #     duration = -1  
+            #     hidden = yes
+            # }
             
-            add_permanent_province_modifier = { 
-                name = Disp_Prod
-                duration = -1  
-            }
-            add_permanent_province_modifier = { 
-                name = Disp_Prod2
-                duration = -1  
-            }
+            # add_permanent_province_modifier = { 
+            #     name = Disp_Prod
+            #     duration = -1  
+            #     hidden = yes
+            # }
+            # add_permanent_province_modifier = { 
+            #     name = Disp_Prod2
+            #     duration = -1  
+            #     hidden = yes
+            # }
             
             add_permanent_province_modifier = { 
                 name = Disp_Trade
@@ -387,6 +394,25 @@ country_event = {
                 }
                 multiply_key = { lhs = Land_Rain value = 1.2 }
             }
+			if = {
+				limit = {
+					## Terrace Farms for Andean Culture
+					OR = {
+						culture_group = andean_group
+						culture_group = north_central_tradition_group
+					}
+					OR = {
+						has_terrain = forest_mountains
+						has_terrain = wood_mountains
+						has_terrain = shrub_mountains
+						has_terrain = grass_mountains
+						has_terrain = desert_mountains
+						has_terrain = forest_mountains
+						has_terrain = alpine_tundra
+					}
+				}
+				add_province_modifier = { name = terrace_farm duration = -1 }
+			}			
         }
             
         every_province = {
@@ -690,12 +716,15 @@ country_event = {
                 }
                 grass_hills = {
                     set_key = { lhs = Tmp_2 value = 0.95 }
+					set_key = { lhs = Land_Forest value = 5 }
                 }
                 grass_mountains = {
                     set_key = { lhs = Tmp_2 value = 0.50 }
+					set_key = { lhs = Land_Forest value = 10 }
                 }
                 grass_highlands = {
                     set_key = { lhs = Tmp_2 value = 0.70 }
+					set_key = { lhs = Land_Forest value = 15 }
                 }
 
                 desert_flats = {
@@ -1038,7 +1067,15 @@ country_event = {
                 }
                 set_key = { lhs = Tmp_1 value = 1.0 }
             }
-			
+			### Experimental change to get rid of marginal forestries which usually end up closing again
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Land_Forest value = 15 } }
+					NOT = { has_terrain = alpine_tundra } # Love the Alps
+				}
+				change_key = { lhs = Land_Size which = Land_Forest }
+				set_key = { lhs = Land_Forest value = 0 }
+			}
 			subtract_key = { lhs = Land_Size which = Land_Forest } # Subtract Forest from available arable land size
 			
             # Multipliers on arable Land Size for water and soil
@@ -1134,7 +1171,7 @@ country_event = {
 			# Display
 			multiply_key = { lhs = Land_Soil value = 100 }
         }
-
+		
         every_province = {
             limit = {
 				isValidEmpty = yes
@@ -1756,6 +1793,17 @@ country_event = {
 						is_key_equal = { lhs = iter value = 200 }
 					}
 					clr_global_flag = POP_Sim20
+				}
+				else_if = {
+					limit = {
+						is_key_equal = { lhs = iter value = 300 }
+					}
+					every_province = {
+						limit = {
+							isValidProv = yes
+						}
+						StartUp_InitResurrect = yes
+					}
 				}
 			}
             # Update local autonomy after iteration
@@ -2824,7 +2872,7 @@ country_event = {
                     isValidProv = yes
                 }
                 Rights_SyncFromOwner = yes
-                add_permanent_province_modifier = { name = Tax_Mod duration = -1 }
+                #add_permanent_province_modifier = { name = Tax_Mod duration = -1 }
                 
                 Dev_DoMain = { iterate=no }
                 if = {
