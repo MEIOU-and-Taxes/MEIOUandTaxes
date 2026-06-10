@@ -5,17 +5,22 @@ import numpy as np
 def get_data(t, i):
     lst = []
     loc = 0
-
     while True:
         loc = t.find(i, loc)
-
-        if loc != -1:
-            end = t.find('\n', loc)
-            lst.append(float(t[loc:end].strip().split(':')[1].strip()))
-            loc = end
-        else:
+        if loc == -1:
             break
-
+        end = t.find('\n', loc)
+        line = t[loc:end]
+        if ':' not in line:
+            loc = end
+            continue
+        val = line.split(':', 1)[1]
+        val = val.strip().split('£')[-1].strip()
+        try:
+            lst.append(float(val))
+        except ValueError:
+            pass
+        loc = end
     return lst
 
 import os
@@ -23,7 +28,7 @@ def read_and_concatenate_old_logs(directory='.'):
     concatenated_text = ''
     for file_name in sorted(os.listdir(directory)):
         if file_name.startswith('game_') and file_name.endswith('.log') and file_name != 'game.log':
-            with open(file_name, 'r') as f:
+           with open(os.path.join(directory, file_name), "r", encoding="cp1252") as f:
                 concatenated_text += f.read()
     return concatenated_text
 
@@ -57,7 +62,7 @@ def calculate_correlations(prices, wealth_vars):
     return correlation_matrix
 
 if __name__ == '__main__':
-    with open('game.log') as f:
+    with open("game.log", "r", encoding="cp1252") as f:
         t = read_and_concatenate_old_logs()
         t += f.read()
         
