@@ -10548,30 +10548,65 @@ POP_CalcLandTime = {
     set_key = { lhs = Land_Travel value = 1.0 }
 	[[Innate]
 	set_key = { lhs = CE_Tmp0 value = $Innate$ } # role of innate things (swamps, etc)
-    multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact }
-    change_key = { lhs = CE_Tmp0 value = 1 }
-	multiply_key = { lhs = Land_Travel which = CE_Tmp0 }
+    #multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact } #RoadImpact has been moved one layer up, as its now a additive calculation. So we can save calcs...
+	change_key = { lhs = Land_Travel which = CE_Tmp0 }
 	]
-	[[Forest]
-    set_key = { lhs = CE_Tmp0 value = $Forest$ } # role of woods/trees
-    multiply_key = { lhs = CE_Tmp0 which = Modi_CEForest }
-    multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact }
-    change_key = { lhs = CE_Tmp0 value = 1 }
-    multiply_key = { lhs = Land_Travel which = CE_Tmp0 }
-	]
-	set_key = { lhs = CE_Tmp0 which = Land_Rugged } # role of terrain
-    multiply_key = { lhs = CE_Tmp0 value = 0.01 } # 100->1 scale
-    multiply_key = { lhs = CE_Tmp0 value = 8 } # Balancing constant
-    multiply_key = { lhs = CE_Tmp0 which = Modi_CEHeight }
-    multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact }
-    change_key = { lhs = CE_Tmp0 value = 1 }
-    multiply_key = { lhs = Land_Travel which = CE_Tmp0 }
+	### Estimate Forestation from Farmland to Forestry Distribution
+	if = {
+		limit = {
+			check_key = { lhs = Land_Forest value = 15 } #threshold at which point we consider forestation
+		}
+		set_key = { lhs = CE_Tmp0 value = Land_Forest } # role of woods/trees
+		if = {
+			limit = {
+				NOT = { check_key = { lhs = Land_Size value = 15 } } # If we have >15 Forest but not 15 Farmland, then we jump into the extreme
+			}
+			set_key = { lhs = CE_Tmp0 value = 3 }
+		}
+		else = {
+			divide_key = { lhs = CE_Tmp0 which = Land_Size } # for example 600 Forestry to 150 Farmland -> 600 / 150
+		}
+		if = {
+			limit = { 
+				check_key = { lhs = CE_Tmp0 value = 3 }
+			}
+			set_key = { lhs = CE_Tmp0 value = 3 }
+		}
+		[[Forest]
+		change_key = { lhs = CE_Tmp0 value = $Forest$ } # Fix impact for Forest
+		]		
+		multiply_key = { lhs = CE_Tmp0 which = Modi_CEForest }
+		#multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact } #RoadImpact has been moved one layer up, as its now a additive calculation. So we can save calcs...
+		change_key = { lhs = Land_Travel which = CE_Tmp0 }
+	}
+	### Factor in Ruggedness of Terrain into CE
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Land_Rugged value = 0.1 } } #avoid unnecessary near zero calculations
+		}
+		set_key = { lhs = CE_Tmp0 which = Land_Rugged } # role of terrain
+		if = { 
+			limit = {
+				check_key = { lhs = CE_Tmp0 value = 10 } # can rarely exceed 10, theoretically up to 100.
+			}
+			set_key = { lhs = CE_Tmp0 value = 10 }
+		}
+		multiply_key = { lhs = CE_Tmp0 which = Modi_CEHeight }
+		#multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact } #RoadImpact has been moved one layer up, as its now a additive calculation. So we can save calcs...
+		### If Ancient Pass
+		if = {
+			limit = {
+				check_key = { lhs = TN_Pass value = 1 }
+			}
+			multiply_key = { lhs = CE_Tmp0 value = 0.6 }
+		}
+		change_key = { lhs = Land_Travel which = CE_Tmp0 }
+	}
 	[[Desert]
     set_key = { lhs = CE_Tmp0 value = $Desert$ } # role of desert
     multiply_key = { lhs = CE_Tmp0 which = Modi_CEDesert }
-    multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact }
-    change_key = { lhs = CE_Tmp0 value = 1 }
-    multiply_key = { lhs = Land_Travel which = CE_Tmp0 }
+    #multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact } #RoadImpact has been moved one layer up, as its now a additive calculation. So we can save calcs...
+    change_key = { lhs = Land_Travel which = CE_Tmp0 }
 	]
     set_key = { lhs = CE_Tmp0 value = 0 }
 }
@@ -10584,40 +10619,40 @@ POP_GetLandTime = {
 			POP_CalcLandTime = { Innate=4 }
         }
         forest_flats = {
-			POP_CalcLandTime = { Forest=0.85 }
+			POP_CalcLandTime = { Forest=1.0 }
         }
         forest_hills = {
-			POP_CalcLandTime = { Forest=0.9 }
+			POP_CalcLandTime = { Forest=1.0 }
         }
         forest_mountains = {
 			POP_CalcLandTime = { Forest=1.0 }
         }
         forest_highlands = {
-			POP_CalcLandTime = { Forest=0.95 }
+			POP_CalcLandTime = { Forest=1.0 }
         }
         wood_flats = {
-			POP_CalcLandTime = { Forest=0.35 }
+			POP_CalcLandTime = { Forest=0.5 }
         }
         wood_hills = {
-			POP_CalcLandTime = { Forest=0.4 }
+			POP_CalcLandTime = { Forest=0.5 }
         }
         wood_mountains = {
 			POP_CalcLandTime = { Forest=0.5 }
         }
         wood_highlands = {
-			POP_CalcLandTime = { Forest=0.45 }
+			POP_CalcLandTime = { Forest=0.5 }
         }
         shrub_flats = {
-			POP_CalcLandTime = { Forest=0.15 }
+			POP_CalcLandTime = { Forest=0.25 }
         }
         shrub_hills = {
-			POP_CalcLandTime = { Forest=0.1 }
+			POP_CalcLandTime = { Forest=0.25 }
         }
         shrub_mountains = {
-			POP_CalcLandTime = { Forest=0.1 }
+			POP_CalcLandTime = { Forest=0.25 }
         }
         shrub_highlands = {
-			POP_CalcLandTime = { Forest=0.1 }
+			POP_CalcLandTime = { Forest=0.25 }
         }
         grass_flats = {
 			POP_CalcLandTime = yes
@@ -10644,116 +10679,22 @@ POP_GetLandTime = {
 			POP_CalcLandTime = { Desert=1.5 }
         }
         jungle_flats = {
-			POP_CalcLandTime = { Forest=2 }
+			POP_CalcLandTime = { Forest=1.5 }
         }
         jungle_hills = {
-			POP_CalcLandTime = { Forest=2 }
+			POP_CalcLandTime = { Forest=1.5 }
         }
         floodplains = {
 			POP_CalcLandTime = { Innate=1 }
         }
         taiga = {
-			POP_CalcLandTime = { Forest=3 }
+			POP_CalcLandTime = yes
         }
         marsh = {
-			POP_CalcLandTime = { Innate=1.5 }
+			POP_CalcLandTime = { Innate=1.0 Forest=0.5 }
         }
         tundra = {
-			POP_CalcLandTime = { Innate=0.5 Forest=1.5 }
-        }
-        alpine_tundra = {
-			POP_CalcLandTime = yes
-        }
-        small_island = {
-			POP_CalcLandTime = yes
-        }
-    }
-}
-
-POP_GetLandTimePath = { 
-    trigger_switch = {
-        on_trigger = has_terrain
-        
-        arctic = {
-			POP_CalcLandTime = { Innate=2 }
-        }
-        forest_flats = {
-			POP_CalcLandTime = { Forest=0.425 }
-        }
-        forest_hills = {
-			POP_CalcLandTime = { Forest=0.45 }
-        }
-        forest_mountains = {
-			POP_CalcLandTime = { Forest=0.5 }
-        }
-        forest_highlands = {
-			POP_CalcLandTime = { Forest=0.475 }
-        }
-        wood_flats = {
-			POP_CalcLandTime = { Forest=0.175 }
-        }
-        wood_hills = {
-			POP_CalcLandTime = { Forest=0.2 }
-        }
-        wood_mountains = {
-			POP_CalcLandTime = { Forest=0.25 }
-        }
-        wood_highlands = {
-			POP_CalcLandTime = { Forest=0.225 }
-        }
-        shrub_flats = {
-			POP_CalcLandTime = { Forest=0.15 }
-        }
-        shrub_hills = {
-			POP_CalcLandTime = { Forest=0.05 }
-        }
-        shrub_mountains = {
-			POP_CalcLandTime = { Forest=0.05 }
-        }
-        shrub_highlands = {
-			POP_CalcLandTime = { Forest=0.05 }
-        }
-        grass_flats = {
-			POP_CalcLandTime = yes
-        }
-        grass_hills = {
-			POP_CalcLandTime = yes
-        }
-        grass_mountains = {
-			POP_CalcLandTime = yes
-        }
-        grass_highlands = {
-			POP_CalcLandTime = yes
-        }
-        desert_flats = {
-			POP_CalcLandTime = { Desert=0.75 }
-        }
-        desert_hills = {
-			POP_CalcLandTime = { Desert=0.5 }
-        }
-        desert_mountains = {
-			POP_CalcLandTime = { Desert=0.5}
-        }
-        desert_highlands = {
-			POP_CalcLandTime = { Desert=0.5 }
-        }
-        jungle_flats = {
-			POP_CalcLandTime = { Forest=0.666 }
-        }
-        jungle_hills = {
-			POP_CalcLandTime = { Forest=0.666 }
-        }
-        floodplains = {
 			POP_CalcLandTime = { Innate=0.5 }
-        }
-        taiga = {
-			POP_CalcLandTime = { Forest=3 }
-        }
-        marsh = {
-			POP_CalcLandTime = { Innate=0.75 }
-        }
-        tundra = {
-			POP_CalcLandTime = { Innate=0.25 Forest=0.5 }
         }
         alpine_tundra = {
 			POP_CalcLandTime = yes
