@@ -84,11 +84,11 @@ Refresh to read game.log again.
         files = glob.glob("game_*.log")
         files.sort(key=lambda x: int(x[5:-4]))
         for fn in files:
-            with open(fn, "r") as f:
+            with open(fn, "r", encoding="cp1252") as f:
                 text += f.read()
         logs = len(files)
         try:
-            with open("game.log", "r") as f:
+            with open("game.log", "r", encoding="cp1252") as f:
                 text += f.read()
                 logs += 1
         except FileNotFoundError:
