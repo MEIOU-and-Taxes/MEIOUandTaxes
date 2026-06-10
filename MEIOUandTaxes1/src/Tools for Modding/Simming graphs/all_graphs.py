@@ -1913,7 +1913,7 @@ def graphLeak_Test(t, plt):
         wealth2 = get_data(t, 'Tax Leak Test')
         wealth3 = get_data(t, 'Expected Wealth Change')
         wealth4 = get_data(t, 'Expected Income Spend')
-        wealth5 = get_data(t, 'Infra Leak Test')
+        wealth5 = get_data(t, 'Infra Leak Test ')
         wealth6 = get_data(t, 'Tariff_Income')
         itr = range(1, len(wealth) + 1)
 
