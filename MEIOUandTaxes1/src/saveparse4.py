@@ -165,8 +165,15 @@ def get_history2(tag, var, flag, modifier):
 	return out
 
 def newest_save():
-	saves = glob.glob(os.path.expanduser(os.path.join('~', 'Documents', 'Paradox Interactive', 'Europa Universalis IV', 'save games', '*')))
-	return max(saves, key=os.path.getmtime)
+	candidates = [
+		os.path.join('~', 'Documents', 'Paradox Interactive', 'Europa Universalis IV', 'save games'),
+		os.path.join('~', '.local', 'share', 'Paradox Interactive', 'Europa Universalis IV', 'save games'),
+	]
+	for candidate in candidates:
+		saves = glob.glob(os.path.expanduser(os.path.join(candidate, '*')))
+		if saves:
+			return max(saves, key=os.path.getmtime)
+	raise FileNotFoundError("No EU4 save games found")
 
 path = ""
 
