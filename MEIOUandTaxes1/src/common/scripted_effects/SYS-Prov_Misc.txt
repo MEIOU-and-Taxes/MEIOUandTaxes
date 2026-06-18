@@ -629,7 +629,6 @@ Prov_TaxInit = {
 	set_key = { lhs = TaxD_SubstancesBU value = 0 }
 	set_key = { lhs = TaxD_TimberBU value = 0 }
 	set_key = { lhs = TaxD_AlcoholBU value = 0 }
-	set_key = { lhs = TaxD_ForestBU value = 0 }
 	set_key = { lhs = TaxD_Corruption value = 0 }
 	set_key = { lhs = TaxD_Farming value = 0 }
 	set_key = { lhs = TaxD_Direct value = 0 }
@@ -684,7 +683,6 @@ Prov_TaxInit = {
 	set_key = { lhs = TaxD_ObligationsBGHigh value = 0 }
 	set_key = { lhs = TaxD_ObligationsCLHigh value = 0 }
 	set_key = { lhs = TaxD_RentsHigh value = 0 }
-	set_key = { lhs = TaxD_ForestBUHigh value = 0 }
 	set_key = { lhs = TaxD_ObligationsTRHigh value = 0 }
 
 	set_key = { lhs = SF_IncomeTax value = 0 }
@@ -1758,16 +1756,15 @@ Prov_TaxDo = {
 		change_key = { lhs = TaxD_CLExciseBU which = TaxD_CLSubstancesBU }
 		change_key = { lhs = TaxD_ExciseBU which = TaxD_SaltBU }
 		change_key = { lhs = TaxD_ExciseBU which = TaxD_SubstancesBU }
-		change_key = { lhs = TaxD_ExciseBU which = TaxD_TimberBU }
-		change_key = { lhs = TaxD_ExciseBU which = TaxD_AlcoholBU }
+		# change_key = { lhs = TaxD_ExciseBU which = TaxD_TimberBU } # Are in industry
+		# change_key = { lhs = TaxD_ExciseBU which = TaxD_AlcoholBU } # Are in industry
 		change_key = { lhs = TaxD_TR which = TaxD_NOObligationsTR }
 	}
 	# Spending on tax isnt subtracted from wealth till the end
 	# Prevents wealth taxes iteratively getting smaller
-	#change_key = { lhs = TaxD_Industry which = TaxD_TollBU }
-	#change_key = { lhs = TaxD_Industry which = TaxD_TimberBU }
-	#change_key = { lhs = TaxD_Industry which = TaxD_AlcoholBU }
-	#change_key = { lhs = TaxD_Industry which = TaxD_ForestBU }
+	change_key = { lhs = TaxD_Industry which = TaxD_TollBU }
+	change_key = { lhs = TaxD_Industry which = TaxD_TimberBU }
+	change_key = { lhs = TaxD_Industry which = TaxD_AlcoholBU }
 	change_key = { lhs = TaxD_Special which = Post_LocalFees }
 	
 	change_key = { lhs = SF_IncomeTax which = TaxD_CharitySF }
@@ -1812,12 +1809,8 @@ Prov_TaxDo = {
 	
 	change_key = { lhs = TaxD_Indirect which = TaxD_Fees }
 	change_key = { lhs = TaxD_Indirect which = Tariff_Income }
-	change_key = { lhs = TaxD_Indirect which = TaxD_SaltBU }
-	change_key = { lhs = TaxD_Indirect which = TaxD_SubstancesBU }
-	change_key = { lhs = TaxD_Indirect which = TaxD_TimberBU }
-	change_key = { lhs = TaxD_Indirect which = TaxD_AlcoholBU }
-	change_key = { lhs = TaxD_Indirect which = TaxD_ForestBU }
-	change_key = { lhs = TaxD_Indirect which = TaxD_TollBU }
+	change_key = { lhs = TaxD_Indirect which = TaxD_ExciseBU }
+	change_key = { lhs = TaxD_Indirect which = TaxD_Industry }
 	change_key = { lhs = TaxD_Indirect which = TaxD_Commerce }
 	change_key = { lhs = TaxD_Indirect which = TaxD_Special }
 	
@@ -2286,8 +2279,9 @@ Prov_TaxDo = {
 	change_key = { lhs = TaxD_Obligations which = TaxD_ObligationsNO }
 	change_key = { lhs = TaxD_Obligations which = TaxD_ObligationsBG }
 	change_key = { lhs = TaxD_Obligations which = TaxD_ObligationsCL }
-	change_key = { lhs = TaxD_Obligations which = TaxD_ObligationsTR }
 	change_key = { lhs = TaxD_Indirect which = TaxD_Obligations }
+	change_key = { lhs = TaxD_Indirect which = TaxD_ObligationsTR } # Need to add it separately, as its the tribal tributes
+	change_key = { lhs = TaxD_Revenue which = TaxD_ObligationsTR }
 	change_key = { lhs = TaxD_Revenue which = TaxD_Obligations }
 
 	Prov_SetRateDisp = { class = SF }
@@ -4046,28 +4040,7 @@ Prov_DoTaxBU = {
 			owner = { Tax_TaxFeudalCan = yes }
 		}
 		Tax_GetTaxRate = { TaxName=TaxFeudal }
-		
-		set_key = { lhs = Tax_TmpBase value = 8 }
-		if = {
-			limit = {
-				is_capital = yes
-			}
-			change_key = { lhs = Tax_TmpBase value = 7 }
-		}
-		if = {
-			limit = {
-				check_key = { lhs = Prov_TRPow value = 0.001 }
-			}
-			multiply_key = { lhs = Tax_TmpBase which = Prov_TRPowCap }
-			multiply_key = { lhs = Tax_TmpBase value = 0.01 }
-		}
-		multiply_key = { lhs = Tax_TmpBase which = BU_PrpResources } # Proportionate to state land
-		multiply_key = { lhs = Tax_TmpBase value = 0.01 } # 0-100 scale -> 0-1 scale
-		
-		# Tax the timber slot at this rate, seigneurial forestry
-		Tax_CalcSlotScaled = { GoodID=13 TaxType=ForestBU }
-		Tax_ResetTax = yes
-		
+				
 		set_key = { lhs = Tax_TmpBase value = 20 }
 		# Calc tax rate
 		if = {
