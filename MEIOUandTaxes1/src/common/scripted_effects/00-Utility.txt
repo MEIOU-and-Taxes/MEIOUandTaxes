@@ -202,8 +202,8 @@ export_tech_cost = { # output: adm_tech_cost, dip_tech_cost, mil_tech_cost
 	export_to_key = { lhs = Tech_Tmp2 value = modifier:technology_cost }
 	export_to_key = { lhs = Tech_Tmp3 value = modifier:all_power_cost }
 	change_key = { lhs = Tech_Tmp2 which = Tech_Tmp3 }
-	export_tech_cost_inst = { inst=Legalism max=400 }
-	export_tech_cost_inst = { inst=Banking max=25 }
+	#export_tech_cost_inst = { inst=Legalism max=20 } ## Legalism no longer has tech penalty, but 20% power costs
+	export_tech_cost_inst = { inst=Banking max=30 }
 	export_tech_cost_inst = { inst=Casual_Literacy max=50 }
 	export_tech_cost_inst = { inst=Columbian_Exchange max=35 }
 	export_tech_cost_inst = { inst=Scientific_Method max=75 }
@@ -224,15 +224,20 @@ export_tech_cost_inst = { #inst #max
 			NOT = { has_institution = $inst$ }
 		}
 		AAA = {
+			# If Banking started 1350 and we have 1360, then this yields 10
 			set_key = { lhs = Tech_Tmp2 which = Current_Year }
 			subtract_key = { lhs = Tech_Tmp2 which = $inst$Date }
 			if = {
 				limit = {
 					check_key = { lhs = Tech_Tmp2 value = $max$ }
 				}
+				# Make sure years passed since 1350 are not larger than max penalty, 30 for Banking.. 
 				set_key = { lhs = Tech_Tmp2 value = $max$ }
 			}
-			multiply_key = { lhs = Tech_Tmp2 value = 0.01 }
+			# Now we multiply the result with the tech increase value
+			# ToDO: Tech increase per 10 years are currently not the same over all Institutions.
+			# Some increase with 5% per 10 years, some with 2.5% or even more than 5%
+			multiply_key = { lhs = Tech_Tmp2 value = 0.05 }
 			PREV = { 
 				change_key = { lhs = Tech_Tmp2 which = PREV }
 			}
@@ -262,7 +267,8 @@ export_tech_cost_helper = { #type
 	change_key = { lhs = Tech_Tmp3 which = Tech_Tmp5 }
 	set_key = { lhs = Tech_Tmp5 which = Tech_Tmp4 } # ahead of time
 	multiply_key = { lhs = Tech_Tmp5 value = 10 }
-	change_key = { lhs = Tech_Tmp5 value = 1290 }
+	# PLEASE NEVER DO TECH TRANSITIONS AGAIN; ELSE WE FORGET THIS VALUE AGAIN!!
+	change_key = { lhs = Tech_Tmp5 value = 1200 } # Date of Tech 0...
 	AAA = { 
 		set_key = { lhs = Tech_Tmp6 which = Current_Year }
 		PREV = { set_key = { lhs = Tech_Tmp6 which = PREV } }
