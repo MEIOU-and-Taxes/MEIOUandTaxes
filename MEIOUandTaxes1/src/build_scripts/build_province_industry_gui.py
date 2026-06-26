@@ -145,7 +145,7 @@ categories = [
 				"id": 34
 			},
 			{
-				"name": "Machinery",
+				"name": "Tools",
 				"id": 35
 			},
 			{
