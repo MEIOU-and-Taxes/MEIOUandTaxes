@@ -198,11 +198,6 @@ mil_available = {
 	export_to_key = { lhs = $output$ value = trigger_value:mil_power }
 }
 ### Make sure to also check tech files if max values change.
-export_tech_cost = { # output: Tech_ADMCost, Tech_DIPCost, Tech_MILCost
-	export_tech_cost_helper = { type = adm output = Tech_ADMCost  }
-	export_tech_cost_helper = { type = dip output = Tech_DIPCost }
-	export_tech_cost_helper = { type = mil output = Tech_MILCost }
-}
 export_tech_cost_inst = { #inst #max #techUnlockYearVar #output
 	if = {
 		limit = {
@@ -246,7 +241,6 @@ export_tech_cost_helper = { #type #output
 	export_to_key = { lhs = Tech_Tmp2 value = modifier:$type$_tech_cost_modifier }
 	change_key = { lhs = Tech_Tmp3 which= Tech_Tmp2 }
 	change_key = { lhs = Tech_Tmp3 value = 1 }
-	
 	# Increase over time, Tech_Tmp5 -> Tech_Tmp3
 	if = { # increase over time, #tech 17 costs 0,1% more, 18 costs 0,5% more, so 0,4% per level
 		limit = {
@@ -264,7 +258,7 @@ export_tech_cost_helper = { #type #output
 		change_key = { lhs = Tech_Tmp5 value = -0.002 }
 	}
 	change_key = { lhs = Tech_Tmp3 which = Tech_Tmp5 }
-
+	
 	# The year of the target tech, Tech_Tmp5 
 	set_key = { lhs = Tech_Tmp5 which = Tech_Tmp4 } # ahead of time
 	multiply_key = { lhs = Tech_Tmp5 value = 10 }
@@ -289,6 +283,9 @@ export_tech_cost_helper = { #type #output
 		PREV = { set_key = { lhs = Tech_Tmp6 which = PREV } }
 	}
 	subtract_key = { lhs = Tech_Tmp5 which = Tech_Tmp6 }
+	# If we are 10 years ahead of time, we get 100% modifier. We don't get 100% increase FOR a tech 10 years in the future
+	# So we remove the 10 years of target tech to get our current ahead of time sum
+	change_key = { lhs = Tech_Tmp5 value = -10 } 
 	multiply_key = { lhs = Tech_Tmp5 value = 0.1 }
 	if = {
 		limit = {
