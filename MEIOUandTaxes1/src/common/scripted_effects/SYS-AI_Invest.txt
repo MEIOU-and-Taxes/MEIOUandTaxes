@@ -113,8 +113,33 @@ Do_Invest = {
         change_key = { lhs = Public_Tmp0 which = Public_Tmp6 }
         
         set_key = { lhs = Public_Tmp9 which = Public_Tmp0 } #save total score here
-        divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } #total score divided by budget
-        #log = "SYS-StateInvestment:[GetYear]:[This.GetName]:Total Score divided by budget = [GV_Public_Tmp9]/[GV_Ai_Invest_BudgetFixed] = [GV_Public_Tmp0]"
+        set_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } 
+        divide_key = { lhs = Public_Tmp0 which = Public_Tmp9 } #budget divided by total score = ducats per score
+
+        if = {
+            limit = {
+                is_key_equal = { lhs = Public_Tmp0 value = 0 } # The ducats per score value is lower than 0.001 (e.g. 2000 total score, 1 ducat invest => bug)
+            }
+            # If we run into this, we add another 1k multiplier, so its 1m total score limit per 1 ducat.
+            set_country_flag = ducats_per_score_exceeds_limit
+            set_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed } 
+            multiply_key = { lhs = Public_Tmp0 value = 1000 }
+            divide_key = { lhs = Public_Tmp0 which = Public_Tmp9 }
+            
+            # If we run into this again, we turn it off completely and swap back to the slower divide calc
+            if = {
+                limit = {
+                    is_key_equal = { lhs = Public_Tmp0 value = 0 } # The ducats per score value is lower than 0.001 (e.g. 2000000 total score, 1 ducat invest => bug)
+                }
+                 set_key = { lhs = Public_Tmp0 which = Public_Tmp9 } 
+                 divide_key = { lhs = Public_Tmp0 which = Ai_Invest_BudgetFixed }
+                 clr_country_flag = ducats_per_score_exceeds_limit
+                 set_country_flag = score_per_ducat_calc
+            }
+        }
+        
+        
+        #log = "SYS-StateInvestment:[GetYear]:[This.GetName]:budget divided by total score = [GV_Ai_Invest_BudgetFixed]/[GV_Public_Tmp9] = [GV_Public_Tmp0]"
 
         set_key = { lhs = Tmp_9 value = 0 }
         set_key = { lhs = Public_Tmp7 value = 0 } #Key to be used to substract treasury
@@ -135,7 +160,7 @@ Do_Invest = {
             set_key = { lhs = Tmp_5 which = Public_Tmp5 }
             set_key = { lhs = Tmp_6 which = Public_Tmp6 }
             
-                # calculate each score's percentage % from the total country's score for each type of building
+            # calculate each score's percentage % from the total country's score for each type of building
             set_key = { lhs = Public_Tmp9 which = PREV } #total country score
             divide_key = { lhs = Tmp_1 which = Public_Tmp9 } 
             divide_key = { lhs = Tmp_2 which = Public_Tmp9 }
@@ -144,25 +169,26 @@ Do_Invest = {
             divide_key = { lhs = Tmp_5 which = Public_Tmp9 }
             divide_key = { lhs = Tmp_6 which = Public_Tmp9 }
             
-                # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
-            multiply_key = { lhs = Tmp_1 value = 100 }
-            multiply_key = { lhs = Tmp_2 value = 100 }
-            multiply_key = { lhs = Tmp_3 value = 100 }
-            multiply_key = { lhs = Tmp_4 value = 100 }
-            multiply_key = { lhs = Tmp_5 value = 100 }
-            multiply_key = { lhs = Tmp_6 value = 100 }
-                # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
+            # tmp_1 is how much % of the total score of the entire country represents this province, #tmp_2 fishery, etc. in raw percentage value
+            #multiply_key = { lhs = Tmp_1 value = 100 }
+            #multiply_key = { lhs = Tmp_2 value = 100 }
+            #multiply_key = { lhs = Tmp_3 value = 100 }
+            #multiply_key = { lhs = Tmp_4 value = 100 }
+            #multiply_key = { lhs = Tmp_5 value = 100 }
+            #multiply_key = { lhs = Tmp_6 value = 100 }
+            
+            # if more than 60% of total score goes into 1 specific industry, set a flag to next time reduce score
             if = {
                 limit = {
                     is_capital = no
                 }
                 if = {
                     limit = {
-                        check_key = { lhs = Tmp_1 value = 60 }
+                        check_key = { lhs = Tmp_1 value = 0.60 }
                     }
                     if = {
                         limit = {
-                            check_key = { lhs = Tmp_1 value = 80 }
+                            check_key = { lhs = Tmp_1 value = 0.80 }
                         }
                         set_province_flag = AgricultureInvestment8
                     }
@@ -172,11 +198,11 @@ Do_Invest = {
                 }
                 else_if = {
                     limit = {
-                        check_key = { lhs = Tmp_2 value = 60 }
+                        check_key = { lhs = Tmp_2 value = 0.60 }
                     }
                     if = {
                         limit = {
-                            check_key = { lhs = Tmp_2 value = 80 }
+                            check_key = { lhs = Tmp_2 value = 0.80 }
                         }
                         set_province_flag = ForestryInvestment8
                     }
@@ -186,11 +212,11 @@ Do_Invest = {
                 }
                 else_if = {
                     limit = {
-                        check_key = { lhs = Tmp_3 value = 60 }
+                        check_key = { lhs = Tmp_3 value = 0.60 }
                     }
                     if = {
                         limit = {
-                            check_key = { lhs = Tmp_3 value = 80 }
+                            check_key = { lhs = Tmp_3 value = 0.80 }
                         }
                         set_province_flag = ExtractionInvestment8
                     }
@@ -200,11 +226,11 @@ Do_Invest = {
                 }
                 else_if = {
                     limit = {
-                        check_key = { lhs = Tmp_4 value = 60 }
+                        check_key = { lhs = Tmp_4 value = 0.60 }
                     }
                     if = {
                         limit = {
-                            check_key = { lhs = Tmp_4 value = 80 }
+                            check_key = { lhs = Tmp_4 value = 0.80 }
                         }
                         set_province_flag = FisheryInvestment8
                     }
@@ -214,11 +240,11 @@ Do_Invest = {
                 }
                 else_if = {
                     limit = {
-                        check_key = { lhs = Tmp_5 value = 60 }
+                        check_key = { lhs = Tmp_5 value = 0.60 }
                     }
                     if = {
                         limit = {
-                            check_key = { lhs = Tmp_5 value = 80 }
+                            check_key = { lhs = Tmp_5 value = 0.80 }
                         }
                         set_province_flag = IndustrialInvestment8
                     }
@@ -228,11 +254,11 @@ Do_Invest = {
                 }
                 else_if = {
                     limit = {
-                        check_key = { lhs = Tmp_6 value = 60 }
+                        check_key = { lhs = Tmp_6 value = 0.60 }
                     }
                     if = {
                         limit = {
-                            check_key = { lhs = Tmp_6 value = 80 }
+                            check_key = { lhs = Tmp_6 value = 0.80 }
                         }
                         set_province_flag = CommercialInvestment8
                     }
@@ -247,35 +273,58 @@ Do_Invest = {
             
             if = {
                 limit = {
+                    owner = { has_country_flag = score_per_ducat_calc }
+                }
+                if = {
+                    limit = {
+                        check_key = { lhs = Public_Tmp0 value = 0.001 }
+                    }
+                    divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+                    divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
+                    divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
+                    divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
+                    divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
+                    divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }   
+                }
+            } else_if = {
+                limit = {
                     check_key = { lhs = Public_Tmp0 value = 0.001 }
                 }
-                divide_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
-                divide_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
-                divide_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
-                divide_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
-                divide_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
-                divide_key = { lhs = Public_Tmp6 which = Public_Tmp0 }
+                multiply_key = { lhs = Public_Tmp1 which = Public_Tmp0 }
+                multiply_key = { lhs = Public_Tmp2 which = Public_Tmp0 }
+                multiply_key = { lhs = Public_Tmp3 which = Public_Tmp0 }
+                multiply_key = { lhs = Public_Tmp4 which = Public_Tmp0 }
+                multiply_key = { lhs = Public_Tmp5 which = Public_Tmp0 }
+                multiply_key = { lhs = Public_Tmp6 which = Public_Tmp0 }   
+
+                if = {
+                    limit = {
+                        owner = { has_country_flag = ducats_per_score_exceeds_limit }
+                    }
+                    multiply_key = { lhs = Public_Tmp1 value = 0.001 }
+                    multiply_key = { lhs = Public_Tmp2 value = 0.001 }
+                    multiply_key = { lhs = Public_Tmp3 value = 0.001 }
+                    multiply_key = { lhs = Public_Tmp4 value = 0.001 }
+                    multiply_key = { lhs = Public_Tmp5 value = 0.001 }
+                    multiply_key = { lhs = Public_Tmp6 value = 0.001 }   
+                }
             }
 
             #invest
             #log = "SYS-StateInvestmentDucat:[GetYear]:[This.Owner.GetName]:[This.GetName]:[GV_Public_Tmp1]:[GV_Public_Tmp2]:[GV_Public_Tmp3]:[GV_Public_Tmp4]:[GV_Public_Tmp5]:[GV_Public_Tmp6]:[GV_Building_IndustrialUp]:[GV_Building_IndustrialDown]:[GV_Building_IndustrialGross]"
             log = "SYS-StateInvestmentDucat:[This.Owner.GetName]:[This.GetName]: Agriculture: [GV_Public_Tmp1] Forestry: [GV_Public_Tmp2] Extraction: [GV_Public_Tmp3] Fishery: [GV_Public_Tmp4] Industrial: [GV_Public_Tmp5] Academic: [GV_Public_Tmp6]"
-                        
-            Do_Invest_PlayerAI = { type=Agriculture return=Public_Tmp1 score=Tmp_1 }
-            
-            Do_Invest_PlayerAI = { type=Forestry return=Public_Tmp2 score=Tmp_2 }
-            
-            Do_Invest_PlayerAI = { type=Extraction return=Public_Tmp3 score=Tmp_3 }
-            
-            Do_Invest_PlayerAI = { type=Fishery return=Public_Tmp4 score=Tmp_4 }
-            
-            Do_Invest_PlayerAI = { type=Industrial return=Public_Tmp5 score=Tmp_5 }
-            
-            Do_Invest_PlayerAI = { type=Commercial return=Public_Tmp6 score=Tmp_6 }
-            
+            Do_Invest_PlayerAI = { type=Agriculture investedDucatVar=Public_Tmp1 score=Tmp_1 }
+            Do_Invest_PlayerAI = { type=Forestry    investedDucatVar=Public_Tmp2 score=Tmp_2 }
+            Do_Invest_PlayerAI = { type=Extraction  investedDucatVar=Public_Tmp3 score=Tmp_3 }
+            Do_Invest_PlayerAI = { type=Fishery     investedDucatVar=Public_Tmp4 score=Tmp_4 }
+            Do_Invest_PlayerAI = { type=Industrial  investedDucatVar=Public_Tmp5 score=Tmp_5 }
+            Do_Invest_PlayerAI = { type=Commercial  investedDucatVar=Public_Tmp6 score=Tmp_6 }
             clr_province_flag = possible_investment
-
         }
+
+        clr_country_flag = ducats_per_score_exceeds_limit
+        clr_country_flag = score_per_ducat_calc
+
         if = {
             limit = {
                 has_country_flag = show_investment
@@ -297,7 +346,7 @@ Do_Invest = {
 Do_Invest_PlayerAI = {
     if = { 
         limit = {
-            check_key = { lhs = $return$ value = 0.001 }
+            check_key = { lhs = $investedDucatVar$ value = 0.001 }
         }
         
         set_province_flag = invested
@@ -305,7 +354,7 @@ Do_Invest_PlayerAI = {
         set_key = { lhs = Tmp_8 which = Tmp_9 } 
         
             # use the proportionate residual amount corresponding to the original score
-		multiply_key = { lhs = $score$ value = 0.01 }
+		#multiply_key = { lhs = $score$ value = 0.01 }
         multiply_key = { lhs = Tmp_8 which = $score$ } # Tmp_8 is how much of the residual budget the property will try to spend
         
             # substract from owner's residual budget
@@ -316,23 +365,23 @@ Do_Invest_PlayerAI = {
             set_key = { lhs = Tmp_9 which = PREV }
         }
             # add residual budget to the actual investment budget
-        change_key =  { lhs = $return$ which = Tmp_8 }
+        change_key =  { lhs = $investedDucatVar$ which = Tmp_8 }
         
         
         set_key = { lhs = Public_Tmp11 which = Building_$type$ }
         multiply_key = { lhs = Public_Tmp11 value = 0.25 } # maximum possible investment depending on building size
         if = {
             limit = { # if investment is higher than the cap 
-                check_key = { lhs = $return$ which = Public_Tmp11 }
+                check_key = { lhs = $investedDucatVar$ which = Public_Tmp11 }
             }
                 # save investment target
-            set_key = { lhs = Tmp_8 which = $return$ }
+            set_key = { lhs = Tmp_8 which = $investedDucatVar$ }
             
                 # set real investment to maximum limit
-            set_key = { lhs = $return$ which = Public_Tmp11 }
+            set_key = { lhs = $investedDucatVar$ which = Public_Tmp11 }
             
                 # re calculate residual budget for this case
-            subtract_key = { lhs = Tmp_8 which = $return$ }
+            subtract_key = { lhs = Tmp_8 which = $investedDucatVar$ }
             
                 # add it to total budget
             change_key = { lhs = Tmp_9 which = Tmp_8 }
@@ -345,10 +394,10 @@ Do_Invest_PlayerAI = {
         if = { # if investment is higher than 75
             limit = {
 				NOT = { is_year = 1450 }
-                check_key = { lhs = $return$ value = 75 }
+                check_key = { lhs = $investedDucatVar$ value = 75 }
             }
                 # re calculate residual budget
-            set_key = { lhs = Tmp_0 which = $return$ }
+            set_key = { lhs = Tmp_0 which = $investedDucatVar$ }
             subtract_key = { lhs = Tmp_0 value = 75 }
             
                 # add it to new residual
@@ -359,15 +408,15 @@ Do_Invest_PlayerAI = {
                 set_key = { lhs = Tmp_9 which = PREV }
             }
             
-            set_key = { lhs = $return$ value = 75 }
+            set_key = { lhs = $investedDucatVar$ value = 75 }
         }
 		else_if = { # if investment is higher than 
             limit = {
 				NOT = { is_year = 1550 }
-                check_key = { lhs = $return$ value = 100 }
+                check_key = { lhs = $investedDucatVar$ value = 100 }
             }
                 # re calculate residual budget
-            set_key = { lhs = Tmp_0 which = $return$ }
+            set_key = { lhs = Tmp_0 which = $investedDucatVar$ }
             subtract_key = { lhs = Tmp_0 value = 100 }
             
                 # add it to new residual
@@ -378,15 +427,15 @@ Do_Invest_PlayerAI = {
                 set_key = { lhs = Tmp_9 which = PREV }
             }
             
-            set_key = { lhs = $return$ value = 100 }
+            set_key = { lhs = $investedDucatVar$ value = 100 }
         }
 		else_if = { # if investment is higher than 150
             limit = {
 				NOT = { is_year = 1650 }
-                check_key = { lhs = $return$ value = 150 }
+                check_key = { lhs = $investedDucatVar$ value = 150 }
             }
                 # re calculate residual budget
-            set_key = { lhs = Tmp_0 which = $return$ }
+            set_key = { lhs = Tmp_0 which = $investedDucatVar$ }
             subtract_key = { lhs = Tmp_0 value = 150 }
             
                 # add it to new residual
@@ -397,14 +446,14 @@ Do_Invest_PlayerAI = {
                 set_key = { lhs = Tmp_9 which = PREV }
             }
             
-            set_key = { lhs = $return$ value = 150 }
+            set_key = { lhs = $investedDucatVar$ value = 150 }
         }
 		else_if = { # if investment is higher than 200
             limit = {
-				check_key = { lhs = $return$ value = 200 }
+				check_key = { lhs = $investedDucatVar$ value = 200 }
             }
                 # re calculate residual budget
-            set_key = { lhs = Tmp_0 which = $return$ }
+            set_key = { lhs = Tmp_0 which = $investedDucatVar$ }
             subtract_key = { lhs = Tmp_0 value = 200 }
             
                 # add it to new residual
@@ -415,7 +464,7 @@ Do_Invest_PlayerAI = {
                 set_key = { lhs = Tmp_9 which = PREV }
             }
             
-            set_key = { lhs = $return$ value = 200 }
+            set_key = { lhs = $investedDucatVar$ value = 200 }
         }
 		
         
@@ -428,7 +477,7 @@ Do_Invest_PlayerAI = {
                 }
             }
             # Set some info for the Autoinvestor event
-            set_key = { lhs = Building_$type$Invest which = $return$ } 
+            set_key = { lhs = Building_$type$Invest which = $investedDucatVar$ } 
             AAA = {
                 set_key = { lhs = $type$_InvestYear which = Current_Year }
                 PREV = { set_key = { lhs = $type$_InvestYear which = PREV } }
@@ -437,8 +486,8 @@ Do_Invest_PlayerAI = {
 
         # Set country scope variable with the full amount (this is deducted from country treasury)
         PREV = {
-            set_key = { lhs = $return$ which = PREV }
-            change_key = { lhs = Public_Tmp7 which = $return$ }
+            set_key = { lhs = $investedDucatVar$ which = PREV }
+            change_key = { lhs = Public_Tmp7 which = $investedDucatVar$ }
         }
 
         # Op hax for Midas Touched AIs, they literally make money out of nothing
@@ -449,11 +498,11 @@ Do_Invest_PlayerAI = {
                     ai = yes
                 }
             }
-            multiply_key = { lhs = $return$ value = 1.25 }
+            multiply_key = { lhs = $investedDucatVar$ value = 1.25 }
         }        
 
         # Money goes into investment pool in Full
-        change_key = { lhs = Building_$type$Wealth which = $return$ }
+        change_key = { lhs = Building_$type$Wealth which = $investedDucatVar$ }
     }
 }
 
