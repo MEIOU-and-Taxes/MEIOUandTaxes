@@ -198,82 +198,94 @@ mil_available = {
 	export_to_key = { lhs = $output$ value = trigger_value:mil_power }
 }
 ### Make sure to also check tech files if max values change.
-export_tech_cost = { # output: adm_tech_cost, dip_tech_cost, mil_tech_cost
-	export_to_key = { lhs = Tech_Tmp2 value = modifier:technology_cost }
-	export_to_key = { lhs = Tech_Tmp3 value = modifier:all_power_cost }
-	change_key = { lhs = Tech_Tmp2 which = Tech_Tmp3 }
-	#export_tech_cost_inst = { inst=Legalism max=20 } ## Legalism no longer has tech penalty, but 20% power costs
-	export_tech_cost_inst = { inst=Banking max=30 }
-	export_tech_cost_inst = { inst=Casual_Literacy max=50 }
-	export_tech_cost_inst = { inst=Columbian_Exchange max=35 }
-	export_tech_cost_inst = { inst=Scientific_Method max=75 }
-	export_tech_cost_inst = { inst=Global_Trade max=50 }
-	export_tech_cost_inst = { inst=Academia max=100 }
-	export_tech_cost_inst = { inst=Nationalism max=75 }
-	export_tech_cost_inst = { inst=Industrialisation max=75 }
-	export_tech_cost_helper = { type = adm output = Tech_ADMCost  }
-	export_tech_cost_helper = { type = dip output = Tech_DIPCost }
-	export_tech_cost_helper = { type = mil output = Tech_MILCost }
-	set_key = { lhs = Tech_Tmp2 value = 0 }
-	set_key = { lhs = Tech_Tmp3 value = 0 }
-}
-export_tech_cost_inst = { #inst #max
+export_tech_cost_inst = { #inst #max #techUnlockYearVar #output
 	if = {
 		limit = {
 			is_institution_enabled = $inst$
 			NOT = { has_institution = $inst$ }
 		}
 		AAA = {
-			# If Banking started 1350 and we have 1360, then this yields 10
-			set_key = { lhs = Tech_Tmp2 which = Current_Year }
-			subtract_key = { lhs = Tech_Tmp2 which = $inst$Date }
+			set_key = { lhs = $techUnlockYearVar$ which = PREV }
+			set_key = { lhs = $output$ which = $techUnlockYearVar$ }
+			subtract_key = { lhs = $output$ which = $inst$Date }
 			if = {
 				limit = {
-					check_key = { lhs = Tech_Tmp2 value = $max$ }
+					check_key = { lhs = $output$ value = 0 }
 				}
-				# Make sure years passed since 1350 are not larger than max penalty, 30 for Banking.. 
-				set_key = { lhs = Tech_Tmp2 value = $max$ }
+				multiply_key = { lhs = $output$ value = 0.005 }
+				# Limit to cap if cap is exceeded
+				if = {
+					limit = {
+						check_key = { lhs = $output$ value = $max$ }
+					}
+					
+					set_key = { lhs = $output$ value = $max$ }
+				}
+				PREV = { 
+					change_key = { lhs = $output$ which = PREV }
+				}
 			}
-			# Now we multiply the result with the tech increase value
-			# ToDO: Tech increase per 10 years are currently not the same over all Institutions.
-			# Some increase with 5% per 10 years, some with 2.5% or even more than 5%
-			multiply_key = { lhs = Tech_Tmp2 value = 0.005 }
-			PREV = { 
-				change_key = { lhs = Tech_Tmp2 which = PREV }
-			}
-			set_key = { lhs = Tech_Tmp2 value = 0 }
+			set_key = { lhs = $output$ value = 0 }
+			set_key = { lhs = $techUnlockYearVar$ value = 0 }
 		}
 	}
 }
-export_tech_cost_helper = { #type
-	export_to_key = { lhs = Tech_Tmp3 value = modifier:$type$_tech_cost_modifier }
+export_tech_cost_helper = { #type #output
+	# Target tech level, Tech_Tmp4
 	export_to_key = { lhs = Tech_Tmp4 value = $type$_tech }
 	change_key = { lhs = Tech_Tmp4 value = 1 }
+	# General tech cost, Tech_Tmp3
+	export_to_key = { lhs = Tech_Tmp3 value = modifier:technology_cost }
+	export_to_key = { lhs = Tech_Tmp2 value = modifier:all_power_cost }
+	change_key = { lhs = Tech_Tmp3 which= Tech_Tmp2 }
+	export_to_key = { lhs = Tech_Tmp2 value = modifier:$type$_tech_cost_modifier }
+	change_key = { lhs = Tech_Tmp3 which= Tech_Tmp2 }
 	change_key = { lhs = Tech_Tmp3 value = 1 }
-	if = { # increase over time
+	# Increase over time, Tech_Tmp5 -> Tech_Tmp3
+	if = { # increase over time, #tech 17 costs 0,1% more, 18 costs 0,5% more, so 0,4% per level
 		limit = {
-			$type$_tech = 6
+			check_key = { lhs = Tech_Tmp4 value = 17 }
 		}
 		set_key = { lhs = Tech_Tmp5 which = Tech_Tmp4 }
-		multiply_key = { lhs = Tech_Tmp5 value = 0.016 }
-		subtract_key = { lhs = Tech_Tmp5 value = 0.106 }
+		change_key = { lhs = Tech_Tmp5 value = -17 }
+		multiply_key = { lhs = Tech_Tmp5 value = 0.004 }
+		change_key = { lhs = Tech_Tmp5 value = 0.001 } # Base 0,1% at lvl 17
 	}
-	else = {
-		set_key = { lhs = Tech_Tmp5 value = 6 }
+	else = { #Tech 15 costs -0,6%, tech 16 costs -0,2%, so 0,2% for 16 and 0,4% for each level under 16
+		set_key = { lhs = Tech_Tmp5 value = 16 }
 		subtract_key = { lhs = Tech_Tmp5 which = Tech_Tmp4 }
-		multiply_key = { lhs = Tech_Tmp5 value = -0.016 }
-		subtract_key = { lhs = Tech_Tmp5 value = 0.009 }
+		multiply_key = { lhs = Tech_Tmp5 value = -0.004 }
+		change_key = { lhs = Tech_Tmp5 value = -0.002 }
 	}
 	change_key = { lhs = Tech_Tmp3 which = Tech_Tmp5 }
+	
+	# The year of the target tech, Tech_Tmp5 
 	set_key = { lhs = Tech_Tmp5 which = Tech_Tmp4 } # ahead of time
 	multiply_key = { lhs = Tech_Tmp5 value = 10 }
 	# PLEASE NEVER DO TECH TRANSITIONS AGAIN; ELSE WE FORGET THIS VALUE AGAIN!!
 	change_key = { lhs = Tech_Tmp5 value = 1200 } # Date of Tech 0...
+	
+	# Institutional cost of said tech, Tech_Tmp2 -> Tech_Tmp3
+	set_key = { lhs = Tech_Tmp2 value = 0 }
+	export_tech_cost_inst = { inst=Banking 				max=0.30 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Casual_Literacy 		max=0.50 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Columbian_Exchange 	max=0.35 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Scientific_Method 	max=0.75 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Global_Trade 		max=0.50 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Academia 			max=1.00 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Nationalism 			max=0.75 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	export_tech_cost_inst = { inst=Industrialisation 	max=0.75 	techUnlockYearVar=Tech_Tmp5 output=Tech_Tmp2 }
+	change_key = { lhs = Tech_Tmp3 which = Tech_Tmp2 }
+
+	# Ahead of time penalty, Tech_Tmp5 -> Tech_Tmp3
 	AAA = { 
 		set_key = { lhs = Tech_Tmp6 which = Current_Year }
 		PREV = { set_key = { lhs = Tech_Tmp6 which = PREV } }
 	}
 	subtract_key = { lhs = Tech_Tmp5 which = Tech_Tmp6 }
+	# If we are 10 years ahead of time, we get 100% modifier. We don't get 100% increase FOR a tech 10 years in the future
+	# So we remove the 10 years of target tech to get our current ahead of time sum
+	change_key = { lhs = Tech_Tmp5 value = -10 } 
 	multiply_key = { lhs = Tech_Tmp5 value = 0.1 }
 	if = {
 		limit = {
@@ -281,10 +293,11 @@ export_tech_cost_helper = { #type
 		}
 		change_key = { lhs = Tech_Tmp3 which = Tech_Tmp5 }
 	}
-	change_key = { lhs = Tech_Tmp3 which = Tech_Tmp2 }
+	### If we ever touch base costs of tech, also adjust this! #Technology #Techcost #important
 	set_key = { lhs = $output$ value = 400 }
 	multiply_key = { lhs = $output$ which = Tech_Tmp3 }
 	
+	set_key = { lhs = Tech_Tmp2 value = 0 }
 	set_key = { lhs = Tech_Tmp3 value = 0 }
 	set_key = { lhs = Tech_Tmp4 value = 0 }
 	set_key = { lhs = Tech_Tmp5 value = 0 }
