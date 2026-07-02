@@ -27,7 +27,7 @@ Do_Invest = {
         subtract_key = { lhs = Public_Tmp1 which = Public_Tmp2 }	 # treasury - X years of income
         set_key = 	   { lhs = Public_Tmp3 value = 0.35 }			 # `DEFINE_AI_AUTOINVESTOR_PERCENTAGE_USAGE_OF_BASE_BUDGET~value`
         
-        Modi_AiInvestBudget = yes #this modifies base budget percentage (Public_Tmp3) based on ruler personality
+        Modi_AiInvestBudget = { return = Public_Tmp3 } #this modifies base budget percentage (Public_Tmp3) based on ruler personality
         
         multiply_key = { lhs = Public_Tmp1 which = Public_Tmp3 }  # this is this year's budget	
         set_key = { lhs = Ai_Invest_BudgetFixed which = Public_Tmp1 }                     
@@ -37,14 +37,13 @@ Do_Invest = {
             lhs = Ai_Invest_BudgetFixed
             value = treasury
         }
-        set_key = { lhs = Tmp_Misc0 which = Ai_Invest_Budget }
-        multiply_key = { lhs = Tmp_Misc0 value = 0.01 }
-        multiply_key = { lhs = Ai_Invest_BudgetFixed which = Tmp_Misc0 }
+        multiply_key = { lhs = Ai_Invest_BudgetFixed which = Ai_Invest_Budget }
+        multiply_key = { lhs = Ai_Invest_BudgetFixed which = 0.01 }
     }
   
     if = {
         limit = { #do not invest if investment budget is below 5 ducats (?)
-            check_key = { lhs = Ai_Invest_BudgetFixed value = 5 }
+            check_key = { lhs = Ai_Invest_BudgetFixed value = 3 }
         }
         log = "SYS-StateInvestmentBudget:[This.GetName]::investment budget of:[GV_Ai_Invest_BudgetFixed]:investment going forward"
 
@@ -74,10 +73,10 @@ Do_Invest = {
             set_key = { lhs = Public_Tmp6 value = 0 }
             
             #Resources have a cap
-            Infra_AISpendCheck_Rural = { type = Agriculture return = Public_Tmp1 cap = Building_AgricultureMax perc = 0.95 }
-            Infra_AISpendCheck_Rural = { type = Forestry return = Public_Tmp2 cap = Building_ForestryMax perc = 0.70 }
-            Infra_AISpendCheck_Rural = { type = Extraction return = Public_Tmp3 cap = Building_ExtractionMax perc = 0.95 }
-            Infra_AISpendCheck_Rural = { type = Fishery return = Public_Tmp4  cap = Building_FisheryMax perc = 0.90 }
+            Infra_AISpendCheck_Rural = { type = Agriculture return = Public_Tmp1 perc = 0.95 }
+            Infra_AISpendCheck_Rural = { type = Forestry return = Public_Tmp2 perc = 0.70 }
+            Infra_AISpendCheck_Rural = { type = Extraction return = Public_Tmp3 perc = 0.95 }
+            Infra_AISpendCheck_Rural = { type = Fishery return = Public_Tmp4 perc = 0.90 }
             #Urbans are potentially uncapped
             # Only player can set the NIndus flag
             if = {
@@ -88,7 +87,7 @@ Do_Invest = {
                 }
                 #Urbans are potentially uncapped
                 Infra_AISpendCheck_Urban = { type = Industrial return = Public_Tmp5 Throughput = 65 }
-                #Disabled Academic, as its basically pointless to invest
+                
                 Infra_AISpendCheck_Urban = { type = Commercial return = Public_Tmp6 Throughput = 80 } 
             }
             #scores of every province added to the country
@@ -451,7 +450,7 @@ Do_Invest_PlayerAI = {
 }
 
 Infra_AISpendCheck_Rural = {
-	set_key = { lhs = Tmp_0 which = $cap$ }
+	set_key = { lhs = Tmp_0 which = Building_$type$Max }
 	multiply_key = { lhs = Tmp_0 value = $perc$ }
     if = {
         limit = {
