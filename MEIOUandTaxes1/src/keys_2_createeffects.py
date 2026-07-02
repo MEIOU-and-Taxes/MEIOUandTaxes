@@ -80,7 +80,7 @@ def gen_customloc(txt, tmpltA, tmpltB, tmplt1, tmplt1H, tmplt2, tmplt2H, tmpltN,
                 if dct[var][1] > 0:
                     text = tmplt1
                     for x in range(dct[var][1], 0, -1):
-                        text = text.replace("%H", tmplt1H.replace("%a", str(dct[var][1] + 1 - x)).replace("%b", str(pow(10, x))))
+                        text = text.replace("%H", tmplt1H.replace("%a", str(dct[var][1] + 1 - x)).replace("%b", str(pow(10, x))).replace("%c", str(1/pow(10, x))))
                     text = text.replace("%H", "")
                     txt += text.replace('%s', var).replace('%d', dct[var][0])
                 
@@ -88,7 +88,7 @@ def gen_customloc(txt, tmpltA, tmpltB, tmplt1, tmplt1H, tmplt2, tmplt2H, tmpltN,
                     text = tmplt2
                     i = 3
                     for x in range(dct[var][2], 0, -1):
-                        text = text.replace("%H", tmplt2H.replace("%a", str(dct[var][2]) + str(x)).replace("%b", str(pow(10, i))))
+                        text = text.replace("%H", tmplt2H.replace("%a", str(dct[var][2]) + str(x)).replace("%b", str(pow(10, i))).replace("%c", str(1/pow(10, x))))
                         i -= 1
                     text = text.replace("%H", "")
                     txt += text.replace('%s', var).replace('%d', dct[var][0])
@@ -560,7 +560,7 @@ tmplt2H_locc = """
                 export_to_variable = { which = temp value = religion }
                 subtract_variable = { which = temp which = temp }
                 change_variable = { which = temp which = %d }
-                divide_variable = { which = temp value = %b }
+                multiply_variable = { which = temp value = %c }
                 multiply_variable = { which = temp value = %b }
                 subtract_variable = { which = temp which = %d }
                 is_variable_equal = { which = temp value = 0 }
