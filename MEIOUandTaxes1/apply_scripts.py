@@ -429,7 +429,7 @@ def compile(compress=False, parse_init=True, debug=False):
 
 	end = time.time()
 	print((end - start))
+	input("\nBuild finished. Press Enter to exit...")
 
 if __name__ == '__main__':
 	compile()
-	input("\nBuild finished. Press Enter to exit...")
