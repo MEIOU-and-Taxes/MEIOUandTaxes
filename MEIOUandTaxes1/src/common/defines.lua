@@ -692,7 +692,7 @@ NCountry = {
 	COUNTRIES_GETTING_SCORE = 10,
 	LAND_FORCELIMIT_EXTRA_COST_FACTOR = 2,			-- extra expense for being above forcelimit
 	NAVAL_FORCELIMIT_EXTRA_COST_FACTOR = 2,			-- extra expense for being above forcelimit
-	REPUBLICAN_TRADITION_YEARLY_INCREASE = 1,		-- how much it increases each year.
+	REPUBLICAN_TRADITION_YEARLY_INCREASE = 0.8,		-- how much it increases each year.
 	PIETY_PERCENTAGE_AT_NEW_RULER = 1.00,  -- percentage of piety kept at new ruler.
 	PIETY_INCREASE_AT_GOOD_WAR = 0.00,  
 	PIETY_DECREASE_AT_BAD_WAR = 0.00,  
@@ -933,7 +933,7 @@ NCountry = {
 	RIVAL_TECH_THRESHOLD = 0.8,  -- Difference in tech group cost modifiers
 	OVERSEAS_DISTANCE = 300,  -- Provinces beyond this distance to capital are distant overseas
 
-	NORMAL_ELECTION_CYCLE = 4,						-- The normal election cycle at which 10 republican tradition is lost from 1 unit of scaled republican tradition
+	NORMAL_ELECTION_CYCLE = 3,						-- The normal election cycle at which 10 republican tradition is lost from 1 unit of scaled republican tradition
 	DICTATORSHIP_TRADITION_FOR_MONARCHY = 50,		-- If republican tradition is lower than this on death of ruler, dictatorship turns into monarchy
 	DICTATORSHIP_TRADITION_FOR_REPUBLIC = 50,		-- If republican tradition is this or higher on death of ruler, dictatorship turns into republic
 	REVOLUTION_TARGET_SCORE_BOOST = 0.5,
