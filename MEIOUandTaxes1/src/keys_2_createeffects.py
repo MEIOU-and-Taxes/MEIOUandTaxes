@@ -1,5 +1,8 @@
 # by KJH, Phlopsi & JF
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import shutil
+import re
 import os
 
 comment = """########################################
@@ -576,6 +579,98 @@ tmplt2H_locc = """
 # tmplt2H_locc = compressH(tmplt2H_locc)
 # tmpltN_locc = compressH(tmpltN_locc)
 
+def load_keys(filename):
+    result = {}
+
+    if not os.path.exists(filename):
+        return result
+
+    with open(filename, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or ":" not in line:
+                continue
+
+            key, var = line.split(":", 1)
+            result[key.strip()] = var.strip()
+
+    return result
+
+def process_file(filename, base_dir, replacement_map):
+    path = os.path.join(base_dir, filename)
+
+    if not os.path.exists(path):
+        return f"Missing: {filename}"
+
+    # compile INSIDE process (important for multiprocessing)
+    pattern = re.compile(
+        r"\b(" + "|".join(map(re.escape, replacement_map.keys())) + r")\b"
+    )
+
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    if replacement_map:
+        text = pattern.sub(lambda m: replacement_map[m.group(0)], text)
+
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+
+    return f"Updated {filename}"
+
+def update_localization_vars():
+    old_keys = load_keys("keys_old.txt")
+    new_keys = load_keys("keys.txt")
+
+    if not old_keys:
+        print("No oldkeys.txt found, skipping localization update.")
+        shutil.copyfile("keys.txt", "keys_old.txt")
+        return
+    
+    if old_keys == new_keys:
+        print("No key changes detected. Skipping localization update.")
+        shutil.copyfile("keys.txt", "keys_old.txt")
+        return
+
+    # old var -> key
+    old_var_to_key = {v: k for k, v in old_keys.items()}
+
+    files = [
+        "DISP-Trade_Bought.txt",
+        "DISP-Trade_Bought_2.txt",
+        "DISP-Trade_Bought_3.txt",
+        "DISP-Trade_Sold.txt",
+        "DISP-Trade_Sold_2.txt",
+        "DISP-Trade_Sold_3.txt",
+        "SYS-LocPlague.txt",
+        "SYS-Modifiers.txt",
+    ]
+
+    base_dir = os.path.join("customizable_localization")
+
+    replacement_map = {}
+
+    for old_var, key in old_var_to_key.items():
+        if key in new_keys:
+            replacement_map[old_var] = new_keys[key]
+
+    if not replacement_map:
+        print("No matching vars to replace.")
+        shutil.copyfile("keys.txt", "keys_old.txt")
+        return
+
+    with ProcessPoolExecutor(max_workers=min(8, len(files))) as executor:
+        futures = {
+            executor.submit(process_file, filename, base_dir, replacement_map): filename
+            for filename in files
+        }
+
+        for future in as_completed(futures):
+            print(future.result())
+
+    # Replace oldkeys.txt with the newly generated keys.txt
+    shutil.copyfile("keys.txt", "keys_old.txt")
+
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))
     
@@ -605,3 +700,5 @@ if __name__ == "__main__":
 
     with open('keys.txt', 'w', newline = '\n') as f:
         f.write(string)
+
+    update_localization_vars()
