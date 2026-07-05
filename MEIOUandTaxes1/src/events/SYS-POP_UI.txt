@@ -1,0 +1,383 @@
+namespace = ui_event
+
+
+country_event = {
+    id = ui_event.1
+    title = ui_event1_t
+    desc = ui_event.1_d
+	picture = MEIOU_AND_TAXES_eventPicture
+    is_triggered_only = yes
+    hidden = yes
+
+    trigger = {
+        ai = no
+    }
+    immediate = {
+        hidden_effect = { country_event = { id = POP_Census.994 } }
+        Nat_SumStats = yes
+        Nat_CalcRealmExpenses = yes
+        every_owned_province = {
+            PREV = {
+                set_key = { lhs = Class_Total value = 0 }
+                set_key = { lhs = Class_TotalBirth value = 0 }
+                set_key = { lhs = Class_Wealth value = 0 }
+
+                set_key = { lhs = SF_Birth value = 0 }
+                set_key = { lhs = NM_Birth value = 0 }
+                set_key = { lhs = RE_Birth value = 0 }
+                set_key = { lhs = BG_Birth value = 0 }
+                set_key = { lhs = NO_Birth value = 0 }
+                set_key = { lhs = CL_Birth value = 0 }
+
+                set_key = { lhs = SF_Wealth value = 0 }
+                set_key = { lhs = NM_Wealth value = 0 }
+                set_key = { lhs = RE_Wealth value = 0 }
+                set_key = { lhs = BG_Wealth value = 0 }
+                set_key = { lhs = NO_Wealth value = 0 }
+                set_key = { lhs = CL_Wealth value = 0 }
+
+                set_key = { lhs = SF_Total value = 0 }
+                set_key = { lhs = NM_Total value = 0 }
+                set_key = { lhs = RE_Total value = 0 }
+                set_key = { lhs = BG_Total value = 0 }
+                set_key = { lhs = NO_Total value = 0 }
+                set_key = { lhs = CL_Total value = 0 }
+                export_to_variable = { which = impatience value = average_autonomy }
+                # export_to_key = {
+                #     lhs = province_amount
+                #     value = num_of_cities
+                # }
+                # set_key = { lhs = GV_Class_UrbanR value = 0}
+            }
+        }
+    }
+    option = {
+        name = "ui1_option"
+            every_owned_province = {
+                PREV = {
+                    change_key = { lhs = Class_Total which = PREV }
+                    change_key = { lhs = Class_TotalBirth which = PREV }
+                    change_key = { lhs = Class_Wealth which = PREV }
+
+                    change_key = { lhs = SF_Birth which = PREV }
+                    change_key = { lhs = RE_Birth which = PREV }
+                    change_key = { lhs = NM_Birth which = PREV }
+                    change_key = { lhs = BG_Birth which = PREV }
+                    change_key = { lhs = NO_Birth which = PREV }
+                    change_key = { lhs = CL_Birth which = PREV }
+
+                    change_key = { lhs = SF_Wealth which = PREV }
+                    change_key = { lhs = RE_Wealth which = PREV }
+                    change_key = { lhs = NM_Wealth which = PREV }
+                    change_key = { lhs = BG_Wealth which = PREV }
+                    change_key = { lhs = NO_Wealth which = PREV }
+                    change_key = { lhs = CL_Wealth which = PREV }
+
+                    change_key = { lhs = SF_Total which = PREV }
+                    change_key = { lhs = RE_Total which = PREV }
+                    change_key = { lhs = NM_Total which = PREV }
+                    change_key = { lhs = BG_Total which = PREV }
+                    change_key = { lhs = NO_Total which = PREV }
+                    change_key = { lhs = CL_Total which = PREV }
+                    #divide_key = { lhs = GV_Class_UrbanR which = num_of_cities }
+                }
+            }
+    }
+    # after = {
+    #     set_key = { lhs = province_amount value = 0 }
+    # }
+}
+
+country_event = {
+    id = ui_event.2 # trigger 1st event
+    title = ui_event.2_t
+    desc = ui_event.2_d
+	picture = MEIOU_AND_TAXES_eventPicture
+    is_triggered_only = yes
+    hidden = yes
+
+	immediate = {
+		every_country = {
+			limit = {
+				ai = no
+			}
+			country_event = {
+				id = ui_event.1
+			}
+		}
+	}
+
+	option = {
+		name = 123
+	}
+}
+
+country_event = { # grain dole
+    id = ui_event.3 
+    title = ui_event.3_t
+    desc = ui_event.3_d
+	picture = MEIOU_AND_TAXES_eventPicture
+    is_triggered_only = yes
+    hidden = yes
+    
+    trigger = {
+        ai = no
+    }
+
+    option = {
+        name = "123"
+        set_country_flag = ProvUI_Action
+		BU_DistributeGrainFull = yes
+		Stab_Add25Percent = yes
+		add_adm_power = -30
+		log ="SYS-Politics:[GetYear]:[This.GetName]:Grain Dole Full:Commoners:+:[This.GovernmentName]"
+
+		custom_tooltip = BU_DistributeGrainFull_expl
+    }
+    after = {
+		if = {
+			limit = {
+				OR = {
+					ai = no
+					has_country_flag = ProvUI_Action
+				}
+			}
+			clr_country_flag = ProvUI_Action
+			Nat_Update = yes
+			Unrest_Update = yes
+			AI_Interactions_Recalc = yes
+		}
+	}
+}
+
+country_event = { # tax relief
+    id = ui_event.4 
+    title = ui_event.4_t
+    desc = ui_event.4_d
+	picture = MEIOU_AND_TAXES_eventPicture
+    is_triggered_only = yes
+    hidden = yes
+    
+    trigger = {
+        NOT = {
+            has_country_flag = BU_TaxReliefStarted
+            has_country_modifier = BU_TaxRelief
+        }
+    }
+
+    option = {
+        name = "123"
+        log ="SYS-Politics:[GetYear]:[This.GetName]:Tax Relief:Commoners:+:[This.GovernmentName]"
+
+		set_country_flag = ProvUI_Action
+		set_country_flag = BU_TaxReliefStarted
+		
+		Stab_Add50Percent = yes
+		add_adm_power = -20
+		Pol_ChangeRelationsEliteStateTooltip = { val=10 }	
+		
+		custom_tooltip = BU_TaxRelief_expl
+    }
+    after = {
+		if = {
+			limit = {
+				OR = {
+					ai = no
+					has_country_flag = ProvUI_Action
+				}
+			}
+			clr_country_flag = ProvUI_Action
+			Nat_Update = yes
+			Unrest_Update = yes
+			AI_Interactions_Recalc = yes
+		}
+	}
+}
+
+country_event = { # state reach
+    id = ui_event.5 
+    title = ui_event.5_t
+    desc = ui_event.5_d
+	picture = MEIOU_AND_TAXES_eventPicture
+    is_triggered_only = yes
+    hidden = yes
+    
+    trigger = {
+        ai = no
+    }
+
+    option = {
+        name = "123"
+        log ="SYS-Politics:[GetYear]:[This.GetName]:Increase State Reach:Bureaucrats:+:[This.GovernmentName]"
+
+		set_country_flag = ProvUI_Action
+		BU_Develop = yes
+		add_adm_power = -20
+		add_mil_power = -5
+		Pol_FacInfReactPos = { Fac=BU }
+		Pol_ProvStabSet7 = { Prov=BU }
+		
+		if = {
+			limit = { Fac_HasTR = yes }
+			Pol_FacInfReact = {Fac=TR}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-5 }
+		}
+
+		custom_tooltip = Rights_LB
+		custom_tooltip = Rights_EveryProvince
+		if = { 
+			limit = {has_idea = bureaucracy_ideas_7}
+			custom_tooltip = BU_Develop_effect_BU_idea
+		}
+		else = {
+			custom_tooltip = BU_Develop_effect
+		}
+		add_corruption = 2.5
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=2.5 }
+
+		custom_tooltip = BU_Develop_expl
+
+		hidden_effect = {
+			change_key = { lhs = BU_Favors value = 1 }
+		}
+    }
+    after = {
+		if = {
+			limit = {
+				OR = {
+					ai = no
+					has_country_flag = ProvUI_Action
+				}
+			}
+			clr_country_flag = ProvUI_Action
+			Nat_Update = yes
+			Unrest_Update = yes
+			AI_Interactions_Recalc = yes
+		}
+	}
+}
+# 1. build pathing
+country_event = {
+    id = ui_event.9
+    title = SYS_Construct.001.t
+    desc = SYS_Construct.001.desc
+    picture = CITY_DEVELOPMENT_eventPicture
+    hidden = yes
+    is_triggered_only = yes
+
+    option = {
+        set_key = { lhs = Construct_Building value = 1 }
+        set_key = { lhs = Construct_TypeToggle value = 1 }
+        set_key = { lhs = Construct_Amount value = 1 }
+        set_key = { lhs = Construct_Type value = 3 }
+		set_key = { lhs = Construct_Tmp3 value = 1 }
+        country_event = {
+            id = SYS_Construct.001
+        }
+    }
+}
+
+# 2. build harbour
+country_event = {
+    id = ui_event.10
+    title = SYS_Construct.001.t
+    desc = SYS_Construct.001.desc
+    picture = CITY_DEVELOPMENT_eventPicture
+    hidden = yes
+    is_triggered_only = yes
+
+    option = {
+        set_key = { lhs = Construct_Building value = 2 }
+        set_key = { lhs = Construct_TypeToggle value = 1 }
+        set_key = { lhs = Construct_Amount value = 1 }
+        set_key = { lhs = Construct_Type value = 3 }
+		set_key = { lhs = Construct_Tmp3 value = 1 }
+        country_event = {
+            id = SYS_Construct.001
+        }
+    }
+}
+
+# 3. build amenities
+country_event = {
+    id = ui_event.11
+    title = SYS_Construct.001.t
+    desc = SYS_Construct.001.desc
+    picture = CITY_DEVELOPMENT_eventPicture
+    hidden = yes
+    is_triggered_only = yes
+
+    option = {
+        set_key = { lhs = Construct_Building value = 3 }
+        set_key = { lhs = Construct_TypeToggle value = 1 }
+        set_key = { lhs = Construct_Amount value = 1 }
+        set_key = { lhs = Construct_Type value = 3 }
+		set_key = { lhs = Construct_Tmp3 value = 1 }
+        country_event = {
+            id = SYS_Construct.001
+        }
+    }
+}
+
+# 4. build irrigation
+country_event = {
+    id = ui_event.12
+    title = SYS_Construct.001.t
+    desc = SYS_Construct.001.desc
+    picture = CITY_DEVELOPMENT_eventPicture
+    hidden = yes
+    is_triggered_only = yes
+
+    option = {
+        set_key = { lhs = Construct_Building value = 4 }
+        set_key = { lhs = Construct_TypeToggle value = 1 }
+        set_key = { lhs = Construct_Amount value = 1 }
+        set_key = { lhs = Construct_Type value = 3 }
+		set_key = { lhs = Construct_Tmp3 value = 1 }
+        country_event = {
+            id = SYS_Construct.001
+        }
+    }
+}
+
+# 5. build capitol
+country_event = {
+    id = ui_event.13
+    title = SYS_Construc`t.001.t
+    desc = SYS_Construct.001.desc
+    picture = CITY_DEVELOPMENT_eventPicture
+    hidden = yes
+    is_triggered_only = yes
+
+    option = {
+        set_key = { lhs = Construct_Building value = 5 }
+        set_key = { lhs = Construct_TypeToggle value = 1 }
+        set_key = { lhs = Construct_Amount value = 1 }
+        set_key = { lhs = Construct_Type value = 3 }
+		set_key = { lhs = Construct_Tmp3 value = 1 }
+        country_event = {
+            id = SYS_Construct.001
+        }
+    }
+}
+
+# 6. build garrison
+country_event = {
+    id = ui_event.14
+    title = SYS_Construct.001.t
+    desc = SYS_Construct.001.desc
+    picture = CITY_DEVELOPMENT_eventPicture
+    hidden = yes
+    is_triggered_only = yes
+
+    option = {
+        set_key = { lhs = Construct_Building value = 7 }
+        set_key = { lhs = Construct_TypeToggle value = 1 }
+        set_key = { lhs = Construct_Amount value = 1 }
+        set_key = { lhs = Construct_Type value = 3 }
+		set_key = { lhs = Construct_Tmp3 value = 1 }
+        country_event = {
+            id = SYS_Construct.001
+        }
+    }
+}
