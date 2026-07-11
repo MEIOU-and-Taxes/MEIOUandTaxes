@@ -6,20 +6,21 @@ ce_get_cost_land = {
 	set_key = { lhs = $return$ value = 12.0 }
     multiply_key = { lhs = $return$ which = Modi_CE }
 
-	if = {
+	if = { # Nomads have bonus CE reduction on certain terrains, this scales down with higher infrastructure
 		limit = {
 			has_province_flag = Modi_NomadCE
 		}
 		set_key = { lhs = CE_Tmp2 value = 0.5 }
-		if = {
-			limit = {
-				check_key = { lhs = Infra_Pathing value = 2 }
-			}
-			divide_key = { lhs = CE_Tmp2 which = Infra_Pathing }
-		}
-		set_key = { lhs = CE_Tmp1 value = 1 }
-		subtract_key = { lhs = CE_Tmp1 which = CE_Tmp2 }
-		multiply_key = { lhs = $return$ which = CE_Tmp1 }
+		if      = { limit = { is_key_equal = { lhs = Infra_Pathing value = 7 } } set_key = { lhs = CE_Tmp2 value = 0.95 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 6 } } set_key = { lhs = CE_Tmp2 value = 0.90 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 5 } } set_key = { lhs = CE_Tmp2 value = 0.85 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 4 } } set_key = { lhs = CE_Tmp2 value = 0.80 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 3 } } set_key = { lhs = CE_Tmp2 value = 0.75 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 2 } } set_key = { lhs = CE_Tmp2 value = 0.60 } }
+
+		# Apply pathing "nerf" effect
+		multiply_key = { lhs = $return$ which = CE_Tmp2 }
+		set_key = { lhs = CE_Tmp2 value = 0 }
 	}
 
 	# Impact of Pathing in CE
@@ -27,24 +28,18 @@ ce_get_cost_land = {
 		limit = {
 			check_key = { lhs = Infra_Pathing value = 1 }
 		}
-		# Pathing effect on base travel time (1 - 0.1 * Rank)
-		set_key = { lhs = CE_Tmp2 value = 0.1 }
-		multiply_key = { lhs = CE_Tmp2 which = Infra_Pathing }
-		set_key = { lhs = CE_Tmp1 value = 1 }
-		subtract_key = { lhs = CE_Tmp1 which = CE_Tmp2 }
+		### Pathing impact on different CE modifiers
+		if      = { limit = { is_key_equal = { lhs = Infra_Pathing value = 7 } } set_key = { lhs = CE_RoadImpact value = 0.125 } set_key = { lhs = CE_Tmp1 value = 0.3 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 6 } } set_key = { lhs = CE_RoadImpact value = 0.25 }  set_key = { lhs = CE_Tmp1 value = 0.4 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 5 } } set_key = { lhs = CE_RoadImpact value = 0.375 } set_key = { lhs = CE_Tmp1 value = 0.5 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 4 } } set_key = { lhs = CE_RoadImpact value = 0.5 }   set_key = { lhs = CE_Tmp1 value = 0.6 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 3 } } set_key = { lhs = CE_RoadImpact value = 0.625 } set_key = { lhs = CE_Tmp1 value = 0.7 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 2 } } set_key = { lhs = CE_RoadImpact value = 0.75 }  set_key = { lhs = CE_Tmp1 value = 0.8 } }
+		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 1 } } set_key = { lhs = CE_RoadImpact value = 0.875 } set_key = { lhs = CE_Tmp1 value = 0.9 } }
 
 		# Apply pathing effect
-		multiply_key = { lhs = $return$ which = CE_Tmp1 }		
-	
-		### Terrain impact on CE
-		# First, pathing multiplier (1- Rank/8 )
-		if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 7 } } set_key = { lhs = CE_RoadImpact value = 0.125 } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 6 } } set_key = { lhs = CE_RoadImpact value = 0.25 } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 5 } } set_key = { lhs = CE_RoadImpact value = 0.375 } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 4 } } set_key = { lhs = CE_RoadImpact value = 0.5 } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 3 } } set_key = { lhs = CE_RoadImpact value = 0.625 } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 2 } } set_key = { lhs = CE_RoadImpact value = 0.75 } }
-		else_if = { limit = { is_key_equal = { lhs = Infra_Pathing value = 1 } } set_key = { lhs = CE_RoadImpact value = 0.875 } }
+		multiply_key = { lhs = $return$ which = CE_Tmp1 }
+		set_key = { lhs = CE_Tmp1 value = 0 }
 	}
 	else = {
 		set_key = { lhs = CE_RoadImpact value = 1 }
@@ -57,8 +52,6 @@ ce_get_cost_land = {
 	multiply_key = { lhs = Land_Travel which = CE_RoadImpact }
 	multiply_key = { lhs = $return$ which = Land_Travel }
 
-	set_key = { lhs = CE_Tmp1 value = 0 }
-	set_key = { lhs = CE_Tmp2 value = 0 }
 	set_key = { lhs = CE_RoadImpact value = 0 }
 }
 
@@ -80,17 +73,6 @@ ce_get_cost_port_to = {
 	multiply_key = { lhs = $return$ which = Modi_CEEmbark }
 }
 
-#export_province_radius_effect = {
-#	export_to_variable = {
-#		which = $which$
-#		value = trigger_value:province_size
-#		who = $who$
-#	}
-#
-#	change_key = { lhs = $which$ value = 1 }
-#	divide_key = { lhs = $which$ value = 3.142 }
-#	sqrt_effect = { which = $which$ }
-#}
 
 export_province_distance_sea_zone_effect = {
 	if = {
@@ -115,9 +97,9 @@ export_province_distance_sea_zone_effect = {
 
 		if = {
 			limit = {
-				check_key = { lhs = tv_ship value = 1 }
+				check_key = { lhs = tv_ship value = 0.01 }
 			}
-			divide_key = { lhs = $which$ which = tv_ship }
+			multiply_key = { lhs = $which$ which = tv_ship }
 		}
 		if = {
 			limit = {
@@ -149,9 +131,9 @@ export_province_distance_sea_zone_effect = {
 
 		if = {
 			limit = {
-				check_key = { lhs = tv_ship value = 1 }
+				check_key = { lhs = tv_ship value = 0.01 }
 			}
-			divide_key = { lhs = $which$ which = tv_ship }
+			multiply_key = { lhs = $which$ which = tv_ship }
 		}
 		if = {
 			limit = {
@@ -218,9 +200,9 @@ export_province_distance_land_province_effect = {
 
 			if = {
 				limit = {
-					check_key = { lhs = tv_ship value = 1 }
+					check_key = { lhs = tv_ship value = 0.01 }
 				}
-				divide_key = { lhs = $which$ which = tv_ship }
+				multiply_key = { lhs = $which$ which = tv_ship }
 			}
 			change_key = { lhs = $which$ which = tv_cost_port_embark }
 			if = {
@@ -281,10 +263,9 @@ export_province_distance_river_province_effect = {
 		which_y2 = Coord_Y
 	}
 	
-	set_key = { lhs = Tmp_8 value = 3 }
-	change_key = { lhs = Tmp_8 which = tv_ship }
-	multiply_key = { lhs = Tmp_8 value = 0.5 }
-	divide_key = { lhs = $which$ which = Tmp_8 }
+	set_key = { lhs = Tmp_8 which = tv_ship }
+	multiply_key = { lhs = Tmp_8 value = 0.75 }
+	multiply_key = { lhs = $which$ which = Tmp_8 }
 	
 	set_key = { lhs = Tmp_8 value = 0 }
 }
@@ -296,58 +277,58 @@ export_ship_speed_multiplier_effect = {
 		limit = {
 			dip_tech = 63
 		}
-		set_key = { lhs = $which$ value = 4 } # + 1
+		set_key = { lhs = $which$ value = 0.25 } # prev 4
 	}
 	else_if = {
 		limit = {
 			dip_tech = 56
 		}
-		set_key = { lhs = $which$ value = 3 } # + 0.5
+		set_key = { lhs = $which$ value = 0.333 } # prev 3
 	}
 	else_if = {
 		limit = {
 			dip_tech = 51
 		}
-		set_key = { lhs = $which$ value = 2.75 } # + 0.25
+		set_key = { lhs = $which$ value = 0.366 } # prev 2.75
 	}
 	else_if = {
 		limit = {
 			dip_tech = 41
 		}
-		set_key = { lhs = $which$ value = 2.6 } # + 0.15
+		set_key = { lhs = $which$ value = 0.38 } # prev 2.6
 	}
 	else_if = {
 		limit = {
 			dip_tech = 36
 		}
-		set_key = { lhs = $which$ value = 2.45 } # + 0.15
+		set_key = { lhs = $which$ value = 0.41 } # prev 2.45
 	}
 	else_if = {
 		limit = {
 			dip_tech = 31
 		}
-		set_key = { lhs = $which$ value = 2.30 } # + 0.15
+		set_key = { lhs = $which$ value = 0.43 } # prev 2.3
 	}
 	else_if = {
 		limit = {
 			dip_tech = 25
 		}
-		set_key = { lhs = $which$ value = 2.15 } # + 0.15
+		set_key = { lhs = $which$ value = 0.47 } # prev 2.15
 	}
 	else_if = {
 		limit = {
 			dip_tech = 19
 		}
-		set_key = { lhs = $which$ value = 2 } # + 0.25
+		set_key = { lhs = $which$ value = 0.5 } # prev 2
 	}
 	else_if = {
 		limit = {
 			dip_tech = 11
 		}
-		set_key = { lhs = $which$ value = 1.75 } # + 0.25
+		set_key = { lhs = $which$ value = 0.6 } # prev 1.75
 	}
 	else = {
-		set_key = { lhs = $which$ value = 1.5 }
+		set_key = { lhs = $which$ value = 0.66 } # prev 1.5
 	}
 }
 remove_CE = {

@@ -913,28 +913,39 @@ TN_GetDmnd = {
 		change_key = { lhs = $class$_FillLife value = 0.01 }
 		change_key = { lhs = $class$_FillComfort value = 0.01 }
 		change_key = { lhs = $class$_FillLuxury value = 0.01 }
-		
+
 		# Grain dole
-		set_key = { lhs = Public_Tmp1 value = 1 }
-        [[DirectBuy1]
-        subtract_key = { lhs = Public_Tmp1 which = $class$_DirectFill1 }
-        ]
         if = {
             limit = {
-                NOT = {
-                    check_key = { lhs = $class$_FillFood which = Public_Tmp1 }
+                OR = {
+                    owner = { has_country_modifier = BU_GrainDoleMinor }
+                    owner = { has_country_modifier = BU_GrainDoleMajor }
+                    owner = { has_country_modifier = BU_GrainDoleFull }
                 }
             }
-            set_key = { lhs = $class$_Dole which = Public_Tmp1 }
-            subtract_key = { lhs = $class$_Dole which = $class$_FillFood }
-
+            set_key = { lhs = $class$_Dole value = 1.8 }
+            [[DirectBuy1]
+            subtract_key = { lhs = $class$_Dole which = $class$_DirectFill1 }
+            ]
             if = {
                 limit = {
-                    check_key = { lhs = $class$_Dole which = TN_Dole }
+                    NOT = {
+                        check_key = { lhs = $class$_FillFood which = $class$_Dole }
+                    }
                 }
-                set_key = { lhs = $class$_Dole which = TN_Dole }
-            }
+                subtract_key = { lhs = $class$_Dole which = $class$_FillFood }
 
+                if = {
+                    limit = {
+                        check_key = { lhs = $class$_Dole which = TN_Dole }
+                    }
+                    set_key = { lhs = $class$_Dole which = TN_Dole }
+                }
+            }
+            else = {
+                set_key = { lhs = $class$_Dole which = TN_Dole }
+                multiply_key = { lhs = $class$_Dole value  = 0.25 }
+            }
             change_key = { lhs = $class$_FillFood which = $class$_Dole }
             set_key = { lhs = $class$_DoleD which = $class$_Dole }
             multiply_key = { lhs = $class$_DoleD value = 100 }

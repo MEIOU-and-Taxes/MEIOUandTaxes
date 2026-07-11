@@ -7,6 +7,13 @@ on_startup = {
 		set_key = { lhs = LegalismDate value = 1000 }
 		set_key = { lhs = MeritocracyDate value = 1000 }
 		set_key = { lhs = BankingDate value = 1350 }
+		set_key = { lhs = Casual_LiteracyDate value = 1450 }
+		set_key = { lhs = Columbian_ExchangeDate value = 1550 }
+		set_key = { lhs = Scientific_MethodDate value = 1600 }
+		set_key = { lhs = Global_TradeDate value = 1610 }
+		set_key = { lhs = AcademiaDate value = 1660 }
+		set_key = { lhs = NationalismDate value = 1740 }
+		set_key = { lhs = IndustrialisationDate value = 1760 }
 
 		if = {
 			limit = {
@@ -1526,22 +1533,6 @@ on_monarch_death = {
 on_new_monarch = {
 	country_event = { id = PTM_Politics.007 } # Ruler Calc for Exec Auth
 	country_event = { id = PTM_Politics.005 } # Ruler Alignment for Factions
-	# if = {			Mepper: This is too obscure for players to know what is going on. Imo we should target e.g. heir_claim and not use some hidden calcs. 
-	# 	limit = {
-	# 		legitimacy_equivalent = 50
-	# 	}
-	# 	POP_GetLegitimacy = { return = Tmp_0 }
-	# 	subtract_key = { lhs = Tmp_0 value = 50 }
-	# 	divide_key = { lhs = Tmp_0 value = 2 }
-
-	# 	if = { limit = { check_key = { lhs = Tmp_0 value = 16 } } add_legitimacy = -16 add_republican_tradition = -13 add_devotion = -16 add_horde_unity = -16 add_meritocracy = -16 }
-	# 	if = { limit = { check_key = { lhs = Tmp_0 value = 8 } } add_legitimacy = -8 add_republican_tradition = -6.5 add_devotion = -8 add_horde_unity = -8 add_meritocracy = -8 }
-	# 	if = { limit = { check_key = { lhs = Tmp_0 value = 4 } } add_legitimacy = -4 add_republican_tradition = -3.5 add_devotion = -4 add_horde_unity = -4 add_meritocracy = -4 }
-	# 	if = { limit = { check_key = { lhs = Tmp_0 value = 2 } } add_legitimacy = -2 add_republican_tradition = -1.5 add_devotion = -2 add_horde_unity = -2 add_meritocracy = -2 }
-	# 	if = { limit = { check_key = { lhs = Tmp_0 value = 1 } } add_legitimacy = -1 add_republican_tradition = -0.75 add_devotion = -1 add_horde_unity = -1 add_meritocracy = -1 }
-
-	# 	set_key = { lhs = Tmp_0 value = 0 }
-	# }
 	if = {
 		limit = {
 			has_consort_regency = no
@@ -3364,31 +3355,51 @@ on_province_owner_change = {
 			owner = {
 				set_country_flag = AITax_Yearly
 			}
+		
+			###### State Property reactions on annexation/integration
+			## Doing a full calculation with all modifiers is way to wasteful here, as we would need to get all API modifers into the new province and so on...
+			## Yes this introduces incorrectness of data in the timeframe between province owner change and 1.1 recalc.
+			## But as an approximation it should be fine to not make players go heavily over cap from an annexation, but also not just sell everything..
 			## Transfer State property to Powerbrokers
 			if = {
-				limit = { 
-					NOT = { check_key = { lhs = SF_Total value = 0.001 } }
+				limit = { # only transfer state property to Powerbrokers if over cap, use unmodifed state property to have a bit of room before actually going over cap
+					owner = { check_key = { lhs = StatePropertyTotal which = StatePropertyCapacity } }
+						  # We dont use the Percentage here, because we would need to recalculate everything up to that point, so just use the totals
 				}
-				StatePropertyAnnexation = { broker = NO type = Agriculture }
-			}
-			else = {
-				StatePropertyAnnexation = { broker = SF type = Agriculture }
-			}
-			StatePropertyAnnexation = { broker = SF type = Extraction }
-			StatePropertyAnnexation = { broker = SF type = Forestry }
-			StatePropertyAnnexation = { broker = SF type = Fishery }
-			if = {
-				limit = { 
-					NOT = { check_key = { lhs = RE_Total value = 0.001 } }
+				if = {
+					limit = { 
+						NOT = { check_key = { lhs = SF_Total value = 0.001 } }
+					}
+					StatePropertyAnnexation = { broker = NO type = Agriculture }
+				}
+				else = {
+					StatePropertyAnnexation = { broker = SF type = Agriculture }
+				}
+				StatePropertyAnnexation = { broker = SF type = Extraction }
+				StatePropertyAnnexation = { broker = SF type = Forestry }
+				StatePropertyAnnexation = { broker = SF type = Fishery }
+				if = {
+					limit = { 
+						check_key = { lhs = RE_Total value = 0.001 }
+					}
+					StatePropertyAnnexation = { broker = RE type = Industrial }
+				}
+				else = {
+					StatePropertyAnnexation = { broker = NO type = Industrial }
 				}
 				StatePropertyAnnexation = { broker = NO type = Industrial }
+				StatePropertyAnnexation = { broker = BG type = Commercial }
+				StatePropertyAnnexation = { broker = CL type = Academic }
 			}
 			else = {
-				StatePropertyAnnexation = { broker = RE type = Industrial }
+				# if we didnt transfer to powerbrokers, then we need to increase the StatePropertyTotal
+				# this means, that if one isnt over cap, the first province will always be kept as property. 
+				# should decrease HRE edgecases, where you would farm OPMs to fund infra
+				### Add StateProperty from Prov to Country Var
+				owner = {
+					change_key = { lhs = StatePropertyTotal which = PREV }
+				}
 			}
-			StatePropertyAnnexation = { broker = NO type = Industrial }
-			StatePropertyAnnexation = { broker = BG type = Commercial }
-			StatePropertyAnnexation = { broker = CL type = Academic }
 		}
 		if = {
 			limit = {
