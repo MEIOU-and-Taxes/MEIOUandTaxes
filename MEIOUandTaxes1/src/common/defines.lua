@@ -931,7 +931,7 @@ NCountry = {
 
 	MAX_CROWN_COLONIES = 2,  -- How many province a country can hold in a colonial region before creating a colonial nation
 	RIVAL_TECH_THRESHOLD = 0.8,  -- Difference in tech group cost modifiers
-	OVERSEAS_DISTANCE = 600,  -- Provinces beyond this distance to capital are distant overseas
+	OVERSEAS_DISTANCE = 525,  -- Provinces beyond this distance to capital are distant overseas
 
 	NORMAL_ELECTION_CYCLE = 3,						-- The normal election cycle at which 10 republican tradition is lost from 1 unit of scaled republican tradition
 	DICTATORSHIP_TRADITION_FOR_MONARCHY = 50,		-- If republican tradition is lower than this on death of ruler, dictatorship turns into monarchy
