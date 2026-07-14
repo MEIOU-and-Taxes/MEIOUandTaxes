@@ -91,7 +91,7 @@ def gen_customloc(txt, tmpltA, tmpltB, tmplt1, tmplt1H, tmplt2, tmplt2H, tmpltN,
                     text = tmplt2
                     i = 3
                     for x in range(dct[var][2], 0, -1):
-                        text = text.replace("%H", tmplt2H.replace("%a", str(dct[var][2]) + str(x)).replace("%b", str(pow(10, i))).replace("%c", str(1/pow(10, x))))
+                        text = text.replace("%H", tmplt2H.replace("%a", str(dct[var][2]) + str(x)).replace("%b", str(pow(10, i))).replace("%c", str(1/pow(10, i))))
                         i -= 1
                     text = text.replace("%H", "")
                     txt += text.replace('%s', var).replace('%d', dct[var][0])
