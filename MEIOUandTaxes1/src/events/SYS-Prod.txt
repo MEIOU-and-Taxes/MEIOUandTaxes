@@ -636,22 +636,6 @@ country_event = {
 		highlight = yes
     }
 }
-
-#Preliminary
-#			if = {
-#				limit = {
-#					OR = {
-#						check_key = { lhs = Prod_S$slot$Soph value = 150 }
-#						AND = {
-#							check_key = { lhs = SkillCapIndu$id$ value = 175 }
-#							check_key = { lhs = Prod_S$slot$Soph value = 130 }
-#						}
-#					}
-#				}
-#				owner = { set_country_flag = Industry_Upgrade }
-#				set_province_flag = Industry_CanUpgrade
-#			}
-
 #Find province that can upgrade
 country_event = {
 	id = POP_Prod.10
@@ -661,19 +645,16 @@ country_event = {
 
 	is_triggered_only = yes
     hidden = yes
-
-	trigger = {
-	}
 	
 	immediate = {
         hidden_effect = {
-			#Prod_FindProvincesForUpgrade = yes
-			#any_owned_province = { # kick off the process in one province, avoid multiple upgrades at the same time to avoid key corruption
-			#	limit = {
-			#		has_province_flag = Industry_CanUpgrade
-			#	}
-			#	province_event = { id = POP_Prod.11 }
-			#}
+			Prod_FindProvincesForUpgrade = yes
+			random_owned_province = { # kick off the process in one province, avoid multiple upgrades at the same time to avoid key corruption
+				limit = {
+					has_province_flag = Industry_CanUpgrade
+				}
+				province_event = { id = POP_Prod.11 days = 5 }
+			}
 		}
 	}
     option = {
@@ -707,10 +688,7 @@ province_event = {
 		name = POP_Prod.11.opta
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_28Present }
-			NOT = { has_province_flag = Industry_33Present }
-			NOT = { has_province_flag = Industry_36Present }
-			has_province_flag = Industry_24Present
+			Prod_Can_28 = yes
 		}
 		hidden_effect = {
 			Public_ChangeProduce = { TargetID=28 FromID=24 }
@@ -753,6 +731,7 @@ province_event = {
 			name = Urban_Innovativeness
 			duration = 7300
 		}
+		owner = { change_innovativeness = 3 }
 	}
 	after = {
         #unset keys
@@ -763,57 +742,16 @@ province_event = {
 		set_key = { lhs = Public_Tmp5 value = 0 }
 		set_key = { lhs = Public_Tmp6 value = 0 }
 		
-		#owner = {
-		#	any_owned_province = { # kick off the process in one province, avoid multiple upgrades at the same time to avoid key corruption
-		#		limit = {
-		#			has_province_flag = Industry_CanUpgrade
-		#		}
-		#		province_event = { id = POP_Prod.11 days = 13 }
-		#	}
-		#}
+		owner = {
+			random_owned_province = { # kick off the process in one province, avoid multiple upgrades at the same time to avoid key corruption
+				limit = {
+					has_province_flag = Industry_CanUpgrade
+				}
+				province_event = { id = POP_Prod.11 days = 13 }
+			}
+		}
 	}
 }
-#Find provinces for urban industry resurrection
-#country_event = {
-#	id = POP_Prod.12
-#	title = POP_Prod.12.t
-#	desc = POP_Prod.12.d
-#	picture = UNIVERSITY_eventPicture
-#
-#	is_triggered_only = yes
-#    hidden = yes
-#
-#	trigger = {
-#		tag = AAA
-#	}
-#	
-#	immediate = {
-#        hidden_effect = {
-#			tradenode_centers = {
-#				every_trade_node_member_province = {
-#					if = {
-#						limit = {
-#							OR = {
-#								has_province_flag = ResurrectIndustry_24
-#								has_province_flag = ResurrectIndustry_25
-#								has_province_flag = ResurrectIndustry_26
-#								has_province_flag = ResurrectIndustry_27
-#								has_province_flag = ResurrectIndustry_29
-#								has_province_flag = ResurrectIndustry_30
-#								has_province_flag = ResurrectIndustry_32
-#								
-#							}
-#						}
-#						province_event = { id = POP_Prod.13 }
-#					}
-#				}
-#			}
-#		}
-#	}
-#    option = {
-#        name = no_localisation
-#    }
-#}
 #Resurrect Industries
 province_event = {
 	id = POP_Prod.13
