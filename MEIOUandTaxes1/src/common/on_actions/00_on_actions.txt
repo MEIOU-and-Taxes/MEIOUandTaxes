@@ -3361,31 +3361,51 @@ on_province_owner_change = {
 			owner = {
 				set_country_flag = AITax_Yearly
 			}
+		
+			###### State Property reactions on annexation/integration
+			## Doing a full calculation with all modifiers is way to wasteful here, as we would need to get all API modifers into the new province and so on...
+			## Yes this introduces incorrectness of data in the timeframe between province owner change and 1.1 recalc.
+			## But as an approximation it should be fine to not make players go heavily over cap from an annexation, but also not just sell everything..
 			## Transfer State property to Powerbrokers
 			if = {
-				limit = { 
-					NOT = { check_key = { lhs = SF_Total value = 0.001 } }
+				limit = { # only transfer state property to Powerbrokers if over cap, use unmodifed state property to have a bit of room before actually going over cap
+					owner = { check_key = { lhs = StatePropertyTotal which = StatePropertyCapacity } }
+						  # We dont use the Percentage here, because we would need to recalculate everything up to that point, so just use the totals
 				}
-				StatePropertyAnnexation = { broker = NO type = Agriculture }
-			}
-			else = {
-				StatePropertyAnnexation = { broker = SF type = Agriculture }
-			}
-			StatePropertyAnnexation = { broker = SF type = Extraction }
-			StatePropertyAnnexation = { broker = SF type = Forestry }
-			StatePropertyAnnexation = { broker = SF type = Fishery }
-			if = {
-				limit = { 
-					NOT = { check_key = { lhs = RE_Total value = 0.001 } }
+				if = {
+					limit = { 
+						NOT = { check_key = { lhs = SF_Total value = 0.001 } }
+					}
+					StatePropertyAnnexation = { broker = NO type = Agriculture }
+				}
+				else = {
+					StatePropertyAnnexation = { broker = SF type = Agriculture }
+				}
+				StatePropertyAnnexation = { broker = SF type = Extraction }
+				StatePropertyAnnexation = { broker = SF type = Forestry }
+				StatePropertyAnnexation = { broker = SF type = Fishery }
+				if = {
+					limit = { 
+						check_key = { lhs = RE_Total value = 0.001 }
+					}
+					StatePropertyAnnexation = { broker = RE type = Industrial }
+				}
+				else = {
+					StatePropertyAnnexation = { broker = NO type = Industrial }
 				}
 				StatePropertyAnnexation = { broker = NO type = Industrial }
+				StatePropertyAnnexation = { broker = BG type = Commercial }
+				StatePropertyAnnexation = { broker = CL type = Academic }
 			}
 			else = {
-				StatePropertyAnnexation = { broker = RE type = Industrial }
+				# if we didnt transfer to powerbrokers, then we need to increase the StatePropertyTotal
+				# this means, that if one isnt over cap, the first province will always be kept as property. 
+				# should decrease HRE edgecases, where you would farm OPMs to fund infra
+				### Add StateProperty from Prov to Country Var
+				owner = {
+					change_key = { lhs = StatePropertyTotal which = PREV }
+				}
 			}
-			StatePropertyAnnexation = { broker = NO type = Industrial }
-			StatePropertyAnnexation = { broker = BG type = Commercial }
-			StatePropertyAnnexation = { broker = CL type = Academic }
 		}
 		if = {
 			limit = {

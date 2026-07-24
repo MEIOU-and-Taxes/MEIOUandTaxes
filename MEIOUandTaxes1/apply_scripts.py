@@ -8,6 +8,9 @@ import multiprocessing
 import runpy
 from concurrent.futures import ProcessPoolExecutor
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+print("Working directory:", os.getcwd())
+
 __all__ = [ 'compile' ]
 
 py_block = re.compile('\\#.*\".*?\".*')
@@ -439,6 +442,7 @@ def compile(compress=False, parse_init=True, debug=False):
 
 	end = time.time()
 	print((end - start))
+	input("\nBuild finished. Press Enter to exit...")
 
 if __name__ == '__main__':
 	compile()
