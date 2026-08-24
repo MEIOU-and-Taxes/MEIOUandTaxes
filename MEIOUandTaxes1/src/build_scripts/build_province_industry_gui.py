@@ -273,7 +273,7 @@ def write(dest):
             prevs.append(prod)
             prod_counter += 1  # Increment prod_counter for each prod
 
-    writeFile(os.path.join(dest, 'common', 'custom_gui', 'province_industry.txt'), customGuiData)
+    #writeFile(os.path.join(dest, 'common', 'custom_gui', 'province_industry.txt'), customGuiData)
     writeFile(os.path.join(dest, 'snippets', 'interface', 'provinceview.gui'), provinceViewData)
 
 if __name__ == '__main__':
