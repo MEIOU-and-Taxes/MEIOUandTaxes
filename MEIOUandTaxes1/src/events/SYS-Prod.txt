@@ -406,6 +406,12 @@ country_event = {
 							duration = -1
 						}
 					}
+					amber = {
+						add_permanent_province_modifier = {
+							name = gems_1
+							duration = -1
+						}
+					}					
 					obsidian = {
 						add_permanent_province_modifier = {
 							name = obsidian_1
@@ -636,7 +642,6 @@ country_event = {
 		highlight = yes
     }
 }
-
 #Find province that can upgrade
 country_event = {
 	id = POP_Prod.10
@@ -646,22 +651,30 @@ country_event = {
 
 	is_triggered_only = yes
     hidden = yes
-
-	trigger = {
-		tag = AAA
-	}
 	
 	immediate = {
         hidden_effect = {
-			tradenode_centers = {
-				every_trade_node_member_province = {
-					if = {
-						limit = {
-							has_province_flag = Industry_CanUpgrade
-							NOT = { has_province_flag = Industry_CanNotUpgrade }
-						}
-						province_event = { id = POP_Prod.11 }
+			if = {
+				limit = {
+					innovativeness = 3.001
+				}
+				random_owned_province = { # kick off the process in one province, avoid multiple upgrades at the same time to avoid key corruption
+					limit = {
+						has_province_flag = Industry_CanUpgrade
 					}
+					province_event = { id = POP_Prod.11 days = 5 }
+				}
+			}
+			else = {
+				every_owned_province = {
+					limit = {
+						has_province_flag = Industry_CanUpgrade
+					}
+					add_permanent_province_modifier = {
+						name = Urban_Innovativeness
+						duration = 3650
+					}
+					clr_province_flag = Industry_CanUpgrade				
 				}
 			}
 		}
@@ -682,7 +695,7 @@ province_event = {
 	immediate = {
 		hidden_effect = {
 			save_event_target_as = upgrade_province_event_target
-			OpenSlotsUrbanDiff = yes
+			#OpenSlotsUrbanDiff = yes
 		}
 	}
 	# Public_Tmp1 Consumer Balance
@@ -691,624 +704,845 @@ province_event = {
 	# Public_Tmp4 Industrial Balance
 	# Public_Tmp5 Luxury
 	
-	###Houseware Branches
+	# TN_ProvPrc21 Consumer 16
+	# TN_ProvPrc22 Military 16
+	# TN_ProvPrc23 Naval 20
+	# TN_ProvPrc24 Industrial 20
+	# TN_ProvPrc25 Luxury 25
+	# TN_ProvPrc41 Knowledge 20
+	
+	###Houseware Branche
 	#Carpentry
 	option = {
 		name = POP_Prod.11.opta
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_28Present }
-			NOT = { has_province_flag = Industry_33Present }
-			NOT = { has_province_flag = Industry_36Present }
-			has_province_flag = Industry_24Present
+			Prod_Can_28 = yes
+			owner = { innovativeness = 3.001 }
+			check_key = { lhs = SkillCapIndu24 value = 140 }
 		}
 		hidden_effect = {
 			Public_ChangeProduce = { TargetID=28 FromID=24 }
-			clr_province_flag = Industry_CanUpgrade
 		}
+		owner = { change_innovativeness = -3 }
 		ai_chance = {
 			factor = 1
 			modifier = {
-				check_key = { lhs = Public_Tmp4 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc24 value = 20 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp4 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp4 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc24 value = 15 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp4 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu28 value = 400 }
-				factor = 2
-			}
-		}
+			}			
+		}		
 	}
-	#Furniture
+	#Tableware
 	option = {
 		name = POP_Prod.11.optb
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_28Present }
-			NOT = { has_province_flag = Industry_33Present }
-			NOT = { has_province_flag = Industry_36Present }
-			has_province_flag = Industry_24Present
+			Prod_Can_36 = yes
+			owner = { innovativeness = 4.001 }
+			check_key = { lhs = SkillCapIndu24 value = 150 }
 		}
 		hidden_effect = {
-			Public_ChangeProduce = { TargetID=33 FromID=24 }
-			clr_province_flag = Industry_CanUpgrade
+			Public_ChangeProduce = { TargetID=36 FromID=24 }
 		}
+		owner = { change_innovativeness = -4 }
 		ai_chance = {
 			factor = 1
 			modifier = {
-				check_key = { lhs = Public_Tmp6 value = 4 } # Pricediff Raw/Fiber
-				factor = 0.1
-			}
-			modifier = {
-				check_key = { lhs = Public_Tmp1 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp1 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp1 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp1 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu33 value = 400 }
-				factor = 2
-			}
+			}			
 		}
 	}
-	#Tableware
+	#Furniture
 	option = {
 		name = POP_Prod.11.optc
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_28Present }
-			NOT = { has_province_flag = Industry_33Present }
-			NOT = { has_province_flag = Industry_36Present }
-			has_province_flag = Industry_24Present
-			OR = {
-				continent = asia
-				superregion = japan_superregion
-				region = vietnam_region
-				area_for_scope_province = {
-					type = any
-					OR = {
-						has_province_flag = pm
-						has_province_flag = ivory
-						has_province_flag = asian_ivory
-						has_province_flag = westafrican_ivory
-					}
-				}
-			}
+			Prod_Can_33 = yes
+			owner = { innovativeness = 3.001 }
+			check_key = { lhs = SkillCapIndu24 value = 140 }
 		}
 		hidden_effect = {
-			Public_ChangeProduce = { TargetID=36 FromID=24 }
-			clr_province_flag = Industry_CanUpgrade
+			Public_ChangeProduce = { TargetID=33 FromID=24 }
 		}
+		owner = { change_innovativeness = -3 }
 		ai_chance = {
-			factor = 2
+			factor = 1
 			modifier = {
-				check_key = { lhs = Public_Tmp5 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc21 value = 16 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp5 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp5 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc21 value = 12 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp5 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu36 value = 400 }
-				factor = 2
-			}
+			}			
 		}
 	}
-	###Textile Branches
-	#Tailors
+	#Timber Framing
 	option = {
 		name = POP_Prod.11.optd
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_34Present }
-			NOT = { has_province_flag = Industry_39Present }
-			has_province_flag = Industry_25Present
+			Prod_Can_48 = yes
+			owner = { innovativeness = 5.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu28 value = 175 }
+				check_key = { lhs = SkillCapIndu36 value = 175 }
+				check_key = { lhs = SkillCapIndu33 value = 175 }
+			}
 		}
 		hidden_effect = {
-			Public_ChangeProduce = { TargetID=34 FromID=25 }
-			clr_province_flag = Industry_CanUpgrade
+			if =  {
+				limit = {
+					has_province_flag = Industry_28Present
+				}
+			Public_ChangeProduce = { TargetID=48 FromID=28 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_36Present
+				}
+			Public_ChangeProduce = { TargetID=48 FromID=36 }				
+			}
+			else_if =  { #shouldnt be possible, due to Prod_Can, but just in case
+				limit = {
+					has_province_flag = Industry_33Present
+				}
+			Public_ChangeProduce = { TargetID=48 FromID=33 }				
+			}
 		}
+		owner = { change_innovativeness = -5 }
 		ai_chance = {
 			factor = 1
 			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp6 value = 2 } } # Pricediff Raw/Fiber
-				factor = 0.1
-			}
-			modifier = {
-				check_key = { lhs = Public_Tmp1 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc24 value = 20 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp1 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp1 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc24 value = 15 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp1 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu34 value = 400 }
-				factor = 2
-			}
+			}			
 		}
 	}
-	#Luxury Cloth
+	#Porcelain
 	option = {
 		name = POP_Prod.11.opte
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_34Present }
-			NOT = { has_province_flag = Industry_39Present }
-			has_province_flag = Industry_25Present
+			Prod_Can_49 = yes
+			owner = { innovativeness = 7.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu28 value = 175 }
+				check_key = { lhs = SkillCapIndu36 value = 175 }
+				check_key = { lhs = SkillCapIndu33 value = 175 }
+			}			
 		}
 		hidden_effect = {
-			Public_ChangeProduce = { TargetID=39 FromID=25 }
-			clr_province_flag = Industry_CanUpgrade
+			if =  {
+				limit = {
+					has_province_flag = Industry_28Present
+				}
+			Public_ChangeProduce = { TargetID=49 FromID=28 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_36Present
+				}
+			Public_ChangeProduce = { TargetID=49 FromID=36 }				
+			}
+			else_if =  { 
+				limit = {
+					has_province_flag = Industry_33Present
+				}
+			Public_ChangeProduce = { TargetID=49 FromID=33 }				
+			}
 		}
+		owner = { change_innovativeness = -7 }
 		ai_chance = {
 			factor = 1
 			modifier = {
-				check_key = { lhs = Public_Tmp5 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp5 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp5 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp5 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu39 value = 400 }
-				factor = 2
-			}
+			}			
 		}
 	}
-	###Metalworking Branches
-	#Machinery
+	#Furniture Manufactory
 	option = {
 		name = POP_Prod.11.optf
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_35Present }
-			NOT = { has_province_flag = Industry_40Present }
-			has_province_flag = Industry_26Present
-			check_key = { lhs = TN_ProvSply41 value = 1 } #Knowledge
+			Prod_Can_50 = yes
+			owner = { innovativeness = 5.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu28 value = 175 }
+				check_key = { lhs = SkillCapIndu36 value = 175 }
+				check_key = { lhs = SkillCapIndu33 value = 175 }
+			}			
 		}
 		hidden_effect = {
-			Public_ChangeProduce = { TargetID=35 FromID=26 }
-			clr_province_flag = Industry_CanUpgrade
+			if =  {
+				limit = {  #shouldnt be possible, due to Prod_Can, but just in case
+					has_province_flag = Industry_28Present
+				}
+			Public_ChangeProduce = { TargetID=50 FromID=28 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_36Present
+				}
+			Public_ChangeProduce = { TargetID=50 FromID=36 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_33Present
+				}
+			Public_ChangeProduce = { TargetID=50 FromID=33 }				
+			}
 		}
+		owner = { change_innovativeness = -5 }
 		ai_chance = {
 			factor = 1
 			modifier = {
-				check_key = { lhs = Public_Tmp4 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc21 value = 16 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp4 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp4 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc21 value = 12 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp4 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu35 value = 400 }
-				factor = 2
-			}
+			}			
 		}
-	}
-	#Armaments
+	}	
+	#Light Industry
 	option = {
 		name = POP_Prod.11.optg
 		goto = ROOT
 		trigger = {
-			NOT = { has_province_flag = Industry_35Present }
-			NOT = { has_province_flag = Industry_40Present }
-			has_province_flag = Industry_26Present
+			Prod_Can_57 = yes
+			owner = { innovativeness = 10.001 }
 			OR = {
-				area_for_scope_province = {
-					type = any
-					OR = {
-						has_province_flag = m
-						has_province_flag = coal
-					}
+				check_key = { lhs = SkillCapIndu48 value = 225 }
+				check_key = { lhs = SkillCapIndu49 value = 225 }
+				check_key = { lhs = SkillCapIndu50 value = 225 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = { 
+					has_province_flag = Industry_48Present
 				}
-				any_neighbor_province = {
-					OR = {
-						has_province_flag = m
-						has_province_flag = coal
-					}
-				}
+			Public_ChangeProduce = { TargetID=57 FromID=48 }				
 			}
+			else_if =  {
+				limit = {   #shouldnt be possible, due to Prod_Can, but just in case
+					has_province_flag = Industry_49Present
+				}
+			Public_ChangeProduce = { TargetID=57 FromID=49 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_50Present
+				}
+			Public_ChangeProduce = { TargetID=57 FromID=50 }				
+			}
+		}
+		owner = { change_innovativeness = -10 }
+		ai_chance = {
+			factor = 1
+		}
+	}
+	### End of Houseware Branch
+	### Textile Branch
+	#Tailors
+	option = {
+		name = POP_Prod.11.opth
+		goto = ROOT
+		trigger = {
+			Prod_Can_34 = yes
+			owner = { innovativeness = 3.001 }
+			check_key = { lhs = SkillCapIndu25 value = 140 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=34 FromID=25 }
+		}
+		owner = { change_innovativeness = -3 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc21 value = 16 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc21 value = 12 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Silks
+	option = {
+		name = POP_Prod.11.opti
+		goto = ROOT
+		trigger = {
+			Prod_Can_44 = yes
+			owner = { innovativeness = 4.001 }
+			check_key = { lhs = SkillCapIndu25 value = 150 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=44 FromID=25 }
+		}
+		owner = { change_innovativeness = -4 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Luxury Cloth
+	option = {
+		name = POP_Prod.11.optj
+		goto = ROOT
+		trigger = {
+			Prod_Can_39 = yes
+			owner = { innovativeness = 3.001 }
+			check_key = { lhs = SkillCapIndu25 value = 140 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=39 FromID=25 }
+		}
+		owner = { change_innovativeness = -3 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Cloth Manufactory
+	option = {
+		name = POP_Prod.11.optk
+		goto = ROOT
+		trigger = {
+			Prod_Can_51 = yes
+			owner = { innovativeness = 5.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu34 value = 175 }
+				check_key = { lhs = SkillCapIndu44 value = 175 }
+				check_key = { lhs = SkillCapIndu39 value = 175 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = {
+					has_province_flag = Industry_34Present
+				}
+			Public_ChangeProduce = { TargetID=51 FromID=34 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_44Present
+				}
+			Public_ChangeProduce = { TargetID=51 FromID=44 }				
+			}
+			else_if =  { #shouldnt be possible, due to Prod_Can, but just in case
+				limit = {
+					has_province_flag = Industry_39Present
+				}
+			Public_ChangeProduce = { TargetID=51 FromID=39 }				
+			}
+		}
+		owner = { change_innovativeness = -5 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc21 value = 16 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc21 value = 12 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Tapisserie
+	option = {
+		name = POP_Prod.11.optl
+		goto = ROOT
+		trigger = {
+			Prod_Can_52 = yes
+			owner = { innovativeness = 7.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu34 value = 175 }
+				check_key = { lhs = SkillCapIndu44 value = 175 }
+				check_key = { lhs = SkillCapIndu39 value = 175 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = {
+					has_province_flag = Industry_34Present
+				}
+			Public_ChangeProduce = { TargetID=52 FromID=34 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_44Present
+				}
+			Public_ChangeProduce = { TargetID=52 FromID=44 }				
+			}
+			else_if =  { 
+				limit = {
+					has_province_flag = Industry_39Present
+				}
+			Public_ChangeProduce = { TargetID=52 FromID=39 }				
+			}
+		}
+		owner = { change_innovativeness = -7 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Silk Cloth
+	option = {
+		name = POP_Prod.11.optm
+		goto = ROOT
+		trigger = {
+			Prod_Can_53 = yes
+			owner = { innovativeness = 5.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu34 value = 175 }
+				check_key = { lhs = SkillCapIndu44 value = 175 }
+				check_key = { lhs = SkillCapIndu39 value = 175 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = {  #shouldnt be possible, due to Prod_Can, but just in case
+					has_province_flag = Industry_34Present
+				}
+			Public_ChangeProduce = { TargetID=53 FromID=34 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_44Present
+				}
+			Public_ChangeProduce = { TargetID=53 FromID=44 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_39Present
+				}
+			Public_ChangeProduce = { TargetID=53 FromID=39 }				
+			}
+		}
+		owner = { change_innovativeness = -5 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}	
+	#Consumer Industry
+	option = {
+		name = POP_Prod.11.optn
+		goto = ROOT
+		trigger = {
+			Prod_Can_58 = yes
+			owner = { innovativeness = 10.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu51 value = 225 }
+				check_key = { lhs = SkillCapIndu52 value = 225 }
+				check_key = { lhs = SkillCapIndu53 value = 225 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = { 
+					has_province_flag = Industry_51Present
+				}
+			Public_ChangeProduce = { TargetID=58 FromID=51 }				
+			}
+			else_if =  {
+				limit = {   #shouldnt be possible, due to Prod_Can, but just in case
+					has_province_flag = Industry_52Present
+				}
+			Public_ChangeProduce = { TargetID=58 FromID=52 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_53Present
+				}
+			Public_ChangeProduce = { TargetID=58 FromID=53 }				
+			}
+		}
+		owner = { change_innovativeness = -10 }
+		ai_chance = {
+			factor = 1
+		}
+	}
+	### End of Textile Branch
+	### Metalwork Branch
+	#Armaments
+	option = {
+		name = POP_Prod.11.opto
+		goto = ROOT
+		trigger = {
+			Prod_Can_40 = yes
+			owner = { innovativeness = 3.001 }
+			check_key = { lhs = SkillCapIndu26 value = 140 }
 		}
 		hidden_effect = {
 			Public_ChangeProduce = { TargetID=40 FromID=26 }
-			clr_province_flag = Industry_CanUpgrade
 		}
+		owner = { change_innovativeness = -3 }
 		ai_chance = {
-			factor = 2
+			factor = 1
 			modifier = {
-				check_key = { lhs = Public_Tmp2 value = 1 } # Means 100% demand gap
+				check_key = { lhs = TN_ProvPrc22 value = 16 } # Expensive
 				factor = 2
 			}
 			modifier = {
-				check_key = { lhs = Public_Tmp2 value = 2 }
-				factor = 2
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp2 value = 0.5 } } # means 100% more prod than demand
+				check_key = { lhs = TN_ProvPrc22 value = 12 } # Cheap
 				factor = 0.5
-			}
-			modifier = {
-				NOT = { check_key = { lhs = Public_Tmp2 value = 0.33 } }
-				factor = 0.5
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 125 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 150 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 175 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 200 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 225 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 250 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 275 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 300 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 325 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 350 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 375 }
-				factor = 2
-			}
-			modifier = {
-				check_key = { lhs = SkillCapIndu40 value = 400 }
-				factor = 2
-			}
+			}			
 		}
 	}
-	#Emergency
+	#Glass
+	option = {
+		name = POP_Prod.11.optp
+		goto = ROOT
+		trigger = {
+			Prod_Can_43 = yes
+			owner = { innovativeness = 4.001 }
+			check_key = { lhs = SkillCapIndu26 value = 150 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=43 FromID=26 }
+		}
+		owner = { change_innovativeness = -4 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Tools
+	option = {
+		name = POP_Prod.11.optq
+		goto = ROOT
+		trigger = {
+			Prod_Can_35 = yes
+			owner = { innovativeness = 3.001 }
+			check_key = { lhs = SkillCapIndu26 value = 140 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=35 FromID=26 }
+		}
+		owner = { change_innovativeness = -3 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc24 value = 20 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc24 value = 15 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Weaponsmith
+	option = {
+		name = POP_Prod.11.optr
+		goto = ROOT
+		trigger = {
+			Prod_Can_45 = yes
+			owner = { innovativeness = 5.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu40 value = 175 }
+				check_key = { lhs = SkillCapIndu43 value = 175 }
+				check_key = { lhs = SkillCapIndu35 value = 175 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = {
+					has_province_flag = Industry_40Present
+				}
+			Public_ChangeProduce = { TargetID=45 FromID=40 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_43Present
+				}
+			Public_ChangeProduce = { TargetID=45 FromID=43 }				
+			}
+			else_if =  { #shouldnt be possible, due to Prod_Can, but just in case
+				limit = {
+					has_province_flag = Industry_35Present
+				}
+			Public_ChangeProduce = { TargetID=45 FromID=35 }				
+			}
+		}
+		owner = { change_innovativeness = -5 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc22 value = 16 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc22 value = 12 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Gadgets
+	option = {
+		name = POP_Prod.11.opts
+		goto = ROOT
+		trigger = {
+			Prod_Can_47 = yes
+			owner = { innovativeness = 7.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu40 value = 175 }
+				check_key = { lhs = SkillCapIndu43 value = 175 }
+				check_key = { lhs = SkillCapIndu35 value = 175 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = {
+					has_province_flag = Industry_40Present
+				}
+			Public_ChangeProduce = { TargetID=47 FromID=40 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_43Present
+				}
+			Public_ChangeProduce = { TargetID=47 FromID=43 }				
+			}
+			else_if =  { 
+				limit = {
+					has_province_flag = Industry_35Present
+				}
+			Public_ChangeProduce = { TargetID=47 FromID=35 }				
+			}
+		}
+		owner = { change_innovativeness = -7 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 25 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc25 value = 18 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}
+	#Machinery
+	option = {
+		name = POP_Prod.11.optt
+		goto = ROOT
+		trigger = {
+			Prod_Can_46 = yes
+			owner = { innovativeness = 5.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu40 value = 175 }
+				check_key = { lhs = SkillCapIndu43 value = 175 }
+				check_key = { lhs = SkillCapIndu35 value = 175 }
+			}			
+		}
+		hidden_effect = {
+			if =  {
+				limit = {  #shouldnt be possible, due to Prod_Can, but just in case
+					has_province_flag = Industry_40Present
+				}
+			Public_ChangeProduce = { TargetID=46 FromID=40 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_43Present
+				}
+			Public_ChangeProduce = { TargetID=46 FromID=43 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_35Present
+				}
+			Public_ChangeProduce = { TargetID=46 FromID=35 }				
+			}
+		}
+		owner = { change_innovativeness = -5 }
+		ai_chance = {
+			factor = 1
+			modifier = {
+				check_key = { lhs = TN_ProvPrc24 value = 20 } # Expensive
+				factor = 2
+			}
+			modifier = {
+				check_key = { lhs = TN_ProvPrc24 value = 15 } # Cheap
+				factor = 0.5
+			}			
+		}
+	}	
+	#Heavy Industry
+	option = {
+		name = POP_Prod.11.optu
+		goto = ROOT
+		trigger = {
+			Prod_Can_56 = yes
+			owner = { innovativeness = 10.001 }
+			OR = {
+				check_key = { lhs = SkillCapIndu45 value = 175 }
+				check_key = { lhs = SkillCapIndu47 value = 175 }
+				check_key = { lhs = SkillCapIndu46 value = 175 }
+			}
+		}
+		hidden_effect = {
+			if =  {
+				limit = { 
+					has_province_flag = Industry_45Present
+				}
+			Public_ChangeProduce = { TargetID=56 FromID=45 }				
+			}
+			else_if =  {
+				limit = {   #shouldnt be possible, due to Prod_Can, but just in case
+					has_province_flag = Industry_47Present
+				}
+			Public_ChangeProduce = { TargetID=56 FromID=47 }				
+			}
+			else_if =  {
+				limit = {
+					has_province_flag = Industry_46Present
+				}
+			Public_ChangeProduce = { TargetID=56 FromID=46 }				
+			}
+		}
+		owner = { change_innovativeness = -10 }
+		ai_chance = {
+			factor = 1
+		}
+	}
+	### End of Metalwork Branch
+	### Ship Branch
+	#Drydock
+	option = {
+		name = POP_Prod.11.optv
+		goto = ROOT
+		trigger = {
+			Prod_Can_54 = yes
+			owner = { innovativeness = 5.001 }
+			check_key = { lhs = SkillCapIndu27 value = 165 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=54 FromID=27 }
+		}
+		owner = { change_innovativeness = -5 }
+		ai_chance = {
+			factor = 1
+		}
+	}	
+	#Steamer
+	option = {
+		name = POP_Prod.11.optw
+		goto = ROOT
+		trigger = {
+			Prod_Can_59 = yes
+			owner = { innovativeness = 10.001 }
+			check_key = { lhs = SkillCapIndu54 value = 225 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=59 FromID=54 }
+		}
+		owner = { change_innovativeness = -10 }
+		ai_chance = {
+			factor = 1
+		}
+	}
+	###End of Ship Branch
+	###Knowledge
+	#Academia
+	option = {
+		name = POP_Prod.11.optx
+		goto = ROOT
+		trigger = {
+			Prod_Can_55 = yes
+			owner = { innovativeness = 15.001 }
+			check_key = { lhs = SkillCapIndu30 value = 250 }
+		}
+		hidden_effect = {
+			Public_ChangeProduce = { TargetID=55 FromID=30 }
+		}
+		owner = { change_innovativeness = -15 }
+		ai_chance = {
+			factor = 1
+		}
+	}	
+	#NonAvailable
 	option = {
 		name = POP_Prod.11.optz
 		goto = ROOT
-		hidden_effect = {
-			set_province_flag = Industry_CanNotUpgrade
+		add_permanent_province_modifier = {
+			name = Urban_Innovativeness
+			duration = 5475
 		}
+		ai_chance = {
+			factor = 1
+			modifier = {
+				NOT = { owner = { Innovativeness = 10 } }
+				factor = 5
+			}
+			modifier = {
+				owner = { Innovativeness = 30 }
+				factor = 0.1
+			}			
+		}		
 	}
 	after = {
         #unset keys
@@ -1318,66 +1552,24 @@ province_event = {
 		set_key = { lhs = Public_Tmp4 value = 0 }
 		set_key = { lhs = Public_Tmp5 value = 0 }
 		set_key = { lhs = Public_Tmp6 value = 0 }
+
+		clr_province_flag = Industry_CanUpgrade
 		
-        if = {
-            limit = {
-                NOT = { has_province_flag = TN_SectorCent }
-            }
-			set_key = { lhs = TN_SectorSply21 value = 0 }
-			set_key = { lhs = TN_SectorSply22 value = 0 }
-			set_key = { lhs = TN_SectorSply23 value = 0 }
-			set_key = { lhs = TN_SectorSply24 value = 0 }
-			set_key = { lhs = TN_SectorSply25 value = 0 }
-			
-			set_key = { lhs = TN_SectorDmnd21 value = 0 }
-			set_key = { lhs = TN_SectorDmnd22 value = 0 }
-			set_key = { lhs = TN_SectorDmnd23 value = 0 }
-			set_key = { lhs = TN_SectorDmnd24 value = 0 }
-			set_key = { lhs = TN_SectorDmnd25 value = 0 }
-        }
+		if = {
+			limit = { 
+				owner = { innovativeness = 10.001 }
+			}
+			owner = {
+				random_owned_province = { # kick off the process in one province, avoid multiple upgrades at the same time to avoid key corruption
+					limit = {
+						has_province_flag = Industry_CanUpgrade
+					}
+					province_event = { id = POP_Prod.11 days = 13 }
+				}
+			}
+		}
 	}
 }
-#Find provinces for urban industry resurrection
-#country_event = {
-#	id = POP_Prod.12
-#	title = POP_Prod.12.t
-#	desc = POP_Prod.12.d
-#	picture = UNIVERSITY_eventPicture
-#
-#	is_triggered_only = yes
-#    hidden = yes
-#
-#	trigger = {
-#		tag = AAA
-#	}
-#	
-#	immediate = {
-#        hidden_effect = {
-#			tradenode_centers = {
-#				every_trade_node_member_province = {
-#					if = {
-#						limit = {
-#							OR = {
-#								has_province_flag = ResurrectIndustry_24
-#								has_province_flag = ResurrectIndustry_25
-#								has_province_flag = ResurrectIndustry_26
-#								has_province_flag = ResurrectIndustry_27
-#								has_province_flag = ResurrectIndustry_29
-#								has_province_flag = ResurrectIndustry_30
-#								has_province_flag = ResurrectIndustry_32
-#								
-#							}
-#						}
-#						province_event = { id = POP_Prod.13 }
-#					}
-#				}
-#			}
-#		}
-#	}
-#    option = {
-#        name = no_localisation
-#    }
-#}
 #Resurrect Industries
 province_event = {
 	id = POP_Prod.13
@@ -1477,6 +1669,6 @@ province_event = {
 	}
 	
     option = {
-        name = no_localisation
+        name = exit
     }
 }
