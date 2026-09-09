@@ -740,6 +740,10 @@ Prod_DoSophSetMax = {
 			
 			change_key = { lhs = SkillCapIndu$id$ value = 100 }
 		}
+
+		# Cut off Skill Cap after one decimal
+		multiply_key = { lhs = SkillCapIndu$id$ value = 0.01 }
+		multiply_key = { lhs = SkillCapIndu$id$ value = 100 }
 	}
 }
 
@@ -813,29 +817,38 @@ Prod_DoSophChangeForSlotIfIndustryMatches = {
 		limit = {
 			is_key_equal = { lhs = Prod_S$slot$ value = $id$ }
 		}
-		if = {
-			limit = {
-				NOT = {
-					check_key = {
-						lhs = Prod_S$slot$Soph which = SkillCapIndu$id$
-					}
+		if = { #If skill is not already on the cap
+			limit = { NOT = { is_key_equal = { lhs = Prod_S$slot$Soph which = SkillCapIndu$id$ } } }
+			
+			if = { #INCREASE SKILL (skill < skill cap)
+				limit = { NOT = { check_key = { lhs = Prod_S$slot$Soph which = SkillCapIndu$id$ } } }
+				### Maximum SkillCap of Industry minus current Skill. of that we take 3% + 0.2 to add to skill per year.
+				
+				set_key = { lhs = Tmp_9 which = SkillCapIndu$id$ }
+				subtract_key = { lhs = Tmp_9 which = Prod_S$slot$Soph }
+				multiply_key = { lhs = Tmp_9 value = 0.03 }
+				change_key = { lhs = Tmp_9 value = 0.2 }
+				change_key = { lhs = Prod_S$slot$Soph which = Tmp_9 } #Tmp_9 might be negative if skillcap drops significantly below 100
+
+				if = { # If over CAP, set to cap (skill > skill cap)
+					limit = { check_key = { lhs = Prod_S$slot$Soph which = SkillCapIndu$id$ } }
+					set_key = { lhs = Prod_S$slot$Soph which = SkillCapIndu$id$ }
 				}
 			}
-			### Maximum SkillCap of Industry minus current Skill. of that we take 3% + 0.2 to add to skill per year.
-			set_key = { lhs = Tmp_9 which = SkillCapIndu$id$ }
-			subtract_key = { lhs = Tmp_9 which = Prod_S$slot$Soph }
-			multiply_key = { lhs = Tmp_9 value = 0.03 }
-			change_key = { lhs = Tmp_9 value = 0.2 }
-			change_key = { lhs = Prod_S$slot$Soph which = Tmp_9 } #Tmp_9 might be negative if skillcap drops significantly below 100
+			else = { #DECREASE SKILL (skill > skill cap)
+				### It decays by 0.5% 
+				multiply_key = { lhs = Prod_S$slot$Soph value = 0.995 }
+				#change_key = { lhs = Prod_S$slot$Soph value = 1 } no longer needed, as DoSophHelper2 makes sure baseline is 100
+
+				if = { # If under CAP, set to cap (skill < skill cap)
+					limit = { NOT = { check_key = { lhs = Prod_S$slot$Soph which = SkillCapIndu$id$ } } }
+					set_key = { lhs = Prod_S$slot$Soph which = SkillCapIndu$id$ }
+				}
+			}
+			# Cut off Skill after one decimal
+			multiply_key = { lhs = Prod_S$slot$Soph value = 0.01 }
+			multiply_key = { lhs = Prod_S$slot$Soph value = 100 }
 		}
-		else = {
-			### It decays by 0.5% 
-			multiply_key = { lhs = Prod_S$slot$Soph value = 0.995 }
-			#change_key = { lhs = Prod_S$slot$Soph value = 1 } no longer needed, as DoSophHelper2 makes sure baseline is 100
-		}
-		# Cut off Skill after one decimal
-		multiply_key = { lhs = Prod_S$slot$Soph value = 0.01 }
-		multiply_key = { lhs = Prod_S$slot$Soph value = 100 }
 		
 		# Check for potential Upgrade
 		# If one changes reqSkill for Upgrade, then make sure to also change the Upgrade Event itself POP_Prod.11
