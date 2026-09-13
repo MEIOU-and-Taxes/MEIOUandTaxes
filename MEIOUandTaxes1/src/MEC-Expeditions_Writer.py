@@ -834,7 +834,7 @@ select_expedition_option_frame_bottom_jumping_node = """\
 					#	has_province_modifier = trading_post_province
 					#	has_province_flag = TN_Natural
 					#	}}
-					#value = 1
+					value = 1
 				}}
 			}}
 """
