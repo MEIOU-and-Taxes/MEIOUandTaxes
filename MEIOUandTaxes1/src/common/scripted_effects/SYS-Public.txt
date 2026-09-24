@@ -558,7 +558,10 @@ Public_PopSlot = {
 	Prod_ClrIndustryFlag = { slot=$slot$ }
     if = {
         limit = {
-            is_key_equal = { lhs = Prod_S$slot$ value = 30 }
+			OR = {
+            	is_key_equal = { lhs = Prod_S$slot$ value = 30 }
+				is_key_equal = { lhs = Prod_S$slot$ value = 55 }
+			}
         }
         clr_province_flag = Has_Uni
     }
@@ -577,6 +580,22 @@ Public_PopSlot = {
             NOT = { has_province_flag = Industry_37Present }
             NOT = { has_province_flag = Industry_39Present }
             NOT = { has_province_flag = Industry_40Present }
+			NOT = { has_province_flag = Industry_44Present }
+			NOT = { has_province_flag = Industry_45Present }
+			NOT = { has_province_flag = Industry_46Present }
+			NOT = { has_province_flag = Industry_47Present }
+			NOT = { has_province_flag = Industry_48Present }
+			NOT = { has_province_flag = Industry_49Present }
+			NOT = { has_province_flag = Industry_50Present }
+			NOT = { has_province_flag = Industry_51Present }
+			NOT = { has_province_flag = Industry_52Present }
+			NOT = { has_province_flag = Industry_53Present }
+			NOT = { has_province_flag = Industry_54Present }
+			NOT = { has_province_flag = Industry_55Present }
+			NOT = { has_province_flag = Industry_56Present }
+			NOT = { has_province_flag = Industry_57Present }
+			NOT = { has_province_flag = Industry_58Present }
+			NOT = { has_province_flag = Industry_59Present }
         }
         clr_province_flag = City_Present
     }
@@ -1197,16 +1216,28 @@ Public_GetValuesOfProd = {
 	}
 }
 #Closes Industry and opens another, while transferring Size. Upgrade/Downgrade 
+#The Flagcheck is for performance, it theoretically exists in the Prod_Can check, however
+#as the Prod_Can contains alot more logic, we can already rule out any further checks if FromID Industry doesnt even exist
 Public_ChangeProduce = {
-	set_key = { lhs = Tmp_1 value = 0 }
-	Public_GetValuesOfProd = { prod=$FromID$ return=Tmp_1 }
-	Effect_CloseProd = { IndustryID=$FromID$ }
-	Public_AddProduce = { prod=$TargetID$ size=5 soph=100 wealth=0 }
-	# Reduce Skill by 20%
-	multiply_key = { lhs = Tmp_2 value = 0.8 }
-	Public_ProdSetSize = { prod=$TargetID$ sizevar=Tmp_1 soph=Tmp_2}
-	set_key = { lhs = Tmp_1 value = 0 }
-	set_key = { lhs = Tmp_2 value = 0 }
+	if = {
+		limit = { 
+			has_province_flag = Industry_$FromID$Present
+		}
+		if = {
+			limit = {
+				Prod_Can_$TargetID$ = yes
+			}
+			set_key = { lhs = Tmp_1 value = 0 }
+			Public_GetValuesOfProd = { prod=$FromID$ return=Tmp_1 }
+			Effect_CloseProd = { IndustryID=$FromID$ }
+			Public_AddProduce = { prod=$TargetID$ size=5 soph=100 wealth=0 }
+			# Reduce Skill by 20%
+			multiply_key = { lhs = Tmp_2 value = 0.8 }
+			Public_ProdSetSize = { prod=$TargetID$ sizevar=Tmp_1 soph=Tmp_2}
+			set_key = { lhs = Tmp_1 value = 0 }
+			set_key = { lhs = Tmp_2 value = 0 }
+		}
+	}
 }
 
 # Use this function to change the rank of an infrastructure
