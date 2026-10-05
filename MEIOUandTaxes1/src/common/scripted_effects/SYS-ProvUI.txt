@@ -1,0 +1,61 @@
+# Country scope. Shared with the native ADM callback.
+Prov_CycleClassLayer = {
+	change_key = { lhs = Class_Layer value = 1 }
+
+	if = {
+		limit = {
+			OR = {
+				check_key = { lhs = Class_Layer value = 5 }
+
+				AND = {
+					NOT = {
+						has_country_flag = UI_Tooltip_On
+					}
+
+					check_key = { lhs = Class_Layer value = 4 }
+				}
+			}
+		}
+		set_key = { lhs = Class_Layer value = 0 }
+	}
+
+	every_owned_province = {
+		limit = {
+			isValidEmpty = yes
+		}
+		set_key = { lhs = Class_Layer which = PREV }
+	}
+	save_event_target_as = Plague
+	every_known_country = {
+		limit = {
+			isValidCountry = yes
+		}
+		every_owned_province = {
+			limit = {
+				isValidEmpty = yes
+			}
+			set_key = { lhs = Class_Layer which = event_target:Plague }
+		}
+	}
+}
+
+# Province scope. Preserve the native selection scopes and SYS_Pin dispatch.
+Prov_ToggleSelection = {
+	if = {
+		limit = {
+			owner = { ai = no NOT = { has_country_flag = UI_Freeze } }
+		}
+		if = {
+			limit = {
+				OR = {
+					has_province_flag = Pin_Show
+					has_province_flag = UI_Select
+				}
+			}
+			Pow_UI_R = yes
+		}
+		else = {
+			Pow_UI = yes
+		}
+	}
+}
