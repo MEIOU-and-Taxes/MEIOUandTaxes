@@ -1,0 +1,21 @@
+# Display helpers. Nothing here changes simulation state; everything writes either display keys
+# (Nat_* recalcs) or mtui_* variables.
+
+# Round variable $var$ to 0 or 1 decimals. EU4 variables are fixed point with 3 decimals, so
+# x * 0.001 * 1000 drops the fraction (the whole_part trick); +-0.5 first makes it round.
+mtui_round0 = {
+	if = {
+		limit = { check_variable = { which = $var$ value = 0 } }
+		change_variable = { which = $var$ value = 0.5 }
+	}
+	else = {
+		subtract_variable = { which = $var$ value = 0.5 }
+	}
+	multiply_variable = { which = $var$ value = 0.001 }
+	multiply_variable = { which = $var$ value = 1000 }
+}
+mtui_round1 = {
+	multiply_variable = { which = $var$ value = 10 }
+	mtui_round0 = { var = $var$ }
+	divide_variable = { which = $var$ value = 10 }
+}
