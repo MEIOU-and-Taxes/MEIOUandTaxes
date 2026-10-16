@@ -783,18 +783,31 @@ MN_GetInfrast_Helper = {
 		if = {
 			limit = { is_key_equal = { lhs = MN_S$slot$ which = DG_Tmp1 } }
 			change_key = { lhs = MN_S$slot$INF value = 5 }
+			# State religion buff from Priv
+			if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLLearning Lvl=2 } } }
+				change_key = { lhs = MN_S$slot$INF value = 5 }
+			}
+			else_if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLLearning Lvl=3 } } }
+				change_key = { lhs = MN_S$slot$INF value = 15 }
+			}			
 		}
 		else = {
 			change_key = { lhs = MN_S$slot$INF value = 1 }
+			# Other religion change from Priv
+			if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLOffice Lvl=1 } } }
+				multiply_key = { lhs = MN_S$slot$INF value = 0.9 }
+			}
+			else_if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLOffice Lvl=2 } } }
+				multiply_key = { lhs = MN_S$slot$INF value = 0.75 }
+			}			
 		}
 		
 		#Entrenchment starts at 50%
 		set_key = { lhs = MN_S$slot$ENT value = 50 }
-		#The fewer the number, the more zealot they are
-#		set_key = { lhs = DG_Tmp1 value = 100 }
-#		subtract_key = { lhs = DG_Tmp1 which = MN_S$slot$TotP }
-#		multiply_key = { lhs = MN_S$slot$ENT which = DG_Tmp1 }
-#		divide_key = { lhs = MN_S$slot$ENT value = 100 }
 		#Effect of harsh terrains
 		if = {
 			limit = { forest_trigger = yes }
@@ -903,6 +916,15 @@ MN_GetInfrast_Helper = {
 			limit = { is_key_equal = { lhs = MN_S$slot$ which = DG_Tmp1 } }
 			change_key = { lhs = MN_S$slot$ENT value = 25 }
 		}
+		if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLBlasphemy Lvl=2 } } }
+			multiply_key = { lhs = MN_S$slot$INF value = 1.05 }
+		}
+		else_if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLBlasphemy Lvl=3 } } }
+			multiply_key = { lhs = MN_S$slot$INF value = 1.15 }
+		}		
+
 		#Entrenchment should be between 0.01 and 100
 		if = {
 			limit = { NOT = { check_key = { lhs = MN_S$slot$ENT value = 0.01 } } }
@@ -912,6 +934,17 @@ MN_GetInfrast_Helper = {
 			limit = { check_key = { lhs = MN_S$slot$ENT value = 100 } }
 			set_key = { lhs = MN_S$slot$ENT value = 100 }
 		}
+
+		#Infrastructure should be between 0.01 and 100, definetly not go below 0, not sure if we accidently could
+		if = {
+			limit = { NOT = { check_key = { lhs = MN_S$slot$INF  value = 0.01 } } }
+			set_key = { lhs = MN_S$slot$INF  value = 0.01 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = MN_S$slot$INF  value = 100 } }
+			set_key = { lhs = MN_S$slot$INF  value = 100 }
+		}
+
 	}
 }
 
