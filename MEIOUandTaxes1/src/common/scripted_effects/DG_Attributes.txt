@@ -783,18 +783,31 @@ MN_GetInfrast_Helper = {
 		if = {
 			limit = { is_key_equal = { lhs = MN_S$slot$ which = DG_Tmp1 } }
 			change_key = { lhs = MN_S$slot$INF value = 5 }
+			# State religion buff from Priv
+			if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLLearning Lvl=2 } } }
+				change_key = { lhs = MN_S$slot$INF value = 5 }
+			}
+			else_if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLLearning Lvl=3 } } }
+				change_key = { lhs = MN_S$slot$INF value = 15 }
+			}			
 		}
 		else = {
 			change_key = { lhs = MN_S$slot$INF value = 1 }
+			# Other religion change from Priv
+			if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLOffice Lvl=1 } } }
+				multiply_key = { lhs = MN_S$slot$INF value = 0.9 }
+			}
+			else_if = {
+				limit = { owner = { Privilege_Has = { Privilege=CLOffice Lvl=2 } } }
+				multiply_key = { lhs = MN_S$slot$INF value = 0.75 }
+			}			
 		}
 		
 		#Entrenchment starts at 50%
 		set_key = { lhs = MN_S$slot$ENT value = 50 }
-		#The fewer the number, the more zealot they are
-#		set_key = { lhs = DG_Tmp1 value = 100 }
-#		subtract_key = { lhs = DG_Tmp1 which = MN_S$slot$TotP }
-#		multiply_key = { lhs = MN_S$slot$ENT which = DG_Tmp1 }
-#		divide_key = { lhs = MN_S$slot$ENT value = 100 }
 		#Effect of harsh terrains
 		if = {
 			limit = { forest_trigger = yes }
@@ -903,6 +916,15 @@ MN_GetInfrast_Helper = {
 			limit = { is_key_equal = { lhs = MN_S$slot$ which = DG_Tmp1 } }
 			change_key = { lhs = MN_S$slot$ENT value = 25 }
 		}
+		if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLBlasphemy Lvl=2 } } }
+			multiply_key = { lhs = MN_S$slot$INF value = 1.05 }
+		}
+		else_if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLBlasphemy Lvl=3 } } }
+			multiply_key = { lhs = MN_S$slot$INF value = 1.15 }
+		}		
+
 		#Entrenchment should be between 0.01 and 100
 		if = {
 			limit = { NOT = { check_key = { lhs = MN_S$slot$ENT value = 0.01 } } }
@@ -912,6 +934,17 @@ MN_GetInfrast_Helper = {
 			limit = { check_key = { lhs = MN_S$slot$ENT value = 100 } }
 			set_key = { lhs = MN_S$slot$ENT value = 100 }
 		}
+
+		#Infrastructure should be between 0.01 and 100, definetly not go below 0, not sure if we accidently could
+		if = {
+			limit = { NOT = { check_key = { lhs = MN_S$slot$INF  value = 0.01 } } }
+			set_key = { lhs = MN_S$slot$INF  value = 0.01 }
+		}
+		else_if = {
+			limit = { check_key = { lhs = MN_S$slot$INF  value = 100 } }
+			set_key = { lhs = MN_S$slot$INF  value = 100 }
+		}
+
 	}
 }
 
@@ -1374,11 +1407,24 @@ MN_RlgShift = {
 	if = {
 		limit = { NOT = { is_key_equal = { lhs = MN_S0 which = DG_Tmp0 } } }
 		MN_AddReligion = { type = which religion = DG_Tmp0 }
-
-		set_key      = { lhs = DG_Tmp2 value = 0.050 }
-		set_key      = { lhs = DG_Tmp3 value = 0.250 }
-		set_key      = { lhs = DG_Tmp4 value = 0.050 }
-		
+		# If we do this more often, introduce it into API as modifier and changeable value.
+		if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLAttendance Lvl=3 } } }
+			set_key      = { lhs = DG_Tmp2 value = 0.100 }
+			set_key      = { lhs = DG_Tmp3 value = 0.500 }
+			set_key      = { lhs = DG_Tmp4 value = 0.100 }
+		}
+		else_if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLAttendance Lvl=2 } } }
+			set_key      = { lhs = DG_Tmp2 value = 0.075 }
+			set_key      = { lhs = DG_Tmp3 value = 0.375 }
+			set_key      = { lhs = DG_Tmp4 value = 0.075 }
+		}
+		else = {
+			set_key      = { lhs = DG_Tmp2 value = 0.050 }
+			set_key      = { lhs = DG_Tmp3 value = 0.250 }
+			set_key      = { lhs = DG_Tmp4 value = 0.050 }		
+		}		
 		MN_HeresyHelper = { to = DG_Tmp0 typeto = which from = MN_S0 typefrom = which }
 
 		set_key = { lhs = DG_Tmp2 value = 0 }
@@ -1672,15 +1718,22 @@ MN_Autonomy_Helper = {
 	subtract_key = { lhs = DG_Tmp7 which = MN_S$slot$Tolerance }
 	multiply_key = { lhs = DG_Tmp7 value = 0.05 }
 	multiply_key = { lhs = DG_Tmp7 which = MN_S$slot$TotP }
+	if = { # if we add another effect for this, make the API support it, would needs new keys
+		limit = { owner = { Privilege_Has = { Privilege=CLInquisition Lvl=0 } } }
+		multiply_key = { lhs = DG_Tmp7 value = 0.50 }
+	}
+	else_if = {
+		limit = { owner = { Privilege_Has = { Privilege=CLInquisition Lvl=1 } } }
+		multiply_key = { lhs = DG_Tmp7 value = 0.25 }
+	}
 	if = {
-		limit = { check_key = { lhs = DG_Tmp7 value = 0.001 } }
+		limit = { check_key = { lhs = DG_Tmp7 value = 0.5 } } # prevent super marginal amounts
 		change_key = { lhs = DG_Tmp1 which = DG_Tmp7 }	#Update the autonomy to be added
 	}
 }
 
 
 MN_Autonomy = {
-    if = {
         set_key = { lhs = DG_Tmp1 value = 0 }	#Reset our value just to be sure
 
 		#Do the autonomy helper for all slots
@@ -1722,7 +1775,6 @@ MN_Autonomy = {
 		#Reset our values to zero to not clog the savefile
         set_key = { lhs = DG_Tmp1 value = 0 }
 		set_key = { lhs = DG_Tmp7 value = 0 }
-    }
 }
 
 #Adds a trauma corresponding to the size of the minority, impacted by the strength set by event.
