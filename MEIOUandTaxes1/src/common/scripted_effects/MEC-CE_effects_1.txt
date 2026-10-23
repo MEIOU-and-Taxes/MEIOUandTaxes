@@ -4,6 +4,8 @@ CE_Main = {
 	# Initialization
 	ce_cleanup = yes
 
+	ce_pick_begin = yes # setup of the dispatch selection (ce_set_runner_dispatching_province_land)
+
 	if = {
 		limit = {
 			is_subject_other_than_tributary_trigger = yes
@@ -94,7 +96,9 @@ CE_Main = {
 		ce_get_cost_port_to = { return = tv_cost_port_to }
 
 		set_province_flag = CE_Cand
+		ce_pick_mark = yes
 	}
+	ce_pick_ready = yes
 
 	# Set runner_dispatching_province
 	# The runner_dispatching_province sends out runners to all neighboring provinces and sea zones 
@@ -175,7 +179,6 @@ CE_Main = {
 				check_key = { lhs = tv_owned_provinces_in_state_in_progress value = 1 }
 			}
 			ce_set_runner_dispatching_province_land = {
-				scope = every_province
 				max = 1800
 			}
 			
@@ -382,7 +385,6 @@ CE_Main = {
 	
 		
 						ce_set_runner_dispatching_province_land = {
-							scope = every_province
 							max = 960
 						}
 						ce_set_runner_dispatching_province_sea = {
@@ -792,24 +794,122 @@ ce_cleanup = {
 	}
 }
 
+# Picks the candidate with the lowest travel time. Only the provinces that can be candidates are walked (see CE_Main);
+# ties go to the lower province id (ID_Prov), so the pick does not depend on the walking order.
+# If nothing qualifies, the dispatching province stays the current one (already final), which ends the caller's loop.
 ce_set_runner_dispatching_province_land = {
+	event_target:runner_dispatching_province = { save_event_target_as = runner_dispatching_province_cand }
 	set_key = { lhs = Tmp_0 which = tv_tt }
 	set_key = { lhs = tv_tt value = 1800 }
-	$scope$ = {
-		limit = {
-			has_province_flag = CE_Cand
-			has_lowest_travel_time = { max = $max$ }
+	set_key = { lhs = CE_BestId value = 1000000 }
+	save_event_target_as = ce_acc
+	if = {
+		limit = { has_global_flag = ce_tree_mode }
+		event_target:tt_highest = { ce_each_tree = { effect = ce_pick_land_$max$ } }
+	}
+	else = {
+		every_country = {
+			limit = { has_country_flag = ce_area_owner }
+			every_owned_province = { ce_pick_land_$max$ = yes }
 		}
-		PREV = { set_key = { lhs = tv_tt which = PREV } }
-		save_event_target_as = runner_dispatching_province_cand
 	}
 	event_target:runner_dispatching_province_cand = { save_event_target_as = runner_dispatching_province }
 	set_key = { lhs = tv_tt which = Tmp_0 }
 	set_key = { lhs = Tmp_0 value = 0 }
+	set_key = { lhs = CE_BestId value = 0 }
 }
+# Setup for the selection; every route finder that uses it (CE_Main, AI_StateBuilding_CE) calls these three:
+# ce_pick_begin (country scope) before flagging CE_Cand, ce_pick_mark in every province it flags CE_Cand,
+# ce_pick_ready (country scope, after event_target:tt_highest is set) afterwards.
+ce_pick_begin = {
+	save_event_target_as = ce_country
+	every_country = {
+		limit = { has_country_flag = ce_area_owner }
+		clr_country_flag = ce_area_owner
+	}
+	set_key = { lhs = CE_CandCount value = 0 }
+}
+ce_pick_mark = {
+	event_target:ce_country = { change_key = { lhs = CE_CandCount value = 1 } }
+	owner = { set_country_flag = ce_area_owner }
+}
+# Which provinces the selection walks: the subject tree of tt_highest if it holds every candidate,
+# otherwise (special access: HRE, Japan, the popes) the provinces of every country that owns a candidate
+ce_pick_ready = {
+	set_key = { lhs = CE_TreeCount value = 0 }
+	event_target:tt_highest = { ce_each_tree = { effect = ce_count_tree } }
+	if = {
+		limit = { is_key_equal = { lhs = CE_TreeCount which = CE_CandCount } }
+		set_global_flag = ce_tree_mode
+	}
+	else = {
+		clr_global_flag = ce_tree_mode
+	}
+}
+# one wrapper per max value used by a caller (CE_Main 1800 and 960, AI_StateBuilding_CE 1440)
+ce_pick_land_1800 = { ce_pick_land = { max = 1800 } }
+ce_pick_land_1440 = { ce_pick_land = { max = 1440 } }
+ce_pick_land_960 = { ce_pick_land = { max = 960 } }
+ce_pick_land = { # province scope; event_target:ce_acc holds the best travel time (tv_tt) and its province id (CE_BestId)
+	if = {
+		limit = {
+			has_province_flag = ce_dispatch_cand
+			NOT = { has_province_flag = tf_communication_efficiency_final }
+			has_province_flag = CE_Cand
+			NOT = { check_key = { lhs = tv_tt value = $max$ } }
+		}
+		set_key = { lhs = CE_BestId which = event_target:ce_acc }
+		if = {
+			limit = {
+				OR = {
+					NOT = { check_key = { lhs = tv_tt which = event_target:ce_acc } } # lower travel time
+					AND = {
+						event_target:ce_acc = { check_key = { lhs = tv_tt which = PREV } } # equal travel time ...
+						NOT = { check_key = { lhs = ID_Prov which = CE_BestId } }       # ... and lower id
+					}
+				}
+			}
+			set_key = { lhs = CE_BestId which = ID_Prov }
+			event_target:ce_acc = {
+				set_key = { lhs = tv_tt which = PREV }
+				set_key = { lhs = CE_BestId which = PREV }
+			}
+			save_event_target_as = runner_dispatching_province_cand
+		}
+		set_key = { lhs = CE_BestId value = 0 }
+	}
+}
+# Runs $effect$ in every province of the current country and its subjects (3 levels deep)
+ce_each_tree = {
+	every_owned_province = { $effect$ = yes }
+	every_subject_country = {
+		every_owned_province = { $effect$ = yes }
+		every_subject_country = {
+			every_owned_province = { $effect$ = yes }
+			every_subject_country = {
+				every_owned_province = { $effect$ = yes }
+			}
+		}
+	}
+}
+ce_count_tree = {
+	if = {
+		limit = { has_province_flag = CE_Cand }
+		event_target:ce_country = { change_key = { lhs = CE_TreeCount value = 1 } }
+	}
+}
+# Runs right after ce_set_runner_dispatching_province_land. A sea zone replaces the land candidate only if its travel
+# time is strictly lower, so the next dispatch is always the closest unsettled province or sea zone (Dijkstra order).
+# The land candidate is new (not final) only if the land pick found one.
 ce_set_runner_dispatching_province_sea = {
 	set_key = { lhs = Tmp_0 which = tv_tt }
 	set_key = { lhs = tv_tt value = 1800 }
+	event_target:runner_dispatching_province = {
+		if = {
+			limit = { NOT = { has_province_flag = tf_communication_efficiency_final } }
+			PREV = { set_key = { lhs = tv_tt which = PREV } }
+		}
+	}
 	sea_starts = {
 		limit = {
 			has_lowest_travel_time = { max = $max$ }
@@ -1080,6 +1180,10 @@ ce_do_land = {
 	}
 }
 
+# River runners: from the dispatching province, shortest travel along connected river provinces (Dijkstra along the
+# river). tf_river_done = river distance (tv_ts) final; tf_river_cand = reached, tv_ts may still shrink. The next
+# province to expand is the reached one with the lowest tv_ts (ties: lowest province id), so the result does not
+# depend on any walking order.
 ce_do_river = {
 	if = {
 		limit = {
@@ -1121,18 +1225,26 @@ ce_do_river = {
 							PREV = { has_province_flag = TN_RiverJoint }
 						}
 					}
-					set_province_flag = tf_river_cand
-					set_province_flag = tf_river_done
-					
-					set_key = { lhs = tv_ts which = PREV }
-					
 					export_province_distance_river_province_effect = {
 						which = tv_province_distance
 						who = event_target:Prov
 					}
-					
+
+					if = {
+						limit = { has_province_flag = tf_river_cand }
+						set_key = { lhs = tv_tt_new which = tv_ts } # river distance found so far
+					}
+					set_key = { lhs = tv_ts which = PREV }
 					change_key = { lhs = tv_ts which = tv_province_distance }
-					
+					if = {
+						limit = {
+							has_province_flag = tf_river_cand
+							check_key = { lhs = tv_ts which = tv_tt_new }
+						}
+						set_key = { lhs = tv_ts which = tv_tt_new } # the earlier one is not longer: keep it
+					}
+					set_province_flag = tf_river_cand
+
 					set_key = { lhs = tv_tt_new which = tv_ts }
 					change_key = { lhs = tv_tt_new which = tv_cost_port_embark }
 					
@@ -1165,15 +1277,32 @@ ce_do_river = {
 				}
 			}
 			
-			random_province = {
+			# next: the reached province with the lowest river distance (event_target:ce_acc, our country, holds the best so far)
+			event_target:ce_country = { save_event_target_as = ce_acc }
+			event_target:ce_acc = {
+				set_key = { lhs = tv_ts value = 1000000 }
+				set_key = { lhs = CE_BestId value = 1000000 }
+			}
+			every_province = {
 				limit = {
 					has_province_flag = tf_river_cand
 				}
-				clr_province_flag = tf_river_cand
-				
+				ce_pick_river = yes
+			}
+			if = {
+				limit = {
+					event_target:ce_acc = { NOT = { check_key = { lhs = CE_BestId value = 1000000 } } }
+				}
+				event_target:ce_river_next = {
+					clr_province_flag = tf_river_cand
+					set_province_flag = tf_river_done
+					save_event_target_as = Prov
+				}
 				set_global_flag = tf_river
-				
-				save_event_target_as = Prov
+			}
+			event_target:ce_acc = {
+				set_key = { lhs = tv_ts value = 0 }
+				set_key = { lhs = CE_BestId value = 0 }
 			}
 		}
 		
@@ -1186,4 +1315,25 @@ ce_do_river = {
 			set_key = { lhs = tv_ts value = 0 }
 		}
 	}
+}
+ce_pick_river = { # province scope; event_target:ce_acc holds the best river distance (tv_ts) and its province id (CE_BestId)
+	set_key = { lhs = CE_BestId which = event_target:ce_acc }
+	if = {
+		limit = {
+			OR = {
+				NOT = { check_key = { lhs = tv_ts which = event_target:ce_acc } } # shorter river distance
+				AND = {
+					event_target:ce_acc = { check_key = { lhs = tv_ts which = PREV } } # equal distance ...
+					NOT = { check_key = { lhs = ID_Prov which = CE_BestId } }       # ... and lower id
+				}
+			}
+		}
+		set_key = { lhs = CE_BestId which = ID_Prov }
+		event_target:ce_acc = {
+			set_key = { lhs = tv_ts which = PREV }
+			set_key = { lhs = CE_BestId which = PREV }
+		}
+		save_event_target_as = ce_river_next
+	}
+	set_key = { lhs = CE_BestId value = 0 }
 }
