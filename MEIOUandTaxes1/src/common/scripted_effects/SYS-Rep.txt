@@ -1,17 +1,28 @@
+# Wealth, income and spending of a census go into the $class$_Hist* keys, not $class$_Wealth/_Income/_Spend:
+# for the estates those country keys hold the national totals (Nat_Main), which the census must not overwrite.
 Rep_1 = {
     set_key = { lhs = $class$_Total value = 0 }
     set_key = { lhs = $class$_Birth value = 0 }
     set_key = { lhs = $class$_In value = 0 }
     set_key = { lhs = $class$_Out value = 0 }
-    set_key = { lhs = $class$_Wealth value = 0 }
+    set_key = { lhs = $class$_HistWealth value = 0 }
     set_key = { lhs = $class$_FillFood value = 0 }
     set_key = { lhs = $class$_FillLife value = 0 }
     set_key = { lhs = $class$_FillComfort value = 0 }
     set_key = { lhs = $class$_FillLuxury value = 0 }
     set_key = { lhs = $class$_FillKnowledge value = 0 }
-    set_key = { lhs = $class$_Income value = 0 }
-    set_key = { lhs = $class$_Spend value = 0 }
+    set_key = { lhs = $class$_HistIncome value = 0 }
+    set_key = { lhs = $class$_HistSpend value = 0 }
     set_key = { lhs = $class$_MP value = 0 }
+}
+
+# Adds PREV's (a census province's) $class$_$key$ to this country's $class$_Hist$key$ (different key names add up through Tmp_9)
+Rep_2Hist = {
+    PREV = { set_key = { lhs = Tmp_9 which = $class$_$key$ } }
+    set_key = { lhs = Tmp_9 which = PREV }
+    change_key = { lhs = $class$_Hist$key$ which = Tmp_9 }
+    set_key = { lhs = Tmp_9 value = 0 }
+    PREV = { set_key = { lhs = Tmp_9 value = 0 } }
 }
 
 Rep_2 = {
@@ -19,7 +30,7 @@ Rep_2 = {
     change_key = { lhs = $class$_Birth which = PREV }
     change_key = { lhs = $class$_In which = PREV }
     change_key = { lhs = $class$_Out which = PREV }
-    change_key = { lhs = $class$_Wealth which = PREV }
+    Rep_2Hist = { class = $class$ key = Wealth }
     change_key = { lhs = $class$_MP which = PREV }
 
     PREV = {
@@ -40,8 +51,8 @@ Rep_2 = {
     change_key = { lhs = $class$_FillComfort which = PREV }
     change_key = { lhs = $class$_FillLuxury which = PREV }
     change_key = { lhs = $class$_FillKnowledge which = PREV }
-    change_key = { lhs = $class$_Income which = PREV }
-    change_key = { lhs = $class$_Spend which = PREV }
+    Rep_2Hist = { class = $class$ key = Income }
+    Rep_2Hist = { class = $class$ key = Spend }
 
     PREV = {
         if = {
@@ -62,9 +73,13 @@ Rep_3 = {
         limit = {
             check_key = { lhs = $class$_Total value = 0.001 }
         }
-        divide_key = { lhs = $class$_Wealth which = $class$_Total }
-        divide_key = { lhs = $class$_Income which = $class$_Total }
-        divide_key = { lhs = $class$_Spend which = $class$_Total }
+        # $class$_Total is in thousands: per 1000 people, then per person
+        divide_key = { lhs = $class$_HistWealth which = $class$_Total }
+        divide_key = { lhs = $class$_HistIncome which = $class$_Total }
+        divide_key = { lhs = $class$_HistSpend which = $class$_Total }
+        multiply_key = { lhs = $class$_HistWealth value = 0.001 }
+        multiply_key = { lhs = $class$_HistIncome value = 0.001 }
+        multiply_key = { lhs = $class$_HistSpend value = 0.001 }
         divide_key = { lhs = $class$_FillFood which = $class$_Total }
         divide_key = { lhs = $class$_FillLife which = $class$_Total }
         divide_key = { lhs = $class$_FillComfort which = $class$_Total }
@@ -72,28 +87,15 @@ Rep_3 = {
         divide_key = { lhs = $class$_FillKnowledge which = $class$_Total }
     }
     else = {
-        set_key = { lhs = $class$_Wealth value = 0 }
-        set_key = { lhs = $class$_Income value = 0 }
-        set_key = { lhs = $class$_Spend value = 0 }
+        set_key = { lhs = $class$_HistWealth value = 0 }
+        set_key = { lhs = $class$_HistIncome value = 0 }
+        set_key = { lhs = $class$_HistSpend value = 0 }
         set_key = { lhs = $class$_FillFood value = 0 }
         set_key = { lhs = $class$_FillLife value = 0 }
         set_key = { lhs = $class$_FillComfort value = 0 }
         set_key = { lhs = $class$_FillLuxury value = 0 }
         set_key = { lhs = $class$_FillKnowledge value = 0 }
     }
-
-    if = { limit = { is_key_equal = { lhs = $class$_HistTotal value = 0 } } set_key = { lhs = $class$_HistTotal which = $class$_Total } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistBirth value = 0 } } set_key = { lhs = $class$_HistBirth which = $class$_Birth } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistIn value = 0 } } set_key = { lhs = $class$_HistIn which = $class$_In } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistOut value = 0 } } set_key = { lhs = $class$_HistOut which = $class$_Out } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistWealth value = 0 } } set_key = { lhs = $class$_HistWealth which = $class$_Wealth } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistFillFood value = 0 } } set_key = { lhs = $class$_HistFillFood which = $class$_FillFood } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistFillLife value = 0 } } set_key = { lhs = $class$_HistFillLife which = $class$_FillLife } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistFillComfort value = 0 } } set_key = { lhs = $class$_HistFillComfort which = $class$_FillComfort } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistFillLuxury value = 0 } } set_key = { lhs = $class$_HistFillLuxury which = $class$_FillLuxury } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistFillKnowledge value = 0 } } set_key = { lhs = $class$_HistFillKnowledge which = $class$_FillKnowledge } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistIncome value = 0 } } set_key = { lhs = $class$_HistIncome which = $class$_Income } }
-    if = { limit = { is_key_equal = { lhs = $class$_HistSpend value = 0 } } set_key = { lhs = $class$_HistSpend which = $class$_Spend } }
 }
 
 Rep_4Helper = {
@@ -101,14 +103,14 @@ Rep_4Helper = {
     set_key = { lhs = $class$_Birth which = Census_S$slot$.$class$_Birth }
     set_key = { lhs = $class$_In which = Census_S$slot$.$class$_In }
     set_key = { lhs = $class$_Out which = Census_S$slot$.$class$_Out }
-    set_key = { lhs = $class$_Wealth which = Census_S$slot$.$class$_Wealth }
+    set_key = { lhs = $class$_HistWealth which = Census_S$slot$.$class$_Wealth }
     set_key = { lhs = $class$_FillFood which = Census_S$slot$.$class$_FillFood }
     set_key = { lhs = $class$_FillLife which = Census_S$slot$.$class$_FillLife }
     set_key = { lhs = $class$_FillComfort which = Census_S$slot$.$class$_FillComfort }
     set_key = { lhs = $class$_FillLuxury which = Census_S$slot$.$class$_FillLuxury }
     set_key = { lhs = $class$_FillKnowledge which = Census_S$slot$.$class$_FillKnowledge }
-    set_key = { lhs = $class$_Income which = Census_S$slot$.$class$_Income }
-    set_key = { lhs = $class$_Spend which = Census_S$slot$.$class$_Spend }
+    set_key = { lhs = $class$_HistIncome which = Census_S$slot$.$class$_Income }
+    set_key = { lhs = $class$_HistSpend which = Census_S$slot$.$class$_Spend }
     set_key = { lhs = $class$_MP which = Census_S$slot$.$class$_MP }
 }
 
@@ -156,14 +158,14 @@ Rep_5Helper = {
     set_key = { lhs = Census_S$slot$.$class$_Birth which = $class$_Birth }
     set_key = { lhs = Census_S$slot$.$class$_In which = $class$_In }
     set_key = { lhs = Census_S$slot$.$class$_Out which = $class$_Out }
-    set_key = { lhs = Census_S$slot$.$class$_Wealth which = $class$_Wealth }
+    set_key = { lhs = Census_S$slot$.$class$_Wealth which = $class$_HistWealth }
     set_key = { lhs = Census_S$slot$.$class$_FillFood which = $class$_FillFood }
     set_key = { lhs = Census_S$slot$.$class$_FillLife which = $class$_FillLife }
     set_key = { lhs = Census_S$slot$.$class$_FillComfort which = $class$_FillComfort }
     set_key = { lhs = Census_S$slot$.$class$_FillLuxury which = $class$_FillLuxury }
     set_key = { lhs = Census_S$slot$.$class$_FillKnowledge which = $class$_FillKnowledge }
-    set_key = { lhs = Census_S$slot$.$class$_Income which = $class$_Income }
-    set_key = { lhs = Census_S$slot$.$class$_Spend which = $class$_Spend }
+    set_key = { lhs = Census_S$slot$.$class$_Income which = $class$_HistIncome }
+    set_key = { lhs = Census_S$slot$.$class$_Spend which = $class$_HistSpend }
     set_key = { lhs = Census_S$slot$.$class$_MP which = $class$_MP }
 }
 

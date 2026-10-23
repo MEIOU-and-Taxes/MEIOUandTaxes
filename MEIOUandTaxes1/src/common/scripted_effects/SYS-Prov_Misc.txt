@@ -273,11 +273,11 @@ Prov_PowInit = {
 	if = {
 		limit = {
 			owner = {
-				check_key = { lhs = Privilege_BGService value = 1 }
+				check_key = { lhs = Privilege_BGServiceE value = 1 }
 			}
 		}
 		owner = {
-			set_key = { lhs = Tmp_1 which = Privilege_BGService }
+			set_key = { lhs = Tmp_1 which = Privilege_BGServiceE }
 			PREV = { set_key = { lhs = Tmp_1 which = PREV } }
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
@@ -311,11 +311,11 @@ Prov_PowInit = {
 	if = {
 		limit = {
 			owner = {
-				check_key = { lhs = Privilege_CLTax value = 1 }
+				check_key = { lhs = Privilege_CLTaxE value = 1 }
 			}
 		}
 		owner = {
-			set_key = { lhs = Tmp_1 which = Privilege_CLTax }
+			set_key = { lhs = Tmp_1 which = Privilege_CLTaxE }
 			PREV = { set_key = { lhs = Tmp_1 which = PREV } }
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
@@ -332,11 +332,11 @@ Prov_PowInit = {
 	if = {
 		limit = {
 			owner = {
-				check_key = { lhs = Privilege_CLService value = 1 }
+				check_key = { lhs = Privilege_CLServiceE value = 1 }
 			}
 		}
 		owner = {
-			set_key = { lhs = Tmp_1 which = Privilege_CLService }
+			set_key = { lhs = Tmp_1 which = Privilege_CLServiceE }
 			PREV = { set_key = { lhs = Tmp_1 which = PREV } }
 			set_key = { lhs = Tmp_1 value = 0 }
 		}
@@ -918,7 +918,7 @@ Prov_DoPowNO = {
 	### Treatment effects, essentially class concern due to power changes
 	# Half effect (PowChange * 0.5), representing the degree that the class can accept self-responsibiliy for their changes
 	set_key = { lhs = Tmp_0 which = Prov_NOPowChange }
-	multiply_key = { lhs = Tmp_0 value = 0.005 }
+	multiply_key = { lhs = Tmp_0 value = 0.5 }
 	Public_ChangeConcern = { Concern=Hierarchy type=which inp=Tmp_0 }
 
 	set_key = { lhs = Tmp_0 value = 0 }
@@ -1050,7 +1050,7 @@ Prov_DoPowBG = {
 	### Treatment effects, essentially class concern due to power changes
 	# Half effect (PowChange * 0.5), representing the degree that the class can accept self-responsibiliy for their changes
 	set_key = { lhs = Tmp_0 which = Prov_BGPowChange }
-	multiply_key = { lhs = Tmp_0 value = 0.005 }
+	multiply_key = { lhs = Tmp_0 value = 0.5 }
 	Public_ChangeConcern = { Concern=Consultation type=which inp=Tmp_0 }
 
 	set_key = { lhs = Tmp_0 value = 0 }
@@ -1178,7 +1178,7 @@ Prov_DoPowCL = {
 	### Treatment effects, essentially class concern due to power changes
 	# Half effect (PowChange * 0.5), representing the degree that the class can accept self-responsibiliy for their changes
 	set_key = { lhs = Tmp_0 which = Prov_CLPowChange }
-	multiply_key = { lhs = Tmp_0 value = 0.005 }
+	multiply_key = { lhs = Tmp_0 value = 0.5 }
 	Public_ChangeConcern = { Concern=Spirituality type=which inp=Tmp_0 }
 
 	set_key = { lhs = Tmp_0 value = 0 }
@@ -3542,9 +3542,51 @@ Prov_DoTaxCL = {
 				}
 			}
 			Tax_CalcClass = { Class=CL TaxBase=Wealth TaxType=CharityRE Flow=yes }
-			Tax_ResetTax = yes
+			Tax_ResetTax = yes			
 		}
-
+		# Church Privileges
+		if = {
+			limit = {
+				Privilege_HasGreater = { Privilege=CLAppointments Lvl=1 }
+			}
+			set_key = { lhs = Tax_TmpBase value = 5 } # 5% of Income
+			if = {
+				limit = {
+					Privilege_Has = { Privilege=CLAppointments Lvl=2 }
+				}
+				change_key = { lhs = Tax_TmpBase value = 5 } # increase to 10% of Income
+			}
+			else_if = {
+				limit = {
+					Privilege_Has = { Privilege=CLAppointments Lvl=3 }
+				}
+				change_key = { lhs = Tax_TmpBase value = 10 } # increase to 15% of Income
+			}
+			Tax_CalcClass = { Class=NO TaxBase=IncomeTax TaxType=DonationsCL Flow=yes }
+			Tax_CalcClass = { Class=BG TaxBase=IncomeTax TaxType=DonationsCL Flow=yes }
+			Tax_ResetTax = yes	
+		}
+		if = {
+			limit = {
+				Privilege_HasGreater = { Privilege=CLTaxE Lvl=3 }
+			}
+			set_key = { lhs = Tax_TmpBase value = 2.5 } # 2.5% of Income
+			if = {
+				limit = {
+					Privilege_Has = { Privilege=CLTaxE Lvl=4 }
+				}
+				change_key = { lhs = Tax_TmpBase value = 2.5 } # increase to 5% of Income
+			}
+			else_if = {
+				limit = {
+					Privilege_Has = { Privilege=CLTaxE Lvl=5 }
+				}
+				change_key = { lhs = Tax_TmpBase value = 5 } # increase to 10% of Income
+			}
+			Tax_CalcClass = { Class=NO TaxBase=IncomeTax TaxType=DonationsCL Flow=yes }
+			Tax_CalcClass = { Class=BG TaxBase=IncomeTax TaxType=DonationsCL Flow=yes }
+			Tax_ResetTax = yes	
+		}		
 	}
 }
 # Clans
