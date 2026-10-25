@@ -8,14 +8,20 @@ comment = """########################################
 ########################################
 """.format( os.path.basename( __file__ ) )
 
-def set_dct(dct, path):
+def set_dct(dct, path, extra=None):
+    """vars.txt: one key per line, optionally its format and further formats (see the top of vars.txt).
+    Empty lines and lines starting with # are skipped."""
     with open(path) as f:
         for line in f.readlines():
             line = line.strip(' \n\t').replace("  ", " ").split(" ")
-            if len(line) == 1:
+            if line[0] == "" or line[0].startswith("#"):
+                continue
+            if len(line) == 1 or line[1] == "-":
                 dct[line[0]] = ""
             else:
                 dct[line[0]] = line[1]
+            if extra is not None and len(line) > 2:
+                extra[line[0]] = line[2:]
 
 def set_scopes(scopes, path):
     with open(path) as f:
@@ -576,6 +582,103 @@ tmplt2H_locc = """
 # tmplt2H_locc = compressH(tmplt2H_locc)
 # tmpltN_locc = compressH(tmpltN_locc)
 
+# Further formats of a key (vars.txt: the formats after its first one): GV<code>_<key>, e.g. GV63_<key> for "6:3",
+# GVP13_<key> for "+1:3", GV413_<key> for "4:1:3". They reuse the key's GVN_, GVL_ and GVR_ where those fit and
+# add GVL<digits>_, GVR<decimals>_ and GVD<decimals><width>_ (blank for decimals the number does not show) otherwise.
+DIGIT, DOT, SIGN = 7, 4, 5          # pixel widths of a digit, the decimal point and the sign blank in the tooltip font
+
+def extra_format(tok):
+    """'4:3', '+1:3', '4:1:3' -> (sign blank, digits, decimals, decimal width) or None"""
+    import re
+    m = re.fullmatch(r'([+x]?)([1-7]):([0-3])(?::([0-3]))?', tok)
+    if not m:
+        return None
+    dec = int(m.group(3))
+    width = int(m.group(4)) if m.group(4) else dec
+    if width < dec:
+        return None
+    return (m.group(1) != '+', int(m.group(2)), dec, width)
+
+def dec_width(n):
+    return DOT + DIGIT * n if n else 0
+
+def gen_extra(dct, extra, loc_out, locc_out):
+    """appends the further formats to 00-locs_l_english.yml and 00-locs.txt"""
+    loc_lines, blocks, blanks, zeros = [], [], {}, {}
+    for var, toks in extra.items():
+        main = dct[var]
+        code_var = main[0]
+        made = set()
+        for tok in toks:
+            f = extra_format(tok)
+            if f is None:
+                raise SystemExit('vars.txt: %s has an unknown format %s' % (var, tok))
+            sign, digits, dec, width = f
+            if len(main) > 1 and (sign, digits - 1, dec, width) == (main[3] not in '+-', main[1], main[2], dec):
+                continue                                    # the same as its first format: GV_<key>
+            name = ('' if sign else 'P') + str(digits) + str(dec) + (str(width) if width != dec else '')
+            parts = ''
+            if sign:
+                if not (len(main) > 1 and main[3] not in '+-'):
+                    if 'N' not in made:
+                        blocks.append(tmpltN_locc.replace('%s', var).replace('%d', code_var))
+                        made.add('N')
+                parts += '[GVN_%s]' % var
+            if digits > 1:
+                if len(main) > 1 and main[1] == digits - 1:
+                    parts += '[GVL_%s]' % var
+                else:
+                    if 'L%d' % digits not in made:
+                        text = tmplt1_locc
+                        for x in range(digits - 1, 0, -1):
+                            text = text.replace("%H", tmplt1H_locc.replace("%a", str(digits - x)).replace("%b", str(pow(10, x))))
+                        blocks.append(text.replace("%H", "").replace('GVL_%s', 'GVL%d_%s' % (digits, var)).replace('%d', code_var))
+                        made.add('L%d' % digits)
+                    parts += '[GVL%d_%s]' % (digits, var)
+            if width > dec:
+                key = 'GVD%d%d_%s' % (dec, width, var)
+                if key not in made:
+                    text = 'defined_text = {\n    name = %s\n    random = no' % key
+                    for i in range(3 - dec, 0, -1):             # the number shows at most 3 - i decimals
+                        px = max(0, dec_width(width) - dec_width(max(3 - i, dec)))
+                        blanks[px] = 1
+                        text += tmplt2H_locc.replace('%H', '').replace('GVR_%a', 'GVB_%d' % px).replace('%b', str(pow(10, i))).replace('%c', str(1 / pow(10, i))).replace('%d', code_var)
+                    px = max(0, dec_width(width) - dec_width(3))
+                    blanks[px] = 1
+                    text += '\n    text = {\n        localisation_key = GVB_%d\n    }\n}\n' % px
+                    blocks.append(text)
+                    made.add(key)
+                parts += '[%s]' % key
+            parts += '[This.%s.GetValue]' % code_var
+            if dec > 0:
+                if len(main) > 1 and main[2] == dec:
+                    parts += '[GVR_%s]' % var
+                else:
+                    if 'R%d' % dec not in made:
+                        text = tmplt2_locc
+                        i = 3
+                        for x in range(dec, 0, -1):
+                            text = text.replace("%H", tmplt2H_locc.replace("%a", str(dec) + str(x)).replace("%b", str(pow(10, i))).replace("%c", str(1 / pow(10, i))))
+                            i -= 1
+                        blocks.append(text.replace("%H", "").replace('GVR_%s', 'GVR%d_%s' % (dec, var)).replace('%d', code_var))
+                        made.add('R%d' % dec)
+                    parts += '[GVR%d_%s]' % (dec, var)
+            # zero: shown padded like the column, with its own decimals
+            if width == dec:
+                zero = ('GVN_' if sign else 'GV0_') + str(digits - 1) + str(dec)
+            else:
+                zero = 'GVZ_' + name
+                zeros[zero] = '£%dpx£0%s' % ((SIGN if sign else 0) + DIGIT * (digits - 1) + dec_width(width) - dec_width(dec),
+                                             '.' + '0' * dec if dec else '')
+            loc_lines.append(' GV%s_%s: "%s"\n' % (name, var, parts))
+            blocks.append(tmpltA_locc.replace('GV_%s', 'GV%s_%s' % (name, var)).replace('GV%N_%a', zero).replace('%d', code_var))
+    with open(loc_out, 'a', encoding='utf-8', newline='\n') as f:
+        f.write(''.join(' GVB_%d: "%s"\n' % (px, '£%dpx£' % px if px else '') for px in sorted(blanks)))
+        f.write(''.join(' %s: "%s"\n' % kv for kv in sorted(zeros.items())))
+        f.write(''.join(loc_lines))
+    with open(locc_out, 'a', newline='\n') as f:
+        f.write(''.join(blocks))
+
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))
     
@@ -584,7 +687,8 @@ if __name__ == "__main__":
     scopes = ["ROOT", "FROM", "THIS", "PREV", "emperor", "EMPEROR", "owner", "OWNER", "capital", "CAPITAL", "AAA"]
 
     set_scopes(scopes, 'event_targets.txt')
-    set_dct(dct, 'vars.txt')
+    extra = dict()
+    set_dct(dct, 'vars.txt', extra)
     set_key(dct)
 
     for scope in scopes:
@@ -597,6 +701,7 @@ if __name__ == "__main__":
     gen_script_core(trigger, os.path.join('common', 'scripted_triggers', '00-triggers_core.txt'))
     gen_loc(loc, tmplt_loc, tmpltH1_loc, tmpltH2_loc, tmpltN_loc, dct, os.path.join('localisation', '00-locs_l_english.yml'), encoding='utf-8-sig')
     gen_customloc(locc, tmpltA_locc, tmpltB_locc, tmplt1_locc, tmplt1H_locc, tmplt2_locc, tmplt2H_locc, tmpltN_locc, dct, os.path.join('customizable_localization', '00-locs.txt'))
+    gen_extra(dct, extra, os.path.join('localisation', '00-locs_l_english.yml'), os.path.join('customizable_localization', '00-locs.txt'))
 
     string = ''
 
