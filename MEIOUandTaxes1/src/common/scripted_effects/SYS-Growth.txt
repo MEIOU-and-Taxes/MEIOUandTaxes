@@ -381,56 +381,14 @@ Growth_DoMove = {
         set_key = { lhs = CL_Out value = 0 }
     }
 
-    # Flag migration zone for each independent country + subjects (4 subject lvls at max) with Growth_Zone province flag
+    # Migration zones: each independent country together with its subjects (4 subject levels at most)
     every_country = {
         limit = {
             isValidCountry = yes
 			is_free_or_tributary_trigger = yes
         }
-        every_owned_province = {
-            set_province_flag = Growth_Zone
-        }
+        save_event_target_as = GrowthZone
 
-        every_subject_country = {
-            limit = {
-                isValidCountry = yes
-				is_subject_other_than_tributary_trigger = yes
-            }
-            every_owned_province = {
-                set_province_flag = Growth_Zone
-            }
-
-            every_subject_country = {
-                limit = {
-                    isValidCountry = yes
-					is_subject_other_than_tributary_trigger = yes
-                }
-                every_owned_province = {
-                    set_province_flag = Growth_Zone
-                }
-
-                every_subject_country = {
-                    limit = {
-                        isValidCountry = yes
-						is_subject_other_than_tributary_trigger = yes
-                    }
-                    every_owned_province = {
-                        set_province_flag = Growth_Zone
-                    }
-
-                    every_subject_country = {
-                        limit = {
-                            isValidCountry = yes
-							is_subject_other_than_tributary_trigger = yes
-                        }
-                        every_owned_province = {
-                            set_province_flag = Growth_Zone
-                        }
-                    }
-                }
-            }
-        }
-	    
         # Reset keys
 		set_key = { lhs = Tmp_0 value = 0 }
         set_key = { lhs = Tmp_1 value = 0 }
@@ -438,15 +396,7 @@ Growth_DoMove = {
 		# Sum up per growth zone 
 		# Tmp_0 = total sum of possible migrants
 		# Tmp_1 = All classes - NO - CL - BG
-        every_province = {
-            limit = {
-				has_province_flag = Growth_Zone
-            }
-            PREV = {
-                change_key = { lhs = Tmp_0 which = PREV }
-                change_key = { lhs = Tmp_1 which = PREV }
-            }
-        }
+        Growth_ZoneEach = { effect = Growth_ZoneSum }
 
 		# Public_Tmp1 = PossibleMigrants in Growth Zone / Total pops in growth zone
         if = {
@@ -467,32 +417,7 @@ Growth_DoMove = {
                 set_key = { lhs = Public_Tmp4 value = 0 }
                 set_key = { lhs = Public_Tmp5 value = 0 }
 
-                every_province = {
-                    limit = {
-                        has_province_flag = Growth_Zone
-                    }
-                    set_key = { lhs = Public_Tmp1 which = PREV } # get possible migrant % of total pops
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
-
-                    # Calculate migration on province level
-                    # how many pops want to go in vs. out
-                    Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 freedom = Tmp_8 }
-                    Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 }
-                    Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 }
-                    Growth_DoMove_HandleLocalMigration = { class = NO tmp = 5 }
-                    Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 factor = 2 }
-                    Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 }
-
-                    PREV = { # sum up all values in growth zone
-                        change_key = { lhs = Public_Tmp2 which = PREV } # Total inward migration
-                        change_key = { lhs = Public_Tmp3 which = PREV } # Total outward migration
-                        change_key = { lhs = Public_Tmp4 which = PREV } # Total inward migration
-                        change_key = { lhs = Public_Tmp5 which = PREV } # Total outward migration
-                    }
-                }
+                Growth_ZoneEach = { effect = Growth_ZoneLocal }
 
                 # cap actual migration to smaller of outward/inward
                 if = {
@@ -502,34 +427,7 @@ Growth_DoMove = {
                     set_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
                 }
 
-                # 
-                every_province = {
-                    limit = {
-                        has_province_flag = Growth_Zone
-                    }
-                    # Get previous calculation results
-                    set_key = { lhs = Public_Tmp2 which = PREV } # Total outward migration
-                    set_key = { lhs = Public_Tmp3 which = PREV } # Total inward migration
-                    set_key = { lhs = Public_Tmp4 which = PREV } # Total actual migration, smaller of outward/inward
-
-                    # Distribute migration on provinces
-                    Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }
-                    Growth_DoMove_DistributeMigration = { class = NM tmp = 3 }
-                    Growth_DoMove_DistributeMigration = { class = RE tmp = 4 }
-                    Growth_DoMove_DistributeMigration = { class = NO tmp = 5 }
-                    Growth_DoMove_DistributeMigration = { class = BG tmp = 6 }
-                    Growth_DoMove_DistributeMigration = { class = CL tmp = 7 }
-
-                    # Clear calculation data
-                    clr_province_flag = Growth_Zone 
-
-                    set_key = { lhs = Public_Tmp1 value = 0 }
-                    set_key = { lhs = Public_Tmp2 value = 0 }
-                    set_key = { lhs = Public_Tmp3 value = 0 }
-                    set_key = { lhs = Public_Tmp4 value = 0 }
-                    set_key = { lhs = Public_Tmp5 value = 0 }
-                    set_key = { lhs = Public_Tmp9 value = 0 }
-                }
+                Growth_ZoneEach = { effect = Growth_ZoneDistribute }
 
                 # Clear calculation data
                 set_key = { lhs = Public_Tmp2 value = 0 }
@@ -643,6 +541,96 @@ Growth_DoMove = {
         set_key = { lhs = Tmp_6 value = 0 }
         set_key = { lhs = Tmp_7 value = 0 }
     }
+}
+
+# Run $effect$ in every province of the migration zone of the current country:
+# its own provinces and those of its subjects, 4 subject levels deep
+Growth_ZoneEach = {
+    every_owned_province = { $effect$ = yes }
+    every_subject_country = {
+        limit = {
+            isValidCountry = yes
+            is_subject_other_than_tributary_trigger = yes
+        }
+        every_owned_province = { $effect$ = yes }
+        every_subject_country = {
+            limit = {
+                isValidCountry = yes
+                is_subject_other_than_tributary_trigger = yes
+            }
+            every_owned_province = { $effect$ = yes }
+            every_subject_country = {
+                limit = {
+                    isValidCountry = yes
+                    is_subject_other_than_tributary_trigger = yes
+                }
+                every_owned_province = { $effect$ = yes }
+                every_subject_country = {
+                    limit = {
+                        isValidCountry = yes
+                        is_subject_other_than_tributary_trigger = yes
+                    }
+                    every_owned_province = { $effect$ = yes }
+                }
+            }
+        }
+    }
+}
+
+# The steps of Growth_DoMove for one province of the migration zone of event_target:GrowthZone
+# Sum up the possible migrants (Tmp_0) and the population (Tmp_1) of the zone
+Growth_ZoneSum = {
+    event_target:GrowthZone = {
+        change_key = { lhs = Tmp_0 which = PREV }
+        change_key = { lhs = Tmp_1 which = PREV }
+    }
+}
+# Local migration of the province, summed up per zone
+Growth_ZoneLocal = {
+    set_key = { lhs = Public_Tmp1 which = event_target:GrowthZone } # get possible migrant % of total pops
+    set_key = { lhs = Public_Tmp2 value = 0 }
+    set_key = { lhs = Public_Tmp3 value = 0 }
+    set_key = { lhs = Public_Tmp4 value = 0 }
+    set_key = { lhs = Public_Tmp5 value = 0 }
+
+    # Calculate migration on province level
+    # how many pops want to go in vs. out
+    Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 freedom = Tmp_8 }
+    Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 }
+    Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 }
+    Growth_DoMove_HandleLocalMigration = { class = NO tmp = 5 }
+    Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 factor = 2 }
+    Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 }
+
+    event_target:GrowthZone = { # sum up all values in growth zone
+        change_key = { lhs = Public_Tmp2 which = PREV } # Total inward migration
+        change_key = { lhs = Public_Tmp3 which = PREV } # Total outward migration
+        change_key = { lhs = Public_Tmp4 which = PREV } # Total inward migration
+        change_key = { lhs = Public_Tmp5 which = PREV } # Total outward migration
+    }
+}
+# Distribute the zone's migration on the province
+Growth_ZoneDistribute = {
+    # Get previous calculation results
+    set_key = { lhs = Public_Tmp2 which = event_target:GrowthZone } # Total outward migration
+    set_key = { lhs = Public_Tmp3 which = event_target:GrowthZone } # Total inward migration
+    set_key = { lhs = Public_Tmp4 which = event_target:GrowthZone } # Total actual migration, smaller of outward/inward
+
+    # Distribute migration on provinces
+    Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }
+    Growth_DoMove_DistributeMigration = { class = NM tmp = 3 }
+    Growth_DoMove_DistributeMigration = { class = RE tmp = 4 }
+    Growth_DoMove_DistributeMigration = { class = NO tmp = 5 }
+    Growth_DoMove_DistributeMigration = { class = BG tmp = 6 }
+    Growth_DoMove_DistributeMigration = { class = CL tmp = 7 }
+
+    # Clear calculation data
+    set_key = { lhs = Public_Tmp1 value = 0 }
+    set_key = { lhs = Public_Tmp2 value = 0 }
+    set_key = { lhs = Public_Tmp3 value = 0 }
+    set_key = { lhs = Public_Tmp4 value = 0 }
+    set_key = { lhs = Public_Tmp5 value = 0 }
+    set_key = { lhs = Public_Tmp9 value = 0 }
 }
 
 ### Inputs:
