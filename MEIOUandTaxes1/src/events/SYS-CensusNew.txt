@@ -14,17 +14,13 @@ country_event = {
 				if = {
 					limit = {
 						isValidProv = yes
+						NOT = { has_province_flag = Colony_Init }
 					}
-					if = {
-						limit = {
-							NOT = { has_province_flag = Colony_Init }
-						}
-						owner = {
-							set_country_flag = tf_recalculate_communication_efficiency
-						}
-						province_event = {
-							id = SYS_Colony.001
-						}
+					owner = {
+						set_country_flag = tf_recalculate_communication_efficiency
+					}
+					province_event = {
+						id = SYS_Colony.001
 					}
 				}
 			}
@@ -383,18 +379,9 @@ country_event = {
 						isValidProv = yes
 					}
 					Tariff_SetRate = yes
-				}
-			}
-			
-			regiongroup = {
-				region = {
-					limit = {
-						has_province_flag = TN_SectorCent
-					}
 					TN_UpdateSubsistence = yes
 				}
 			}
-
 		}
     }
 
@@ -1131,7 +1118,7 @@ country_event = {
 
 					set_key = { lhs = Tmp_0 value = 0 }
 					set_key = { lhs = Tmp_1 value = 0 }
-					set_key = { lhs = Tmp_0 value = 0 }
+					set_key = { lhs = Tmp_2 value = 0 }
 					set_key = { lhs = Tmp_3 value = 0 }
 					set_key = { lhs = Tmp_4 value = 0 }
 					set_key = { lhs = Tmp_5 value = 0 }
@@ -1152,24 +1139,6 @@ country_event = {
 				}
 			}
 		}
-    }
-
-    option = {
-		name = no_localisation
-    }
-}
-
-country_event = {
-    id = POP_Census.0018
-    title = no_localisation
-    desc = no_localisation
-	picture = MEIOU_AND_TAXES_eventPicture
-
-    hidden = yes
-
-    is_triggered_only = yes
-    
-    immediate = {
     }
 
     option = {
@@ -1224,6 +1193,9 @@ country_event = {
 					limit = {
 						NOT = { has_province_flag = Wealth_Dispersal }
 						NOT = { check_key = { lhs = NM_Ratio value = 75 } } ### cant build anything
+						# Prevent super poor provinces to be considered for wealth sharing
+						# This also prevents a Wealthleak that the code would not transition back funds if these are marginal, see PREV = { check_key = { lhs = Tmp_0 value = 0.1 } }
+						check_key = { lhs = Infra_Wealth value = 50 } # Too poor for sharing
 					}
 					set_province_flag = Wealth_Dispersal
 					set_key = { lhs = Tmp_0 which = Infra_Wealth }
@@ -1876,8 +1848,8 @@ country_event = {
 								superregion = european_steppe_superregion
 							}
 						}
+						PREV = { set_country_flag = CAUCASIANISOLATION }
 					}
-					PREV = { set_country_flag = CAUCASIANISOLATION }
 				}
 				capital_scope = {
 					if = {
@@ -3001,7 +2973,7 @@ country_event = {
 
 	option = {
 		name = "Tax_DisabledTaxChattels"
-		custom_tooltip = Tax_SummaryTaxChattels
+		custom_tooltip = Tax_SummaryTaxChattel
 		custom_tooltip = Tax_SummarySum
 
 		trigger = {
@@ -3391,7 +3363,7 @@ country_event = {
 
 	option = {
 		name = "Tax_DisabledTaxChattels"
-		custom_tooltip = Tax_SummaryTaxChattels
+		custom_tooltip = Tax_SummaryTaxChattel
 		custom_tooltip = Tax_SummarySum
 
 		trigger = {
@@ -4646,7 +4618,6 @@ country_event = { # Performance testing
 				country_event = { id = POP_Census.0015 days = 11 } # Trade main do
 				country_event = { id = POP_Census.0016 days = 12 } # Trade after
 				country_event = { id = POP_Census.0017 days = 13 }
-				country_event = { id = POP_Census.0018 days = 14 }
 				country_event = { id = POP_Stockpile.0012 days = 15 }
 				country_event = { id = POP_Census.0021 days = 16 }
 				country_event = { id = POP_Census.0022 days = 17 }
@@ -4760,7 +4731,7 @@ country_event = {
 					isValidCountry = yes
 				}	
 				#Privileges
-				log = "Privileges2:[GV_Privilege_BUOffice]:[GV_Privilege_BUFarm]:[GV_Privilege_BUTenure]:[GV_Privilege_BUWages]:[GV_Privilege_BUHierarchy]:[GV_Privilege_BUHire]:[GV_Privilege_BUExams]:[GV_Privilege_BUOversight]:[GV_Privilege_BUEnlist]:[GV_Privilege_BUStructure]:[GV_Privilege_BUCourts]:[GV_Privilege_BUPolitics]:[GV_Privilege_BURotate]"
+				log = "Privileges2:[This.GetName]:[GV_Privilege_BUOffice]:[GV_Privilege_BUFarm]:[GV_Privilege_BUTenure]:[GV_Privilege_BUWages]:[GV_Privilege_BUHierarchy]:[GV_Privilege_BUHire]:[GV_Privilege_BUExams]:[GV_Privilege_BUOversight]:[GV_Privilege_BUEnlist]:[GV_Privilege_BUStructure]:[GV_Privilege_BUCourts]:[GV_Privilege_BUPolitics]:[GV_Privilege_BURotate]"
 			}
 			log = "Privileges3: BGIndustry: BGLuxury: BGConsumerGoods: BGAutonomy: BGPatent: BGCivic: BGOligopolization: BGRuralOwnership: BGGuild: BGLicensing: BGTaxE: BGServiceE"
 			every_country = {
@@ -4768,7 +4739,7 @@ country_event = {
 					isValidCountry = yes
 				}	
 				#Privileges
-				log = "Privileges3:[Privilege_BGIndustry]:[GV_Privilege_BGLuxury]:[GV_Privilege_BGConsumerGoods]:[GV_Privilege_BGAutonomy]:[GV_Privilege_BGPatent]:[GV_Privilege_BGCivic]:[GV_Privilege_BGOligopolization]:[GV_Privilege_BGRuralOwnership]:[GV_Privilege_BGGuild]:[GV_Privilege_BGLicensing]:[GV_Privilege_BGTaxE]:[GV_Privilege_BGServiceE]"
+				log = "Privileges3:[GV_Privilege_BGIndustry]:[GV_Privilege_BGLuxury]:[GV_Privilege_BGConsumerGoods]:[GV_Privilege_BGAutonomy]:[GV_Privilege_BGPatent]:[GV_Privilege_BGCivic]:[GV_Privilege_BGOligopolization]:[GV_Privilege_BGRuralOwnership]:[GV_Privilege_BGGuild]:[GV_Privilege_BGLicensing]:[GV_Privilege_BGTaxE]:[GV_Privilege_BGServiceE]"
 			}
 
 			### OUTPUT DATA PROVINCE:
@@ -4780,12 +4751,12 @@ country_event = {
 						is_colony = yes
 					}
 				}
-				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Peasants :[This.Owner.GetName]:[This.GetContinentName]:[GV_SF_Total]:[GV_SF_Ratio]:[GV_SF_Wealth]:[SF_FillFood]:[GV_SF_FillLife]:[GV_SF_FillLifeC]:[GV_SF_FillComfort]:[GV_SF_FillLuxury]"
-				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Residents:[This.Owner.GetName]:[This.GetContinentName]:[GV_NM_Total]:[GV_NM_Ratio]:[GV_NM_Wealth]:[NM_FillFood]:[GV_RE_FillLife]:[GV_NM_FillLifeC]:[GV_RE_FillComfort]:[GV_RE_FillLuxury]"
-				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Nomads   :[This.Owner.GetName]:[This.GetContinentName]:[GV_RE_Total]:[GV_RE_Ratio]:[GV_RE_Wealth]:[RE_FillFood]:[GV_NM_FillLife]:[GV_RE_FillLifeC]:[GV_NM_FillComfort]:[GV_NM_FillLuxury]"
-				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Nobles   :[This.Owner.GetName]:[This.GetContinentName]:[GV_NO_Total]:[GV_NO_Ratio]:[GV_NO_Wealth]:[NO_FillFood]:[GV_NO_FillLife]:[GV_NO_FillLifeC]:[GV_NO_FillComfort]:[GV_NO_FillLuxury]"
-				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Burghers :[This.Owner.GetName]:[This.GetContinentName]:[GV_BG_Total]:[GV_BG_Ratio]:[GV_BG_Wealth]:[BG_FillFood]:[GV_BG_FillLife]:[GV_BG_FillLifeC]:[GV_BG_FillComfort]:[GV_BG_FillLuxury]"
-				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Clergy   :[This.Owner.GetName]:[This.GetContinentName]:[GV_CL_Total]:[GV_CL_Ratio]:[GV_CL_Wealth]:[CL_FillFood]:[GV_CL_FillLife]:[GV_CL_FillLifeC]:[GV_CL_FillComfort]:[GV_CL_FillLuxury]"
+				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Peasants :[This.Owner.GetName]:[This.GetContinentName]:[GV_SF_Total]:[GV_SF_Ratio]:[GV_SF_Wealth]:[GV_SF_FillFood]:[GV_SF_FillLife]:[GV_SF_FillLifeC]:[GV_SF_FillComfort]:[GV_SF_FillLuxury]"
+				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Nomads   :[This.Owner.GetName]:[This.GetContinentName]:[GV_NM_Total]:[GV_NM_Ratio]:[GV_NM_Wealth]:[GV_NM_FillFood]:[GV_NM_FillLife]:[GV_NM_FillLifeC]:[GV_NM_FillComfort]:[GV_NM_FillLuxury]"
+				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Residents:[This.Owner.GetName]:[This.GetContinentName]:[GV_RE_Total]:[GV_RE_Ratio]:[GV_RE_Wealth]:[GV_RE_FillFood]:[GV_RE_FillLife]:[GV_RE_FillLifeC]:[GV_RE_FillComfort]:[GV_RE_FillLuxury]"
+				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Nobles   :[This.Owner.GetName]:[This.GetContinentName]:[GV_NO_Total]:[GV_NO_Ratio]:[GV_NO_Wealth]:[GV_NO_FillFood]:[GV_NO_FillLife]:[GV_NO_FillLifeC]:[GV_NO_FillComfort]:[GV_NO_FillLuxury]"
+				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Burghers :[This.Owner.GetName]:[This.GetContinentName]:[GV_BG_Total]:[GV_BG_Ratio]:[GV_BG_Wealth]:[GV_BG_FillFood]:[GV_BG_FillLife]:[GV_BG_FillLifeC]:[GV_BG_FillComfort]:[GV_BG_FillLuxury]"
+				log = "PopulationData:[GV_ID_Prov]-[This.GetName]:Clergy   :[This.Owner.GetName]:[This.GetContinentName]:[GV_CL_Total]:[GV_CL_Ratio]:[GV_CL_Wealth]:[GV_CL_FillFood]:[GV_CL_FillLife]:[GV_CL_FillLifeC]:[GV_CL_FillComfort]:[GV_CL_FillLuxury]"
 			}
 
 			log = "EconomyData:ID-Name:FoodPrice:SaltPrice:FibrePrice:FuelPrice:RawPrice:TimberPrice:ExoticsPrice:ConsumerPrice:MilitaryPrice:NavalPrice:IndustrialPrice:LuxuryPrice:KnowledgePrice"
