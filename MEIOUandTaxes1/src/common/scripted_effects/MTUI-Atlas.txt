@@ -1,0 +1,90 @@
+# Nation Atlas values (country scope, human players) the game does not have: trade centres, shares, balance.
+# Called from Nat_Display while the Atlas is open, and when it opens. Display only: nothing in the simulation
+# reads the Atlas_* keys.
+Atlas_Refresh = {
+	# an open reform package: its severity as Rights.001 computes it
+	if = {
+		limit = { check_key = { lhs = Rights_Timer value = 1 } }
+		Rights_CalcSeverity = yes
+	}
+	# trade: sector centres owned and the best rank among them
+	set_key = { lhs = Atlas_TradeCenters value = 0 }
+	set_key = { lhs = Atlas_TradeRank value = 0 }
+	every_owned_province = {
+		limit = {
+			has_province_flag = TN_SectorCent
+			check_key = { lhs = Sector_ScoreDisp value = 1 }
+		}
+		set_key = { lhs = Tmp_9 which = Sector_ScoreDisp }
+		PREV = {
+			set_key = { lhs = Tmp_9 which = PREV }
+			change_key = { lhs = Atlas_TradeCenters value = 1 }
+			if = {
+				limit = {
+					OR = {
+						NOT = { check_key = { lhs = Atlas_TradeRank value = 1 } }
+						check_key = { lhs = Atlas_TradeRank which = Tmp_9 }
+					}
+				}
+				set_key = { lhs = Atlas_TradeRank which = Tmp_9 }
+			}
+		}
+		set_key = { lhs = Tmp_9 value = 0 }
+	}
+	# shares of the gross tax take (direct + indirect + special taxation) and of all expenses
+	set_key = { lhs = Tmp_9 which = TaxD_Direct }
+	change_key = { lhs = Tmp_9 which = TaxD_Indirect }
+	change_key = { lhs = Tmp_9 which = TopBar_SpecialIncome }
+	set_key = { lhs = Atlas_DirectShare which = TaxD_Direct }
+	Atlas_Share = { key = Atlas_DirectShare total = Tmp_9 }
+	set_key = { lhs = Atlas_IndirectShare which = TaxD_Indirect }
+	Atlas_Share = { key = Atlas_IndirectShare total = Tmp_9 }
+	set_key = { lhs = Atlas_SpecialShare which = TopBar_SpecialIncome }
+	Atlas_Share = { key = Atlas_SpecialShare total = Tmp_9 }
+	set_key = { lhs = Atlas_FarmingShare which = TaxD_Farming }
+	Atlas_Share = { key = Atlas_FarmingShare total = Tmp_9 }
+	set_key = { lhs = Atlas_CorruptionShare which = TaxD_Corruption }
+	Atlas_Share = { key = Atlas_CorruptionShare total = Tmp_9 }
+	set_key = { lhs = Atlas_SFTaxesShare which = TaxD_SF_BU }
+	Atlas_Share = { key = Atlas_SFTaxesShare total = Tmp_9 }
+	set_key = { lhs = Atlas_RETaxesShare which = TaxD_RE_BU }
+	Atlas_Share = { key = Atlas_RETaxesShare total = Tmp_9 }
+	set_key = { lhs = Atlas_NOTaxesShare which = TaxD_NO_BU }
+	Atlas_Share = { key = Atlas_NOTaxesShare total = Tmp_9 }
+	set_key = { lhs = Atlas_BGTaxesShare which = TaxD_BG_BU }
+	Atlas_Share = { key = Atlas_BGTaxesShare total = Tmp_9 }
+	set_key = { lhs = Atlas_CLTaxesShare which = TaxD_CL_BU }
+	Atlas_Share = { key = Atlas_CLTaxesShare total = Tmp_9 }
+	set_key = { lhs = Atlas_TRTaxesShare which = TaxD_TR_BU }
+	Atlas_Share = { key = Atlas_TRTaxesShare total = Tmp_9 }
+	set_key = { lhs = Atlas_WagesShare which = Admin_CostUni }
+	Atlas_Share = { key = Atlas_WagesShare total = Realm_Expenses }
+	set_key = { lhs = Atlas_MilMaintShare which = Mil_ManpowerExpenses }
+	Atlas_Share = { key = Atlas_MilMaintShare total = Realm_Expenses }
+	set_key = { lhs = Atlas_MilRecruitShare which = BU_SpendMPBuild }
+	Atlas_Share = { key = Atlas_MilRecruitShare total = Realm_Expenses }
+	set_key = { lhs = Atlas_PropertyCostShare which = TaxD_BUPropertyNeg }
+	Atlas_Share = { key = Atlas_PropertyCostShare total = Realm_Expenses }
+	set_key = { lhs = Atlas_InfraShare which = Infra_StateSpend }
+	Atlas_Share = { key = Atlas_InfraShare total = Realm_Expenses }
+	set_key = { lhs = Atlas_DoleShare which = Class_IncomeDole }
+	Atlas_Share = { key = Atlas_DoleShare total = Realm_Expenses }
+	set_key = { lhs = Atlas_ColonialShare which = Colonial_SubsidyDisp }
+	Atlas_Share = { key = Atlas_ColonialShare total = Realm_Expenses }
+	set_key = { lhs = Tmp_9 value = 0 }
+	# the balance of the year, rounded
+	set_key = { lhs = Atlas_Balance which = TaxD_Total }
+	subtract_key = { lhs = Atlas_Balance which = Realm_Expenses }
+	TopBar_Round = { key = Atlas_Balance }
+}
+
+# $key$ (a copy of one budget line) as a whole-number percentage of $total$
+Atlas_Share = {
+	if = {
+		limit = { check_key = { lhs = $total$ value = 0.001 } }
+		divide_key = { lhs = $key$ which = $total$ }
+		multiply_key = { lhs = $key$ value = 100 }
+		TopBar_Round = { key = $key$ }
+	}
+	else = { set_key = { lhs = $key$ value = 0 } }
+}

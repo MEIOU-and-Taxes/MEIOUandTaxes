@@ -1,0 +1,119 @@
+# Nation Atlas actions (country scope).
+# No log statements in scripted effects (the game crashes while loading them): the SYS-Politics log lines are in
+# the calling events (mtui_ui.10, mtui_ui.2x).
+
+# What MEIOU's Prov_UI events do in their `after` block for player actions.
+mtui_after_action = {
+	hidden_effect = {
+		clr_country_flag = ProvUI_Action
+		Nat_Update = yes
+		Unrest_Update = yes
+		AI_Interactions_Recalc = yes
+	}
+}
+
+# ----------------------------------------------------------------------------- Nation Atlas
+mtui_atlas_toggle = {
+	if = {
+		limit = { has_country_flag = mtui_atlas_open }
+		mtui_atlas_close = yes
+	}
+	else = {
+		mtui_atlas_open_tab = { tab = overview }
+		# refresh through a hidden event: the game evaluates the conditions inside a button's effect (province loops)
+		# from the country to build its tooltip, which logs scope errors; it does not look into events
+		hidden_effect = { country_event = { id = mtui_ui.2 } }
+	}
+}
+
+# Infrastructure funding: the country flags Infra_<Type><25|50|75|100> hold the configuration
+# (no flag = 0%), exactly like MEIOU's Prov_UI.120 configurator; applying copies it into provinces.
+mtui_infra_clear = {
+	clr_country_flag = Infra_$t$25
+	clr_country_flag = Infra_$t$50
+	clr_country_flag = Infra_$t$75
+	clr_country_flag = Infra_$t$100
+}
+mtui_infra_apply_here = { # province scope
+	Infra_UISet = { Infra=Capitol }
+	Infra_UISet = { Infra=Harbourage }
+	Infra_UISet = { Infra=Amenities }
+	Infra_UISet = { Infra=Pathing }
+	Infra_UISet = { Infra=Irrigation }
+	Infra_UISet = { Infra=Garrison }
+}
+
+# Military budget (Mil_BUBudgetMult, % of tax income), clamped to 0..100
+mtui_milbudget_change = {
+	change_key = { lhs = Mil_BUBudgetMult value = $v$ }
+	if = {
+		limit = { NOT = { check_key = { lhs = Mil_BUBudgetMult value = 0 } } }
+		set_key = { lhs = Mil_BUBudgetMult value = 0 }
+	}
+	if = {
+		limit = { check_key = { lhs = Mil_BUBudgetMult value = 100.001 } }
+		set_key = { lhs = Mil_BUBudgetMult value = 100 }
+	}
+	hidden_effect = { TopBar_Refresh = yes }
+}
+
+# Repeating actions ("Repeat: on" in the Atlas): one shared monthly chain (mtui_ui.10), guarded by mtui_chain.
+# k = tax | grain. The grain repeat re-orders the last dole level used every 3 years.
+mtui_repeat_on = {
+	set_country_flag = mtui_repeat_$k$
+	if = {
+		limit = { NOT = { has_country_flag = mtui_chain } }
+		set_country_flag = mtui_chain
+		country_event = { id = mtui_ui.10 days = 1 }
+	}
+}
+# Called by the grain buttons: remember level and restart the 3-year timer.
+mtui_grain_mark = {
+	clr_country_flag = mtui_grain_last_Minor
+	clr_country_flag = mtui_grain_last_Major
+	clr_country_flag = mtui_grain_last_Full
+	set_country_flag = mtui_grain_last_$lvl$
+	clr_country_flag = mtui_grain_done
+	set_country_flag = mtui_grain_done
+}
+
+# ----------------------------------------------------------------------------- reform package (State tab)
+# MEIOU bundles rights changes into one package (Rights_Timer months until it is enacted by the monthly
+# pulse, SYS-Pulse). Its crown-land interactions open Rights.001 after every change; the Atlas instead adds
+# the change to the package directly and offers the Rights.001 choices as buttons.
+# Called by the rights ladder effects mtui_lr_* (MTUI-AtlasLadders.txt) in place of `country_event = { id = Rights.001 }`.
+mtui_rights_queue = {
+	custom_tooltip = Rights_LB
+	custom_tooltip = mtui_rights_queue_tt
+	hidden_effect = {
+		# Rights.001 immediate
+		if = {
+			limit = { NOT = { check_key = { lhs = Rights_Timer value = 1 } } }
+			set_key = { lhs = Rights_Timer value = 6 }
+		}
+		Rights_CalcSeverity = yes
+		mtui_after_action = yes
+	}
+}
+# Rights.001 option "Enact Reforms"
+mtui_rights_enact = {
+	Rights_ImplementReform = yes
+	hidden_effect = {
+		country_event = { id = SYS_UI.003 }
+		mtui_after_action = yes
+	}
+}
+# Rights.001 option "Back Down"
+mtui_rights_backdown = {
+	custom_tooltip = Rights_BackDown_desc
+	add_country_modifier = {
+		name = Reform_CD
+		duration = 3625
+	}
+	custom_tooltip = Rights_LB
+	country_event = { id = Rights.003 }
+	hidden_effect = {
+		set_key = { lhs = Rights_Timer value = 0 }
+		mtui_after_action = yes
+	}
+}
