@@ -1,0 +1,2179 @@
+# Actions of the estate and bureaucracy menus (events/SYS-Prov_UI.txt), shared with the Nation Atlas buttons.
+# Country scope. No log statements in scripted effects: the calling events and buttons log.
+
+# ---------------------------------------------------------------- Nobles
+
+# Prepares the nobles menu (advisor candidates, royal consort home)
+NO_Action_Setup = {
+	hidden_effect = {
+		random_owned_province = {
+			limit = {
+				isValidProv = yes
+			}
+			save_event_target_as = consort_home
+		}
+		random_owned_province = {
+			limit = {
+				isValidProv = yes
+				check_key = { lhs = Prov_NOPow which = event_target:consort_home }
+			}
+			save_event_target_as = consort_home
+		}
+		random_owned_province = {
+			limit = {
+				isValidProv = yes
+				check_key = { lhs = Prov_NOPow which = event_target:consort_home }
+			}
+			save_event_target_as = consort_home
+		}
+		random_owned_province = {
+			limit = {
+				isValidProv = yes
+				check_key = { lhs = Prov_NOPow which = event_target:consort_home }
+			}
+			save_event_target_as = consort_home
+		}
+		Pol_AdvisorGenerateCabinet = { Faction = NO Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 }
+	}
+}
+
+# Promote the Aristocratic Faction
+NO_Action_FactionBoost = {
+	set_country_flag = ProvUI_Action
+	NO_FactionBoost = yes
+	add_dip_power = -10
+	add_mil_power = -5
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Prov_NOPow value = 20 } }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	Pol_FacInfReactPosMajor = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_NO
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=15 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_NO
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReact
+	hidden_effect = {
+		set_key = { lhs = Prov_React value = 3 }
+		set_key = { lhs = Prov_ReactSrc value = 1 }
+		#country_event = { id = Prov_React.001 }
+	}
+	custom_tooltip = NO_FactionBoost_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 2 }
+	}
+}
+
+# Provide Land Grants
+NO_Action_LandGrant = {
+	if = {
+		limit = {
+			NOT = { has_country_flag = LandInt_Block }
+		}
+		hidden_effect = {
+		set_key = { lhs = LandInt_Mode value = 0 }
+		set_key = { lhs = LandInt_Class value = 0 }
+		set_key = { lhs = LandInt_Class2 value = 3 }
+		}
+		country_event = {
+			id = SYS_LandInteraction.001
+		}
+		custom_tooltip = NO_LandGrant_expl
+	}
+	else = {
+		custom_tooltip = LandInt_Block
+	}
+}
+
+# Promote Lesser Nobles
+NO_Action_RecruitLords = {
+	set_country_flag = ProvUI_Action
+	NO_RecruitLords = yes
+	add_adm_power = -5
+	add_dip_power = -15
+	Pol_FacInfReactPosMajor = { Fac=NO }
+	Pol_ProvStabSet2 = { Prov=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_RecruitLords_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=20 }
+	Public_ChangeConcernTooltipProv= { Concern=Welfare Amount=-1 }
+	custom_tooltip = NO_RecruitLords_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Overlook Tenant Abuse
+NO_Action_Serfs = {
+	set_country_flag = ProvUI_Action
+	NO_Serfs = yes
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=NO }
+	Pol_ProvStabSet1 = { Prov=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_Serfs_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=15 }
+	Public_ChangeConcernTooltipProv= { Concern=Welfare Amount=-3 }
+	custom_tooltip = NO_Serfs_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Marry Noble Consort
+NO_Action_RoyalConsort = {
+	set_country_flag = ProvUI_Action
+	NO_RoyalConsort = yes
+	add_dip_power = -15
+	Pol_ProvStabSet6 = { Prov=NO }
+	Pol_FacInfReactPos = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_RoyalConsort_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+	custom_tooltip = NO_RoyalConsort_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Arrange a Strategic Marriage
+NO_Action_StrategicMarriage = {
+	set_country_flag = ProvUI_Action
+	NO_StrategicMarriage = yes
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=NO }
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 80 }
+		}
+		Stab_Add25Percent = yes
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 65 }
+		}
+		Stab_Add10Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_StrategicMarriage_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=7.5 }
+	custom_tooltip = NO_StrategicMarriage_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Disown an Unpopular Relative
+NO_Action_DisownRelative = {
+	set_country_flag = ProvUI_Action
+	NO_DisownRelative = yes
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 85 }
+		}
+		add_legitimacy = -10
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 65 }
+		}
+		add_legitimacy = -7.5
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 35 }
+		}
+		add_legitimacy = -5
+	}
+	else = {
+		add_legitimacy = -2.5
+	}
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=NO }
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 80 }
+		}
+		Stab_Add25Percent = yes
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 65 }
+		}
+		Stab_Add10Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_DisownRelative_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=7.5 }
+	custom_tooltip = NO_DisownRelative_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Yield Concessions to Ancient Liberties
+NO_Action_Concessions = {
+	set_country_flag = ProvUI_Action
+	NO_Concessions = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	add_prestige = -10
+	Pol_FacInfReactPos = { Fac=NO }
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 90 }
+		}
+		Stab_Add50Percent = yes
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 70 }
+		}
+		Stab_Add25Percent = yes
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 50 }
+		}
+		Stab_Add10Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_Concessions_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=10 }
+	custom_tooltip = NO_Concessions_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Hold Grand Celebrations
+NO_Action_Celebrations = {
+	set_country_flag = ProvUI_Action
+	NO_Celebrations = yes
+	add_dip_power = -5
+	trigger_switch = {
+		on_trigger = government_rank
+		6 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=640 } }
+			add_treasury = -640
+			}
+		5 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=320 } }
+			add_treasury = -320
+			}
+		4 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=160 } }
+			add_treasury = -160
+			}
+		3 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=80 } }
+			add_treasury = -80
+			}
+		2 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=40 } }
+			add_treasury = -40
+			}
+		1 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=20 } }
+			add_treasury = -20
+			}
+		0 = {
+			capital_scope = { Public_ChangeClassWealthVal = { class=NO type=value inp=10 } }
+			add_treasury = -10
+			}
+	}
+	add_prestige = 5
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 80 }
+		}
+		Stab_Add25Percent = yes
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 60 }
+		}
+		Stab_Add10Percent = yes
+	}
+	Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=10 } #it is mostly about relations
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_Celebrations_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=5 }
+	custom_tooltip = NO_Celebrations_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Grant Special Commissions to Loyalists
+NO_Action_Commissions = {
+	set_country_flag = ProvUI_Action
+	NO_Commissions = yes
+	add_mil_power = -15
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 75 }
+		}
+		add_army_tradition = -10
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 50 }
+		}
+		add_army_tradition = -7.5
+	}
+	else = {
+		add_army_tradition = -5
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_Commissions_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=7.5 }
+	Pol_FacInfReactPos = { Fac=NO }
+	custom_tooltip = NO_Commissions_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 1 }
+	}
+}
+
+# Align the cabinet with the Aristocrats
+NO_Action_Advisor = {
+	set_country_flag = ProvUI_Action
+	NO_Advisor = yes
+	add_dip_power = -30
+	Pol_FacInfReactPosMajor = { Fac=NO }
+	Pol_ProvStabSet3 = { Prov=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_Advisor_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=20 }
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReactPath
+	custom_tooltip = NO_Advisor_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = 2 }
+	}
+}
+
+# Crackdown on the Aristocratic Faction
+NO_Action_FactionCrackdown = {
+	set_country_flag = ProvUI_Action
+	NO_FactionCrackdown = yes
+	add_dip_power = -5
+	add_mil_power = -15
+	if = {
+		limit = {
+			check_key = { lhs = Prov_NOPow value = 65 }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_NO
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_NO
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-15 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+	}
+	custom_tooltip = Rights_LB
+	Pol_ChangeRelationsStateTooltip = { NO=yes type=value val=-30 }
+	custom_tooltip = NO_FactionCrackdown_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -4 }
+	}
+}
+
+# Expropriate Land
+NO_Action_LandExpropriate = {
+	hidden_effect = {
+		set_key = { lhs = LandInt_Mode value = 1 }
+		set_key = { lhs = LandInt_Class value = 3 }
+		set_key = { lhs = LandInt_Class2 value = 1 }
+	}
+	country_event = {
+		id = SYS_LandInteraction.001
+	}
+	custom_tooltip = NO_LandExpropriate_expl
+}
+
+# Demote Greater Nobles
+NO_Action_DemoteLords = {
+	set_country_flag = ProvUI_Action
+	NO_DemoteLords = yes
+	add_dip_power = -5
+	add_mil_power = -15
+	Pol_FacInfReact = { Fac=NO }
+	Pol_ProvStabSet8 = { Prov=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_DemoteLords_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-25 }
+	custom_tooltip = NO_DemoteLords_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -3 }
+	}
+}
+
+# Protect the Peasants
+NO_Action_ProtectSerfs = {
+	set_country_flag = ProvUI_Action
+	NO_ProtectSerfs = yes
+	add_mil_power = -30
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_ProtectSerfs_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-15 }
+	Public_ChangeConcernTooltipProv= { Concern=Welfare Amount=2 }
+	custom_tooltip = NO_ProtectSerfs_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# Enforce Levy Obligations
+NO_Action_EnforceLevee = {
+	set_country_flag = ProvUI_Action
+	NO_EnforceLevee = yes
+	add_mil_power = -20
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Prov_AddTooltipXL = { Elite=NO name=NO_EnforceLevee }
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+	custom_tooltip = NO_EnforceLevee_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# Leverage the Nobles
+NO_Action_Leverage = {
+	set_country_flag = ProvUI_Action
+	NO_Leverage = yes
+	add_dip_power = -10
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = NO_Leverage_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-15 }
+	custom_tooltip = NO_Leverage_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# Reaffirm Fealty
+NO_Action_Fealty = {
+	set_country_flag = ProvUI_Action
+	NO_Fealty = yes
+	add_dip_power = -20
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_Fealty_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+	custom_tooltip = NO_Fealty_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# Reaffirm Support for our Heir
+NO_Action_SupportHeir = {
+	set_country_flag = ProvUI_Action
+	NO_SupportHeir = yes
+	add_dip_power = -15
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_SupportHeir_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-5 }
+	custom_tooltip = NO_SupportHeir_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# Banish the Agitators
+NO_Action_Banish = {
+	set_country_flag = ProvUI_Action
+	NO_Banish = yes
+	add_dip_power = -5
+	add_mil_power = -20
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = NO_Banish_effect
+	if = {
+		limit = {
+			Privilege_HasGreater = { Privilege=NOHierarchy Lvl=1 }
+		}
+		if = {
+			limit = {
+				check_key = { lhs = Prov_NOPow value = 65 }
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-25 }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prov_NOPow value = 35 }
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+		}
+		else = {
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-15 }
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				check_key = { lhs = Prov_NOPow value = 65 }
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-20 }
+		}
+		else_if = {
+			limit = {
+				check_key = { lhs = Prov_NOPow value = 35 }
+			}
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-15 }
+		}
+		else = {
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+		}
+	}
+	custom_tooltip = NO_Banish_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# Bolster our Defences
+NO_Action_Defences = {
+	set_country_flag = ProvUI_Action
+	NO_Defences = yes
+	add_mil_power = -30
+	Pol_FacInfReact = { Fac=NO }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=NO Amount=-10 }
+	custom_tooltip = NO_Defences_expl
+	hidden_effect = {
+		change_key = { lhs = NO_Favors value = -2 }
+	}
+}
+
+# ---------------------------------------------------------------- Burghers
+
+# Prepares the burghers menu (advisor candidates)
+BG_Action_Setup = {
+	hidden_effect = {
+		Pol_AdvisorGenerateCabinet = { Faction = BG Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 }
+	}
+}
+
+# Promote the Metropolitan Faction
+BG_Action_FactionBoost = {
+	set_country_flag = ProvUI_Action
+	BG_FactionBoost = yes
+	add_dip_power = -15
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Prov_BGPow value = 20 } }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_BG
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=15 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_BG
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+	}
+	Pol_FacInfReactPosMajor = { Fac=BG }
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReact
+	hidden_effect = {
+		set_key = { lhs = Prov_React value = 3 }
+		set_key = { lhs = Prov_ReactSrc value = 2 }
+		#country_event = { id = Prov_React.001 }
+	}
+	custom_tooltip = BG_FactionBoost_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 2 }
+	}
+}
+
+# Provide Property Grants
+BG_Action_LandGrant = {
+	if = {
+		limit = {
+			NOT = { has_country_flag = LandInt_Block }
+		}
+		hidden_effect = {
+			set_key = { lhs = LandInt_Mode value = 0 }
+			set_key = { lhs = LandInt_Class value = 0 }
+			set_key = { lhs = LandInt_Class2 value = 4 }
+		}
+		country_event = {
+			id = SYS_LandInteraction.001
+		}
+
+		custom_tooltip = BG_LandGrant_expl
+	}
+	else = {
+		custom_tooltip = LandInt_Block
+	}
+}
+
+# Promote and Support Commerce
+BG_Action_CommerceDrive = {
+	set_country_flag = ProvUI_Action
+	BG_CommerceDrive = yes
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=BG }
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		if = {
+			limit = {
+				has_country_modifier = gonfaloniere_artigiani
+			}
+			custom_tooltip = medici_system_add_cost_gonfaloniere_artigiani
+			add_dip_power = -10
+			add_adm_power = -10
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = gonfaloniere_mercanti
+			}
+			custom_tooltip = medici_system_sub_cost_gonfaloniere_mercanti
+			add_dip_power = 5
+		}
+
+		custom_tooltip = mercanti_little_add
+		hidden_effect = {
+			change_variable = {
+				which = "mercanti_favor"
+				value = 1
+			}
+		}
+
+		custom_tooltip = artigiani_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "artigiani_favor"
+				value = -1
+			}
+		}
+
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_CommerceDrive_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+	custom_tooltip = BG_CommerceDrive_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 1 }
+	}
+}
+
+# Support Burgher Autonomy
+BG_Action_Autonomy = {
+	set_country_flag = ProvUI_Action
+	BG_Autonomy = yes
+	add_adm_power = -5
+	add_dip_power = -15
+	Pol_FacInfReactPos = { Fac=BG }
+	Pol_ProvStabSet2 = { Prov=BG }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_Autonomy_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=25 }
+	custom_tooltip = BG_Autonomy_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 1 }
+	}
+}
+
+# Pardon Smugglers
+BG_Action_PardonSmugglers = {
+	set_country_flag = ProvUI_Action
+	BG_PardonSmugglers = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=BG }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_PardonSmugglers_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+	custom_tooltip = BG_PardonSmugglers_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 1 }
+	}
+}
+
+# Consolidate Urban Guilds
+BG_Action_WeakenGuilds = {
+	set_country_flag = ProvUI_Action
+	BG_WeakenGuilds = yes
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=BG }
+	Pol_ProvStabSet1 = { Prov=BG }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = BG_WeakenGuilds_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=5 }
+	custom_tooltip = BG_WeakenGuilds_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 1 }
+	}
+}
+
+# Provide Tax Relief
+BG_Action_TaxRelief = {
+	set_country_flag = ProvUI_Action
+	BG_TaxRelief = yes
+	if = {
+		limit = {
+			Rights_BGCom2Has = yes
+		}
+		Pol_FacInfReact = { Fac=NO }
+	}
+	add_adm_power = -10
+	Pol_FacInfReactPos = { Fac=BG }
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		if = {
+			limit = {
+				has_country_modifier = gonfaloniere_artigiani
+			}
+			custom_tooltip = medici_system_add_cost_gonfaloniere_artigiani
+			add_dip_power = -10
+			add_adm_power = -10
+		}
+		else_if = {
+			limit = {
+				has_country_modifier = gonfaloniere_mercanti
+			}
+			custom_tooltip = medici_system_sub_cost_gonfaloniere_mercanti
+			add_dip_power = 5
+		}
+
+		custom_tooltip = mercanti_little_add
+		hidden_effect = {
+			change_variable = {
+				which = "mercanti_favor"
+				value = 1
+			}
+		}
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_TaxRelief_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=15 }
+	custom_tooltip = BG_TaxRelief_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 1 }
+	}
+}
+
+# Align the cabinet with the Metropolitans
+BG_Action_Advisor = {
+	set_country_flag = ProvUI_Action
+	BG_Advisor = yes
+	add_dip_power = -30
+	Pol_FacInfReactPosMajor = { Fac=BG }
+	Pol_ProvStabSet3 = { Prov=BG }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_Advisor_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=20 }
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReactPath
+	custom_tooltip = BG_Advisor_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = 2 }
+	}
+}
+
+# Crackdown on the Metropolitan Faction
+BG_Action_FactionCrackdown = {
+	set_country_flag = ProvUI_Action
+	BG_FactionCrackdown = yes
+	add_dip_power = -5
+	add_mil_power = -15
+	if = {
+		limit = {
+			check_key = { lhs = Prov_BGPow value = 65 }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_BG
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-20 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_BG
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-15 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	}
+	custom_tooltip = Rights_LB
+	Pol_ChangeRelationsStateTooltip = { BG=yes type=value val=-30 }
+	custom_tooltip = BG_FactionCrackdown_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -4 }
+	}
+}
+
+# Expropriate Property
+BG_Action_LandExpropriate = {
+	hidden_effect = {
+		set_key = { lhs = LandInt_Mode value = 1 }
+		set_key = { lhs = LandInt_Class value = 4 }
+		set_key = { lhs = LandInt_Class2 value = 1 }
+	}
+	country_event = {
+		id = SYS_LandInteraction.001
+	}
+	custom_tooltip = BG_LandExpropriate_expl
+}
+
+# Renegotiate Urban Charters
+BG_Action_RevokeCharters = {
+	set_country_flag = ProvUI_Action
+	BG_RevokeCharters = yes
+	add_dip_power = -15
+	add_mil_power = -5
+	Pol_FacInfReact = { Fac=BG }
+	Pol_ProvStabSet8 = { Prov=BG }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_RevokeCharters_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-25 }
+	custom_tooltip = BG_RevokeCharters_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# Negotiate a Discounted Loan
+BG_Action_DiscountedDebt = {
+	set_country_flag = ProvUI_Action
+	BG_DiscountedDebt = yes
+	add_dip_power = -10
+	add_prestige = -10
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		custom_tooltip = mercanti_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "mercanti_favor"
+				value = 1
+			}
+		}
+
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = BG_DiscountedDebt_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	custom_tooltip = BG_DiscountedDebt_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# Raise Extraordinary Levy
+BG_Action_ExtraLevee = {
+	set_country_flag = ProvUI_Action
+	BG_ExtraLevee = yes
+	add_mil_power = -20
+	Pol_FacInfReact = { Fac=BG }
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		custom_tooltip = popolo_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "popolo_favor"
+				value = 1
+			}
+		}
+
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Prov_AddTooltipXL = { Elite=BG name=BG_ExtraLevee }
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	custom_tooltip = BG_ExtraLevee_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# Restrict Foreign Trade
+BG_Action_RestrictTrade = {
+	set_country_flag = ProvUI_Action
+	BG_RestrictTrade = yes
+	add_dip_power = -10
+	add_mil_power = -5
+	Pol_FacInfReact = { Fac=BG }
+	Pol_ProvStabSet9 = { Prov=BG }
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		custom_tooltip = mercanti_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "mercanti_favor"
+				value = 1
+			}
+		}
+
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Prov_AddTooltip = { Elite=BG name=BG_RestrictTrade }
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-20 }
+	custom_tooltip = BG_RestrictTrade_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# Promote Anti-Competitive Practices
+BG_Action_AntiCompetitive = {
+	set_country_flag = ProvUI_Action
+	BG_AntiCompetitive = yes
+	add_dip_power = -10
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = BG_AntiCompetitive_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	custom_tooltip = BG_AntiCompetitive_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# Enforce Special Tolls
+BG_Action_SpecialToll = {
+	set_country_flag = ProvUI_Action
+	BG_SpecialToll = yes
+	add_adm_power = -5
+	add_dip_power = -10
+	Pol_FacInfReact = { Fac=BG }
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		custom_tooltip = mercanti_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "mercanti_favor"
+				value = 1
+			}
+		}
+
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BG_SpecialToll_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	custom_tooltip = BG_SpecialToll_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# Secure the Naval Supply
+BG_Action_SecureMaterial = {
+	set_country_flag = ProvUI_Action
+	BG_SecureMaterial = yes
+	add_dip_power = -10
+	add_mil_power = -5
+	if = {
+		limit = {
+			has_country_flag = medici_system_triggers_active
+		}
+
+		custom_tooltip = mercanti_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "mercanti_favor"
+				value = 1
+			}
+		}
+
+		custom_tooltip = artigiani_little_sub
+		hidden_effect = {
+			change_variable = {
+				which = "artigiani_favor"
+				value = -1
+			}
+		}
+
+		recalculate_medici_faction_relation_modifiers = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = BG_SecureMaterial_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=-10 }
+	custom_tooltip = BG_SecureMaterial_expl
+	hidden_effect = {
+		change_key = { lhs = BG_Favors value = -2 }
+	}
+}
+
+# ---------------------------------------------------------------- Clergy
+
+# Prepares the clergy menu (advisor candidates)
+CL_Action_Setup = {
+	hidden_effect = {
+		Pol_AdvisorGenerateCabinet = { Faction = CL Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 }
+	}
+}
+
+# Promote the Spiritualist Faction
+CL_Action_FactionBoost = {
+	set_country_flag = ProvUI_Action
+	CL_FactionBoost = yes
+	add_adm_power = -5
+	add_dip_power = -10
+	Pol_FacInfReactPosMajor = { Fac=CL }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Prov_CLPow value = 20 } }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_CL
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=15 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_CL
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReact
+	hidden_effect = {
+		set_key = { lhs = Prov_React value = 3 }
+		set_key = { lhs = Prov_ReactSrc value = 3 }
+		#country_event = { id = Prov_React.001 }
+	}
+	custom_tooltip = CL_FactionBoost_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 2 }
+	}
+}
+
+# Provide Land Grants
+CL_Action_LandGrant = {
+	if = {
+		limit = {
+			NOT = { has_country_flag = LandInt_Block }
+		}
+		hidden_effect = {
+			set_key = { lhs = LandInt_Mode value = 0 }
+			set_key = { lhs = LandInt_Class value = 0 }
+			set_key = { lhs = LandInt_Class2 value = 5 }
+		}
+		country_event = {
+			id = SYS_LandInteraction.001
+		}
+
+		custom_tooltip = CL_LandGrant_expl
+	}
+	else = {
+		custom_tooltip = LandInt_Block
+	}
+}
+
+# Empower the Clergy
+CL_Action_EmpowerClergy = {
+	set_country_flag = ProvUI_Action
+	CL_EmpowerClergy = yes
+	add_adm_power = -5
+	add_dip_power = -15
+	Pol_FacInfReactPos = { Fac=CL }
+	Pol_ProvStabSet2 = { Prov=CL }
+	custom_tooltip = Rights_LB
+	#custom_tooltip = Rights_EveryProvince
+	custom_tooltip = CL_EmpowerClergy_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=20 }
+	custom_tooltip = CL_EmpowerClergy_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 1 }
+	}
+	if = {
+		limit = { religion = catholic }
+		add_reform_desire = -0.00001
+	}
+}
+
+# Donate to the Church
+CL_Action_ProvideDonationsMinor = {
+	set_country_flag = ProvUI_Action
+	CL_ProvideDonationsMinor = yes
+	add_adm_power = -8
+	custom_tooltip = CL_ProvideDonationsMinor_effect
+	Pol_FacInfReactPos = { Fac=CL }
+	custom_tooltip = Rights_LB
+	#custom_tooltip = Rights_EveryProvince
+	Public_ChangeConcernTooltipProv = { Concern=Spirituality Amount=0.5 }
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=5 }
+	custom_tooltip = CL_ProvideDonationsMinor_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 1 }
+	}
+}
+
+# Support Missionary Work
+CL_Action_SupportMissionary = {
+	set_country_flag = ProvUI_Action
+	CL_SupportMissionary = yes
+	add_adm_power = -15
+	Pol_FacInfReactPos = { Fac=CL }
+	custom_tooltip = Rights_LB
+	#custom_tooltip = Rights_EveryProvince
+	custom_tooltip = CL_SupportMissionary_effect
+	custom_tooltip = CL_SupportMissionary_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 1 }
+	}
+	if = {
+		limit = { religion = catholic }
+		add_reform_desire = -0.00001
+	}
+}
+
+# Lavishly Endow the Church
+CL_Action_ProvideDonationsLavish = {
+	set_country_flag = ProvUI_Action
+	CL_ProvideDonationsLavish = yes
+	add_adm_power = -15
+	custom_tooltip = CL_ProvideDonationsLavish_effect
+	Pol_FacInfReactPos = { Fac=CL }
+	custom_tooltip = Rights_LB
+	#custom_tooltip = Rights_EveryProvince
+	Public_ChangeConcernTooltipProv = { Concern=Spirituality Amount=1 }
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=15 }
+	custom_tooltip = CL_ProvideDonationsLavish_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 1 }
+	}
+	if = {
+		limit = { religion = catholic }
+		add_reform_desire = -0.00001
+	}
+}
+
+# Perform a Show of Devotion
+CL_Action_Devotion = {
+	set_country_flag = ProvUI_Action
+	CL_Devotion = yes
+	add_prestige = -10
+	if = {
+		limit = {
+			check_key = { lhs = Prov_CLPow value = 65 }
+		}
+		add_adm_power = -30
+		add_dip_power = -30
+		add_mil_power = -30
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Prov_CLPow value = 35 }
+		}
+		add_adm_power = -20
+		add_dip_power = -20
+		add_mil_power = -20
+	}
+	else = {
+		add_adm_power = -10
+		add_dip_power = -10
+		add_mil_power = -10
+	}
+	#custom_tooltip = CL_Devotion_effect
+	Pol_FacInfReactPos = { Fac=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangeConcernTooltipProv = { Concern=Spirituality Amount=1 }
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+	custom_tooltip = CL_Devotion_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 1 }
+	}
+}
+
+# Oppose Populist Reform
+CL_Action_PopularReform = {
+	set_country_flag = ProvUI_Action
+	CL_PopularReform = yes
+	add_mil_power = -15
+	#custom_tooltip = CL_PopularReform_effect
+	Pol_FacInfReactPos = { Fac=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=10 }
+	custom_tooltip = CL_PopularReform_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 1 }
+	}
+	if = {
+		limit = { religion = catholic }
+		add_reform_desire = -0.00001
+	}
+}
+
+# Align the cabinet with the Spiritualists
+CL_Action_Advisor = {
+	set_country_flag = ProvUI_Action
+	CL_Advisor = yes
+	add_dip_power = -30
+	Pol_FacInfReactPosMajor = { Fac=CL }
+	Pol_ProvStabSet3 = { Prov=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = CL_Advisor_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=20 }
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReactPath
+	custom_tooltip = CL_Advisor_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = 2 }
+	}
+}
+
+# Crackdown on the Spiritualist Faction
+CL_Action_FactionCrackdown = {
+	set_country_flag = ProvUI_Action
+	CL_FactionCrackdown = yes
+	add_dip_power = -5
+	add_mil_power = -15
+	if = {
+		limit = {
+			check_key = { lhs = Prov_CLPow value = 65 }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_CL
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_CL
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-15 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	}
+	custom_tooltip = Rights_LB
+	Pol_ChangeRelationsStateTooltip = { CL=yes type=value val=-30 }
+	custom_tooltip = CL_FactionCrackdown_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = -4 }
+	}
+	if = {
+		limit = { religion = catholic }
+		add_reform_desire = -0.00001
+	}
+}
+
+# Expropriate Land and Property
+CL_Action_LandExpropriate = {
+	hidden_effect = {
+		set_key = { lhs = LandInt_Mode value = 1 }
+		set_key = { lhs = LandInt_Class value = 5 }
+		set_key = { lhs = LandInt_Class2 value = 1 }
+	}
+	country_event = {
+		id = SYS_LandInteraction.001
+	}
+	custom_tooltip = CL_LandExpropriate_expl
+	if = {
+		limit = { religion = catholic }
+		add_reform_desire = -0.00001
+	}
+}
+
+# Promote Secularisation
+CL_Action_Secularise = {
+	set_country_flag = ProvUI_Action
+	CL_Secularise = yes
+	add_dip_power = -15
+	add_mil_power = -5
+	Pol_FacInfReact = { Fac=CL }
+	Pol_ProvStabSet8 = { Prov=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = CL_Secularise_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-25 }
+	custom_tooltip = CL_Secularise_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = -2 }
+	}
+}
+
+# Leverage the Church
+CL_Action_Leverage = {
+	set_country_flag = ProvUI_Action
+	CL_Leverage = yes
+	add_adm_power = -10
+	Pol_FacInfReact = { Fac=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = CL_Leverage_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-15 }
+	custom_tooltip = CL_Leverage_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = -2 }
+	}
+}
+
+# Prepare for Religious War
+CL_Action_ReligiousWar = {
+	set_country_flag = ProvUI_Action
+	CL_ReligiousWar = yes
+	add_mil_power = -30
+	custom_tooltip = CL_ReligiousWar_effect
+	Pol_FacInfReact = { Fac=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	custom_tooltip = CL_ReligiousWar_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = -2 }
+	}
+}
+
+# Rally the Faithful
+CL_Action_RallyFaithful = {
+	set_country_flag = ProvUI_Action
+	CL_RallyFaithful = yes
+	add_mil_power = -20
+	Pol_FacInfReact = { Fac=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = CL_RallyFaithful_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-10 }
+	custom_tooltip = CL_RallyFaithful_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = -2 }
+	}
+}
+
+# Compel Dynastic Endorsement
+CL_Action_Dynasty = {
+	set_country_flag = ProvUI_Action
+	CL_Dynasty = yes
+	add_dip_power = -30
+	Pol_FacInfReact = { Fac=CL }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	#custom_tooltip = CL_Dynasty_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-15 }
+	custom_tooltip = CL_Dynasty_expl
+	hidden_effect = {
+		change_key = { lhs = CL_Favors value = -2 }
+	}
+}
+
+# ---------------------------------------------------------------- Clans
+
+# Prepares the clans menu (advisor candidates)
+TR_Action_Setup = {
+	hidden_effect = {
+		Pol_AdvisorGenerateCabinet = { Faction = TR Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 }
+	}
+}
+
+# Promote the Chiefs Faction
+TR_Action_FactionBoost = {
+	set_country_flag = ProvUI_Action
+	TR_FactionBoost = yes
+	add_dip_power = -10
+	add_mil_power = -5
+	Pol_FacInfReactPosMajor = { Fac=TR }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Prov_TRPow value = 20 } }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=7.5 }
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReact
+	hidden_effect = {
+		set_key = { lhs = Prov_React value = 3 }
+		set_key = { lhs = Prov_ReactSrc value = 4 }
+		#country_event = { id = Prov_React.001 }
+	}
+	custom_tooltip = TR_FactionBoost_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 2 }
+	}
+}
+
+# Promote Clan Rule
+TR_Action_EmpowerChiefs = {
+	set_country_flag = ProvUI_Action
+	TR_EmpowerChiefs = yes
+	add_adm_power = -5
+	add_dip_power = -15
+	Pol_FacInfReactPos = { Fac=TR }
+	Pol_ProvStabSet2 = { Prov=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_EmpowerChiefs_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=20 }
+	custom_tooltip = TR_EmpowerChiefs_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Reduce Tributes
+TR_Action_ReduceTribute = {
+	set_country_flag = ProvUI_Action
+	TR_ReduceTribute = yes
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_ReduceTribute_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=5 }
+	custom_tooltip = TR_ReduceTribute_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Support Nomadic Living
+TR_Action_SupportNomadism = {
+	set_country_flag = ProvUI_Action
+	TR_SupportNomadism = yes
+	add_dip_power = -10
+	add_mil_power = -10
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvinceNomad
+	custom_tooltip = POP_TRLoyProv_5
+	custom_tooltip = POP_WelfareProv_-2
+	custom_tooltip = TR_SupportNomadism_effect
+	custom_tooltip = TR_SupportNomadism_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Expand Clan Autonomy
+TR_Action_GrantAutonomy = {
+	set_country_flag = ProvUI_Action
+	TR_GrantAutonomy = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_GrantAutonomy_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=7.5 }
+	custom_tooltip = TR_GrantAutonomy_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Support the Old Ways
+TR_Action_SupportRightsClans = {
+	set_country_flag = ProvUI_Action
+	TR_SupportRights = yes
+	add_adm_power = -15
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_SupportRights_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=5 }
+	custom_tooltip = TR_SupportRightsClans_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Permit the Old Ways
+TR_Action_SupportRightsState = {
+	set_country_flag = ProvUI_Action
+	TR_SupportRights = yes
+	add_adm_power = -15
+	add_dip_power = -10
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_SupportRights_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=5 }
+	custom_tooltip = TR_SupportRightsState_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Entrench our Clan
+TR_Action_LeadingClan = {
+	set_country_flag = ProvUI_Action
+	TR_LeadingClan = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	add_mil_power = -10
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=7.5 }
+	custom_tooltip = TR_LeadingClan_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Strengthen Ties through Marriage
+TR_Action_ClanMarriageClans = {
+	set_country_flag = ProvUI_Action
+	TR_ClanMarriageClans = yes
+	add_dip_power = -15
+	add_legitimacy = -5 # Immediate loss for Clans
+	add_horde_unity = -5 # Immediate loss for Clans
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_SupportRights_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=5 }
+	custom_tooltip = TR_ClanMarriageClans_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Arrange a Strategic Marriage
+TR_Action_ClanMarriageState = {
+	set_country_flag = ProvUI_Action
+	TR_ClanMarriageState = yes
+	add_dip_power = -15
+	Pol_FacInfReactPos = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_SupportRights_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=5 }
+	custom_tooltip = TR_ClanMarriageState_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = 1 }
+	}
+}
+
+# Crackdown on the Chiefs Faction
+TR_Action_FactionCrackdown = {
+	set_country_flag = ProvUI_Action
+	TR_FactionCrackdown = yes
+	add_dip_power = -5
+	add_mil_power = -15
+	if = {
+		limit = {
+			check_key = { lhs = Prov_TRPow value = 65 }
+		}
+		Stab_Subtract25Percent = yes
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {
+			faction_influence = {
+				faction = FC_TR
+				influence = 50
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-20 }
+	}
+	else_if = {
+		limit = {
+			faction_influence = {
+				faction = FC_TR
+				influence = 25
+			}
+		}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-15 }
+	}
+	else = {
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-10 }
+	}
+	custom_tooltip = Rights_LB
+	Pol_ChangeRelationsStateTooltip = { TR=yes type=value val=-30 }
+	custom_tooltip = TR_FactionCrackdown_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -4 }
+	}
+}
+
+# Encourage Hierarchy
+TR_Action_Stratify = {
+	set_country_flag = ProvUI_Action
+	TR_Stratify = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	add_mil_power = -10
+	Pol_FacInfReact = { Fac=TR }
+	Pol_ProvStabSet8 = { Prov=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_Stratify_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-20 }
+	custom_tooltip = TR_Stratify_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -2 }
+	}
+}
+
+# Expand our Authority
+TR_Action_ExpandState = {
+	set_country_flag = ProvUI_Action
+	TR_ExpandState = yes
+	add_adm_power = -15
+	add_mil_power = -5
+	Pol_FacInfReact = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvinceNomad
+	#custom_tooltip = TR_ExpandState_effect
+	Public_ChangePowTooltip = { Powerbroker=TR Amount=-5 }
+	hidden_effect = {
+		every_owned_province = {
+			limit = {
+				check_key = { lhs = Prov_TRPow value = 0.001 }
+			}
+			Public_ChangePowBU = { type=value inp=2.5 }
+		}
+	}
+	custom_tooltip = POP_BUPowProv_2.5
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-15 }
+	custom_tooltip = TR_ExpandState_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -2 }
+	}
+}
+
+# Demand Additional Tribute
+TR_Action_ExtraTribute = {
+	set_country_flag = ProvUI_Action
+	TR_ExtraTribute = yes
+	add_dip_power = -10
+	Pol_FacInfReact = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_ExtraTribute_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-10 }
+	custom_tooltip = TR_ExtraTribute_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -2 }
+	}
+}
+
+# Uplift the Forgotten Clans
+TR_Action_LesserClans = {
+	set_country_flag = ProvUI_Action
+	TR_LesserClans = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	add_mil_power = -10
+	Pol_FacInfReact = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-10 }
+	custom_tooltip = TR_LesserClans_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -2 }
+	}
+}
+
+# Rally the Clans
+TR_Action_RallyClans = {
+	set_country_flag = ProvUI_Action
+	TR_RallyClans = yes
+	add_mil_power = -20
+	Pol_FacInfReact = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_RallyClans_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-10 }
+	custom_tooltip = TR_RallyClans_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -2 }
+	}
+}
+
+# Enforce our Authority
+TR_Action_DemandSupport = {
+	set_country_flag = ProvUI_Action
+	TR_DemandSupport = yes
+	add_dip_power = -10
+	Pol_FacInfReact = { Fac=TR }
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = TR_DemandSupport_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-10 }
+	custom_tooltip = TR_DemandSupport_expl
+	hidden_effect = {
+		change_key = { lhs = TR_Favors value = -2 }
+	}
+}
+
+# ---------------------------------------------------------------- Bureaucracy
+
+# Prepares the bureaucracy menu (advisor candidates)
+BU_Action_Setup = {
+	hidden_effect = {
+		Pol_AdvisorGenerateCabinet = { Faction = BU Var1=Pol_Tmp0 Var2=Pol_Tmp1 Var3=Pol_Tmp2 }
+	}
+}
+
+# Enact Land Reform
+BU_Action_LandGrant_P = {
+	if = {
+		limit = {
+			NOT = { has_country_flag = LandInt_Block }
+		}
+
+		hidden_effect = {
+			set_key = { lhs = LandInt_Mode value = 0 }
+			set_key = { lhs = LandInt_Class value = 0 }
+			set_key = { lhs = LandInt_Class2 value = 1 }
+		}
+		country_event = {
+			id = SYS_LandInteraction.001
+		}
+
+		custom_tooltip = BU_LandGrant_P_expl
+	}
+	else = {
+		custom_tooltip = LandInt_Block
+	}
+}
+
+# Provide Property Grants
+BU_Action_LandGrant_R = {
+	if = {
+		limit = {
+			NOT = { has_country_flag = LandInt_Block }
+		}
+		hidden_effect = {
+			set_key = { lhs = LandInt_Mode value = 0 }
+			set_key = { lhs = LandInt_Class value = 0 }
+			set_key = { lhs = LandInt_Class2 value = 2 }
+		}
+		country_event = {
+			id = SYS_LandInteraction.001
+		}
+
+		custom_tooltip = BU_LandGrant_R_expl
+	}
+	else = {
+		custom_tooltip = LandInt_Block
+	}
+}
+
+# Provide Grain for the Commoners
+BU_Action_Grain = {
+	country_event = {
+		id = Prov_UI.056
+	}
+	custom_tooltip = BU_Grain_expl
+	hidden_effect = { clr_country_flag = TN_Dole_Universal }
+}
+
+# Provide Temporary Tax Relief
+BU_Action_TaxRelief = {
+	set_country_flag = ProvUI_Action
+	# BrutusY: Instead of immediately applying the timed modifier we first set the BU_TaxReliefStarted flag.
+	# In the province tax calculation the flag is checked first, so the modifier is applied in sync with the tax cycle.
+	set_country_flag = BU_TaxReliefStarted
+	Stab_Add50Percent = yes
+	add_adm_power = -20
+	Pol_ChangeRelationsEliteStateTooltip = { val=10 }
+	custom_tooltip = BU_TaxRelief_expl
+}
+
+# Minor grain dole
+BU_Action_GrainMinor = {
+	set_country_flag = ProvUI_Action
+	BU_DistributeGrainMinor = yes
+	add_adm_power = -10
+	custom_tooltip = BU_DistributeGrainMinor_expl
+}
+
+# Major grain dole
+BU_Action_GrainMajor = {
+	set_country_flag = ProvUI_Action
+	BU_DistributeGrainMajor = yes
+	Stab_Add10Percent = yes
+	add_adm_power = -20
+	custom_tooltip = BU_DistributeGrainMajor_expl
+}
+
+# Full grain dole
+BU_Action_GrainFull = {
+	set_country_flag = ProvUI_Action
+	BU_DistributeGrainFull = yes
+	Stab_Add25Percent = yes
+	add_adm_power = -30
+	custom_tooltip = BU_DistributeGrainFull_expl
+}
+
+# Expand the Bureaucracy
+BU_Action_Develop = {
+	set_country_flag = ProvUI_Action
+	BU_Develop = yes
+	add_adm_power = -20
+	add_mil_power = -5
+	Pol_FacInfReactPos = { Fac=BU }
+	Pol_ProvStabSet7 = { Prov=BU }
+	if = {
+		limit = { Fac_HasTR = yes }
+		Pol_FacInfReact = {Fac=TR}
+		Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=TR Amount=-5 }
+	}
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	if = {
+		limit = {has_idea = bureaucracy_ideas_7}
+		custom_tooltip = BU_Develop_effect_BU_idea
+	}
+	else = {
+		custom_tooltip = BU_Develop_effect
+	}
+	add_corruption = 2.5
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=2.5 }
+	custom_tooltip = BU_Develop_expl
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# Promote the Bureaucrat Faction
+BU_Action_FactionBoost = {
+	set_country_flag = ProvUI_Action
+	BU_FactionBoost = yes
+	add_adm_power = -10
+	add_dip_power = -10
+	Pol_FacInfReactPosMajor = { Fac=BU }
+	if = {
+		limit = {
+			NOT = { check_key = { lhs = Prov_BUPow value = 20 } }
+		}
+		Stab_Subtract25Percent = yes
+	}
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=5 }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReact
+	hidden_effect = {
+		set_key = { lhs = Prov_React value = 3 }
+		set_key = { lhs = Prov_ReactSrc value = 5 }
+		#country_event = { id = Prov_React.001 }
+	}
+
+	custom_tooltip = BU_FactionBoost_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 2 }
+	}
+}
+
+# Empower Local Traders
+BU_Action_EmpowerTraders = {
+	set_country_flag = ProvUI_Action
+	BU_EmpowerLocalTraders = yes
+	add_dip_power = -25
+	add_mil_power = -5
+	Pol_FacInfReactPos = { Fac=BU }
+	Pol_ProvStabSet7 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvincePost
+	custom_tooltip = BU_EmpowerLocalTraders_effect
+
+	custom_tooltip = BU_EmpowerLocalTraders_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# Align the cabinet with the Bureaucrats
+BU_Action_Advisor = {
+	set_country_flag = ProvUI_Action
+	BU_Advisor = yes
+	add_dip_power = -30
+	Pol_FacInfReactPosMajor = { Fac=BU }
+	Pol_ProvStabSet3 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BU_Advisor_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=5 }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = POP_NegReactPath
+
+	custom_tooltip = BU_Advisor_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 2 }
+	}
+}
+
+# Leverage the Elites
+BU_Action_FightCrptLoy = {
+	set_country_flag = ProvUI_Action
+	BU_FightCrptLoy = yes
+	custom_tooltip = Rights_LB
+	add_dip_power = -25
+	Pol_FacInfReactPos = { Fac=BU }
+	Pol_ProvStabSet10 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BU_FightCrptLoy_effect
+	add_corruption = -5
+	Public_ChangeEliteLoyaltyTooltipProv = { Amount=-20 }
+
+	custom_tooltip = BU_FightCrptLoy_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# Overturn the Status Quo
+BU_Action_FightCrptStab = {
+	set_country_flag = ProvUI_Action
+	BU_FightCrptStab = yes
+	custom_tooltip = Rights_LB
+	Stab_Subtract2 = yes
+	Pol_FacInfReact = { Fac=BU }
+
+	custom_tooltip = Rights_LB
+	add_corruption = -5
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=-10 }
+
+	custom_tooltip = BU_FightCrptStab_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# Influence the Executive
+BU_Action_FightCrptSkill = {
+	set_country_flag = ProvUI_Action
+	BU_FightCrptSkill = yes
+	custom_tooltip = Rights_LB
+	add_adm_power = -50
+	add_dip_power = -50
+	add_mil_power = -50
+	add_prestige = -15
+	Pol_FacInfReactPos = { Fac=BU }
+	Pol_ProvStabSet10 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	add_corruption = -20
+
+	custom_tooltip = BU_FightCrptSkill_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# £loc_corruption£ Raise Administrative Wages
+BU_Action_FightCrptWages = {
+	set_country_flag = ProvUI_Action
+	BU_FightCrptWages = yes
+	custom_tooltip = Rights_LB
+	add_adm_power = -25
+	Pol_FacInfReactPos = { Fac=BU }
+	Pol_ProvStabSet10 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BU_FightCrptWages_effect
+
+	custom_tooltip = BU_FightCrptWages_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# Recall Corrupt Officials
+BU_Action_FightCrptRecall = {
+	set_country_flag = ProvUI_Action
+	BU_FightCrptRecall = yes
+	custom_tooltip = Rights_LB
+	add_mil_power = -25
+	Pol_FacInfReact = { Fac=BU }
+	Pol_ProvStabSet10 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BU_FightCrptRecall_effect
+
+	custom_tooltip = BU_FightCrptRecall_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
+
+# Revitalise the Administration
+BU_Action_FightCrptRevitalise = {
+	set_country_flag = ProvUI_Action
+	BU_FightCrptRevitalise = yes
+	custom_tooltip = Rights_LB
+	add_adm_power = -25
+	Pol_FacInfReact = { Fac=BU }
+	Pol_ProvStabSet9 = { Prov=BU }
+
+	custom_tooltip = Rights_LB
+	custom_tooltip = Rights_EveryProvince
+	custom_tooltip = BU_FightCrptRevitalise_effect
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BU Amount=-15 }
+
+	custom_tooltip = BU_FightCrptRevitalise_expl
+
+	hidden_effect = {
+		change_key = { lhs = BU_Favors value = 1 }
+	}
+}
