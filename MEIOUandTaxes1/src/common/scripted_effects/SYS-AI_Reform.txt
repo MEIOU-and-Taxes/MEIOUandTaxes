@@ -107,12 +107,7 @@ AI_ReformMain = {
 	}
 	else_if = {
 		limit = {
-			OR = {
-				has_reform = Pol_Centralisation1
-				has_reform = Pol_Centralisation2
-				has_reform = Pol_Centralisation3
-				has_reform = Pol_Centralisation4
-			}
+			has_reform = Pol_Centralisation1
 			Pol_Centralisation2Can = yes
 		}
 		add_government_reform = Pol_Centralisation2
@@ -181,11 +176,10 @@ AI_ReevaluateAllGoals = {
 	AI_InteractionsMain = yes
 }
 
-# This function recalculates reform desire for one right and then reevalutes focus reforms
+# This function recalculates reform desires and then reevalutes focus reforms
+# All desires are recalculated, as the desire keys are cleared after each evaluation and recalculating only $reform$ would drop every other focus reform
 AI_ReevaluateRightGoals = {
-	AI_ReformDesire = { reform = $reform$ }
-
-	AI_Eval_Focus_Reform_All = yes
+	AI_RightsMain = yes
 }
 
 # This function does everything necessary to recalculate focus reforms
@@ -196,170 +190,67 @@ AI_Eval_Focus_Reform_All = {
 	AI_Eval_Focus_Reform = { slot = 2 cutoff = 2 }
 	AI_Eval_Focus_Reform = { slot = 3 cutoff = 3 }
 
+	AI_Eval_Focus_Reform_Flag = { reform = BUTax id = 1 }
+	AI_Eval_Focus_Reform_Flag = { reform = BUDir id = 2 }
+	AI_Eval_Focus_Reform_Flag = { reform = BUInd id = 3 }
+	AI_Eval_Focus_Reform_Flag = { reform = BUSer id = 4 }
+	AI_Eval_Focus_Reform_Flag = { reform = NOGov id = 5 }
+	AI_Eval_Focus_Reform_Flag = { reform = NOObl id = 6 }
+	AI_Eval_Focus_Reform_Flag = { reform = NOTen id = 7 }
+	AI_Eval_Focus_Reform_Flag = { reform = NOSer id = 8 }
+	AI_Eval_Focus_Reform_Flag = { reform = BGCom id = 9 }
+	AI_Eval_Focus_Reform_Flag = { reform = BGGov id = 10 }
+	AI_Eval_Focus_Reform_Flag = { reform = CLHie id = 11 }
+	AI_Eval_Focus_Reform_Flag = { reform = CLObl id = 12 }
+	AI_Eval_Focus_Reform_Flag = { reform = CLTax id = 13 }
+
 	AI_Eval_Focus_Reform_ResetKeys = yes # Clear Reform desire keys
 }
 
+# Picks the reform with the greatest desire (at least the cutoff) that is not in another slot yet
 AI_Eval_Focus_Reform = {
-	set_key = { lhs = Tmp_0 which = Rights_BUTax_Ref_Des_Up }
-	set_key = { lhs = Tmp_1 value = $cutoff$ }
+	set_key = { lhs = Tmp_0 value = $cutoff$ }
 	set_key = { lhs = ReformAI_Slot$slot$ value = 0 }
 
-	if = {
-		limit = {
-			check_key = { lhs = Rights_BUDir_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_BUDir_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 2 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 2 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 2 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_BUDir_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 2 }
-		set_country_flag = AI_Reform_BUDir
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_BUInd_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_BUInd_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 3 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 3 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 3 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_BUInd_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 3 }
-		set_country_flag = AI_Reform_BUInd
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_BUSer_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_BUSer_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 4 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 4 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 4 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_BUSer_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 4 }
-		set_country_flag = AI_Reform_BUSer
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_NOGov_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_NOGov_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 5 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 5 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 5 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_NOGov_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 5 }
-		set_country_flag = AI_Reform_NOGov
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_NOObl_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_NOObl_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 6 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 6 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 6 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_NOObl_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 6 }
-		set_country_flag = AI_Reform_NOObl
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_NOTen_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_NOTen_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 7 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 7 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 7 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_NOTen_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 7 }
-		set_country_flag = AI_Reform_NOTen
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_NOSer_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_NOSer_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 8 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 8 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 8 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_NOSer_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 8 }
-		set_country_flag = AI_Reform_NOSer
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_BGCom_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_BGCom_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 9 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 9 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 9 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_BGCom_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 9 }
-		set_country_flag = AI_Reform_BGCom
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_BGGov_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_BGGov_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 10 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 10 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 10 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_BGGov_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 10 }
-		set_country_flag = AI_Reform_BGGov
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_CLHie_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_CLHie_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 11 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 11 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 11 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_CLHie_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 11 }
-		set_country_flag = AI_Reform_CLHie
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_CLObl_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_CLObl_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 12 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 12 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 12 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_CLObl_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 12 }
-		set_country_flag = AI_Reform_CLObl
-	}
-	if = {
-		limit = {
-			check_key = { lhs = Rights_CLTax_Ref_Des_Up which = Tmp_0 }
-			check_key = { lhs = Rights_CLTax_Ref_Des_Up which = Tmp_1 }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 13 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 13 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 13 } }
-		}
-		set_key = { lhs = Tmp_0 which = Rights_CLTax_Ref_Des_Up }
-		set_key = { lhs = ReformAI_Slot$slot$ value = 13 }
-		set_country_flag = AI_Reform_CLTax
-	}
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = BUTax id = 1 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = BUDir id = 2 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = BUInd id = 3 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = BUSer id = 4 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = NOGov id = 5 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = NOObl id = 6 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = NOTen id = 7 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = NOSer id = 8 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = BGCom id = 9 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = BGGov id = 10 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = CLHie id = 11 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = CLObl id = 12 }
+	AI_Eval_Focus_Reform_Check = { slot = $slot$ reform = CLTax id = 13 }
+}
 
+AI_Eval_Focus_Reform_Check = {
 	if = {
 		limit = {
-			check_key = { lhs = Rights_BUTax_Ref_Des_Up which = Tmp_0 } # BUTax has greatest reform desire
-			check_key = { lhs = Rights_BUTax_Ref_Des_Up which = Tmp_1 } # Reform desire is greater then cutoff
-
-			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = 1 } } # No other slot is already BUTax
-			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = 1 } }
-			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = 1 } }
+			check_key = { lhs = Rights_$reform$_Ref_Des_Up which = Tmp_0 } # Greatest reform desire so far and at least the cutoff
+			NOT = { is_key_equal = { lhs = ReformAI_Slot1 value = $id$ } } # No other slot is already this reform
+			NOT = { is_key_equal = { lhs = ReformAI_Slot2 value = $id$ } }
+			NOT = { is_key_equal = { lhs = ReformAI_Slot3 value = $id$ } }
 		}
-		set_key = { lhs = ReformAI_Slot$slot$ value = 1 }
-		set_country_flag = AI_Reform_BUTax
+		set_key = { lhs = Tmp_0 which = Rights_$reform$_Ref_Des_Up }
+		set_key = { lhs = ReformAI_Slot$slot$ value = $id$ }
+	}
+}
+
+# Sets the focus flag only for reforms that won a slot
+AI_Eval_Focus_Reform_Flag = {
+	if = {
+		limit = {
+			OR = {
+				is_key_equal = { lhs = ReformAI_Slot1 value = $id$ }
+				is_key_equal = { lhs = ReformAI_Slot2 value = $id$ }
+				is_key_equal = { lhs = ReformAI_Slot3 value = $id$ }
+			}
+		}
+		set_country_flag = AI_Reform_$reform$
 	}
 }
 
