@@ -492,7 +492,6 @@ AI_StateBuilding_CE = {
 					ROOT = { # remove money from budgets
 						set_key = { lhs = Public_Tmp3 which = PREV }
 						subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
-						subtract_key = { lhs = Tmp_1 which = Public_Tmp3 }
 						POP_RemoveDucat = { type = which inp = Public_Tmp3 } # take money out of actual treasury
 					}
 
@@ -513,7 +512,6 @@ AI_StateBuilding_CE = {
 						ROOT = { # remove money from budgets
 							set_key = { lhs = Public_Tmp3 which = PREV }
 							subtract_key = { lhs = Public_Tmp2 which = Public_Tmp3 }
-							subtract_key = { lhs = Tmp_1 which = Public_Tmp3 }
 							POP_RemoveDucat = { type = which inp = Public_Tmp3 } # take money out of actual treasury
 						}
 
@@ -532,6 +530,8 @@ AI_StateBuilding_CE = {
 	while = {
 		limit = {
 			check_key = { lhs = Public_Tmp2 value = 0.001 } # while tag has money left
+			
+			NOT = { has_country_flag = AI_StateBuilding_CE_no_additional_investments_possible }
 		}
 		save_event_target_as = Prov # save tag as event target
 		
@@ -551,7 +551,7 @@ AI_StateBuilding_CE = {
 			if = {
 				limit = { is_key_equal = { lhs = Tmp_0 value = -1 } } # if relevance is not set break loop (--> province with relevance left)
 
-				PREV = { set_key = { lhs = Public_Tmp2 value = 0 } } # set available money to 0 (PREV = Tag)
+				PREV = { set_country_flag = AI_StateBuilding_CE_no_additional_investments_possible } # (PREV = Tag)
 			}
 			else = {
 				if = {
@@ -562,7 +562,6 @@ AI_StateBuilding_CE = {
 						if = {
 							limit = { check_key = { lhs = Public_Tmp2 which = Tmp_7 }	} # if available money > cost
 
-							subtract_key = { lhs = Tmp_1 which = Tmp_7 } # subtract cost from backgrouns budget
 							subtract_key = { lhs = Public_Tmp2 which = Tmp_7 } # subtract cost from available money
 							POP_RemoveDucat = { type = which inp = Tmp_7 } # take money out of actual treasury
 							
@@ -594,7 +593,6 @@ AI_StateBuilding_CE = {
 							limit = {
 								check_key = { lhs = Public_Tmp2 which = Tmp_9 } # if available money > cost
 							}
-							subtract_key = { lhs = Tmp_1 which = Tmp_9 } # subtract cost from backgrouns budget
 							subtract_key = { lhs = Public_Tmp2 which = Tmp_9 } # subtract cost from available money
 							POP_RemoveDucat = { type = which inp = Tmp_9 } # take money out of actual treasury
 							
@@ -621,6 +619,8 @@ AI_StateBuilding_CE = {
 			}
 		}
 	}
+
+	clr_country_flag = AI_StateBuilding_CE_no_additional_investments_possible 
 
 	# Clear all temporary variables
 	ce_cleanup = yes
