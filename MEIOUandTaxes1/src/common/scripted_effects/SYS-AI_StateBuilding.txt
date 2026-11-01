@@ -529,7 +529,7 @@ AI_StateBuilding_CE = {
 	# Actually try to build stuff
 	while = {
 		limit = {
-			check_key = { lhs = Public_Tmp2 value = 0.001 } # while tag has money left
+			check_key = { lhs = Public_Tmp2 value = 100 } # while tag has money left and budget > 100 ducats
 			
 			NOT = { has_country_flag = AI_StateBuilding_CE_no_additional_investments_possible }
 		}
@@ -550,10 +550,12 @@ AI_StateBuilding_CE = {
 		event_target:Prov = { # current highest relevance province
 			if = {
 				limit = { is_key_equal = { lhs = Tmp_0 value = -1 } } # if relevance is not set break loop (--> province with relevance left)
-
+				# Warning: If key is equal to -1, we are country scope not province scope! Regardless, we scope to PREV to be sure to be in country.
+				log = "SYS-AI_StateBuilding:[GetYear]:[Root.GetName]:[This.GetName]:No provinces left to iterate, Budget left is: [Root.GV_Public_Tmp2]"
 				PREV = { set_country_flag = AI_StateBuilding_CE_no_additional_investments_possible } # (PREV = Tag)
 			}
 			else = {
+				log = "SYS-AI_StateBuilding:[GetYear]:[Root.GetName]:[This.GetName]:Iterating provinces, Budget left is: [Root.GV_Public_Tmp2]"
 				if = {
 					limit = { is_key_equal = { lhs = Tmp_0 which = Tmp_1 } } # PATHING CASE: highest relevance = pathing relevance
 					PREV = { # PREV = Tag
@@ -620,7 +622,13 @@ AI_StateBuilding_CE = {
 		}
 	}
 
-	clr_country_flag = AI_StateBuilding_CE_no_additional_investments_possible 
+	if = {
+		limit = {
+			has_country_flag = AI_StateBuilding_CE_no_additional_investments_possible
+		}
+		log = "SYS-AI_StateBuilding:[GetYear]:[Root.GetName]:CLEAR FLAG AI_StateBuilding_CE_no_additional_investments_possible"
+		clr_country_flag = AI_StateBuilding_CE_no_additional_investments_possible 
+	}
 
 	# Clear all temporary variables
 	ce_cleanup = yes
