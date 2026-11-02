@@ -465,9 +465,18 @@ AI_StateBuilding_CE = {
 						owner = { total_development = 350 }
 					}					
 				}
-				check_key = { lhs = RE_Total value = 35 } #only try to built capitol when the city is large enough to maintain it
 				Infra_CanCapitol = yes
-				NOT = { check_key = { lhs = Infra_Capitol value = 5 } } # never make the AI build past lvl 5
+				OR = {
+					AND = {
+						check_key = { lhs = RE_Total value = 200 } #only try to built capitol beyond 3 if really large city
+						NOT = { check_key = { lhs = Infra_Capitol value = 5 } }
+					}
+					AND = {
+						check_key = { lhs = RE_Total value = 35 } #only try to built capitol when the city is large enough to maintain it
+						NOT = { check_key = { lhs = RE_Total value = 200 } }
+						NOT = { check_key = { lhs = Infra_Capitol value = 3 } }
+					}
+				}
 			}
 
 			set_key = { lhs = Public_Tmp4 which = Infra_CapitolGoal } # get capitol unit goal
@@ -479,7 +488,7 @@ AI_StateBuilding_CE = {
 			
 			# Get Fraction of the budget potentially assigned for building capitols
 			set_key = { lhs = Public_Tmp2 which = ROOT }
-			multiply_key = { lhs = Public_Tmp2 value = 0.6 } # `DEFINE_AI_STATE_BUILDING_BUDGET_CAPITOL~value`
+			multiply_key = { lhs = Public_Tmp2 value = 0.45 } # `DEFINE_AI_STATE_BUILDING_BUDGET_CAPITOL~value`
 
 			log = "SYS-AI_StateBuilding:[GetYear]:[Root.GetName]:Treasury Fraction for Capitol is [GV_Public_Tmp2], while costs are [GV_Public_Tmp3]"
 
