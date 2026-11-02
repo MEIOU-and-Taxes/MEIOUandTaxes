@@ -150,6 +150,24 @@ country_event = {
 		export_to_key = { lhs = Public_Tmp1 value = treasury }
 		multiply_key = { lhs = Public_Tmp1 value = 0.9 } # `DEFINE_AI_STATE_BUILDING_USE_TREASURY_PERC~value`
 
+		# Throw some wealth into capital as general Infra funding
+		set_key = { lhs = Public_Tmp5 which = Public_Tmp1 }
+		multiply_key = { lhs = Public_Tmp5 value = 0.1 } # 10% of budget
+		capital_scope = {
+			if = {
+				limit = {
+					check_key = { lhs = Infra_Wealth value = 750 } #already quite rich
+				}
+				set_key = { Public_Tmp5 which = PREV }
+				change_key = { lhs = Infra_Wealth which = Public_Tmp5 }
+				PREV = { 
+					POP_RemoveDucat = { type = which inp = Public_Tmp5 }  # take money out of actual treasury
+					subtract_key = { lhs = Public_Tmp1 which = Public_Tmp5 }
+				}
+				set_key = { Public_Tmp5 value = 0 }
+			}
+		}
+
 		# Public_Tmp1 = total budget
 		# Tmp_0 = budget handed to a builder (Public_Tmp5 for the CE builder: its route finder uses Tmp_0)
 		# Tmp_1 = What the builder left over
