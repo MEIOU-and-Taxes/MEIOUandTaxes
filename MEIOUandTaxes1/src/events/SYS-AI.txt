@@ -150,18 +150,44 @@ country_event = {
 		export_to_key = { lhs = Public_Tmp1 value = treasury }
 		multiply_key = { lhs = Public_Tmp1 value = 0.9 } # `DEFINE_AI_STATE_BUILDING_USE_TREASURY_PERC~value`
 
+		# Throw some wealth into capital as general Infra funding
+		set_key = { lhs = Public_Tmp5 which = Public_Tmp1 }
+		multiply_key = { lhs = Public_Tmp5 value = 0.1 } # 10% of budget
+		capital_scope = {
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = Infra_Wealth value = 750 } } #already quite rich
+				}
+				set_key = { lhs = Public_Tmp5 which = ROOT }
+				change_key = { lhs = Infra_Wealth which = Public_Tmp5 }
+				ROOT = { 
+					POP_RemoveDucat = { type = which inp = Public_Tmp5 }  # take money out of actual treasury
+					subtract_key = { lhs = Public_Tmp1 which = Public_Tmp5 }
+				}
+				set_key = { lhs = Public_Tmp5 value = 0 }
+			}
+		}
+
 		# Public_Tmp1 = total budget
-		# Tmp_0 = budget handed to a builder
+		# Tmp_0 = budget handed to a builder (Public_Tmp5 for the CE builder: its route finder uses Tmp_0)
 		# Tmp_1 = What the builder left over
 
 		### Build CE Buildings
-		set_key = { lhs = Tmp_0 which = Public_Tmp1 }
-		multiply_key = { lhs = Tmp_0 value = 0.30 } # `DEFINE_AI_STATE_BUILDING_BUDGET_CE~value`
-		subtract_key = { lhs = Public_Tmp1 which = Tmp_0 }
+		set_key = { lhs = Public_Tmp5 which = Public_Tmp1 }
+		multiply_key = { lhs = Public_Tmp5 value = 0.45 } # `DEFINE_AI_STATE_BUILDING_BUDGET_CE~value`
 
-		AI_StateBuilding_CE = { budget = Tmp_0 type = value percentage = 1 }
+		if = {
+			limit = {
+				check_key = { lhs = Public_Tmp5 value = 100 }
+			}
+			
+			subtract_key = { lhs = Public_Tmp1 which = Public_Tmp5 }
+	
+			AI_StateBuilding_CE = { budget = Public_Tmp5 }
+	
+			change_key = { lhs = Public_Tmp1 which = Public_Tmp2 } # Put left over back into pot
+		}
 
-		change_key = { lhs = Public_Tmp1 which = Tmp_1 } # Put left over back into pot
 
 		### Build Amenities in small cities (1 - BigCities_BudgetFraction)
 		AI_StateBuilding_FindBiggestCities = yes # find the 3 biggest cities in the country as event targets
@@ -171,12 +197,12 @@ country_event = {
 		multiply_key = { lhs = Tmp_0 which = Public_Tmp1 }
 		subtract_key = { lhs = Public_Tmp1 which = Tmp_0 }
 
-		AI_StateBuilding_Amenities = { budget = Tmp_0 type = value percentage = 1 }
+		AI_StateBuilding_Amenities = { budget = Tmp_0 }
 
 		change_key = { lhs = Public_Tmp1 which = Tmp_1 } # Put left over back into pot
 
 		### Build Amenities in 3 biggest cities + capital with the rest
-		AI_StateBuilding_Amenities_BiggestCities = { budget = Public_Tmp1 type = value percentage = 1 }
+		AI_StateBuilding_Amenities_BiggestCities = { budget = Public_Tmp1 }
 
 		AI_StateBuilding_Cleanup = yes
     }
@@ -707,6 +733,7 @@ country_event = {
                     }
                     country_event = { id = Prov_UI.011 } # Nobles Grant (privileges)
 					country_event = { id = Prov_UI.013 } # Burghers Grant (privileges)
+					country_event = { id = Prov_UI.015 } # Clergy Grant (privileges)
                 }
             }
         }
@@ -879,6 +906,7 @@ country_event = {
 					AI_PrivilegeMain = yes # update logic here
                     country_event = { id = Prov_UI.021 } # Nobles Revoke (privileges)
 					country_event = { id = Prov_UI.023 } # Burghers Revoke (privileges)
+					country_event = { id = Prov_UI.025 } # Clergy Revoke (privileges)
                     if = {
                         limit = {
                             check_key = { lhs = Prov_TRPow value = 5 }
