@@ -24,3 +24,91 @@ reset_golden_bull_effect = {
 		remove_country_modifier = golden_bull_9_rivals
 	}
 }
+
+# When a golden Bull is enacted, we tap into the accumulated wealth in the curia treasury and do something with it. 
+# 
+#
+# ToDo, can we somehow see the cost of the Golden Bull vanilla interaction and also make sure we dont destroy wealth/money?
+
+
+
+DG_GoldenBull_CuriaDistribution = {
+	if = {
+		limit = {
+			has_dlc = "Emperor"
+			curia_treasury_size = 2000 # needs to have some cash in it. 
+		}
+		hidden_effect = {
+			AAA = {
+				export_to_key = { lhs = DG_Tmp15 value = trigger_value:curia_treasury_size }
+			}
+			# Number of cardinal provinces to receive some cash
+			every_province = {
+				limit = { 
+					has_cardinal = yes
+				}
+				AAA = {
+					change_key = { lhs = DG_Tmp16 value = 1 }
+				}
+			}
+			AAA = {
+				if = {
+					# security condition, make sure we have at least one cardinal. In case a player is very very thorough with anti catholicism 
+					limit = { 
+						check_key = { lhs = DG_Tmp16 value = 1 } 
+					}
+					
+					multiply_key = { lhs = DG_Tmp15 value = 0.15 } # ~15% of curia treasury
+					divide_key = { lhs = DG_Tmp15 which = DG_Tmp16 } # amount per cardinal
+
+					every_province = {
+						limit = {
+							has_cardinal = yes
+						}
+						AAA = { 
+							PREV = { set_key = { lhs = DG_Tmp15 which = PREV } } # write the value into the province
+							change_key = { lhs = DG_Tmp20 which = DG_Tmp15 } # Track expenditure in a separate key for later
+						} 
+						change_key = { lhs = CL_Wealth which = DG_Tmp15 } # how else do you afford those hats?
+						set_key = { lhs = DG_Tmp15 value = 0 }
+					}
+					papal_controller = { # somehow some lucrative sidedeals end up with the papal controller
+						capital_scope = {
+							AAA = { 
+								PREV = { set_key = { lhs = DG_Tmp15 which = PREV } } # write the value into the province
+								change_key = { lhs = DG_Tmp20 which = DG_Tmp15 } # Track expenditure in a separate key for later
+							}
+
+							change_key = { lhs = CL_Wealth which = DG_Tmp15 } # how else do you afford those hats?
+							set_key = { lhs = DG_Tmp15 value = 0 }
+						}
+					}
+					DG_scaled_curia_treasury_cost = { input = DG_Tmp20 }
+
+				}
+				set_key = { lhs = DG_Tmp15 value = 0 }
+				set_key = { lhs = DG_Tmp16 value = 0 }				
+				set_key = { lhs = DG_Tmp20 value = 0 }	
+			}
+
+		}
+	}
+}
+
+# Removes the amount in key $input$ from the curia treasury
+DG_scaled_curia_treasury_cost = {
+	while = { limit = { check_key = { lhs = $input$ value = 8192 } } add_curia_treasury = -8192 	subtract_key = { lhs = $input$ value = 8192 } }
+	if = { limit = { check_key = { lhs = $input$ value = 4096 } } 	 add_curia_treasury = -4096 	subtract_key = { lhs = $input$ value = 4096 } }
+	if = { limit = { check_key = { lhs = $input$ value = 2048 } } 	 add_curia_treasury = -2048 	subtract_key = { lhs = $input$ value = 2048 } }
+	if = { limit = { check_key = { lhs = $input$ value = 1024 } } 	 add_curia_treasury = -1024 	subtract_key = { lhs = $input$ value = 1024 } }
+	if = { limit = { check_key = { lhs = $input$ value = 512 } } 	 add_curia_treasury = -512 	subtract_key = { lhs = $input$ value = 512 } }
+	if = { limit = { check_key = { lhs = $input$ value = 256 } } 	 add_curia_treasury = -256 	subtract_key = { lhs = $input$ value = 256 } }
+	if = { limit = { check_key = { lhs = $input$ value = 128 } } 	 add_curia_treasury = -128 	subtract_key = { lhs = $input$ value = 128 } }
+	if = { limit = { check_key = { lhs = $input$ value = 64 } } 	 add_curia_treasury = -64 	subtract_key = { lhs = $input$ value = 64 } }
+	if = { limit = { check_key = { lhs = $input$ value = 32 } } 	 add_curia_treasury = -32 	subtract_key = { lhs = $input$ value = 32 } }
+	if = { limit = { check_key = { lhs = $input$ value = 16 } } 	 add_curia_treasury = -16 	subtract_key = { lhs = $input$ value = 16 } }
+	if = { limit = { check_key = { lhs = $input$ value = 8 } } 		 add_curia_treasury = -8 	subtract_key = { lhs = $input$ value = 8 } }
+	if = { limit = { check_key = { lhs = $input$ value = 4 } } 		 add_curia_treasury = -4 	subtract_key = { lhs = $input$ value = 4 } }
+	if = { limit = { check_key = { lhs = $input$ value = 2 } } 		 add_curia_treasury = -2 	subtract_key = { lhs = $input$ value = 2 } }
+	if = { limit = { check_key = { lhs = $input$ value = 1 } } 		 add_curia_treasury = -1 	subtract_key = { lhs = $input$ value = 1 } }
+}

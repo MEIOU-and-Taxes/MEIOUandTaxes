@@ -987,10 +987,7 @@ MN_RlgShift_Helper = {
 		set_key = { lhs = DG_Tmp3 which = MN_S$slot$ENT }
 		multiply_key = { lhs = DG_Tmp3 value = 2 }
 		change_key = { lhs = DG_Tmp3 value = 75 }
-		if = {
-			limit = { NOT = { is_key_equal = { lhs = DG_Tmp3 value = 0 } } }
-			divide_key = { lhs = DG_Tmp2			which = DG_Tmp3 }
-		}
+		divide_key = { lhs = DG_Tmp2 which = DG_Tmp3 }
 
 		multiply_key = { lhs = DG_Tmp1 which = DG_Tmp2 }
 
@@ -998,10 +995,7 @@ MN_RlgShift_Helper = {
 		multiply_key = { lhs = DG_Tmp2 value = 5 }
 		set_key = { lhs = DG_Tmp3 which = MN_S$slot$INF }
 		change_key = { lhs = DG_Tmp3 value = 5 }
-		if = {
-			limit = { NOT = { is_key_equal = { lhs = DG_Tmp3 value = 0 } } }
-			divide_key = { lhs = DG_Tmp2			which = DG_Tmp3 }
-		}
+		divide_key = { lhs = DG_Tmp2 which = DG_Tmp3 }
 
 		multiply_key = { lhs = DG_Tmp1 which = DG_Tmp2 }
 		multiply_key = { lhs = DG_Tmp1 value = 0.01 } # bring back to % range
@@ -1236,7 +1230,7 @@ MN_RlgShift_Helper = {
 			}
 		}
 		else_if = {
-			limit = { owner = { is_key_equal = { lhs = aspect_25 value = 3 } } } #Selective Tolerance - Children of the book don't shift
+			limit = { owner = { is_key_equal = { lhs = aspect_25 value = 3 } } } #Selective Tolerance - Children of the book shift by a small amount
 			if = {
 				limit = {
 					owner = { OR = { religion_group = christian religion_group = muslim religion_group = jewish_group } }
@@ -1248,7 +1242,7 @@ MN_RlgShift_Helper = {
 				multiply_key = { lhs = DG_Tmp1 value = 10 } # BALANCE Factor <- use this to increase or decrease overall speed of passive conversion
 			}
 			else = {
-				multiply_key = { lhs = DG_Tmp1 value = 0 } # BALANCE Factor <- use this to increase or decrease overall speed of passive conversion
+				multiply_key = { lhs = DG_Tmp1 value = 5 } # BALANCE Factor <- use this to increase or decrease overall speed of passive conversion
 			}
 		}
 		else_if = {
@@ -1291,6 +1285,15 @@ MN_RlgShift_Helper = {
 			limit = { has_global_flag = historical_religion }
 			multiply_key = { lhs = DG_Tmp1 value = 0.5 } # half passive conversion speed at historic religion game setting
 		}
+
+		if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLAttendance Lvl=3 } } }
+			multiply_key = { lhs = DG_Tmp1 value = 2 }
+		}
+		else_if = {
+			limit = { owner = { Privilege_Has = { Privilege=CLAttendance Lvl=2 } } }
+			multiply_key = { lhs = DG_Tmp1 value = 1.5 }
+		}	
 		
 		#Handling Missionaries
 		set_key = { lhs = DG_Tmp6 which = MN_S$slot$Tolerance }
@@ -1407,35 +1410,12 @@ MN_RlgShift = {
 	if = {
 		limit = { NOT = { is_key_equal = { lhs = MN_S0 which = DG_Tmp0 } } }
 		MN_AddReligion = { type = which religion = DG_Tmp0 }
-		# If we do this more often, introduce it into API as modifier and changeable value.
 		
-		### This is a dangerous edition, will need balancing. But makes passive conversion actually noticable on large provinces
-		set_key = { lhs = DG_Tmp2 which = Class_Rural }
-		multiply_key = { lhs = DG_Tmp2 value = 0.005 } # Rural convert slow
-		set_key = { lhs = DG_Tmp3 which = Class_Urban }
-		multiply_key = { lhs = DG_Tmp3 value = 0.01 } # Urbans convert faster
-		set_key = { lhs = DG_Tmp4 which = Class_Notables }
-		multiply_key = { lhs = DG_Tmp4 value = 0.015 } # Notables are.. Elites
-		
-		change_key = { lhs = DG_Tmp2 value = 0.050 } # Rural
-		change_key = { lhs = DG_Tmp3 value = 0.250 } # Urban
-		change_key = { lhs = DG_Tmp4 value = 0.050 } # Notables
-
-		# Population scaling: add 1% of total province population to each class's flat conversion		
-
-		if = {
-			limit = { owner = { Privilege_Has = { Privilege=CLAttendance Lvl=3 } } }
-			multiply_key = { lhs = DG_Tmp2 value = 2 }
-			multiply_key = { lhs = DG_Tmp3 value = 2 }
-			multiply_key = { lhs = DG_Tmp4 value = 2 }
-		}
-		else_if = {
-			limit = { owner = { Privilege_Has = { Privilege=CLAttendance Lvl=2 } } }
-			multiply_key = { lhs = DG_Tmp2 value = 1.5 }
-			multiply_key = { lhs = DG_Tmp3 value = 1.5 }
-			multiply_key = { lhs = DG_Tmp4 value = 1.5 }
-		}
+		set_key = { lhs = DG_Tmp2 value = 0.050 } # Rural
+		set_key = { lhs = DG_Tmp3 value = 0.250 } # Urban
+		set_key = { lhs = DG_Tmp4 value = 0.050 } # Notables		
 		MN_HeresyHelper = { to = DG_Tmp0 typeto = which from = MN_S0 typefrom = which }
+
 
 		set_key = { lhs = DG_Tmp2 value = 0 }
 		set_key = { lhs = DG_Tmp3 value = 0 }
