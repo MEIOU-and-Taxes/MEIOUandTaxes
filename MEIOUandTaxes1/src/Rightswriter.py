@@ -294,24 +294,18 @@ for i in ui_matrix.keys():
 			tooltip = Reform_HighSeverity
 			NOT = {{ check_key = {{ lhs = Rights_SeverityR value = 10.001 }} }}
 		}}
-		hidden_trigger = {{
-			NOT = {{ has_country_modifier = Reform_CD }}
-			if = {{
-				limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
+		NOT = {{ has_country_modifier = Reform_CD }}
+		if = {{
+			limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
 
-				{Adm_Pow}
-				{Dip_Pow}
-				{Mil_Pow}
-				custom_trigger_tooltip = {{
-					tooltip = Rights_UI_MetReqs
-					{Codename}{Rank}{Interaction_Type}Allow = yes
-				}}
-			}}
+			{Adm_Pow}
+			{Dip_Pow}
+			{Mil_Pow}
+			{Codename}{Rank}{Interaction_Type}Allow = yes
+		}}
 		""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type, Adm_Pow = Adm_Pow_Trig, Dip_Pow = Dip_Pow_Trig, Mil_Pow = Mil_Pow_Trig)
 				effects_tmp2 = 	"""if = {{
 			limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
-			{Codename}{Rank}{Interaction_Type}Reqs = yes
-			custom_tooltip = Rights_LB
 			custom_tooltip = {Codename}{Rank}{Interaction_Type}_description
 			{Codename}{Rank}{Interaction_Type} = yes
 			custom_tooltip = Rights_LB
@@ -319,38 +313,20 @@ for i in ui_matrix.keys():
 			{Dip_Pow}
 			{Mil_Pow}
 		}}""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type,  Adm_Pow = Adm_Pow_Eff, Dip_Pow = Dip_Pow_Eff, Mil_Pow = Mil_Pow_Eff)
-				effects_tmp3 = """if = {{
-			limit = {{
-				has_country_modifier = Reform_CD
-			}}
-            custom_tooltip = Rights_ReformCD
-		}}
-		if = {{
-			limit = {{
-				{Codename}{Rank}{Interaction_Type}Potential = yes
-				{Codename}{Rank}{Interaction_Type}Allow = yes
-			}}
-			custom_tooltip = Rights_UI_Success
-		}}""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type)
 			else:
 				trigger_tmp += """
-			else_if = {{
-				limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
-			
-				{Adm_Pow}
-				{Dip_Pow}
-				{Mil_Pow}
-				custom_trigger_tooltip = {{
-					tooltip = Rights_UI_MetReqs
-					{Codename}{Rank}{Interaction_Type}Allow = yes
-				}}
-			}}""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type,  Adm_Pow = Adm_Pow_Trig, Dip_Pow = Dip_Pow_Trig, Mil_Pow = Mil_Pow_Trig)
+		else_if = {{
+			limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
+
+			{Adm_Pow}
+			{Dip_Pow}
+			{Mil_Pow}
+			{Codename}{Rank}{Interaction_Type}Allow = yes
+		}}""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type,  Adm_Pow = Adm_Pow_Trig, Dip_Pow = Dip_Pow_Trig, Mil_Pow = Mil_Pow_Trig)
 
 				effects_tmp2 +=	"""
 		else_if = {{
 			limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
-			{Codename}{Rank}{Interaction_Type}Reqs = yes
-			custom_tooltip = Rights_LB
 			custom_tooltip = {Codename}{Rank}{Interaction_Type}_description
 			custom_tooltip = Rights_LB
 			{Codename}{Rank}{Interaction_Type} = yes
@@ -362,29 +338,12 @@ for i in ui_matrix.keys():
 		""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type,  Adm_Pow = Adm_Pow_Eff, Dip_Pow = Dip_Pow_Eff, Mil_Pow = Mil_Pow_Eff)
 
 
-				effects_tmp3 += """
-		else_if = {{
-			limit = {{
-				{Codename}{Rank}{Interaction_Type}Potential = yes
-				{Codename}{Rank}{Interaction_Type}Allow = yes
-			}}
-			custom_tooltip = Rights_UI_Success
-		}}""".format(Codename=Codename, Rank = CodeRank, Interaction_Type = UD_Type)
-
-		effects_tmp3 += """
-		else = {
-            custom_tooltip = Rights_UI_Failed
-        }
-		
-		"""
-
-		Effect += effects_tmp3 + effects_tmp2 + effects_tmp
+		Effect += effects_tmp2 + effects_tmp
 		Trigger += trigger_tmp + """
-			else = {
-				custom_trigger_tooltip = {
-					tooltip = Rights_UI_NotAvail
-					always = no
-				}
+		else = {
+			custom_trigger_tooltip = {
+				tooltip = Rights_UI_NotAvail
+				always = no
 			}
 		}"""
 
