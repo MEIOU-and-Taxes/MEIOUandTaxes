@@ -516,33 +516,33 @@ defined_text = {{
  Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
  Privilege_{Codename}{Tier}HasGreater: "£estate_greater_nobles_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
  Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_greater_nobles_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
- Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
- Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
-""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_greater_nobles_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege,Plus="+" if Tier > 0 else "")
 		elif Codename[0:2] == "BG":
 			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
  Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
  Privilege_{Codename}{Tier}HasGreater: "£estate_city_burghers_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
  Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_city_burghers_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
- Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_city_burghers_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
- Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_city_burghers_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
-""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_city_burghers_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_city_burghers_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege,Plus="+" if Tier > 0 else "")
 		elif Codename[0:2] == "CL":
 			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
  Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
  Privilege_{Codename}{Tier}HasGreater: "£estate_church_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
  Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_church_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
- Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_church_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
- Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_church_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
-""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_church_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_church_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege,Plus="+" if Tier > 0 else "")
 		elif Codename[0:2] == "BU":
 			TierL += """ Privilege_{Codename}{Tier}Has: "[Privilege_{Codename}{Tier}Has]"
  Privilege_{Codename}{Tier}NotHas: "[Privilege_{Codename}{Tier}NotHas]" 
  Privilege_{Codename}{Tier}HasGreater: "£estate_bureaucracy_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
  Privilege_{Codename}{Tier}HasGreaterNOT: "NOT £estate_bureaucracy_icon_small£ §G{Privilege}:§! *{Codename}{Tier}Title* §Y({Tier})+§!"
- Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_bureaucracy_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
- Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_bureaucracy_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier})§!"
-""".format(Codename=Codename,Tier=Tier,Privilege=Privilege)
+ Privilege_{Codename}{Tier}_G: "§G - {Privilege}: £estate_bureaucracy_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+ Privilege_{Codename}{Tier}_R: "§R - {Privilege}: £estate_bureaucracy_icon_small£ *{Codename}{Tier}Title*§! §Y({Tier}){Plus}§!"
+""".format(Codename=Codename,Tier=Tier,Privilege=Privilege,Plus="+" if Tier > 0 else "")
 	file4.write(TierL)
 	TierL = ""
 	TierPL = ""
