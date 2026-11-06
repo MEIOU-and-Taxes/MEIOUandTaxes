@@ -1,0 +1,88 @@
+# namespace = militaryreform
+# Military reform by threat
+country_event = {
+	id = militaryreform.001
+	title = militaryreform.001.t
+	desc = militaryreform.001.d
+	picture = MILITARY_CAMP_eventPicture
+
+	is_triggered_only = yes
+
+	trigger = {
+		NOT = { has_country_flag = military_reform_by_threat }
+		NOT = { has_country_flag = military_reform_by_threat_pending }
+		Rights_BUSer3HasGreater = no
+		any_neighbor_country = {
+			Rights_BUSer3HasGreater = yes
+			is_great_power = yes
+			OR = { 
+				has_institution = Banking
+				has_institution = Nationalism
+			}
+			# Maybe also "attitude = attitude_threatened" somehow ? 
+			ROOT = {
+				has_opinion_modifier = {
+					who = PREV
+					modifier = aggressive_expansion
+					value = -30
+				}
+			}
+		}
+	}
+
+	immediate = {
+		hidden_effect = {
+			set_country_flag = military_reform_by_threat_pending
+			random_neighbor_country = {
+				limit = {
+					Rights_BUSer3HasGreater = yes
+					is_great_power = yes
+					OR = { 
+						has_institution = Banking
+						has_institution = Nationalism
+					}
+					# Maybe also "attitude = attitude_threatened" somehow ? 
+					ROOT = {
+						has_opinion_modifier = {
+							who = PREV
+							modifier = aggressive_expansion
+							value = -30
+						}
+					}
+				}
+				save_event_target_as = military_reform_threat
+			}
+		}
+	}
+
+	option = {
+		name = militaryreform.001.a
+		hidden_effect = {
+			country_event = { id = militaryreform.002 days = 300 }
+		}
+		ai_chance = { factor = 1 }
+	}
+}
+
+# Military reform by threat - the reform is pushed through
+country_event = {
+	id = militaryreform.002
+	title = militaryreform.002.t
+	desc = militaryreform.002.d
+	picture = MILITARY_CAMP_eventPicture
+
+	is_triggered_only = yes
+
+	immediate = {
+		hidden_effect = {
+			clr_country_flag = military_reform_by_threat_pending
+		}
+	}
+
+	option = {
+		name = militaryreform.002.a
+		# There is no price for this reform package yet. Just a first draft of the mechanic.
+		reform_military_by_threat = yes
+		ai_chance = { factor = 1 }
+	}
+}
