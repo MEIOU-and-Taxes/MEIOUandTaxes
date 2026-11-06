@@ -294,7 +294,7 @@ for i in ui_matrix.keys():
 			tooltip = Reform_HighSeverity
 			NOT = {{ check_key = {{ lhs = Rights_SeverityR value = 10.001 }} }}
 		}}
-		NOT = {{ has_country_modifier = Reform_CD }}
+		Rights_NotRecovering = yes
 		if = {{
 			limit = {{ {Codename}{Rank}{Interaction_Type}Potential = yes }}
 
