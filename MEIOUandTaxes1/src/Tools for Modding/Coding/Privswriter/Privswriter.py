@@ -240,7 +240,7 @@ Privilege_{Codename}{Tier}CanRaise = {{
 		adm_power = 50"""
 			TierEffects2 += """
 		OR = {{
-			Rights_HasSpecialAdvisorOR = {{ Elite={Powerbroker} }}
+			Elite_HasPact = {{ Elite={Powerbroker} }}
 			faction_influence = {{ faction = FC_{Powerbroker} influence = 30 }}
 		}}
 	}}
