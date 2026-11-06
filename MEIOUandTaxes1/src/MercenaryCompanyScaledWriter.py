@@ -40,7 +40,7 @@ for key in scaling.keys():
 				continent = africa
 			}}
 		}}
-		Rights_BUSer3HasGreater = no
+		Rights_BUSer3NotHasGreater = yes
 		OR = {{
 			NOT = {{ stability = 0 }}
 			NOT = {{ corruption = 40 }}
@@ -68,7 +68,7 @@ for key in scaling.keys():
 				continent = africa
 			}}
 		}}
-		Rights_BUSer3HasGreater = no
+		Rights_BUSer3NotHasGreater = yes
 		OR = {{
 			NOT = {{ stability = 0 }}
 			NOT = {{ corruption = 40 }}
@@ -95,7 +95,7 @@ for key in scaling.keys():
 				continent = africa
 			}}
 		}}
-		Rights_BUSer3HasGreater = no
+		Rights_BUSer3NotHasGreater = yes
 		OR = {{
 			NOT = {{ stability = 0 }}
 			NOT = {{ corruption = 40 }}
