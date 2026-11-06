@@ -1218,7 +1218,7 @@ CardinalChanceP = {
 		multiply_key = { lhs = MN_Cardinal value = 1.2 }
 	}
 	if = {
-		limit = { culture_group = owner }
+		limit = { owner = { culture_group = PREV } }
 		multiply_key = { lhs = MN_Cardinal value = 1.2 }
 	}
 	if = {
@@ -2426,4 +2426,223 @@ support_emperor_effect = {
 		limit = { is_emperor = yes }
 		country_event = { id = DG_Protestant.026 days = 90 random = 15 }
 	}
+}
+
+reform_church_on_conversion_minor = {
+	set_country_flag = church_reformed
+	custom_tooltip = reform_church_minor_tt
+	# Weaken Church authority
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLImmunity Lvl=4 }
+				Privilege_Has = { Privilege=CLImmunity Lvl=3 }		
+			}
+		}
+		custom_tooltip = reform_church_CLImmunity_tt
+		Privilege_CLImmunity2Apply = yes		
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=CLImmunity Lvl=2 }	
+		}
+		custom_tooltip = reform_church_CLImmunity_tt
+		Privilege_CLImmunity1Apply = yes	
+	}
+	# strengthen church independent education for priests and commoners alike
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=CLLearning Lvl=3 }	
+		}
+		custom_tooltip = reform_church_CLLearning_tt
+		Privilege_CLLearning2Apply = yes	
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=CLLearning Lvl=2 }	
+		}
+		custom_tooltip = reform_church_CLLearning_tt
+		Privilege_CLLearning1Apply = yes	
+	}
+	# Compete for church appointments independent of pope
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=CLAppointments Lvl=3 }
+		}
+		custom_tooltip = reform_church_CLAppointments_tt
+		Privilege_CLAppointments2Apply = yes		
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=CLAppointments Lvl=2 }	
+		}
+		custom_tooltip = reform_church_CLAppointments_tt
+		Privilege_CLAppointments1Apply = yes	
+	}	
+	# Weaken funding of church, this will strengthen Nobles and Burghers
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLTaxE Lvl=5 }
+				Privilege_Has = { Privilege=CLTaxE Lvl=4 }
+				Privilege_Has = { Privilege=CLTaxE Lvl=3 }		
+			}
+		}
+		custom_tooltip = reform_church_CLTaxE_tt
+		Privilege_CLTaxE2Apply = yes		
+	}
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-40 }
+}
+
+reform_church_on_conversion_major = {
+	set_country_flag = church_reformed
+	custom_tooltip = reform_church_major_tt
+	#Break Authority of Clergy
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLImmunity Lvl=4 }
+				Privilege_Has = { Privilege=CLImmunity Lvl=3 }
+				Privilege_Has = { Privilege=CLImmunity Lvl=2 }
+			}	
+		}
+		custom_tooltip = reform_church_CLImmunity_tt
+		Privilege_CLImmunity1Apply = yes	
+	}
+	# Break Clerical monopoly on education
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLLearning Lvl=3 }
+				Privilege_Has = { Privilege=CLLearning Lvl=2 }
+			}	
+		}
+		custom_tooltip = reform_church_CLLearning_tt
+		Privilege_CLLearning1Apply = yes	
+	}
+	# Force Attendance and conversion of all, new Faith is for "everyone", unless somehow already civic
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLAttendance Lvl=2 }
+				Privilege_Has = { Privilege=CLAttendance Lvl=1 }
+			}	
+		}
+		custom_tooltip = reform_church_CLAttendance_tt
+		Privilege_CLAttendance3Apply = yes	
+	}
+	# Any blasphemy is outlawed, every heathen is prosecuted full force. No heretics allowed, unless super tolerant
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLBlasphemy Lvl=2 }
+				Privilege_Has = { Privilege=CLBlasphemy Lvl=1 }
+			}	
+		}
+		custom_tooltip = reform_church_CLBlasphemy_tt
+		Privilege_CLBlasphemy3Apply = yes	
+	}	
+	# Enforce State appointments of church offices
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLAppointments Lvl=3 }
+				Privilege_Has = { Privilege=CLAppointments Lvl=2 }
+			}	
+		}
+		custom_tooltip = reform_church_CLAppointments_tt
+		Privilege_CLAppointments1Apply = yes	
+	}
+	# First force church property into the legal framework, or rather not..get rid of it...
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLOffice Lvl=2 }
+				Privilege_Has = { Privilege=CLOffice Lvl=1 }
+			}	
+		}
+		custom_tooltip = reform_church_CLOffice_tt
+		Privilege_CLOffice0Apply = yes	
+	}
+	# here, new country event that will handle the massive expropriation and breaking the back of church property
+
+	if = {
+		limit = {
+			NOT = { is_key_equal = { lhs = Rights_CLHie value = 1 } } # Reforms are weird, thats the best way to see if reform hierarchy 3 is in place?
+		}
+		custom_tooltip = reform_church_CLHie_tt	
+		Rights_CLHie2Apply = yes 
+	}
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-60 }
+}
+
+reform_church_from_pressure = {
+	set_country_flag = church_reformed
+	custom_tooltip = reform_church_from_pressure_tt	
+	# Weaken Church authority
+	if = {
+		limit = {
+			OR = {
+				Privilege_Has = { Privilege=CLImmunity Lvl=4 }
+				Privilege_Has = { Privilege=CLImmunity Lvl=3 }		
+			}
+		}
+		custom_tooltip = reform_church_CLImmunity_tt
+		Privilege_CLImmunity2Apply = yes		
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=CLImmunity Lvl=2 }	
+		}
+		custom_tooltip = reform_church_CLImmunity_tt
+		Privilege_CLImmunity1Apply = yes	
+	}
+	# Compete for church appointments independent of pope
+	if = {
+		limit = {
+			Privilege_Has = { Privilege=CLAppointments Lvl=3 }
+		}
+		custom_tooltip = reform_church_CLAppointments_tt
+		Privilege_CLAppointments2Apply = yes		
+	}
+	else_if = {
+		limit = {
+			Privilege_Has = { Privilege=CLAppointments Lvl=2 }	
+		}
+		custom_tooltip = reform_church_CLAppointments_tt
+		Privilege_CLAppointments1Apply = yes	
+	}
+	if = {
+		limit = {
+			NOT = { is_key_equal = { lhs = Rights_CLHie value = 1 } } # Reforms are weird, thats the best way to see if reform hierarchy 3 is in place?
+		}
+		custom_tooltip = reform_church_CLHie_tt	
+		Rights_CLHie2Apply = yes 
+	}
+	Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=CL Amount=-20 }
+}
+
+reform_church_property_minor = {
+ 	# not really minor, but less evil. Large ownerships are getting taken over, smaller stuff stays alive
+	Church_Secularization = { threshold = 50 broker = NO type = Agriculture }	
+	Church_Secularization = { threshold = 15 broker = NO type = Extraction }
+	Church_Secularization = { threshold = 15 broker = NO type = Forestry }
+	Church_Secularization = { threshold = 15 broker = NO type = Fishery }
+
+	Church_Secularization = { threshold = 50 broker = BG type = Industrial }
+	Church_Secularization = { threshold = 0.001 broker = BG type = Commercial }
+	Church_Secularization = { threshold = 25 broker = BG type = Academic }
+}
+
+reform_church_property_major = {
+ 	# really really hard crackdown on the church
+	# Almost nothing remains
+	Church_Secularization = { threshold = 15 broker = NO type = Agriculture }	
+	Church_Secularization = { threshold = 0.001 broker = NO type = Extraction }
+	Church_Secularization = { threshold = 0.001 broker = NO type = Forestry }
+	Church_Secularization = { threshold = 0.001 broker = NO type = Fishery }
+
+	Church_Secularization = { threshold = 0.001 broker = BG type = Industrial }
+	Church_Secularization = { threshold = 0.001 broker = BG type = Commercial }
+	Church_Secularization = { threshold = 10 broker = BG type = Academic }
 }

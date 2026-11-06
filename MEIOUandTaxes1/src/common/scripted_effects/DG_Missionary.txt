@@ -8,6 +8,7 @@ MN_MissionaryHelper = {
 		set_key = { lhs = MN_S$slot$MStrength value = 0 }
 	}
 	#Adds tolerance effect
+	# Needs decision how to handle trade company, as this basically immidiatly skips to an else.
 	else = {
 		set_key = { lhs = MN_S$slot$MStrength which = DG_Tmp2 }
 		if = {
@@ -205,9 +206,9 @@ MN_MissionaryHelper = {
 MN_Missionary = {
 	#Export global data
 	export_to_key = {
-		 lhs = DG_Tmp1
-		 value = religion
-		 who = owner
+		lhs = DG_Tmp1
+		value = religion
+		who = owner
 	}
 	export_to_key = {
 		lhs = DG_Tmp2
@@ -240,9 +241,14 @@ MN_Missionary = {
 	multiply_key = { lhs = DG_Tmp2 value = 100 }
 	multiply_key = { lhs = DG_Tmp3 value = 0.2 }
 	subtract_key = { lhs = DG_Tmp2 which = DG_Tmp3 }
+
+	# Factor in Base Tolerances
+	change_key = { lhs = DG_Tmp4 value = -2 }
+	change_key = { lhs = DG_Tmp5 value = -4 }
+
 	if = {
 		limit = {
-			is_pagan = yes
+			owner = { is_pagan = yes }
 		}
 		change_key = { lhs = DG_Tmp2 value = 2.5 }
 	}
@@ -286,6 +292,7 @@ MN_Missionary = {
 	set_key = { lhs = DG_Tmp4 value = 0 }
 	set_key = { lhs = DG_Tmp5 value = 0 }
 	set_key = { lhs = DG_Tmp6 value = 0 }
+	set_key = { lhs = DG_Tmp7 value = 0 }
 }
 
 AvailableMissionariesCount = {
@@ -380,6 +387,7 @@ SendingAvailableMissionaries = {
 					}
 					NOT = { check_key = { lhs = MN_S0TotP value = 90 } }
 					NOT = { has_province_modifier = minority_missionary }
+					has_missionary = no
 				}
 			}
 			random_owned_province = {
@@ -395,6 +403,7 @@ SendingAvailableMissionaries = {
 					}
 					NOT = { check_key = { lhs = MN_S0TotP value = 90 } }
 					NOT = { has_province_modifier = minority_missionary }
+					has_missionary = no
 				}
 				add_province_modifier = { name = minority_missionary duration = -1 hidden = yes }
 			}
