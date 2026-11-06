@@ -6,10 +6,11 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import numpy as np
 import codecs
 import math
 
-rights = pd.read_csv('ReformDesire.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
+rights = pd.read_csv('ReformDesire.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
 
 file = codecs.open('common/scripted_effects/SYS-AI_Reform_Misc.txt', 'w+', encoding='utf-8')
 
@@ -49,10 +50,7 @@ for key in rights.keys():
 		LvlDown = rights[key]['Lvl'+ str(index)].split(',')[0]
 		index += 1
 
-		if(DefaultPosition == 0):
-			 CurRank = Rank
-		else:
-			CurRank = Rank - DefaultPosition + 1
+		CurRank = Rank + 1
 		InversedCodeRank = Ranks - Rank
 		if Rank == 0:
 			ReformDesireEffect = """	
