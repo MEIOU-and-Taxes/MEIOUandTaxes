@@ -45,10 +45,7 @@ for key in rights.keys():
 	index = 1
 
 	for Rank in range(0,Ranks):
-		if(DefaultPosition == 0):
-			CurRank = Rank
-		else:
-			CurRank = Rank - DefaultPosition + 1
+		CurRank = Rank + 1
 		RightsP += """
 {Codename}{CodeRank} = {{
 	icon = privilege_right_{CodeRank}
@@ -58,7 +55,7 @@ for key in rights.keys():
 	influence = 0
 	can_select = {{
 		hidden_trigger = {{ ai = no }}
-        is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+        Rights_Has = {{ Right={Right} Lvl={ValueRank} }}
 	}}
 	on_granted = {{
 	}}
@@ -73,7 +70,7 @@ for key in rights.keys():
 	ai_will_do = {{
 		factor = 0
 	}}
-}}""".format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1, Icons=Icon)
+}}""".format(Codename=Codename,Right=Codename[len("Rights_"):],ValueRank=int(CurRank), CodeRank = Rank + 1, Icons=Icon)
 		RightsList += """{Codename}{Rank}
 """.format(Codename=Codename,Rank=Rank+1)
 
@@ -111,35 +108,29 @@ for key in rights.keys():
 	
 	## Create Reset effects
 	for Rank in range(0,Ranks):
-		if(DefaultPosition == 0):
-			CurRank = Rank
-		else:
-			CurRank = Rank - DefaultPosition + 1 
+		CurRank = Rank + 1
 		RightsAssign += """	remove_estate_privilege = {Codename}{CodeRank}
 """.format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1)
 
 	## Create Assignment effects
 	for Rank in range(0,Ranks):
-		if(DefaultPosition == 0):
-			CurRank = Rank
-		else:
-			CurRank = Rank - DefaultPosition + 1 
+		CurRank = Rank + 1
 		if(Rank == 0):
 			RightsAssign += """    if = {{
         limit = {{
-            is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+            Rights_Has = {{ Right={Right} Lvl={ValueRank} }}
         }}
         set_estate_privilege = {Codename}{CodeRank}
     }}
-"""	.format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1)
+"""	.format(Codename=Codename,Right=Codename[len("Rights_"):],ValueRank=int(CurRank), CodeRank = Rank + 1)
 		else:
 			RightsAssign += """    else_if = {{
         limit = {{
-            is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+            Rights_Has = {{ Right={Right} Lvl={ValueRank} }}
         }}
 		set_estate_privilege = {Codename}{CodeRank}
     }}
-""".format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1)
+""".format(Codename=Codename,Right=Codename[len("Rights_"):],ValueRank=int(CurRank), CodeRank = Rank + 1)
 
 RightsAssign += """}"""
 
@@ -233,10 +224,7 @@ for i in ui_matrix.keys():
 		"""		
 		index = 0
 		for Rank in range(1,Ranks):
-			if(DefaultPosition == 0):
-				CurRank = Rank
-			else:
-				CurRank = Rank - DefaultPosition + 1
+			CurRank = Rank + 1
 
 			if UD_Type == "Raise":
 				CodeRank = Rank + 1
