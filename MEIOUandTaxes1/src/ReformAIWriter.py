@@ -6,10 +6,11 @@ This is a temporary script file.
 """
 
 import pandas as pd
+import numpy as np
 import codecs
 import math
 
-rights = pd.read_csv('ReformDesire.csv', index_col='Index', sep=';').dropna(how='all').replace({pd.np.nan:None}).to_dict(orient='index')
+rights = pd.read_csv('ReformDesire.csv', index_col='Index', sep=';').dropna(how='all').replace({np.nan:None}).to_dict(orient='index')
 
 file = codecs.open('common/scripted_effects/SYS-AI_Reform_Misc.txt', 'w+', encoding='utf-8')
 
@@ -49,16 +50,13 @@ for key in rights.keys():
 		LvlDown = rights[key]['Lvl'+ str(index)].split(',')[0]
 		index += 1
 
-		if(DefaultPosition == 0):
-			 CurRank = Rank
-		else:
-			CurRank = Rank - DefaultPosition + 1
+		CurRank = Rank + 1
 		InversedCodeRank = Ranks - Rank
 		if Rank == 0:
 			ReformDesireEffect = """	
 	if = {{
 		limit = {{
-			{Codename}{CodeRank}Has = yes
+			Rights_Has = {{ Right={Right} Lvl={CodeRank} }}
 		}}
 		set_key = {{ lhs = {Codename}_Ref_Des_Up value = {LvlUp} }}
 		change_key = {{ lhs = {Codename}_Ref_Des_Up which = Modi_Add_Rights_{Faction}_Ref_Des_Up }}
@@ -66,7 +64,7 @@ for key in rights.keys():
 		set_key = {{ lhs = {Codename}_Ref_Des_Down value = {LvlDown} }}
 		change_key = {{ lhs = {Codename}_Ref_Des_Up which = Modi_Add_Rights_{Faction}_Ref_Des_Up }}
 		multiply_key = {{ lhs = {Codename}_Ref_Des_Down which = Modi_Multi_Rights_{Faction}_Ref_Des_Down }}
-	}}""".format(Codename='Rights_'+ Codename,Faction = Codename[0:2],ValueRank=int(CurRank), CodeRank = Rank + 1, LvlUp = LvlUp, LvlDown=LvlDown)
+	}}""".format(Codename='Rights_'+ Codename,Right=Codename,Faction = Codename[0:2],ValueRank=int(CurRank), CodeRank = Rank + 1, LvlUp = LvlUp, LvlDown=LvlDown)
 			ReformDoEffect = """	
 		if = {{
 			limit = {{
@@ -85,7 +83,7 @@ for key in rights.keys():
 			ReformDesireEffect += """	
 	else_if = {{
 		limit = {{
-			{Codename}{CodeRank}Has = yes
+			Rights_Has = {{ Right={Right} Lvl={CodeRank} }}
 		}}
 		set_key = {{ lhs = {Codename}_Ref_Des_Up value = {LvlUp} }}
 		change_key = {{ lhs = {Codename}_Ref_Des_Up which = Modi_Add_Rights_{Faction}_Ref_Des_Up }}
@@ -93,7 +91,7 @@ for key in rights.keys():
 		set_key = {{ lhs = {Codename}_Ref_Des_Down value = {LvlDown} }}
 		change_key = {{ lhs = {Codename}_Ref_Des_Up which = Modi_Add_Rights_{Faction}_Ref_Des_Up }}
 		multiply_key = {{ lhs = {Codename}_Ref_Des_Down which = Modi_Multi_Rights_{Faction}_Ref_Des_Down }}
-	}}""".format(Codename='Rights_'+ Codename,Faction = Codename[0:2],ValueRank=int(CurRank), CodeRank = Rank + 1, LvlUp = LvlUp, LvlDown=LvlDown)
+	}}""".format(Codename='Rights_'+ Codename,Right=Codename,Faction = Codename[0:2],ValueRank=int(CurRank), CodeRank = Rank + 1, LvlUp = LvlUp, LvlDown=LvlDown)
 			if Ranks-Rank > 1:
 				ReformDoEffect += """	
 		else_if = {{

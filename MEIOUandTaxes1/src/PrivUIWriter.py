@@ -104,7 +104,7 @@ country_event = {{
 	option = {{
 		name = Privilege_{Codename}Raise_title
 		trigger = {{
-   			NOT = {{ Privilege_Has = {{ Privilege={Codename} Lvl={LastRank} }} }}
+   			Privilege_NotHas = {{ Privilege={Codename} Lvl={LastRank} }}
 		}}
 		Privilege_{Codename}Raise = yes
 		custom_tooltip = Privilege_UI_Info
@@ -119,7 +119,7 @@ country_event = {{
 	option = {{
 		name = Privilege_{Codename}Lower_title
 		trigger = {{
-   			NOT = {{ Privilege_Has = {{ Privilege={Codename} Lvl=0 }} }}
+   			Privilege_NotHas = {{ Privilege={Codename} Lvl=0 }}
 		}}
 		Privilege_{Codename}Lower = yes
 		custom_tooltip = Privilege_UI_Info
