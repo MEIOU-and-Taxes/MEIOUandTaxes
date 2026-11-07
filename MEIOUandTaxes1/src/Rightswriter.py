@@ -55,7 +55,7 @@ for key in rights.keys():
 	influence = 0
 	can_select = {{
 		hidden_trigger = {{ ai = no }}
-        is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+        Rights_Has = {{ Right={Right} Lvl={ValueRank} }}
 	}}
 	on_granted = {{
 	}}
@@ -70,7 +70,7 @@ for key in rights.keys():
 	ai_will_do = {{
 		factor = 0
 	}}
-}}""".format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1, Icons=Icon)
+}}""".format(Codename=Codename,Right=Codename[len("Rights_"):],ValueRank=int(CurRank), CodeRank = Rank + 1, Icons=Icon)
 		RightsList += """{Codename}{Rank}
 """.format(Codename=Codename,Rank=Rank+1)
 
@@ -118,19 +118,19 @@ for key in rights.keys():
 		if(Rank == 0):
 			RightsAssign += """    if = {{
         limit = {{
-            is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+            Rights_Has = {{ Right={Right} Lvl={ValueRank} }}
         }}
         set_estate_privilege = {Codename}{CodeRank}
     }}
-"""	.format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1)
+"""	.format(Codename=Codename,Right=Codename[len("Rights_"):],ValueRank=int(CurRank), CodeRank = Rank + 1)
 		else:
 			RightsAssign += """    else_if = {{
         limit = {{
-            is_key_equal = {{ lhs = {Codename} value = {ValueRank} }}
+            Rights_Has = {{ Right={Right} Lvl={ValueRank} }}
         }}
 		set_estate_privilege = {Codename}{CodeRank}
     }}
-""".format(Codename=Codename,ValueRank=int(CurRank), CodeRank = Rank + 1)
+""".format(Codename=Codename,Right=Codename[len("Rights_"):],ValueRank=int(CurRank), CodeRank = Rank + 1)
 
 RightsAssign += """}"""
 
