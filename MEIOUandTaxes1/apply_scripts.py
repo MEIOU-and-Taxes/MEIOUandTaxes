@@ -340,10 +340,16 @@ def compile(compress=False, parse_init=True, debug=False):
 			[ 'events', '00-POP_Init-2.txt' ]
 		])
 
+	ignore = [
+		'gfx_unused'
+	]
+
 	parse = [ os.path.join( *p ) if type( p ) is list else p for p in parse ]
 	link = [ os.path.join( *p ) if type( p ) is list else p for p in link ]
 
 	def check_path_link ( path ):
+		if path.split( os.sep )[0] in ignore:
+			return False
 		for p in link:
 			if path.startswith( p ):
 				return True
