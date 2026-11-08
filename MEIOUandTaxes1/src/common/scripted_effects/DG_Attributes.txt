@@ -916,14 +916,6 @@ MN_GetInfrast_Helper = {
 			limit = { is_key_equal = { lhs = MN_S$slot$ which = DG_Tmp1 } }
 			change_key = { lhs = MN_S$slot$ENT value = 25 }
 		}
-		if = {
-			limit = { owner = { Privilege_Has = { Privilege=CLBlasphemy Lvl=2 } } }
-			multiply_key = { lhs = MN_S$slot$ENT value = 1.05 }
-		}
-		else_if = {
-			limit = { owner = { Privilege_Has = { Privilege=CLBlasphemy Lvl=3 } } }
-			multiply_key = { lhs = MN_S$slot$ENT value = 1.15 }
-		}		
 
 		#Entrenchment should be between 0.01 and 100
 		if = {
@@ -1006,7 +998,10 @@ MN_RlgShift_Helper = {
 				is_key_equal = { lhs = MN_S$slot$ which = MN_S0 }
 				NOT = { is_key_equal = { lhs = DG_Tmp0 which = MN_S0 } }
 			}
-			change_key = { lhs = DG_Tmp1 value = -0.010 }
+			change_key = { lhs = DG_Tmp1 value = -0.012 }
+		}
+		else = {
+			change_key = { lhs = DG_Tmp1 value = -0.01 }
 		}
 
 		#Preacher Impact and Special Cases
@@ -1304,7 +1299,7 @@ MN_RlgShift_Helper = {
 				limit = { check_key = { lhs = MN_S$slot$MStrength value = 0 } }
 				change_key = { lhs = DG_Tmp5 which = MN_S$slot$MStrength }
 			}
-			multiply_key = { lhs = DG_Tmp6 value = -0.5 }
+			multiply_key = { lhs = DG_Tmp6 value = -0.125 }
 			multiply_key = { lhs = DG_Tmp5 which = DG_Tmp6 }	# missionary strength impact based on tolerance
 			subtract_key = { lhs = DG_Tmp1 which = DG_Tmp5 }	# add missionary strength effect to passive conversion
 		}
@@ -1315,7 +1310,7 @@ MN_RlgShift_Helper = {
 				limit = { check_key = { lhs = MN_S$slot$MStrength value = 0 } }
 				change_key = { lhs = DG_Tmp5 which = MN_S$slot$MStrength }
 			}
-			multiply_key = { lhs = DG_Tmp6 value = -0.2 }
+			multiply_key = { lhs = DG_Tmp6 value = -0.1 }
 			multiply_key = { lhs = DG_Tmp5 which = DG_Tmp6 }	# missionary strength impact based on tolerance
 			subtract_key = { lhs = DG_Tmp1 which = DG_Tmp5 }	# add minority missionary effect to passive conversion
 		}
@@ -1326,7 +1321,7 @@ MN_RlgShift_Helper = {
 				limit = { check_key = { lhs = MN_S$slot$MStrength value = 0 } }
 				change_key = { lhs = DG_Tmp5 which = MN_S$slot$MStrength }
 			}
-			multiply_key = { lhs = DG_Tmp6 value = -0.1 }
+			multiply_key = { lhs = DG_Tmp6 value = -0.025 }
 			multiply_key = { lhs = DG_Tmp5 which = DG_Tmp6 }	# missionary strength impact based on tolerance
 			subtract_key = { lhs = DG_Tmp1 which = DG_Tmp5 }	# effect of neighboring provinces having a missionary on conversion strength
 		}
@@ -1338,12 +1333,13 @@ MN_RlgShift_Helper = {
 				NOT = { check_key = { lhs = MN_S$slot$ value = 7 } }
 				has_province_modifier = jesuit_activity
 			}
+			set_key = { lhs = DG_Tmp6 which = MN_S$slot$Tolerance } # reset, missionary blocks above already multiplied DG_Tmp6
 			set_key = { lhs = DG_Tmp5 value = 0.75 }
 			if = {
 				limit = { check_key = { lhs = MN_S$slot$MStrength value = 0 } }
 				change_key = { lhs = DG_Tmp5 which = MN_S$slot$MStrength }
 			}
-			multiply_key = { lhs = DG_Tmp6 value = -0.2 }
+			multiply_key = { lhs = DG_Tmp6 value = -0.1 }
 			multiply_key = { lhs = DG_Tmp5 which = DG_Tmp6 }	# missionary strength impact based on tolerance
 			subtract_key = { lhs = DG_Tmp1 which = DG_Tmp5 }	# add minority missionary effect to passive conversion
 		}
@@ -1367,7 +1363,12 @@ MN_RlgShift_Helper = {
 		}
 		else = {
 			set_key = { lhs = MN_S$slot$Rur_Var which = DG_Tmp1 }
-			multiply_key = { lhs = MN_S$slot$Rur_Var value = 0.40 }
+			multiply_key = { lhs = MN_S$slot$Rur_Var which = MN_S$slot$RurN }
+			multiply_key = { lhs = MN_S$slot$Rur_Var value = 0.08 }
+			if = {
+				limit = { NOT = { check_key = { lhs = DG_Tmp1 value = 0 } } } # only when shifting towards owner religion
+				change_key = { lhs = MN_S$slot$Rur_Var value = -0.025 }
+			}
 		}
 		if = {
 			limit = { OR = { is_key_equal = { lhs = MN_S$slot$UrbN value = 0 } NOT = { check_key = { lhs = Class_Urban value = 0.001 } } } }
@@ -1375,7 +1376,12 @@ MN_RlgShift_Helper = {
 		}
 		else = {
 			set_key = { lhs = MN_S$slot$Urb_Var which = DG_Tmp1 }
-			multiply_key = { lhs = MN_S$slot$Urb_Var value = 0.50 }
+			multiply_key = { lhs = MN_S$slot$Urb_Var which = MN_S$slot$UrbN }
+			multiply_key = { lhs = MN_S$slot$Urb_Var value = 0.15 }
+			if = {
+				limit = { NOT = { check_key = { lhs = DG_Tmp1 value = 0 } } }
+				change_key = { lhs = MN_S$slot$Urb_Var value = -0.010 } 
+			}
 		}
 		if = {
 			limit = { OR = { is_key_equal = { lhs = MN_S$slot$NotN value = 0 } NOT = { check_key = { lhs = Class_Notables value = 0.001 } } } }
@@ -1383,7 +1389,12 @@ MN_RlgShift_Helper = {
 		}
 		else = {
 			set_key = { lhs = MN_S$slot$Not_Var which = DG_Tmp1 }
-			multiply_key = { lhs = MN_S$slot$Not_Var value = 0.25 }
+			multiply_key = { lhs = MN_S$slot$Not_Var which = MN_S$slot$NotN }
+			multiply_key = { lhs = MN_S$slot$Not_Var value = 0.4 }
+			if = {
+				limit = { NOT = { check_key = { lhs = DG_Tmp1 value = 0 } } } 
+				change_key = { lhs = MN_S$slot$Not_Var value = -0.005 } 
+			}
 		}
 
 		# sum up the total variance of the religious shift
@@ -1411,9 +1422,9 @@ MN_RlgShift = {
 		limit = { NOT = { is_key_equal = { lhs = MN_S0 which = DG_Tmp0 } } }
 		MN_AddReligion = { type = which religion = DG_Tmp0 }
 		
-		set_key = { lhs = DG_Tmp2 value = 0.050 } # Rural
-		set_key = { lhs = DG_Tmp3 value = 0.250 } # Urban
-		set_key = { lhs = DG_Tmp4 value = 0.050 } # Notables		
+		set_key = { lhs = DG_Tmp2 value = 0.2 } # Rural
+		set_key = { lhs = DG_Tmp3 value = 0.150 } # Urban
+		set_key = { lhs = DG_Tmp4 value = 0.075 } # Notables		
 		MN_HeresyHelper = { to = DG_Tmp0 typeto = which from = MN_S0 typefrom = which }
 
 
