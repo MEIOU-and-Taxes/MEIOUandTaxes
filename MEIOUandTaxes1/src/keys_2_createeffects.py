@@ -587,6 +587,14 @@ tmplt2H_locc = """
 # add GVL<digits>_, GVR<decimals>_ and GVD<decimals><width>_ (blank for decimals the number does not show) otherwise.
 DIGIT, DOT, SIGN = 7, 4, 5          # pixel widths of a digit, the decimal point and the sign blank in the tooltip font
 
+def spacer(px):
+    out = ''
+    while px > 50:
+        out += '£50px£'
+        px -= 50
+    return out + ('£%dpx£' % px if px else '')
+
+
 def extra_format(tok):
     """'4:3', '+1:3', '4:1:3' -> (sign blank, digits, decimals, decimal width) or None"""
     import re
@@ -668,12 +676,11 @@ def gen_extra(dct, extra, loc_out, locc_out):
                 zero = ('GVN_' if sign else 'GV0_') + str(digits - 1) + str(dec)
             else:
                 zero = 'GVZ_' + name
-                zeros[zero] = '£%dpx£0%s' % ((SIGN if sign else 0) + DIGIT * (digits - 1) + dec_width(width) - dec_width(dec),
-                                             '.' + '0' * dec if dec else '')
+                zeros[zero] = spacer((SIGN if sign else 0) + DIGIT * (digits - 1) + dec_width(width) - dec_width(dec)) + '0' + ('.' + '0' * dec if dec else '')
             loc_lines.append(' GV%s_%s: "%s"\n' % (name, var, parts))
             blocks.append(tmpltA_locc.replace('GV_%s', 'GV%s_%s' % (name, var)).replace('GV%N_%a', zero).replace('%d', code_var))
     with open(loc_out, 'a', encoding='utf-8', newline='\n') as f:
-        f.write(''.join(' GVB_%d: "%s"\n' % (px, '£%dpx£' % px if px else '') for px in sorted(blanks)))
+        f.write(''.join(' GVB_%d: "%s"\n' % (px, spacer(px)) for px in sorted(blanks)))
         f.write(''.join(' %s: "%s"\n' % kv for kv in sorted(zeros.items())))
         f.write(''.join(loc_lines))
     with open(locc_out, 'a', newline='\n') as f:

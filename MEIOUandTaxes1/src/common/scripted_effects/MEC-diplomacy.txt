@@ -369,13 +369,19 @@ Subject_Call_to_Arms_Execute = {
 							participants = $scp_subject$
 						}
 					}
+					NOT = { truce_with = $scp_subject$ }
+					NOT = { alliance_with = $scp_subject$ }
 				}
 			}
-			$scp_subject$ = { 
-				join_all_offensive_wars_of = $scp_overlord$ 
+			$scp_subject$ = {
+				join_all_offensive_wars_of = $scp_overlord$
 
 				if = {
-					limit = { 
+					limit = {
+						is_in_war = {
+							attackers = $scp_overlord$
+							participants = THIS
+						}
 						OR = {
 							is_subject_of_type = appanage_subject
 							is_subject_of_type = daimyo_vassal
@@ -399,16 +405,22 @@ Subject_Call_to_Arms_Execute = {
 					NOT = {
 						is_in_war = {
 							defenders = $scp_subject$
-							participants = THIS
+							attackers = THIS
 						}
 					}
+					NOT = { truce_with = $scp_subject$ }
+					NOT = { alliance_with = $scp_subject$ }
 				}
 			}
-			$scp_subject$ = { 
-				join_all_defensive_wars_of = $scp_overlord$ 
+			$scp_subject$ = {
+				join_all_defensive_wars_of = $scp_overlord$
 
 				if = {
-					limit = { 
+					limit = {
+						is_in_war = {
+							defenders = $scp_overlord$
+							participants = THIS
+						}
 						OR = {
 							is_subject_of_type = appanage_subject
 							is_subject_of_type = daimyo_vassal
@@ -775,15 +787,21 @@ Calculate_AI_Reasons = {
 	]
 
 	[[cta]
+		clr_country_flag = AI_Reasons_cta_offensive
+		clr_country_flag = AI_Reasons_cta_defensive
 		if = {
-			limit = { $scp2$ = { has_country_flag = subject_cta_attacker } }
+			limit = { $scp1$ = { has_country_flag = subject_cta_attacker } }
 
 			set_key = { lhs = AI_Reasons_17 value = $cta_attacker_reasons$ }
+			set_country_flag = AI_Reasons_cta_offensive
 		}
 		else_if = {
-			limit = { $scp2$ = { has_country_flag = subject_cta_defender } }
+			limit = { $scp1$ = { has_country_flag = subject_cta_defender } }
 			set_key = { lhs = AI_Reasons_17 value = $cta_defender_reasons$ }
-
+			set_country_flag = AI_Reasons_cta_defensive
+		}
+		else = {
+			set_key = { lhs = AI_Reasons_17 value = 0 }
 		}
 	]
 
@@ -924,6 +942,17 @@ Save_AI_Reasons_ToScope = {
 		set_key = { lhs = AI_Reasons_25 	 which = PREV }
 		set_key = { lhs = Diplo_Bribe_Ducats which = PREV }
 		set_key = { lhs = AI_Reasons_Outcome which = PREV }
+
+		clr_country_flag = AI_Reasons_cta_offensive
+		clr_country_flag = AI_Reasons_cta_defensive
+		if = {
+			limit = { PREV = { has_country_flag = AI_Reasons_cta_offensive } }
+			set_country_flag = AI_Reasons_cta_offensive
+		}
+		else_if = {
+			limit = { PREV = { has_country_flag = AI_Reasons_cta_defensive } }
+			set_country_flag = AI_Reasons_cta_defensive
+		}
 	}
 }
 
@@ -987,6 +1016,8 @@ Clr_AI_Reasons = {
 		set_key = { lhs = AI_Reasons_25 value = 0 }
 		set_key = { lhs = Diplo_Bribe_Ducats value = 0 }
 		set_key = { lhs = AI_Reasons_Outcome which = PREV }
+		clr_country_flag = AI_Reasons_cta_offensive
+		clr_country_flag = AI_Reasons_cta_defensive
 	}
 }
 

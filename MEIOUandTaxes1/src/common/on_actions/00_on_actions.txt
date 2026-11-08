@@ -3774,18 +3774,20 @@ on_dependency_gained = {
 	FROM = { 
 		if = { limit = { OR = { is_subject_of_type = personal_union is_subject_of_type = personal_union_limited } }
 			every_subject_country = { limit = { OR = { is_subject_of_type = permanent_union is_subject_of_type = permanent_union_limited } }
+				set_country_flag = transfer_permanent_union_to_new_overlord
+			}
+			every_country = { limit = { has_country_flag = transfer_permanent_union_to_new_overlord } #don't free subjects while iterating the subject list
+				clr_country_flag = transfer_permanent_union_to_new_overlord
 				grant_independence_effect = yes ROOT = { create_subject = { subject_type = permanent_union_limited 	subject = PREV  } }
 			}
-			every_country = { #vanilla bug - not sure if it needs to be two sided tbh
+			every_country = { #vanilla bug - junior partner keeps its royal marriages; break each existing one once (breaking twice / breaking non-existing marriages is suspected of crashing the game)
 				limit = {
 					NOT = {
 						tag = ROOT
 					}
+					marriage_with = PREV
 				}
 				break_marriage = PREV
-				PREV = {
-					break_marriage = PREV
-				}
 			}
 		}
 	}
