@@ -596,7 +596,7 @@ Growth_ZoneLocal = {
     # how many pops want to go in vs. out
     Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 freedom = Tmp_8 }
     Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 }
-    Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 }
+    Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 industrial = yes }
     Growth_DoMove_HandleLocalMigration = { class = NO tmp = 5 }
     Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 factor = 2 }
     Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 }
@@ -641,6 +641,7 @@ Growth_ZoneDistribute = {
 # Public_Tmp1 = (PossibleMigrants in Growth Zone / Total pops in growth zone)
 ## Conditionals:
 # $zone$ = enables 50% multiplier on amount of possible migration
+# $industrial$ = inward migration bonus if has the Industrialisation institution
 ### Outputs:
 # Public_Tmp2, Public_Tmp4 = Outward migration absolute
 # Public_Tmp3, Public_Tmp5 = Inward migration absolute
@@ -709,7 +710,16 @@ Growth_DoMove_HandleLocalMigration = {
 			multiply_key = { lhs = Tmp_$tmp$ which = Public_Tmp9 }
 			divide_key = { lhs = Tmp_$tmp$ value = -40 }
 			[[factor] divide_key = { lhs = Tmp_$tmp$ value = $factor$ } ]
-			
+			[[industrial]
+			# Increase urban inward migration in lategame
+			if = {
+				limit = {
+					owner = { has_institution = Industrialisation }
+				}
+				multiply_key = { lhs = Tmp_$tmp$ value = 2 }
+			}
+			]
+
 			# Store results
 			change_key = { lhs = Public_Tmp3 which = Tmp_$tmp$ }
 			change_key = { lhs = Public_Tmp5 which = Tmp_$tmp$ }
@@ -1059,7 +1069,7 @@ Growth_ZoneHelper = {
 
             [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 zone=yes freedom = Tmp_8 }]
             [[NM] Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 zone=yes }]
-            [[RE] Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 zone=yes }]
+            [[RE] Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 zone=yes industrial = yes }]
             [[NO] Growth_DoMove_HandleLocalMigration = { class = NO tmp = 5 zone=yes }]
             [[BG] Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 zone=yes factor = 2 }]
             [[CL] Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 zone=yes }]
