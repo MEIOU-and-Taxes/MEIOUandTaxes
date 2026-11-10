@@ -37,6 +37,12 @@ def parse_block(block):
 		return []
 
 def parse_file(path):
+	try:
+		return _parse_file(path)
+	except Exception as e:
+		raise RuntimeError(f'{path}: {type(e).__name__}: {e}') from e
+
+def _parse_file(path):
 	with open(path, encoding='ISO-8859-1') as f:
 		file = list()
 		stack = [file]
@@ -282,6 +288,15 @@ def link_file ( filepath, destpath ):
 	os.link( filepath, destpath )
 
 def compile(compress=False, parse_init=True, debug=False):
+	try:
+		_compile(compress, parse_init, debug)
+	except BaseException:
+		print()
+		sys.excepthook(*sys.exc_info())
+		input('\nBuild FAILED, see the error above. Press Enter to exit...')
+		sys.exit(1)
+
+def _compile(compress=False, parse_init=True, debug=False):
 	start = time.time()
 
 	# files/paths to run through parsing
