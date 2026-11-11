@@ -234,9 +234,15 @@ def apply_script_to_decision(file, scripts, check):
 
 	return out
 
+noinline = [
+	os.path.join('src', 'common', 'scripted_effects', 'SYS-ProdSort.txt'),
+]
+
 scripts = dict()
 def load_scripts():
 	for path in glob.iglob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
+		if path in noinline:
+			continue
 		parsed = parse_file(path)
 		for script in parsed:
 			scripts[script[0]] = script[2]
@@ -364,6 +370,8 @@ def _compile(compress=False, parse_init=True, debug=False):
 
 	def check_path_link ( path ):
 		if path.split( os.sep )[0] in ignore:
+			return False
+		if os.path.join( 'src', path ) in noinline:
 			return False
 		for p in link:
 			if path.startswith( p ):
