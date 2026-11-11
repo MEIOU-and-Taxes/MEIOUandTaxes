@@ -72,12 +72,17 @@ def index():
 	return lines
 
 
+def index_new():
+	return [f'Prod_SortIndexNew{prod} = {{ set_key = {{ lhs = Prod_SortIndexNew value = {i + 1} }} }}' for i, prod in enumerate(ORDER)]
+
+
 def write():
 	src = os.path.dirname(os.path.abspath(__file__))
 	assert sorted(ORDER) == list(range(1, 60)), sorted(set(range(1, 60)) ^ set(ORDER))
 	suffixes = slot_suffixes(read_vars(src))
 	out = list(HEADER)
 	out += index()
+	out += index_new()
 	for s in range(SLOTS - 1):
 		out += move(suffixes, s, s + 1)
 		out += move(suffixes, s + 1, s)
