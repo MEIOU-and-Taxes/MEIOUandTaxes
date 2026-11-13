@@ -1,5 +1,7 @@
 # This generates the code for expedition related files
-### DOESNT SEEM TO WORK PROPERLY ANYMORE
+# Run from the src folder: python MEC-Expeditions_Writer.py
+# Output verified to match the committed files (2026-11), incl. the naval requirement from 397c90304.
+# Files are written with LF line endings to match the repository.
 
 # Python 3.6 or later
 from pathlib import Path
@@ -23,12 +25,15 @@ expedition_decision_events_start_number = 800
 
 
 class Expedition:
-    def __init__(self, name, localized_name, ai_preference, target_type, associated_TN):
+    def __init__(self, name, localized_name, ai_preference, target_type, associated_TN, extra_unlock_groups=None):
         self.name = name
         self.localized_name = localized_name
         self.ai_preference = ai_preference
         self.target_type = target_type
         self.associated_TN = associated_TN
+        # Province groups that also count as an AI trade node link (trade node gate), for routes
+        # the trade node network doesn't represent, e.g. the Manila galleon from the American Pacific coast.
+        self.extra_unlock_groups = extra_unlock_groups or []
         self.node_tech_reqs = []
         self.target_provinces = []
 
@@ -259,7 +264,9 @@ expeditions_list[-1].set_node_tech_reqs(
      ('Yellow Sea', 27), ('Amur', 27), ('Chala', 33), ('Southern Andes', 33), ('Central Andes', 33), ('Southern Cone', 32), ('Guiana', 31), ('Northern Andes', 31), ('Amazonia', 33), ('Cerrado', 33), ('Isthmus of Darien', 33), ('Caribbean', 32), ('Valley of Mexico', 33), ('Western Valley', 33), ('Gulf of Mexico', 33), ('Gulf of Tehuantepec', 33), ('Rio Grande', 33), ('Mississippi', 33), ('Western Cordillera', 33), ('Plains', 33), ('Eastern Seaboard', 33), ('Great Lakes', 33),
      ('Western Seaboard', 33), ('Pacific', 43)])
 # the Philippines
-expeditions_list.append(Expedition('philippines', 'the Philippines', 800, 'Regular', ['Moluccas']))
+expeditions_list.append(Expedition('philippines', 'the Philippines', 800, 'Regular', ['Moluccas'],
+                                   extra_unlock_groups=['expedition_provs.pacific_mexico', 'expedition_provs.pacific_central_america',
+                                                        'expedition_provs.peru', 'expedition_provs.california']))
 expeditions_list[-1].set_node_tech_reqs(
     [('Iberia', 31), ('Strait of Gibraltar', 31), ('Sahara', 31), ('Alboran Sea', 31), ('Gulf of Lion', 31), ('Bay of Biscay', 31), ('France', 31), ('North Sea', 31), ('Channel', 31), ('Norwegian Sea', 31), ('Western Baltic', 31), ('Berber Coast', 31), ('Maghreb', 31), ('Tyrrenean Sea', 31), ('Rhineland', 31), ('Upper Danube', 31), ('Lower Nile', 29), ('Po Valley', 31), ('Adriatic Sea', 31), ('Levantine Sea', 31),
      ('Aegean Sea', 31), ('Dniester', 31), ('Lower Danube', 31), ('Middle Danube', 31), ('Elbe', 31), ('Eastern Baltic', 31),
@@ -580,6 +587,187 @@ expeditions_list[-1].set_node_tech_reqs(
 
 # Jiangxi, Volga, Jazira, Lower Danube
 
+############################################################################################################
+# AI Expedition Goals
+#
+# Every time an AI country gets the expedition menu event, MEC_Expeditions_set_goal_effect picks one goal
+# from the chain belonging to its capital region: the first goal that is not done, not blocked and has at
+# least one route expedition available with a likely success. The goal sets the flag MEC_Expeditions_goal_<id>, which
+#   - multiplies the AI chance of every expedition by weights[name] (or off_route if not listed),
+#   - exempts route expeditions (weight > 1) from the trade node gate.
+# Goals are recomputed every time, so they follow capital moves, tag switches and lost colonies.
+# A goal is blocked (skipped) when no target province is likely to be gained: every province is run through the
+# same success calculation as the arrival events and needs at least goal_min_success_chance (x10%).
+############################################################################################################
+
+goal_min_success_chance = 4  # Arrival success comparison (sender mil tech - province defence), 4 = 40%
+
+class ExpeditionGoal:
+    def __init__(self, id, description, targets, weights, done_type='own', done_value=1, done_custom=None, off_route=0.1, can_block=True):
+        self.id = id
+        self.description = description
+        self.targets = targets          # Expeditions whose province groups define done / blocked
+        self.weights = weights          # AI chance multiplier per expedition while the goal is active
+        self.done_type = done_type      # 'own': own >= done_value provinces in targets, 'colonial_nation': a colonial nation subject owns >= done_value there, 'custom'
+        self.done_value = done_value
+        self.done_custom = done_custom  # Raw trigger text for done_type 'custom'
+        self.off_route = off_route      # Multiplier for expeditions not in weights
+        self.can_block = can_block      # Skip goal if no province in targets is likely to be gained (see goal_min_success_chance)
+
+    def route(self):
+        return [name for name, weight in self.weights.items() if weight > 1]
+
+
+goals_list = [
+    # Eastern route
+    ExpeditionGoal('north_africa', 'North African foothold (Ceuta, Melilla)', ['northwest_africa'],
+                   {'northwest_africa': 10}),
+    ExpeditionGoal('west_african_posts', 'West African trading posts (Elmina, Goree)', ['west_africa', 'gulf_of_guinea'],
+                   {'west_africa': 10, 'gulf_of_guinea': 8}),
+    ExpeditionGoal('congo', 'Colonize Congo (Luanda)', ['central_africa'],
+                   {'central_africa': 10, 'gulf_of_guinea': 4, 'west_africa': 2}, done_value=3),
+    ExpeditionGoal('cape', 'Reach the Cape', ['south_africa'],
+                   {'south_africa': 12, 'central_africa': 5, 'gulf_of_guinea': 4, 'west_africa': 3}),
+    ExpeditionGoal('india', 'Reach India (Goa, Surat, Pondicherry, Tranquebar)', ['western_india', 'southern_india', 'eastern_india'],
+                   {'western_india': 10, 'southern_india': 10, 'eastern_india': 6, 'east_africa': 6, 'indian_ocean': 6, 'south_africa': 4}),
+    ExpeditionGoal('gulf', 'Control the Gulf (Hormuz, Muscat)', ['arabia'],
+                   {'arabia': 10, 'western_india': 3, 'east_africa': 3}),
+    ExpeditionGoal('east_indies', 'Reach the East Indies (Malacca, Bantam)', ['malacca', 'indonesia'],
+                   {'malacca': 12, 'indonesia': 12, 'southern_india': 4, 'eastern_india': 4, 'south_africa': 3, 'indian_ocean': 2}, done_value=3),  # One island (e.g. Nicobar) is not a foothold
+    ExpeditionGoal('spice_trade', 'Control the Spice Trade (Moluccas and Sunda)', ['indonesia'],
+                   {'indonesia': 15, 'malacca': 6, 'philippines': 2}, done_type='custom',
+                   done_custom=('num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = { value = 3 province_group = expedition_provs.indonesia province_group = tradenode_33 } # Moluccas\n'
+                                'num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = { value = 3 province_group = expedition_provs.indonesia province_group = tradenode_37 } # Sunda Strait')),
+    ExpeditionGoal('china_japan', 'Trade with China and Japan (Macau, Nagasaki, Dejima)', ['southern_china', 'japan'],
+                   {'southern_china': 10, 'japan': 10, 'southeast_asia': 3, 'malacca': 3}),
+    ExpeditionGoal('philippines', 'Colonize the Philippines (Manila)', ['philippines'],
+                   {'philippines': 20, 'pacific_mexico': 4, 'pacific_central_america': 3}, done_type='custom',
+                   done_custom=('num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = { value = 1 province_group = expedition_provs.philippines }\n'
+                                'NOT = { expedition_provs.philippines = { type = any is_empty = yes } } # Done once no Philippine province is left uncolonized')),
+    # Atlantic and South America
+    ExpeditionGoal('atlantic_islands', 'Claim the Atlantic Islands (Canaries, Madeira, Azores)', ['iberian_islands'],
+                   {'iberian_islands': 10}),
+    ExpeditionGoal('brazil', 'Settle Brazil', ['north_brazil', 'south_brazil'],
+                   {'north_brazil': 10, 'south_brazil': 10, 'west_africa': 2}, done_type='colonial_nation', done_value=3),
+    ExpeditionGoal('wild_coast', 'Settle the Wild Coast (Guiana)', ['guyana'],
+                   {'guyana': 10, 'caribbean': 3, 'west_africa': 2}, done_value=2),
+    ExpeditionGoal('la_plata', 'Rio de la Plata (Buenos Aires)', ['la_plata'],
+                   {'la_plata': 10, 'south_brazil': 3}),
+    # Central America and the Pacific
+    ExpeditionGoal('caribbean_cn', 'Colonial Nation in the Caribbean', ['cuba', 'hispaniola', 'caribbean'],
+                   {'cuba': 10, 'hispaniola': 10, 'caribbean': 6, 'iberian_islands': 2}, done_type='colonial_nation', done_value=3),
+    ExpeditionGoal('mexico', 'Colonize Mexico', ['atlantic_mexico', 'pacific_mexico'],
+                   {'atlantic_mexico': 10, 'pacific_mexico': 5, 'cuba': 3, 'hispaniola': 3, 'caribbean': 2}, done_type='colonial_nation', done_value=3),
+    ExpeditionGoal('pacific', 'Reach the Pacific (Panama, Acapulco)', ['pacific_central_america', 'pacific_mexico', 'peru'],
+                   {'pacific_central_america': 10, 'pacific_mexico': 10, 'peru': 6, 'atlantic_mexico': 3, 'atlantic_colombia': 3}),
+    ExpeditionGoal('inca', 'Conquer the Inca', ['peru'],
+                   {'peru': 10, 'pacific_central_america': 4, 'atlantic_colombia': 2, 'chile': 2}, done_value=3),
+    # North America
+    ExpeditionGoal('east_north_america', 'Colonize East-North America', ['eastern_america', 'southeastern_america', 'canada'],
+                   {'eastern_america': 10, 'southeastern_america': 8, 'canada': 8, 'north_atlantic': 2, 'gulf_of_mexico': 2}, done_value=10),  # A real foothold (of 55), not a single small colonial nation
+    ExpeditionGoal('hudson_bay', 'Hudson Bay fur trade', ['hudson_bay'],
+                   {'hudson_bay': 10, 'canada': 3}),
+    ExpeditionGoal('reach_west_north_america', 'Reach West-North America (California, Alaska)', ['california', 'alaska'],
+                   {'california': 10, 'alaska': 10, 'pacific_mexico': 3}),
+    ExpeditionGoal('west_north_america', 'Colonize West-North America', ['california', 'alaska'],
+                   {'california': 10, 'alaska': 8}, done_type='colonial_nation', done_value=3),
+    ExpeditionGoal('north_atlantic', 'Resettle the North Atlantic (Iceland, Greenland, Faroes)', ['north_atlantic'],
+                   {'north_atlantic': 10, 'canada': 2}),
+    # Indian Ocean and Asian powers
+    ExpeditionGoal('swahili_coast', 'Control the Swahili Coast (Kilwa, Mombasa, Zanzibar)', ['east_africa'],
+                   {'east_africa': 10, 'indian_ocean': 3}),
+    ExpeditionGoal('madagascar', 'Settle Madagascar and the Mascarenes', ['indian_ocean'],
+                   {'indian_ocean': 10, 'east_africa': 3}),
+    ExpeditionGoal('southeast_asia', 'Reach Southeast Asia (Pegu, Ayutthaya, Champa)', ['southeast_asia'],
+                   {'southeast_asia': 10, 'malacca': 4}),
+    # Generic fallback, filled in below with every colonial node expedition
+    ExpeditionGoal('colonial_nation', 'Get a Colonial Nation', [], {}, done_type='custom',
+                   done_custom='any_subject_country = { is_colonial_nation = yes }', off_route=1, can_block=False),
+]
+goals = {goal.id: goal for goal in goals_list}
+goals['colonial_nation'].targets = [e.name for e in expeditions_list if e.target_type == 'Colonial Node']
+goals['colonial_nation'].weights = {name: 3 for name in goals['colonial_nation'].targets}
+
+# Goal chains by capital location (regions, or areas for smaller entities). First matching chain wins, so area
+# based chains must come before the region based chain they are part of. Within a chain the first valid goal is picked.
+# Countries whose capital is in none of these get no goal (default expedition weights).
+goal_chains = [
+    # Smaller (and often ahistorical) Atlantic powers, before the regions they are part of
+    ('Normandy / Brittany', ['normandy_area', 'brittany_area'],  # Bethencourt's Canaries, Dieppe in Guinea, brazilwood trade, Cartier
+     ['atlantic_islands', 'west_african_posts', 'brazil', 'east_north_america', 'caribbean_cn', 'colonial_nation']),
+    ('Genoa', ['liguria_area'],  # Malocello's Canaries, the Vivaldi brothers, Columbus
+     ['atlantic_islands', 'west_african_posts', 'caribbean_cn', 'brazil', 'colonial_nation']),
+    ('Portugal', ['portugal_region'],  # Ceuta 1415, Madeira/Azores 1420s, Elmina 1482, Cape 1488, Calicut 1498, Cabral 1500,
+     # Kilwa/Mozambique 1505, Malacca 1511, Moluccas 1512, Hormuz 1515, Macau 1557, Luanda 1576
+     ['north_africa', 'atlantic_islands', 'west_african_posts', 'cape', 'india', 'brazil', 'swahili_coast', 'east_indies', 'spice_trade', 'gulf', 'china_japan', 'congo', 'colonial_nation']),
+    ('Castile / Spain', ['castille_region', 'andalucia_region', 'leon_region', 'aragon_region'],
+     ['atlantic_islands', 'caribbean_cn', 'mexico', 'pacific', 'inca', 'philippines', 'la_plata', 'reach_west_north_america', 'west_north_america', 'colonial_nation']),
+    ('Low Countries', ['low_countries_region', 'belgii_region'],  # Bantam 1596, Ambon 1605, Hirado 1609, Mouri 1612, Essequibo 1616,
+     # New Amsterdam 1624, Curacao 1634, Cape 1652 (late: an early Cape goal floods South Africa with colonists)
+     ['east_indies', 'spice_trade', 'china_japan', 'west_african_posts', 'wild_coast', 'east_north_america', 'caribbean_cn', 'cape', 'colonial_nation']),
+    ('England', ['south_england_region', 'north_england_region'],  # Jamestown 1607, Surat 1612, St Kitts 1624, Hudson's Bay Company 1670
+     ['east_north_america', 'india', 'caribbean_cn', 'hudson_bay', 'colonial_nation']),
+    ('Scotland', ['scotland_region'],  # Nova Scotia, the Darien scheme, Company of Scotland
+     ['east_north_america', 'caribbean_cn', 'pacific', 'wild_coast', 'india', 'colonial_nation']),
+    ('France', ['east_france_region', 'ouest_france_region', 'aquitaine_region', 'languedoc_region', 'provence_region'],
+     # Quebec 1608, Martinique 1635, Cayenne 1643, Saint-Louis 1659, Pondicherry 1674
+     ['east_north_america', 'caribbean_cn', 'wild_coast', 'west_african_posts', 'india', 'colonial_nation']),
+    # Scandinavia going heavy on colonization
+    ('Denmark', ['danish_region'],  # Tranquebar 1620, Christiansborg 1661, St Thomas 1672, Greenland 1721, Jens Munk
+     ['india', 'west_african_posts', 'caribbean_cn', 'north_atlantic', 'hudson_bay', 'east_north_america', 'colonial_nation']),
+    ('Norway', ['norwegian_region'],  # Resettle Greenland, then Vinland revisited
+     ['north_atlantic', 'east_north_america', 'hudson_bay', 'caribbean_cn', 'colonial_nation']),
+    ('Sweden', ['scandinavia_region', 'finland_region'],  # New Sweden 1638, Cabo Corso 1650, Swedish East India Company 1731, Saint-Barthelemy 1784
+     ['east_north_america', 'west_african_posts', 'india', 'caribbean_cn', 'wild_coast', 'colonial_nation']),
+    ('Brandenburg', ['brandenburg_pommern_region'],
+     ['west_african_posts', 'colonial_nation']),
+    ('Courland', ['baltic_region'],
+     ['west_african_posts', 'caribbean_cn', 'colonial_nation']),
+    ('Russia', ['russia_region', 'north_russia_region'],
+     ['reach_west_north_america', 'colonial_nation']),
+    # Africa
+    ('Morocco', ['west_maghreb_region'],  # Canaries next door, the Saadian push to the Niger, an Atlantic Morocco
+     ['atlantic_islands', 'west_african_posts', 'brazil', 'caribbean_cn', 'colonial_nation']),
+    ('Mali / Senegambia', ['manding_region', 'senegambia_region'],  # Abu Bakr II's Atlantic voyage
+     ['atlantic_islands', 'brazil', 'caribbean_cn', 'colonial_nation']),
+    ('Egypt', ['egypt_region'],  # Mamluk fleet at Diu
+     ['india', 'swahili_coast', 'east_indies']),
+    ('Swahili / Somali coast', ['east_africa_region', 'somalia_region'],
+     ['madagascar', 'india', 'east_indies']),
+    # Indian Ocean and Asia
+    ('Southern Arabia', ['hadhramaut_region'],  # Yemen, Hadhramaut, Oman: the Omani Swahili empire
+     ['swahili_coast', 'india', 'madagascar', 'east_indies', 'spice_trade']),
+    ('Western India', ['gujarat_region', 'konkan_region'],  # Gujarati merchants in Kilwa and Malacca
+     ['swahili_coast', 'east_indies', 'spice_trade', 'gulf']),
+    ('Eastern India', ['carnatic_region', 'east_deccan_region', 'orissa_region', 'west_bengal_region', 'east_bengal_region'],  # Chola raids on Srivijaya
+     ['southeast_asia', 'east_indies', 'spice_trade']),
+    ('Maritime Southeast Asia', ['malaya_region', 'sumatra_region', 'java_region', 'borneo_region', 'indonesia_region'],  # Austronesian Madagascar, Brunei and Sulu
+     ['spice_trade', 'philippines', 'madagascar', 'india']),
+    ('China', ['guangdong_region', 'fujian_region', 'zhejiang_region', 'jiangnan_region', 'hebei_region'],  # Zheng He: Malacca, Calicut, Hormuz, Malindi
+     ['east_indies', 'india', 'gulf', 'swahili_coast', 'philippines']),
+    ('Japan', ['west_japan_region', 'central_japan_region', 'east_japan_region'],  # Nihonmachi in Luzon and Ayutthaya, a Japanese Pacific
+     ['philippines', 'southeast_asia', 'reach_west_north_america', 'west_north_america']),
+]
+
+expedition_names = [e.name for e in expeditions_list]
+for goal in goals_list:
+    assert goal.done_type in ('own', 'colonial_nation', 'custom'), f"{goal.id}: unknown done_type"
+    assert goal.done_type != 'custom' or goal.done_custom, f"{goal.id}: custom goals need done_custom"
+    assert goal.targets, f"{goal.id}: needs targets"
+    assert goal.route(), f"{goal.id}: needs at least one route expedition (weight > 1)"
+    for name in goal.targets + list(goal.weights):
+        assert name in expedition_names, f"{goal.id}: expedition {name} spelled incorrectly"
+map_areas = set(re.findall(r'^\s*(\w+_area)\s*=\s*\{', Path('map/area.txt').read_text(encoding='cp1252'), re.M))
+map_regions = set(re.findall(r'^\s*(\w+_region)\s*=\s*\{', Path('map/region.txt').read_text(encoding='cp1252'), re.M))
+for chain_name, regions, chain in goal_chains:
+    for location in regions:
+        assert location in (map_areas if location.endswith('_area') else map_regions), f"{chain_name}: unknown area/region {location}"
+    for goal_id in chain:
+        assert goal_id in goals, f"{chain_name}: goal {goal_id} spelled incorrectly"
+for expedition in expeditions_list:
+    for group in expedition.extra_unlock_groups:
+        assert group.startswith('expedition_provs.') and group[len('expedition_provs.'):] in expedition_names, f"{expedition.name}: unknown unlock group {group}"
+
 can_trigger_MAM_event_15 = ['east_africa', 'indian_ocean', 'arabia', 'indian_ocean', 'western_india', 'southern_india']
 
 # Setup expeditions unlocks dict with keys for each tradenode holding an empty list
@@ -875,10 +1063,32 @@ select_expedition_option_frame_bottom_chinese_mainland = """\
 			}}
 """
 # Has variables: expedition_name, event_num_arrival, event_num_total_failure, event_num_map_failure, event_num_trade_failure, expedition_duration, ai_base_chance, clr_all_sent_flags
+# Has variables: factor (0 for European targets, soft gate elsewhere)
 select_expedition_option_frame_TN_link_check_top = """\
-			modifier = { # Less likely to send expeditions to places you have no trade node connection with
-				factor = 0 
-				NOT = {is_year = 1650}
+			modifier = {{ # Less likely to send expeditions to places you have no trade node connection with
+				factor = {factor}
+"""
+# The AI should never send expeditions within Europe: keep the hard trade node gate for these
+european_expeditions = ['british_isles', 'northern_europe', 'france', 'iberia']
+# Has variables: flag (the active goal flag exempts its route expeditions from the trade node gate)
+select_expedition_option_frame_TN_link_check_goal_exemption = """\
+				NOT = {{ has_country_flag = {flag} }}
+"""
+# Has variables: group (extra province group that counts as a trade node link)
+select_expedition_option_frame_TN_link_check_extra_group = """\
+				NOT = {{
+					num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
+						value = 1
+						province_group = {group}
+					}}
+				}}
+"""
+# Has variables: goal_id, description, factor
+select_expedition_option_goal_modifier = """\
+			modifier = {{ # AI goal: {description}
+				factor = {factor}
+				has_country_flag = MEC_Expeditions_goal_{goal_id}
+			}}
 """
 select_expedition_option_frame_TN_link_check_inside = """\
 				NOT = {{
@@ -924,13 +1134,9 @@ select_expedition_option_frame_bottom = """\
 				factor = 0.1
 				has_country_modifier = MEC_Modifier_Expedition_Failed_{expedition_name}
 			}}
-			modifier = {{ # Stop AI from loosing expeditions of provinces owned by comparable nations
+			modifier = {{ # Stop AI from losing expeditions: no province there with a likely success (MEC_Expeditions_calc_gainable_effect)
 				factor = 0.05
-				expedition_provs.{expedition_name} = {{
-					type = all 
-					is_empty = no
-					owner = {{ check_key = {{ lhs = tech_mil which = ROOT }} }}
-				}}
+				NOT = {{ has_country_flag = MEC_Expeditions_gainable_{expedition_name} }}
 			}}
 		}}
 		hidden_effect = {{
@@ -972,75 +1178,6 @@ select_expedition_option_frame_bottom = """\
 				}}
 			}}
 		}}
-		else_if = {{
-			limit = {{
-				has_idea = colonialism_ideas_1
-                num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
-					province_group = expedition_provs.{expedition_name}
-					value = 3
-				}}                
-			}}
-			random_list = {{
-				50 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_arrival}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-				30 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_trade_failure}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-				5 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_map_failure}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-				5 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_total_failure}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-			}}
-		}}
-		else_if = {{
-			limit = {{
-                num_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{
-					province_group = expedition_provs.{expedition_name}
-					value = 3
-				}}                
-			}}        
-			random_list = {{
-				20 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_arrival}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-				70 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_trade_failure}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-				5 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_map_failure}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-				5 = {{
-					country_event = {{
-						id = MEC_Expeditions.{event_num_total_failure}
-						days = {expedition_duration} random = 25
-					}}
-				}}
-			}}
-		}}               
 		else = {{
 			random_list = {{
 				40 = {{
@@ -1198,6 +1335,17 @@ country_event = {{
                         change_key = {{
                             lhs = MEC_Expeditions_Comparison
                             value = 1
+                        }}
+                    }}
+                    if = {{ # Unknown Frontier mission modifier
+                        limit = {{
+                            FROM = {{
+                                has_country_modifier = the_unknown_frontier
+                            }}
+                        }}
+                        change_key = {{
+                            lhs = MEC_Expeditions_Comparison
+                            value = 2
                         }}
                     }}
                     MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
@@ -1806,6 +1954,17 @@ province_event = {{ # Called on province being colonized
                         value = 1
                     }}
                 }}
+                if = {{ # Unknown Frontier mission modifier
+                    limit = {{
+                        FROM = {{
+                            has_country_modifier = the_unknown_frontier
+                        }}
+                    }}
+                    change_key = {{
+                        lhs = MEC_Expeditions_Comparison
+                        value = 2
+                    }}
+                }}
 				MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
 				subtract_key = {{
 					lhs = MEC_Expeditions_Comparison
@@ -2336,8 +2495,137 @@ python_generated_file_warning = """\
 ############################################################################################################
 """
 
+def indent(text, tabs):
+    return ''.join('\t' * tabs + line + '\n' for line in text.splitlines())
+
+
+def province_group_or(names):
+    return 'OR = { ' + ' '.join(f'province_group = expedition_provs.{name}' for name in names) + ' }'
+
+
+def write_goal_ai_modifiers(events, expedition):
+    """Goal multipliers plus the (soft) trade node gate for one menu option."""
+    for goal in goals_list:
+        factor = goal.weights.get(expedition.name)
+        if factor is not None and factor != 1:
+            events.write(select_expedition_option_goal_modifier.format(goal_id=goal.id, description=goal.description, factor=factor))
+    off_route = {}  # factor -> goals that don't list this expedition
+    for goal in goals_list:
+        if expedition.name not in goal.weights and goal.off_route != 1:
+            off_route.setdefault(goal.off_route, []).append(goal.id)
+    for factor, goal_ids in off_route.items():
+        events.write(f"\t\t\tmodifier = {{ # AI goal points elsewhere\n\t\t\t\tfactor = {factor}\n\t\t\t\tOR = {{\n")
+        for goal_id in goal_ids:
+            events.write(f"\t\t\t\t\thas_country_flag = MEC_Expeditions_goal_{goal_id}\n")
+        events.write("\t\t\t\t}\n\t\t\t}\n")
+    events.write(select_expedition_option_frame_TN_link_check_top.format(factor=0 if expedition.name in european_expeditions else 0.1))
+    for goal in goals_list:
+        if expedition.name in goal.route():
+            events.write(select_expedition_option_frame_TN_link_check_goal_exemption.format(flag=f'MEC_Expeditions_goal_{goal.id}'))
+    for node_name in expedition.associated_TN:
+        events.write(select_expedition_option_frame_TN_link_check_inside.format(TN=trade_nodes[node_name]))
+    for group in expedition.extra_unlock_groups:
+        events.write(select_expedition_option_frame_TN_link_check_extra_group.format(group=group))
+    events.write("\t\t\t}\n")
+
+
+def write_goal_triggers(triggers):
+    triggers.write(hash_line + "# AI Expedition Goals (see goals_list in MEC-Expeditions_Writer.py)\n" + hash_line + '\n')
+    for goal in goals_list:
+        triggers.write(f"# {goal.description}\n")
+        triggers.write(f"MEC_Expeditions_goal_{goal.id}_done_trigger = {{\n")
+        if goal.done_type == 'own':
+            triggers.write(f"\tnum_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{\n\t\tvalue = {goal.done_value}\n\t\t{province_group_or(goal.targets)}\n\t}}\n")
+        elif goal.done_type == 'colonial_nation':
+            # Also done at 5 provinces there: a colonial nation is about to form and colonists take over from expeditions
+            triggers.write(f"\tOR = {{\n\t\tany_subject_country = {{\n\t\t\tis_colonial_nation = yes\n\t\t\tnum_of_owned_provinces_with = {{\n\t\t\t\tvalue = {goal.done_value}\n\t\t\t\t{province_group_or(goal.targets)}\n\t\t\t}}\n\t\t}}\n"
+                           f"\t\tnum_of_provinces_owned_or_owned_by_non_sovereign_subjects_with = {{\n\t\t\tvalue = 5\n\t\t\t{province_group_or(goal.targets)}\n\t\t}}\n\t}}\n")
+        else:
+            triggers.write(indent(goal.done_custom, 1))
+        triggers.write("}\n")
+        triggers.write(f"MEC_Expeditions_goal_{goal.id}_valid_trigger = {{\n")
+        triggers.write(f"\tNOT = {{ MEC_Expeditions_goal_{goal.id}_done_trigger = yes }}\n")
+        if goal.can_block:
+            # Flags are set by MEC_Expeditions_calc_gainable_effect in the immediate of the menu event
+            # While no target is available yet the goal can't be judged, so it isn't blocked (it is reached via its route first).
+            # Once any target is available, only the available targets count: if none of them is gainable the goal is skipped.
+            triggers.write(f"\tOR = {{ # Not blocked: some target province is likely to be gained (>= {goal_min_success_chance * 10}% expedition success), or no target is available yet\n")
+            for name in goal.targets:
+                triggers.write(f"\t\thas_country_flag = MEC_Expeditions_gainable_{name}\n")
+            triggers.write("\t\tNOT = { # No target available yet\n\t\t\tOR = {\n")
+            for name in goal.targets:
+                triggers.write(f"\t\t\t\tMEC_Expeditions_available_{name}_trigger = yes\n")
+            triggers.write("\t\t\t}\n\t\t}\n")
+            triggers.write("\t}\n")
+        # Recent failures on every target: move on in the chain, retry once the 10-20 year modifiers expire
+        triggers.write("\tNOT = { # Not every target failed recently (NOT alone would be NOR, hence the AND)\n\t\tAND = {\n")
+        for name in goal.targets:
+            triggers.write(f"\t\t\thas_country_modifier = MEC_Modifier_Expedition_Failed_{name}\n")
+        triggers.write("\t\t}\n\t}\n")
+        # The flag is only set for available expeditions. Requiring a gainable route stops a goal from staying active
+        # through a hopeless side route while its targets are still locked (e.g. Hudson Bay behind dip tech, via a taken Canada).
+        triggers.write("\tOR = { # A route expedition is available and likely to succeed\n")
+        for name in goal.route():
+            triggers.write(f"\t\thas_country_flag = MEC_Expeditions_gainable_{name}\n")
+        triggers.write("\t}\n}\n\n")
+
+
+def write_goal_effect(effects):
+    effects.write(hash_line + "# AI Expedition success estimate and goals: called from the immediate of the expedition menu event (see goals_list in MEC-Expeditions_Writer.py)\n" + hash_line)
+    # Province scope: flag the province if an expedition from ROOT would likely take it, using the same success
+    # calculation as the arrival events (sender mil tech + Romanus Pontifex - MEC_Expeditions_defence_calc_effect, 10% per point)
+    effects.write("# Province scope, ROOT = sending country. The province flag is cleared again by the caller right away\n")
+    effects.write("MEC_Expeditions_mark_gainable_effect = {\n"
+                  "\tif = {\n\t\tlimit = {\n\t\t\tNOT = { country_or_non_sovereign_subject_holds = ROOT }\n\t\t\tMEC_Expeditions_eligible_province_trigger = yes\n\t\t}\n"
+                  "\t\tMEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9\n"
+                  "\t\texport_to_key = { lhs = Tmp_8 value = mil_tech who = ROOT }\n"
+                  "\t\tif = {\n\t\t\tlimit = {\n\t\t\t\thas_global_flag = romanus_pontifex_expedition_boost\n\t\t\t\tROOT = { religion = catholic }\n"
+                  "\t\t\t\towner = { NOT = { religion = catholic } }\n\t\t\t}\n\t\t\tchange_key = { lhs = Tmp_8 value = 1 }\n\t\t}\n"
+                  "\t\tif = { # Unknown Frontier mission modifier\n\t\t\tlimit = {\n\t\t\t\tROOT = { has_country_modifier = the_unknown_frontier }\n\t\t\t}\n\t\t\tchange_key = { lhs = Tmp_8 value = 2 }\n\t\t}\n"
+                  "\t\tsubtract_key = { lhs = Tmp_8 which = Tmp_9 }\n"
+                  f"\t\tif = {{\n\t\t\tlimit = {{ check_key = {{ lhs = Tmp_8 value = {goal_min_success_chance} }} }}\n"
+                  "\t\t\tset_province_flag = MEC_Expeditions_gainable\n\t\t}\n\t}\n}\n\n")
+
+    # Country scope: sets MEC_Expeditions_gainable_<name> if some province of that expedition is likely to be gained.
+    # Country flags, so overlapping menu events of different countries can't interfere. Read by the option AI weights and goals.
+    # Only calculated for available expeditions; goals treat targets that aren't available yet as not blocked.
+    effects.write("# Country scope, AI only. Sets MEC_Expeditions_gainable_<expedition> when the expedition is available and a province there has a likely expedition success\n")
+    effects.write("MEC_Expeditions_calc_gainable_effect = {\n\tMEC_Expeditions_clr_gainable_effect = yes\n\tif = {\n\t\tlimit = {\n\t\t\tai = yes\n\t\t}\n")
+    for expedition in expeditions_list:
+        if expedition.name in european_expeditions:
+            continue  # The AI never sends these
+        effects.write("\t\tif = {\n\t\t\tlimit = {\n")
+        effects.write(f"\t\t\t\tMEC_Expeditions_available_{expedition.name}_trigger = yes\n")
+        effects.write(f"\t\t\t}}\n\t\t\texpedition_provs.{expedition.name} = {{\n\t\t\t\tMEC_Expeditions_mark_gainable_effect = yes\n"
+                      f"\t\t\t\tif = {{\n\t\t\t\t\tlimit = {{ has_province_flag = MEC_Expeditions_gainable }}\n"
+                      f"\t\t\t\t\tROOT = {{ set_country_flag = MEC_Expeditions_gainable_{expedition.name} }}\n"
+                      f"\t\t\t\t\tclr_province_flag = MEC_Expeditions_gainable\n\t\t\t\t}}\n\t\t\t}}\n\t\t}}\n")
+    effects.write("\t}\n}\n\n")
+    effects.write("MEC_Expeditions_clr_gainable_effect = {\n")
+    for expedition in expeditions_list:
+        if expedition.name not in european_expeditions:
+            effects.write(f"\tclr_country_flag = MEC_Expeditions_gainable_{expedition.name}\n")
+    effects.write("}\n\n")
+
+    effects.write("MEC_Expeditions_set_goal_effect = {\n")
+    for goal in goals_list:
+        effects.write(f"\tclr_country_flag = MEC_Expeditions_goal_{goal.id}\n")
+    effects.write("\tif = {\n\t\tlimit = {\n\t\t\tai = yes\n\t\t}\n")
+    for index, (chain_name, regions, chain) in enumerate(goal_chains):
+        effects.write(f"\t\t{'if' if index == 0 else 'else_if'} = {{ # {chain_name}\n\t\t\tlimit = {{\n\t\t\t\tcapital_scope = {{\n\t\t\t\t\tOR = {{\n")
+        for location in regions:
+            effects.write(f"\t\t\t\t\t\t{'area' if location.endswith('_area') else 'region'} = {location}\n")
+        effects.write("\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n")
+        for goal_index, goal_id in enumerate(chain):
+            effects.write(f"\t\t\t{'if' if goal_index == 0 else 'else_if'} = {{\n\t\t\t\tlimit = {{ MEC_Expeditions_goal_{goal_id}_valid_trigger = yes }}\n"
+                          f"\t\t\t\tset_country_flag = MEC_Expeditions_goal_{goal_id}\n"
+                          f"\t\t\t\t#log = \"MEC_Expeditions:[GetYear]:[Root.GetName]:goal:{goal_id}\"\n\t\t\t}}\n")
+        effects.write("\t\t}\n")
+    effects.write("\t}\n}\n\n")
+
+
 # Get the province ids from the province groups
-provincegroups = Path('map/provincegroup.txt').read_text(encoding='cp1252')
+provincegroups =Path('map/provincegroup.txt').read_text(encoding='cp1252')
 no_comments_pgs = re.sub('#.*', '', provincegroups)  # Get rid of comments
 split_pgs = re.split(r'\n\s*expedition_provs.', no_comments_pgs)[1:]  # Split on the expedition province groups
 
@@ -2361,14 +2649,14 @@ for expedition in expeditions_list:
     assert len(expedition.target_provinces) != 0, "Every expedition should have some target provinces"
 
 # Overwrite the modifier file
-with open(Path('common/event_modifiers/MEC-Expeditions_modifiers.txt'), 'w', encoding='cp1252') as modifiers:
+with open(Path('common/event_modifiers/MEC-Expeditions_modifiers.txt'), 'w', encoding='cp1252', newline='\n') as modifiers:
     modifiers.write(python_generated_file_warning + '\n')
     for expedition in expeditions_list:
         modifiers.write(f'\nMEC_Modifier_Expedition_{expedition.name} = {{\n}}\n')
         modifiers.write(f'\nMEC_Modifier_Expedition_Failed_{expedition.name} = {{\n}}\n')
 
 # Overwrite the decision file
-with open(Path('decisions/MEC-Expeditions_decisions.txt'), 'w', encoding='cp1252') as decisions:
+with open(Path('decisions/MEC-Expeditions_decisions.txt'), 'w', encoding='cp1252', newline='\n') as decisions:
     decisions.write(python_generated_file_warning + '\n')
 
     # Main decision that highlights all provinces and toggles other decisions
@@ -2391,13 +2679,14 @@ with open(Path('decisions/MEC-Expeditions_decisions.txt'), 'w', encoding='cp1252
     decisions.write('}\n')
 
 # Overwrite the scripted effects file
-with open(Path('common/scripted_effects/MEC-Expeditions_effects.txt'), 'w', encoding='cp1252') as effects:
+with open(Path('common/scripted_effects/MEC-Expeditions_effects.txt'), 'w', encoding='cp1252', newline='\n') as effects:
     effects.write(python_generated_file_warning + '\n')
 
     effects.write(province_defence_calculation + '\n')
+    write_goal_effect(effects)
 
 # Overwrite the scripted triggers file
-with open(Path('common/scripted_triggers/MEC-Expeditions_triggers.txt'), 'w', encoding='cp1252') as triggers:
+with open(Path('common/scripted_triggers/MEC-Expeditions_triggers.txt'), 'w', encoding='cp1252', newline='\n') as triggers:
     triggers.write(python_generated_file_warning + '\n')
 
     triggers.write("# Provinces are eligible expedition targets if neither you nor your subjects own them, and you don't have a truce or alliance with the owner.\n")
@@ -2430,8 +2719,10 @@ with open(Path('common/scripted_triggers/MEC-Expeditions_triggers.txt'), 'w', en
             triggers.write(f"\t\t\t\t\t\tprovince_group = tradenode_{trade_nodes[trade_node]} # {trade_node}\n")
         triggers.write("\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n\n")
 
+    write_goal_triggers(triggers)
+
 # Overwrite the custom localization file
-with open(Path('customizable_localization/MEC-Expeditions_customloc.txt'), 'w', encoding='cp1252') as custom_loc:
+with open(Path('customizable_localization/MEC-Expeditions_customloc.txt'), 'w', encoding='cp1252', newline='\n') as custom_loc:
     custom_loc.write(python_generated_file_warning + '\n\n')
     custom_loc.write('defined_text = {\n\tname = MEC_Expeditions_Decision_tradenode\n\n')
 
@@ -2451,8 +2742,8 @@ with open(Path('customizable_localization/MEC-Expeditions_customloc.txt'), 'w', 
     custom_loc.write("}\n")
 
 # Overwrite the event file
-with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
-    with open(Path('localisation/MEC-Expeditions_l_english.yml'), 'w', encoding='utf-8-sig') as loc:
+with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252', newline='\n') as events:
+    with open(Path('localisation/MEC-Expeditions_l_english.yml'), 'w', encoding='utf-8-sig', newline='\n') as loc:
         loc.write("l_english:\n\n")
         loc.write(python_generated_file_warning + '\n')
 
@@ -2540,11 +2831,11 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
         loc.write(f' MEC_Expeditions.{str(menu_event_number).zfill(3)}.dont: "Don\'t send an expedition."\n')
 
         events.write(
-            "\ttrigger = {\n\t\tOR = {\n\t\t\thas_idea = exploration_ideas_3\n\t\t\thas_country_modifier = can_colonize_country_modifier\n\t\t}\n\t\tmax_sailors = 1500\n\t\tNOT = {\n\t\t\thas_country_flag = MEC_Expeditions_paused\n\t\t}\n\t\tnum_of_ports = 1\n\t\tOR = { # Has an expedition available\n")
+            "\ttrigger = {\n\t\tOR = {\n\t\t\thas_idea = exploration_ideas_3\n\t\t\thas_country_modifier = can_colonize_country_modifier\n\t\t}\n\t\tOR = {\n\t\t\thas_idea = naval_ideas_3\n\t\t\tdip_tech = 33\n\t\t}\n\t\tmax_sailors = 1500\n\t\tNOT = {\n\t\t\thas_country_flag = MEC_Expeditions_paused\n\t\t}\n\t\tnum_of_ports = 1\n\t\tOR = { # Has an expedition available\n")
         for expedition in expeditions_list:
             events.write(f"\t\t\tMEC_Expeditions_available_{expedition.name}_trigger = yes\n")
         events.write("\t\t}\n\t}\n\n")
-        events.write('\timmediate = {\n\t\thidden_effect = {\n\t\t\tROOT = {\n\t\t\t\tsubtract_key = { lhs = tech_mil value = 5 }\n\t\t\t}\n\t\t}\n\t}\n\n')
+        events.write('\timmediate = {\n\t\thidden_effect = {\n\t\t\tMEC_Expeditions_calc_gainable_effect = yes\n\t\t\tMEC_Expeditions_set_goal_effect = yes\n\t\t}\n\t}\n\n')
         events.write(f"\toption = {{ # AI should take when no expedition available\n\t\tname = MEC_Expeditions.{str(menu_event_number).zfill(3)}.dont\n\t\tai_chance = {{\n\t\t\tfactor = 0.1\n\t\t}}\n\t}}\n\n")
 
         clr_all_sent_flags = ''
@@ -2561,11 +2852,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
                 events.write(select_expedition_option_frame_bottom_colonial_node.format(expedition_name=expedition.name))
             if expedition.target_type == 'Chinese Mainland':
                 events.write(select_expedition_option_frame_bottom_chinese_mainland.format(expedition_name=expedition.name))
-            events.write(select_expedition_option_frame_TN_link_check_top)
-            for i, node_name in enumerate(expedition.associated_TN):
-                node_number = trade_nodes[node_name]
-                events.write(select_expedition_option_frame_TN_link_check_inside.format(TN=node_number))
-            events.write("\t\t\t}\n")
+            write_goal_ai_modifiers(events, expedition)
 
             events.write(select_expedition_option_frame_bottom.format(expedition_name=expedition.name,
                                                                       event_num_arrival=str(expedition_arrival_start_number + index).zfill(3), event_num_total_failure=str(expedition_total_failure_start_number + index).zfill(3),
@@ -2583,11 +2870,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
                 events.write(select_expedition_option_frame_bottom_colonial_node.format(expedition_name=expedition.name))
             if expedition.target_type == 'Chinese Mainland':
                 events.write(select_expedition_option_frame_bottom_chinese_mainland.format(expedition_name=expedition.name))
-            events.write(select_expedition_option_frame_TN_link_check_top)
-            for i, node_name in enumerate(expedition.associated_TN):
-                node_number = trade_nodes[node_name]
-                events.write(select_expedition_option_frame_TN_link_check_inside.format(TN=node_number))
-            events.write("\t\t\t}\n")
+            write_goal_ai_modifiers(events, expedition)
             if expedition.target_type == 'Colonial Node':
                 events.write(select_expedition_option_claim_frame.format(expedition_name=expedition.name))
             events.write(select_expedition_option_frame_bottom.format(expedition_name=expedition.name,
@@ -2598,7 +2881,7 @@ with open(Path('events/MEC-Expeditions.txt'), 'w', encoding='cp1252') as events:
             loc.write(f' MEC_Expeditions.{str(menu_event_number).zfill(3)}.{expedition.name}: "Send the expedition to {expedition.localized_name}"\n')
 
         events.write('\tafter = {\n\t\tif = {\n\t\t\tlimit = {\n\t\t\t\tNOT = {\n\t\t\t\t\thas_idea = colonialism_ideas_1\n\t\t\t\t}\n\t\t\t}\n\t\t\tset_country_flag = MEC_Expeditions_skip_year\n\t\t}\n')
-        events.write('\t\tROOT = {change_key = { lhs = tech_mil value = 5 }}\n\t}\n}\n')
+        events.write('\t\tMEC_Expeditions_clr_gainable_effect = yes\n\t}\n}\n')
         # Write the Expedition Arrival section header
         events.write(hash_line)
         events.write(
