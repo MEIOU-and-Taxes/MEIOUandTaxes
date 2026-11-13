@@ -5,7 +5,7 @@
 
 ![image](https://user-images.githubusercontent.com/849166/226088284-248b627d-fc82-4edc-b0a4-919952d68455.png)
 
-A complete overhaul for Europa Universallis IV, featuring an extended and more detailed map, a real economy, political simulation, multiple new mechanics and systems built upon an earlier start date of 1356.
+A complete overhaul for Europa Universalis IV, featuring an extended and more detailed map, a real economy, political simulation, multiple new mechanics and systems built upon an earlier start date of 1356.
 
 This mod has been formed by the merger of two major EUIII mods: MEIOU created in 2007, and Death & Taxes created in 2011, following the announcement of Europa Universalis IV. The former's name is a play on the old Habsburg motto AEIOU. Which means Autria Est Imperare Orbi Universo or, in English, "it is Austria's destiny to rule the world". We changed the first word from Austria to Mihi, changing the meaning to "it is my destiny to rule the world". The second is based on a quote of Benjamin Franklin: "in this world, nothing can be said to be certain, except death and taxes."
 

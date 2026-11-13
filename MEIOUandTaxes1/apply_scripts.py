@@ -37,6 +37,12 @@ def parse_block(block):
 		return []
 
 def parse_file(path):
+	try:
+		return _parse_file(path)
+	except Exception as e:
+		raise RuntimeError(f'{path}: {type(e).__name__}: {e}') from e
+
+def _parse_file(path):
 	with open(path, encoding='ISO-8859-1') as f:
 		file = list()
 		stack = [file]
@@ -228,9 +234,15 @@ def apply_script_to_decision(file, scripts, check):
 
 	return out
 
+noinline = [
+	os.path.join('src', 'common', 'scripted_effects', 'SYS-ProdSort.txt'),
+]
+
 scripts = dict()
 def load_scripts():
 	for path in glob.iglob(os.path.join('src', 'common', 'scripted_effects', '*.txt')):
+		if path in noinline:
+			continue
 		parsed = parse_file(path)
 		for script in parsed:
 			scripts[script[0]] = script[2]
@@ -282,6 +294,15 @@ def link_file ( filepath, destpath ):
 	os.link( filepath, destpath )
 
 def compile(compress=False, parse_init=True, debug=False):
+	try:
+		_compile(compress, parse_init, debug)
+	except BaseException:
+		print()
+		sys.excepthook(*sys.exc_info())
+		input('\nBuild FAILED, see the error above. Press Enter to exit...')
+		sys.exit(1)
+
+def _compile(compress=False, parse_init=True, debug=False):
 	start = time.time()
 
 	# files/paths to run through parsing
@@ -349,6 +370,8 @@ def compile(compress=False, parse_init=True, debug=False):
 
 	def check_path_link ( path ):
 		if path.split( os.sep )[0] in ignore:
+			return False
+		if os.path.join( 'src', path ) in noinline:
 			return False
 		for p in link:
 			if path.startswith( p ):
