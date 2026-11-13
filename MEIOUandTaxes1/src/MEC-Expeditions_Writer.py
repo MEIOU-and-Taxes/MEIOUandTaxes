@@ -1337,6 +1337,17 @@ country_event = {{
                             value = 1
                         }}
                     }}
+                    if = {{ # Unknown Frontier mission modifier
+                        limit = {{
+                            FROM = {{
+                                has_country_modifier = the_unknown_frontier
+                            }}
+                        }}
+                        change_key = {{
+                            lhs = MEC_Expeditions_Comparison
+                            value = 2
+                        }}
+                    }}
                     MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
                     subtract_key = {{
                         lhs = MEC_Expeditions_Comparison
@@ -1941,6 +1952,17 @@ province_event = {{ # Called on province being colonized
                     change_key = {{
                         lhs = MEC_Expeditions_Comparison
                         value = 1
+                    }}
+                }}
+                if = {{ # Unknown Frontier mission modifier
+                    limit = {{
+                        FROM = {{
+                            has_country_modifier = the_unknown_frontier
+                        }}
+                    }}
+                    change_key = {{
+                        lhs = MEC_Expeditions_Comparison
+                        value = 2
                     }}
                 }}
 				MEC_Expeditions_defence_calc_effect = yes # Sets Tmp 0-4, 9
@@ -2559,6 +2581,7 @@ def write_goal_effect(effects):
                   "\t\texport_to_key = { lhs = Tmp_8 value = mil_tech who = ROOT }\n"
                   "\t\tif = {\n\t\t\tlimit = {\n\t\t\t\thas_global_flag = romanus_pontifex_expedition_boost\n\t\t\t\tROOT = { religion = catholic }\n"
                   "\t\t\t\towner = { NOT = { religion = catholic } }\n\t\t\t}\n\t\t\tchange_key = { lhs = Tmp_8 value = 1 }\n\t\t}\n"
+                  "\t\tif = { # Unknown Frontier mission modifier\n\t\t\tlimit = {\n\t\t\t\tROOT = { has_country_modifier = the_unknown_frontier }\n\t\t\t}\n\t\t\tchange_key = { lhs = Tmp_8 value = 2 }\n\t\t}\n"
                   "\t\tsubtract_key = { lhs = Tmp_8 which = Tmp_9 }\n"
                   f"\t\tif = {{\n\t\t\tlimit = {{ check_key = {{ lhs = Tmp_8 value = {goal_min_success_chance} }} }}\n"
                   "\t\t\tset_province_flag = MEC_Expeditions_gainable\n\t\t}\n\t}\n}\n\n")
