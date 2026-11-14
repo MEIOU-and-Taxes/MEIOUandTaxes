@@ -1255,7 +1255,7 @@ Plague_Model = {
             }
             clr_province_flag = PlagueCD$Type$
         }
-        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ } 
+        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ VirginDecay=0.84 } 
     }
 }
 Plague_Tick = {
@@ -1329,7 +1329,15 @@ Plague_ModelHelper = { #Bubonic
 
         # Store the susceptible change
         set_key = { lhs = Plague_Tmp2 which = Plague_Susceptible$Type$ }
-        multiply_key = { lhs = Plague_Susceptible$Type$ value = 0.84 } #remove % each month. Diseases don't have infinite time to infect
+        if = { # virgin soil (no immunity): disease gets a bit more time
+            limit = {
+                NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+            }
+            multiply_key = { lhs = Plague_Susceptible$Type$ value = $VirginDecay$ }
+        }
+        else = {
+            multiply_key = { lhs = Plague_Susceptible$Type$ value = 0.84 } #remove % each month. Diseases don't have infinite time to infect
+        }
         subtract_key = { lhs = Plague_Tmp2 which = Plague_Susceptible$Type$ }
         if = {
             limit = {
@@ -1734,7 +1742,7 @@ Plague_Model_Smallpox = {
             }
             clr_province_flag = PlagueCD$Type$
         }   
-        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ } 
+        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ VirginDecay=0.92 } 
 	}
 }
 Plague_Model_Salmonella = {
@@ -1928,7 +1936,7 @@ Plague_Model_Salmonella = {
             }
             clr_province_flag = PlagueCD$Type$
         }
-        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ } 
+        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ VirginDecay=0.84 } 
     }
 }
 Plague_Model_Typhus = { 
