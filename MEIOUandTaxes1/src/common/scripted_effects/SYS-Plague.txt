@@ -646,7 +646,7 @@ Plague_InitSystem = {
                 set_key = { lhs = Plague_Resistance0 value = 40 } # north africa was hit by black death
             }
         }
-        if = {
+        else_if = { # chained with Africa so the generic block below does not overwrite Africa
             limit = {
                 OR = {
                     continent = southeast_asia 
@@ -847,7 +847,7 @@ Plague_Clean = {
 	clr_province_flag = Plague$Type$
     clr_province_flag = max_death
     clr_province_flag = PlagueSpawner
-    clr_province_flag = PlagueTNM$Type$
+    clr_province_flag = PlagueTN$Type$
     clr_province_flag = PlagueTNM$Type$
 	set_key = { lhs = Plague_Susceptible$Type$ value = 0 }
 	set_key = { lhs = Plague_Infected$Type$ value = 0 }
@@ -889,9 +889,10 @@ Plague_Clean_Malaria = {
     clr_province_flag = Plague$Type$
     clr_province_flag = max_death
     clr_province_flag = PlagueSpawner
+    clr_province_flag = PlagueTN$Type$
     clr_province_flag = PlagueTNM$Type$
-    clr_province_flag = PlagueTNM$Type$
-	
+	set_key = { lhs = Plague_Susceptible$Type$ value = 0 }
+	set_key = { lhs = Plague_Infected$Type$ value = 0 }
     remove_province_modifier = Plague_mod$Type$
     remove_province_modifier = Plague_mod_m$Type$
     remove_province_modifier = Plague_mod_s$Type$
@@ -900,6 +901,7 @@ Plague_Clean_Malaria = {
         name = Plague_Passed$Type$
         duration = 365
     }
+    clr_province_flag = Plague
 }
 #Plague_Test = {
 #	#Plague_Init = { Type=0 }
@@ -1442,80 +1444,92 @@ Plague_SpreadRateCalc = {
 	multiply_key = { lhs = $return$ value = $SpreadRate$ } #Differentiate by Plague Type
 }
 Plague_Spread = {
-    set_key = { lhs = Plague_Infected$Type$ which = PREV }
-	set_key = { lhs = Plague_Tmp0 which = Plague_Resistance$Type$ }
-	multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
-	multiply_key = { lhs = Plague_Tmp0 which = Plague_Tmp0 }
-    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
-    multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
-   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
-	if = {
-		limit = {
-			check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
+	if = { # no co-infection: skip provinces that already have another active disease
+		limit = { NOT = { has_province_flag = Plague } }
+	    set_key = { lhs = Plague_Infected$Type$ which = PREV }
+		set_key = { lhs = Plague_Tmp0 which = Plague_Resistance$Type$ }
+		multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
+		multiply_key = { lhs = Plague_Tmp0 which = Plague_Tmp0 }
+		multiply_key = { lhs = Plague_Tmp0 value = -1 }
+		change_key = { lhs = Plague_Tmp0 value = 1 } # 1 - r^2: low resistance (virgin soil) gets more initial infection
+		if = { limit = { NOT = { check_key = { lhs = Plague_Tmp0 value = 0 } } } set_key = { lhs = Plague_Tmp0 value = 0 } }
+	    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
+	    multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+	   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = {
+			limit = {
+				check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
+			}
+			set_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
 		}
-		set_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
-	}
-	else_if = { # over flow measures
-		limit = {
-			NOT = { check_key = { lhs = Plague_Infected$Type$ value = 0.001 } }
+		else_if = { # over flow measures
+			limit = {
+				NOT = { check_key = { lhs = Plague_Infected$Type$ value = 0.001 } }
+			}
+			set_key = { lhs = Plague_Infected$Type$ value = 0.001 }
 		}
-		set_key = { lhs = Plague_Infected$Type$ value = 0.001 }
-	}
-    if = {
-        limit = {
-            check_key = { lhs = Plague_Infected$Type$ value = 0.001 }
-        }
-        set_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Infected$Type$ }
-        subtract_key = { lhs = Plague_Susceptible$Type$ which = Plague_Infected$Type$ }
-        multiply_key = { lhs = Plague_Susceptible$Type$ value = 0.9 }
-        subtract_key = { lhs = Plague_SusceptibleChange$Type$ which = Plague_Infected$Type$ }
-        set_province_flag = Plague
-        set_province_flag = PlagueCD$Type$
-        clr_province_flag = PlagueCand$Type$
-        set_province_flag = Plague$Type$
+	    if = {
+	        limit = {
+	            check_key = { lhs = Plague_Infected$Type$ value = 0.001 }
+	        }
+	        set_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Infected$Type$ }
+	        subtract_key = { lhs = Plague_Susceptible$Type$ which = Plague_Infected$Type$ }
+	        multiply_key = { lhs = Plague_Susceptible$Type$ value = 0.9 }
+	        subtract_key = { lhs = Plague_SusceptibleChange$Type$ which = Plague_Infected$Type$ }
+	        set_province_flag = Plague
+	        set_province_flag = PlagueCD$Type$
+	        clr_province_flag = PlagueCand$Type$
+	        set_province_flag = Plague$Type$
         
-        if = { limit = { NOT = { has_province_modifier = Plague_mod$Type$ } }
-            add_permanent_province_modifier = {
-                name = Plague_mod$Type$
-                duration = -1
-            }
-        }
-    }
-    else = { 
-        set_key = { lhs = Plague_Infected$Type$ value = 0 }
-    }
+	        if = { limit = { NOT = { has_province_modifier = Plague_mod$Type$ } }
+	            add_permanent_province_modifier = {
+	                name = Plague_mod$Type$
+	                duration = -1
+	            }
+	        }
+	    }
+	    else = { 
+	        set_key = { lhs = Plague_Infected$Type$ value = 0 }
+	    }
+	}
 }
 Plague_SpreadScope = {
-	set_province_flag = Plague
-	set_province_flag = PlagueCD$Type$
-	clr_province_flag = PlagueCand$Type$
-	set_province_flag = Plague$Type$
-	set_key = { lhs = Plague_Infected$Type$ which = PREV }
-	set_key = { lhs = Plague_Tmp0 which = Plague_Resistance$Type$ }
-	multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
-	multiply_key = { lhs = Plague_Tmp0 which = Plague_Tmp0 }
-    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
-   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
-	if = {
-		limit = {
-			check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
+	if = { # no co-infection: skip provinces that already have another active disease
+		limit = { NOT = { has_province_flag = Plague } }
+		set_province_flag = Plague
+		set_province_flag = PlagueCD$Type$
+		clr_province_flag = PlagueCand$Type$
+		set_province_flag = Plague$Type$
+		set_key = { lhs = Plague_Infected$Type$ which = PREV }
+		set_key = { lhs = Plague_Tmp0 which = Plague_Resistance$Type$ }
+		multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
+		multiply_key = { lhs = Plague_Tmp0 which = Plague_Tmp0 }
+		multiply_key = { lhs = Plague_Tmp0 value = -1 }
+		change_key = { lhs = Plague_Tmp0 value = 1 } # 1 - r^2: low resistance (virgin soil) gets more initial infection
+		if = { limit = { NOT = { check_key = { lhs = Plague_Tmp0 value = 0 } } } set_key = { lhs = Plague_Tmp0 value = 0 } }
+	    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
+	   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = {
+			limit = {
+				check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
+			}
+			set_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
 		}
-		set_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
-	}
-	else_if = { # over flow measures
-		limit = {
-			NOT = { check_key = { lhs = Plague_Infected$Type$ value = 0.001 } }
+		else_if = { # over flow measures
+			limit = {
+				NOT = { check_key = { lhs = Plague_Infected$Type$ value = 0.001 } }
+			}
+			set_key = { lhs = Plague_Infected$Type$ value = 0.001 }
 		}
-		set_key = { lhs = Plague_Infected$Type$ value = 0.001 }
-	}
-	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
-    set_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Infected$Type$ }
-	subtract_key = { lhs = Plague_Susceptible$Type$ which = Plague_Infected$Type$ }
-	subtract_key = { lhs = Plague_SusceptibleChange$Type$ which = Plague_Infected$Type$ }
-	if = { limit = { NOT = { has_province_modifier = Plague_mod$Type$ } }
-		add_permanent_province_modifier = {
-			name = Plague_mod$Type$
-			duration = -1
+		multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+	    set_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Infected$Type$ }
+		subtract_key = { lhs = Plague_Susceptible$Type$ which = Plague_Infected$Type$ }
+		subtract_key = { lhs = Plague_SusceptibleChange$Type$ which = Plague_Infected$Type$ }
+		if = { limit = { NOT = { has_province_modifier = Plague_mod$Type$ } }
+			add_permanent_province_modifier = {
+				name = Plague_mod$Type$
+				duration = -1
+			}
 		}
 	}
 }
@@ -1829,6 +1843,7 @@ Plague_Model_Salmonella = {
                                         every_neighbor_province = {
                                             limit = {
                                                 has_province_flag = PlagueCand$Type$
+                                                has_province_flag = salmonella_candidate
                                             }
                                             Plague_Spread = { Type=$Type$ }
                                         }
@@ -1852,6 +1867,7 @@ Plague_Model_Salmonella = {
                                         every_neighbor_province = {
                                             limit = {
                                                 has_province_flag = PlagueCand$Type$
+                                                has_province_flag = salmonella_candidate
                                             }
                                             Plague_Spread = { Type=$Type$ }
                                         }
@@ -1880,6 +1896,7 @@ Plague_Model_Salmonella = {
                                     every_empty_neighbor_province = {
                                         limit = {
                                             has_province_flag = PlagueCand$Type$
+                                            has_province_flag = salmonella_candidate
                                         }
                                         Plague_Spread = { Type=$Type$ }
                                     }
@@ -2065,7 +2082,7 @@ Plague_Model_Typhus = {
             }
             clr_province_flag = PlagueCD$Type$
         }
-        Plague_ModelHelper = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ } 
+        Plague_ModelHelper_Typhus = { Type=$Type$ SpreadRate=$SpreadRate$ RemovalRate=$RemovalRate$ Severity=$Severity$ ImmunityGain=$ImmunityGain$ } 
 	}
 }
 Plague_ModelHelper_Typhus = {
@@ -2155,7 +2172,7 @@ Plague_ModelHelper_Typhus = {
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
         limit = {
-            NOT = { has_province_flag = PlagueSpawner }
+            NOT = { has_province_flag = max_death }
             check_key = { lhs = Plague_Dead$Type$ value = 10 }
         }
         if = {
@@ -2165,6 +2182,7 @@ Plague_ModelHelper_Typhus = {
             remove_province_modifier = Plague_mod$Type$
             remove_province_modifier = Plague_mod_m$Type$
             add_permanent_province_modifier = { name = Plague_mod_s$Type$ duration = -1 }
+            set_province_flag = max_death
         }
         else = { 
             remove_province_modifier = Plague_mod$Type$
@@ -2470,7 +2488,7 @@ Plague_ModelHelper_Malaria = {
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
         limit = {
-            NOT = { has_province_flag = PlagueSpawner }
+            NOT = { has_province_flag = max_death }
             check_key = { lhs = Plague_Dead$Type$ value = 10 }
         }
         if = {
@@ -2480,6 +2498,7 @@ Plague_ModelHelper_Malaria = {
             remove_province_modifier = Plague_mod$Type$
             remove_province_modifier = Plague_mod_m$Type$
             add_permanent_province_modifier = { name = Plague_mod_s$Type$ duration = -1 }
+            set_province_flag = max_death
         }
         else = { 
             remove_province_modifier = Plague_mod$Type$
