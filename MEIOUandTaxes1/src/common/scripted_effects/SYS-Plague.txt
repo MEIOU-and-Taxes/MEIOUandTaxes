@@ -845,7 +845,7 @@ Plague_Spawn_Malaria = {
 }
 Plague_Clean = {
 	clr_province_flag = Plague$Type$
-    clr_province_flag = max_death
+    clr_province_flag = max_death$Type$
     clr_province_flag = PlagueSpawner
     clr_province_flag = PlagueTN$Type$
     clr_province_flag = PlagueTNM$Type$
@@ -858,7 +858,7 @@ Plague_Clean = {
     remove_province_modifier = Plague_mod_m$Type$
     remove_province_modifier = Plague_mod_s$Type$
     remove_province_modifier = Plague_Spawn$Type$
-    clr_province_flag = Plague
+    Plague_ClearSharedFlag = yes
     add_province_modifier = {
         name = Plague_Passed$Type$
         duration = 365
@@ -887,7 +887,7 @@ Plague_Clean_Malaria = {
         set_province_flag = mosquitos
     }
     clr_province_flag = Plague$Type$
-    clr_province_flag = max_death
+    clr_province_flag = max_death$Type$
     clr_province_flag = PlagueSpawner
     clr_province_flag = PlagueTN$Type$
     clr_province_flag = PlagueTNM$Type$
@@ -901,7 +901,19 @@ Plague_Clean_Malaria = {
         name = Plague_Passed$Type$
         duration = 365
     }
-    clr_province_flag = Plague
+    Plague_ClearSharedFlag = yes
+}
+Plague_ClearSharedFlag = { # co-infection: keep the shared Plague flag while any other disease is still active
+    if = {
+        limit = {
+            NOT = { has_province_flag = Plague0 }
+            NOT = { has_province_flag = Plague1 }
+            NOT = { has_province_flag = Plague2 }
+            NOT = { has_province_flag = Plague3 }
+            NOT = { has_province_flag = Plague4 }
+        }
+        clr_province_flag = Plague
+    }
 }
 #Plague_Test = {
 #	#Plague_Init = { Type=0 }
@@ -1251,32 +1263,32 @@ Plague_Tick = {
 		limit = {
 			has_province_flag = Plague
 		}
-        if = {
+        if = { # co-infection: each active disease runs its own model (separate ifs, not else_if)
             limit = {
                 has_province_flag = Plague0
             }
             Plague_Model = { Type=0 SpreadRate=16 RemovalRate=0.77 Severity=0.27 ImmunityGain=0.67 } # Bubonic
             
         }
-        else_if = {
+        if = {
             limit = {
                 has_province_flag = Plague1
             }
             Plague_Model_Smallpox = { Type=1 SpreadRate=11 RemovalRate=0.73 Severity=0.38 ImmunityGain=1 } # Smallpox
         }
-        else_if = {
+        if = {
             limit = {
                 has_province_flag = Plague2
             }
             Plague_Model_Salmonella = { Type=2 SpreadRate=38 RemovalRate=0.45 Severity=0.70 ImmunityGain=0.85 } # Salmonella
         }
-        else_if = {
+        if = {
             limit = {
                 has_province_flag = Plague3
             }
             Plague_Model_Typhus = { Type=3 SpreadRate=0.8 RemovalRate=0.55 Severity=0.25 ImmunityGain=0.8 } # Typhus
         }
-        else_if = {
+        if = {
             limit = {
                 has_province_flag = Plague4
             }
@@ -1388,7 +1400,7 @@ Plague_ModelHelper = { #Bubonic
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
         limit = {
-            NOT = { has_province_flag = max_death }
+            NOT = { has_province_flag = max_death$Type$ }
             check_key = { lhs = Plague_Dead$Type$ value = 10 }
         }
         if = {
@@ -1398,7 +1410,7 @@ Plague_ModelHelper = { #Bubonic
             remove_province_modifier = Plague_mod$Type$
             remove_province_modifier = Plague_mod_m$Type$
             add_permanent_province_modifier = { name = Plague_mod_s$Type$ duration = -1 }
-            set_province_flag = max_death
+            set_province_flag = max_death$Type$
         }
         else = { 
             remove_province_modifier = Plague_mod$Type$
@@ -1444,8 +1456,8 @@ Plague_SpreadRateCalc = {
 	multiply_key = { lhs = $return$ value = $SpreadRate$ } #Differentiate by Plague Type
 }
 Plague_Spread = {
-	if = { # no co-infection: skip provinces that already have another active disease
-		limit = { NOT = { has_province_flag = Plague } }
+	if = { # co-infection allowed: only skip provinces already infected with this same disease
+		limit = { NOT = { has_province_flag = Plague$Type$ } }
 	    set_key = { lhs = Plague_Infected$Type$ which = PREV }
 		set_key = { lhs = Plague_Tmp0 which = Plague_Resistance$Type$ }
 		multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
@@ -1494,8 +1506,8 @@ Plague_Spread = {
 	}
 }
 Plague_SpreadScope = {
-	if = { # no co-infection: skip provinces that already have another active disease
-		limit = { NOT = { has_province_flag = Plague } }
+	if = { # co-infection allowed: only skip provinces already infected with this same disease
+		limit = { NOT = { has_province_flag = Plague$Type$ } }
 		set_province_flag = Plague
 		set_province_flag = PlagueCD$Type$
 		clr_province_flag = PlagueCand$Type$
@@ -2172,7 +2184,7 @@ Plague_ModelHelper_Typhus = {
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
         limit = {
-            NOT = { has_province_flag = max_death }
+            NOT = { has_province_flag = max_death$Type$ }
             check_key = { lhs = Plague_Dead$Type$ value = 10 }
         }
         if = {
@@ -2182,7 +2194,7 @@ Plague_ModelHelper_Typhus = {
             remove_province_modifier = Plague_mod$Type$
             remove_province_modifier = Plague_mod_m$Type$
             add_permanent_province_modifier = { name = Plague_mod_s$Type$ duration = -1 }
-            set_province_flag = max_death
+            set_province_flag = max_death$Type$
         }
         else = { 
             remove_province_modifier = Plague_mod$Type$
@@ -2488,7 +2500,7 @@ Plague_ModelHelper_Malaria = {
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
         limit = {
-            NOT = { has_province_flag = max_death }
+            NOT = { has_province_flag = max_death$Type$ }
             check_key = { lhs = Plague_Dead$Type$ value = 10 }
         }
         if = {
@@ -2498,7 +2510,7 @@ Plague_ModelHelper_Malaria = {
             remove_province_modifier = Plague_mod$Type$
             remove_province_modifier = Plague_mod_m$Type$
             add_permanent_province_modifier = { name = Plague_mod_s$Type$ duration = -1 }
-            set_province_flag = max_death
+            set_province_flag = max_death$Type$
         }
         else = { 
             remove_province_modifier = Plague_mod$Type$
