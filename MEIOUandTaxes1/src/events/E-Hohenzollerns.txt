@@ -82,15 +82,17 @@ country_event = {
 					is_female = yes
 				}
 			}
-			OR = {
-				tag = BYR
-				tag = ANS
-				tag = HOH
-				tag = BRA
-			}
-			OR = {
-				NOT = { dynasty = "von Hohenzollern" }
-				is_female = yes
+			AND = {
+				OR = {
+					tag = BYR
+					tag = ANS
+					tag = HOH
+					tag = BRA
+				}
+				OR = {
+					NOT = { dynasty = "von Hohenzollern" }
+					is_female = yes
+				}
 			}
 		}
 
@@ -266,6 +268,7 @@ country_event = {			#Poland version
 			tag = POL
 			NOT = { exists = PLC }
 		}
+		NOT = { has_global_flag = second_peace_of_thorn_happened }
 		has_country_flag = first_peace_of_thorn
 		has_country_flag = supported_prussian_confederation_flag
 		TEU = {
@@ -435,6 +438,7 @@ country_event = {			#Poland version
   
 	option = {
 	    name = "secondpeaceofthorn.1.a"
+		set_global_flag = second_peace_of_thorn_happened
         add_dip_power = -50
 		TEU = {
 			free_vassal = LVO
@@ -453,14 +457,15 @@ country_event = {			#PLC version
 	title = "secondpeaceofthorn.1.t"
 	desc = "secondpeaceofthorn.1.d"
 	picture = SIEGE_eventPicture
-  
+	major = yes
 	fire_only_once = yes
-  
+
 	trigger = {
 		OR = {
 			tag = PLC
 			NOT = { exists = POL }
 		}
+		NOT = { has_global_flag = second_peace_of_thorn_happened }
 		has_country_flag = first_peace_of_thorn
 		has_country_flag = supported_prussian_confederation_flag
 		TEU = {
@@ -568,6 +573,7 @@ country_event = {			#PLC version
   
 	option = {
 		name = "secondpeaceofthorn.1.a"
+		set_global_flag = second_peace_of_thorn_happened
 		add_dip_power = -50
 		TEU = {
 			free_vassal = LVO
@@ -602,7 +608,50 @@ country_event = {
 			Effect_set_capital = { target = 41 } # Ostpreussen
 		}	
 		add_prestige = 15
-		hidden_effect = { vassalize = TEU }
+		hidden_effect = {
+			vassalize = TEU
+			#Reduce TEU to East Prussia and DNZ to West Prussia
+			#Basically making sure bordergore isnt inherited.
+			every_province = {
+				limit = {
+					OR = {
+						AND = {
+							owned_by = TEU
+							NOT = { area = east_prussia_area }
+							#ceded with cores to ROOT in secondpeaceofthorn.3
+							NOT = { province_id = 2845 } #Lauenburg-Bytow
+							NOT = { province_id = 43 } #Pomerellen
+							NOT = { province_id = 1844 } #Elbing
+							NOT = { province_id = 1391 } #Warmia
+							NOT = { province_id = 4025 } #Tuchel
+							TEU = { any_owned_province = { area = east_prussia_area } }
+						}
+						AND = {
+							owned_by = DNZ
+							NOT = { area = west_prussia_area }
+							DNZ = { any_owned_province = { area = west_prussia_area } }
+						}
+					}
+				}
+				if = {
+					limit = {
+						LIT = {
+							exists = yes
+							is_subject_of = ROOT
+						}
+						OR = {
+							is_core = LIT
+							is_core = TRK
+							region = lithuania_region
+						}
+					}
+					cede_province = LIT
+				}
+				else = {
+					cede_province = ROOT
+				}
+			}
+		}
 		create_subject = {
 			who = DNZ
 			subject_type = decentralized_vassal
