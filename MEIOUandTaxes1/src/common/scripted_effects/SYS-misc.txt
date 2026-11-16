@@ -10326,15 +10326,117 @@ POP_GetTlrnc = {
 	}
 }
 
-POP_CalcLandTime = {
-    set_key = { lhs = Land_Travel value = 0 }
+POP_GetLandTerrains = {
+	if = {
+		limit = { NOT = { has_province_flag =  LandTerrainsCE_set } }
+		trigger_switch = {
+			on_trigger = has_terrain
+			
+			arctic = {
+				POP_GetLandTerrainsCE = { Innate=4 }
+			}
+			forest_flats = {
+				POP_GetLandTerrainsCE = { Forest=1.0 }
+			}
+			forest_hills = {
+				POP_GetLandTerrainsCE = { Forest=1.0 }
+			}
+			forest_mountains = {
+				POP_GetLandTerrainsCE = { Forest=1.0 }
+			}
+			forest_highlands = {
+				POP_GetLandTerrainsCE = { Forest=1.0 }
+			}
+			wood_flats = {
+				POP_GetLandTerrainsCE = { Forest=0.5 }
+			}
+			wood_hills = {
+				POP_GetLandTerrainsCE = { Forest=0.5 }
+			}
+			wood_mountains = {
+				POP_GetLandTerrainsCE = { Forest=0.5 }
+			}
+			wood_highlands = {
+				POP_GetLandTerrainsCE = { Forest=0.5 }
+			}
+			shrub_flats = {
+				POP_GetLandTerrainsCE = { Forest=0.25 }
+			}
+			shrub_hills = {
+				POP_GetLandTerrainsCE = { Forest=0.25 }
+			}
+			shrub_mountains = {
+				POP_GetLandTerrainsCE = { Forest=0.25 }
+			}
+			shrub_highlands = {
+				POP_GetLandTerrainsCE = { Forest=0.25 }
+			}
+			grass_flats = {
+				POP_GetLandTerrainsCE = yes
+			}
+			grass_hills = {
+				POP_GetLandTerrainsCE = yes
+			}
+			grass_mountains = {
+				POP_GetLandTerrainsCE = yes
+			}
+			grass_highlands = {
+				POP_GetLandTerrainsCE = yes
+			}
+			desert_flats = {
+				POP_GetLandTerrainsCE = { Desert=1.5 }
+			}
+			desert_hills = {
+				POP_GetLandTerrainsCE = { Desert=1.5 }
+			}
+			desert_mountains = {
+				POP_GetLandTerrainsCE = { Desert=1.5 }
+			}
+			desert_highlands = {
+				POP_GetLandTerrainsCE = { Desert=1.5 }
+			}
+			jungle_flats = {
+				POP_GetLandTerrainsCE = { Forest=1.5 }
+			}
+			jungle_hills = {
+				POP_GetLandTerrainsCE = { Forest=1.5 }
+			}
+			floodplains = {
+				POP_GetLandTerrainsCE = { Innate=1 }
+			}
+			taiga = {
+				POP_GetLandTerrainsCE = yes
+			}
+			marsh = {
+				POP_GetLandTerrainsCE = { Innate=1.0 Forest=0.5 }
+			}
+			tundra = {
+				POP_GetLandTerrainsCE = { Innate=0.5 }
+			}
+			alpine_tundra = {
+				POP_GetLandTerrainsCE = yes
+			}
+			small_island = {
+				POP_GetLandTerrainsCE = yes
+			}
+		}
+		set_province_flag = LandTerrainsCE_set
+	}
+}
+
+POP_GetLandTerrainsCE = {
+	# Store key values in province
 	[[Innate]
-	set_key = { lhs = CE_Tmp0 value = $Innate$ } # role of innate things (swamps, etc)
-    #multiply_key = { lhs = CE_Tmp0 which = CE_RoadImpact } #RoadImpact has been moved one layer up, as its now a additive calculation. So we can save calcs...
-	change_key = { lhs = Land_Travel which = CE_Tmp0 }
+		set_key = { lhs = CE_Innate value = $Innate$ } # role of innate things (swamps, etc)
+		if = { # Ancient Pass benefits
+			limit = {
+				check_key = { lhs = TN_Pass value = 1 }
+			}
+			multiply_key = { lhs = CE_Innate value = 0.6 }
+		}		
 	]
-	set_key = { lhs = CE_Tmp0 value = 0 }
 	### Estimate Forestation from Farmland to Forestry Distribution
+	set_key = { lhs = CE_Forest value = 0 }
 	if = {
 		limit = {
 			check_key = { lhs = Land_Forest value = 15 } #threshold at which point we consider forestation
@@ -10355,17 +10457,18 @@ POP_CalcLandTime = {
 			}
 			set_key = { lhs = CE_Tmp0 value = 3 }
 		}
-		multiply_key = { lhs = CE_Tmp0 which = Modi_CEForest }
-		change_key = { lhs = Land_Travel which = CE_Tmp0 }
-		set_key = { lhs = CE_Tmp0 value = 0 }
-	}
-
-	# Even if Forestation is extremly low, apply the fixed penalty
+		change_key = { lhs = CE_Forest which = CE_Tmp0 }
+	}	
 	[[Forest]
-		change_key = { lhs = CE_Tmp0 value = $Forest$ } # Fix impact for Forest
-		multiply_key = { lhs = CE_Tmp0 which = Modi_CEForest }
-		change_key = { lhs = Land_Travel which = CE_Tmp0 }
+		change_key = { lhs = CE_Forest value = $Forest$ } # Role of fixed forest penalty
 	]
+	if = { # Ancient Pass benefits
+		limit = {
+			check_key = { lhs = TN_Pass value = 1 }
+			check_key = { lhs = CE_Forest value = 0 }
+		}
+		multiply_key = { lhs = CE_Forest value = 0.6 }
+	}	
 	### Factor in Ruggedness of Terrain into CE
 	if = {
 		limit = {
@@ -10379,118 +10482,66 @@ POP_CalcLandTime = {
 			set_key = { lhs = CE_Tmp0 value = 25 }
 		}
 		subtract_key = { lhs = CE_Tmp0 value = 4 }
-		multiply_key = { lhs = CE_Tmp0 which = Modi_CEHeight }
 		multiply_key = { lhs = CE_Tmp0 value = 0.2 } # we scale ruggedness down to a similar max penalty as from Forestry
-		change_key = { lhs = Land_Travel which = CE_Tmp0 }
+		set_key = { lhs = CE_Rugged which = CE_Tmp0 }
+		if = { # Ancient Pass benefits
+			limit = {
+				check_key = { lhs = TN_Pass value = 1 }
+			}
+			multiply_key = { lhs = CE_Rugged value = 0.6 }
+		}		
 	}
 	[[Desert]
-    	set_key = { lhs = CE_Tmp0 value = $Desert$ } # role of desert
-    	multiply_key = { lhs = CE_Tmp0 which = Modi_CEDesert }
-    	change_key = { lhs = Land_Travel which = CE_Tmp0 }
+    	set_key = { lhs = CE_Desert value = $Desert$ } # Role of fixed desert penalty
+		if = { # Ancient Pass benefits
+			limit = {
+				check_key = { lhs = TN_Pass value = 1 }
+			}
+			multiply_key = { lhs = CE_Desert value = 0.6 }
+		}		
 	]
-	if = { # Ancient Pass benefits, impacts all terrain penalties
-		limit = {
-			check_key = { lhs = TN_Pass value = 1 }
-		}
-		multiply_key = { lhs = Land_Travel value = 0.6 }
-	}
-	change_key = { lhs = Land_Travel value = 1 }
-	multiply_key = { lhs = Land_Travel which = CE_RoadImpact }
-    set_key = { lhs = CE_Tmp0 value = 0 }
+	set_key = { lhs = CE_Tmp0 value = 0 }
 }
 
 POP_GetLandTime = { 
-    trigger_switch = {
-        on_trigger = has_terrain
-        
-        arctic = {
-			POP_CalcLandTime = { Innate=4 }
-        }
-        forest_flats = {
-			POP_CalcLandTime = { Forest=1.0 }
-        }
-        forest_hills = {
-			POP_CalcLandTime = { Forest=1.0 }
-        }
-        forest_mountains = {
-			POP_CalcLandTime = { Forest=1.0 }
-        }
-        forest_highlands = {
-			POP_CalcLandTime = { Forest=1.0 }
-        }
-        wood_flats = {
-			POP_CalcLandTime = { Forest=0.5 }
-        }
-        wood_hills = {
-			POP_CalcLandTime = { Forest=0.5 }
-        }
-        wood_mountains = {
-			POP_CalcLandTime = { Forest=0.5 }
-        }
-        wood_highlands = {
-			POP_CalcLandTime = { Forest=0.5 }
-        }
-        shrub_flats = {
-			POP_CalcLandTime = { Forest=0.25 }
-        }
-        shrub_hills = {
-			POP_CalcLandTime = { Forest=0.25 }
-        }
-        shrub_mountains = {
-			POP_CalcLandTime = { Forest=0.25 }
-        }
-        shrub_highlands = {
-			POP_CalcLandTime = { Forest=0.25 }
-        }
-        grass_flats = {
-			POP_CalcLandTime = yes
-        }
-        grass_hills = {
-			POP_CalcLandTime = yes
-        }
-        grass_mountains = {
-			POP_CalcLandTime = yes
-        }
-        grass_highlands = {
-			POP_CalcLandTime = yes
-        }
-        desert_flats = {
-			POP_CalcLandTime = { Desert=1.5 }
-        }
-        desert_hills = {
-			POP_CalcLandTime = { Desert=1.5 }
-        }
-        desert_mountains = {
-			POP_CalcLandTime = { Desert=1.5 }
-        }
-        desert_highlands = {
-			POP_CalcLandTime = { Desert=1.5 }
-        }
-        jungle_flats = {
-			POP_CalcLandTime = { Forest=1.5 }
-        }
-        jungle_hills = {
-			POP_CalcLandTime = { Forest=1.5 }
-        }
-        floodplains = {
-			POP_CalcLandTime = { Innate=1 }
-        }
-        taiga = {
-			POP_CalcLandTime = yes
-        }
-        marsh = {
-			POP_CalcLandTime = { Innate=1.0 Forest=0.5 }
-        }
-        tundra = {
-			POP_CalcLandTime = { Innate=0.5 }
-        }
-        alpine_tundra = {
-			POP_CalcLandTime = yes
-        }
-        small_island = {
-			POP_CalcLandTime = yes
-        }
-    }
+	POP_GetLandTerrains = yes
+	set_key = { lhs = CE_Total_Terrain value = 0 }
+
+	if = { # Innate
+		limit = {
+			check_key = { lhs = CE_Innate value = 0 }
+		}
+		change_key = { lhs = CE_Total_Terrain which = CE_Innate }	
+	}	
+	if = { # Forest
+		limit = {
+			check_key = { lhs = CE_Forest value = 0 }
+		}
+		set_key = { lhs = CE_Tmp0 which = CE_Forest }
+		multiply_key = { lhs = CE_Tmp0 which = Modi_CEForest }
+		change_key = { lhs = CE_Total_Terrain which = CE_Tmp0 }
+	}
+	if = { # Ruggedness
+		limit = {
+			check_key = { lhs = CE_Rugged value = 0 }
+		}
+		set_key = { lhs = CE_Tmp0 which = CE_Rugged }
+		multiply_key = { lhs = CE_Tmp0 which = Modi_CEHeight }
+		change_key = { lhs = CE_Total_Terrain which = CE_Tmp0 }
+	}
+	if = { # Desert
+		limit = {
+			check_key = { lhs = CE_Desert value = 0 }
+		}
+		set_key = { lhs = CE_Tmp0 which = CE_Desert }
+		multiply_key = { lhs = CE_Tmp0 which = Modi_CEDesert }
+		change_key = { lhs = CE_Total_Terrain which = CE_Tmp0 }
+	}
+	change_key = { lhs = CE_Total_Terrain value = 1 }
+	set_key = { lhs = Land_Travel which = CE_Total_Terrain }
+
+	multiply_key = { lhs = Land_Travel which = CE_RoadImpact }
+	set_key = { lhs = CE_Tmp0 value = 0 }
 }
 
 POP_GetDevastation = {
