@@ -123,29 +123,22 @@ Promotion_REPromotion = {
 		limit = {
 			check_key = { lhs = RE_Total value = 0.1 } # There is a city
 			NOT = { check_key = { lhs = RE_Total which = Ideal_ResidentSize } } # Residents < IdealSize
-			NOT = { is_key_equal = { lhs = RE_FillLifeC value = 0 } }
+			check_key = { lhs = RE_FillLifeC value = 0.3 } # No promotion into a miserable city
 		}
-		# Base yearly rate in percent (kept in % to avoid losing the 0.001 key precision)
-		set_key = { lhs = Tmp_1 value = 2 }
-
-		# Get RE LifeC fulfilment modifier in %, neutral at RE_FillLifeC = 0.9:
-		#   (RE_FillLifeC - 0.9) / RE_FillLifeC * 2.5    if below 0.9 (penalty)
-		#   (RE_FillLifeC - 0.9) / RE_FillLifeC * 1.63   if above 0.9 (bonus, reaches +1 at Growth_PointMaxFulfill 2.33)
-		# Constraints: [-1, 1]
-		set_key = { lhs = Tmp_5 which = RE_FillLifeC }
-		subtract_key = { lhs = Tmp_5 value = 0.9 }
-		divide_key = { lhs = Tmp_5 which = RE_FillLifeC }
+		# Peasants only promote willingly if life in the city is better than in the countryside.
+		#   (RE_FillLifeC - SF_FillLifeC) / max(RE_FillLifeC, 0.9)
+		# Relative above the neutral point 0.9. Below it, the absolute gap / 0.9 .
+		# Constraints: [-1, 1] - 0 if equally well off, negative if peasants are better off
+		set_key = { lhs = Tmp_2 which = RE_FillLifeC }
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_5 value = 0 }
+				NOT = { check_key = { lhs = Tmp_2 value = 0.9 } }
 			}
-			multiply_key = { lhs = Tmp_5 value = 1.63 }
+			set_key = { lhs = Tmp_2 value = 0.9 }
 		}
-		else = {
-			multiply_key = { lhs = Tmp_5 value = 2.5 }
-		}
-
-		# Upper lower case handling: [-1,1]
+		set_key = { lhs = Tmp_5 which = RE_FillLifeC }
+		subtract_key = { lhs = Tmp_5 which = SF_FillLifeC }
+		divide_key = { lhs = Tmp_5 which = Tmp_2 }
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_5 value = 1 }
@@ -159,8 +152,33 @@ Promotion_REPromotion = {
 			set_key = { lhs = Tmp_5 value = -1 }
 		}
 
-		## Get Yearly Change in %: [1, 3]
-		change_key = { lhs = Tmp_1 which = Tmp_5 } # RE LifeC Fulfill modifier
+		## Get Yearly Change in % (kept in % to avoid losing the 0.001 key precision): [0, 2]
+		#   0.25 + 1.75 * advantage    if residents are better off  -> [0.25, 2]
+		#   0.25 + 0.25 * advantage    if peasants are better off   -> [0, 0.25]
+		set_key = { lhs = Tmp_1 which = Tmp_5 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_5 value = 0 }
+			}
+			multiply_key = { lhs = Tmp_1 value = 1.75 }
+		}
+		else = {
+			multiply_key = { lhs = Tmp_1 value = 0.25 }
+		}
+		change_key = { lhs = Tmp_1 value = 0.25 }
+
+		# City misery factor: clamp((RE_FillLifeC - 0.3) / 0.6, 0, 1)
+		# 0 at RE_FillLifeC 0.3 (no promotion), full rate from the neutral point 0.9 up
+		set_key = { lhs = Tmp_2 which = RE_FillLifeC }
+		subtract_key = { lhs = Tmp_2 value = 0.3 }
+		divide_key = { lhs = Tmp_2 value = 0.6 }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_2 value = 1 }
+			}
+			set_key = { lhs = Tmp_2 value = 1 }
+		}
+		multiply_key = { lhs = Tmp_1 which = Tmp_2 }
 
 		multiply_key = { lhs = Tmp_1 which = Modi_ResidentPromoteSpeed }
 
