@@ -613,8 +613,9 @@ Promotion_BGPromotion = {
 			set_key = { lhs = Tmp_6 value = -0.01 }
 		}
 
-		# Get Commerce Throughput modifier - Through*-0.005 + 0.035
-		multiply_key = { lhs = Tmp_2 value = -0.005 } #inverted effect - additional magnitue (0) because throughput is 0-100 scale
+		# Get Commerce Throughput modifier - Through*-0.0005 + 0.035
+		multiply_key = { lhs = Tmp_2 value = -0.5 } #inverted effect - additional magnitue (0) because throughput is 0-100 scale
+		multiply_key = { lhs = Tmp_2 value = 0.001 } 
 		change_key = { lhs = Tmp_2 value = 0.035 }
 		
 		# Upper lower case handling: [-0.01,0.05]
@@ -626,7 +627,7 @@ Promotion_BGPromotion = {
 		}
 		else_if = {
 			limit = {
-				NOT = { check_key = { lhs = Tmp_2 value = 0 } }
+				NOT = { check_key = { lhs = Tmp_2 value = -0.01 } }
 			}
 			set_key = { lhs = Tmp_2 value = -0.01 }
 		}		
@@ -669,20 +670,22 @@ Promotion_BGPromotion = {
 		set_key = { lhs = Tmp_4 which = BG_Total }
 		multiply_key = { lhs = Tmp_4 value = 0.1 }
 
-		# Stopgap to ensure some promotion occurs when there are fewer than 1000 burghers
-		if = {
-			limit = {
-				NOT = { has_global_flag = POP_Sim } 
-				NOT = { check_key = { lhs = Tmp_4 value = 0.02 } }
-			}
-			set_key = { lhs = Tmp_3 value = 0.005 }
-		}
 		# Hyper promotion prevention here:
-		else_if = {
+		if = {
 			limit = {
 				check_key = { lhs = Tmp_3 which = Tmp_4 }
 			}
 			set_key = {lhs = Tmp_3 which = Tmp_4 }
+		}
+		# Stopgap to ensure some promotion occurs when there are fewer than 200 burghers
+		# (applied after the 10% cap, so the minimum of 0.005 always holds for small burgher pops)
+		if = {
+			limit = {
+				NOT = { has_global_flag = POP_Sim }
+				NOT = { check_key = { lhs = Tmp_4 value = 0.02 } }
+				NOT = { check_key = { lhs = Tmp_3 value = 0.005 } }
+			}
+			set_key = { lhs = Tmp_3 value = 0.005 }
 		}
 
 
@@ -703,14 +706,13 @@ Promotion_BGDemotion = {
 		subtract_key = { lhs = Tmp_4 which = Ideal_BurgherSize }
 
 
-		# Get RE LifeC fulfilment modifier: ((BG_FillLifeC * 0.01 + 0.5) / BG_FillLifeC) * 0.01
-		set_key = { lhs = Tmp_5 which = BG_FillLifeC }
-		multiply_key = { lhs = Tmp_5 value = 0.01 }
-		change_key = { lhs = Tmp_5 value = 0.5 }
+		# Get BG LifeC fulfilment modifier: (5 / BG_FillLifeC) * 0.001 = 0.005 / BG_FillLifeC
+		# (computed as 5/F first so no step drops below the 0.001 key precision)
+		set_key = { lhs = Tmp_5 value = 5 }
 		divide_key = { lhs = Tmp_5 which = BG_FillLifeC }
-		multiply_key = { lhs = Tmp_5 value = 0.01 }
+		multiply_key = { lhs = Tmp_5 value = 0.001 }
 
-		# Upper lower case handling: [0,0.01]
+		# Upper lower case handling: [0,0.05]
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_5 value = 0.05 }
@@ -724,11 +726,13 @@ Promotion_BGDemotion = {
 			set_key = { lhs = Tmp_5 value = 0 }
 		}
 
-		# Get Commerce Throughput modifier - Throughput*0.005-0.04  -> modi [0, 0.05]
-		multiply_key = { lhs = Tmp_2 value = 0.005 } 
+		# Get Commerce Throughput modifier - Throughput*0.0005-0.04 (throughput is 0-100 scale)
+		# 0.0005 is split into 0.5 * 0.001 because keys only support 3 decimals
+		multiply_key = { lhs = Tmp_2 value = 0.5 }
+		multiply_key = { lhs = Tmp_2 value = 0.001 }
 		change_key = { lhs = Tmp_2 value = -0.04 }
-		
-		# Upper lower case handling: [-0.01,0.02]
+
+		# Upper lower case handling: [-0.01,0.05]
 		if = {
 			limit = {
 				check_key = { lhs = Tmp_2 value = 0.05 }
