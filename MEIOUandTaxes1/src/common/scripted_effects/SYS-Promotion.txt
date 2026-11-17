@@ -796,10 +796,14 @@ Promotion_CLPromotion = {}
 Promotion_CLDemotion = {}
 
 # Tmp_7 = SF Share, Tmp_8 = NM_Share, Tmp_9 = RE_Share of total population
-# $Elite$_Promoted - total promotion towards the elite
-# $Lower$_Promoted$Elite$ - promotion of $Lower$ towards $Elite$ 
+# $From$_Promoted$To$ / $From$_Demoted$To$ - pops moving from class $From$ to class $To$ (always >= 0)
+#
+# Output (display and top bar), signed net change of each class:
+# $class$_Promoted - + pops promoted into $class$ from below, - pops promoted out of $class$ upwards
+# $class$_Demoted  - + pops demoted into $class$ from above,  - pops demoted out of $class$ downwards
+# Promotion only moves pops between classes, it never touches $class$_In / $class$_Out (migration).
 Promotion_Handle = {
-	# Handle Nobility
+	# Split noble and clergy promotion/demotion over the lower classes by their population share
 	multiply_key = { lhs = SF_PromotedNO which = Tmp_7 }
 	multiply_key = { lhs = NM_PromotedNO which = Tmp_8 }
 	multiply_key = { lhs = RE_PromotedNO which = Tmp_9 }
@@ -807,10 +811,6 @@ Promotion_Handle = {
 	multiply_key = { lhs = NO_DemotedNM which = Tmp_8 }
 	multiply_key = { lhs = NO_DemotedRE which = Tmp_9 }
 
-	subtract_key = { lhs = NO_Total which = NO_Demoted }
-	change_key = { lhs = NO_Total which = NO_Promoted }
-
-	# Handle Clergy
 	multiply_key = { lhs = SF_PromotedCL which = Tmp_7 }
 	multiply_key = { lhs = NM_PromotedCL which = Tmp_8 }
 	multiply_key = { lhs = RE_PromotedCL which = Tmp_9 }
@@ -818,97 +818,96 @@ Promotion_Handle = {
 	multiply_key = { lhs = CL_DemotedNM which = Tmp_8 }
 	multiply_key = { lhs = CL_DemotedRE which = Tmp_9 }
 
-	subtract_key = { lhs = CL_Total which = CL_Demoted }
-	change_key = { lhs = CL_Total which = CL_Promoted }
+	### Net promotion per class
+	# Nomads: -> Peasants, Nobles, Clergy
+	set_key = { lhs = NM_Promoted value = 0 }
+	subtract_key = { lhs = NM_Promoted which = NM_PromotedSF }
+	subtract_key = { lhs = NM_Promoted which = NM_PromotedNO }
+	subtract_key = { lhs = NM_Promoted which = NM_PromotedCL }
 
-	# Handle Burghers, RE_PromotedBG, BG_Promoted
-	subtract_key = { lhs = BG_Total which = BG_Demoted }
-	change_key = { lhs = BG_Total which = BG_Promoted }
+	# Peasants: Nomads -> | -> Residents, Nobles, Clergy
+	set_key = { lhs = SF_Promoted which = NM_PromotedSF }
+	subtract_key = { lhs = SF_Promoted which = SF_PromotedRE }
+	subtract_key = { lhs = SF_Promoted which = SF_PromotedNO }
+	subtract_key = { lhs = SF_Promoted which = SF_PromotedCL }
 
-	# Handle Peasantry
-	set_key = { lhs = SF_Promoted which = SF_PromotedNO }
-	change_key = { lhs = SF_Promoted which = SF_PromotedCL }	
+	# Residents: Peasants -> | -> Burghers, Nobles, Clergy
+	set_key = { lhs = RE_Promoted which = SF_PromotedRE }
+	subtract_key = { lhs = RE_Promoted which = RE_PromotedBG }
+	subtract_key = { lhs = RE_Promoted which = RE_PromotedNO }
+	subtract_key = { lhs = RE_Promoted which = RE_PromotedCL }
+
+	# Elites: from the lower classes
+	set_key = { lhs = BG_Promoted which = RE_PromotedBG }
+
+	set_key = { lhs = NO_Promoted which = SF_PromotedNO }
+	change_key = { lhs = NO_Promoted which = NM_PromotedNO }
+	change_key = { lhs = NO_Promoted which = RE_PromotedNO }
+
+	set_key = { lhs = CL_Promoted which = SF_PromotedCL }
+	change_key = { lhs = CL_Promoted which = NM_PromotedCL }
+	change_key = { lhs = CL_Promoted which = RE_PromotedCL }
+
+	### Net demotion per class
+	# Lower classes: from the elites
+	set_key = { lhs = NM_Demoted which = NO_DemotedNM }
+	change_key = { lhs = NM_Demoted which = CL_DemotedNM }
 
 	set_key = { lhs = SF_Demoted which = NO_DemotedSF }
 	change_key = { lhs = SF_Demoted which = CL_DemotedSF }
 
-	change_key = { lhs = SF_Total which = SF_Demoted }
-	subtract_key = { lhs = SF_Total which = SF_Promoted }
-
-	# Handle Residents
-	set_key = { lhs = RE_Promoted which = RE_PromotedNO }
-	change_key = { lhs = RE_Promoted which = RE_PromotedBG }
-	change_key = { lhs = RE_Promoted which = RE_PromotedCL }
-
-	set_key = { lhs = RE_Demoted which = NO_DemotedRE }
-	change_key = { lhs = RE_Demoted which = BG_DemotedRE }
+	set_key = { lhs = RE_Demoted which = BG_DemotedRE }
+	change_key = { lhs = RE_Demoted which = NO_DemotedRE }
 	change_key = { lhs = RE_Demoted which = CL_DemotedRE }
 
-	change_key = { lhs = RE_Total which = RE_Demoted }
-	subtract_key = { lhs = RE_Total which = RE_Promoted }
+	# Elites: -> lower classes
+	set_key = { lhs = BG_Demoted value = 0 }
+	subtract_key = { lhs = BG_Demoted which = BG_DemotedRE }
 
-	# Handle Peasant->Resident Promotion
-	change_key = { lhs = RE_Total which = SF_PromotedRE }
-	subtract_key = { lhs = SF_Total which = SF_PromotedRE }
-	change_key = { lhs = RE_In which = SF_PromotedRE }
-	change_key = { lhs = SF_Out which = SF_PromotedRE }
+	set_key = { lhs = NO_Demoted value = 0 }
+	subtract_key = { lhs = NO_Demoted which = NO_DemotedSF }
+	subtract_key = { lhs = NO_Demoted which = NO_DemotedNM }
+	subtract_key = { lhs = NO_Demoted which = NO_DemotedRE }
 
-	# Handle Nomad->Peasant Promotion
-	change_key = { lhs = SF_Total which = NM_PromotedSF }
-	subtract_key = { lhs = NM_Total which = NM_PromotedSF }
-	change_key = { lhs = SF_In which = NM_PromotedSF }
-	change_key = { lhs = NM_Out which = NM_PromotedSF }
+	set_key = { lhs = CL_Demoted value = 0 }
+	subtract_key = { lhs = CL_Demoted which = CL_DemotedSF }
+	subtract_key = { lhs = CL_Demoted which = CL_DemotedNM }
+	subtract_key = { lhs = CL_Demoted which = CL_DemotedRE }
 
-	# Handle Nomads
-	set_key = { lhs = NM_Promoted which = NM_PromotedNO }
-	#change_key = { lhs = NM_Promoted which = NM_PromotedBG }
-	change_key = { lhs = NM_Promoted which = NM_PromotedCL }
+	### Move the pops
+	Promotion_ApplyNet = { class = SF }
+	Promotion_ApplyNet = { class = NM }
+	Promotion_ApplyNet = { class = RE }
+	Promotion_ApplyNet = { class = BG }
+	Promotion_ApplyNet = { class = NO }
+	Promotion_ApplyNet = { class = CL }
 
-	set_key = { lhs = NM_Demoted which = NO_DemotedNM }
-	#change_key = { lhs = NM_Demoted which = BG_DemotedNM }
-	change_key = { lhs = NM_Demoted which = CL_DemotedNM }
-
-	change_key = { lhs = NM_Total which = NM_Demoted }
-	subtract_key = { lhs = NM_Total which = NM_Promoted }
+	Promotion_AddClassChange = yes
 }
 
-Promotion_ClassAggregationDisplay = {
-    ## Sum up changes per class category
-    set_key = { lhs = Class_RuralPromoted      which = SF_Promoted }
-    change_key = { lhs = Class_RuralPromoted   which = NM_Promoted }
+Promotion_ApplyNet = {
+	change_key = { lhs = $class$_Total which = $class$_Promoted }
+	change_key = { lhs = $class$_Total which = $class$_Demoted }
+}
 
-    set_key = { lhs = Class_UrbanPromoted which = RE_Promoted }
+# Adds the net promotion/demotion of each class category to its yearly change.
+# Class_<category>Change is set in birth (Growth_GetBirthProv) and extended by migration (Growth_DoMove),
+# promotion runs last in the pulse. Class_TotalChange stays as it is, promotion nets to zero over all classes.
+Promotion_AddClassChange = {
+	change_key = { lhs = Class_RuralChange which = SF_Promoted }
+	change_key = { lhs = Class_RuralChange which = SF_Demoted }
+	change_key = { lhs = Class_RuralChange which = NM_Promoted }
+	change_key = { lhs = Class_RuralChange which = NM_Demoted }
 
-    set_key = { lhs = Class_NotablesPromoted       which = CL_Promoted }
-    change_key = { lhs = Class_NotablesPromoted    which = BG_Promoted }
-    change_key = { lhs = Class_NotablesPromoted    which = NO_Promoted }
+	change_key = { lhs = Class_UrbanChange which = RE_Promoted }
+	change_key = { lhs = Class_UrbanChange which = RE_Demoted }
 
-    set_key = { lhs = Class_TotalPromoted      which = Class_RuralPromoted }
-    change_key = { lhs = Class_TotalPromoted   which = Class_UrbanPromoted }
-    change_key = { lhs = Class_TotalPromoted   which = Class_NotablesPromoted }
-
-    set_key = { lhs = Class_RuralDemoted      which = SF_Demoted }
-    change_key = { lhs = Class_RuralDemoted   which = NM_Demoted }
-
-    set_key = { lhs = Class_UrbanDemoted which = RE_Demoted }
-
-    set_key = { lhs = Class_NotablesDemoted       which = CL_Demoted }
-    change_key = { lhs = Class_NotablesDemoted    which = BG_Demoted }
-    change_key = { lhs = Class_NotablesDemoted    which = NO_Demoted }
-
-    set_key = { lhs = Class_TotalDemoted      which = Class_RuralDemoted }
-    change_key = { lhs = Class_TotalDemoted   which = Class_UrbanDemoted }
-    change_key = { lhs = Class_TotalDemoted   which = Class_NotablesDemoted }
-
-    ### THOSE KEYS ARE INITIALLY SET IN BIRTH CALCULATION --> THEY SUM UP TOTAL PROVINCE POP CHANGE
-    change_key = { lhs = Class_RuralChange which = Class_RuralPromoted }
-    subtract_key = { lhs = Class_RuralChange which = Class_RuralDemoted }
-    change_key = { lhs = Class_UrbanChange which = Class_UrbanPromoted }
-    subtract_key = { lhs = Class_UrbanChange which = Class_UrbanDemoted }
-    change_key = { lhs = Class_NotablesChange which = Class_NotablesPromoted }
-    subtract_key = { lhs = Class_NotablesChange which = Class_NotablesDemoted }
-    change_key = { lhs = Class_TotalChange which = Class_TotalPromoted }
-    subtract_key = { lhs = Class_TotalChange which = Class_TotalDemoted }
+	change_key = { lhs = Class_NotablesChange which = BG_Promoted }
+	change_key = { lhs = Class_NotablesChange which = BG_Demoted }
+	change_key = { lhs = Class_NotablesChange which = NO_Promoted }
+	change_key = { lhs = Class_NotablesChange which = NO_Demoted }
+	change_key = { lhs = Class_NotablesChange which = CL_Promoted }
+	change_key = { lhs = Class_NotablesChange which = CL_Demoted }
 }
 
 Promotion_GetCommerceDataHelper = {
