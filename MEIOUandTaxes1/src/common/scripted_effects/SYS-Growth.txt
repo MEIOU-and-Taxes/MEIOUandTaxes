@@ -365,6 +365,12 @@ Growth_DoMove = {
 			Growth_ZoneSetFlow = { class = BG tmp = 6 }
 
             Growth_ZoneEach = { effect = Growth_ZoneDistribute }
+
+			# give what was lost to truncation to the most attractive province, so arrivals = departures
+			Growth_ZoneRemainder = { class = SF tmp = 2 }
+			Growth_ZoneRemainder = { class = NM tmp = 3 }
+			Growth_ZoneRemainder = { class = RE tmp = 4 }
+			Growth_ZoneRemainder = { class = BG tmp = 6 }
         }
 
         Growth_ZoneReset = yes
@@ -606,10 +612,16 @@ Growth_ZoneLocal = {
 
     # Calculate migration on province level
     # how many pops of each class want to go in vs. out
-    Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 freedom = Tmp_8 }
-    Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 }
-    Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 industrial = yes }
-    Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 }
+    Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 seed = 10 freedom = Tmp_8 }
+    Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 seed = 2.5 }
+    Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 seed = 5 industrial = yes }
+    Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 seed = 0.05 }
+
+    # remember the province with the largest inward migration per class
+    Growth_ZoneTrackBest = { class = SF zone = event_target:GrowthZone }
+    Growth_ZoneTrackBest = { class = NM zone = event_target:GrowthZone }
+    Growth_ZoneTrackBest = { class = RE zone = event_target:GrowthZone }
+    Growth_ZoneTrackBest = { class = BG zone = event_target:GrowthZone }
 
     event_target:GrowthZone = { # sum up all values in growth zone
         change_key = { lhs = Growth_MigOutSF which = PREV } # Total outward migration
@@ -640,6 +652,7 @@ Growth_ZoneDistribute = {
 ### Outputs:
 # Growth_MigAvg$class$ = possible migrants of class in zone / migrating pops of class in zone (0 if there are none)
 # Growth_MigOut$class$, Growth_MigIn$class$ = 0, ready to be summed up
+# Growth_MigPop$class$ = 0, ready for Growth_ZoneTrackBest
 Growth_ZoneSetAverage = {
 	if = {
 		limit = {
@@ -653,6 +666,62 @@ Growth_ZoneSetAverage = {
 	}
 	set_key = { lhs = Growth_MigOut$class$ value = 0 }
 	set_key = { lhs = Growth_MigIn$class$ value = 0 }
+	set_key = { lhs = Growth_MigPop$class$ value = 0 }
+}
+
+# Remember the province with the largest inward migration of a class in the zone (province scope, after
+# Growth_DoMove_HandleLocalMigration). Growth_MigPop$class$ is free at this point and holds the running maximum.
+### Inputs:
+# $class$ = SF | NM | RE | BG
+# $zone$ = scope holding the zone's results (event_target:GrowthZone or PREV)
+### Outputs:
+# $zone$ Growth_MigPop$class$ = largest inward migration of the class so far
+# event_target:GrowthBest$class$ = province with the largest inward migration of the class so far
+Growth_ZoneTrackBest = {
+	if = {
+		limit = {
+			check_key = { lhs = Growth_MigIn$class$ value = 0.001 }
+		}
+		set_key = { lhs = Growth_MigPop$class$ which = $zone$ }
+		if = {
+			limit = {
+				check_key = { lhs = Growth_MigIn$class$ which = Growth_MigPop$class$ }
+			}
+			set_key = { lhs = Growth_MigPop$class$ which = Growth_MigIn$class$ }
+			$zone$ = { set_key = { lhs = Growth_MigPop$class$ which = PREV } }
+			save_event_target_as = GrowthBest$class$
+		}
+		set_key = { lhs = Growth_MigPop$class$ value = 0 }
+	}
+}
+
+# Keys hold 3 decimals, so the migration of each province is truncated and a little less arrives than left
+# (or the other way round). Add the difference to the province with the largest inward migration (zone scope).
+### Inputs:
+# $class$ = SF | NM | RE | BG
+# $tmp$ = tmp key number holding the actual migration of the class (Growth_ZoneSetFlow)
+# Growth_MigPop$class$ = departures - arrivals of the class (summed up in Growth_DoMove_DistributeMigration)
+### Outputs:
+# $class$_In of event_target:GrowthBest$class$ increased (or decreased) by the difference
+Growth_ZoneRemainder = {
+	if = {
+		limit = {
+			# something moved, so some province had inward migration and set GrowthBest$class$ in this zone
+			check_key = { lhs = Tmp_$tmp$ value = 0.001 }
+		}
+		event_target:GrowthBest$class$ = {
+			set_key = { lhs = Growth_MigPop$class$ which = PREV }
+			change_key = { lhs = $class$_In which = Growth_MigPop$class$ }
+			if = {
+				limit = {
+					NOT = { check_key = { lhs = $class$_In value = 0 } }
+				}
+				set_key = { lhs = $class$_In value = 0 }
+			}
+			set_key = { lhs = Growth_MigPop$class$ value = 0 }
+		}
+	}
+	set_key = { lhs = Growth_MigPop$class$ value = 0 }
 }
 
 # Actual migration of a class in the zone = smaller of its total outward and total inward migration (zone scope)
@@ -662,7 +731,9 @@ Growth_ZoneSetAverage = {
 # Growth_MigOut$class$, Growth_MigIn$class$ = total outward / inward migration of the class in the zone (kept)
 ### Outputs:
 # Tmp_$tmp$ = actual migration of the class (0 if there is no outward or no inward migration)
+# Growth_MigPop$class$ = 0, ready to sum up departures - arrivals
 Growth_ZoneSetFlow = {
+	set_key = { lhs = Growth_MigPop$class$ value = 0 }
 	if = {
 		limit = {
 			check_key = { lhs = Growth_MigOut$class$ value = 0.001 }
@@ -684,7 +755,8 @@ Growth_ZoneSetFlow = {
 ### Inputs:
 # $class$ = SF | NM | RE | BG
 # $tmp$ = tmp key number to use for calculation
-# $factor$ = balancing factor to reduce migration speed
+# $seed$ = pops added to the class total for inward migration, About 20% of the class's typical size per province ;
+#          a seed far above the class size spreads the inflow evenly over all attractive provinces.
 ## Keys:
 # Growth_Pressure$class$ = Local outward migratory pressure in % of the population
 # Growth_MigAvg$class$ = (PossibleMigrants of class in Growth Zone / Pops of class in growth zone)
@@ -748,18 +820,15 @@ Growth_DoMove_HandleLocalMigration = {
         }
         else = { # Migratory outward pressure of province < average pressure of class in zone --> inward migration
 
-			#       ($class$_Total * [[zone] * 0.5] + 10)* (Pressure/Average pressure - 1)
+			#       ($class$_Total * [[zone] * 0.5] + seed)* (Pressure/Average pressure - 1)
 			#       ------------------------------------------------------------
 			#                                -40
-			#                     ------------------------
-			#                          [[factor] factor]
 			set_key = { lhs = Tmp_$tmp$ which = $class$_Total }
 			[[zone]multiply_key = { lhs = Tmp_$tmp$ value = 0.5 }]
 			[[freedom] multiply_key = { lhs = Tmp_$tmp$ which = $freedom$ }]
-			change_key = { lhs = Tmp_$tmp$ value = 10 }
+			change_key = { lhs = Tmp_$tmp$ value = $seed$ }
 			multiply_key = { lhs = Tmp_$tmp$ which = Public_Tmp9 }
 			divide_key = { lhs = Tmp_$tmp$ value = -40 }
-			[[factor] divide_key = { lhs = Tmp_$tmp$ value = $factor$ } ]
 			[[industrial]
 			# Increase urban inward migration in lategame
 			if = {
@@ -790,6 +859,7 @@ Growth_DoMove_HandleLocalMigration = {
 #
 ### Outputs:
 # $class$_In | $class$_Out = Migration for this province (mutually exclusive, either in or out per class)
+# $zone$ Growth_MigPop$class$ = departures - arrivals summed up, for Growth_ZoneRemainder
 #
 #   local migration * 1000
 # --------------------------------------------- * actual migration of class in zone / 1000
@@ -809,6 +879,8 @@ Growth_DoMove_DistributeMigration = {
 		multiply_key = { lhs = Tmp_$tmp$ which = $zone$ } # * actual migration
 		divide_key = { lhs = Tmp_$tmp$ value = 1000 }
 		change_key = { lhs = $class$_Out which = Tmp_$tmp$ }
+		set_key = { lhs = Growth_MigPop$class$ which = Tmp_$tmp$ }
+		$zone$ = { change_key = { lhs = Growth_MigPop$class$ which = PREV } }
 	}
 	else_if = {
 		limit = {
@@ -820,7 +892,10 @@ Growth_DoMove_DistributeMigration = {
 		multiply_key = { lhs = Tmp_$tmp$ which = $zone$ } # * actual migration
 		divide_key = { lhs = Tmp_$tmp$ value = 1000 }
 		change_key = { lhs = $class$_In which = Tmp_$tmp$ }
+		set_key = { lhs = Growth_MigPop$class$ which = Tmp_$tmp$ }
+		$zone$ = { subtract_key = { lhs = Growth_MigPop$class$ which = PREV } }
 	}
+	set_key = { lhs = Growth_MigPop$class$ value = 0 }
 }
 
 # This function sets the migratory pressure for each class and labor type in percent
@@ -1025,10 +1100,15 @@ Growth_ZoneHelper = {
             set_key = { lhs = Growth_MigAvgRE which = PREV }
             set_key = { lhs = Growth_MigAvgBG which = PREV }
 
-            [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 zone=yes freedom = Tmp_8 }]
-            [[NM] Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 zone=yes }]
-            [[RE] Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 zone=yes industrial = yes }]
-            [[BG] Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 zone=yes }]
+            [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 seed = 10 zone=yes freedom = Tmp_8 }]
+            [[NM] Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 seed = 2.5 zone=yes }]
+            [[RE] Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 seed = 5 zone=yes industrial = yes }]
+            [[BG] Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 seed = 0.05 zone=yes }]
+
+            [[SF] Growth_ZoneTrackBest = { class = SF zone = PREV }]
+            [[NM] Growth_ZoneTrackBest = { class = NM zone = PREV }]
+            [[RE] Growth_ZoneTrackBest = { class = RE zone = PREV }]
+            [[BG] Growth_ZoneTrackBest = { class = BG zone = PREV }]
 
             PREV = {
                 change_key = { lhs = Growth_MigOutSF which = PREV }
@@ -1070,6 +1150,11 @@ Growth_ZoneHelper = {
 
             Growth_ZoneReset = yes
         }
+
+        [[SF] Growth_ZoneRemainder = { class = SF tmp = 2 } ]
+        [[NM] Growth_ZoneRemainder = { class = NM tmp = 3 } ]
+        [[RE] Growth_ZoneRemainder = { class = RE tmp = 4 } ]
+        [[BG] Growth_ZoneRemainder = { class = BG tmp = 6 } ]
     }
 
     Growth_ZoneReset = yes
