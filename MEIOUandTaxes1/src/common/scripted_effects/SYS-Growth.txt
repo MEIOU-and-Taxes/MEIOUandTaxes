@@ -277,6 +277,13 @@ Growth_GetBirth = {
 
 # Main function to handle migration for all provinces and countries
 # Triggered by pulse system and event POP_Growth.002
+#
+# Every class migrates in its own pool: each growth zone has a separate average pressure, outflow and inflow per
+# class, so a peasant leaving a province can only arrive as a peasant elsewhere. Migration never changes the class of
+# a pop; moving between classes is left to the promotion system.
+# Classes taking part: SF, NM, RE, BG (BG at half speed). NO and CL are disabled. To enable one, add its
+# Growth_Mig*<class> keys to vars.txt and add its calls next to the BG ones below, in Growth_ZoneReset, Growth_ZoneSum,
+# Growth_ZoneLocal, Growth_ZoneDistribute and Growth_ZoneHelper.
 Growth_DoMove = {
     # Prepare migration in all valid provinces
     every_province = {
@@ -287,83 +294,23 @@ Growth_DoMove = {
         Growth_SetPressure = { class = SF labor = R peasant=yes }
         Growth_SetPressure = { class = NM labor = NM nomad=yes }
         Growth_SetPressure = { class = RE labor = UL urban=yes }
+        Growth_SetPressure = { class = BG labor = BG burgher=yes }
 
-		### This effectively disables elite migration
+		### This effectively disables noble and clergy migration
         #Growth_SetPressure = { class = NO labor = NO }
-        #Growth_SetPressure = { class = BG labor = BG burgher=yes }
         #Growth_SetPressure = { class = CL labor = CL }
 		set_key = { lhs = Growth_PressureNO value = 0 }
-		set_key = { lhs = Growth_PressureBG value = 0 }
 		set_key = { lhs = Growth_PressureCL value = 0 }
-        
-        ### Get multiplication of class pop numbers and calculated outward pressure % --> potential pressure
-        set_key = { lhs = Tmp_2 which = SF_Total }
-        set_key = { lhs = Tmp_3 which = NM_Total }
-        set_key = { lhs = Tmp_4 which = RE_Total }
-        set_key = { lhs = Tmp_5 which = NO_Total }
-        set_key = { lhs = Tmp_6 which = BG_Total }
-        set_key = { lhs = Tmp_7 which = CL_Total }
 
-        multiply_key = { lhs = Tmp_2 which = Growth_PressureSF }
-        multiply_key = { lhs = Tmp_3 which = Growth_PressureNM }
-        multiply_key = { lhs = Tmp_4 which = Growth_PressureRE }
-        multiply_key = { lhs = Tmp_5 which = Growth_PressureNO }
-        multiply_key = { lhs = Tmp_6 which = Growth_PressureBG }
-        multiply_key = { lhs = Tmp_7 which = Growth_PressureCL }
+		# Tmp_8 = peasant freedom multiplier
+		Growth_SetFreedomMult = yes
 
-		### Apply modifier on migration based on peasant freedom and tenacy reform
-        #
-        # Tenacy Reform Level     Peasant Freedom
-        # ------------------- *  ----------------- + 0.1
-        #          4                    100
-        #
-        # Constraints: [0.1, 1]
-		owner = { 
-		    set_key = { lhs = Tmp_8 which = Rights_NOTen }
-		}
+		# Tmp_<tmp> = possible migrants, Growth_MigPop<class> = pops that count for the zone average
+		Growth_SetClassMigrants = { class = SF tmp = 2 freedom = Tmp_8 }
+		Growth_SetClassMigrants = { class = NM tmp = 3 }
+		Growth_SetClassMigrants = { class = RE tmp = 4 }
+		Growth_SetClassMigrants = { class = BG tmp = 6 }
 
-		set_key = { lhs = Tmp_8 which = owner }
-		divide_key = { lhs = Tmp_8 value = 4 }
-
-		set_key = { lhs = Tmp_9 which = SF_Freedom }
-
-		divide_key = { lhs = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
-
-		multiply_key = { lhs = Tmp_8 which = Tmp_9 } # calculate multiplier
-
-		change_key = { lhs = Tmp_8 value = 0.1 }
-		if = {
-		    limit = {
-		        check_key = { lhs = Tmp_8 value = 1.001 }
-		    }
-		    set_key = { lhs = Tmp_8 value = 1 }
-		}
-		else_if = {
-		    limit = {
-		        NOT = { check_key = { lhs = Tmp_8 value = 0.1 } }
-		    }
-		    set_key = { lhs = Tmp_8 value = 0.1 }
-		}
-
-		multiply_key = { lhs = Tmp_2 which = Tmp_8 } # apply multiplier to actual migrants pool
-
-		# Tmp_0 = total sum of possible migrants
-        set_key = { lhs = Tmp_0 which = Tmp_2 }
-        change_key = { lhs = Tmp_0 which = Tmp_3 }
-        change_key = { lhs = Tmp_0 which = Tmp_4 }
-        change_key = { lhs = Tmp_0 which = Tmp_5 }
-        change_key = { lhs = Tmp_0 which = Tmp_6 }
-        change_key = { lhs = Tmp_0 which = Tmp_7 }
-
-        # Tmp_1 = All classes - NO - CL - BG
-        set_key = { lhs = Tmp_1 which = SF_Total }
-		multiply_key = { lhs = Tmp_1 which = Tmp_8 } # deduct peasant freedom effect from peasant total
-        change_key = { lhs = Tmp_1 which = NM_Total }
-        change_key = { lhs = Tmp_1 which = RE_Total }
-        #change_key = { lhs = Tmp_1 which = BG_Total }
-        #change_key = { lhs = Tmp_1 which = NO_Total }
-        #change_key = { lhs = Tmp_1 which = CL_Total }
-        
         # Reset existing migration variables of last year
         set_key = { lhs = SF_In value = 0 }
         set_key = { lhs = NM_In value = 0 }
@@ -388,58 +335,39 @@ Growth_DoMove = {
         }
         save_event_target_as = GrowthZone
 
-        # Reset keys
-		set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
+        Growth_ZoneReset = yes
 
-		# Sum up per growth zone 
-		# Tmp_0 = total sum of possible migrants
-		# Tmp_1 = All classes - NO - CL - BG
+		# Sum up possible migrants and pops per class in the growth zone
         Growth_ZoneEach = { effect = Growth_ZoneSum }
 
-		# Public_Tmp1 = PossibleMigrants in Growth Zone / Total pops in growth zone
+		# Growth_MigAvg<class> = possible migrants of class in growth zone / pops of class in growth zone
+		Growth_ZoneSetAverage = { class = SF tmp = 2 }
+		Growth_ZoneSetAverage = { class = NM tmp = 3 }
+		Growth_ZoneSetAverage = { class = RE tmp = 4 }
+		Growth_ZoneSetAverage = { class = BG tmp = 6 }
+
+        # If there are possible migrants of any class calculate
         if = {
             limit = {
-                check_key = { lhs = Tmp_0 value = 0.001 }
-                check_key = { lhs = Tmp_1 value = 0.001 }
+				OR = {
+					check_key = { lhs = Growth_MigAvgSF value = 0.001 }
+					check_key = { lhs = Growth_MigAvgNM value = 0.001 }
+					check_key = { lhs = Growth_MigAvgRE value = 0.001 }
+					check_key = { lhs = Growth_MigAvgBG value = 0.001 }
+				}
             }
-            set_key = { lhs = Public_Tmp1 which = Tmp_0 }
-            divide_key = { lhs = Public_Tmp1 which = Tmp_1 }
+            Growth_ZoneEach = { effect = Growth_ZoneLocal }
 
-            # If there are possible migrants calculate
-            if = {
-                limit = {
-                    check_key = { lhs = Public_Tmp1 value = 0.001 }
-                }
-                set_key = { lhs = Public_Tmp2 value = 0 }
-                set_key = { lhs = Public_Tmp3 value = 0 }
-                set_key = { lhs = Public_Tmp4 value = 0 }
-                set_key = { lhs = Public_Tmp5 value = 0 }
+            # cap actual migration of each class to the smaller of its outward/inward migration
+			Growth_ZoneSetFlow = { class = SF tmp = 2 }
+			Growth_ZoneSetFlow = { class = NM tmp = 3 }
+			Growth_ZoneSetFlow = { class = RE tmp = 4 }
+			Growth_ZoneSetFlow = { class = BG tmp = 6 }
 
-                Growth_ZoneEach = { effect = Growth_ZoneLocal }
-
-                # cap actual migration to smaller of outward/inward
-                if = {
-                    limit = {
-                        check_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
-                    }
-                    set_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
-                }
-
-                Growth_ZoneEach = { effect = Growth_ZoneDistribute }
-
-                # Clear calculation data
-                set_key = { lhs = Public_Tmp2 value = 0 }
-                set_key = { lhs = Public_Tmp3 value = 0 }
-                set_key = { lhs = Public_Tmp4 value = 0 }
-                set_key = { lhs = Public_Tmp5 value = 0 }
-            }
+            Growth_ZoneEach = { effect = Growth_ZoneDistribute }
         }
 
-        set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
-
-        set_key = { lhs = Public_Tmp1 value = 0 }
+        Growth_ZoneReset = yes
     }
 
 	#### Migration Zone Mechanics:
@@ -447,9 +375,9 @@ Growth_DoMove = {
 	# This is meant to represent a number of historical situations
 
     #Holy Roman Empire
-    Growth_ZoneHelper = { scope=europe HRE=yes SF=yes RE=yes }
+    Growth_ZoneHelper = { scope=europe HRE=yes SF=yes RE=yes BG=yes }
     #Italian States
-    Growth_ZoneHelper = { scope=italy_superregion cultg=latin SF=yes RE=yes }
+    Growth_ZoneHelper = { scope=italy_superregion cultg=latin SF=yes RE=yes BG=yes }
     #Maya
     Growth_ZoneHelper = { scope=central_america_region SF=yes RE=yes NM=yes }
     #Ireland
@@ -539,7 +467,85 @@ Growth_DoMove = {
         set_key = { lhs = Tmp_5 value = 0 }
         set_key = { lhs = Tmp_6 value = 0 }
         set_key = { lhs = Tmp_7 value = 0 }
+		Growth_ZoneReset = yes
     }
+}
+
+# Peasant freedom multiplier on migration, based on peasant freedom and tenancy reform (province scope)
+#
+# Tenancy Reform Level     Peasant Freedom
+# -------------------- *  ----------------- + 0.1
+#          4                     100
+#
+# Constraints: [0.1, 1]
+# Output: Tmp_8
+Growth_SetFreedomMult = {
+	owner = {
+	    set_key = { lhs = Tmp_8 which = Rights_NOTen }
+	}
+
+	set_key = { lhs = Tmp_8 which = owner }
+	divide_key = { lhs = Tmp_8 value = 4 }
+
+	set_key = { lhs = Tmp_9 which = SF_Freedom }
+
+	divide_key = { lhs = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
+
+	multiply_key = { lhs = Tmp_8 which = Tmp_9 } # calculate multiplier
+
+	change_key = { lhs = Tmp_8 value = 0.1 }
+	if = {
+	    limit = {
+	        check_key = { lhs = Tmp_8 value = 1.001 }
+	    }
+	    set_key = { lhs = Tmp_8 value = 1 }
+	}
+	else_if = {
+	    limit = {
+	        NOT = { check_key = { lhs = Tmp_8 value = 0.1 } }
+	    }
+	    set_key = { lhs = Tmp_8 value = 0.1 }
+	}
+}
+
+# Possible migrants and migrating pops of one class in this province (province scope)
+### Inputs:
+# $class$ = SF | NM | RE | BG
+# $tmp$ = tmp key number to use for calculation
+# $freedom$ = key with the peasant freedom multiplier (optional)
+### Outputs:
+# Tmp_$tmp$ = $class$_Total * Growth_Pressure$class$ [* freedom]
+# Growth_MigPop$class$ = $class$_Total [* freedom]
+Growth_SetClassMigrants = {
+	set_key = { lhs = Growth_MigPop$class$ which = $class$_Total }
+	[[freedom] multiply_key = { lhs = Growth_MigPop$class$ which = $freedom$ } ]
+	set_key = { lhs = Tmp_$tmp$ which = Growth_MigPop$class$ }
+	multiply_key = { lhs = Tmp_$tmp$ which = Growth_Pressure$class$ }
+}
+
+# Clear all per class migration keys of the current scope (zone leader or province)
+Growth_ZoneReset = {
+	set_key = { lhs = Tmp_2 value = 0 }
+	set_key = { lhs = Tmp_3 value = 0 }
+	set_key = { lhs = Tmp_4 value = 0 }
+	set_key = { lhs = Tmp_6 value = 0 }
+	set_key = { lhs = Growth_MigPopSF value = 0 }
+	set_key = { lhs = Growth_MigPopNM value = 0 }
+	set_key = { lhs = Growth_MigPopRE value = 0 }
+	set_key = { lhs = Growth_MigPopBG value = 0 }
+	set_key = { lhs = Growth_MigAvgSF value = 0 }
+	set_key = { lhs = Growth_MigAvgNM value = 0 }
+	set_key = { lhs = Growth_MigAvgRE value = 0 }
+	set_key = { lhs = Growth_MigAvgBG value = 0 }
+	set_key = { lhs = Growth_MigOutSF value = 0 }
+	set_key = { lhs = Growth_MigOutNM value = 0 }
+	set_key = { lhs = Growth_MigOutRE value = 0 }
+	set_key = { lhs = Growth_MigOutBG value = 0 }
+	set_key = { lhs = Growth_MigInSF value = 0 }
+	set_key = { lhs = Growth_MigInNM value = 0 }
+	set_key = { lhs = Growth_MigInRE value = 0 }
+	set_key = { lhs = Growth_MigInBG value = 0 }
+	set_key = { lhs = Public_Tmp9 value = 0 }
 }
 
 # Run $effect$ in every province of the migration zone of the current country:
@@ -577,84 +583,132 @@ Growth_ZoneEach = {
 }
 
 # The steps of Growth_DoMove for one province of the migration zone of event_target:GrowthZone
-# Sum up the possible migrants (Tmp_0) and the population (Tmp_1) of the zone
+# Sum up the possible migrants (Tmp_<tmp>) and the migrating pops (Growth_MigPop<class>) per class of the zone
 Growth_ZoneSum = {
     event_target:GrowthZone = {
-        change_key = { lhs = Tmp_0 which = PREV }
-        change_key = { lhs = Tmp_1 which = PREV }
+        change_key = { lhs = Tmp_2 which = PREV }
+        change_key = { lhs = Tmp_3 which = PREV }
+        change_key = { lhs = Tmp_4 which = PREV }
+        change_key = { lhs = Tmp_6 which = PREV }
+        change_key = { lhs = Growth_MigPopSF which = PREV }
+        change_key = { lhs = Growth_MigPopNM which = PREV }
+        change_key = { lhs = Growth_MigPopRE which = PREV }
+        change_key = { lhs = Growth_MigPopBG which = PREV }
     }
 }
-# Local migration of the province, summed up per zone
+# Local migration of the province, summed up per class and zone
 Growth_ZoneLocal = {
-    set_key = { lhs = Public_Tmp1 which = event_target:GrowthZone } # get possible migrant % of total pops
-    set_key = { lhs = Public_Tmp2 value = 0 }
-    set_key = { lhs = Public_Tmp3 value = 0 }
-    set_key = { lhs = Public_Tmp4 value = 0 }
-    set_key = { lhs = Public_Tmp5 value = 0 }
+	# get the average pressure per class of the zone
+    set_key = { lhs = Growth_MigAvgSF which = event_target:GrowthZone }
+    set_key = { lhs = Growth_MigAvgNM which = event_target:GrowthZone }
+    set_key = { lhs = Growth_MigAvgRE which = event_target:GrowthZone }
+    set_key = { lhs = Growth_MigAvgBG which = event_target:GrowthZone }
 
     # Calculate migration on province level
-    # how many pops want to go in vs. out
+    # how many pops of each class want to go in vs. out
     Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 freedom = Tmp_8 }
     Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 }
     Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 industrial = yes }
-    Growth_DoMove_HandleLocalMigration = { class = NO tmp = 5 }
-    Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 factor = 2 }
-    Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 }
+    Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 }
 
     event_target:GrowthZone = { # sum up all values in growth zone
-        change_key = { lhs = Public_Tmp2 which = PREV } # Total inward migration
-        change_key = { lhs = Public_Tmp3 which = PREV } # Total outward migration
-        change_key = { lhs = Public_Tmp4 which = PREV } # Total inward migration
-        change_key = { lhs = Public_Tmp5 which = PREV } # Total outward migration
+        change_key = { lhs = Growth_MigOutSF which = PREV } # Total outward migration
+        change_key = { lhs = Growth_MigOutNM which = PREV }
+        change_key = { lhs = Growth_MigOutRE which = PREV }
+        change_key = { lhs = Growth_MigOutBG which = PREV }
+        change_key = { lhs = Growth_MigInSF which = PREV } # Total inward migration
+        change_key = { lhs = Growth_MigInNM which = PREV }
+        change_key = { lhs = Growth_MigInRE which = PREV }
+        change_key = { lhs = Growth_MigInBG which = PREV }
     }
 }
 # Distribute the zone's migration on the province
 Growth_ZoneDistribute = {
-    # Get previous calculation results
-    set_key = { lhs = Public_Tmp2 which = event_target:GrowthZone } # Total outward migration
-    set_key = { lhs = Public_Tmp3 which = event_target:GrowthZone } # Total inward migration
-    set_key = { lhs = Public_Tmp4 which = event_target:GrowthZone } # Total actual migration, smaller of outward/inward
-
-    # Distribute migration on provinces
-    Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }
-    Growth_DoMove_DistributeMigration = { class = NM tmp = 3 }
-    Growth_DoMove_DistributeMigration = { class = RE tmp = 4 }
-    Growth_DoMove_DistributeMigration = { class = NO tmp = 5 }
-    Growth_DoMove_DistributeMigration = { class = BG tmp = 6 }
-    Growth_DoMove_DistributeMigration = { class = CL tmp = 7 }
+    Growth_DoMove_DistributeMigration = { class = SF tmp = 2 zone = event_target:GrowthZone }
+    Growth_DoMove_DistributeMigration = { class = NM tmp = 3 zone = event_target:GrowthZone }
+    Growth_DoMove_DistributeMigration = { class = RE tmp = 4 zone = event_target:GrowthZone }
+    Growth_DoMove_DistributeMigration = { class = BG tmp = 6 zone = event_target:GrowthZone }
 
     # Clear calculation data
-    set_key = { lhs = Public_Tmp1 value = 0 }
-    set_key = { lhs = Public_Tmp2 value = 0 }
-    set_key = { lhs = Public_Tmp3 value = 0 }
-    set_key = { lhs = Public_Tmp4 value = 0 }
-    set_key = { lhs = Public_Tmp5 value = 0 }
-    set_key = { lhs = Public_Tmp9 value = 0 }
+    Growth_ZoneReset = yes
+}
+
+# Average migratory pressure of a class in the zone (zone scope)
+### Inputs:
+# $class$ = SF | NM | RE | BG
+# $tmp$ = tmp key number holding the summed possible migrants of the class
+### Outputs:
+# Growth_MigAvg$class$ = possible migrants of class in zone / migrating pops of class in zone (0 if there are none)
+# Growth_MigOut$class$, Growth_MigIn$class$ = 0, ready to be summed up
+Growth_ZoneSetAverage = {
+	if = {
+		limit = {
+			check_key = { lhs = Growth_MigPop$class$ value = 0.001 }
+		}
+		set_key = { lhs = Growth_MigAvg$class$ which = Tmp_$tmp$ }
+		divide_key = { lhs = Growth_MigAvg$class$ which = Growth_MigPop$class$ }
+	}
+	else = {
+		set_key = { lhs = Growth_MigAvg$class$ value = 0 }
+	}
+	set_key = { lhs = Growth_MigOut$class$ value = 0 }
+	set_key = { lhs = Growth_MigIn$class$ value = 0 }
+}
+
+# Actual migration of a class in the zone = smaller of its total outward and total inward migration (zone scope)
+### Inputs:
+# $class$ = SF | NM | RE | BG
+# $tmp$ = tmp key number to use for calculation
+# Growth_MigOut$class$, Growth_MigIn$class$ = total outward / inward migration of the class in the zone (kept)
+### Outputs:
+# Tmp_$tmp$ = actual migration of the class (0 if there is no outward or no inward migration)
+Growth_ZoneSetFlow = {
+	if = {
+		limit = {
+			check_key = { lhs = Growth_MigOut$class$ value = 0.001 }
+			check_key = { lhs = Growth_MigIn$class$ value = 0.001 }
+		}
+		set_key = { lhs = Tmp_$tmp$ which = Growth_MigOut$class$ }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_$tmp$ which = Growth_MigIn$class$ }
+			}
+			set_key = { lhs = Tmp_$tmp$ which = Growth_MigIn$class$ }
+		}
+	}
+	else = {
+		set_key = { lhs = Tmp_$tmp$ value = 0 }
+	}
 }
 
 ### Inputs:
-# $class$ = SF | NM | RE | NO | BG | CL
+# $class$ = SF | NM | RE | BG
 # $tmp$ = tmp key number to use for calculation
 # $factor$ = balancing factor to reduce migration speed
 ## Keys:
 # Growth_Pressure$class$ = Local outward migratory pressure in % of the population
-# Public_Tmp1 = (PossibleMigrants in Growth Zone / Total pops in growth zone)
+# Growth_MigAvg$class$ = (PossibleMigrants of class in Growth Zone / Pops of class in growth zone)
 ## Conditionals:
 # $zone$ = enables 50% multiplier on amount of possible migration
 # $industrial$ = inward migration bonus if has the Industrialisation institution
 ### Outputs:
-# Public_Tmp2, Public_Tmp4 = Outward migration absolute
-# Public_Tmp3, Public_Tmp5 = Inward migration absolute
+# Growth_MigOut$class$ = Outward migration absolute
+# Growth_MigIn$class$ = Inward migration absolute
+# Tmp_$tmp$ = Outward or inward migration absolute, whichever applies
 Growth_DoMove_HandleLocalMigration = {
+	set_key = { lhs = Tmp_$tmp$ value = 0 }
+	set_key = { lhs = Growth_MigOut$class$ value = 0 }
+	set_key = { lhs = Growth_MigIn$class$ value = 0 }
     if = {
         limit = {
             check_key = { lhs = Growth_Pressure$class$ value = 0.001 } # If pressure per $class$ greater 0.001 in this province
+            check_key = { lhs = Growth_MigAvg$class$ value = 0.001 } # and there are possible migrants of $class$ in the zone
         }
-		
-		# Public_Tmp9 = Migratory pressure of class / (PossibleMigrants in Growth Zone / Total pops in growth zone)
+
+		# Public_Tmp9 = Migratory pressure of class / (PossibleMigrants of class in Growth Zone / Pops of class in growth zone)
         set_key = { lhs = Public_Tmp9 which = Growth_Pressure$class$ }
-        divide_key = { lhs = Public_Tmp9 which = Public_Tmp1 }
-        
+        divide_key = { lhs = Public_Tmp9 which = Growth_MigAvg$class$ }
+
 		# Ceiling at factor of 3
         if = {
             limit = {
@@ -664,24 +718,21 @@ Growth_DoMove_HandleLocalMigration = {
         }
 
         subtract_key = { lhs = Public_Tmp9 value = 1 }
-		
-		## Case: Migratory outward pressured pops % of province >= Possible Migrants in % of zone pops --> outward migration
+
+		## Case: Migratory outward pressure of province >= average pressure of class in zone --> outward migration
         if = {
             limit = {
-                check_key = { lhs = Growth_Pressure$class$ which = Public_Tmp1 }
+                check_key = { lhs = Growth_Pressure$class$ which = Growth_MigAvg$class$ }
             }
 
-			#       $class$_Total * (Pressure/Possible Migrants%) [[freedom] * Freedom modifier on migration] [[zone] * 0.5]
+			#       $class$_Total * (Pressure/Average pressure - 1) [[freedom] * Freedom modifier on migration] [[zone] * 0.5]
 			#       ------------------------------------------------------------
 			#                                80
-			#                     ------------------------
-			#                          [[factor] factor]
 			set_key = { lhs = Tmp_$tmp$ which = $class$_Total }
 			[[zone]multiply_key = { lhs = Tmp_$tmp$ value = 0.5 }]
 			[[freedom] multiply_key = { lhs = Tmp_$tmp$ which = $freedom$ }]
 			multiply_key = { lhs = Tmp_$tmp$ which = Public_Tmp9 }
 			divide_key = { lhs = Tmp_$tmp$ value = 80 }
-			[[factor] divide_key = { lhs = Tmp_$tmp$ value = $factor$ } ]
             if = {
                 limit = {
                     OR = {
@@ -690,15 +741,14 @@ Growth_DoMove_HandleLocalMigration = {
                     }
                 }
                 multiply_key = { lhs = Tmp_$tmp$ value = 0.25 } # reduce outward if colonial
-            }           
-			
+            }
+
 			# Store results
-            change_key = { lhs = Public_Tmp2 which = Tmp_$tmp$ }
-            change_key = { lhs = Public_Tmp4 which = Tmp_$tmp$ }
+            set_key = { lhs = Growth_MigOut$class$ which = Tmp_$tmp$ }
         }
-        else = { # Migratory outward pressured pops % of province < Possible Migrants in % of zone pops --> inward migration
-			
-			#       ($class$_Total * [[zone] * 0.5] + 10)* (Pressure/Possible Migrants%) 
+        else = { # Migratory outward pressure of province < average pressure of class in zone --> inward migration
+
+			#       ($class$_Total * [[zone] * 0.5] + 10)* (Pressure/Average pressure - 1)
 			#       ------------------------------------------------------------
 			#                                -40
 			#                     ------------------------
@@ -721,74 +771,56 @@ Growth_DoMove_HandleLocalMigration = {
 			]
 
 			# Store results
-			change_key = { lhs = Public_Tmp3 which = Tmp_$tmp$ }
-			change_key = { lhs = Public_Tmp5 which = Tmp_$tmp$ }
+			set_key = { lhs = Growth_MigIn$class$ which = Tmp_$tmp$ }
 		}
+		set_key = { lhs = Public_Tmp9 value = 0 }
     }
 }
 
-# This function distributes the migration happening on the provinces inside the growth zone
+# This function distributes the migration of a class happening on the provinces inside the growth zone
 ### Inputs:
-# $class$ = SF | NM | RE | NO | BG | CL
+# $class$ = SF | NM | RE | BG
 # $tmp$ = tmp key number to use for calculation
+# $zone$ = scope holding the zone's results (event_target:GrowthZone or PREV)
 #
 ## Keys:
-# Growth_Pressure$class$ = Local outward migratory pressure in % of the population
-# Public_Tmp1 = (PossibleMigrants in Growth Zone / Total pops in growth zone)
-# Public_Tmp2 = Total per Growth Zone Outward migration absolute
-# Public_Tmp3 = Total per Growth Zone Inward migration absolute
-# Public_Tmp4 = Total per Growth Zone migration absolute (smaller of Public_Tmp2/Public_Tmp3)
+# Growth_MigOut$class$, Growth_MigIn$class$ = Local outward / inward migration absolute, only one of them > 0
+# $zone$ Tmp_$tmp$ = actual migration of class in zone
+# $zone$ Growth_MigOut$class$, Growth_MigIn$class$ = total outward / inward migration of class in zone
 #
 ### Outputs:
 # $class$_In | $class$_Out = Migration for this province (mutually exclusive, either in or out per class)
+#
+#   local migration * 1000
+# --------------------------------------------- * actual migration of class in zone / 1000
+#  total migration of class in zone (same side)
+#
+# Keys hold 3 decimals and every step truncates. The share is taken in per mille (at most 1000) so it keeps 6 digits;
+# a plain share (at most 1) would lose up to 0.001 / share of the migrants, and multiplying the small local and actual
+# migration first would lose up to 0.001 / total in every province. Largest value: 1000 * actual migration.
 Growth_DoMove_DistributeMigration = {
-    if = {
-        limit = {
-            check_key = { lhs = Growth_Pressure$class$ value = 0.001 } #if province has pressure
-        }
-        if = {
-            limit = {
-                check_key = { lhs = Growth_Pressure$class$ which = Public_Tmp1 } # local pressure >= possible migrants %
-            }
-            if = {
-                limit = {
-                    check_key = { lhs = Public_Tmp2 value = 0.001 } # total outward migration > 0
-                }
-
-				### Outward migration in province
-				#     local migration 
-				# ----------------------  * total outward migration
-				# total outward migration
-                set_key = { lhs = Public_Tmp9 which = Tmp_$tmp$ } # Result of local migration calc
-				multiply_key = { lhs = Public_Tmp9 which = Public_Tmp4 }
-				if = {
-					limit = { 
-						check_key = { lhs = Public_Tmp9 value = 0.001 }
-					}
-					divide_key = { lhs = Public_Tmp9 which = Public_Tmp2 }
-				}
-				else = {
-					set_key = { lhs = Public_Tmp9 value = 0 }
-				}
-                change_key = { lhs = $class$_Out which = Public_Tmp9 }
-            }
-        }
-        else_if = {
-            limit = {
-                check_key = { lhs = Public_Tmp3 value = 0.001 } # total inward migration > 0
-            }
-
-			### Inward migration in province
-			#     local migration 
-			# ----------------------  * total inward migration
-			# total inward migration
-            set_key = { lhs = Public_Tmp9 which = Tmp_$tmp$ }
-			multiply_key = { lhs = Public_Tmp9 which = Public_Tmp4 }
-            divide_key = { lhs = Public_Tmp9 which = Public_Tmp3 }
-            
-            change_key = { lhs = $class$_In which = Public_Tmp9 }
-        }
-    }
+	if = {
+		limit = {
+			check_key = { lhs = Growth_MigOut$class$ value = 0.001 }
+		}
+		multiply_key = { lhs = Growth_MigOut$class$ value = 1000 }
+		divide_key = { lhs = Growth_MigOut$class$ which = $zone$ } # share of zone outward migration in per mille
+		set_key = { lhs = Tmp_$tmp$ which = Growth_MigOut$class$ }
+		multiply_key = { lhs = Tmp_$tmp$ which = $zone$ } # * actual migration
+		divide_key = { lhs = Tmp_$tmp$ value = 1000 }
+		change_key = { lhs = $class$_Out which = Tmp_$tmp$ }
+	}
+	else_if = {
+		limit = {
+			check_key = { lhs = Growth_MigIn$class$ value = 0.001 }
+		}
+		multiply_key = { lhs = Growth_MigIn$class$ value = 1000 }
+		divide_key = { lhs = Growth_MigIn$class$ which = $zone$ } # share of zone inward migration in per mille
+		set_key = { lhs = Tmp_$tmp$ which = Growth_MigIn$class$ }
+		multiply_key = { lhs = Tmp_$tmp$ which = $zone$ } # * actual migration
+		divide_key = { lhs = Tmp_$tmp$ value = 1000 }
+		change_key = { lhs = $class$_In which = Tmp_$tmp$ }
+	}
 }
 
 # This function sets the migratory pressure for each class and labor type in percent
@@ -798,7 +830,9 @@ Growth_DoMove_DistributeMigration = {
 # Conditionals:
 # peasants | nomads | urban | burgher = yes --> enable special conditions to allow migration
 #
-# Output: Growth_Pressure$class$ - Constraints [0.02, 0.10]
+# Output: Growth_Pressure$class$ in percent - Constraints [0.2, 10]
+# Pressure is only used relative to the zone average, so the scale does not change migration. Percent instead of a
+# fraction (0.1) gives it enough decimals: keys only hold 3 decimals, and at a fraction most provinces of a class tied.
 Growth_SetPressure = {
     # Generate preasure if pops exist or labor price in province is > 1
     if = {
@@ -826,11 +860,11 @@ Growth_SetPressure = {
         }
 		
         ### Calculate migration (outward?) pressure per class in %:
-        #                    0.1
-        #      ------------------------------ 
+        #                    10
+        #      ------------------------------
         #        Province Labor Cost per Type
-        # 0.1 = 10% is the maximum pressure it can exert at wage 1.
-        set_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+        # 10 = 10% is the maximum pressure it can exert at wage 1.
+        set_key = { lhs = Growth_Pressure$class$ value = 10 }
 		divide_key = { lhs = Growth_Pressure$class$ which = Class_P$labor$ }
 
 		[[urban]
@@ -884,32 +918,40 @@ Growth_SetPressure = {
 
         # Apply API effects on pressure
 		multiply_key = { lhs = Growth_Pressure$class$ which = Modi_PressureMulti$class$ }
-		change_key = { lhs = Growth_Pressure$class$ which = Modi_PressureAdd$class$ }
-		
+		# Modi_PressureAdd is given as a fraction (0.01 = 1%), convert to percent
+		set_key = { lhs = Tmp_0 which = Modi_PressureAdd$class$ }
+		multiply_key = { lhs = Tmp_0 value = 100 }
+		change_key = { lhs = Growth_Pressure$class$ which = Tmp_0 }
+		set_key = { lhs = Tmp_0 value = 0 }
+
 		if = {
 			limit = {
 				NOT = {
-					check_key = { lhs = Growth_Pressure$class$ value = 0.002 }
+					check_key = { lhs = Growth_Pressure$class$ value = 0.2 }
 				}
 			}
-			set_key = { lhs = Growth_Pressure$class$ value = 0.002 }
+			set_key = { lhs = Growth_Pressure$class$ value = 0.2 }
 		}
 		if = {
 			limit = {
-				check_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+				check_key = { lhs = Growth_Pressure$class$ value = 10 }
 			}
-			set_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+			set_key = { lhs = Growth_Pressure$class$ value = 10 }
 		}
     }
     else = {
-        set_key = { lhs = Growth_Pressure$class$ value = 0.1 }
+        set_key = { lhs = Growth_Pressure$class$ value = 10 }
     }
 }
 
+# Repeats the migration calculation for a regional zone across borders, at half strength (zone = yes).
+# Each enabled class migrates in its own pool, as in Growth_DoMove. The results are summed up on the current scope.
+### Inputs:
+# $scope$ = region, superregion or province group to iterate over
+# $flag$ | $HRE$ | $cultg$ | $cult$ = optional province filters
+# $SF$ | $NM$ | $RE$ | $BG$ = yes to let the class migrate in this zone
 Growth_ZoneHelper = {
-    set_key = { lhs = Tmp_0 value = 0 }
-    set_key = { lhs = Tmp_1 value = 0 }
-    set_key = { lhs = Public_Tmp1 value = 0 }
+    Growth_ZoneReset = yes
 
     $scope$ = {
         limit = {
@@ -926,128 +968,48 @@ Growth_ZoneHelper = {
             [[cultg] culture_group = $cultg$ ]
             [[cult] culture = $cult$ ]
         }
-        set_key = { lhs = Tmp_0 value = 0 }
-        set_key = { lhs = Tmp_1 value = 0 }
+        Growth_ZoneReset = yes
 
         [[SF]
-        Growth_SetPressure = { class = SF labor = R peasant=yes }
-        set_key = { lhs = Tmp_2 which = SF_Total }
-        multiply_key = { lhs = Tmp_2 value = 0.5 }
-        multiply_key = { lhs = Tmp_2 which = Growth_PressureSF }
-
-		### Apply modifier on migration based on peasant freedom and tenacy reform
-        #
-        # Tenacy Reform Level     Peasant Freedom
-        # ------------------- *  -----------------
-        #          4                    100
-        #
-        # Constraints: [0.1, 1]
-		owner = { 
-		    set_key = { lhs = Tmp_8 which = Rights_NOTen }
-		}
-
-		set_key = { lhs = Tmp_8 which = owner }
-		divide_key = { lhs = Tmp_8 value = 4 }
-
-		set_key = { lhs = Tmp_9 which = SF_Freedom }
-
-		divide_key = { lhs = Tmp_9 value = 100 } # move peasant freedom on a scale between [0,1]
-
-		multiply_key = { lhs = Tmp_8 which = Tmp_9 } # calculate multiplier
-
-		change_key = { lhs = Tmp_8 value = 0.1 }
-		if = {
-		    limit = {
-		        check_key = { lhs = Tmp_8 value = 1.001 }
-		    }
-		    set_key = { lhs = Tmp_8 value = 1 }
-		}
-		else_if = {
-		    limit = {
-		        NOT = { check_key = { lhs = Tmp_8 value = 0.1 } }
-		    }
-		    set_key = { lhs = Tmp_8 value = 0.1 }
-		}
-
-		multiply_key = { lhs = Tmp_2 which = Tmp_8 } # apply multiplier to actual migrants pool
-
-        change_key = { lhs = Tmp_0 which = Tmp_2 }
-
-		set_key = { lhs = Tmp_9 which = SF_Total }
-		multiply_key = { lhs = Tmp_9 which = Tmp_8 }
-		change_key = { lhs = Tmp_1 which = Tmp_9 }
-		]
-        [[NM]
-        Growth_SetPressure = { class = NM labor = NM nomad=yes }
-        set_key = { lhs = Tmp_3 which = NM_Total }
-        multiply_key = { lhs = Tmp_3 value = 0.5 }
-        multiply_key = { lhs = Tmp_3 which = Growth_PressureNM }
-        change_key = { lhs = Tmp_0 which = Tmp_3 }
-		change_key = { lhs = Tmp_1 which = NM_Total }
+        Growth_SetFreedomMult = yes
+        Growth_SetClassMigrants = { class = SF tmp = 2 freedom = Tmp_8 }
         ]
-        [[RE]
-        Growth_SetPressure = { class = RE labor = UL urban=yes }
-        set_key = { lhs = Tmp_4 which = RE_Total }
-        multiply_key = { lhs = Tmp_4 value = 0.5 }
-        multiply_key = { lhs = Tmp_4 which = Growth_PressureRE }
-        change_key = { lhs = Tmp_0 which = Tmp_4 }
-		change_key = { lhs = Tmp_1 which = RE_Total }
-        ]
-        [[NO]
-        Growth_SetPressure = { class = NO labor = NO }
-        set_key = { lhs = Tmp_5 which = NO_Total }
-        multiply_key = { lhs = Tmp_5 value = 0.5 }
-        multiply_key = { lhs = Tmp_5 which = Growth_PressureNO }
-        change_key = { lhs = Tmp_0 which = Tmp_5 }
-		change_key = { lhs = Tmp_1 which = NO_Total }
-        ]
-        [[BG]
-        Growth_SetPressure = { class = BG labor = BG burgher=yes }
-        set_key = { lhs = Tmp_6 which = BG_Total }
-        multiply_key = { lhs = Tmp_6 value = 0.5 }
-        multiply_key = { lhs = Tmp_6 which = Growth_PressureBG }
-		change_key = { lhs = Tmp_1 which = BG_Total }
-        change_key = { lhs = Tmp_0 which = Tmp_6 }
-        ]
-        [[CL]
-        Growth_SetPressure = { class = CL labor = CL }
-        set_key = { lhs = Tmp_7 which = CL_Total }
-        multiply_key = { lhs = Tmp_7 value = 0.5 }
-        multiply_key = { lhs = Tmp_7 which = Growth_PressureCL }
-        change_key = { lhs = Tmp_0 which = Tmp_7 }
-		change_key = { lhs = Tmp_1 which = CL_Total }
-        ]
-        multiply_key = { lhs = Tmp_1 value = 0.5 }
-        
+        [[NM] Growth_SetClassMigrants = { class = NM tmp = 3 } ]
+        [[RE] Growth_SetClassMigrants = { class = RE tmp = 4 } ]
+        [[BG] Growth_SetClassMigrants = { class = BG tmp = 6 } ]
+
         PREV = {
-            change_key = { lhs = Tmp_0 which = PREV }
-            change_key = { lhs = Tmp_1 which = PREV }
+            change_key = { lhs = Tmp_2 which = PREV }
+            change_key = { lhs = Tmp_3 which = PREV }
+            change_key = { lhs = Tmp_4 which = PREV }
+            change_key = { lhs = Tmp_6 which = PREV }
+            change_key = { lhs = Growth_MigPopSF which = PREV }
+            change_key = { lhs = Growth_MigPopNM which = PREV }
+            change_key = { lhs = Growth_MigPopRE which = PREV }
+            change_key = { lhs = Growth_MigPopBG which = PREV }
         }
     }
 
-    if = {
-        limit = {
-            check_key = { lhs = Tmp_0 value = 0.001 }
-            check_key = { lhs = Tmp_1 value = 0.001 }
-        }
-        set_key = { lhs = Public_Tmp1 which = Tmp_0 }
-        divide_key = { lhs = Public_Tmp1 which = Tmp_1 }
-    }
+    [[SF] Growth_ZoneSetAverage = { class = SF tmp = 2 } ]
+    [[NM] Growth_ZoneSetAverage = { class = NM tmp = 3 } ]
+    [[RE] Growth_ZoneSetAverage = { class = RE tmp = 4 } ]
+    [[BG] Growth_ZoneSetAverage = { class = BG tmp = 6 } ]
 
     if = {
         limit = {
-            check_key = { lhs = Public_Tmp1 value = 0.001 }
+            OR = {
+                check_key = { lhs = Growth_MigAvgSF value = 0.001 }
+                check_key = { lhs = Growth_MigAvgNM value = 0.001 }
+                check_key = { lhs = Growth_MigAvgRE value = 0.001 }
+                check_key = { lhs = Growth_MigAvgBG value = 0.001 }
+            }
         }
-        set_key = { lhs = Public_Tmp2 value = 0 }
-        set_key = { lhs = Public_Tmp3 value = 0 }
-        set_key = { lhs = Public_Tmp4 value = 0 }
-        set_key = { lhs = Public_Tmp5 value = 0 }
 
         $scope$ = {
             limit = {
                 isValidProv = yes
                 [[flag]has_province_flag = $flag$]
-                [[HRE]is_part_of_hre = yes
+                [[HRE]is_part_of_hre = $HRE$
                 OR = {
                     culture_group = low_germanic
                     culture_group = high_germanic
@@ -1058,39 +1020,38 @@ Growth_ZoneHelper = {
                 [[cultg]culture_group = $cultg$]
                 [[cult]culture = $cult$]
             }
-            set_key = { lhs = Public_Tmp1 which = PREV }
-            set_key = { lhs = Public_Tmp2 value = 0 }
-            set_key = { lhs = Public_Tmp3 value = 0 }
-            set_key = { lhs = Public_Tmp4 value = 0 }
-            set_key = { lhs = Public_Tmp5 value = 0 }
+            set_key = { lhs = Growth_MigAvgSF which = PREV }
+            set_key = { lhs = Growth_MigAvgNM which = PREV }
+            set_key = { lhs = Growth_MigAvgRE which = PREV }
+            set_key = { lhs = Growth_MigAvgBG which = PREV }
 
             [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 zone=yes freedom = Tmp_8 }]
             [[NM] Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 zone=yes }]
             [[RE] Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 zone=yes industrial = yes }]
-            [[NO] Growth_DoMove_HandleLocalMigration = { class = NO tmp = 5 zone=yes }]
-            [[BG] Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 zone=yes factor = 2 }]
-            [[CL] Growth_DoMove_HandleLocalMigration = { class = CL tmp = 7 zone=yes }]
+            [[BG] Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 zone=yes }]
 
             PREV = {
-                change_key = { lhs = Public_Tmp2 which = PREV }
-                change_key = { lhs = Public_Tmp3 which = PREV }
-                change_key = { lhs = Public_Tmp4 which = PREV }
-                change_key = { lhs = Public_Tmp5 which = PREV }
+                change_key = { lhs = Growth_MigOutSF which = PREV }
+                change_key = { lhs = Growth_MigOutNM which = PREV }
+                change_key = { lhs = Growth_MigOutRE which = PREV }
+                change_key = { lhs = Growth_MigOutBG which = PREV }
+                change_key = { lhs = Growth_MigInSF which = PREV }
+                change_key = { lhs = Growth_MigInNM which = PREV }
+                change_key = { lhs = Growth_MigInRE which = PREV }
+                change_key = { lhs = Growth_MigInBG which = PREV }
             }
         }
 
-        if = {
-            limit = {
-                check_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
-            }
-            set_key = { lhs = Public_Tmp4 which = Public_Tmp5 }
-        }
+        [[SF] Growth_ZoneSetFlow = { class = SF tmp = 2 } ]
+        [[NM] Growth_ZoneSetFlow = { class = NM tmp = 3 } ]
+        [[RE] Growth_ZoneSetFlow = { class = RE tmp = 4 } ]
+        [[BG] Growth_ZoneSetFlow = { class = BG tmp = 6 } ]
 
         $scope$ = {
             limit = {
                 isValidProv = yes
                 [[flag]has_province_flag = $flag$]
-                [[HRE]is_part_of_hre = yes
+                [[HRE]is_part_of_hre = $HRE$
                 OR = {
                     culture_group = low_germanic
                     culture_group = high_germanic
@@ -1101,33 +1062,15 @@ Growth_ZoneHelper = {
                 [[cultg]culture_group = $cultg$]
                 [[cult]culture = $cult$]
             }
-            set_key = { lhs = Public_Tmp2 which = PREV }
-            set_key = { lhs = Public_Tmp3 which = PREV }
-            set_key = { lhs = Public_Tmp4 which = PREV }
 
-            [[SF]Growth_DoMove_DistributeMigration = { class = SF tmp = 2 }]
-            [[NM]Growth_DoMove_DistributeMigration = { class = NM tmp = 3 }]
-            [[RE]Growth_DoMove_DistributeMigration = { class = RE tmp = 4 }]
-            [[NO]Growth_DoMove_DistributeMigration = { class = NO tmp = 5 }]
-            [[BG]Growth_DoMove_DistributeMigration = { class = BG tmp = 6 }]
-            [[CL]Growth_DoMove_DistributeMigration = { class = CL tmp = 7 }]
+            [[SF]Growth_DoMove_DistributeMigration = { class = SF tmp = 2 zone = PREV }]
+            [[NM]Growth_DoMove_DistributeMigration = { class = NM tmp = 3 zone = PREV }]
+            [[RE]Growth_DoMove_DistributeMigration = { class = RE tmp = 4 zone = PREV }]
+            [[BG]Growth_DoMove_DistributeMigration = { class = BG tmp = 6 zone = PREV }]
 
-            set_key = { lhs = Public_Tmp1 value = 0 }
-            set_key = { lhs = Public_Tmp2 value = 0 }
-            set_key = { lhs = Public_Tmp3 value = 0 }
-            set_key = { lhs = Public_Tmp4 value = 0 }
-            set_key = { lhs = Public_Tmp5 value = 0 }
-            set_key = { lhs = Public_Tmp9 value = 0 }
+            Growth_ZoneReset = yes
         }
-
-        set_key = { lhs = Public_Tmp2 value = 0 }
-        set_key = { lhs = Public_Tmp3 value = 0 }
-        set_key = { lhs = Public_Tmp4 value = 0 }
-        set_key = { lhs = Public_Tmp5 value = 0 }
     }
 
-    set_key = { lhs = Tmp_0 value = 0 }
-    set_key = { lhs = Tmp_1 value = 0 }
-
-    set_key = { lhs = Public_Tmp1 value = 0 }
+    Growth_ZoneReset = yes
 }
