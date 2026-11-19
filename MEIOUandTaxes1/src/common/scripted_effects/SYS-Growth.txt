@@ -612,7 +612,7 @@ Growth_ZoneLocal = {
 
     # Calculate migration on province level
     # how many pops of each class want to go in vs. out
-    Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 seed = 10 freedom = Tmp_8 }
+    Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 seed = 30 freedom = Tmp_8 }
     Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 seed = 2.5 }
     Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 seed = 5 industrial = yes }
     Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 seed = 0.05 }
@@ -820,15 +820,27 @@ Growth_DoMove_HandleLocalMigration = {
         }
         else = { # Migratory outward pressure of province < average pressure of class in zone --> inward migration
 
-			#       ($class$_Total * [[zone] * 0.5] + seed)* (Pressure/Average pressure - 1)
+			# Attractiveness mirrors the outward formula: Average pressure/Pressure - 1, ceiling at factor of 3,
+			# so very attractive provinces (e.g. from a goldmine) pull far harder than average ones
+			set_key = { lhs = Public_Tmp9 which = Growth_MigAvg$class$ }
+			divide_key = { lhs = Public_Tmp9 which = Growth_Pressure$class$ }
+			subtract_key = { lhs = Public_Tmp9 value = 1 }
+			if = {
+				limit = {
+					check_key = { lhs = Public_Tmp9 value = 3 }
+				}
+				set_key = { lhs = Public_Tmp9 value = 3 }
+			}
+
+			#       ($class$_Total * [[zone] * 0.5] [[freedom] * Freedom modifier on migration] + seed) * (Average pressure/Pressure - 1)
 			#       ------------------------------------------------------------
-			#                                -40
+			#                                40
 			set_key = { lhs = Tmp_$tmp$ which = $class$_Total }
 			[[zone]multiply_key = { lhs = Tmp_$tmp$ value = 0.5 }]
 			[[freedom] multiply_key = { lhs = Tmp_$tmp$ which = $freedom$ }]
 			change_key = { lhs = Tmp_$tmp$ value = $seed$ }
 			multiply_key = { lhs = Tmp_$tmp$ which = Public_Tmp9 }
-			divide_key = { lhs = Tmp_$tmp$ value = -40 }
+			divide_key = { lhs = Tmp_$tmp$ value = 40 }
 			[[industrial]
 			# Increase urban inward migration in lategame
 			if = {
@@ -1100,7 +1112,7 @@ Growth_ZoneHelper = {
             set_key = { lhs = Growth_MigAvgRE which = PREV }
             set_key = { lhs = Growth_MigAvgBG which = PREV }
 
-            [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 seed = 10 zone=yes freedom = Tmp_8 }]
+            [[SF] Growth_DoMove_HandleLocalMigration = { class = SF tmp = 2 seed = 30 zone=yes freedom = Tmp_8 }]
             [[NM] Growth_DoMove_HandleLocalMigration = { class = NM tmp = 3 seed = 2.5 zone=yes }]
             [[RE] Growth_DoMove_HandleLocalMigration = { class = RE tmp = 4 seed = 5 zone=yes industrial = yes }]
             [[BG] Growth_DoMove_HandleLocalMigration = { class = BG tmp = 6 seed = 0.05 zone=yes }]
