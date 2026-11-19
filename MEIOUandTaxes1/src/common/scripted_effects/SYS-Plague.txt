@@ -1347,7 +1347,7 @@ Plague_ModelHelper = { #Bubonic
         }
         
         ## apply factors to spread, like population density, disease type, etc
-        Plague_SpreadRateCalc = { return=Plague_InfectedChange$Type$ SpreadRate=$SpreadRate$ } # outputs a multiplier
+        Plague_SpreadRateCalc = { return=Plague_InfectedChange$Type$ SpreadRate=$SpreadRate$ Type=$Type$ } # outputs a multiplier
            
         # calculate actual people infected
         multiply_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Susceptible$Type$ }
@@ -1460,7 +1460,15 @@ Plague_SpreadRateCalc = {
         10 = { multiply_key = { lhs = $return$ value = 12 } }
         1 = { multiply_key = { lhs = $return$ value = 6 } }
     }
-    multiply_key = { lhs = $return$ which = Plague_Factors } #Differentiate by Terrain Type
+    if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+    	limit = {
+    		OR = { continent = north_america continent = south_america }
+    		NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+    		NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+    	}
+    	multiply_key = { lhs = $return$ value = 0.5 }
+    }
+    else = { multiply_key = { lhs = $return$ which = Plague_Factors } } #Differentiate by Terrain Type
 	multiply_key = { lhs = $return$ value = $SpreadRate$ } #Differentiate by Plague Type
 }
 Plague_Spread = {
@@ -1475,7 +1483,15 @@ Plague_Spread = {
 		if = { limit = { NOT = { check_key = { lhs = Plague_Tmp0 value = 0 } } } set_key = { lhs = Plague_Tmp0 value = 0 } }
 	    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
 	    multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
-	   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+			limit = {
+				OR = { continent = north_america continent = south_america }
+				NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+				NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+			}
+			multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+		}
+		else = { multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } } # Slow spread by terrain
 		if = {
 			limit = {
 				check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
@@ -1528,7 +1544,15 @@ Plague_SpreadScope = {
 		change_key = { lhs = Plague_Tmp0 value = 1 } # 1 - r^2: low resistance (virgin soil) gets more initial infection
 		if = { limit = { NOT = { check_key = { lhs = Plague_Tmp0 value = 0 } } } set_key = { lhs = Plague_Tmp0 value = 0 } }
 	    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
-	   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+			limit = {
+				OR = { continent = north_america continent = south_america }
+				NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+				NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+			}
+			multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+		}
+		else = { multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } } # Slow spread by terrain
 		if = {
 			limit = {
 				check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
@@ -1541,7 +1565,15 @@ Plague_SpreadScope = {
 			}
 			set_key = { lhs = Plague_Infected$Type$ value = 0.001 }
 		}
-		multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+			limit = {
+				OR = { continent = north_america continent = south_america }
+				NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+				NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+			}
+			multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+		}
+		else = { multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } } # Slow spread by terrain
 	    set_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Infected$Type$ }
 		subtract_key = { lhs = Plague_Susceptible$Type$ which = Plague_Infected$Type$ }
 		subtract_key = { lhs = Plague_SusceptibleChange$Type$ which = Plague_Infected$Type$ }
