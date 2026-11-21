@@ -999,20 +999,53 @@ America_Plague_Spawner = {
 #      / the Pacific side of Central America (America_SmallpoxContact_Pacific), schedules the Central America
 #      wave (Plague_Spawner.222, 7-8 years). Only the first contact counts
 #   2. The Central America wave schedules the South America wave (Plague_Spawner.2, 5-10 years later).
+# Note: the Pacific test below is written out instead of calling America_SmallpoxContact_Pacific
+# (SYS-PlagueAmerica.txt): this raw file is loaded by the game, and calling that nested scripted trigger
+# from here crashed it at startup (stack overflow). Keep both lists in sync.
 America_ContactDisease = {
 	if = {
 		limit = {
 			NOT = { has_global_flag = america_central_contact }
 			OR = {
 				superregion = central_america_superregion
-				America_SmallpoxContact_Pacific = yes
+				superregion = west_america_superregion
+				area = sonora_area
+				area = sinaloa_area
+				area = jalisco_area
+				area = michoacan_area
+				area = guerrero_area
+				area = oaxaca_area
+				province_id = 3519
+				province_id = 2206
+				area = guatemala_area
+				area = pipil_area
+				area = salvador_area
+				province_id = 2604
+				province_id = 2209
 			}
 		}
 		set_global_flag = america_central_contact
 		if = {
-			limit = { America_SmallpoxContact_Pacific = yes }
+			limit = { # first contact on the Pacific side (Panama keeps the Atlantic route)
+				OR = {
+					superregion = west_america_superregion
+					area = sonora_area
+					area = sinaloa_area
+					area = jalisco_area
+					area = michoacan_area
+					area = guerrero_area
+					area = oaxaca_area
+					province_id = 3519
+					province_id = 2206
+					area = guatemala_area
+					area = pipil_area
+					area = salvador_area
+					province_id = 2604
+					province_id = 2209
+				}
+			}
 			set_global_flag = america_central_contact_pacific
-			log = "Plague: pacific contact with [This.GetName], central america smallpox scheduled (pacific side)"
+			log = "Plague: pacific contact, central america smallpox scheduled (pacific side)"
 		}
 		else = {
 			log = "Plague: contact with central america, central america smallpox scheduled"
@@ -1051,46 +1084,54 @@ America_SmallpoxNews = {
 	}
 }
 
-# Country scope (AAA). Seeds smallpox in one province of a zone (scripted trigger in SYS-PlagueAmerica.txt).
+# Country scope (AAA). Seeds smallpox (Type = 1) in one province of a zone.
+# The caller first marks the zone: every_province = { limit = { America_SmallpoxZone_X = yes } set_province_flag = america_smallpox_zone }
+# (zone triggers in SYS-PlagueAmerica.txt). This effect clears the mark again.
 # Only settled provinces (any owner) without smallpox immunity; prefers a harbor, falls back to any such province in the zone.
 # Sets global flag america_smallpox_seeded when a seed was placed.
+# Note: no parameter is used as a trigger name here ($zone$ = yes) and Plague_Spawn only gets $Type$ passed through:
+# the raw file is loaded by the game, and the earlier $zone$ version crashed it at startup (stack overflow).
 America_SmallpoxSeedZone = {
 	if = {
 		limit = {
 			any_province = {
-				$zone$ = yes
+				has_province_flag = america_smallpox_zone
 				America_SmallpoxSeed_Valid = yes
 				has_port = yes
 			}
 		}
 		random_province = {
 			limit = {
-				$zone$ = yes
+				has_province_flag = america_smallpox_zone
 				America_SmallpoxSeed_Valid = yes
 				has_port = yes
 			}
-			Plague_Spawn = { Type=1 InitInfection=0.3 } # above the 0.2 spread threshold so contact outbreaks can take off
+			Plague_Spawn = { Type=$Type$ InitInfection=0.3 } # above the 0.2 spread threshold so contact outbreaks can take off
 			set_global_flag = america_smallpox_seeded
 			America_SmallpoxNews = yes
-			log = "Plague: smallpox seeded in harbor [This.GetName] ($zone$)"
+			log = "Plague: smallpox seeded in harbor [This.GetName]"
 		}
 	}
 	else_if = {
 		limit = {
 			any_province = {
-				$zone$ = yes
+				has_province_flag = america_smallpox_zone
 				America_SmallpoxSeed_Valid = yes
 			}
 		}
 		random_province = {
 			limit = {
-				$zone$ = yes
+				has_province_flag = america_smallpox_zone
 				America_SmallpoxSeed_Valid = yes
 			}
-			Plague_Spawn = { Type=1 InitInfection=0.3 }
+			Plague_Spawn = { Type=$Type$ InitInfection=0.3 }
 			set_global_flag = america_smallpox_seeded
 			America_SmallpoxNews = yes
-			log = "Plague: smallpox seeded inland in [This.GetName] ($zone$)"
+			log = "Plague: smallpox seeded inland in [This.GetName]"
 		}
+	}
+	every_province = {
+		limit = { has_province_flag = america_smallpox_zone }
+		clr_province_flag = america_smallpox_zone
 	}
 }
