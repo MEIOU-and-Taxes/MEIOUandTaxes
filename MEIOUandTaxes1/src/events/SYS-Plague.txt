@@ -306,6 +306,7 @@ country_event = { #south america smallpox
         set_global_flag = active_america_plagues
         log = "fire in the hole south america"
         clr_global_flag = not_samerica_smallpox
+        set_global_flag = america_smallpox_south_hit # timestamp
     }
 	
 	option = {
@@ -325,6 +326,7 @@ province_event = { #north america smallpox
 
     immediate = { #iiiincoooomiiing
         Plague_Spawn = { Type=1 InitInfection=0.5 } # above the 0.2 spread threshold so contact outbreaks can take off
+        America_SmallpoxNews = yes
         north_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
@@ -512,6 +514,10 @@ country_event = {
             }
         }
         set_global_flag = active_salmonella_plagues
+        if = { # tell the world (Plague_Spawner.19); .4 fires only once
+            limit = { any_province = { has_province_flag = Plague2 } }
+            country_event = { id = Plague_Spawner.19 days = 1 }
+        }
         central_america_superregion = {
             trigger_switch = {
                 on_trigger = has_terrain
@@ -1150,3 +1156,210 @@ country_event = {
 	}
 }
 #
+
+############################################################
+# New World epidemics: news for the whole world
+# Smallpox: .15 (first American smallpox, via America_SmallpoxNews) -> .16 news, then .23 (yearly check) -> .17 -> .18 death toll once the Central and South American waves are over
+# Salmonella: .19 (from Plague_Spawner.4) -> .20 news, then .21 -> .22 death toll 5 years later
+# The toll is the running total on AAA (Plague_AmericaDead<Type>, summed in Plague_ModelHelper)
+############################################################
+
+country_event = {
+	id = Plague_Spawner.15
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		set_key = { lhs = Plague_AmericaDead1 value = 0 }
+		set_global_flag = america_count_dead1 # start counting smallpox deaths (Plague_ModelHelper)
+		every_country = {
+			limit = { ai = no }
+			country_event = { id = Plague_Spawner.16 }
+		}
+		country_event = { id = Plague_Spawner.23 days = 365 } # yearly check until Central and South American waves are over
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.16
+	title = Plague_Spawner.16.t
+	desc = Plague_Spawner.16.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.16.a
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.17
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		clr_global_flag = america_count_dead1 # stop counting: the toll covers the initial outbreak only
+		every_country = {
+			limit = { ai = no }
+			set_key = { lhs = Plague_AmericaDead1 which = PREV } # copy AAA's total
+			country_event = { id = Plague_Spawner.18 }
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+# Smallpox death toll timing: checked once a year, publishes (.17) once both the Central and the South American
+# waves have hit and smallpox has died out in Central and South America. The South wave comes 5-10 years after
+# the Central one, so the toll usually lands some 10-20 years after the first news.
+# Safety: publishes anyway 25 years after counting started (e.g. a wave never fired, or recurrences keep smallpox alive).
+country_event = {
+	id = Plague_Spawner.23
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = {
+		tag = AAA
+		has_global_flag = america_count_dead1 # stop if the toll was already published
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						NOT = { has_global_flag = not_camerica_smallpox } # Central wave has hit
+						had_global_flag = { flag = america_smallpox_south_hit days = 730 } # South wave hit at least 2 years ago
+						NOT = {
+							any_province = {
+								has_province_flag = Plague1
+								OR = {
+									superregion = central_america_superregion
+									superregion = western_south_america_superregion
+									superregion = eastern_south_america_superregion
+								}
+							}
+						}
+					}
+					had_global_flag = { flag = america_count_dead1 days = 9125 } # 25 years
+				}
+			}
+			country_event = { id = Plague_Spawner.17 }
+		}
+		else = {
+			country_event = { id = Plague_Spawner.23 days = 365 }
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.18
+	title = Plague_Spawner.18.t
+	desc = Plague_Spawner.18.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.18.a
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.19
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		set_key = { lhs = Plague_AmericaDead2 value = 0 }
+		set_global_flag = america_count_dead2 # start counting salmonella deaths (Plague_ModelHelper)
+		every_country = {
+			limit = { ai = no }
+			country_event = { id = Plague_Spawner.20 }
+		}
+		country_event = { id = Plague_Spawner.21 days = 1825 }
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.20
+	title = Plague_Spawner.20.t
+	desc = Plague_Spawner.20.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.20.a
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.21
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		clr_global_flag = america_count_dead2 # stop counting: the toll covers the initial outbreak only
+		every_country = {
+			limit = { ai = no }
+			set_key = { lhs = Plague_AmericaDead2 which = PREV } # copy AAA's total
+			country_event = { id = Plague_Spawner.22 }
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.22
+	title = Plague_Spawner.22.t
+	desc = Plague_Spawner.22.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.22.a
+	}
+}

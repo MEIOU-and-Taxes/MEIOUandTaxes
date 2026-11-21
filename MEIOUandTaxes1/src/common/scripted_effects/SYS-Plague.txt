@@ -1456,12 +1456,28 @@ Plague_ModelHelper = { #Bubonic
 	
 	multiply_key = { lhs = Plague_DeadRaw$Type$ which = Class_Total }
 	multiply_key = { lhs = Plague_DeadRawChange$Type$ which = Class_Total }
-	
+
+	# New World epidemics: running total of deaths in the Americas on AAA.
+	# Only counts while america_count_dead<Type> is set: from the initial outbreak news (Plague_Spawner.15 smallpox,
+	# .19 salmonella) until the death toll is published (.17 / .21). Kept separate from Plague_Dead,
+	# which Plague_Init resets whenever this disease spawns anywhere in the world.
+	if = {
+		limit = {
+			has_global_flag = america_count_dead$Type$
+			OR = {
+				continent = north_america
+				continent = south_america
+			}
+		}
+		set_key = { lhs = Plague_AmericaDead$Type$ which = Plague_DeadRawChange$Type$ }
+		AAA = { change_key = { lhs = Plague_AmericaDead$Type$ which = PREV } }
+	}
+
 	## Apply dead
     set_key = { lhs = Plague_Tmp0 value = 100 }
     subtract_key = { lhs = Plague_Tmp0 which = Plague_DeadChange$Type$ }
     multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
-	
+
 	# note, this might be performance intensive. we might need to batch this or something
 	Public_ChangeClassPropAll = { type = which inp = Plague_Tmp0 } # apply to all classes equally, could change
 
