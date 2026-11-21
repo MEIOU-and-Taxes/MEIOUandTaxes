@@ -225,8 +225,58 @@ country_event = {
 	}
 }
 
-#Gets fired from succesful expedition/colony
-province_event = { #south america smallpox
+# America smallpox chain (see America_ContactDisease in SYS-PlagueSpawner.txt)
+# Central America is hit 7-8 years after first contact in Central America / the Caribbean,
+# or in West America / the Pacific side of Central America (seeds the Pacific coast instead),
+# South America follows 5-10 years after Central. North America is triggered by colonies there.
+country_event = { #central america smallpox
+	id = Plague_Spawner.222
+	title = no_localisation
+	desc = no_localisation
+    picture = no_picture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+	trigger = {
+        tag = AAA
+        has_global_flag = not_camerica_smallpox
+    }
+    
+    immediate = { #iiiincoooomiiing
+        # One seed per zone so the outbreak spreads around the region
+        if = { # first contact came from the Pacific: mirror of the Atlantic zones on the west coast
+            limit = { has_global_flag = america_central_contact_pacific }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_WestCoast }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_PacificNorthMexico }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_PacificSouthMexico }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_PacificIsthmus }
+            west_america_superregion = {
+                set_key = { lhs = Plague_SpawnChance1 value = 2 }
+            }
+            log = "fire in the hole central america (pacific side)"
+        }
+        else = {
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_Caribbean }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_GulfCoast }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_Yucatan }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_Isthmus }
+            log = "fire in the hole central america"
+        }
+        clr_global_flag = america_smallpox_seeded
+        central_america_superregion = {
+            set_key = { lhs = Plague_SpawnChance1 value = 2 }
+        }
+        set_global_flag = active_america_plagues
+        clr_global_flag = not_camerica_smallpox
+        # South America follows a few years later
+        country_event = { id = Plague_Spawner.2 days = 1825 random = 1825 }
+    }
+	
+	option = {
+		name = no_localisation
+	}
+}
+country_event = { #south america smallpox
 	id = Plague_Spawner.2
 	title = no_localisation
 	desc = no_localisation
@@ -234,18 +284,27 @@ province_event = { #south america smallpox
 	fire_only_once = yes
 	is_triggered_only = yes
 	hidden = yes
-	trigger = { NOT = { has_province_flag = Plague1 } } # co-infection allowed; if smallpox already active, a later contact can retry
+	trigger = {
+        tag = AAA
+        has_global_flag = not_samerica_smallpox
+    }
     
     immediate = { #iiiincoooomiiing
-        Plague_Spawn = { Type=1 InitInfection=0.5 } # above the 0.2 spread threshold so contact outbreaks can take off  
+        # Start in a northern west-coast harbor (Ecuador/north Peru); if nothing valid there, any settled province in South America
+        America_SmallpoxSeedZone = { zone = America_SmallpoxZone_SouthNorthCoast }
+        if = {
+            limit = { NOT = { has_global_flag = america_smallpox_seeded } }
+            America_SmallpoxSeedZone = { zone = America_SmallpoxZone_South }
+        }
+        clr_global_flag = america_smallpox_seeded
         western_south_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
         eastern_south_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
-        log = "fire in the hole south america"
         set_global_flag = active_america_plagues
+        log = "fire in the hole south america"
         clr_global_flag = not_samerica_smallpox
     }
 	
@@ -263,9 +322,9 @@ province_event = { #north america smallpox
 	is_triggered_only = yes
 	hidden = yes
 	trigger = { NOT = { has_province_flag = Plague1 } } # co-infection allowed; if smallpox already active, a later contact can retry
-    
+
     immediate = { #iiiincoooomiiing
-        Plague_Spawn = { Type=1 InitInfection=0.5 } # above the 0.2 spread threshold so contact outbreaks can take off  
+        Plague_Spawn = { Type=1 InitInfection=0.5 } # above the 0.2 spread threshold so contact outbreaks can take off
         north_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
@@ -275,31 +334,6 @@ province_event = { #north america smallpox
         log = "fire in the hole north america"
         set_global_flag = active_america_plagues
         clr_global_flag = not_namerica_smallpox
-    }
-	
-	option = {
-		name = no_localisation
-	}
-}
-#Gets fired from succesful expedition/colony
-province_event = { #central america smallpox
-	id = Plague_Spawner.222
-	title = no_localisation
-	desc = no_localisation
-    picture = no_picture
-	fire_only_once = yes
-	is_triggered_only = yes
-	hidden = yes
-	trigger = { NOT = { has_province_flag = Plague1 } } # co-infection allowed; if smallpox already active, a later contact can retry
-    
-    immediate = { #iiiincoooomiiing
-        Plague_Spawn = { Type=1 InitInfection=0.5 } # above the 0.2 spread threshold so contact outbreaks can take off  
-        central_america_superregion = {
-            set_key = { lhs = Plague_SpawnChance1 value = 2 }
-        }
-        log = "fire in the hole central america"
-        set_global_flag = active_america_plagues
-        clr_global_flag = not_camerica_smallpox
     }
 	
 	option = {
@@ -620,7 +654,7 @@ country_event = {
     }
     
     immediate = {
-        
+
         if = {
             limit = {
                 has_global_flag = active_salmonella_plagues

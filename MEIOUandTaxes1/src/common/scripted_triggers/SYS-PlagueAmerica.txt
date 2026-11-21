@@ -1,0 +1,108 @@
+# America smallpox seeding zones (used by America_SmallpoxSeedZone in SYS-PlagueSpawner.txt)
+# Province scope.
+
+# A valid seed: settled province (any owner: native, colony or conquered) without smallpox immunity.
+# American provinces start with 0 smallpox resistance; expedition colonies get the founder's capital value / 3 (~25).
+# Uncolonised provinces are not seeded directly, but smallpox spreads into them from a seed.
+America_SmallpoxSeed_Valid = {
+	isValidEmpty = yes
+	is_empty = no
+	NOT = { check_key = { lhs = Plague_Resistance1 value = 30 } } # no smallpox immunity
+	NOT = { has_province_flag = Plague1 } # co-infection allowed; skip only if smallpox already active
+}
+
+# Central America wave
+# Caribbean has no native owners in 1356, so this only seeds once someone has colonised there
+America_SmallpoxZone_Caribbean = {
+	region = carribeans_region
+}
+America_SmallpoxZone_GulfCoast = {
+	OR = {
+		area = huastec_area
+		area = eastern_mexico_area
+		area = tabasco_area
+	}
+}
+America_SmallpoxZone_Yucatan = {
+	OR = {
+		area = yucatan_area
+		area = mayapan_area
+		area = hocaba_area
+		area = campeche_area
+	}
+}
+America_SmallpoxZone_Isthmus = {
+	region = central_america_region
+	NOT = {
+		OR = {
+			area = yucatan_area
+			area = mayapan_area
+			area = hocaba_area
+			area = campeche_area
+		}
+	}
+}
+
+# Central America wave, Pacific variant (mirror of the Atlantic zones above)
+# Used when the first contact comes from the Pacific side (America_SmallpoxContact_Pacific).
+# West American coast: the colonizer's landing zone, like the Caribbean in the Atlantic variant
+America_SmallpoxZone_WestCoast = {
+	OR = {
+		region = california_region
+		region = cascadia_region
+	}
+}
+# North-west Mexico: Sonora, Sinaloa, Nayarit, Jalisco, Colima
+America_SmallpoxZone_PacificNorthMexico = {
+	OR = {
+		area = sonora_area
+		area = sinaloa_area
+		area = jalisco_area
+	}
+}
+# South-west Mexico: Michoacan, Guerrero, Oaxaca coast, Tehuantepec, Soconusco
+America_SmallpoxZone_PacificSouthMexico = {
+	OR = {
+		area = michoacan_area
+		area = guerrero_area
+		area = oaxaca_area
+		province_id = 3519 # Tehuantepec
+		province_id = 2206 # Xoconochco
+	}
+}
+# Pacific Central America: Guatemala, El Salvador, Pacific Nicaragua, Panama/Costa Rica
+America_SmallpoxZone_PacificIsthmus = {
+	OR = {
+		area = guatemala_area
+		area = pipil_area
+		area = salvador_area
+		province_id = 2604 # Chorotega
+		province_id = 2209 # Chontalli
+		area = panama_area
+	}
+}
+# A first contact here sends the Central America wave down the Pacific side.
+# Panama is left out: it borders both oceans, so an Atlantic colony there keeps the Atlantic route.
+America_SmallpoxContact_Pacific = {
+	OR = {
+		superregion = west_america_superregion
+		America_SmallpoxZone_PacificNorthMexico = yes
+		America_SmallpoxZone_PacificSouthMexico = yes
+		AND = {
+			America_SmallpoxZone_PacificIsthmus = yes
+			NOT = { area = panama_area }
+		}
+	}
+}
+
+# South America wave
+# Settled northern harbors on the west coast (Atacames, Manabi, Huancavilcas, Tumbez, Sechura in 1356)
+America_SmallpoxZone_SouthNorthCoast = {
+	OR = {
+		area = quito_area
+		area = ayavaca_area
+	}
+}
+America_SmallpoxZone_South = {
+	continent = south_america
+}
