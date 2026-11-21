@@ -104,3 +104,76 @@ America_SmallpoxZone_SouthNorthCoast = {
 America_SmallpoxZone_South = {
 	continent = south_america
 }
+
+# Salmonella (Type 2) seeding, used by Plague_Spawner.4 in events/SYS-Plague.txt
+# Province scope.
+
+# Terrain that salmonella can spread into. Must match the salmonella_candidate tagging in Plague_Spawner.4.
+America_SalmonellaCandidate = {
+	OR = {
+		superregion = central_america_superregion
+		superregion = western_south_america_superregion
+	}
+	OR = {
+		has_terrain = forest_hills
+		has_terrain = forest_mountains
+		has_terrain = forest_highlands
+		has_terrain = wood_hills
+		has_terrain = wood_mountains
+		has_terrain = wood_highlands
+		has_terrain = shrub_hills
+		has_terrain = shrub_mountains
+		has_terrain = shrub_highlands
+		has_terrain = grass_hills
+		has_terrain = grass_mountains
+		has_terrain = grass_highlands
+		has_terrain = desert_hills
+		has_terrain = desert_mountains
+		has_terrain = desert_highlands
+		has_terrain = jungle_hills
+		has_terrain = floodplains
+	}
+}
+# A province salmonella can start from without dead-ending: settled mainland Central America
+# with at least one candidate neighbour (all such neighbours connect to the main Mexico-to-Copan candidate block).
+# Excluded by this: the Caribbean islands (isolated candidate pockets), the Yucatan/Campeche lowlands,
+# Veracruz (4040) and Frontera (4041), whose neighbours are all non-candidate lowland.
+America_SalmonellaSeed_Geo = {
+	superregion = central_america_superregion
+	NOT = { region = carribeans_region }
+	is_empty = no # needs population for the outbreak to grow
+	NOT = { has_province_flag = Plague2 } # co-infection allowed; skip only if salmonella already active
+	any_neighbor_province = {
+		America_SalmonellaCandidate = yes
+		NOT = { region = carribeans_region }
+	}
+}
+# Preferred patient zero: a seed province held by a foreign culture or religion (the conqueror/settler)
+America_SalmonellaSeed_Valid = {
+	America_SalmonellaSeed_Geo = yes
+	OR = {
+		has_owner_religion = no
+		has_owner_culture = no
+	}
+}
+# Country scope: a country that can carry salmonella over from the Old World.
+# Old World tech group with an Old World capital (so westernized natives don't count), or a colonial nation.
+America_SalmonellaCarrier = {
+	OR = {
+		is_colonial_nation = yes
+		AND = {
+			OR = {
+				technology_group = chinese
+				technology_group = western
+				technology_group = eastern
+				technology_group = indian
+				technology_group = muslim
+				technology_group = ottoman
+			}
+			capital_scope = {
+				NOT = { continent = north_america }
+				NOT = { continent = south_america }
+			}
+		}
+	}
+}

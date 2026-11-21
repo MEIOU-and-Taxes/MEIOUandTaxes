@@ -368,15 +368,7 @@ country_event = {
         }
         
         ROOT = {
-        
-            OR = {
-                technology_group = chinese
-                technology_group = western
-                technology_group = eastern
-                technology_group = indian
-                technology_group = muslim
-                technology_group = ottoman
-            }
+            America_SalmonellaCarrier = yes
             OR = {
                 AND = {
                     any_owned_province = {
@@ -384,7 +376,7 @@ country_event = {
                         superregion = central_america_superregion
                     }
                 }
-            
+
                 AND = {
                     any_subject_country = {
                         any_owned_province = {
@@ -396,17 +388,40 @@ country_event = {
             }
         }
     }
-    
+
     immediate = {
-        
+        set_country_flag = salmonella_carrier
+        # contact points: Plague_Spawner.4 seeds near these if no carrier-held seed exists
+        every_owned_province = {
+            limit = {
+                is_core = FROM
+                superregion = central_america_superregion
+            }
+            set_province_flag = salmonella_contact
+        }
+        every_subject_country = {
+            every_owned_province = {
+                limit = {
+                    is_core = FROM
+                    superregion = central_america_superregion
+                }
+                set_province_flag = salmonella_contact
+            }
+        }
     }
-	
+
 	option = {
 		name = no_localisation
 	}
     after = {
-        country_event = { id = Plague_Spawner.4 days = 2555 random = 365 }
-    }   
+        if = { # one shared timer for conquest (.3) and settlement (.14); .4 fires on AAA so it can't be lost with the carrier
+            limit = {
+                NOT = { has_global_flag = salmonella_timer_started }
+            }
+            set_global_flag = salmonella_timer_started
+            AAA = { country_event = { id = Plague_Spawner.4 days = 2555 random = 365 } }
+        }
+    }
 }
 
 country_event = {
@@ -419,68 +434,84 @@ country_event = {
 	hidden = yes
 	
 	trigger = {
-        OR = {
-            AND = {
-                any_owned_province = {
-                    superregion = central_america_superregion
-                    OR = {
-                        has_owner_religion = no
-                        has_owner_culture = no
-                    }
-                }
-            }
-            AND = {
-                any_subject_country = {
-                    any_owned_province = {
-                        superregion = central_america_superregion
-                        OR = {
-                            has_owner_religion = no
-                            has_owner_culture = no
-                        }
-                    }
-                }
-            }
-        }
+        tag = AAA # scheduled by .3 (conquest) or .14 (settlement); always fires once introduced, whoever holds the land by then
     }
-    
+
     immediate = { #iiiincoooomiiing
-        if = {
+        # Patient zero, in order of preference. Every option uses America_SalmonellaSeed_Geo, so it cannot dead-end.
+        if = { # 1. a carrier still holds a foreign-held seed province
             limit = {
-                any_owned_province = {
-                    superregion = central_america_superregion
+                any_country = {
+                    has_country_flag = salmonella_carrier
+                    any_owned_province = { America_SalmonellaSeed_Valid = yes }
                 }
             }
-            random_owned_province = {
+            random_country = {
                 limit = {
-                    superregion = central_america_superregion
-                    NOT = { has_province_flag = Plague2 } # co-infection allowed; skip only if salmonella already active
-                    
-                    OR = {
-                        has_owner_religion = no
-                        has_owner_culture = no
-                    }
+                    has_country_flag = salmonella_carrier
+                    any_owned_province = { America_SalmonellaSeed_Valid = yes }
                 }
-                Plague_Spawn = { Type=2 InitInfection=0.1 }
-                set_global_flag = active_salmonella_plagues
-            }
-        }
-        else = {
-            every_subject_country = {
                 random_owned_province = {
-                    limit = {
-                        superregion = central_america_superregion
-                        NOT = { has_province_flag = Plague2 } # co-infection allowed; skip only if salmonella already active
-                    
-                        OR = {
-                            has_owner_religion = no
-                            has_owner_culture = no
-                        }
-                    }
-                    set_global_flag = active_salmonella_plagues
+                    limit = { America_SalmonellaSeed_Valid = yes }
                     Plague_Spawn = { Type=2 InitInfection=0.1 }
                 }
             }
         }
+        else_if = { # 2. a carrier's subject holds one
+            limit = {
+                any_country = {
+                    has_country_flag = salmonella_carrier
+                    any_subject_country = {
+                        any_owned_province = { America_SalmonellaSeed_Valid = yes }
+                    }
+                }
+            }
+            random_country = {
+                limit = {
+                    has_country_flag = salmonella_carrier
+                    any_subject_country = {
+                        any_owned_province = { America_SalmonellaSeed_Valid = yes }
+                    }
+                }
+                random_subject_country = {
+                    limit = {
+                        any_owned_province = { America_SalmonellaSeed_Valid = yes }
+                    }
+                    random_owned_province = {
+                        limit = { America_SalmonellaSeed_Valid = yes }
+                        Plague_Spawn = { Type=2 InitInfection=0.1 }
+                    }
+                }
+            }
+        }
+        else_if = { # 3. land was lost or converted: seed at or next to a contact point, whoever owns it now
+            limit = {
+                any_province = {
+                    America_SalmonellaSeed_Geo = yes
+                    OR = {
+                        has_province_flag = salmonella_contact
+                        any_neighbor_province = { has_province_flag = salmonella_contact }
+                    }
+                }
+            }
+            random_province = {
+                limit = {
+                    America_SalmonellaSeed_Geo = yes
+                    OR = {
+                        has_province_flag = salmonella_contact
+                        any_neighbor_province = { has_province_flag = salmonella_contact }
+                    }
+                }
+                Plague_Spawn = { Type=2 InitInfection=0.1 }
+            }
+        }
+        else = { # 4. contact point unusable (e.g. Yucatan or Veracruz only): any valid seed in Central America
+            random_province = {
+                limit = { America_SalmonellaSeed_Geo = yes }
+                Plague_Spawn = { Type=2 InitInfection=0.1 }
+            }
+        }
+        set_global_flag = active_salmonella_plagues
         central_america_superregion = {
             trigger_switch = {
                 on_trigger = has_terrain
@@ -631,6 +662,57 @@ country_event = {
 		}
     }
 	
+	option = {
+		name = no_localisation
+	}
+}
+
+# Settlement path: an Old World power or its colony holds mainland Central America (by any means, e.g. colonization).
+# Starts the same timer as the conquest path (.3); whichever comes first wins.
+country_event = {
+	id = Plague_Spawner.14
+	title = no_localisation
+	desc = no_localisation
+	picture = no_picture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = {
+		tag = AAA
+		is_year = 1500
+		NOT = { has_global_flag = salmonella_timer_started }
+		any_country = {
+			America_SalmonellaCarrier = yes
+			any_owned_province = {
+				superregion = central_america_superregion
+				NOT = { region = carribeans_region }
+			}
+		}
+	}
+
+	immediate = {
+		every_country = {
+			limit = {
+				America_SalmonellaCarrier = yes
+				any_owned_province = {
+					superregion = central_america_superregion
+					NOT = { region = carribeans_region }
+				}
+			}
+			set_country_flag = salmonella_carrier
+			every_owned_province = {
+				limit = {
+					superregion = central_america_superregion
+					NOT = { region = carribeans_region }
+				}
+				set_province_flag = salmonella_contact
+			}
+		}
+		set_global_flag = salmonella_timer_started
+		country_event = { id = Plague_Spawner.4 days = 2555 random = 365 }
+	}
+
 	option = {
 		name = no_localisation
 	}
