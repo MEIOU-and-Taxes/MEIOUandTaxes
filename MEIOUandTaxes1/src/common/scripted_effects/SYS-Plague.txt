@@ -714,6 +714,7 @@ Plague_Init = {
 Plague_Spawn = {
 	set_province_flag = Plague
 	clr_province_flag = PlagueCand$Type$
+	clr_province_flag = PlagueSpread$Type$ # stale flag from an earlier wave would block spreading
 	set_province_flag = Plague$Type$
     set_province_flag = PlagueSpawner
 	set_key = { lhs = Plague_Susceptible$Type$ value = 100 }
@@ -769,6 +770,7 @@ Plague_Spawn = {
 Plague_Spawn_Malaria = {
 	set_province_flag = Plague
 	clr_province_flag = PlagueCand$Type$
+	clr_province_flag = PlagueSpread$Type$ # stale flag from an earlier wave would block spreading
 	set_province_flag = Plague$Type$
     set_province_flag = PlagueSpawner
 	set_key = { lhs = Plague_Susceptible$Type$ value = 100 }
@@ -849,6 +851,8 @@ Plague_Clean = {
     clr_province_flag = PlagueSpawner
     clr_province_flag = PlagueTN$Type$
     clr_province_flag = PlagueTNM$Type$
+    clr_province_flag = PlagueSpread$Type$ # otherwise left set forever and the province can never spread this disease again
+    clr_province_flag = PlagueCD$Type$
 	set_key = { lhs = Plague_Susceptible$Type$ value = 0 }
 	set_key = { lhs = Plague_Infected$Type$ value = 0 }
 	#set_key = { lhs = Plague_RemovedChange$Type$ value = 0 }
@@ -891,6 +895,8 @@ Plague_Clean_Malaria = {
     clr_province_flag = PlagueSpawner
     clr_province_flag = PlagueTN$Type$
     clr_province_flag = PlagueTNM$Type$
+    clr_province_flag = PlagueSpread$Type$ # otherwise left set forever and the province can never spread this disease again
+    clr_province_flag = PlagueCD$Type$
 	set_key = { lhs = Plague_Susceptible$Type$ value = 0 }
 	set_key = { lhs = Plague_Infected$Type$ value = 0 }
     remove_province_modifier = Plague_mod$Type$
@@ -1347,7 +1353,7 @@ Plague_ModelHelper = { #Bubonic
         }
         
         ## apply factors to spread, like population density, disease type, etc
-        Plague_SpreadRateCalc = { return=Plague_InfectedChange$Type$ SpreadRate=$SpreadRate$ } # outputs a multiplier
+        Plague_SpreadRateCalc = { return=Plague_InfectedChange$Type$ SpreadRate=$SpreadRate$ Type=$Type$ } # outputs a multiplier
            
         # calculate actual people infected
         multiply_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Susceptible$Type$ }
@@ -1399,11 +1405,27 @@ Plague_ModelHelper = { #Bubonic
     
     
 	### Calculate new dead
-	set_key = { lhs = Plague_DeadChange$Type$ which = Plague_RemovedChange$Type$ }
-	set_key = { lhs = Public_Tmp2 value = 100 }
-	divide_key = { lhs = Public_Tmp2 which = Class_TotalFillLifeC } #avg life fullfilment
-    multiply_key = { lhs = Public_Tmp2 value = $Severity$ } # disease death rate
-	multiply_key = { lhs = Plague_DeadChange$Type$ which = Public_Tmp2 } #multiply dead depending on life quality
+	if = { # no population (uncolonized): nobody can die, and Class_TotalFillLifeC is unset there (would divide by zero)
+		limit = {
+			NOT = { check_key = { lhs = Class_Total value = 0.001 } }
+		}
+		set_key = { lhs = Plague_DeadChange$Type$ value = 0 }
+	}
+	else = {
+		set_key = { lhs = Plague_DeadChange$Type$ which = Plague_RemovedChange$Type$ }
+		set_key = { lhs = Public_Tmp2 value = 100 }
+		if = { # freshly colonized, no economy update yet: fulfilment unset, use neutral factor 1
+			limit = {
+				NOT = { check_key = { lhs = Class_TotalFillLifeC value = 1 } }
+			}
+			set_key = { lhs = Public_Tmp2 value = 1 }
+		}
+		else = {
+			divide_key = { lhs = Public_Tmp2 which = Class_TotalFillLifeC } #avg life fullfilment
+		}
+		multiply_key = { lhs = Public_Tmp2 value = $Severity$ } # disease death rate
+		multiply_key = { lhs = Plague_DeadChange$Type$ which = Public_Tmp2 } #multiply dead depending on life quality
+	}
    
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
@@ -1434,12 +1456,28 @@ Plague_ModelHelper = { #Bubonic
 	
 	multiply_key = { lhs = Plague_DeadRaw$Type$ which = Class_Total }
 	multiply_key = { lhs = Plague_DeadRawChange$Type$ which = Class_Total }
-	
+
+	# New World epidemics: running total of deaths in the Americas on AAA.
+	# Only counts while america_count_dead<Type> is set: from the initial outbreak news (Plague_Spawner.15 smallpox,
+	# .19 salmonella) until the death toll is published (.17 / .21). Kept separate from Plague_Dead,
+	# which Plague_Init resets whenever this disease spawns anywhere in the world.
+	if = {
+		limit = {
+			has_global_flag = america_count_dead$Type$
+			OR = {
+				continent = north_america
+				continent = south_america
+			}
+		}
+		set_key = { lhs = Plague_AmericaDead$Type$ which = Plague_DeadRawChange$Type$ }
+		AAA = { change_key = { lhs = Plague_AmericaDead$Type$ which = PREV } }
+	}
+
 	## Apply dead
     set_key = { lhs = Plague_Tmp0 value = 100 }
     subtract_key = { lhs = Plague_Tmp0 which = Plague_DeadChange$Type$ }
     multiply_key = { lhs = Plague_Tmp0 value = 0.01 }
-	
+
 	# note, this might be performance intensive. we might need to batch this or something
 	Public_ChangeClassPropAll = { type = which inp = Plague_Tmp0 } # apply to all classes equally, could change
 
@@ -1460,7 +1498,15 @@ Plague_SpreadRateCalc = {
         10 = { multiply_key = { lhs = $return$ value = 12 } }
         1 = { multiply_key = { lhs = $return$ value = 6 } }
     }
-    multiply_key = { lhs = $return$ which = Plague_Factors } #Differentiate by Terrain Type
+    if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+    	limit = {
+    		OR = { continent = north_america continent = south_america }
+    		NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+    		NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+    	}
+    	multiply_key = { lhs = $return$ value = 0.5 }
+    }
+    else = { multiply_key = { lhs = $return$ which = Plague_Factors } } #Differentiate by Terrain Type
 	multiply_key = { lhs = $return$ value = $SpreadRate$ } #Differentiate by Plague Type
 }
 Plague_Spread = {
@@ -1475,7 +1521,15 @@ Plague_Spread = {
 		if = { limit = { NOT = { check_key = { lhs = Plague_Tmp0 value = 0 } } } set_key = { lhs = Plague_Tmp0 value = 0 } }
 	    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
 	    multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
-	   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+			limit = {
+				OR = { continent = north_america continent = south_america }
+				NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+				NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+			}
+			multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+		}
+		else = { multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } } # Slow spread by terrain
 		if = {
 			limit = {
 				check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
@@ -1499,6 +1553,7 @@ Plague_Spread = {
 	        set_province_flag = Plague
 	        set_province_flag = PlagueCD$Type$
 	        clr_province_flag = PlagueCand$Type$
+	        clr_province_flag = PlagueSpread$Type$ # stale flag from an earlier wave would block spreading
 	        set_province_flag = Plague$Type$
         
 	        if = { limit = { NOT = { has_province_modifier = Plague_mod$Type$ } }
@@ -1519,6 +1574,7 @@ Plague_SpreadScope = {
 		set_province_flag = Plague
 		set_province_flag = PlagueCD$Type$
 		clr_province_flag = PlagueCand$Type$
+		clr_province_flag = PlagueSpread$Type$ # stale flag from an earlier wave would block spreading
 		set_province_flag = Plague$Type$
 		set_key = { lhs = Plague_Infected$Type$ which = PREV }
 		set_key = { lhs = Plague_Tmp0 which = Plague_Resistance$Type$ }
@@ -1528,7 +1584,15 @@ Plague_SpreadScope = {
 		change_key = { lhs = Plague_Tmp0 value = 1 } # 1 - r^2: low resistance (virgin soil) gets more initial infection
 		if = { limit = { NOT = { check_key = { lhs = Plague_Tmp0 value = 0 } } } set_key = { lhs = Plague_Tmp0 value = 0 } }
 	    multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Tmp0 }
-	   	multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+			limit = {
+				OR = { continent = north_america continent = south_america }
+				NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+				NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+			}
+			multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+		}
+		else = { multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } } # Slow spread by terrain
 		if = {
 			limit = {
 				check_key = { lhs = Plague_Infected$Type$ which = Plague_Susceptible$Type$ }
@@ -1541,7 +1605,15 @@ Plague_SpreadScope = {
 			}
 			set_key = { lhs = Plague_Infected$Type$ value = 0.001 }
 		}
-		multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } # Slow spread by terrain
+		if = { # virgin soil in the Americas: terrain can't slow the disease below 0.5
+			limit = {
+				OR = { continent = north_america continent = south_america }
+				NOT = { check_key = { lhs = Plague_Resistance$Type$ value = 30 } }
+				NOT = { check_key = { lhs = Plague_Factors value = 0.5 } }
+			}
+			multiply_key = { lhs = Plague_Infected$Type$ value = 0.5 }
+		}
+		else = { multiply_key = { lhs = Plague_Infected$Type$ which = Plague_Factors } } # Slow spread by terrain
 	    set_key = { lhs = Plague_InfectedChange$Type$ which = Plague_Infected$Type$ }
 		subtract_key = { lhs = Plague_Susceptible$Type$ which = Plague_Infected$Type$ }
 		subtract_key = { lhs = Plague_SusceptibleChange$Type$ which = Plague_Infected$Type$ }
@@ -2183,11 +2255,27 @@ Plague_ModelHelper_Typhus = {
     
     
 	### Calculate new dead
-	set_key = { lhs = Plague_DeadChange$Type$ which = Plague_RemovedChange$Type$ }
-	set_key = { lhs = Public_Tmp2 value = 100 }
-	divide_key = { lhs = Public_Tmp2 which = Class_TotalFillLifeC } #avg life fullfilment
-    multiply_key = { lhs = Public_Tmp2 value = $Severity$ } # disease death rate
-	multiply_key = { lhs = Plague_DeadChange$Type$ which = Public_Tmp2 } #multiply dead depending on life quality
+	if = { # no population (uncolonized): nobody can die, and Class_TotalFillLifeC is unset there (would divide by zero)
+		limit = {
+			NOT = { check_key = { lhs = Class_Total value = 0.001 } }
+		}
+		set_key = { lhs = Plague_DeadChange$Type$ value = 0 }
+	}
+	else = {
+		set_key = { lhs = Plague_DeadChange$Type$ which = Plague_RemovedChange$Type$ }
+		set_key = { lhs = Public_Tmp2 value = 100 }
+		if = { # freshly colonized, no economy update yet: fulfilment unset, use neutral factor 1
+			limit = {
+				NOT = { check_key = { lhs = Class_TotalFillLifeC value = 1 } }
+			}
+			set_key = { lhs = Public_Tmp2 value = 1 }
+		}
+		else = {
+			divide_key = { lhs = Public_Tmp2 which = Class_TotalFillLifeC } #avg life fullfilment
+		}
+		multiply_key = { lhs = Public_Tmp2 value = $Severity$ } # disease death rate
+		multiply_key = { lhs = Plague_DeadChange$Type$ which = Public_Tmp2 } #multiply dead depending on life quality
+	}
    
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {
@@ -2499,11 +2587,27 @@ Plague_ModelHelper_Malaria = {
     
     
 	### Calculate new dead
-	set_key = { lhs = Plague_DeadChange$Type$ which = Plague_RemovedChange$Type$ }
-	set_key = { lhs = Public_Tmp2 value = 100 }
-	divide_key = { lhs = Public_Tmp2 which = Class_TotalFillLifeC } #avg life fullfilment
-    multiply_key = { lhs = Public_Tmp2 value = $Severity$ } # disease death rate
-	multiply_key = { lhs = Plague_DeadChange$Type$ which = Public_Tmp2 } #multiply dead depending on life quality
+	if = { # no population (uncolonized): nobody can die, and Class_TotalFillLifeC is unset there (would divide by zero)
+		limit = {
+			NOT = { check_key = { lhs = Class_Total value = 0.001 } }
+		}
+		set_key = { lhs = Plague_DeadChange$Type$ value = 0 }
+	}
+	else = {
+		set_key = { lhs = Plague_DeadChange$Type$ which = Plague_RemovedChange$Type$ }
+		set_key = { lhs = Public_Tmp2 value = 100 }
+		if = { # freshly colonized, no economy update yet: fulfilment unset, use neutral factor 1
+			limit = {
+				NOT = { check_key = { lhs = Class_TotalFillLifeC value = 1 } }
+			}
+			set_key = { lhs = Public_Tmp2 value = 1 }
+		}
+		else = {
+			divide_key = { lhs = Public_Tmp2 which = Class_TotalFillLifeC } #avg life fullfilment
+		}
+		multiply_key = { lhs = Public_Tmp2 value = $Severity$ } # disease death rate
+		multiply_key = { lhs = Plague_DeadChange$Type$ which = Public_Tmp2 } #multiply dead depending on life quality
+	}
    
 	change_key = { lhs = Plague_Dead$Type$ which = Plague_DeadChange$Type$ }
     if = {

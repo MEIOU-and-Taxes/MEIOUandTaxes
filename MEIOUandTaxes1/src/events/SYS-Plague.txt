@@ -225,8 +225,66 @@ country_event = {
 	}
 }
 
-#Gets fired from succesful expedition/colony
-province_event = { #south america smallpox
+# America smallpox chain (see America_ContactDisease in SYS-PlagueSpawner.txt)
+# Central America is hit 7-8 years after first contact in Central America / the Caribbean,
+# or in West America / the Pacific side of Central America (seeds the Pacific coast instead),
+# South America follows 5-10 years after Central. North America is triggered by colonies there.
+country_event = { #central america smallpox
+	id = Plague_Spawner.222
+	title = no_localisation
+	desc = no_localisation
+    picture = no_picture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+	trigger = {
+        tag = AAA
+        has_global_flag = not_camerica_smallpox
+    }
+    
+    immediate = { #iiiincoooomiiing
+        # One seed per zone so the outbreak spreads around the region
+        if = { # first contact came from the Pacific: mirror of the Atlantic zones on the west coast
+            limit = { has_global_flag = america_central_contact_pacific }
+            every_province = { limit = { America_SmallpoxZone_WestCoast = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            every_province = { limit = { America_SmallpoxZone_PacificNorthMexico = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            every_province = { limit = { America_SmallpoxZone_PacificSouthMexico = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            every_province = { limit = { America_SmallpoxZone_PacificIsthmus = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            west_america_superregion = {
+                set_key = { lhs = Plague_SpawnChance1 value = 2 }
+            }
+            log = "fire in the hole central america (pacific side)"
+        }
+        else = {
+            every_province = { limit = { America_SmallpoxZone_Caribbean = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            every_province = { limit = { America_SmallpoxZone_GulfCoast = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            every_province = { limit = { America_SmallpoxZone_Yucatan = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            every_province = { limit = { America_SmallpoxZone_Isthmus = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+            log = "fire in the hole central america"
+        }
+        clr_global_flag = america_smallpox_seeded
+        central_america_superregion = {
+            set_key = { lhs = Plague_SpawnChance1 value = 2 }
+        }
+        set_global_flag = active_america_plagues
+        clr_global_flag = not_camerica_smallpox
+        # South America follows a few years later
+        country_event = { id = Plague_Spawner.2 days = 1825 random = 1825 }
+    }
+	
+	option = {
+		name = no_localisation
+	}
+}
+country_event = { #south america smallpox
 	id = Plague_Spawner.2
 	title = no_localisation
 	desc = no_localisation
@@ -234,19 +292,31 @@ province_event = { #south america smallpox
 	fire_only_once = yes
 	is_triggered_only = yes
 	hidden = yes
-	trigger = { NOT = { has_province_flag = Plague1 } } # co-infection allowed; if smallpox already active, a later contact can retry
+	trigger = {
+        tag = AAA
+        has_global_flag = not_samerica_smallpox
+    }
     
     immediate = { #iiiincoooomiiing
-        Plague_Spawn = { Type=1 InitInfection=0.12 }  
+        # Start in a northern west-coast harbor (Ecuador/north Peru); if nothing valid there, any settled province in South America
+        every_province = { limit = { America_SmallpoxZone_SouthNorthCoast = yes } set_province_flag = america_smallpox_zone }
+        America_SmallpoxSeedZone = { Type = 1 }
+        if = {
+            limit = { NOT = { has_global_flag = america_smallpox_seeded } }
+            every_province = { limit = { America_SmallpoxZone_South = yes } set_province_flag = america_smallpox_zone }
+            America_SmallpoxSeedZone = { Type = 1 }
+        }
+        clr_global_flag = america_smallpox_seeded
         western_south_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
         eastern_south_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
-        log = "fire in the hole south america"
         set_global_flag = active_america_plagues
+        log = "fire in the hole south america"
         clr_global_flag = not_samerica_smallpox
+        set_global_flag = america_smallpox_south_hit # timestamp
     }
 	
 	option = {
@@ -263,9 +333,10 @@ province_event = { #north america smallpox
 	is_triggered_only = yes
 	hidden = yes
 	trigger = { NOT = { has_province_flag = Plague1 } } # co-infection allowed; if smallpox already active, a later contact can retry
-    
+
     immediate = { #iiiincoooomiiing
-        Plague_Spawn = { Type=1 InitInfection=0.12 }  
+        Plague_Spawn = { Type=1 InitInfection=0.5 } # above the 0.2 spread threshold so contact outbreaks can take off
+        America_SmallpoxNews = yes
         north_america_superregion = {
             set_key = { lhs = Plague_SpawnChance1 value = 2 }
         }
@@ -275,31 +346,6 @@ province_event = { #north america smallpox
         log = "fire in the hole north america"
         set_global_flag = active_america_plagues
         clr_global_flag = not_namerica_smallpox
-    }
-	
-	option = {
-		name = no_localisation
-	}
-}
-#Gets fired from succesful expedition/colony
-province_event = { #central america smallpox
-	id = Plague_Spawner.222
-	title = no_localisation
-	desc = no_localisation
-    picture = no_picture
-	fire_only_once = yes
-	is_triggered_only = yes
-	hidden = yes
-	trigger = { NOT = { has_province_flag = Plague1 } } # co-infection allowed; if smallpox already active, a later contact can retry
-    
-    immediate = { #iiiincoooomiiing
-        Plague_Spawn = { Type=1 InitInfection=0.12 }  
-        central_america_superregion = {
-            set_key = { lhs = Plague_SpawnChance1 value = 2 }
-        }
-        log = "fire in the hole central america"
-        set_global_flag = active_america_plagues
-        clr_global_flag = not_camerica_smallpox
     }
 	
 	option = {
@@ -334,15 +380,7 @@ country_event = {
         }
         
         ROOT = {
-        
-            OR = {
-                technology_group = chinese
-                technology_group = western
-                technology_group = eastern
-                technology_group = indian
-                technology_group = muslim
-                technology_group = ottoman
-            }
+            America_SalmonellaCarrier = yes
             OR = {
                 AND = {
                     any_owned_province = {
@@ -350,7 +388,7 @@ country_event = {
                         superregion = central_america_superregion
                     }
                 }
-            
+
                 AND = {
                     any_subject_country = {
                         any_owned_province = {
@@ -362,17 +400,40 @@ country_event = {
             }
         }
     }
-    
+
     immediate = {
-        
+        set_country_flag = salmonella_carrier
+        # contact points: Plague_Spawner.4 seeds near these if no carrier-held seed exists
+        every_owned_province = {
+            limit = {
+                is_core = FROM
+                superregion = central_america_superregion
+            }
+            set_province_flag = salmonella_contact
+        }
+        every_subject_country = {
+            every_owned_province = {
+                limit = {
+                    is_core = FROM
+                    superregion = central_america_superregion
+                }
+                set_province_flag = salmonella_contact
+            }
+        }
     }
-	
+
 	option = {
 		name = no_localisation
 	}
     after = {
-        country_event = { id = Plague_Spawner.4 days = 2555 random = 365 }
-    }   
+        if = { # one shared timer for conquest (.3) and settlement (.14); .4 fires on AAA so it can't be lost with the carrier
+            limit = {
+                NOT = { has_global_flag = salmonella_timer_started }
+            }
+            set_global_flag = salmonella_timer_started
+            AAA = { country_event = { id = Plague_Spawner.4 days = 2555 random = 365 } }
+        }
+    }
 }
 
 country_event = {
@@ -385,67 +446,87 @@ country_event = {
 	hidden = yes
 	
 	trigger = {
-        OR = {
-            AND = {
-                any_owned_province = {
-                    superregion = central_america_superregion
-                    OR = {
-                        has_owner_religion = no
-                        has_owner_culture = no
-                    }
-                }
-            }
-            AND = {
-                any_subject_country = {
-                    any_owned_province = {
-                        superregion = central_america_superregion
-                        OR = {
-                            has_owner_religion = no
-                            has_owner_culture = no
-                        }
-                    }
-                }
-            }
-        }
+        tag = AAA # scheduled by .3 (conquest) or .14 (settlement); always fires once introduced, whoever holds the land by then
     }
-    
+
     immediate = { #iiiincoooomiiing
-        if = {
+        # Patient zero, in order of preference. Every option uses America_SalmonellaSeed_Geo, so it cannot dead-end.
+        if = { # 1. a carrier still holds a foreign-held seed province
             limit = {
-                any_owned_province = {
-                    superregion = central_america_superregion
+                any_country = {
+                    has_country_flag = salmonella_carrier
+                    any_owned_province = { America_SalmonellaSeed_Valid = yes }
                 }
             }
-            random_owned_province = {
+            random_country = {
                 limit = {
-                    superregion = central_america_superregion
-                    NOT = { has_province_flag = Plague2 } # co-infection allowed; skip only if salmonella already active
-                    
-                    OR = {
-                        has_owner_religion = no
-                        has_owner_culture = no
-                    }
+                    has_country_flag = salmonella_carrier
+                    any_owned_province = { America_SalmonellaSeed_Valid = yes }
                 }
-                Plague_Spawn = { Type=2 InitInfection=0.1 }
-                set_global_flag = active_salmonella_plagues
-            }
-        }
-        else = {
-            every_subject_country = {
                 random_owned_province = {
-                    limit = {
-                        superregion = central_america_superregion
-                        NOT = { has_province_flag = Plague2 } # co-infection allowed; skip only if salmonella already active
-                    
-                        OR = {
-                            has_owner_religion = no
-                            has_owner_culture = no
-                        }
-                    }
-                    set_global_flag = active_salmonella_plagues
+                    limit = { America_SalmonellaSeed_Valid = yes }
                     Plague_Spawn = { Type=2 InitInfection=0.1 }
                 }
             }
+        }
+        else_if = { # 2. a carrier's subject holds one
+            limit = {
+                any_country = {
+                    has_country_flag = salmonella_carrier
+                    any_subject_country = {
+                        any_owned_province = { America_SalmonellaSeed_Valid = yes }
+                    }
+                }
+            }
+            random_country = {
+                limit = {
+                    has_country_flag = salmonella_carrier
+                    any_subject_country = {
+                        any_owned_province = { America_SalmonellaSeed_Valid = yes }
+                    }
+                }
+                random_subject_country = {
+                    limit = {
+                        any_owned_province = { America_SalmonellaSeed_Valid = yes }
+                    }
+                    random_owned_province = {
+                        limit = { America_SalmonellaSeed_Valid = yes }
+                        Plague_Spawn = { Type=2 InitInfection=0.1 }
+                    }
+                }
+            }
+        }
+        else_if = { # 3. land was lost or converted: seed at or next to a contact point, whoever owns it now
+            limit = {
+                any_province = {
+                    America_SalmonellaSeed_Geo = yes
+                    OR = {
+                        has_province_flag = salmonella_contact
+                        any_neighbor_province = { has_province_flag = salmonella_contact }
+                    }
+                }
+            }
+            random_province = {
+                limit = {
+                    America_SalmonellaSeed_Geo = yes
+                    OR = {
+                        has_province_flag = salmonella_contact
+                        any_neighbor_province = { has_province_flag = salmonella_contact }
+                    }
+                }
+                Plague_Spawn = { Type=2 InitInfection=0.1 }
+            }
+        }
+        else = { # 4. contact point unusable (e.g. Yucatan or Veracruz only): any valid seed in Central America
+            random_province = {
+                limit = { America_SalmonellaSeed_Geo = yes }
+                Plague_Spawn = { Type=2 InitInfection=0.1 }
+            }
+        }
+        set_global_flag = active_salmonella_plagues
+        if = { # tell the world (Plague_Spawner.19); .4 fires only once
+            limit = { any_province = { has_province_flag = Plague2 } }
+            country_event = { id = Plague_Spawner.19 days = 1 }
         }
         central_america_superregion = {
             trigger_switch = {
@@ -602,6 +683,57 @@ country_event = {
 	}
 }
 
+# Settlement path: an Old World power or its colony holds mainland Central America (by any means, e.g. colonization).
+# Starts the same timer as the conquest path (.3); whichever comes first wins.
+country_event = {
+	id = Plague_Spawner.14
+	title = no_localisation
+	desc = no_localisation
+	picture = no_picture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = {
+		tag = AAA
+		is_year = 1500
+		NOT = { has_global_flag = salmonella_timer_started }
+		any_country = {
+			America_SalmonellaCarrier = yes
+			any_owned_province = {
+				superregion = central_america_superregion
+				NOT = { region = carribeans_region }
+			}
+		}
+	}
+
+	immediate = {
+		every_country = {
+			limit = {
+				America_SalmonellaCarrier = yes
+				any_owned_province = {
+					superregion = central_america_superregion
+					NOT = { region = carribeans_region }
+				}
+			}
+			set_country_flag = salmonella_carrier
+			every_owned_province = {
+				limit = {
+					superregion = central_america_superregion
+					NOT = { region = carribeans_region }
+				}
+				set_province_flag = salmonella_contact
+			}
+		}
+		set_global_flag = salmonella_timer_started
+		country_event = { id = Plague_Spawner.4 days = 2555 random = 365 }
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
 country_event = {
 	id = Plague_Spawner.5
 	hidden = yes
@@ -620,7 +752,7 @@ country_event = {
     }
     
     immediate = {
-        
+
         if = {
             limit = {
                 has_global_flag = active_salmonella_plagues
@@ -1034,3 +1166,210 @@ country_event = {
 	}
 }
 #
+
+############################################################
+# New World epidemics: news for the whole world
+# Smallpox: .15 (first American smallpox, via America_SmallpoxNews) -> .16 news, then .23 (yearly check) -> .17 -> .18 death toll once the Central and South American waves are over
+# Salmonella: .19 (from Plague_Spawner.4) -> .20 news, then .21 -> .22 death toll 5 years later
+# The toll is the running total on AAA (Plague_AmericaDead<Type>, summed in Plague_ModelHelper)
+############################################################
+
+country_event = {
+	id = Plague_Spawner.15
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		set_key = { lhs = Plague_AmericaDead1 value = 0 }
+		set_global_flag = america_count_dead1 # start counting smallpox deaths (Plague_ModelHelper)
+		every_country = {
+			limit = { ai = no }
+			country_event = { id = Plague_Spawner.16 }
+		}
+		country_event = { id = Plague_Spawner.23 days = 365 } # yearly check until Central and South American waves are over
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.16
+	title = Plague_Spawner.16.t
+	desc = Plague_Spawner.16.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.16.a
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.17
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		clr_global_flag = america_count_dead1 # stop counting: the toll covers the initial outbreak only
+		every_country = {
+			limit = { ai = no }
+			set_key = { lhs = Plague_AmericaDead1 which = PREV } # copy AAA's total
+			country_event = { id = Plague_Spawner.18 }
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+# Smallpox death toll timing: checked once a year, publishes (.17) once both the Central and the South American
+# waves have hit and smallpox has died out in Central and South America. The South wave comes 5-10 years after
+# the Central one, so the toll usually lands some 10-20 years after the first news.
+# Safety: publishes anyway 25 years after counting started (e.g. a wave never fired, or recurrences keep smallpox alive).
+country_event = {
+	id = Plague_Spawner.23
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = {
+		tag = AAA
+		has_global_flag = america_count_dead1 # stop if the toll was already published
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						NOT = { has_global_flag = not_camerica_smallpox } # Central wave has hit
+						had_global_flag = { flag = america_smallpox_south_hit days = 730 } # South wave hit at least 2 years ago
+						NOT = {
+							any_province = {
+								has_province_flag = Plague1
+								OR = {
+									superregion = central_america_superregion
+									superregion = western_south_america_superregion
+									superregion = eastern_south_america_superregion
+								}
+							}
+						}
+					}
+					had_global_flag = { flag = america_count_dead1 days = 9125 } # 25 years
+				}
+			}
+			country_event = { id = Plague_Spawner.17 }
+		}
+		else = {
+			country_event = { id = Plague_Spawner.23 days = 365 }
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.18
+	title = Plague_Spawner.18.t
+	desc = Plague_Spawner.18.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.18.a
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.19
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		set_key = { lhs = Plague_AmericaDead2 value = 0 }
+		set_global_flag = america_count_dead2 # start counting salmonella deaths (Plague_ModelHelper)
+		every_country = {
+			limit = { ai = no }
+			country_event = { id = Plague_Spawner.20 }
+		}
+		country_event = { id = Plague_Spawner.21 days = 1825 }
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.20
+	title = Plague_Spawner.20.t
+	desc = Plague_Spawner.20.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.20.a
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.21
+	title = no_localisation
+	desc = no_localisation
+	picture = PLAGUE_eventPicture
+	fire_only_once = yes
+	is_triggered_only = yes
+	hidden = yes
+
+	trigger = { tag = AAA }
+
+	immediate = {
+		clr_global_flag = america_count_dead2 # stop counting: the toll covers the initial outbreak only
+		every_country = {
+			limit = { ai = no }
+			set_key = { lhs = Plague_AmericaDead2 which = PREV } # copy AAA's total
+			country_event = { id = Plague_Spawner.22 }
+		}
+	}
+
+	option = {
+		name = no_localisation
+	}
+}
+
+country_event = {
+	id = Plague_Spawner.22
+	title = Plague_Spawner.22.t
+	desc = Plague_Spawner.22.d
+	picture = PLAGUE_eventPicture
+	is_triggered_only = yes
+
+	option = {
+		name = Plague_Spawner.22.a
+	}
+}
