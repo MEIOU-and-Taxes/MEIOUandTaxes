@@ -1532,6 +1532,21 @@ on_monarch_death = {
 on_new_monarch = {
 	country_event = { id = PTM_Politics.007 } # Ruler Calc for Exec Auth
 	country_event = { id = PTM_Politics.005 } # Ruler Alignment for Factions
+	# Dragon Throne: a new dynasty on the Chinese throne, princes of the old house rise in revolt
+	if = {
+		limit = {
+			has_new_dynasty = yes
+			has_country_flag = China_Claim
+		}
+		every_subject_country = {
+			limit = {
+				is_subject_of_type = warlord
+				has_country_flag = imperial_appenage
+				NOT = { dynasty = ROOT }
+			}
+			country_event = { id = tianxia.140 days = 30 }
+		}
+	}
 	if = {
 		limit = {
 			has_consort_regency = no
@@ -4220,6 +4235,23 @@ on_capital_moved = {
 		country_event = { 
 			id = capital_city.001 #Event looking for a new capital city on loss of the previous capital, allowing for a change without the cost
 		}
+	}
+
+	# Dragon Throne: moving the imperial capital renames the old and new seats (Nanjing/Beijing etc.)
+	if = {
+		limit = {
+			owner = { has_country_flag = China_Claim }
+			FROM = {
+				owner = { owns = ROOT }
+				OR = {
+					superregion = north_china_superregion
+					superregion = east_china_superregion
+					superregion = southwest_china_superregion
+					liaoning_trigger = yes
+				}
+			}
+		}
+		FROM = { province_event = { id = tianxia.110 } }
 	}
 
 	#province_event = {
