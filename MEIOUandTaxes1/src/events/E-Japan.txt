@@ -257,6 +257,11 @@ country_event = { #
 			limit = {
 				NOT = { tag = JAP }
 				culture_group = japanese_g
+				NOT = { primary_culture = ryukyuan }
+				OR = {
+					is_subject = no
+					overlord = { culture_group = japanese_g }
+				}
 				exists = yes
 				NOT = { is_subject_of = ROOT }
 				NOT = { overlord = { is_subject_of = ROOT } }
@@ -283,13 +288,13 @@ country_event = { #
 						has_country_flag = kyushu_tandai
 						has_country_flag = chugoku_tandai
 						has_country_flag = shikoku_tandai
-						has_country_flag = uo_tandai
+						has_country_flag = ou_tandai
 					}
 				}
 				clr_country_flag = kyushu_tandai
 				clr_country_flag = chugoku_tandai
 				clr_country_flag = shikoku_tandai
-				clr_country_flag = uo_tandai
+				clr_country_flag = ou_tandai
 				change_title_2 = yes
 			}
 			clr_country_flag = supporting_northern_court
@@ -361,6 +366,11 @@ country_event = { #
 			limit = {
 				NOT = { tag = event_target:japanese_shogun }
 				culture_group = japanese_g
+				NOT = { primary_culture = ryukyuan }
+				OR = {
+					is_subject = no
+					overlord = { culture_group = japanese_g }
+				}
 				exists = yes
 				NOT = { is_subject_of = ROOT }
 				NOT = { overlord = { is_subject_of = ROOT } }
@@ -394,13 +404,13 @@ country_event = { #
 						has_country_flag = kyushu_tandai
 						has_country_flag = chugoku_tandai
 						has_country_flag = shikoku_tandai
-						has_country_flag = uo_tandai
+						has_country_flag = ou_tandai
 					}
 				}
 				clr_country_flag = kyushu_tandai
 				clr_country_flag = chugoku_tandai
 				clr_country_flag = shikoku_tandai
-				clr_country_flag = uo_tandai
+				clr_country_flag = ou_tandai
 				change_title_2 = yes
 			}
 			if = {
@@ -419,14 +429,6 @@ country_event = { #
 			}
 			clr_country_flag = supporting_northern_court
 			clr_country_flag = supporting_southern_court
-		}
-		random_province = {
-			limit = {
-				superregion = japan_superregion
-				has_province_modifier = emperors_palace
-			}
-			remove_province_modifier = emperors_palace
-			clear_global_event_target = imperial_capital
 		}
 		clr_global_flag = nanbokucho
 	}
@@ -476,8 +478,10 @@ country_event = { # Event fired from decision claim_shogunate
 					limit = {
 						OR = {
 							region = west_japan_region
-							area = west_kansai_area
-							NOT = { province_id = 2281 }
+							AND = {
+								area = west_kansai_area
+								NOT = { province_id = 2281 }
+							}
 						}
 					}
 					rename_capital = "Saikyau"
@@ -519,6 +523,12 @@ country_event = { # Event fired from decision claim_shogunate
 				culture_group = japanese_g
 				NOT = {
 					primary_culture = ryukyuan
+				}
+				NOT = { tag = ROOT }
+				NOT = { tag = JAP }
+				OR = {
+					is_subject = no
+					overlord = { culture_group = japanese_g }
 				}
 			}
 			country_event = { id = japan.6 days = 30 random = 15 }
@@ -693,36 +703,12 @@ country_event = { #
 	
 	major = yes
 	trigger = {
-		has_country_flag = tried_claiming_throne
+		had_country_flag = { flag = tried_claiming_throne days = 60 }
 		NOT = { has_country_flag = japan_lost_ambition }
 	}
 	
 	mean_time_to_happen = {
 		years = 2
-	}
-	
-	immediate = {
-		hidden_effect = {
-			every_subject_country = {
-				limit = {
-					culture_group = japanese_g
-					is_subject_of_type = daimyo_vassal
-				}
-				PREV = { change_variable = { which = "number_of_subjects" value = 1 } }
-			}
-			export_to_variable = {
-				variable_name = number_of_subjects_t
-				value = trigger_value:num_of_subjects
-			}
-			
-			change_variable = {
-				which = "number_of_subjects_t"
-				which = "number_of_subjects"
-			}
-			
-			divide_variable = { which = "number_of_subjects_t" value = 2 }
-		
-		}
 	}
 	
 	option = {
@@ -731,7 +717,7 @@ country_event = { #
 			OR = {
 				check_variable = {
 					which = opposition_to_emperorship
-					which = number_of_subjects_t
+					which = agreement_to_emperorship
 				}
 				ai = no
 			}
@@ -750,9 +736,11 @@ country_event = { #
 		name = "japan.10b" #We will manage
 		trigger = {
 			OR = {
-				check_variable = {
-					which = agreement_to_emperorship
-					which = number_of_subjects_t
+				NOT = {
+					check_variable = {
+						which = opposition_to_emperorship
+						which = agreement_to_emperorship
+					}
 				}
 				ai = no
 			}
@@ -773,8 +761,6 @@ country_event = { #
 	after = {
 		set_variable = { which = opposition_to_emperorship value = 0 }
 		set_variable = { which = agreement_to_emperorship value = 0 }
-		set_variable = { which = number_of_subjects value = 0 }
-		set_variable = { which = number_of_subjects_t value = 0 }
 	}
 }
 
@@ -1029,11 +1015,9 @@ country_event = { #
 		}
 		if = {
 			limit = {
-				FROM = {
-					is_vassal = yes
-				}
+				is_subject = yes
 			}
-			free_vassal = FROM
+			overlord = { free_vassal = ROOT }
 		}
 		FROM = {
 			dependency_lost_color_effect = yes
@@ -1264,8 +1248,10 @@ country_event = { #
 			capital_scope = {
 				OR = {
 					region = west_japan_region
-					area = west_kansai_area
-					NOT = { province_id = 2281 }
+					AND = {
+						area = west_kansai_area
+						NOT = { province_id = 2281 }
+					}
 				}
 			}
 		}
@@ -1312,6 +1298,13 @@ country_event = { #
 	}
 	desc = {
 		trigger = {
+			check_variable = { which = emperor_moves_capital value = 5 }
+			capital_scope = { province_id = 2283 }
+		}
+		desc = japan.21.df
+	}
+	desc = {
+		trigger = {
 			NOT = { check_variable = { which = emperor_moves_capital value = 5 } }
 		}
 		desc = japan.21.de
@@ -1329,11 +1322,19 @@ country_event = { #
 		}
 		add_legitimacy = 30
 		add_prestige = 30
-		random_province = {
-			limit = {
-				has_province_modifier = emperors_palace
+		if = {
+			limit = { has_saved_event_target = imperial_capital }
+			event_target:imperial_capital = {
+				remove_province_modifier = emperors_palace
 			}
-			remove_province_modifier = emperors_palace
+		}
+		else = {
+			random_province = {
+				limit = {
+					has_province_modifier = emperors_palace
+				}
+				remove_province_modifier = emperors_palace
+			}
 		}
 		clear_global_event_target = imperial_capital
 		capital_scope = {
@@ -1352,8 +1353,10 @@ country_event = { #
 					limit = {
 						OR = {
 							region = west_japan_region
-							area = west_kansai_area
-							NOT = { province_id = 2281 }
+							AND = {
+								area = west_kansai_area
+								NOT = { province_id = 2281 }
+							}
 						}
 					}
 					rename_capital = "Saikyau"
@@ -1398,10 +1401,10 @@ country_event = { #
 		trigger = {
 			NOT = { check_variable = { which = emperor_moves_capital value = 5 } }
 		}
-		clr_country_flag = inviting_emperor
 	}
 	
 	after = {
+		clr_country_flag = inviting_emperor
 		set_variable = { which = emperor_moves_capital value = 0 }
 	}
 }
@@ -1805,7 +1808,7 @@ country_event = { # Event fired from on_monarch_death
 				NOT = { has_country_flag = kyushu_tandai }
 				NOT = { has_country_flag = chugoku_tandai }
 				NOT = { has_country_flag = shikoku_tandai }
-				NOT = { has_country_flag = uo_tandai }
+				NOT = { has_country_flag = ou_tandai }
 			}
 			change_title_2 = yes
 		}
@@ -1935,12 +1938,10 @@ country_event = {
 			clr_country_flag = kanrei_appointement
 			if = {
 				limit = {
-					NOT = {
-						has_country_flag = kyushu_tandai
-						has_country_flag = chugoku_tandai
-						has_country_flag = shikoku_tandai
-						has_country_flag = uo_tandai
-					}
+					NOT = { has_country_flag = kyushu_tandai }
+					NOT = { has_country_flag = chugoku_tandai }
+					NOT = { has_country_flag = shikoku_tandai }
+					NOT = { has_country_flag = ou_tandai }
 				}
 				change_title_2 = yes
 			}
@@ -2012,7 +2013,7 @@ country_event = { # Event fired from decision form_japan
 	}
 	
 	option = {
-		name = "japan.30a" #Never!
+		name = "japan.30b" #Never!
 		ai_chance = {
 			factor = 50
 			
@@ -2323,6 +2324,10 @@ province_event = {
 			}
 		}
 		NOT = { has_province_modifier = martial_law }
+		OR = {
+			NOT = { has_province_flag = imperial_edict_target }
+			had_province_flag = { flag = imperial_edict_target days = 730 } # CB from a previous contest has expired
+		}
 		local_autonomy = 60
 	}
 	
@@ -2365,6 +2370,7 @@ province_event = {
 	
 	option = {
 		name = "japan.44a" #Contest it
+		clr_province_flag = imperial_edict_target
 		set_province_flag = imperial_edict_target
 		add_core = JAP
 		owner = {
@@ -2535,7 +2541,7 @@ country_event = {
 		name = "japan.60a" #ok
 	}
 	option = { #
-		name = "japan.60a" #Play as Kakizaki
+		name = "japan.60b" #Play as Kakizaki
 		trigger = {
 			ai = no
 		}
@@ -2628,12 +2634,17 @@ country_event = {
 		hidden_effect = {
 			if = {
 				limit = {
-					1014 = { is_empty = yes } #Amami
+					NOT = { has_saved_event_target = ryukyu_target }
 				}
-				1014 = { save_global_event_target_as = ryukyu_target }
-			}
-			else = {
-				1012 = { save_global_event_target_as = ryukyu_target }
+				if = {
+					limit = {
+						1014 = { is_empty = yes } #Amami
+					}
+					1014 = { save_global_event_target_as = ryukyu_target }
+				}
+				else = {
+					1012 = { save_global_event_target_as = ryukyu_target }
+				}
 			}
 			set_variable = { which = nobles_loyalty_removed_a 		value = 5 }
 			set_variable = { which = burghers_loyalty_added_a 		value = 5 }
@@ -2798,8 +2809,8 @@ country_event = {
 			}
 		}
 		event_target:ryukyu_target = {
-			cede_province = FROM
-			add_core = FROM
+			cede_province = ROOT
+			add_core = ROOT
 		}
 		if = {
 			limit = {
