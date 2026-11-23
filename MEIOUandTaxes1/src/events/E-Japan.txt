@@ -461,11 +461,23 @@ country_event = { # Event fired from decision claim_shogunate
 			limit = {
 				NOT = { has_saved_event_target = imperial_capital }
 			}
-			capital_scope = {
-				save_global_event_target_as = imperial_capital
-				add_permanent_province_modifier = {
-					name = emperors_palace
-					duration = -1
+			# Already holding the Emperor's Palace (e.g. took Yoshino): make it the imperial seat instead of founding a second one
+			if = {
+				limit = {
+					any_owned_province = { has_province_modifier = emperors_palace }
+				}
+				random_owned_province = {
+					limit = { has_province_modifier = emperors_palace }
+					save_global_event_target_as = imperial_capital
+				}
+			}
+			else = {
+				capital_scope = {
+					save_global_event_target_as = imperial_capital
+					add_permanent_province_modifier = {
+						name = emperors_palace
+						duration = -1
+					}
 				}
 			}
 		}
@@ -547,6 +559,11 @@ country_event = { # Notification for all daimyo
 	option = {
 		name = "japan.6a" # Accept new Shogun
 		hidden_effect = { set_key = { lhs = Vassal_Type value = 10 } }
+		# The previous shogun bows to the new Bakufu and steps down to Shugo
+		if = {
+			limit = { has_country_modifier = title_5 }
+			change_title_2 = yes
+		}
 		FROM = {
 			create_subject = {
 				who = ROOT
@@ -2884,5 +2901,60 @@ country_event = {
 		clr_global_flag = subjugating_ryukyu
 		
 		clear_global_event_target = ryukyu_target
+	}
+}
+
+# Nanboku-cho ends: the Southern Court was destroyed by a clan other than the Shogun (fired from on_war_won)
+country_event = {
+	id = japan.73
+	title = "japan.73.t"
+	desc = "japan.73.d"
+	picture = SHOGUNATE_eventPicture
+
+	major = yes
+	is_triggered_only = yes
+
+	trigger = {
+		has_global_flag = nanbokucho
+		NOT = { exists = JAP }
+	}
+
+	option = {
+		name = "japan.73a"
+		log = "FE-Japan:[GetYear]:[Root.GetName]:destroyed the Southern Court, Nanboku-cho ends:japan.73"
+		add_prestige = 25
+		every_country = {
+			limit = {
+				OR = {
+					has_country_flag = supporting_northern_court
+					has_country_flag = supporting_southern_court
+				}
+			}
+			clr_country_flag = supporting_northern_court
+			clr_country_flag = supporting_southern_court
+		}
+		# The surviving Emperor's Palace becomes the imperial seat, preferably one we hold
+		hidden_effect = {
+			clear_global_event_target = imperial_capital
+			if = {
+				limit = {
+					any_owned_province = { has_province_modifier = emperors_palace }
+				}
+				random_owned_province = {
+					limit = { has_province_modifier = emperors_palace }
+					save_global_event_target_as = imperial_capital
+				}
+			}
+			else = {
+				random_province = {
+					limit = {
+						superregion = japan_superregion
+						has_province_modifier = emperors_palace
+					}
+					save_global_event_target_as = imperial_capital
+				}
+			}
+		}
+		clr_global_flag = nanbokucho
 	}
 }
