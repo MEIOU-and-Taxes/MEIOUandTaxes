@@ -80,6 +80,95 @@ country_event = {
 		NOT = { religion = mahayana }
 		is_year = 1400
 		NOT = { has_country_flag = white_lotus_rebellion }
+		# Needs a Chinese province the option below can pick (same rules as its region branches),
+		# otherwise the event fires without effect; an Emperor ruling from outside China gets tianxia.073-075
+		OR = {
+			AND = {
+				capital_scope = { region = hebei_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = hebei_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = shanxi_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = shanxi_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = shaangan_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = shaangan_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = jiaoliao_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = jiaoliao_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = zhongyuan_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = zhongyuan_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = zhejiang_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = zhejiang_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = huguang_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = huguang_region }
+				}
+			}
+			AND = {
+				capital_scope = { region = jiangnan_region }
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { region = jiangnan_region }
+				}
+			}
+			AND = {
+				capital_scope = {
+					NOT = {
+						OR = {
+					region = hebei_region
+					region = shanxi_region
+					region = shaangan_region
+					region = jiaoliao_region
+					region = zhongyuan_region
+					region = zhejiang_region
+					region = huguang_region
+					region = jiangnan_region
+						}
+					}
+				}
+				any_owned_province = {
+					isValidProv = yes
+					culture_group = chinese_group
+					NOT = { is_in_capital_area = yes }
+				}
+			}
+		}
 		# Only start an episode if tianxia.072 has a tag left to spawn, otherwise the flagged areas pile up
 		OR = {
 			NOT = { exists = MNG }
@@ -484,6 +573,262 @@ country_event = {
 				set_country_flag = red_turban_reb
 			}
 		}
+	}
+}
+
+#### White Lotus restoration: the Emperor rules from outside China (tianxia.070-072 cover an Emperor ruling China) ####
+# Seed: the White Lotus starts organising in one Chinese area
+country_event = {
+	id = tianxia.073
+	title = "tianxia.73.t"
+	desc = "tianxia.73.d"
+	picture = DIPLOMACY_eventPicture
+
+	major = yes
+
+	trigger = {
+		is_year = 1400
+		is_emperor_without_mandate = yes
+		NOT = { any_owned_province = { culture_group = chinese_group } }
+		NOT = { has_global_flag = white_lotus_restoration }
+		# Again 25 years after the last uprising (tianxia.075)
+		OR = {
+			NOT = { has_global_flag = white_lotus_restoration_spawned }
+			had_global_flag = { flag = white_lotus_restoration_spawned days = 9125 }
+		}
+		OR = {
+			NOT = { exists = MNG }
+			NOT = { exists = SNG }
+			NOT = { exists = TIA }
+			NOT = { exists = CTA }
+			NOT = { exists = DAA }
+			NOT = { exists = ZOU }
+			NOT = { exists = XIA }
+		}
+	}
+
+	mean_time_to_happen = {
+		years = 2
+	}
+
+	option = {
+		name = "tianxia.73a"
+		set_global_flag = white_lotus_restoration
+		hidden_effect = {
+			random_province = {
+				limit = {
+					isValidProv = yes
+					culture_group = chinese_group
+					is_capital = no
+					OR = {
+						superregion = north_china_superregion
+						superregion = east_china_superregion
+						superregion = southwest_china_superregion
+					}
+				}
+				area = {
+					limit = { culture_group = chinese_group }
+					set_province_flag = white_lotus_restoration
+				}
+			}
+		}
+	}
+}
+
+# Spread: the White Lotus moves into neighbouring Chinese areas, whoever owns them
+province_event = {
+	id = tianxia.074
+	title = "tianxia.74.t"
+	desc = "tianxia.74.d"
+	picture = DIPLOMACY_eventPicture
+
+	hidden = yes
+
+	trigger = {
+		has_global_flag = white_lotus_restoration
+		NOT = { has_province_flag = white_lotus_restoration }
+		isValidProv = yes
+		culture_group = chinese_group
+		OR = {
+			superregion = north_china_superregion
+			superregion = east_china_superregion
+			superregion = southwest_china_superregion
+		}
+		any_neighbor_province = {
+			has_province_flag = white_lotus_restoration
+		}
+	}
+
+	mean_time_to_happen = {
+		years = 5
+
+		modifier = {
+			devastation = 80
+			factor = 0.5
+		}
+		modifier = {
+			devastation = 60
+			factor = 0.5
+		}
+		modifier = {
+			devastation = 40
+			factor = 0.5
+		}
+		modifier = {
+			devastation = 20
+			factor = 0.5
+		}
+	}
+
+	option = {
+		name = "tianxia.74a"
+		area = {
+			limit = { culture_group = chinese_group }
+			set_province_flag = white_lotus_restoration
+		}
+	}
+}
+
+# Spawn: the White Lotus rises and proclaims a new dynasty from everything it holds
+country_event = {
+	id = tianxia.075
+	title = "tianxia.75.t"
+	desc = "tianxia.75.d"
+	picture = DIPLOMACY_eventPicture
+
+	major = yes
+
+	trigger = {
+		is_emperor_of_china = yes
+		has_global_flag = white_lotus_restoration
+		# Spread for at least 5 years first (about 10 on average)
+		had_global_flag = { flag = white_lotus_restoration days = 1825 }
+	}
+
+	mean_time_to_happen = {
+		years = 5
+	}
+
+	immediate = {
+		hidden_effect = {
+			clear_global_event_target = white_lotus_restoration_tag
+			# Everything the White Lotus holds, unless a third party occupies it
+			every_province = {
+				limit = {
+					has_province_flag = white_lotus_restoration
+					isValidProv = yes
+					culture_group = chinese_group
+					OR = {
+						controlled_by = owner
+						controlled_by = REB
+					}
+				}
+				set_province_flag = white_lotus_cede
+			}
+			# The first free Red Turban dynasty takes up the banner
+			if = {
+				limit = { NOT = { exists = MNG } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = MNG
+					cede_province = MNG
+				}
+				MNG = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			else_if = {
+				limit = { NOT = { exists = SNG } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = SNG
+					cede_province = SNG
+				}
+				SNG = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			else_if = {
+				limit = { NOT = { exists = TIA } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = TIA
+					cede_province = TIA
+				}
+				TIA = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			else_if = {
+				limit = { NOT = { exists = CTA } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = CTA
+					cede_province = CTA
+				}
+				CTA = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			else_if = {
+				limit = { NOT = { exists = DAA } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = DAA
+					cede_province = DAA
+				}
+				DAA = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			else_if = {
+				limit = { NOT = { exists = ZOU } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = ZOU
+					cede_province = ZOU
+				}
+				ZOU = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			else_if = {
+				limit = { NOT = { exists = XIA } }
+				every_province = {
+					limit = { has_province_flag = white_lotus_cede }
+					add_core = XIA
+					cede_province = XIA
+				}
+				XIA = { save_global_event_target_as = white_lotus_restoration_tag }
+			}
+			if = {
+				limit = {
+					has_saved_event_target = white_lotus_restoration_tag
+					event_target:white_lotus_restoration_tag = { exists = yes }
+				}
+				event_target:white_lotus_restoration_tag = {
+					change_religion = mahayana
+					force_converted = yes
+					change_primary_culture = capital
+					set_country_flag = red_turban_reb
+					set_country_flag = InMiddleKingdom
+					# A real army: one regiment per province it rose in
+					every_owned_province = {
+						limit = { has_province_flag = white_lotus_cede }
+						owner = { infantry = PREV }
+					}
+					# Claims on the whole Middle Kingdom
+					north_china_superregion = { limit = { NOT = { owned_by = PREV } NOT = { province_id = 5266 } } add_permanent_claim = PREV }
+					east_china_superregion = { limit = { NOT = { owned_by = PREV } NOT = { province_id = 5267 } } add_permanent_claim = PREV }
+					southwest_china_superregion = { limit = { NOT = { owned_by = PREV } NOT = { province_id = 5268 } } add_permanent_claim = PREV }
+				}
+			}
+			every_province = {
+				limit = {
+					OR = {
+						has_province_flag = white_lotus_restoration
+						has_province_flag = white_lotus_cede
+					}
+				}
+				clr_province_flag = white_lotus_restoration
+				clr_province_flag = white_lotus_cede
+			}
+			clr_global_flag = white_lotus_restoration
+			clr_global_flag = white_lotus_restoration_spawned
+			set_global_flag = white_lotus_restoration_spawned
+		}
+	}
+
+	option = {
+		name = "tianxia.75a"
 	}
 }
 
