@@ -32,6 +32,7 @@ country_event = {
 				NOT = { num_of_cities = 20 }
 				any_neighbor_country = {
 					culture_group = chinese_group
+					ai = yes
 					num_of_cities = 100
 					legitimacy = 70
 					isValidCountry = yes
@@ -40,6 +41,7 @@ country_event = {
 			random_neighbor_country = {
 				limit = {
 					culture_group = chinese_group
+					ai = yes
 					num_of_cities = 100
 					legitimacy = 70
 					isValidCountry = yes
@@ -398,9 +400,12 @@ country_event = {
 				is_at_war = no
 				ai = yes
 			}
-			declare_war_with_cb = {
-				who = ROOT
-				casus_belli = cb_chinese_unification
+			# The rebel strikes at its neighbour
+			ROOT = {
+				declare_war_with_cb = {
+					who = PREV
+					casus_belli = cb_chinese_unification
+				}
 			}
 		}
 		ai_chance = {
@@ -669,25 +674,6 @@ country_event = {
 		name = "red_turban.14a"
 		#_log = "FE-Red Turbans:[GetYear]:[Root.GetName]:surrendered:red_turban.14"
 
-		if = {
-			limit = {
-				has_saved_event_target = white_lotus_tag
-			}
-			if = {
-				limit = {
-					event_target:white_lotus_tag = {
-						tag = ROOT
-					}
-				}
-				random_known_country = {
-					limit = {
-						isValidCountry = yes
-						has_country_flag = white_lotus_rebellion
-					}
-					clr_country_flag = white_lotus_rebellion
-				}
-			}
-		}		
 		if = {
 			limit = {
 				tag = SNG
@@ -969,19 +955,19 @@ country_event = {
 					limit = {
 						country_or_vassal_holds = FROM
 					}
-					owner = { change_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 1 } }
+					FROM = { change_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 1 } } # count on the Empire itself, vassals included
 				}
 				east_china_superregion = {
 					limit = {
 						country_or_vassal_holds = FROM
 					}
-					owner = { change_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 1 } }
+					FROM = { change_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 1 } } # count on the Empire itself, vassals included
 				}
 				southwest_china_superregion = {
 					limit = {
 						country_or_vassal_holds = FROM
 					}
-					owner = { change_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 1 } }
+					FROM = { change_variable = { which = "Demesne_in_the_Mandate_of_Heaven" value = 1 } } # count on the Empire itself, vassals included
 				}
 			}
 		}
@@ -1209,8 +1195,7 @@ country_event = {
 		ChangeTagEffect = { scope=SNG }
 		if = {
 			limit = {
-				exists = XNG
-				is_free_or_tributary_trigger = yes
+				XNG = { exists = yes is_free_or_tributary_trigger = yes }
 			}
 			create_subject = {
 				who = XNG
@@ -1219,8 +1204,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				exists = SHU
-				is_free_or_tributary_trigger = yes
+				SHU = { exists = yes is_free_or_tributary_trigger = yes }
 			}
 			create_subject = {
 				who = SHU
@@ -1229,9 +1213,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				exists = QII
-				is_free_or_tributary_trigger = yes
-				NOT = { borjigin_trigger = yes }
+				QII = { exists = yes is_free_or_tributary_trigger = yes NOT = { borjigin_trigger = yes } }
 			}
 			create_subject = {
 				who = QII
@@ -1246,8 +1228,7 @@ country_event = {
 		name = "red_turban.27b"
 		if = {
 			limit = {
-				exists = XNG
-				is_free_or_tributary_trigger = yes
+				XNG = { exists = yes is_free_or_tributary_trigger = yes }
 			}
 			create_subject = {
 				who = XNG
@@ -1256,8 +1237,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				exists = SHU
-				is_free_or_tributary_trigger = yes
+				SHU = { exists = yes is_free_or_tributary_trigger = yes }
 			}
 			create_subject = {
 				who = SHU
@@ -1266,9 +1246,7 @@ country_event = {
 		}
 		if = {
 			limit = {
-				exists = QII
-				is_free_or_tributary_trigger = yes
-				NOT = { has_country_modifier = China_LoyalistMod }
+				QII = { exists = yes is_free_or_tributary_trigger = yes NOT = { has_country_modifier = China_LoyalistMod } }
 			}
 			create_subject = {
 				who = QII
@@ -1745,18 +1723,6 @@ country_event = {
 			}
 			GUG = { country_event = { id = red_turban.30 days = 30 } }
 		}
-		if = {
-			limit = {
-				exists = MGH
-				MGH = {
-					NOT = {
-						has_country_flag = InMiddleKingdom
-					}
-					is_subject = no
-				}
-			}
-			MGH = { country_event = { id = red_turban.30 days = 30 } }
-		}
 	}
 	option = {
 		name = "red_turban.29b" #ignore
@@ -1804,5 +1770,62 @@ country_event = {
 			factor = 10
 		}
 		add_prestige = 25
+	}
+}
+
+### The Urianqad demand tribute from the Jurchen clans
+country_event = {
+	id = red_turban.35
+	title = "red_turban.35.t"
+	desc = "red_turban.35.d"
+	picture = DIPLOMACY_eventPicture
+	
+	is_triggered_only = yes
+	
+	trigger = {
+		exists = MXI
+		NOT = { tag = MXI }
+		MXI = { is_subject = no }
+		is_free_or_tributary_trigger = yes
+		NOT = { is_subject_of = MXI }
+	}
+	
+	option = {
+		name = "red_turban.35a" # Pay tribute
+		log = "FE-Red Turbans:[GetYear]:[Root.GetName]:became a tributary of [MXI.GetName]:red_turban.35"
+		if = {
+			limit = { is_subject = yes }
+			hidden_effect = { grant_independence_effect = yes }
+		}
+		MXI = {
+			create_subject = {
+				subject_type = tributary_state
+				subject = ROOT
+			}
+		}
+		ai_chance = {
+			factor = 50
+			modifier = {
+				factor = 2
+				MXI = { army_strength = { who = ROOT value = 2 } }
+			}
+			modifier = {
+				factor = 0.25
+				NOT = { MXI = { army_strength = { who = ROOT value = 1 } } }
+			}
+		}
+	}
+	option = {
+		name = "red_turban.35b" # Dismiss the claims
+		add_prestige = 5
+		MXI = {
+			add_opinion = {
+				who = ROOT
+				modifier = tributary_refused_tribute
+			}
+		}
+		ai_chance = {
+			factor = 50
+		}
 	}
 }

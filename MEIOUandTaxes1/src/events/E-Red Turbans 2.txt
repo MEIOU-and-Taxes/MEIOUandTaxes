@@ -22,12 +22,7 @@ country_event = {
 	fire_only_once = yes
 	
 	trigger = {
-		OR = {
-			tag = QII
-			any_country = {
-				has_country_flag = fall_of_yidu
-			}
-		}
+		tag = QII
 		NOT = {
 			has_country_flag = red_turban_invasion
 			controls = 2249
@@ -43,13 +38,6 @@ country_event = {
 		add_treasury = -50
 		if = {
 			limit = {
-				QII = { owns = 2249 }
-			}
-			QII = { 2249 = { cede_province = YUA } }
-		}
-		if = {
-			limit = {
-				has_country_flag = fall_of_yidu
 				owns = 2249 # Fengtian
 			}
 			2249 = { cede_province = YUA }
@@ -61,13 +49,6 @@ country_event = {
 		set_country_flag = red_turban_invasion
 		if = {
 			limit = {
-				QII = { owns = 2249 }
-			}
-			QII = { 2249 = { cede_province = YUA } }
-		}
-		if = {
-			limit = {
-				has_country_flag = fall_of_yidu
 				owns = 2249 # Fengtian
 			}
 			2249 = { cede_province = YUA }
@@ -98,43 +79,12 @@ country_event = {
 	option = {
 		name = "tianxia.2a"
 		set_country_flag = red_turban_incursion
-		if = {
-			limit = {
-				QII = { NOT = { has_country_flag = fall_of_yidu } }
-			}
-			730 = {
-				spawn_rebels = {
-					type = warlord_rebels
-					size = 2
-					friend = QII
-					leader = "Duo Guan"
-				}
-			}
-		}
-		if = {
-			limit = {
-				SNG = { has_country_flag = fall_of_yidu }
-			}
-			730 = {
-				spawn_rebels = {
-					type = warlord_rebels
-					size = 2
-					friend = SNG
-					leader = "Duo Guan"
-				}
-			}
-		}
-		if = {
-			limit = {
-				MNG = { has_country_flag = fall_of_yidu }
-			}
-			730 = {
-				spawn_rebels = {
-					type = warlord_rebels
-					size = 2
-					friend = MNG
-					leader = "Duo Guan"
-				}
+		730 = {
+			spawn_rebels = {
+				type = warlord_rebels
+				size = 2
+				friend = QII
+				leader = "Duo Guan"
 			}
 		}
 	}
@@ -200,6 +150,7 @@ country_event = {
 			capital_scope = {
 				remove_province_triggered_modifier = betray_chinese_lord_trigger
 			}
+			clr_country_flag = coup_discovered # stale flag from an earlier plot
 		}
 	}
 	
@@ -232,7 +183,8 @@ country_event = {
 	is_triggered_only = yes
 	
 	immediate = {
-		set_country_flag = coup_discovered
+		# Flag the plotting subject (not the overlord), it reads and clears it in tianxia.006/007
+		FROM = { set_country_flag = coup_discovered }
 	}
 	
 	option = { #Offer them a chance to peacefully surrender
@@ -254,10 +206,8 @@ country_event = {
 		custom_tooltip = coup_war.tt
 		hidden_effect = {
 			FROM = { country_event = { id = tianxia.009 } } #FROM is notified of war
-			FROM = {
-				free_vassal = ROOT
-			}
-			dependency_lost_color_effect = yes
+			free_vassal = FROM
+			FROM = { dependency_lost_color_effect = yes }
 		}
 		declare_war_with_cb = {
 			who = FROM
@@ -286,19 +236,21 @@ country_event = {
 	
 	desc = {
 		trigger = {
-			NOT = { overlord = { has_country_flag = coup_discovered } }
+			is_subject = yes
+			NOT = { has_country_flag = coup_discovered }
 		}
 		desc = tianxia.6.d
 	}
 	desc = {
 		trigger = {
-			overlord = { has_country_flag = coup_discovered }
+			has_country_flag = coup_discovered
 		}
 		desc = tianxia.6.db
 	}
 	desc = {
 		trigger = {
 			is_subject = no
+			NOT = { has_country_flag = coup_discovered }
 		}
 		desc = tianxia.6.dc
 	}
@@ -311,24 +263,24 @@ country_event = {
 		name = "tianxia.6a"#Rejoice
 		trigger = {
 			is_subject = yes
-			NOT = { overlord = { has_country_flag = coup_discovered } }
+			NOT = { has_country_flag = coup_discovered }
 		}
 		custom_tooltip = coup_success.tt
 		clr_country_flag = attempted_coup
 		hidden_effect = { overlord = { country_event = { id = tianxia.010 } } } # Overlord gets information that he is about to be inherited
-		FROM = { clr_country_flag = coup_discovered }
+		clr_country_flag = coup_discovered
 	}
 	option = {
 		name = "tianxia.6b"#To arms!
 		trigger = {
 			OR = {
-				overlord = { has_country_flag = coup_discovered }
+				has_country_flag = coup_discovered
 				is_subject = no
 			}
 		}
 		custom_tooltip = coup_failure.tt
 		#overlord = { country_event = { id = tianxia.005 } } #Overlord is notified of the attempted coup
-		FROM = { clr_country_flag = coup_discovered }
+		clr_country_flag = coup_discovered
 	}
 }
 
@@ -340,19 +292,21 @@ country_event = {
 	
 	desc = {
 		trigger = {
-			NOT = { overlord = { has_country_flag = coup_discovered } }
+			is_subject = yes
+			NOT = { has_country_flag = coup_discovered }
 		}
 		desc = tianxia.7.d
 	}
 	desc = {
 		trigger = {
-			overlord = { has_country_flag = coup_discovered }
+			has_country_flag = coup_discovered
 		}
 		desc = tianxia.7.db
 	}
 	desc = {
 		trigger = {
 			is_subject = no
+			NOT = { has_country_flag = coup_discovered }
 		}
 		desc = tianxia.7.dc
 	}
@@ -365,7 +319,7 @@ country_event = {
 		name = "tianxia.7a"#Rejoice
 		trigger = {
 			is_subject = yes
-			NOT = { overlord = { has_country_flag = coup_discovered } }
+			NOT = { has_country_flag = coup_discovered }
 		}
 		custom_tooltip = coup_safe.tt
 		clr_country_flag = attempted_coup
@@ -374,13 +328,13 @@ country_event = {
 		name = "tianxia.7b"#To arms!
 		trigger = {
 			OR = {
-				overlord = { has_country_flag = coup_discovered }
+				has_country_flag = coup_discovered
 				is_subject = no
 			}
 		}
 		custom_tooltip = coup_failure.tt
 		#overlord = { country_event = { id = tianxia.005 } } #Overlord is notified of the attempted coup
-		FROM = { clr_country_flag = coup_discovered }
+		clr_country_flag = coup_discovered
 		#set_global_flag = zhao_defects
 	}
 }
@@ -479,12 +433,13 @@ country_event = {
 		name = "tianxia.10a"
 		custom_tooltip = coup_annexation.tt
 		hidden_effect = {
+			# Our other vassals pass to the new ruler once the old court is gone (tianxia.061)
 			every_subject_country = {
 				limit = {
 					NOT = { tag = FROM }
 					isValidCountry = yes
 				}
-				country_event = { id = tianxia.011 days = 10 random = 3 }
+				set_country_flag = coup_transfer_subject
 			}
 		}
 		FROM = {
@@ -501,6 +456,7 @@ country_event = {
 					remove_core = ROOT
 					cede_province = PREV
 				}
+				hidden_effect = { country_event = { id = tianxia.061 days = 1 } }
 			}
 		}
 	}
@@ -512,7 +468,7 @@ country_event = {
 		custom_tooltip = coup_continuation.tt
 		hidden_effect = {
 			switch_tag = FROM
-			country_event = { id = tianxia.012 days = 1 }
+			FROM = { country_event = { id = tianxia.012 days = 1 } }
 		}
 	}
 }
@@ -555,13 +511,13 @@ country_event = {
 	title = "tianxia.12.t"
 	desc = {
 		trigger = {
-			num_of_subjects = 1
+			FROM = { num_of_subjects = 2 } # the old court has vassals besides us
 		}
 		desc = tianxia.12.d
 	}
 	desc = {
 		trigger = {
-			NOT = { num_of_subjects = 1 }
+			FROM = { NOT = { num_of_subjects = 2 } }
 		}
 		desc = tianxia.12.db
 	}
@@ -579,6 +535,14 @@ country_event = {
 					limit = {
 						exists = yes
 					}
+					# The old court's other vassals pass to us once it is gone (tianxia.061)
+					every_subject_country = {
+						limit = {
+							NOT = { tag = ROOT }
+							isValidCountry = yes
+						}
+						set_country_flag = coup_transfer_subject
+					}
 					every_province = {
 						limit = {
 							owned_by = PREV
@@ -591,10 +555,36 @@ country_event = {
 					}
 				}
 			}
-			every_subject_country = {
+			country_event = { id = tianxia.061 days = 1 }
+		}
+	}
+}
+
+#Coup aftermath: the old court's vassals pass to the new ruler, who then asks for their loyalty (tianxia.011)
+country_event = {
+	id = tianxia.061
+	title = "tianxia.11.t"
+	desc = "tianxia.11.d"
+	picture = DIPLOMACY_eventPicture
+
+	is_triggered_only = yes
+	hidden = yes
+
+	option = {
+		name = "tianxia.11b"
+		every_country = {
+			limit = { has_country_flag = coup_transfer_subject }
+			clr_country_flag = coup_transfer_subject
+			if = {
 				limit = {
-					NOT = { tag = FROM }
 					isValidCountry = yes
+					is_subject = no
+				}
+				ROOT = {
+					create_subject = {
+						subject_type = warlord
+						subject = PREV
+					}
 				}
 				country_event = { id = tianxia.011 days = 10 random = 3 }
 			}
@@ -798,6 +788,11 @@ country_event = {
 			}
 		}
 		name = "tianxia.15b"
+		# The defector asks while we are attacking it: make peace before taking it as a vassal
+		if = {
+			limit = { war_with = FROM }
+			hidden_effect = { white_peace = FROM }
+		}
 		create_subject = {
 			subject_type = warlord
 			who = FROM
