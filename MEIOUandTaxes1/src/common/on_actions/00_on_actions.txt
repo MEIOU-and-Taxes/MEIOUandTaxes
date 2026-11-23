@@ -2552,6 +2552,99 @@ on_yearly_pulse_4 = {
 			country_event = { id = red_turban.35 days = 1 }
 		}
 	}
+	# Nanboku-cho: weigh both courts' camps (court + its Japanese vassals, bigger clans count more)
+	# nbc_south/nbc_north (+ _m with a margin) live on JAP; read by the support_*_court AI and used for the civil war CB below
+	if = {
+		limit = {
+			tag = JAP
+			has_global_flag = nanbokucho
+		}
+		set_variable = { which = nbc_south value = 0 }
+		set_variable = { which = nbc_north value = 0 }
+		every_country = {
+			limit = {
+				culture_group = japanese_g
+				OR = {
+					tag = JAP
+					is_subject_of = JAP
+				}
+			}
+			JAP = { change_variable = { which = nbc_south value = 1 } }
+			if = {
+				limit = { num_of_cities = 3 }
+				JAP = { change_variable = { which = nbc_south value = 1 } }
+			}
+			if = {
+				limit = { num_of_cities = 6 }
+				JAP = { change_variable = { which = nbc_south value = 1 } }
+			}
+		}
+		event_target:japanese_shogun = {
+			every_country = {
+				limit = {
+					culture_group = japanese_g
+					OR = {
+						tag = PREV
+						is_subject_of = PREV
+					}
+				}
+				JAP = { change_variable = { which = nbc_north value = 1 } }
+				if = {
+					limit = { num_of_cities = 3 }
+					JAP = { change_variable = { which = nbc_north value = 1 } }
+				}
+				if = {
+					limit = { num_of_cities = 6 }
+					JAP = { change_variable = { which = nbc_north value = 1 } }
+				}
+			}
+		}
+		set_variable = { which = nbc_south_m which = nbc_south }
+		change_variable = { which = nbc_south_m value = 4 }
+		set_variable = { which = nbc_north_m which = nbc_north }
+		change_variable = { which = nbc_north_m value = 4 }
+		# The clearly stronger court gets a civil war CB against the other (every 5 years at most), so the split gets fought out (japan.3/japan.4)
+		if = {
+			limit = {
+				OR = {
+					NOT = { has_global_flag = nanbokucho_cb }
+					had_global_flag = { flag = nanbokucho_cb days = 1825 }
+				}
+				is_subject = no
+				event_target:japanese_shogun = {
+					exists = yes
+					is_subject = no
+					NOT = { tag = JAP }
+				}
+			}
+			if = {
+				limit = { check_variable = { which = nbc_south which = nbc_north_m } }
+				clr_global_flag = nanbokucho_cb
+				set_global_flag = nanbokucho_cb
+				event_target:japanese_shogun = {
+					JAP = {
+						add_casus_belli = {
+							target = PREV
+							type = cb_civil_war
+							months = 60
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = { check_variable = { which = nbc_north which = nbc_south_m } }
+				clr_global_flag = nanbokucho_cb
+				set_global_flag = nanbokucho_cb
+				event_target:japanese_shogun = {
+					add_casus_belli = {
+						target = JAP
+						type = cb_civil_war
+						months = 60
+					}
+				}
+			}
+		}
+	}
 }
 on_yearly_pulse_5 = {
 
