@@ -531,6 +531,27 @@ StatePropertyCapacityPerc = {
 		clr_country_flag = StatePropertyBurden
 	}
 }
+## State Property sale payout (province scope, ROOT = selling country)
+## Recalculates the price at decision time from BuyOutValue (Tmp keys may have been overwritten while the event was open),
+## stores it in Tmp_1 on ROOT (only one option runs, so all classes share it) for the payout, and takes it from the buyer's wealth
+## class = NO/CL/BG
+StatePropertyBuyOutPayLoyalty = {
+	set_key = { lhs = Tmp_1 value = 1 }
+	multiply_key = { lhs = Tmp_1 which = Prov_$class$Loy } # 0 to 100
+	multiply_key = { lhs = Tmp_1 value = 0.5 } # to have a 0 to 50 range
+	change_key = { lhs = Tmp_1 value = 50 } # make sure they offer at least 50%
+	multiply_key = { lhs = Tmp_1 value = 0.01 } # 50 to 100 -> 0.50 to 1.00
+	multiply_key = { lhs = Tmp_1 which = BuyOutValue } # Factor x Value
+	ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # payout uses the same price
+	subtract_key = { lhs = $class$_Wealth which = Tmp_1 }
+}
+## Same as above for buyers that always pay 65% (class = SF/RE)
+StatePropertyBuyOutPayFlat = {
+	set_key = { lhs = Tmp_1 value = 0.65 }
+	multiply_key = { lhs = Tmp_1 which = BuyOutValue }
+	ROOT = { set_key = { lhs = Tmp_1 which = PREV } } # payout uses the same price
+	subtract_key = { lhs = $class$_Wealth which = Tmp_1 }
+}
 StatePropertyAnnexation = {
 	if = {
 		limit = {
