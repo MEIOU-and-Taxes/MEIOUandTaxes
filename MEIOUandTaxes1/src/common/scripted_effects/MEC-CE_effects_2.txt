@@ -170,6 +170,13 @@ export_province_distance_sea_zone_effect = {
 		
 		
 		set_key = { lhs = tv_cost_port_to which = $who$ }
+		if = { # River mouth ports (TN_RiverSea) only pay half the port-to cost when departing
+			limit = {
+				$who$ = { has_province_flag = TN_RiverSea }
+			}
+			# we dont need tmp key here because we look from seazone into province and borrow keys
+			multiply_key = { lhs = tv_cost_port_to value = 0.5 }
+		}
 		change_key = { lhs = $which$ which = tv_cost_port_to }
 		if = {
 			limit = {
@@ -218,10 +225,16 @@ export_province_distance_land_province_effect = {
 				multiply_key = { lhs = $which$ which = tv_ship }
 			}
 			change_key = { lhs = $which$ which = tv_cost_port_embark }
-			if = {
+			if = { # River mouth ports (TN_RiverSea) only pay half the port-to cost when landing
 				limit = {
-					NOT = { has_province_flag = TN_RiverSea }
-				}
+					has_province_flag = TN_RiverSea
+				} # needs to use tmp key, as we else modify persisted value
+				set_key = { lhs = Tmp_8 which = tv_cost_port_to }
+				multiply_key = { lhs = Tmp_8 value = 0.5 }
+				change_key = { lhs = $which$ which = Tmp_8 }
+				set_key = { lhs = Tmp_8 value = 0 }
+			}
+			else = {
 				change_key = { lhs = $which$ which = tv_cost_port_to }
 			}
 		}
