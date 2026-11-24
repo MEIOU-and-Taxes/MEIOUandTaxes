@@ -4199,3 +4199,114 @@ country_event = {
 		add_reform_desire = -0.00001
 	}
 }
+
+#East Asian Printing Press Spawns (independent of the Christian printing press, gated at adm tech 30 ~1500)
+province_event = {
+	id = POP_DG.105
+	title = "AI_Event"
+	desc = "AI_Event"
+	picture = INVENTION_eventPicture
+	
+	hidden = yes
+	fire_only_once = yes
+	
+	trigger = {
+		NOT = { has_global_flag = printing_press_asia_g }
+		is_capital = yes
+		owner = {
+			Inst_Is_East_Asian_Print_Culture = yes
+			adm_tech = 30 # 1500
+		}
+		check_key = { lhs = TN_ProvSply41 value = 1 } # Knowledge production >= 1
+	}
+	
+	mean_time_to_happen = {
+		years = 1
+	}
+	
+	immediate = {
+		set_global_flag = printing_press_asia_g
+		set_province_flag = printing_press_p
+		save_global_event_target_as = asia_printing_press
+		owner = { set_country_flag = printing_press_c }
+	}
+	
+	option = {
+		owner = { country_event = { id = POP_DG.107 days = 1 } }
+		province_event = { id = POP_DG.106 days = 300 random = 10 }
+	}
+}
+
+#East Asian Printing Press spread, within East Asian print cultures
+province_event = {
+	id = POP_DG.106
+	title = "AI_Event"
+	desc = "AI_Event"
+	picture = INVENTION_eventPicture
+	
+	hidden = yes
+	is_triggered_only = yes
+	
+	immediate = {
+		set_province_flag = printing_press_p
+		if = {
+			limit = { owner = { NOT = { has_country_flag = printing_press_c } } }
+			owner = { set_country_flag = printing_press_c country_event = { id = POP_DG.108 } }
+		}
+	}
+
+	option = {
+		name = "AI_Event"
+		random_province = {
+			limit = { owner = { Inst_Is_East_Asian_Print_Culture = yes } is_capital = yes check_key = { lhs = TN_ProvSply41 value = 1 } NOT = { has_province_flag = printing_press_p } }
+			set_province_flag = printing_press_p
+			if = {
+				limit = { owner = { NOT = { has_country_flag = printing_press_c } } }
+				owner = { set_country_flag = printing_press_c country_event = { id = POP_DG.108 } }
+			}
+		}
+		random_province = {
+			limit = { owner = { Inst_Is_East_Asian_Print_Culture = yes } OR = { has_province_flag = TN_Important has_province_flag = TN_Major } check_key = { lhs = TN_ProvSply41 value = 1 } NOT = { has_province_flag = printing_press_p } }
+			set_province_flag = printing_press_p
+			if = {
+				limit = { owner = { NOT = { has_country_flag = printing_press_c } } }
+				owner = { set_country_flag = printing_press_c country_event = { id = POP_DG.108 } }
+			}
+		}
+	}
+	
+	after = {
+		random_province = {
+			limit = { owner = { Inst_Is_East_Asian_Print_Culture = yes } check_key = { lhs = TN_ProvSply41 value = 1 } NOT = { has_province_flag = printing_press_p } }
+			province_event = { id = POP_DG.106 days = 300 random = 10 }
+		}
+	}
+}
+
+#East Asian Printing Press notification for the founding country
+country_event = {
+	id = POP_DG.107
+	title = "POP_DG.107.title"
+	desc = "POP_DG.107.desc"
+	picture = INVENTION_eventPicture
+	
+	is_triggered_only = yes
+	
+	option = {
+		name = "POP_DG.107.opta"
+	}
+}
+
+#East Asian Printing Press notification for countries reached by the spread (POP_DG.106)
+country_event = {
+	id = POP_DG.108
+	title = "POP_DG.108.title"
+	desc = "POP_DG.108.desc"
+	picture = INVENTION_eventPicture
+
+	is_triggered_only = yes
+
+	option = {
+		name = "POP_DG.108.opta"
+	}
+}

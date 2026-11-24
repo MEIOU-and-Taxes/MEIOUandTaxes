@@ -240,8 +240,6 @@ Inst_Can_Columbian_Exchange_Country_Invent = {
 }
 Inst_Can_Columbian_Exchange_Prov = {
 	AND = {
-		Banking = 100
-
 		has_port = yes
 
 		has_local_modifier_value = { which = trade_value value = 2 }
@@ -255,61 +253,45 @@ Inst_Can_Columbian_Exchange_Embrace = {
 }
 
 Inst_Can_Casual_Literacy = {
-    is_year = 1420 # for performance reasons don't check before 1440, 10 years ahead of tech 24
+    is_year = 1430 # for performance reasons don't check before 1430, 20 years ahead of tech 25 (1450)
 }
 Inst_Can_Casual_Literacy_Country = {
-	AND = {
-		OR = {
-			is_year = 1440	# 10 Years after Printing press technology
-			adm_tech = 24	# Printing Press Technology
-			any_known_country = { has_institution = Casual_Literacy }
-		}
-		Inst_Can_Casual_Literacy_Country_Invent = yes
-	}
+	Inst_Can_Casual_Literacy_Country_Invent = yes
 }
 Inst_Can_Casual_Literacy_Spawn = {
 	custom_trigger_tooltip = {
 		tooltip = Requirements_Casual_Literacy
-		AND = {
-			OR = {
-				is_year = 1440	# 10 Years after Printing press technology
-				any_country = {
-					exists = yes
-					adm_tech = 24	# Printing Press Technology
-					Inst_Can_Casual_Literacy_Country_Invent = yes
-				}
-			}
+		OR = {
+			has_global_flag = printing_press_g		# set by POP_DG.101 when the printing press is invented in Christendom
+			has_global_flag = printing_press_asia_g	# set by POP_DG.105 when East Asian commercial print culture flourishes
 		}
 	}
 }
+Inst_Is_East_Asian_Print_Culture = { # country scope, historical woodblock / movable type print cultures
+	OR = {
+		culture_group = chinese_group
+		culture_group = korean_group
+		culture_group = japanese_g
+		culture_group = vietic
+	}
+}
 Inst_Can_Casual_Literacy_Country_Invent = {
-	Rights_HasGreater = { Right=BGCom Lvl=7 }
-	Rights_HasGreater = { Right=NOTen Lvl=3 }
+	# invention is tied to printing press provinces (POP_DG.101 / POP_DG.103)
+	any_owned_province = { has_province_flag = printing_press_p }
 }
 Inst_Can_Casual_Literacy_Prov = {
-	AND = {
-		#Banking = 100
-		
-		#continent = europe # Latin/Greek alphabetic script
-
-		check_key = { lhs = TN_ProvSply41 value = 0.001 }
-		
-		#Prod_HasProd = { Prod=30 }
-	}
+	has_province_flag = printing_press_p
 }
 Inst_Can_Casual_Literacy_Spread = {
 	#Banking = 100
-	owner = {
-		adm_tech = 24
-	}
-
+	always = yes 
 }
 Inst_Can_Casual_Literacy_Embrace = {
 	#has_institution = Banking
 }
 
 Inst_Can_Scientific_Method = {
-    is_year = 1560 # for performance reasons don't check before 1520, 40 years ahead of tech 40
+    is_year = 1560 # for performance reasons don't check before 1560, 40 years ahead of tech 40
 }
 
 Inst_Can_Scientific_Method_Country = {
@@ -342,7 +324,14 @@ Inst_Can_Scientific_Method_Country_Invent = {
 	AND = {
 		has_institution = Casual_Literacy
 		has_institution = Banking
-		#OR = {                                      #Enable when all institutions are in (AI stop picking ideas due to behind in tech from lacking institutions). Alternatively use personal freedom rights
+		OR = {
+			Privilege_NotHasGreater = { Privilege=CLLearning Lvl=2 }
+			AND = {
+				adm_tech = 44
+				Privilege_NotHasGreater = { Privilege=CLLearning Lvl=3 }
+			}
+		}
+		#OR = {                                     #Enable when all institutions are in (AI stop picking ideas due to behind in tech from lacking institutions). Alternatively use personal freedom rights
 		#	has_idea = innovativeness_ideas_4
 		#	has_idea = culture_ideas_7
 		##	has_idea = economic_ideas_7
@@ -365,13 +354,14 @@ Inst_Can_Scientific_Method_Spread = {
 		Casual_Literacy = 100
 		Banking = 100
 		owner = {
-			adm_tech = 38
+			Privilege_NotHasGreater = { Privilege=CLLearning Lvl=3 } # no spread with Entrenched Clerical Education
 		}
 	}
 }
 Inst_Can_Scientific_Method_Embrace = {
 	has_institution = Casual_Literacy
 	has_institution = Banking
+	Privilege_NotHasGreater = { Privilege=CLLearning Lvl=3 } # no embrace with Entrenched Clerical Education
 }
 
 Inst_Can_Global_Trade = {
@@ -416,10 +406,7 @@ Inst_Can_Global_Trade_Prov = {
 	}
 }
 Inst_Can_Global_Trade_Spread = {
-	OR = {
-		Banking = 100
-		has_local_modifier_value = { which = trade_value value = 3 }
-	}
+	Banking = 100
 }
 Inst_Can_Global_Trade_Embrace = {
 	has_institution = Banking
@@ -454,7 +441,12 @@ Inst_Can_Academia_Spawn = {
 	}
 }
 Inst_Can_Academia_Country_Invent = {
-	has_institution = Scientific_Method 
+	has_institution = Scientific_Method
+	Privilege_NotHasGreater = { Privilege=BGGuild Lvl=2 }
+	Privilege_HasGreater = { Privilege=BUExams Lvl=2 }
+	Privilege_HasGreater = { Privilege=BUOversight Lvl=1 }
+	Rights_NotHasGreater = { Right=BGGov Lvl=5 }
+	innovativeness = 50
 }
 Inst_Can_Academia_Prov = {
 	AND = {
@@ -464,10 +456,7 @@ Inst_Can_Academia_Prov = {
 	}
 }
 Inst_Can_Academia_Spread = {
-	AND = {
 		Scientific_Method = 100
-		owner = { adm_tech = 44 }
-	}
 }
 Inst_Can_Academia_Embrace = {
 	has_institution = Scientific_Method
@@ -569,8 +558,7 @@ Inst_Can_Industrialisation_Spread = {
 	AND = {
 		owner = { adm_tech = 50 }
 		Banking = 100
-		Scientific_Method = 100 
-		check_key = { lhs = Building_Industrial value = 1 }
+		Scientific_Method = 100
 	}
 }
 Inst_Can_Industrialisation_Embrace = {
