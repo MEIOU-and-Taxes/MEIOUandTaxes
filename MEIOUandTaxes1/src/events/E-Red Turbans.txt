@@ -360,7 +360,13 @@ country_event = {
 	hidden = yes
 	
 	trigger = {
-		has_country_flag = red_turban_reb
+		# Rebels, plus the Mandate holder and any other state in China proper,
+		# so the rivalry does not freeze once red_turban_reb expires or the Mandate is claimed
+		OR = {
+			has_country_flag = red_turban_reb
+			has_country_flag = China_Claim
+			has_country_flag = InMiddleKingdom
+		}
 		ai = yes
 		is_at_war = no
 		any_neighbor_country = {
@@ -377,11 +383,22 @@ country_event = {
 			NOT = { overlord_of = ROOT }
 			is_at_war = no
 			ai = yes
+			# Non-rebels only strike a clearly weaker neighbour
+			OR = {
+				ROOT = { has_country_flag = red_turban_reb }
+				ROOT = { army_strength = { who = PREV value = 1.2 } }
+			}
 		}
 	}
-	
-	mean_time_to_happen = { months = 12 }
-	
+
+	mean_time_to_happen = {
+		months = 12
+		modifier = {
+			factor = 5 # 60 months for non-rebels
+			NOT = { has_country_flag = red_turban_reb }
+		}
+	}
+
 	option = {
 		name = "red_turban.3a"
 		random_neighbor_country = {
@@ -399,6 +416,10 @@ country_event = {
 				NOT = { overlord_of = ROOT }
 				is_at_war = no
 				ai = yes
+				OR = {
+					ROOT = { has_country_flag = red_turban_reb }
+					ROOT = { army_strength = { who = PREV value = 1.2 } }
+				}
 			}
 			# The rebel strikes at its neighbour
 			ROOT = {
