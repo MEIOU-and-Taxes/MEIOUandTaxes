@@ -1,502 +1,852 @@
-Andes_1 = {
+#####################################################
+# Inca mission tree (Cuzco / Tawantinsuyu)
+#####################################################
+
+#####################################################
+# Column 1 - Collasuyu
+#####################################################
+inca_collasuyu_missions = {
 	slot = 1
 	generic = no
 	ai = yes
-
 	potential = {
+		NOT = { has_country_flag = andean_formed_tawantinsuyu }
 		OR = {
-			culture_group = andean_group
-			culture_group = north_central_tradition_group
+			tag = CZC
+			tag = INC
+			primary_culture = inca
+			primary_culture = quechuan
 		}
-
 	}
-	
-	Andes_1_start_Collasuyu = {
+
+	inca_lords_of_the_lake = {
 		icon = mission_city_of_victory_vij
-		required_missions = { Andes_2_Famous }
+		required_missions = { inca_chanka_war }
+		position = 3
+		provinces_to_highlight = {
+			area = antisuyu_area
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			antisuyu_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+		}
+		effect = {
+			upper_peru_area = {
+				limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+				add_permanent_claim = ROOT
+			}
+			2344 = {	# Cochabamba
+				if = {
+					limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+					add_permanent_claim = ROOT
+				}
+			}
+			inca_conquest_reward = { area = antisuyu_area }
+			add_prestige = 10
+		}
+	}
+
+	inca_charcas_cochabamba_porco = {
+		icon = mission_potosi_silver
+		required_missions = { inca_lords_of_the_lake }
 		position = 4
 		provinces_to_highlight = {
+			OR = {
+				area = upper_peru_area
+				province_id = 2344
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
+			upper_peru_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			2344 = { country_or_non_sovereign_subject_holds = ROOT }	# Cochabamba
 		}
 		effect = {
+			2344 = {
+				if = {
+					limit = { owned_by = ROOT }
+					add_or_extend_province_modifier_effect = { NAME = rural_development_efforts DURATION = 9125 }
+				}
+			}
+			inca_conquest_reward = { area = upper_peru_area }
+			add_adm_power = 50
+			add_years_of_income = 1
+			set_country_flag = inca_frontier_collasuyu
+			custom_tooltip = inca_frontier_collasuyu_tt
 		}
 	}
-	Andes_1_rule_Collasuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_1_start_Collasuyu }
-		position = 5
+
+	inca_across_the_atacama = {
+		icon = mission_colonial
+		required_missions = { inca_charcas_cochabamba_porco inca_mitmaqkuna }
+		position = 8
 		provinces_to_highlight = {
+			OR = {
+				province_id = 3445
+				province_id = 2342
+				province_id = 2349
+				area = tucuman_area
+			}
+			NOT = { owned_by = ROOT }
 		}
 		trigger = {
+			3445 = { owned_by = ROOT is_city = yes }	# Atacama
+			2342 = { owned_by = ROOT is_city = yes }	# Tarapaca
+			2349 = { owned_by = ROOT is_city = yes }	# Copiapo
+			calc_true_if = {
+				amount = 2
+				2348 = { owned_by = ROOT is_city = yes }	# Qulla
+				2347 = { owned_by = ROOT is_city = yes }	# Tilcara
+				2350 = { owned_by = ROOT is_city = yes }	# Pucara
+				2351 = { owned_by = ROOT is_city = yes }	# Chiletico
+			}
 		}
 		effect = {
+			2346 = {
+				if = {
+					limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+					add_permanent_claim = ROOT
+				}
+			}
+			add_army_tradition = 10
+			add_mil_power = 50
 		}
-	}	
+	}
+
+	inca_maule_frontier = {
+		icon = mission_european_fort
+		required_missions = { inca_across_the_atacama }
+		position = 9
+		provinces_to_highlight = {
+			OR = {
+				province_id = 5508
+				province_id = 2346
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			5508 = { owned_by = ROOT is_city = yes }	# Coquimbo
+			2346 = { country_or_non_sovereign_subject_holds = ROOT }	# Picunche
+		}
+		effect = {
+			add_prestige = 15
+			add_army_tradition = 10
+			central_chile_area = {
+				limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+				add_permanent_claim = ROOT
+			}
+		}
+	}
 }
-Andes_2 = {
+
+#####################################################
+# Column 2 - Cuzco: core and state
+#####################################################
+inca_cuzco_missions = {
 	slot = 2
 	generic = no
 	ai = yes
-
 	potential = {
+		NOT = { has_country_flag = andean_formed_tawantinsuyu }
 		OR = {
-			culture_group = andean_group
-			culture_group = north_central_tradition_group
+			tag = CZC
+			tag = INC
+			primary_culture = inca
+			primary_culture = quechuan
 		}
 	}
-	Andes_2_Local_Hegemony = {
-		icon = mission_restore_rule_over_mysore
+
+	inca_cuzco_valley = {
+		icon = mission_unite_home_region
 		required_missions = { }
 		position = 1
 		provinces_to_highlight = {
+			area = cuzco_area
+			is_city = yes
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
 		}
 		trigger = {
+			capital_scope = {
+				area_for_scope_province = {
+					type = all
+					OR = {
+						is_city = no
+						country_or_non_sovereign_subject_holds = ROOT
+					}
+				}
+			}
 		}
 		effect = {
+			3423 = { if = { limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } } add_permanent_claim = ROOT } }	# Andahuaylas
+			2067 = { if = { limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } } add_permanent_claim = ROOT } }	# Ayacucho
+			3421 = { if = { limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } } add_permanent_claim = ROOT } }	# Huancavelica
+			inca_conquest_reward = { area = cuzco_area }
+			if = {
+				limit = { has_dlc = "Third Rome" }
+				3425 = {	# Paucartampo
+					if = {
+						limit = { is_empty = yes }
+						add_siberian_construction = 100
+					}
+				}
+			}
+			else = {
+				add_country_modifier = { name = inca_valley_colonist duration = 5475 }
+			}
+			add_prestige = 10
 		}
 	}
-	Andes_2_First_Capital = {
-		icon = mission_sw_paquime
-		required_missions = { Andes_2_Local_Hegemony }
+
+	inca_chanka_war = {
+		icon = mission_ground_shaker
+		required_missions = { inca_cuzco_valley }
 		position = 2
 		provinces_to_highlight = {
+			OR = {
+				province_id = 3423
+				province_id = 2067
+				province_id = 3421
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			3423 = { country_or_non_sovereign_subject_holds = ROOT }	# Andahuaylas
+			2067 = { country_or_non_sovereign_subject_holds = ROOT }	# Ayacucho
+			3421 = { country_or_non_sovereign_subject_holds = ROOT }	# Huancavelica
+		}
+		effect = {
+			add_country_modifier = { name = land_enthusiasm_mission duration = 3650 }
+			add_prestige = 10
+			antisuyu_area = {
+				limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+				add_permanent_claim = ROOT
+			}
+			huanuco_area = {
+				limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+				add_permanent_claim = ROOT
+			}
+			inca_conquest_reward = { area = nazca_area }
+			inca_conquest_reward = { area = arequipa_area }
+		}
+	}
+
+	inca_tawantinsuyu = {
+		icon = mission_empire
+		required_missions = { inca_chanka_war }
+		position = 6
+		provinces_to_highlight = {
+			OR = {
+				region = peru_region
+				region = bolivia_region
+			}
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			OR = {
+				tag = INC
+				inca_can_form_tawantinsuyu = yes
+			}
+		}
+		effect = {
+			if = {
+				limit = { NOT = { tag = INC } }
+				country_event = { id = mission_event.051 }
+			}
+			else = {
+				add_prestige = 10
+			}
+		}
+	}
+
+	inca_mitmaqkuna = {
+		icon = mission_colonial
+		required_missions = { inca_tawantinsuyu }
+		position = 7
+		trigger = {
+			stability = 1
+		}
+		effect = {
+			if = {
+				limit = { has_dlc = "Third Rome" }
+				add_country_modifier = { name = inca_mitmaqkuna duration = -1 }
+				custom_tooltip = inca_mitmaqkuna_frontier_tt
+			}
+			else = {
+				add_country_modifier = { name = inca_mitmaqkuna_colonist duration = -1 }
+			}
+		}
+	}
+
+	inca_strangers_from_the_sea = {
+		icon = mission_iberian_conquistador
+		required_missions = { }
+		position = 8
+		provinces_to_highlight = {
+			province_id = 3408
+		}
+		trigger = {
+			stability = 1
+			3408 = {
+				owned_by = ROOT
+				HasBuildingOrBetter = { b1=fort_15th b2=fort_16th b3=fort_17th b4=fort_18th }
+			}
+			custom_trigger_tooltip = {
+				tooltip = inca_european_neighbour_tt
+				any_neighbor_country = {
+					OR = {
+						technology_group = western
+						is_colonial_nation = yes
+					}
+				}
+			}
+		}
+		effect = {
+			add_country_modifier = { name = inca_lessons_of_cajamarca duration = 7300 }
+			add_mil_power = 100
+		}
+	}
+}
+
+#####################################################
+# Column 3 - Chinchaysuyu
+#####################################################
+inca_chinchaysuyu_missions = {
+	slot = 3
+	generic = no
+	ai = yes
+	potential = {
+		NOT = { has_country_flag = andean_formed_tawantinsuyu }
+		OR = {
+			tag = CZC
+			tag = INC
+			primary_culture = inca
+			primary_culture = quechuan
+		}
+	}
+
+	inca_huanca_highlands = {
+		icon = mission_assemble_an_army
+		required_missions = { inca_chanka_war }
+		position = 3
+		provinces_to_highlight = {
+			OR = {
+				province_id = 3419
+				province_id = 820
+				province_id = 3416
+				province_id = 3413
+				province_id = 3415
+				province_id = 819
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			3419 = { country_or_non_sovereign_subject_holds = ROOT }	# Yauyo
+			820 = { country_or_non_sovereign_subject_holds = ROOT }		# Huancayo
+			3416 = { country_or_non_sovereign_subject_holds = ROOT }	# Chinchaycocha
+			3413 = { country_or_non_sovereign_subject_holds = ROOT }	# Huayla
+			3415 = { country_or_non_sovereign_subject_holds = ROOT }	# Cajatampo
+			819 = { country_or_non_sovereign_subject_holds = ROOT }		# Huanuco
+		}
+		effect = {
+			if = {
+				limit = { national_focus = ADM }
+				add_country_modifier = { name = inca_territorial_integration duration = 5475 }
+			}
+			else_if = {
+				limit = { national_focus = MIL }
+				add_country_modifier = { name = inca_four_parts_together duration = 5475 }
+			}
+			else = {
+				add_country_modifier = { name = inca_conquest_by_intimidation duration = 5475 }
+			}
+			816 = { if = { limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } } add_permanent_claim = ROOT } }	# Pachacamac
+			nazca_area = {
+				limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+				add_permanent_claim = ROOT
+			}
+			inca_conquest_reward = { area = huanuco_area }
+		}
+	}
+
+	inca_oracle_of_pachacamac = {
+		icon = mission_hands_praying
+		required_missions = { inca_huanca_highlands }
+		position = 4
+		provinces_to_highlight = {
+			OR = {
+				province_id = 816
+				province_id = 1491
+				province_id = 2066
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			816 = { country_or_non_sovereign_subject_holds = ROOT }		# Pachacamac
+			1491 = { country_or_non_sovereign_subject_holds = ROOT }	# Ica
+			2066 = { country_or_non_sovereign_subject_holds = ROOT }	# Nazca
+		}
+		effect = {
+			add_country_modifier = { name = inca_oracle_of_pachacamac duration = 7300 }
+			add_prestige = 10
+			816 = { add_province_modifier = { name = mis_prov_growth duration = 9125 } }
+			chimor_area = {
+				limit = { NOT = { country_or_non_sovereign_subject_holds = ROOT } }
+				add_permanent_claim = ROOT
+			}
+		}
+	}
+
+	inca_fall_of_chimor = {
+		icon = mission_conquer_50_development
+		required_missions = { inca_oracle_of_pachacamac }
+		position = 5
+		provinces_to_highlight = {
+			OR = {
+				area = chimor_area
+				province_id = 3408
+				province_id = 804
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			chimor_area = {
+				type = all
+				country_or_non_sovereign_subject_holds = ROOT
+			}
+			3408 = { country_or_non_sovereign_subject_holds = ROOT }	# Tumbez
+			804 = { country_or_non_sovereign_subject_holds = ROOT }		# Sechura
+		}
+		effect = {
+			add_years_of_income = 1
+			add_prestige = 15
+			inca_conquest_reward = { area = chimor_area }
+			inca_conquest_reward = { area = ayavaca_area }
+		}
+	}
+
+	inca_cajamarca_chachapoyas = {
+		icon = mission_conquer_5_states
+		required_missions = { inca_fall_of_chimor inca_tawantinsuyu }
+		position = 7
+		provinces_to_highlight = {
+			OR = {
+				province_id = 811
+				province_id = 3412
+				province_id = 813
+				province_id = 807
+				province_id = 3407
+				province_id = 815
+			}
+			NOT = { country_or_non_sovereign_subject_holds = ROOT }
+		}
+		trigger = {
+			811 = { country_or_non_sovereign_subject_holds = ROOT }		# Kasha Marka
+			3412 = { country_or_non_sovereign_subject_holds = ROOT }	# Huamachugo
+			813 = { country_or_non_sovereign_subject_holds = ROOT }		# Panatahuas
+			807 = { country_or_non_sovereign_subject_holds = ROOT }		# Chachapoyas
+			3407 = { country_or_non_sovereign_subject_holds = ROOT }	# Moyopampa
+			815 = { country_or_non_sovereign_subject_holds = ROOT }		# Ucayali
+		}
+		effect = {
+			quito_area = {
+				limit = {
+					is_city = yes
+					NOT = { country_or_non_sovereign_subject_holds = ROOT }
+				}
+				add_permanent_claim = ROOT
+			}
+			add_dip_power = 50
+			inca_conquest_reward = { area = cajamarca_area }
+			inca_conquest_reward = { area = ucayali_area }
+		}
+	}
+
+	inca_northern_court = {
+		icon = mission_restore_rule_over_mysore
+		required_missions = { inca_cajamarca_chachapoyas inca_mitmaqkuna }
+		position = 8
+		provinces_to_highlight = {
+			area = quito_area
+			is_city = yes
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			793 = { country_or_non_sovereign_subject_holds = ROOT }		# Quito
+			796 = { country_or_non_sovereign_subject_holds = ROOT }		# Hatun Canar (Tomebamba)
+			3403 = { country_or_non_sovereign_subject_holds = ROOT }	# Atacames
+			797 = { country_or_non_sovereign_subject_holds = ROOT }		# Huancavilcas
+			3404 = { country_or_non_sovereign_subject_holds = ROOT }	# Manabi
+			quito_area = {
+				owned_by = ROOT
+				Infra_HasGreater = { Infra=Capitol Lvl=1 }
+			}
+		}
+		effect = {
+			add_prestige = 10
+			add_mil_power = 50
+			inca_conquest_reward = { area = quito_area }
+			set_country_flag = inca_frontier_north
+			custom_tooltip = inca_frontier_north_tt
+		}
+	}
+
+	inca_beyond_the_ancasmayo = {
+		icon = mission_conquer_5_states
+		required_missions = { inca_northern_court }
+		position = 9
+		provinces_to_highlight = {
+			OR = {
+				province_id = 795
+				province_id = 3402
+			}
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			795 = { owned_by = ROOT is_city = yes }		# Pasto
+			3402 = { owned_by = ROOT is_city = yes }	# Tumaco
+		}
+		effect = {
+			bogota_area = {
+				limit = {
+					is_city = yes
+					NOT = { country_or_non_sovereign_subject_holds = ROOT }
+				}
+				add_permanent_claim = ROOT
+			}
+			add_prestige = 10
+			add_adm_power = 50
+		}
+	}
+}
+
+#####################################################
+# Column 4 - Cuntisuyu and Antisuyu (settlement after Mitmaqkuna)
+#####################################################
+inca_cunti_anti_missions = {
+	slot = 4
+	generic = no
+	ai = yes
+	potential = {
+		NOT = { has_country_flag = andean_formed_tawantinsuyu }
+		OR = {
+			tag = CZC
+			tag = INC
+			primary_culture = inca
+			primary_culture = quechuan
+		}
+	}
+
+	inca_navel_of_the_world = {
+		icon = mission_sw_paquime
+		required_missions = { inca_chanka_war }
+		position = 3
+		provinces_to_highlight = {
+			province_id = 2068
 		}
 		trigger = {
 			capital_scope = {
 				Infra_HasGreater = { Infra=Amenities Lvl=3 }
 				Infra_HasGreater = { Infra=Pathing Lvl=3 }
+				HasBuildingOrBetter = { b1=fort_14th b2=fort_15th b3=fort_16th b4=fort_17th b5=fort_18th }
 			}
 		}
 		effect = {
 			capital_scope = {
-				add_or_extend_province_modifier_effect = { NAME = urban_development_efforts	DURATION = 9125 }
+				add_or_extend_province_modifier_effect = { NAME = urban_development_efforts DURATION = 9125 }
 				custom_tooltip = urban_development_efforts_tt
 			}
-		}
-	}	
-	Andes_2_Famous = {
-		icon = mission_ground_shaker
-		required_missions = { Andes_2_First_Capital }
-		position = 3
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
+			add_legitimacy = 10
+			add_prestige = 10
 		}
 	}
-	Andes_2_start_Chinchansuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_2_Famous }
-		position = 4
+
+	inca_cuntisuyu_coast = {
+		icon = mission_exploration
+		required_missions = { inca_mitmaqkuna }
+		position = 8
 		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-		}
-	}
-	Andes_2_rule_Chinchansuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_2_start_Chinchansuyu }
-		position = 5
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-		}
-	}
-	Andes_2_claim_Tawintinsuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_1_rule_Collasuyu Andes_2_rule_Chinchansuyu Andes_3_rule_Antisuyu }
-		position = 6
-		provinces_to_highlight = {
-			region = peru_region
-			region = bolivia_region
-		}
-		trigger = {
-			check_variable = { which = "Cores_on_Inca" value = 25 }
-			custom_trigger_tooltip = {tooltip ="is_free_or_tributary_trigger_tooltip" is_free_or_tributary_trigger = yes }
-			owns_core_province = 2068		# Cuzco
 			OR = {
-				owns_core_province = 816		# Pachacamac
-				AND = {
-					816 = { owned_by = CHC }
-					alliance_with = CHC
+				province_id = 3429
+				province_id = 2339
+				province_id = 3430
+				province_id = 3431
+				province_id = 3432
+				province_id = 3433
+			}
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			calc_true_if = {
+				amount = 5
+				3429 = { owned_by = ROOT is_city = yes }	# Parinacocha
+				2339 = { owned_by = ROOT is_city = yes }	# Arequipa
+				3430 = { owned_by = ROOT is_city = yes }	# Yauca
+				3431 = { owned_by = ROOT is_city = yes }	# Atico
+				3432 = { owned_by = ROOT is_city = yes }	# Camana
+				3433 = { owned_by = ROOT is_city = yes }	# Moquegua
+			}
+		}
+		effect = {
+			2339 = {
+				if = {
+					limit = { owned_by = ROOT }
+					add_or_extend_province_modifier_effect = { NAME = rural_development_efforts DURATION = 9125 }
 				}
 			}
+			add_dip_power = 50
+			add_prestige = 10
+		}
+	}
+
+	inca_into_the_antisuyu = {
+		icon = mission_explore_the_world
+		required_missions = { inca_cuntisuyu_coast }
+		position = 9
+		provinces_to_highlight = {
 			OR = {
-				owns_core_province = 820		# Huancayo
-				owns_core_province = 3435		# lupaca
+				province_id = 2338
+				province_id = 2341
+				province_id = 3417
+				province_id = 3418
 			}
-			OR = {
-				owns_core_province = 811		# Kasha Marka
-				owns_core_province = 3436		# Golla
+			NOT = { owned_by = ROOT }
+		}
+		trigger = {
+			2338 = { owned_by = ROOT is_city = yes }	# Hatun Colla
+			2341 = { owned_by = ROOT is_city = yes }	# Chuquipaya
+			3417 = { owned_by = ROOT is_city = yes }	# Chupacho
+			3418 = { owned_by = ROOT is_city = yes }	# Satipo
+		}
+		effect = {
+			add_prestige = 10
+			add_mil_power = 50
+			custom_tooltip = inca_ucayali_terraces_tt
+			hidden_effect = {
+				every_owned_province = {
+					limit = {
+						OR = {
+							province_id = 3417
+							province_id = 807
+						}
+						NOT = { has_province_modifier = terrace_farm }
+					}
+					add_province_modifier = { name = terrace_farm duration = -1 }
+				}
 			}
-			is_at_war = no
-		}
-		effect = {
-			country_event = { id = mission_event.051 }
 		}
 	}
 }
-Andes_3 = {
-	slot = 3
-	generic = no
-	ai = yes
 
-	potential = {
-		OR = {
-			culture_group = andean_group
-			culture_group = north_central_tradition_group
-		}
-
-	}
-
-	Andes_3_start_Antisuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_2_Famous }
-		position = 4
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-		}
-	}
-	Andes_3_rule_Antisuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_3_start_Antisuyu }
-		position = 5
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-		}
-	}	
-}
-Andes_4 = {
-	slot = 4
-	generic = no
-	ai = yes
-
-	potential = {
-		OR = {
-			culture_group = andean_group
-			culture_group = north_central_tradition_group
-		}
-
-	}
-
-	Andes_4_start_Cuntisuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_2_Famous }
-		position = 4
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-		}
-	}
-	Andes_4_rule_Cuntisuyu = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_4_start_Cuntisuyu }
-		position = 5
-		provinces_to_highlight = {
-		}
-		trigger = {
-		}
-		effect = {
-		}
-	}
-	Andes_4_settle_AntiCuntiCenter = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_4_rule_Cuntisuyu Andes_3_rule_Antisuyu }
-		position = 5
-		provinces_to_highlight = {
-		}
-		trigger = {
-			#owns_core_province = 2068		# Cuzco
-			#owns_core_province = 2068		# Cuzco
-			#owns_core_province = 2068		# Cuzco
-		}
-		effect = {
-		}
-	} 		
-}
-Andes_5 = {
+#####################################################
+# Column 5 - Commerce
+#####################################################
+inca_commerce_missions = {
 	slot = 5
 	generic = no
 	ai = yes
-
 	potential = {
 		OR = {
+			tag = CZC
+			tag = INC
 			culture_group = andean_group
 			culture_group = north_central_tradition_group
 		}
-
 	}
 
-	Andes_5_Expand_Trade = {
-		icon = mission_city_of_victory_vij
+	inca_expand_trade = {
+		icon = mission_dominate_home_trade_node
 		required_missions = { }
 		position = 1
-		provinces_to_highlight = {
-		}
 		trigger = {
 			Rights_HasGreater = { Right=BGCom Lvl=5 }
 		}
 		effect = {
-			add_country_modifier = {
-				name = monarchy_stabilise_country_mod
-				duration = 7300 #20 years
-			}
+			add_country_modifier = { name = merchant_society duration = 9125 }
 		}
 	}
 
-	Andes_5_Embrace_Commerce = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_5_Expand_Trade Andes_6_Expand_Burgher_Power }
+	inca_andean_markets = {
+		icon = mission_high_income
+		required_missions = { inca_expand_trade inca_state_power }
 		position = 2
 		provinces_to_highlight = {
+			OR = {
+				AND = {
+					OR = {
+						ROOT = { tag = CZC }
+						ROOT = { tag = INC }
+					}
+					OR = {
+						province_id = 2068
+						province_id = 816
+					}
+				}
+				AND = {
+					NOT = { ROOT = { tag = CZC } }
+					NOT = { ROOT = { tag = INC } }
+					is_capital_of = ROOT
+				}
+			}
 		}
 		trigger = {
-			Rights_HasGreater = { Right=BGCom Lvl=6 }		
-		}
-		effect = {
+			Rights_HasGreater = { Right=BGCom Lvl=6 }
 			if = {
 				limit = {
-					Rights_Has = { Right=BGCom Lvl=6 }
+					OR = {
+						tag = CZC
+						tag = INC
+					}
 				}
-				Rights_BGCom7Apply = yes
+				2068 = { is_strongest_trade_power = ROOT }	# Cuzco
+				816 = { is_strongest_trade_power = ROOT }	# Pachacamac
 			}
+			else = {
+				capital_scope = { is_strongest_trade_power = ROOT }
+			}
+		}
+		effect = {
+			add_country_modifier = { name = inca_andean_markets duration = 7300 }
+			add_dip_power = 50
 		}
 	}
 
-	Andes_5_Establish_Markets = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_5_Embrace_Commerce }
+	inca_coinage_and_commerce = {
+		icon = mission_war_chest
+		required_missions = { inca_andean_markets }
 		position = 3
-		provinces_to_highlight = {
-		}
 		trigger = {
-			816 = {
-				is_strongest_trade_power = ROOT
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			2068 = {
-				is_strongest_trade_power = ROOT
-				country_or_non_sovereign_subject_holds = ROOT
-			}			
-		}
-		effect = {
-			add_country_modifier = {
-				name = growing_economy
-				duration = 7300 #20 years
-			}
-		}
-	}
-	
-	Andes_5_Adopt_Precious_Metal_Barter = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_5_Establish_Markets Andes_2_claim_Tawintinsuyu }
-		position = 7
-		provinces_to_highlight = {
-		}
-		trigger = {
-			full_idea_group = trade_ideas
-			3504 = {
-				is_strongest_trade_power = ROOT
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-		}
-		effect = {
 			if = {
-				limit = {
-					Rights_Has = { Right=BGCom Lvl=7 }
+				limit = { tag = CZC }
+				custom_trigger_tooltip = {
+					tooltip = inca_requires_tawantinsuyu_tt
+					tag = INC
 				}
-				Rights_BGCom8Apply = yes
-			}			
-		}
-	}
-	
-	Andes_5_Introduce_Coinage = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_5_Adopt_Precious_Metal_Barter }
-		position = 8
-		provinces_to_highlight = {
-		}
-		trigger = {
-			816 = {
-				is_strongest_trade_power = ROOT
-				country_or_non_sovereign_subject_holds = ROOT
 			}
-			2068 = {
-				is_strongest_trade_power = ROOT
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			3504 = {
-				is_strongest_trade_power = ROOT
-				country_or_non_sovereign_subject_holds = ROOT
-			}
-			Rights_HasGreater = { Right=BGCom Lvl=8 }			
+			Rights_HasGreater = { Right=BGCom Lvl=8 }
+			has_institution = Banking
 		}
 		effect = {
-			add_country_modifier = {
-				name = the_unknown_frontier
-				duration = 7300 #20 years
-			}
-		}
-	}
-	
-	Andes_5_Commercialization = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_5_Introduce_Coinage }
-		position = 9
-		provinces_to_highlight = {
-		}
-		trigger = {
-			has_institution = Banking		
-		}
-		effect = {
+			add_years_of_income = 1
 			if = {
-				limit = { 
-					has_country_modifier = AndeanNoMarketEconomy
-				}
+				limit = { has_country_modifier = AndeanNoMarketEconomy }
+				custom_tooltip = inca_andean_market_loss_tt
 				remove_country_modifier = AndeanNoMarketEconomy
 				add_country_modifier = { name = AndeanMarketReformed duration = -1 }
 			}
 		}
 	}
 }
-Andes_6 = {
+
+#####################################################
+# Column 6 - State and khipu
+#####################################################
+inca_state_missions = {
 	slot = 6
 	generic = no
 	ai = yes
-
 	potential = {
 		OR = {
+			tag = CZC
+			tag = INC
 			culture_group = andean_group
 			culture_group = north_central_tradition_group
 		}
 	}
 
-	Andes_6_Expand_Burgher_Power = {
-		icon = mission_city_of_victory_vij
+	inca_state_power = {
+		icon = mission_noble_council
 		required_missions = { }
 		position = 1
-		provinces_to_highlight = {
-		}
 		trigger = {
 			Elite_HasLoy = { Elite=BG Value=50 }
-		}
-		effect = {
-			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
-		}
-	}
-
-	Andes_6_Develop_State_Power = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_6_Expand_Burgher_Power }
-		position = 2
-		provinces_to_highlight = {
-		}
-		trigger = {
 			custom_trigger_tooltip = {
 				tooltip = gen_hre_centralize_realm.tooltip
 				check_key = { lhs = Prov_BUPow value = 20 }
 			}
 		}
 		effect = {
-			add_adm_power = 100
-			add_dip_power = 100
+			Public_ChangePowerbrokerLoyaltyTooltipProv = { Powerbroker=BG Amount=10 }
+			add_adm_power = 50
+			add_dip_power = 50
 		}
 	}
 
-	Andes_6_Formalize_Administration = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_6_Develop_State_Power }
-		position = 3
-		provinces_to_highlight = {
-		}
+	inca_formalize_administration = {
+		icon = mission_plc_governance_act
+		required_missions = { inca_state_power }
+		position = 2
 		trigger = {
 			Privilege_HasGreater = { Privilege=BUStructure Lvl=2 }
 		}
 		effect = {
-			add_corruption = -10		
+			add_corruption = -10
 		}
-	} 
-	
-	Andes_6_Investigate_Writing = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_5_Introduce_Coinage }
-		position = 9
-		provinces_to_highlight = {
+	}
+
+	inca_khipukamayuq = {
+		icon = mission_noble_council
+		required_missions = { inca_formalize_administration }
+		position = 3
+		trigger = {
+			Privilege_HasGreater = { Privilege=BUEnlist Lvl=1 }
 		}
+		effect = {
+			add_country_modifier = { name = inca_khipukamayuq duration = 7300 }
+		}
+	}
+
+	inca_investigate_writing = {
+		icon = mission_early_modern_university
+		required_missions = { inca_khipukamayuq }
+		position = 4
 		trigger = {
 			OR = {
 				guatemala_area = {
 					has_discovered = ROOT
 				}
 				has_institution = Columbian_Exchange
+				Elite_HasPow = { Elite=BU Value=60 }
 			}
 		}
 		effect = {
 			add_adm_power = 100
 		}
 	}
-	
-	Andes_6_Collect_Khipu_Varieties = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_6_Investigate_Writing }
-		position = 10
-		provinces_to_highlight = {
-		}
+
+	inca_collect_khipu_varieties = {
+		icon = mission_noble_council
+		required_missions = { inca_investigate_writing }
+		position = 5
 		trigger = {
 			Rights_NotRecovering = yes
 		}
 		effect = {
-			add_country_modifier = {
-				name = Reform_CD_3
-				duration = 3650
-			}
-			add_country_modifier = {
-				name = Reform_CD
-				duration = 3650
-			}		
+			add_country_modifier = { name = Reform_CD_3 duration = 3650 }
+			add_country_modifier = { name = Reform_CD duration = 3650 }
 		}
 	}
-	
-	Andes_6_Khipu_Reformed = {
-		icon = mission_city_of_victory_vij
-		required_missions = { Andes_6_Collect_Khipu_Varieties }
-		position = 11
-		provinces_to_highlight = {
-		}
+
+	inca_khipu_scripture = {
+		icon = medici_bank_ledgers
+		required_missions = { inca_collect_khipu_varieties }
+		position = 6
 		trigger = {
 			Rights_NotRecovering = yes
 		}
 		effect = {
 			if = {
-				limit = { 
-					has_country_modifier = khipu_knot_writing
-				}
+				limit = { has_country_modifier = khipu_knot_writing }
 				remove_country_modifier = khipu_knot_writing
 				add_country_modifier = { name = khipu_scripture duration = -1 }
 			}
-			add_country_modifier = {
-				name = Reform_CD_3
-				duration = 3650
-			}
-			add_country_modifier = {
-				name = Reform_CD
-				duration = 3650
-			}			
+			add_country_modifier = { name = Reform_CD_3 duration = 3650 }
+			add_country_modifier = { name = Reform_CD duration = 3650 }
 		}
-	}	
-	
+	}
 }
