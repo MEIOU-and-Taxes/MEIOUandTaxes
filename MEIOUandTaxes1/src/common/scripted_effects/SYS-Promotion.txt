@@ -13,13 +13,8 @@ Promotion_Calc = {
 	[[RE]
 	Promotion_DeriveResidentRestingPoint = yes
 	Promotion_REPromotion = yes
-	Promotion_REDemotion = yes
+	#Promotion_REDemotion = yes
 	]
-	## Calc Nobility Promotion/Demotion - output in % of total pop - based on government
-	#Promotion_DeriveNobleRestingPoint = yes
-	#Promotion_NOPromotion = yes 
-	#Promotion_NODemotion = yes
-
 	[[BG]
 	## Calc Burgher Promotion/Demotion - output in k pop - based on ideal resting point
 	# Only if an urban commerce industry is present (provides throughput and burgher labor demand)
@@ -33,16 +28,22 @@ Promotion_Calc = {
 		Promotion_BGDemotion = yes
 	}
 	]
-	## Calc Clergy Promotion/Demotion - output in % of total pop
-	#Promotion_CLPromotion = yes
-	#Promotion_CLDemotion = yes
-
 	## Calc Nomad Promotion into Peasants
 	[[NM]
 	Promotion_GetNomadRestingPoint = yes
 	Promotion_NMPromotion = yes
 	]
-
+	[[CL]
+	## Calc Clergy Promotion/Demotion - output in % of total pop
+	Promotion_DeriveClergyRestingPoint = yes 
+	Promotion_CLPromotion = yes
+	]
+	[[NO]
+	## Calc Nobility Promotion/Demotion
+	Promotion_DeriveNobleRestingPoint = yes
+	#Promotion_NOPromotion = yes 
+	Promotion_NODemotion = yes
+	]
 	Promotion_Handle = yes # execute handling of promotion, moving pops around, storing values
 
 	Promotion_ResetTmp = yes # Reset Tmp Values
@@ -218,229 +219,93 @@ Promotion_REPromotion = {
 	}
 }
 
-Promotion_REDemotion = {
-	
+Promotion_REDemotion = {	
 }
 
 Promotion_DeriveNobleRestingPoint = {
-	if = { # Blood Nobility
+	if = {
 		limit = {
-			owner = {
-				has_reform = Pol_Nobility1
-				#is_key_equal = { lhs = Pol_Nobility value = 0 } 
-			}
+			check_key = { lhs = Class_Total value = 0.05 } # just in case, before end up in zeros
 		}
-		set_key = { lhs = Tmp_1 value = 0.0125 } # 1 % Nobility of Total Population with Blood nobility
-	}
-	else_if = { # Possession Nobility
-		limit = {
-			owner = { 
-				has_reform = Pol_Nobility2
-				#is_key_equal = { lhs = Pol_Nobility value = 1 } 
-			}
-		}
+		set_key = { lhs = Tmp_1 value = 0.015 } # 1.5% base Resting Point
+
+		change_key = { lhs = Tmp_1 which = Modi_IdealNobleSizePerc_Add }
+
+		# Get their intended total population
+		set_key = { lhs = Ideal_NobleSize which = Class_Total }
+		multiply_key = { lhs = Ideal_NobleSize which = Tmp_1 }
+
 		if = {
-			limit = {
-				check_key = { lhs = SF_FillLifeC value = 1 }
+			limit = { 
+				is_capital = yes
 			}
-			# Get SF LifeC fulfilment modifier: (SF_FillLifeC * 0.5 + 0.5) * NO_Ratio * 0.01 in % as Nobility of Total Population
-			set_key = { lhs = Tmp_1 which = SF_FillLifeC }
-			multiply_key = { lhs = Tmp_1 value = 0.5 }
-			change_key = { lhs = Tmp_1 value = 0.5 }
-			set_key = { lhs = Tmp_2 which = NO_Ratio }
-			multiply_key = { lhs = Tmp_1 which = Tmp_2 }
-			# Upper lower case handling: [1,10]
-			if = {
-				limit = {
-					check_key = { lhs = Tmp_1 value = 10 }
-				}
-				set_key = { lhs = Tmp_1 value = 10 }
-			}
-			else_if = {
-				limit = {
-					NOT = { check_key = { lhs = Tmp_1 value = 1 } }
-				}
-				set_key = { lhs = Tmp_1 value = 1 }
-			}
-			multiply_key = { lhs = Tmp_1 value = 0.01 }
-		}
-		else = { # if below 100% life fulfillment 1 % Nobility of Total Population
-			set_key = { lhs = Tmp_1 value = 0.01 }
-		}
-	}
-	else_if = { # Office Nobility
-		limit = {
 			owner = {
-				has_reform = Pol_Nobility3
-				#is_key_equal = { lhs = Pol_Nobility value = 2 } 
+				trigger_switch = {
+					on_trigger = government_rank
+					6 = { PREV = { change_key = { lhs = Ideal_NobleSize value = 6.4 } } }
+					5 = { PREV = { change_key = { lhs = Ideal_NobleSize value = 3.2 } } }
+					4 = { PREV = { change_key = { lhs = Ideal_NobleSize value = 1.6 } } }
+					3 = { PREV = { change_key = { lhs = Ideal_NobleSize value = 0.8  } } }
+					2 = { PREV = { change_key = { lhs = Ideal_NobleSize value = 0.4  } } }
+					1 = { PREV = { change_key = { lhs = Ideal_NobleSize value = 0.2  } } }
+				}
 			}
 		}
-
-		# Get ideal size based of: (0.25 * StateReach + 5) * 0.001
-		set_key = { lhs = Tmp_1 value = 0.25 }
-		multiply_key = { lhs = Tmp_1 which = Prov_BUPow }
-		change_key = { lhs = Tmp_1 value = 5 }
-		multiply_key = { lhs = Tmp_1 value = 0.001 }
 	}
-	else = { # None
-		set_key = { lhs = Tmp_1 value = 0.005 }
+	else = { # too few pops
+		set_key = { lhs = Ideal_NobleSize value = 0 }
 	}
-
-	# Noble Power Additive % - NO Power/1000 * 0.2
-	set_key = { lhs = Tmp_2 which = Prov_NOPow }
-	multiply_key = { lhs = Tmp_2 value = 0.001 }
-	multiply_key = { lhs = Tmp_2 value = 0.2 }
-
-	change_key = { lhs = Tmp_1 which = Tmp_2}
-
-	# Get their intended % of total population
-	set_key = { lhs = Ideal_NobleSize which = Class_Total }
-	multiply_key = { lhs = Ideal_NobleSize which = Tmp_1 }
 }
 # Handle Promotion speed
 Promotion_NOPromotion = {
-	if = { # Check if NO_Total is at least this
-		limit = {
-			NOT = { check_key = { lhs = NO_Total which = Ideal_NobleSize } } # Nobles < Ideal Size
-		}
-
-		set_key = { lhs = Tmp_0 value = 0.015 } # Base speed of change 1% of dif <- use this for balance
-
-		# Get difference 
-		set_key = { lhs = Tmp_1 which = Ideal_NobleSize }
-		subtract_key = { lhs = Tmp_1 which = NO_Total }
-
-		# Get NO LifeC fulfilment modifier: ((-NOFillLifeC + 0.8) / -NOFillLifeC) * 0.01
-		set_key = { lhs = Tmp_2 which = NO_FillLifeC }
-		multiply_key = { lhs = Tmp_2 value = -1 }
-		change_key = { lhs = Tmp_2 value = 0.8 }
-		set_key = { lhs = Tmp_3 which = NO_FillLifeC }
-		multiply_key = { lhs = Tmp_3 value = -1 }
-		divide_key = { lhs = Tmp_2 which = Tmp_3 }
-		multiply_key = { lhs = Tmp_2 value = 0.01 }
-
-		# Upper lower case handling: [-0.01,0.02]
-		if = {
-			limit = {
-				check_key = { lhs = Tmp_2 value = 0.02 }
-			}
-			set_key = { lhs = Tmp_2 value = 0.02 }
-		}
-		else_if = {
-			limit = {
-				NOT = { check_key = { lhs = Tmp_2 value = -0.01 } }
-			}
-			set_key = { lhs = Tmp_2 value = -0.01 }
-		}
-
-		# Get NO Comfort fulfilment modifier: ((-NOFillComfort + 0.6) / -NOFillComfort) * 0.01
-		set_key = { lhs = Tmp_3 which = NO_FillComfort }
-		multiply_key = { lhs = Tmp_3 value = -1 }
-		change_key = { lhs = Tmp_3 value = 0.6 }
-		set_key = { lhs = Tmp_4 which = NO_FillComfort }
-		multiply_key = { lhs = Tmp_4 value = -1 }
-		divide_key = { lhs = Tmp_3 which = Tmp_4 }
-		multiply_key = { lhs = Tmp_3 value = 0.01 }
-		
-		if = {
-			limit = {
-				is_key_equal = { lhs = Tmp_4 value = 0 }
-			}
-			log = "<ERROR><29AF39C0><THIS:[This.GetName]><PREV:[Prev.GetName]><ROOT:[Root.GetName]><FROM:[From.GetName]> Division by zero!"
-		}
-
-		# Upper lower case handling: [-0.01,0.02]
-		if = {
-			limit = {
-				check_key = { lhs = Tmp_3 value = 0.02 }
-			}
-			set_key = { lhs = Tmp_3 value = 0.02 }
-		}
-		else_if = {
-			limit = {
-				NOT = { check_key = { lhs = Tmp_3 value = -0.01 } }
-			}
-			set_key = { lhs = Tmp_3 value = -0.01 }
-		}
-
-		change_key = { lhs = Tmp_0 which = Tmp_2 }
-		change_key = { lhs = Tmp_0 which = Tmp_3 }
-	}
-	else = {
-		set_key = { lhs = Tmp_0 value = 0 }
-	}
-
-	if = {
-		limit = {
-			check_key = { lhs = Tmp_0 value = 0.001 }
-		}
-
-		multiply_key = { lhs = Tmp_1 which = Modi_NobilityPromoteSpeed }
-		multiply_key = { lhs = Tmp_0 which = Tmp_1 }
-
-
-		change_key = { lhs = SF_PromotedNO which = Tmp_0 }
-		change_key = { lhs = NM_PromotedNO which = Tmp_0 }
-		change_key = { lhs = RE_PromotedNO which = Tmp_0 }
-		change_key = { lhs = NO_Promoted which = Tmp_0 }
-	}
-
 }
 #Tmp 7-9 used for Lower Pop Ratio's
 Promotion_NODemotion = {
+	# If Ideal Noble surpasses 80% Ideal, then we scale up Demote
+	set_key = { lhs = Tmp_1 which = Ideal_NobleSize }
+	multiply_key = { lhs = Tmp_1 value = 0.8 }
+
 	if = { # Check if NO_Total is at least this
 		limit = {
-			check_key = { lhs = NO_Total which = Ideal_NobleSize } # Nobles > Ideal Size
-			check_key = { lhs = NO_FillLifeC value = 0.001 }
+			check_key = { lhs = NO_Total which = Tmp_1 } # Nobles > 80% of Ideal
+			check_key = { lhs = Ideal_NobleSize value = 0.001 } # just in case
 		}
-
-		set_key = { lhs = Tmp_0 value = 0.02 } # Base speed of change 1% of dif <- use this for balance
-
 		# Get difference 
-		set_key = { lhs = Tmp_1 which = NO_Total }
-		subtract_key = { lhs = Tmp_1 which = Ideal_NobleSize }
-
-		# Get NO LifeC fulfilment modifier: ((NO_FillLifeC * 0.01 + 0.5) / NO_FillLifeC) * 0.01
-		set_key = { lhs = Tmp_5 which = NO_FillLifeC }
-		multiply_key = { lhs = Tmp_5 value = 0.01 }
-		change_key = { lhs = Tmp_5 value = 0.5 }
-		divide_key = { lhs = Tmp_5 which = NO_FillLifeC }
-		multiply_key = { lhs = Tmp_5 value = 0.01 }
-
-		# Upper lower case handling: [-0.01,0.05]
+		subtract_key = { lhs = Tmp_1 which = NO_Total }
+		multiply_key = { lhs = Tmp_1 value = -1 } # make scaling positive
 		if = {
 			limit = {
-				check_key = { lhs = Tmp_5 value = 0.05 }
+				# make sure there is at least a bit excess
+				# 0.05 x 0.02 = 0.001 ; before we enter zero
+				check_key = { lhs = Tmp_1 value = 0.05 }
 			}
-			set_key = { lhs = Tmp_5 value = 0.05 }
-		}
-		else_if = {
-			limit = {
-				NOT = { check_key = { lhs = Tmp_5 value = 0.005 } }
+			multiply_key = { lhs = Tmp_1 value = 5 } # divide / 0.2
+			divide_key = { lhs = Tmp_1 which = Ideal_NobleSize } 
+
+			# Demote %
+			#set_key = { lhs = Tmp_0 value = 0.02 } # Base speed of change 2% <- use this for balance
+			multiply_key = { lhs = Tmp_1 value = 0.02 } # (0.001..1..Y) * 0.02
+			if = { # cap demotion at 5% of nobles per year
+				limit = {
+					check_key = { lhs = Tmp_1 value = 0.05 }
+				}
+				set_key = { lhs = Tmp_1 value = 0.05 }
 			}
-			set_key = { lhs = Tmp_5 value = 0 }
+
+			multiply_key = { lhs = Tmp_1 which = NO_Total }
+
+			if = {
+				limit = {
+					check_key = { lhs = Tmp_1 value = 0.001 }
+				}
+
+				multiply_key = { lhs = Tmp_1 which = Modi_NobilityDemoteSpeed }
+
+				change_key = { lhs = NO_DemotedSF which = Tmp_1 }
+				change_key = { lhs = NO_DemotedNM which = Tmp_1 }
+				change_key = { lhs = NO_DemotedRE which = Tmp_1 }
+			}
 		}
-
-
-		change_key = { lhs = Tmp_0 which = Tmp_5 }
-	}
-	else = {
-		set_key = { lhs = Tmp_0 value = 0 }
-	}
-
-	if = {
-		limit = {
-			check_key = { lhs = Tmp_0 value = 0.001 }
-		}
-
-		multiply_key = { lhs = Tmp_1 which = Modi_NobilityDemoteSpeed }
-		multiply_key = { lhs = Tmp_0 which = Tmp_1 }
-
-
-		change_key = { lhs = NO_DemotedSF which = Tmp_0 }
-		change_key = { lhs = NO_DemotedNM which = Tmp_0 }
-		change_key = { lhs = NO_DemotedRE which = Tmp_0 }
-		change_key = { lhs = NO_Demoted which = Tmp_0 }
 	}
 }
 Promotion_GetNomadRestingPoint = { 
@@ -820,8 +685,56 @@ Promotion_BGDemotion = {
 		set_key = { lhs = BG_Demoted which = Tmp_3 }
 	}
 }
-Promotion_CLPromotion = {}
-Promotion_CLDemotion = {}
+
+Promotion_DeriveClergyRestingPoint = {
+	if = {
+		limit = {
+			check_key = { lhs = Class_Total value = 0.05 } # just in case, before end up in zeros
+		}
+		set_key = { lhs = Tmp_1 value = 0.01 } # 1% base Resting Point
+
+		change_key = { lhs = Tmp_1 which = Modi_IdealClergySizePerc_Add }
+
+		# Get their intended total population
+		set_key = { lhs = Ideal_ClergySize which = Class_Total }
+		multiply_key = { lhs = Ideal_ClergySize which = Tmp_1 }
+	}
+	else = { # too few pops
+		set_key = { lhs = Ideal_ClergySize value = 0 }
+	}
+}
+
+Promotion_CLPromotion = {
+	if = { # Check if CL_Total is at least this
+		limit = {
+			NOT = { check_key = { lhs = CL_Total which = Ideal_ClergySize } } # Clergy < Ideal Size
+		}
+		set_key = { lhs = Tmp_0 which = CL_FillComfort }
+		if = {
+			limit = {
+				check_key = { lhs = Tmp_0 value = 1.5 }
+			}
+			set_key = { lhs = Tmp_0 value = 1.5 }
+		}
+		multiply_key = { lhs = Tmp_0 value = 20 }
+		set_key = { lhs = Tmp_2 which = CL_FillLifeC }
+		multiply_key = { lhs = Tmp_2 value = 153.8 }
+		change_key = { lhs = Tmp_0 which = Tmp_2 }
+		change_key = { lhs = Tmp_0 value = 30 }
+
+		# Gap * speed modifier
+		set_key = { lhs = Tmp_1 which = Ideal_ClergySize }
+		subtract_key = { lhs = Tmp_1 which = CL_Total }
+		multiply_key = { lhs = Tmp_1 which = Modi_ClergyPromoteSpeed }
+
+		multiply_key = { lhs = Tmp_0 which = Tmp_1 }
+		multiply_key = { lhs = Tmp_0 value = 0.001 } # per mille -> k pops
+
+		change_key = { lhs = SF_PromotedCL which = Tmp_0 }
+		change_key = { lhs = NM_PromotedCL which = Tmp_0 }
+		change_key = { lhs = RE_PromotedCL which = Tmp_0 }
+	}
+}
 
 # Tmp_7 = SF Share, Tmp_8 = NM_Share, Tmp_9 = RE_Share of total population
 # $From$_Promoted$To$ / $From$_Demoted$To$ - pops moving from class $From$ to class $To$ (always >= 0)

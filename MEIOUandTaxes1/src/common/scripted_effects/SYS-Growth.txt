@@ -9,9 +9,9 @@ Growth_GetBirthProv = {
     Growth_GetBirth = { class = SF rBirth = 1.00 rDeath = 1.05 rural = yes }
     Growth_GetBirth = { class = NM rBirth = 1.00 rDeath = 1.25 rural = yes }
     Growth_GetBirth = { class = RE rBirth = 0.80 rDeath = 1.25 urban = yes }
-    Growth_GetBirth = { class = NO rBirth = 0.80 rDeath = 1.50 }
+    Growth_GetBirth = { class = NO rBirth = 1.25 rDeath = 1.05 }
     Growth_GetBirth = { class = BG rBirth = 0.80 rDeath = 1.50 }
-    Growth_GetBirth = { class = CL rBirth = 0.80 rDeath = 1.50 }
+    Growth_GetBirth = { class = CL rBirth = 0.80 rDeath = 1.50 clergy = yes }
 
     # Set how many literates there are
     # Later move Clergy in here as well, when adding clergy privs
@@ -252,6 +252,20 @@ Growth_GetBirth = {
         # Multiply combined birth/death rate with class total to get absolute pop change
 		multiply_key = { lhs = $class$_Birth which = $class$_Total }
 		multiply_key = { lhs = $class$_Birth value = 0.01 }  # `Growth_GrowthSpeed~value`
+
+		# Clergy above its ideal size
+		[[clergy]
+			if = {
+				limit = {
+					check_key = { lhs = Ideal_ClergySize value = 0.001 } # not yet derived -> no excess death
+					check_key = { lhs = CL_Total which = Ideal_ClergySize }
+				}
+				set_key = { lhs = Tmp_0 which = CL_Total }
+				subtract_key = { lhs = Tmp_0 which = Ideal_ClergySize }
+				multiply_key = { lhs = Tmp_0 value = 0.1 } # share of excess dying per year <- use this for balance
+				subtract_key = { lhs = CL_Birth which = Tmp_0 }
+			}
+		]
 
         # Apply change to actual total pop key
 		change_key = { lhs = $class$_Total which = $class$_Birth }
