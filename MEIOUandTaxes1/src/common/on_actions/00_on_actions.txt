@@ -900,7 +900,18 @@ on_war_won = {
 			NOT = { tag = JAP }
 			NOT = { tag = event_target:japanese_shogun }
 		}
+		set_country_flag = nbc_won_war # war-flavoured desc in japan.73
 		country_event = { id = japan.73 days = 1 }
+	}
+	# Nanboku-cho: a clan other than JAP beat the Shogun; japan.74 ends the split if the Shogun is gone
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = event_target:japanese_shogun }
+			NOT = { tag = JAP }
+			exists = JAP
+		}
+		JAP = { country_event = { id = japan.74 days = 1 } }
 	}
 	events = {
 		japan.3						# Shogunate is victorious
@@ -2265,6 +2276,23 @@ on_native_change_government = {
 # seems to not support Scopes or is not triggered by diplomatic action (perhaps only triggered by inheritance)
 on_integrate = {
 	log = "OnAction:[GetYear]:[Root.GetName] integrated [From.GetName]:on_integrate"
+	# Nanboku-cho: one of the two courts was integrated; end the split (same as on_annexed)
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = JAP }
+		}
+		clr_country_flag = nbc_won_war
+		country_event = { id = japan.73 days = 1 }
+	}
+	else_if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = event_target:japanese_shogun }
+			exists = JAP
+		}
+		JAP = { country_event = { id = japan.74 days = 1 } }
+	}
 	if = {
 		limit = { FROM = { has_country_flag = Holds_Urbs_Mundi } }
 		FROM = { clr_country_flag = Holds_Urbs_Mundi }
@@ -2285,6 +2313,23 @@ on_integrate = {
 # FROM is the nation being annexed, ROOT is the annexing country
 # Also triggered by diplomatic actions annexationaction and also integrationaction
 on_annexed = {
+	# Nanboku-cho: one of the two courts was annexed; end the split (japan.73 if JAP is gone, japan.74 if the Shogun is gone)
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = JAP }
+		}
+		clr_country_flag = nbc_won_war
+		country_event = { id = japan.73 days = 1 }
+	}
+	else_if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = event_target:japanese_shogun }
+			exists = JAP
+		}
+		JAP = { country_event = { id = japan.74 days = 1 } }
+	}
 	if = {
 		limit = {
 			has_country_flag = red_turban_reb
@@ -2644,6 +2689,33 @@ on_yearly_pulse_4 = {
 				}
 			}
 		}
+	}
+	# Nanboku-cho fallback: one court is gone by a path the war/annex hooks missed (rebels, lost as a war participant, survived the lost war and died later...)
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			NOT = { exists = JAP }
+			OR = {
+				AND = {
+					tag = event_target:japanese_shogun
+					exists = yes
+				}
+				AND = {
+					NOT = { event_target:japanese_shogun = { exists = yes } }
+					any_owned_province = { has_province_modifier = emperors_palace }
+				}
+			}
+		}
+		clr_country_flag = nbc_won_war
+		country_event = { id = japan.73 days = 1 }
+	}
+	else_if = {
+		limit = {
+			tag = JAP
+			has_global_flag = nanbokucho
+			NOT = { event_target:japanese_shogun = { exists = yes } }
+		}
+		country_event = { id = japan.74 days = 1 }
 	}
 }
 on_yearly_pulse_5 = {

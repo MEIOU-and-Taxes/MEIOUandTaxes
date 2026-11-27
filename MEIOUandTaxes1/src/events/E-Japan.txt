@@ -2912,11 +2912,20 @@ country_event = {
 	}
 }
 
-# Nanboku-cho ends: the Southern Court was destroyed by a clan other than the Shogun (fired from on_war_won)
+# Nanboku-cho ends: the Southern Court (JAP) is gone without japan.3 firing
+# Fired from on_war_won (a clan other than the Shogun beat JAP; sets nbc_won_war), on_annexed/on_integrate (annexer of JAP)
+# and on_yearly_pulse_4 (fallback: the Shogun, else whoever holds an Emperor's Palace)
 country_event = {
 	id = japan.73
 	title = "japan.73.t"
-	desc = "japan.73.d"
+	desc = {
+		trigger = { has_country_flag = nbc_won_war }
+		desc = japan.73.d
+	}
+	desc = {
+		trigger = { NOT = { has_country_flag = nbc_won_war } }
+		desc = japan.73.db
+	}
 	picture = SHOGUNATE_eventPicture
 
 	major = yes
@@ -2930,7 +2939,66 @@ country_event = {
 	option = {
 		name = "japan.73a"
 		log = "FE-Japan:[GetYear]:[Root.GetName]:destroyed the Southern Court, Nanboku-cho ends:japan.73"
+		clr_country_flag = nbc_won_war
 		add_prestige = 25
+		every_country = {
+			limit = {
+				OR = {
+					has_country_flag = supporting_northern_court
+					has_country_flag = supporting_southern_court
+				}
+			}
+			clr_country_flag = supporting_northern_court
+			clr_country_flag = supporting_southern_court
+		}
+		# The surviving Emperor's Palace becomes the imperial seat, preferably one we hold
+		hidden_effect = {
+			clear_global_event_target = imperial_capital
+			if = {
+				limit = {
+					any_owned_province = { has_province_modifier = emperors_palace }
+				}
+				random_owned_province = {
+					limit = { has_province_modifier = emperors_palace }
+					save_global_event_target_as = imperial_capital
+				}
+			}
+			else = {
+				random_province = {
+					limit = {
+						superregion = japan_superregion
+						has_province_modifier = emperors_palace
+					}
+					save_global_event_target_as = imperial_capital
+				}
+			}
+		}
+		clr_global_flag = nanbokucho
+	}
+}
+
+# Nanboku-cho ends: the Shogun (protector of the Northern Court) is gone without japan.4 firing
+# Fired on JAP from on_war_won (a clan other than JAP beat the Shogun), on_annexed/on_integrate (Shogun annexed) and on_yearly_pulse_4 (fallback)
+country_event = {
+	id = japan.74
+	title = "japan.74.t"
+	desc = "japan.74.d"
+	picture = SHOGUNATE_eventPicture
+
+	major = yes
+	is_triggered_only = yes
+
+	trigger = {
+		tag = JAP
+		has_global_flag = nanbokucho
+		NOT = { event_target:japanese_shogun = { exists = yes } }
+	}
+
+	option = {
+		name = "japan.74a"
+		log = "FE-Japan:[GetYear]:[Root.GetName]:the Shogunate is gone, Nanboku-cho ends:japan.74"
+		add_prestige = 25
+		add_legitimacy = 25
 		every_country = {
 			limit = {
 				OR = {
