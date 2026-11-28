@@ -447,21 +447,10 @@ Tax_CalcWeight = {
 		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 5000 } # NO CRAZY VALUES
 	}
 	#### DUCATS / MANA
-	if = {
-		limit = {
-			check_key = { lhs = Tax_Cost$TaxName$High value = 0.05 }
-		}
-		divide_key = { lhs = Tax_Cost$TaxName$HighAI which = Tax_Cost$TaxName$High }
-	}
-	else = {
-		multiply_key = { lhs = Tax_Cost$TaxName$HighAI value = 20 } #divide_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.05 }
-	}
+	divide_key = { lhs = Tax_Cost$TaxName$HighAI which = Tax_Cost$TaxName$High } # High is never below 0.05 here, Tax_CalcCostTax floors it
 	if = { ### OVERFLOW
 		limit = {
-			OR = {
-				check_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
-				NOT = { check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0 } }
-			}
+			check_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
 		}
 		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
 	}
@@ -481,18 +470,10 @@ Tax_GetPre = {
 Tax_GetMetric = {
 	if = {
 		limit = {
-			# Note for future dev
-			# We should check Country TaxCan already before looping into all provinces
-			# Easiest would be to put flags into each province?
-			# We definetly can save about 30 TaxCan checks per province + alot of scopes
-			# better solution needs to be developed
 			check_key = { lhs = $DucatVar$ value = 0.001 }
-			check_key = { lhs = Tax_Cost$TaxName$High value = 0.001 }		
-			owner = {
-				Tax_$TaxName$Can = yes
-			}
+			check_key = { lhs = Tax_Cost$TaxName$High value = 0.001 } # Tax_CalcCostTax sets High to 0 if the owner can't use the tax
 		}
-		## Calc how much wealth adjusted mana this costs. Its basically either mana if mana > ducats, or mana / (ducats / mana) if ducats > mana
+		## Calc how much the tax yields per point of mana it costs (ducats / mana)
 		Tax_CalcWeight = { TaxName=$TaxName$ DucatVar=$DucatVar$ [[Scalar] Scalar=$Scalar$ ] [[ScalarFixed] ScalarFixed=$ScalarFixed$ ] }
 		## Also need to know the total sum of mana costs to check if we're going over
 		change_key = { lhs = Tax_CostSum$Type$ which = Tax_Cost$TaxName$High } ### Sum up all mana costs while we're here
