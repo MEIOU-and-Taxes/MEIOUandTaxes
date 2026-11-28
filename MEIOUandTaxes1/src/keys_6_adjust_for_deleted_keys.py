@@ -78,12 +78,6 @@ def update_localization_vars():
 
     old_var_to_key = {v: k for k, v in old_keys.items()}
     files = [
-        "DISP-Trade_Bought.txt",
-        "DISP-Trade_Bought_2.txt",
-        "DISP-Trade_Bought_3.txt",
-        "DISP-Trade_Sold.txt",
-        "DISP-Trade_Sold_2.txt",
-        "DISP-Trade_Sold_3.txt",
         "SYS-LocPlague.txt",
         "SYS-Modifiers.txt",
     ]
