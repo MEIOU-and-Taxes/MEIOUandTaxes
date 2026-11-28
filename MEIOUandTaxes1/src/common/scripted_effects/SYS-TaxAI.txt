@@ -52,11 +52,6 @@ Tax_DistributeMana = {
 					AND = {
 						is_state = yes
 						is_state_core = owner
-						OR = {
-							check_key = { lhs = pv_ce value = 50 }
-							NOT = { local_autonomy = 99 }
-							check_key = { lhs = Prov_TRPow value = 15 }
-						}
 					}
 					AND = {
 						OR = {
@@ -110,23 +105,30 @@ Tax_DistributeMana = {
 		Tax_GetPre = { Type = DIP }
 		Tax_GetPre = { Type = MIL }
 
-		Tax_GetMetric = { Type = ADM TaxName = TaxLand DucatVar=TaxD_LandHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxProp DucatVar=TaxD_PropertyBUHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxChattels DucatVar=TaxD_ChattelHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxInherit DucatVar=TaxD_InheritanceHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxPoll DucatVar=TaxD_PollHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxToll DucatVar=TaxD_TollBUHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxSalt DucatVar=TaxD_SaltBUHigh }
-		Tax_GetMetric = { Type = ADM TaxName = TaxSubst DucatVar=TaxD_SubstancesBUHigh }
+		if = {
+			limit = {
+				# only allow BU taxation in province where you actually can project power
+				Tax_Centralized = yes
+			}
+			Tax_GetMetric = { Type = ADM TaxName = TaxLand DucatVar=TaxD_LandHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxProp DucatVar=TaxD_PropertyBUHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxChattels DucatVar=TaxD_ChattelHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxInherit DucatVar=TaxD_InheritanceHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxPoll DucatVar=TaxD_PollHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxToll DucatVar=TaxD_TollBUHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxSalt DucatVar=TaxD_SaltBUHigh }
+			Tax_GetMetric = { Type = ADM TaxName = TaxSubst DucatVar=TaxD_SubstancesBUHigh }
+			Tax_GetMetric = { Type = DIP TaxName = TaxTimber DucatVar=TaxD_TimberBUHigh }
+			Tax_GetMetric = { Type = DIP TaxName = TaxAlcohol DucatVar=TaxD_AlcoholBUHigh }
+			Tax_GetMetric = { Type = MIL TaxName = LevyDraft DucatVar=Mil_ConscriptHigh Scalar=Mil_StateSpendMulti }
+			Tax_GetMetric = { Type = MIL TaxName = LevyVolunt DucatVar=Mil_VolunteerHigh Scalar=Mil_StateSpendMulti }
+		}	
 
-		Tax_GetMetric = { Type = DIP TaxName = TaxTimber DucatVar=TaxD_TimberBUHigh }
-		Tax_GetMetric = { Type = DIP TaxName = TaxAlcohol DucatVar=TaxD_AlcoholBUHigh }
-		
 		Tax_GetMetric = { Type = DIP TaxName = TaxNoble DucatVar=TaxD_ObligationsNOHigh }
 		Tax_GetMetric = { Type = DIP TaxName = TaxCharter DucatVar=TaxD_ObligationsBGHigh }
 		Tax_GetMetric = { Type = DIP TaxName = TaxTribute DucatVar=TaxD_ObligationsTRHigh }
 		Tax_GetMetric = { Type = DIP TaxName = TaxFeudal DucatVar=TaxD_RentsHigh }
-				
+
 		Tax_GetMetric = { Type = DIP TaxName = PropAgriculture DucatVar=BU_GrossAgriculture }
 		Tax_GetMetric = { Type = DIP TaxName = PropExtraction DucatVar=BU_GrossExtraction }
 		Tax_GetMetric = { Type = DIP TaxName = PropForestry DucatVar=BU_GrossForestry }
@@ -135,8 +137,6 @@ Tax_DistributeMana = {
 		Tax_GetMetric = { Type = DIP TaxName = PropAcademic DucatVar=BU_GrossAcademic }
 		Tax_GetMetric = { Type = DIP TaxName = PropCommercial DucatVar=BU_GrossCommercial }
 
-		Tax_GetMetric = { Type = MIL TaxName = LevyDraft DucatVar=Mil_ConscriptHigh Scalar=Mil_StateSpendMulti }
-		Tax_GetMetric = { Type = MIL TaxName = LevyVolunt DucatVar=Mil_VolunteerHigh Scalar=Mil_StateSpendMulti }
 		Tax_GetMetric = { Type = MIL TaxName = LevyFeudal DucatVar=Mil_LevyHigh Scalar=Mil_StateSpendMulti }
 		Tax_GetMetric = { Type = MIL TaxName = LevyNoble DucatVar=Mil_NobleHigh }
 		Tax_GetMetric = { Type = MIL TaxName = LevyUrban DucatVar=Mil_BurgherHigh }
@@ -447,21 +447,10 @@ Tax_CalcWeight = {
 		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 5000 } # NO CRAZY VALUES
 	}
 	#### DUCATS / MANA
-	if = {
-		limit = {
-			check_key = { lhs = Tax_Cost$TaxName$High value = 0.05 }
-		}
-		divide_key = { lhs = Tax_Cost$TaxName$HighAI which = Tax_Cost$TaxName$High }
-	}
-	else = {
-		multiply_key = { lhs = Tax_Cost$TaxName$HighAI value = 20 } #divide_key = { lhs = Tax_Cost$TaxName$HighAI value = 0.05 }
-	}
+	divide_key = { lhs = Tax_Cost$TaxName$HighAI which = Tax_Cost$TaxName$High } # High is never below 0.05 here, Tax_CalcCostTax floors it
 	if = { ### OVERFLOW
 		limit = {
-			OR = {
-				check_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
-				NOT = { check_key = { lhs = Tax_Cost$TaxName$HighAI value = 0 } }
-			}
+			check_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
 		}
 		set_key = { lhs = Tax_Cost$TaxName$HighAI value = 500 }
 	}
@@ -481,13 +470,10 @@ Tax_GetPre = {
 Tax_GetMetric = {
 	if = {
 		limit = {
-			owner = {
-				Tax_$TaxName$Can = yes
-			}
 			check_key = { lhs = $DucatVar$ value = 0.001 }
-			check_key = { lhs = Tax_Cost$TaxName$High value = 0.001 }
+			check_key = { lhs = Tax_Cost$TaxName$High value = 0.001 } # Tax_CalcCostTax sets High to 0 if the owner can't use the tax
 		}
-		## Calc how much wealth adjusted mana this costs. Its basically either mana if mana > ducats, or mana / (ducats / mana) if ducats > mana
+		## Calc how much the tax yields per point of mana it costs (ducats / mana)
 		Tax_CalcWeight = { TaxName=$TaxName$ DucatVar=$DucatVar$ [[Scalar] Scalar=$Scalar$ ] [[ScalarFixed] ScalarFixed=$ScalarFixed$ ] }
 		## Also need to know the total sum of mana costs to check if we're going over
 		change_key = { lhs = Tax_CostSum$Type$ which = Tax_Cost$TaxName$High } ### Sum up all mana costs while we're here
