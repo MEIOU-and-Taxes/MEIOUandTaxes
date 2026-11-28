@@ -29,21 +29,32 @@ country_decisions = {
 			is_at_war = no
 		}
 		effect = {
-			random_country = {
+			# Only replace the former dynasty when a claimant is actually displaced now (a collapsed Yuan keeps it)
+			if = {
 				limit = {
-					has_country_flag = former_dynasty_china
+					any_country = {
+						has_country_flag = China_Claim
+						NOT = { tag = ROOT }
+					}
 				}
-				clr_country_flag = former_dynasty_china
-			}
-			random_country = {
-				limit = {
-					has_country_flag = China_Claim
-					NOT = { tag = ROOT }
+				random_country = {
+					limit = {
+						has_country_flag = former_dynasty_china
+					}
+					clr_country_flag = former_dynasty_china
 				}
-				clr_country_flag = China_Claim
-				set_country_flag = former_dynasty_china
+				random_country = {
+					limit = {
+						has_country_flag = China_Claim
+						NOT = { tag = ROOT }
+					}
+					clr_country_flag = China_Claim
+					set_country_flag = former_dynasty_china
+				}
 			}
 			set_country_flag = China_Claim
+			clr_country_flag = former_dynasty_china # a restored dynasty is no longer the "former" one
+			clr_country_flag = compiled_dynastic_history # a new reign may compile the history of the dynasty it replaced
 			clr_country_flag = red_turban_reb
 			clr_country_flag = imperial_appenage
 			clr_country_flag = annexed_emperor_of_china
@@ -473,13 +484,12 @@ country_decisions = {
 			}
 		}
 		effect = {
+			# Offer our submission to the claimant that is attacking us (same as the allow)
 			random_neighbor_country = {
 				limit = {
 					isValidCountry = yes
 					has_country_flag = China_Claim
-					NOT = { war_with = ROOT }
-					culture_group = chinese_group
-					is_free_or_tributary_trigger = yes
+					offensive_war_with = ROOT
 				}
 				country_event = { id = tianxia.015 }
 			}

@@ -125,7 +125,10 @@ cb_nomadic_reconquest = {
 	}
 	
 	prerequisites = {
-		core_claim = FROM
+		OR = {
+			core_claim = FROM
+			any_subject_country = { core_claim = FROM }
+		}
 		OR = {
 			AND = {
 				#NOT = { tag = GOL }
@@ -135,6 +138,20 @@ cb_nomadic_reconquest = {
 			ai = no
 			FROM = { is_tribal = yes }
 			FROM = { is_nomad = yes }
+			AND = { # WHI/BLU vs settled states: only when unified and strong or well-led
+				legitimacy_equivalent = 75
+				OR = {
+					check_key = { lhs = Ruler_SkillMIL value = 4 }
+					AND = {
+						FROM = { is_subject = no }
+						army_strength = { who = FROM value = 1 }
+					}
+					FROM = {
+						is_subject = yes
+						overlord = { ROOT = { army_strength = { who = PREV value = 1 } } }
+					}
+				}
+			}
 		}
 		NOT = { overlord_of = FROM }
 	}

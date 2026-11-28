@@ -892,6 +892,27 @@ on_war_won = {
 	}
 	clr_country_flag = steppe_declined_tributary
 	vassal_type_tracking_effect = yes
+	# Nanboku-cho: a clan other than the Shogun beat the Southern Court; japan.73 ends the split if JAP is gone
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = JAP }
+			NOT = { tag = JAP }
+			NOT = { tag = event_target:japanese_shogun }
+		}
+		set_country_flag = nbc_won_war # war-flavoured desc in japan.73
+		country_event = { id = japan.73 days = 1 }
+	}
+	# Nanboku-cho: a clan other than JAP beat the Shogun; japan.74 ends the split if the Shogun is gone
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = event_target:japanese_shogun }
+			NOT = { tag = JAP }
+			exists = JAP
+		}
+		JAP = { country_event = { id = japan.74 days = 1 } }
+	}
 	events = {
 		japan.3						# Shogunate is victorious
 		japan.4						# Emperor is victorious
@@ -1438,7 +1459,6 @@ on_monarch_death = {
 	events = {
 		Horde_Collapse.10	# Horde puppet master dead
 		Horde_Collapse.14	# Horde great khan dead
-		japan.15			# Underage Shogun
 		japan.24			# Adopting accurate name
 		japan.25			# Losing Kanrei position
 		flavor_anj.1
@@ -1533,6 +1553,23 @@ on_monarch_death = {
 on_new_monarch = {
 	country_event = { id = PTM_Politics.007 } # Ruler Calc for Exec Auth
 	country_event = { id = PTM_Politics.005 } # Ruler Alignment for Factions
+	# Dragon Throne: a new dynasty on the Chinese throne, princes of the old house rise in revolt
+	if = {
+		limit = {
+			has_new_dynasty = yes
+			has_country_flag = China_Claim
+		}
+		every_subject_country = {
+			limit = {
+				is_subject_of_type = warlord
+				has_country_flag = imperial_appenage
+				NOT = { dynasty = ROOT }
+			}
+			country_event = { id = tianxia.140 days = 30 }
+		}
+		# The new dynasty may compile the history of its predecessor (compile_dynastic_history)
+		clr_country_flag = compiled_dynastic_history
+	}
 	if = {
 		limit = {
 			has_consort_regency = no
@@ -2241,6 +2278,23 @@ on_native_change_government = {
 # seems to not support Scopes or is not triggered by diplomatic action (perhaps only triggered by inheritance)
 on_integrate = {
 	log = "OnAction:[GetYear]:[Root.GetName] integrated [From.GetName]:on_integrate"
+	# Nanboku-cho: one of the two courts was integrated; end the split (same as on_annexed)
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = JAP }
+		}
+		clr_country_flag = nbc_won_war
+		country_event = { id = japan.73 days = 1 }
+	}
+	else_if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = event_target:japanese_shogun }
+			exists = JAP
+		}
+		JAP = { country_event = { id = japan.74 days = 1 } }
+	}
 	if = {
 		limit = { FROM = { has_country_flag = Holds_Urbs_Mundi } }
 		FROM = { clr_country_flag = Holds_Urbs_Mundi }
@@ -2261,11 +2315,22 @@ on_integrate = {
 # FROM is the nation being annexed, ROOT is the annexing country
 # Also triggered by diplomatic actions annexationaction and also integrationaction
 on_annexed = {
+	# Nanboku-cho: one of the two courts was annexed; end the split (japan.73 if JAP is gone, japan.74 if the Shogun is gone)
 	if = {
 		limit = {
-			has_country_flag = China_Rebel
+			has_global_flag = nanbokucho
+			FROM = { tag = JAP }
 		}
-		country_event = { id = red_turban.24 }
+		clr_country_flag = nbc_won_war
+		country_event = { id = japan.73 days = 1 }
+	}
+	else_if = {
+		limit = {
+			has_global_flag = nanbokucho
+			FROM = { tag = event_target:japanese_shogun }
+			exists = JAP
+		}
+		JAP = { country_event = { id = japan.74 days = 1 } }
 	}
 	FROM = {
 		clr_country_flag = POP_Init
@@ -2501,6 +2566,157 @@ on_yearly_pulse_4 = {
 			}
 		}
 		remove_country_modifier = polish_hussars
+	}
+	# Urianqad: once independent, offer the free Jurchen tribes to become its tributaries (red_turban.35)
+	if = {
+		limit = {
+			tag = MXI
+			is_subject = no
+			NOT = { is_year = 1400 }
+			NOT = { has_country_flag = mxi_jurchen_tribute_offered }
+		}
+		set_country_flag = mxi_jurchen_tribute_offered
+		every_country = {
+			limit = {
+				culture_group = jurchen_group
+				isValidCountry = yes
+				is_free_or_tributary_trigger = yes
+				NOT = { tag = MXI }
+				# Same exclusions as the spawn offer in MEC-Yuan (Yuan_Degenerate)
+				NOT = { tag = MGH }
+				NOT = { tag = CHG }
+				NOT = { tag = TIM }
+				NOT = { tag = GGK }
+				NOT = { tag = SYG }
+				NOT = { tag = JOL }
+			}
+			country_event = { id = red_turban.35 days = 1 }
+		}
+	}
+	# Nanboku-cho: weigh both courts' camps (court + its Japanese vassals, bigger clans count more)
+	# nbc_south/nbc_north (+ _m with a margin) live on JAP; read by the support_*_court AI and used for the civil war CB below
+	if = {
+		limit = {
+			tag = JAP
+			has_global_flag = nanbokucho
+		}
+		set_variable = { which = nbc_south value = 0 }
+		set_variable = { which = nbc_north value = 0 }
+		every_country = {
+			limit = {
+				culture_group = japanese_g
+				OR = {
+					tag = JAP
+					is_subject_of = JAP
+				}
+			}
+			JAP = { change_variable = { which = nbc_south value = 1 } }
+			if = {
+				limit = { num_of_cities = 3 }
+				JAP = { change_variable = { which = nbc_south value = 1 } }
+			}
+			if = {
+				limit = { num_of_cities = 6 }
+				JAP = { change_variable = { which = nbc_south value = 1 } }
+			}
+		}
+		event_target:japanese_shogun = {
+			every_country = {
+				limit = {
+					culture_group = japanese_g
+					OR = {
+						tag = PREV
+						is_subject_of = PREV
+					}
+				}
+				JAP = { change_variable = { which = nbc_north value = 1 } }
+				if = {
+					limit = { num_of_cities = 3 }
+					JAP = { change_variable = { which = nbc_north value = 1 } }
+				}
+				if = {
+					limit = { num_of_cities = 6 }
+					JAP = { change_variable = { which = nbc_north value = 1 } }
+				}
+			}
+		}
+		set_variable = { which = nbc_south_m which = nbc_south }
+		change_variable = { which = nbc_south_m value = 4 }
+		set_variable = { which = nbc_north_m which = nbc_north }
+		change_variable = { which = nbc_north_m value = 4 }
+		# The clearly stronger court gets a civil war CB against the other (every 5 years at most), so the split gets fought out (japan.3/japan.4)
+		if = {
+			limit = {
+				OR = {
+					NOT = { has_global_flag = nanbokucho_cb }
+					had_global_flag = { flag = nanbokucho_cb days = 1825 }
+				}
+				is_subject = no
+				event_target:japanese_shogun = {
+					exists = yes
+					is_subject = no
+					NOT = { tag = JAP }
+				}
+			}
+			if = {
+				limit = { check_variable = { which = nbc_south which = nbc_north_m } }
+				clr_global_flag = nanbokucho_cb
+				set_global_flag = nanbokucho_cb
+				event_target:japanese_shogun = {
+					JAP = {
+						add_casus_belli = {
+							target = PREV
+							type = cb_civil_war
+							months = 60
+						}
+					}
+				}
+			}
+			else_if = {
+				limit = { check_variable = { which = nbc_north which = nbc_south_m } }
+				clr_global_flag = nanbokucho_cb
+				set_global_flag = nanbokucho_cb
+				event_target:japanese_shogun = {
+					add_casus_belli = {
+						target = JAP
+						type = cb_civil_war
+						months = 60
+					}
+				}
+			}
+		}
+	}
+	# Nanboku-cho: drop a stale nbc_won_war (set in on_war_won when the beaten JAP survived, so japan.73 never fired)
+	if = {
+		limit = { had_country_flag = { flag = nbc_won_war days = 30 } }
+		clr_country_flag = nbc_won_war
+	}
+	# Nanboku-cho fallback: one court is gone by a path the war/annex hooks missed (rebels, lost as a war participant, survived the lost war and died later...)
+	if = {
+		limit = {
+			has_global_flag = nanbokucho
+			NOT = { exists = JAP }
+			OR = {
+				AND = {
+					tag = event_target:japanese_shogun
+					exists = yes
+				}
+				AND = {
+					NOT = { event_target:japanese_shogun = { exists = yes } }
+					any_owned_province = { has_province_modifier = emperors_palace }
+				}
+			}
+		}
+		clr_country_flag = nbc_won_war
+		country_event = { id = japan.73 days = 1 }
+	}
+	else_if = {
+		limit = {
+			tag = JAP
+			has_global_flag = nanbokucho
+			NOT = { event_target:japanese_shogun = { exists = yes } }
+		}
+		country_event = { id = japan.74 days = 1 }
 	}
 }
 on_yearly_pulse_5 = {
@@ -4221,6 +4437,23 @@ on_capital_moved = {
 		country_event = { 
 			id = capital_city.001 #Event looking for a new capital city on loss of the previous capital, allowing for a change without the cost
 		}
+	}
+
+	# Dragon Throne: moving the imperial capital renames the old and new seats (Nanjing/Beijing etc.)
+	if = {
+		limit = {
+			owner = { has_country_flag = China_Claim }
+			FROM = {
+				owner = { owns = ROOT }
+				OR = {
+					superregion = north_china_superregion
+					superregion = east_china_superregion
+					superregion = southwest_china_superregion
+					liaoning_trigger = yes
+				}
+			}
+		}
+		FROM = { province_event = { id = tianxia.110 } }
 	}
 
 	#province_event = {
