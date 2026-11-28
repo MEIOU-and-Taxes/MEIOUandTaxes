@@ -1891,6 +1891,15 @@ TN_DoTrade = {
         # Loop ends when there's no country left with score higher than or equal to 1
     set_global_flag = TN_Loop1
         
+        # Clear trade loop flags left over from earlier runs
+        # The end-of-run clean only reaches valid provinces, so uncolonised node centers could keep TN_SectorCentNodeBest
+        # A leftover flag would give a node two "best" sectors, or hide a sector from TN_SetReach
+    every_province = {
+        clr_province_flag = TN_SectorCentNodeBest
+        clr_province_flag = TN_SectorCentReachWithin
+        clr_province_flag = TN_SectorCentReachContain
+    }
+
         # Grabs best sector of each node
     tradenode_centers = {
         set_province_flag = TN_IsNodeCenter # Lets the main loop find this center from inside its node
@@ -1946,6 +1955,7 @@ TN_DoTrade = {
             event_target:Prov = {
                 every_trade_node_member_province = {
                     limit = {
+                        isValidProv = yes
                         has_province_flag = TN_SectorCentNodeBest
                     }
                     save_event_target_as = Prov # This is the winner, highest sector score of the world
@@ -1987,14 +1997,12 @@ TN_DoTrade = {
 					save_event_target_as = ProvOwner
                 }                    
 				
-                # Flag all tradenodes that contain at least one sector that is within Prov's reach
+                # Go through all tradenodes that contain at least one sector that is within Prov's reach
+                # TN_SetReach already flagged their centers TN_SectorCentReachContain (TN_FlagReachNode)
                 tradenode_centers = {
                     limit = {
-                        any_trade_node_member_province = {
-                            has_province_flag = TN_SectorCentReachWithin
-                        }
+                        has_province_flag = TN_SectorCentReachContain
                     }
-                    set_province_flag = TN_SectorCentReachContain
 
 					every_trade_node_member_province = {
 						if = {
@@ -2295,6 +2303,7 @@ TN_DoTrade = {
 TN_SetReach = {
 	# Itself is always within reach
     set_province_flag = TN_SectorCentReachWithin
+    TN_FlagReachNode = yes
     #set_province_flag = TN_SectorCentReachSpread
 	
 	# Later used in TN_effect11 triggers
@@ -2481,6 +2490,19 @@ TN_SetReach = {
     clr_global_flag = IsCapitalTN
 
 	# The distance value is set afterwards by TN_SetReachDistance, once the callers have flagged TN_SectorCentReachContain
+}
+
+# Province scope: call right after setting TN_SectorCentReachWithin on a province
+# Flags the province's node center TN_SectorCentReachContain, so TN_DoTrade doesn't have to search all nodes for reachable sectors
+# Every place that sets TN_SectorCentReachWithin on a new province must call this, or that node's flags won't be cleaned
+# (Not needed in TN_effect11: it only flags sectors in the node of a province that already has the flag)
+TN_FlagReachNode = {
+    every_trade_node_member_province = {
+        limit = {
+            has_province_flag = TN_IsNodeCenter
+        }
+        set_province_flag = TN_SectorCentReachContain
+    }
 }
 
 # Province scope: the score this node's best sector competes with in TN_DoTrade's main loop
